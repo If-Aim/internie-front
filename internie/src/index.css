@@ -1,0 +1,42 @@
+/* 모든 굵기(100–900) 지원 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+
+html, body {font-family: Pretendard, system-ui, -apple-system, Arial;}
+
+:root{--bg:#EEF5FF;--ink:#111;--muted:#6b7280;--accent:#0166FF}
+
+/* Header styles */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0;}
+.iconbtn{background:transparent;border:0;cursor:pointer}
+.icon{width:25px;height:25px;display:block}
+.app-title{font-size:24px;font-weight:800}
+.wrap{min-width:398px;margin:0 20px 0 20px;padding:21px 0px 64px}
+
+/* General styles */
+body{margin:0;background:var(--bg);color:var(--ink);}
+.row{display:flex;align-items:center;justify-content:space-between}
+.h1{font-size:24px;font-weight:800;font-family: Pretendard;margin:0;line-height:1;}
+.h2{font-size:16px;color:#979797;font-weight:500;margin:25px 0 13px}
+.link{color:var(--accent);font-weight:700;text-decoration:none;justify-content:space-between;}
+.card{background:#fff;border-radius:10px;padding:19px 0 20px 24px;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);margin-top:13px;max-height: 80px;}
+.item{display:flex;gap:25px;align-items:center}
+.thumb{width:28px;height:28px;background:#e5e7eb;border-radius:5px;flex:none}
+.title{font-size:16px;font-weight:700;line-height:20px}
+.subtitle{margin-top:1px;color:rgba(0, 0, 0, 0.50);font-size:14px;line-height: 20px;}
+.muted{color:#9aa3af;font-size:14px}
+
+/*month*/
+.month-row{display:flex;align-items:center;justify-content:space-between;margin-top:23px;position:relative;}
+.month-left{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.month-btn{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;padding:0;line-height:1;}
+
+
+/* 모달 */
+.month-pop{
+  position:absolute;left:0;top:100%;margin-top:8px;background:#fff;border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);padding:8px;z-index:20;
+  width:max-content;max-width:calc(100vw - 32px);max-height:240px;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;
+}
+.month-menu{display:flex;flex-direction:column;gap:6px;}
+.month-item{display:inline-block;padding:8px 10px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.month-item[aria-current="true"]{border-color:#0166FF;color:#0166FF;font-weight:700;}
