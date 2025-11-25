@@ -2,7 +2,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 //import AuthCallback from "./pages/authCallback";
-import ScheduleIntro from "./pages/scheduleIntro";
 import NewSchedule from "./pages/newSchedule";
 import Login from "./pages/login";
 
@@ -192,7 +191,6 @@ export default function App(): React.ReactElement {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/schedule/intro" element={<ScheduleIntro />} />
         <Route path="/schedule/new" element={<NewSchedule />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
