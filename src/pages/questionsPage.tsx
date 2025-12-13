@@ -33,33 +33,88 @@ export default function QuestionsPage() {
   const analyserRef = React.useRef<AnalyserNode | null>(null);
   const dataArrayRef = React.useRef<Float32Array | null>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
+
+  const uploadAudio = async (audioBlob: Blob) => {
+    if (!current) return;
+
+    // 1. 파일 객체 생성 (확장자는 webm 또는 mp3 등 백엔드 요구사항에 맞춤)
+    const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
+
+    // 2. FormData 생성
+    const formData = new FormData();
+    formData.append("file", audioFile); // 백엔드에서 받는 키 이름이 'file'인지 확인 필요!
+    // formData.append("questionId", current.id); // 필요시 질문 ID 등 추가
+
+    const token = localStorage.getItem("accessToken"); // 토큰 이름 확인
+
+    try {
+      // TODO: 실제 백엔드 업로드 API 주소로 변경해주세요!
+      // 예: `/questions/${current.id}/answers` 
+      const res = await fetch(`/questions/${current.id}/answers`, {
+        method: "POST",
+        headers: {
+            // FormData는 Content-Type을 설정하지 않아야 브라우저가 알아서 boundary를 설정함
+            "Authorization": token ? token : "", 
+        },
+        body: formData,
+      });
+
+      if (res.ok) {
+        console.log("업로드 성공!");
+        // 여기서 다음 단계로 넘어가는 등의 처리를 할 수도 있음
+      } else {
+        console.error("업로드 실패:", res.status);
+      }
+    } catch (e) {
+      console.error("업로드 중 에러:", e);
+    }
+  };
 
   const [showOutro, setShowOutro] = React.useState(false);
   // 질문 불러오기
   React.useEffect(() => {
-    // TODO: 나중에 실제 eventDayId로 교체
-    if (!eventDayId) {
-      // 백엔드 연동 전, 화면 확인용 임시 데이터
-      setQuestions([
-        {
-          id: "1",
-          order: 1,
-          text: "오늘 행사(플리마켓, 부스 방문 등)에서 체력이나 집중력이 떨어진 순간이 있었나요?",
-          totalCount: 10,
-        },
-      ]);
-      return;
-    }
+    const fetchQuestions = async () => {
+      // 1. 토큰 가져오기 (App.tsx와 동일하게)
+      const token = localStorage.getItem("accessToken"); 
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        navigate("/login"); // navigate 변수가 선언되어 있어야 합니다.
+        return;
+      }
 
-    (async () => {
-      const res = await fetch(
-        `http://localhost:8080/event-days/${eventDayId}/questions`
-      );
-      const data = await res.json();
-      setQuestions(data);
-    })();
-  }, [eventDayId]);
+      try {
+        // 2. 질문 목록 API 호출
+        // [중요] 백엔드 개발자분이 알려준 '질문 조회 API 주소'를 아래에 적어야 합니다.
+        // 예시: `/daily-events/${eventDayId}/questions` 또는 그냥 `/questions`
+        const res = await fetch(`/questions`, { 
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token, // Bearer 중복 없이 토큰만 전송
+          },
+        });
 
+        if (res.ok) {
+          const data = await res.json();
+          console.log("질문 목록 응답:", data);
+
+          // 3. 받아온 데이터를 상태(State)에 저장
+          // 만약 백엔드가 { items: [...] } 형태로 준다면 data.items로 수정 필요
+          // 백엔드 데이터 필드명(questionText 등)이 다르다면 map으로 연결해야 함
+          setQuestions(data); 
+        } else {
+          console.error("질문 불러오기 실패:", res.status);
+        }
+      } catch (e) {
+        console.error("에러 발생:", e);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+  
   const current = questions[index] ?? null;
   const total = (current?.totalCount ?? questions.length) || 1;
   const currentNo = current?.order ?? index + 1;
@@ -93,7 +148,6 @@ export default function QuestionsPage() {
 
   React.useEffect(() => {
     if (recordStage !== "recording") {
-      // recording이 아닐 땐 오디오 리소스 정리
       if (audioCtxRef.current) {
         audioCtxRef.current.close();
         audioCtxRef.current = null;
@@ -101,6 +155,9 @@ export default function QuestionsPage() {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
       }
       return;
     }
@@ -112,7 +169,6 @@ export default function QuestionsPage() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         if (cancelled) return;
-
         streamRef.current = stream;
 
         const AC =
@@ -130,7 +186,6 @@ export default function QuestionsPage() {
         const dataArray = new Float32Array(bufferLength);
         dataArrayRef.current = dataArray;
 
-        // 60ms마다 파형 샘플링 → history 왼쪽으로 밀고 오른쪽에 새 값 추가
         intervalId = window.setInterval(() => {
           const analyserNode = analyserRef.current;
           const arr = dataArrayRef.current;
@@ -165,6 +220,26 @@ export default function QuestionsPage() {
 
           setRingLevel(amp);
         }, 60); // 60ms 간격 (약 16fps 정도)
+
+        const recorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
+        audioChunksRef.current = []; // 초기화
+
+        // 데이터가 들어올 때마다 배열에 저장
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        // 녹음이 정지되면 파일을 만들고 업로드
+        recorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          uploadAudio(audioBlob); // 위에서 만든 업로드 함수 호출
+        };
+
+        recorder.start();
+
       } catch (err) {
         console.error("마이크 접근 실패", err);
         alert("마이크 권한을 허용해 주셔야 녹음할 수 있어요.");

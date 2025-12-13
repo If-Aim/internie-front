@@ -11,6 +11,13 @@ const TIME_OPTIONS: string[] = Array.from({ length: 24 }, (_, h) => {
   return `${period} ${hh}:00`;
 });
 
+function toYmd(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export default function NewSchedule() {
     const nav = useNavigate();
     const [stage, setStage] = React.useState<Stage>("form");
@@ -28,9 +35,7 @@ export default function NewSchedule() {
     const [title, setTitle] = React.useState("");
     const [memo, setMemo] = React.useState("");
     const { eventId } = useParams<{ eventId: string }>();
-    // input에 value/onChange 연결
-    // <input ... value={title} onChange={e => setTitle(e.target.value)} />
-    // <textarea ... value={memo} onChange={e => setMemo(e.target.value)} />
+
 
     React.useEffect(() => {
         if (stage !== "intro") return;
@@ -44,25 +49,69 @@ export default function NewSchedule() {
         const day = d.getDate();
         return `${y}년 ${m}월 ${day}일`;
     }, []);
-    const toYmd = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
+
     const startDateLabel = formatKoreanDate(startDate);
     const endDateLabel = formatKoreanDate(endDate);
     const dateRangeLabel = `${formatKoreanDate(startDate)} ~ ${formatKoreanDate(endDate)}`;
     const isRangeSelected = startDate.getTime() !== endDate.getTime();
+    const stripTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    // 시간 문자열(예: "오전 09:00")의 인덱스를 반환하는 헬퍼 함수
+    const getTimeIndex = (t: string | null) => (t ? TIME_OPTIONS.indexOf(t) : -1);
+
+    // 시작 시간 변경 시
+    const handleStartTimeChange = (newTime: string) => {
+        setStartTime(newTime);
+        
+        // 날짜가 같고 + 종료 시간이 이미 설정되어 있는데 + 시작 시간이 종료 시간보다 늦어진 경우
+        // -> 종료 시간을 시작 시간과 똑같이 맞춰줌
+        const isSameDay = startDate.getTime() === endDate.getTime();
+        if (isSameDay && endTime) {
+            if (getTimeIndex(newTime) > getTimeIndex(endTime)) {
+                setEndTime(newTime);
+            }
+        }
+    };
+
+    // 종료 시간 변경 시
+    const handleEndTimeChange = (newTime: string) => {
+        const isSameDay = startDate.getTime() === endDate.getTime();
+        
+        // 날짜가 같고 + 시작 시간이 있는데 + 종료 시간이 시작 시간보다 빠른 경우
+        // -> 경고 띄우고 변경 안 함
+        if (isSameDay && startTime) {
+            if (getTimeIndex(newTime) < getTimeIndex(startTime)) {
+                alert("종료 시간은 시작 시간보다 빠를 수 없습니다.");
+                return;
+            }
+        }
+        setEndTime(newTime);
+    };
+
+    const handleStartDateChange = (newDate: Date) => {
+        setStartDate(newDate);
+        // 만약 새로 선택한 시작일이 현재 마감일보다 늦다면, 마감일도 시작일과 같게 맞춤
+        if (stripTime(newDate) > stripTime(endDate)) {
+            setEndDate(newDate);
+        }
+    };
+    // 마감일 변경 시 처리
+    const handleEndDateChange = (newDate: Date) => {
+        // 마감일이 시작일보다 빠른지 검사
+        if (stripTime(newDate) < stripTime(startDate)) {
+            alert("마감일은 시작일보다 빠를 수 없습니다.");
+            return;
+        }
+        setEndDate(newDate);
+    };
 
     const handleSave = async () => {
-      const token = localStorage.getItem("accessToken");
       
-      // 1. 유효성 검사
       if (!title.trim()) {
         alert("일정 제목을 입력해주세요.");
         return;
       }
+      
+      const token = localStorage.getItem("accessToken");
       if (!token) {
         alert("로그인이 필요합니다.");
         nav("/login");
@@ -70,9 +119,6 @@ export default function NewSchedule() {
       }
 
       try {
-        // 2. 백엔드로 보낼 데이터 만들기
-        // (시간 정보가 있다면 memo나 별도 필드에 추가하거나, 백엔드 스펙에 맞게 합쳐야 합니다.
-        //  여기서는 일단 날짜 위주로 보냅니다.)
         const payload = {
           title: title,
           content: memo, // 메모 내용
@@ -80,24 +126,28 @@ export default function NewSchedule() {
           endDate: toYmd(endDate)    
         };
 
-        // 3. API 요청 (POST /events)
+        console.log("보내는 데이터:", payload); // 디버깅용
+        
         const res = await fetch(`/events`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // 헤더에 토큰 필수!
+            "Authorization": `${token}` 
           },
           body: JSON.stringify(payload),
         });
 
         if (!res.ok) {
-           if (res.status === 403) {
-             alert("서버 보안 설정(403) 때문에 저장이 막혔습니다. 백엔드 팀 확인 필요!");
-             return;
-           }
-           throw new Error(`저장 실패: ${res.status}`);
+        // 에러 처리
+          if (res.status === 401) {
+            alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
+            nav("/login");
+            return;
+          }
+          throw new Error(`저장 실패: ${res.status}`);
         }
 
+        //성공 시
         setStage("outro");
         
         setTimeout(() => {
@@ -110,12 +160,12 @@ export default function NewSchedule() {
       }
     };
 
-    type LocalScheduleItem = {
-      id: string;
-      title: string;
-      subtitle: string;
-      date: string; // 'YYYY-MM-DD'
-    };
+    //type LocalScheduleItem = {
+      //id: string;
+      //title: string;
+      //subtitle: string;
+      //date: string; // 'YYYY-MM-DD'
+    //};
 
     return (
         <div className="screen">
@@ -145,7 +195,7 @@ export default function NewSchedule() {
             </header>
 
             <main className="new-event">
-                <input className="title-input" placeholder="새로운 이벤트..." aria-label="이벤트 제목" />
+                <input className="title-input" placeholder="새로운 이벤트..." aria-label="이벤트 제목" value={title} onChange={(e) => setTitle(e.target.value)} />
 
                 {/* 일정 */}
                 <section className="row">
@@ -219,8 +269,8 @@ export default function NewSchedule() {
                 <TimeSheet
                     startTime={startTime}
                     endTime={endTime}
-                    onChangeStart={setStartTime}
-                    onChangeEnd={setEndTime}
+                    onChangeStart={handleStartTimeChange}
+                    onChangeEnd={handleEndTimeChange}
                     onClose={() => setShowSheet(false)}
                 />
             )}
@@ -228,7 +278,7 @@ export default function NewSchedule() {
             {showStartDateSheet && (
                 <DateSheet
                     value={startDate}
-                    onChange={(d) => setStartDate(d)}
+                    onChange={handleStartDateChange}
                     onClose={() => setShowStartDateSheet(false)}
                 />
             )}
@@ -236,7 +286,7 @@ export default function NewSchedule() {
             {showEndDateSheet && (
                 <DateSheet
                     value={endDate}
-                    onChange={(d) => setEndDate(d)}
+                    onChange={handleEndDateChange}
                     onClose={() => setShowEndDateSheet(false)}
                 />
             )}
@@ -245,8 +295,8 @@ export default function NewSchedule() {
               <DateRangeSheet
                 startDate={startDate}
                 endDate={endDate}
-                onChangeStart={setStartDate}
-                onChangeEnd={setEndDate}
+                onChangeStart={handleStartDateChange}
+                onChangeEnd={handleEndDateChange}
                 onClose={() => setShowDateRangeSheet(false)}
               />
             )}

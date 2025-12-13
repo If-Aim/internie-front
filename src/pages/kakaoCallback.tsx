@@ -67,5 +67,5 @@ export default function KakaoCallback() {
     })();
   }, [navigate, searchParams]);
 
-  return <div>로그인 처리 중입니다...</div>;
+  return <div></div>;
 }

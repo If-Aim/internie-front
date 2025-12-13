@@ -13,6 +13,12 @@ export default defineConfig({
         secure: false,
       },
 
+      '/events': {
+        target: 'https://aim-internie-app.p-e.kr',
+        changeOrigin: true,
+        secure: false,
+      },
+      
       '/schedules': {
         target: 'https://aim-internie-app.p-e.kr',
         changeOrigin: true,

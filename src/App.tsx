@@ -1,13 +1,11 @@
 // src/App.tsx
 import React from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-//import AuthCallback from "./pages/authCallback";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import NewSchedule from "./pages/newSchedule";
 import Login from "./pages/login";
 import QuestionsPage from "./pages/questionsPage";
 import ProtectedRoute from "./protectedRoute";
 import KakaoCallback from "./pages/kakaoCallback";
-const USE_MOCK = false as const;  // true: 목업 데이터 사용, false: 실제 API 호출
 
 type ScheduleItem = {
   id: string;
@@ -17,16 +15,14 @@ type ScheduleItem = {
   date: string;
 };
 
-type ApiSchedulesResp = { items: ScheduleItem[] };
-
 async function api<T = unknown>(path: string): Promise<T> {
 
-  const accessToken = localStorage.getItem("accessToken");
+  const Token = localStorage.getItem("accessToken");
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
-  if (accessToken) {
-    headers["Authorization"] = `Bearer ${accessToken}`;
+  if (Token) {
+    headers["Authorization"] = `${Token}`;
   }
 
   const res = await fetch(path, {
@@ -148,21 +144,6 @@ function dateLabel(iso: string): string {
   return same ? `${d.getDate()}일 오늘` : `${d.getDate()}일 ${w}요일`;
 }
 
-function mockList(): ScheduleItem[] {
-  const today = new Date();
-  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-    today.getDate()
-  ).padStart(2, "0")}`;
-
-  return [
-    {
-      id: "demo-1",
-      title: "새로운 이벤트",
-      subtitle: "첫 번째 일정입니다",
-      date: dateStr,           // 오늘 날짜에 붙이기
-    },
-  ];
-}
 
 type EmptyStateProps = {
   onAddClick: () => void;
@@ -196,11 +177,10 @@ function Home(): React.ReactElement {
 
   const [month, setMonth] = React.useState<string>(currentMonth);
 
-  const [items, setItems] = React.useState<ScheduleItem[]>(USE_MOCK ? mockList() : []);
+  const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
 
   React.useEffect(() => {
-    if (USE_MOCK) return;
 
     //(async () => {
       //const data = await api<ApiSchedulesResp>(`/schedules?month=${month}`);
@@ -217,19 +197,13 @@ function Home(): React.ReactElement {
         const data = await api<any>(path); 
         console.log("백엔드 응답 데이터:", data); 
 
-        // 4. 데이터 매핑 (Backend 'Event' -> Frontend 'ScheduleItem')
-        // 백엔드가 { items: [...] } 형태가 아니라 배열([...])을 바로 줄 수도 있습니다.
-        // 백엔드 필드명이 id, title, content, startDate 처럼 다를 수 있으니 여기서 맞춰줍니다.
-        
-        const rawList = Array.isArray(data) ? data : (data.items || []);
+        const rawList = data.eventList || [];
         
         const mappedItems: ScheduleItem[] = rawList.map((item: any) => ({
-            // 좌측: 프론트엔드 필드명, 우측: 백엔드에서 오는 필드명(추측)
-            // console.log(data) 결과를 보고 우측 이름을 수정해야 합니다.
-            id: item.eventId || item.id,            
-            title: item.title || item.eventName,
-            subtitle: item.content || item.description || "상세 내용 없음",
-            date: item.startDate || item.date // "YYYY-MM-DD" 형태여야 함
+            id: String(item.id),
+            title: item.title,
+            subtitle: item.content,  
+            date: item.startDate
         }));
 
         setItems(mappedItems);
@@ -299,18 +273,19 @@ function Home(): React.ReactElement {
     </div>
   );
 }
-//나중에 콜백 페이지 쓰면 라우트 추가 <Route path="/auth/callback" element={<AuthCallback />} />   카카오: 
+
 
 export default function App(): React.ReactElement {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
-        <Route path="/schedule/new" element={<NewSchedule />} />
-        <Route path="/schedule/:scheduleId/questions" element={<QuestionsPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/schedule/new" element={<NewSchedule />} />
+          <Route path="/schedule/:scheduleId/questions" element={<QuestionsPage />} />
+        </Route>
       </Routes>
     </div>
   );

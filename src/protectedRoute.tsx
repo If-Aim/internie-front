@@ -1,10 +1,13 @@
+// src/protectedRoute.tsx
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute({ children }: { children: React.ReactElement }) {
-  const token = localStorage.getItem("token"); // 로그인 여부 판단
+export default function ProtectedRoute() {
+  const isLogin = localStorage.getItem("accessToken"); 
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!isLogin) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return children;
+  return <Outlet />;
 }

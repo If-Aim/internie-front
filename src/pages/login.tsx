@@ -13,10 +13,6 @@ const kakaoAuthUrl =
 
 const GOOGLE_AUTH_URL = "/auth/google"; // 백엔드 라우트에 맞게 수정
 
-/**
- * 로그인 화면 컴포넌트
- * 역할: 소셜 로그인 시작 버튼을 노출하고, 공급자 승인 페이지로 리다이렉트
- */
 export default function Login() {
 
   const go = (url: string) => { window.location.href = url; };
