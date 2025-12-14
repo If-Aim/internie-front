@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/questions.css";
 
-type Stage = "intro" | "asking";
+type Stage = "asking" | "completed";
 type RecordStage = "closed" | "preparing" | "recording";
 
 type QuestionDto = {
@@ -19,13 +19,13 @@ const SENSITIVITY = 10; // 감도 조절 상수
 export default function QuestionsPage() {
   const navigate = useNavigate();
   const { scheduleId } = useParams<{ scheduleId: string }>();
-  const { eventDayId } = useParams<{ eventDayId: string }>();
 
   const [questions, setQuestions] = React.useState<QuestionDto[]>([]);
   const [index, setIndex] = React.useState(0);
-  const [stage, setStage] = React.useState<Stage>("intro");
+  const [stage, setStage] = React.useState<Stage>("asking");
 
   const [recordStage, setRecordStage] = React.useState<RecordStage>("closed");
+  const [isMicOn, setIsMicOn] = React.useState(false);
   const [levels, setLevels] = React.useState<number[]>(() => Array(BARS).fill(0));
   const [ringLevel, setRingLevel] = React.useState(0);
 
@@ -38,7 +38,19 @@ export default function QuestionsPage() {
 
   const uploadAudio = async (audioBlob: Blob) => {
     if (!current) return;
-
+    /*const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = `recording_${current.id}_${new Date().getTime()}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // 5. 뒷정리 (메모리 해제)
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);*/
     // 1. 파일 객체 생성 (확장자는 webm 또는 mp3 등 백엔드 요구사항에 맞춤)
     const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
 
@@ -71,38 +83,36 @@ export default function QuestionsPage() {
       console.error("업로드 중 에러:", e);
     }
   };
-
   const [showOutro, setShowOutro] = React.useState(false);
+
   // 질문 불러오기
   React.useEffect(() => {
     const fetchQuestions = async () => {
-      // 1. 토큰 가져오기 (App.tsx와 동일하게)
+      
+      // ==========================================
+      // [1] 실제 API 호출 코드는 잠시 주석 처리합니다.
+      // (나중에 백엔드 API가 완성되면 이 주석만 풀고 아래 가짜 데이터를 지우면 됩니다)
+      // ==========================================
+      /*
       const token = localStorage.getItem("accessToken"); 
       if (!token) {
         alert("로그인이 필요합니다.");
-        navigate("/login"); // navigate 변수가 선언되어 있어야 합니다.
+        navigate("/login");
         return;
       }
+      if (!scheduleId) return;
 
       try {
-        // 2. 질문 목록 API 호출
-        // [중요] 백엔드 개발자분이 알려준 '질문 조회 API 주소'를 아래에 적어야 합니다.
-        // 예시: `/daily-events/${eventDayId}/questions` 또는 그냥 `/questions`
-        const res = await fetch(`/questions`, { 
+        const res = await fetch(`/event-days/${scheduleId}/questions`, { 
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": token, // Bearer 중복 없이 토큰만 전송
+            "Authorization": token, 
           },
         });
 
         if (res.ok) {
           const data = await res.json();
-          console.log("질문 목록 응답:", data);
-
-          // 3. 받아온 데이터를 상태(State)에 저장
-          // 만약 백엔드가 { items: [...] } 형태로 준다면 data.items로 수정 필요
-          // 백엔드 데이터 필드명(questionText 등)이 다르다면 map으로 연결해야 함
           setQuestions(data); 
         } else {
           console.error("질문 불러오기 실패:", res.status);
@@ -110,25 +120,47 @@ export default function QuestionsPage() {
       } catch (e) {
         console.error("에러 발생:", e);
       }
+      */
+
+      // ==========================================
+      // [2] 임시 가짜 데이터 (Mock Data) 사용
+      // ==========================================
+      console.log("⚠️ [임시] 가짜 질문 데이터를 사용합니다.");
+
+      // 위에 정의된 QuestionDto 타입(id, order, text, totalCount)에 맞춰야 합니다.
+      const mockQuestions: QuestionDto[] = [
+        {
+          id: "temp_q1",
+          order: 1,
+          text: "오늘 가장 기억에 남는 일은 무엇인가요?",
+          totalCount: 3,
+        },
+        {
+          id: "temp_q2",
+          order: 2,
+          text: "그 일을 통해 무엇을 배웠나요?",
+          totalCount: 3,
+        },
+        {
+          id: "temp_q3",
+          order: 3,
+          text: "앞으로 어떻게 내 삶에 적용해볼 수 있을까요?",
+          totalCount: 3,
+        },
+      ];
+
+      // 핵심: API에서 받아온 것처럼 setQuestions를 해줘야 화면에 뜹니다!
+      setQuestions(mockQuestions); 
     };
 
     fetchQuestions();
-  }, []);
+  }, [scheduleId, navigate]);
   
   const current = questions[index] ?? null;
   const total = (current?.totalCount ?? questions.length) || 1;
   const currentNo = current?.order ?? index + 1;
 
   const isLastQuestion = index === questions.length - 1;
-  // 인트로 → 질문 화면 전환
-  React.useEffect(() => {
-    if (stage !== "intro" || showOutro) return;
-    if (!current) return;
-
-    const timer = setTimeout(() => setStage("asking"), 1500);
-    return () => clearTimeout(timer);
-  }, [stage, current, showOutro]);
-
   React.useEffect(() => {
     if (recordStage === "preparing") {
       const staticLevels = Array.from({ length: BARS }, () => 0.15);
@@ -142,12 +174,13 @@ export default function QuestionsPage() {
       return () => window.clearTimeout(timer);
     }
     
-    if (recordStage === "closed") {setLevels(Array(BARS).fill(0)); setRingLevel(0);}
+    if (recordStage === "closed") {setLevels(Array(BARS).fill(0)); setRingLevel(0);setIsMicOn(false);}
   
   }, [recordStage]);
 
   React.useEffect(() => {
     if (recordStage !== "recording") {
+      setIsMicOn(false);
       if (audioCtxRef.current) {
         audioCtxRef.current.close();
         audioCtxRef.current = null;
@@ -193,22 +226,18 @@ export default function QuestionsPage() {
 
           (analyserNode as any).getFloatTimeDomainData(arr as any);
 
-          // 전체 RMS 구하기
           let sum = 0;
           for (let i = 0; i < arr.length; i++) {
             const v = arr[i]; // -1 ~ 1
             sum += v * v;
           }
           const rms = Math.sqrt(sum / arr.length);
-
           const noiseFloor = 0.01;
           const norm = Math.max(0, rms - noiseFloor);
-
           const amp = Math.min(1, norm * SENSITIVITY);// 감도 적용
 
           setLevels((prev) => {
             const next = prev.slice(1);
-            
             const minLevel = 0.4;
             const newVal = amp > 0
               ? minLevel + amp * (3 - minLevel) // 0.4 ~ 1.0
@@ -217,15 +246,13 @@ export default function QuestionsPage() {
             next.push(newVal);
             return next;
           });
-
           setRingLevel(amp);
         }, 60); // 60ms 간격 (약 16fps 정도)
 
         const recorder = new MediaRecorder(stream);
         mediaRecorderRef.current = recorder;
-        audioChunksRef.current = []; // 초기화
+        audioChunksRef.current = []; 
 
-        // 데이터가 들어올 때마다 배열에 저장
         recorder.ondataavailable = (e) => {
           if (e.data.size > 0) {
             audioChunksRef.current.push(e.data);
@@ -239,6 +266,7 @@ export default function QuestionsPage() {
         };
 
         recorder.start();
+        setIsMicOn(true);
 
       } catch (err) {
         console.error("마이크 접근 실패", err);
@@ -251,56 +279,36 @@ export default function QuestionsPage() {
 
     return () => {
       cancelled = true;
-      if (intervalId !== null) {
-        window.clearInterval(intervalId);
-      }
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close();
-        audioCtxRef.current = null;
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
+      if (intervalId !== null) window.clearInterval(intervalId);
     };
   }, [recordStage]);
 
   React.useEffect(() => {
     if (!showOutro) return;
-
     const timer = window.setTimeout(() => {
-      setShowOutro(false);
-
       if (isLastQuestion) {
-        navigate("/");
+        setStage("completed"); 
       } else {
         setIndex((prev) => prev + 1);
         setStage("asking");
       }
       setShowOutro(false);
-    }, 2000); // 2초
-
+    }, 2000);
     return () => clearTimeout(timer);
   }, [showOutro, isLastQuestion, navigate]);
 
+  React.useEffect(() => {
+    if (stage === "completed") {
+      const timer = setTimeout(() => {
+        navigate("/");
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [stage, navigate]);
+
   return (
     <div className="screen">
-      {/* 인트로 화면 */}
-      {stage === "intro" && (
-        <main className="questions-intro">
-          <img
-            src="/internie_mascot_normal.png"
-            alt=""
-            className="questions-intro-img"
-          />
-          <p className="questions-intro-text">
-            인터니가 질문을 준비하고 있어요!
-            <br />
-            오늘은 어떤 역량을 얻을 수 있을까요?
-          </p>
-        </main>
-      )}
-
       {/* 기록화면 */}
       {stage === "asking" && current && (
           <div className="wrap">
@@ -375,27 +383,25 @@ export default function QuestionsPage() {
 
                     {/* 텍스트 */}
                     <p className="recording-text">
-                      {recordStage === "preparing" ? "녹음 준비중이에요" : "지금 말하세요"}
+                      {recordStage === "recording" && isMicOn ? "지금 말하세요" : "녹음 준비중이에요"}
                     </p>
 
-                    {/* 흰색 마이크 버튼 */}
                     <div
                       className={
                         "recording-mic-ring" +
-                        (recordStage === "recording" ? " recording-mic-ring--active" : "")
+                        (recordStage === "recording" && isMicOn ? " recording-mic-ring--active" : "")
                       }
                       style={{
-                        background: `rgba(255, 255, 255, ${0.1 + ringLevel * 0.4})`
+                        background: isMicOn ? `rgba(255, 255, 255, ${ringLevel * 0.4})` : "transparent"
                       }}
                     >
                       <button
                         type="button"
-                        className={
-                          "recording-mic-btn" +
-                          (recordStage === "recording" ? " recording-mic-btn--active" : "")
-                        }
+                        className={"recording-mic-btn" + (recordStage === "recording" ? " recording-mic-btn--active" : "")}
+                        disabled={!isMicOn}
+                        style={{ opacity: 1, cursor: isMicOn ? 'pointer' : 'default',}}
                         onClick={() => {
-                          if (recordStage === "recording") {
+                          if (recordStage === "recording" && isMicOn) {
                             setRecordStage("closed");
                             setShowOutro(true);
                           }
@@ -418,6 +424,26 @@ export default function QuestionsPage() {
             </div>
             <p className="record-outro-text">기록완료!</p>
           </div>
+        </div>
+      )}
+      {stage === "completed" && (
+        <div className="wrap">
+          <div className="spacer-50" aria-hidden="true" />
+          <header className="topbar-completion">
+            <button className="iconbtn" aria-label="메뉴">
+              <img className="icon" src="/menu-01.svg" alt="" />
+            </button>
+            <h1 className="topbar-title">활동 보고서</h1>
+            <div style={{ width: 24 }} />
+          </header>
+          <main className="completion-page">
+            <div className="completion-content">          
+              <h2 className="completion-title">역량 분석 중..</h2>
+              <p className="completion-desc">
+                인터니가 사용자님의 답변을 분석 중이에요!
+              </p>
+            </div>
+          </main>
         </div>
       )}
     </div>

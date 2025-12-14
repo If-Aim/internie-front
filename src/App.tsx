@@ -6,6 +6,7 @@ import Login from "./pages/login";
 import QuestionsPage from "./pages/questionsPage";
 import ProtectedRoute from "./protectedRoute";
 import KakaoCallback from "./pages/kakaoCallback";
+import "./App.css";
 
 type ScheduleItem = {
   id: string;
@@ -15,7 +16,7 @@ type ScheduleItem = {
   date: string;
 };
 
-async function api<T = unknown>(path: string): Promise<T> {
+async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
 
   const Token = localStorage.getItem("accessToken");
   const headers: HeadersInit = {
@@ -24,21 +25,34 @@ async function api<T = unknown>(path: string): Promise<T> {
   if (Token) {
     headers["Authorization"] = `${Token}`;
   }
-
+  console.log("실제로 전송되는 헤더:", headers["Authorization"]);
   const res = await fetch(path, {
+    ...init,
     headers,
-    credentials: "include", // Refresh Token 쿠키도 같이 보내서 토큰 만료 시 대비
+    credentials: "include",
   });
+
+  if (res.status === 401) {
+    localStorage.removeItem("accessToken"); 
+    
+    window.location.href = "/login"; 
+    
+    throw new Error("세션이 만료되었습니다. 다시 로그인해주세요.");
+  }
 
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as T;
 }
 
-function Header(): React.ReactElement {
+type HeaderProps = {
+  onMenuClick: () => void;
+};
+
+function Header({ onMenuClick }: HeaderProps): React.ReactElement {
   return (
     <div className="topbar">
-      <button className="iconbtn" aria-label="menu" onClick={() => { /* TODO */ }}>
-        {/* public 폴더 자산은 /파일명 으로 접근 */}
+      {/* 햄버거 버튼 클릭 시 onMenuClick 실행 */}
+      <button className="iconbtn" aria-label="menu" onClick={onMenuClick}>
         <img className="icon" src="/menu-01.svg" alt="메뉴" />
       </button>
 
@@ -48,6 +62,61 @@ function Header(): React.ReactElement {
         <img className="icon" src="/calendar-07.svg" alt="추가" />
       </button>
     </div>
+  );
+}
+
+type SideMenuProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onLogout: () => void;
+  userId: number | null; 
+};
+
+function SideMenu({ isOpen, onClose, onLogout, userId }: SideMenuProps) {
+  if (!isOpen) return null;
+
+  // 닉네임이나 이미지는 현재 API에 없으므로 고정값 혹은 로컬스토리지 활용 가능
+  // 여기서는 userId만 동적으로 표시합니다.
+  const user = {
+    nickname: "null",
+    profileImage: "/internie_mascot_normal.png"
+  };
+
+  return (
+    <>
+      <div className="drawer-backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="drawer-panel">
+        <div className="drawer-header">
+          <div className="profile-wrap">
+            <img 
+              src={user.profileImage} 
+              alt="프로필" 
+              className="profile-img" 
+            />
+            <div className="profile-info">
+              <div className="name">{user.nickname}</div>
+              {/* Home에서 받아온 userId 표시 */}
+              <div className="email">User ID: {userId ?? "-"}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="drawer-body">
+          <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
+            마이페이지
+          </button>
+          <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
+            설정
+          </button>
+        </div>
+
+        <div className="drawer-footer">
+          <button className="btn-logout" onClick={onLogout}>
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -171,43 +240,34 @@ function EmptyState({ onAddClick }: EmptyStateProps): React.ReactElement {
 
 function Home(): React.ReactElement {
   const navigate = useNavigate();
+  const [isMenuOpen, setMenuOpen] = React.useState(false);
 
+  const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-
   const [month, setMonth] = React.useState<string>(currentMonth);
-
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
 
   React.useEffect(() => {
-
-    //(async () => {
-      //const data = await api<ApiSchedulesResp>(`/schedules?month=${month}`);
-      //setItems(Array.isArray(data.items) ? data.items : []);
-    //})().catch(console.error);
     (async () => {
       try {
         const [y, m] = month.split("-"); 
-        
         const path = `/events/${y}/${m}`;
-
-        console.log("스케줄 요청:", path); // 디버깅용 로그
-
         const data = await api<any>(path); 
-        console.log("백엔드 응답 데이터:", data); 
-
         const rawList = data.eventList || [];
-        
+
+        if (rawList.length > 0) {
+          // 첫 번째 일정의 userId를 사용 (모든 일정의 소유자는 같을 테니)
+          setCurrentUserId(rawList[0].userId);
+        }
         const mappedItems: ScheduleItem[] = rawList.map((item: any) => ({
             id: String(item.id),
             title: item.title,
             subtitle: item.content,  
             date: item.startDate
         }));
-
         setItems(mappedItems);
-
       } catch (e) {
         console.error("스케줄 불러오기 실패:", e);
       }
@@ -219,15 +279,63 @@ function Home(): React.ReactElement {
     for (const it of items) {
       (g[it.date] ??= []).push(it);
     }
-    return Object.entries(g).sort((a, b) => (a[0] < b[0] ? 1 : -1)); // 내림차순
+    return Object.entries(g).sort((a, b) => (a[0] < b[0] ? 1 : -1)); 
   }, [items]);
   
   const hasItems = byDate.length > 0;
-//false;
+
+  const handleRecord = async () => {
+    if (!selectedItem) return;
+
+    try {
+      const body = {
+        title: selectedItem.title,
+        memo: selectedItem.subtitle, // subtitle을 content로 매핑
+        date: selectedItem.date,
+      };
+
+      // 2. API 호출: POST /event-days/events/{eventId}
+      // 응답 타입을 any 혹은 명세서에 맞게 정의 가능
+      const response = await api<any>(`/event-days/events/${selectedItem.id}`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+
+      console.log("세부 일정 생성 성공:", response);
+
+      const newEventDayId = response.eventDayId;
+      setSelectedItem(null);
+      navigate(`/schedule/${newEventDayId}/questions`);
+
+    } catch (error) {
+      console.error("기록하기 실패:", error);
+      alert("일정을 기록하는 중 오류가 발생했습니다.");
+    }
+  };
+
+
+  // 로그아웃 핸들러
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken"); // 토큰 삭제
+    setMenuOpen(false); // 메뉴 닫기
+    navigate("/login"); // 로그인 페이지로 이동
+  };
+
   return (
     <div className="wrap">
+      {/* SideMenu 배치 (z-index가 높으므로 맨 위에 뜸) */}
+      <SideMenu 
+        isOpen={isMenuOpen} 
+        onClose={() => setMenuOpen(false)} 
+        onLogout={handleLogout}
+        userId={currentUserId}
+      />
+
       <div className="spacer-50" aria-hidden="true" />
-      <Header />
+      
+      {/* Header에 메뉴 클릭 핸들러 전달 */}
+      <Header onMenuClick={() => setMenuOpen(true)} />
+      
       <div className="row" style={{ marginTop: 23 }}>
         <MonthHeader value={month} onChange={setMonth} />
       </div>
@@ -235,14 +343,14 @@ function Home(): React.ReactElement {
       {hasItems ? (
         byDate.map(([date, arr]) => (
           <section key={date}>
-            <h2 className="h2">{dateLabel(date)}</h2>
+            <h2 className="h2"style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginTop: "27px" }}>{dateLabel(date)}</h2>
             {arr.map((it) => (
               <EventCard
                 key={it.id}
                 title={it.title}
                 subtitle={it.subtitle}
                 selected={selectedItem?.id === it.id}
-                onClick={() => setSelectedItem(it)}      // ← 클릭 시 모달용 상태 설정
+                onClick={() => setSelectedItem(it)}
               />
             ))}
           </section>
@@ -259,34 +367,15 @@ function Home(): React.ReactElement {
       >
         <img className="icon" src="/plus-01-white.svg" alt="" />
       </button>
+      
+      {/* ... EventModal 등 ... */}
       {selectedItem && (
         <EventModal
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
-          onRecord={() => {
-            const id = selectedItem.id;
-            setSelectedItem(null);
-            navigate(`/schedule/${id}/questions`);
-          }}
+          onRecord={handleRecord}
         />
       )}
-    </div>
-  );
-}
-
-
-export default function App(): React.ReactElement {
-  return (
-    <div>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/schedule/new" element={<NewSchedule />} />
-          <Route path="/schedule/:scheduleId/questions" element={<QuestionsPage />} />
-        </Route>
-      </Routes>
     </div>
   );
 }
@@ -356,6 +445,23 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
           </button>
         </footer>
       </div>
+    </div>
+  );
+}
+
+
+export default function App(): React.ReactElement {
+  return (
+    <div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/schedule/new" element={<NewSchedule />} />
+          <Route path="/schedule/:scheduleId/questions" element={<QuestionsPage />} />
+        </Route>
+      </Routes>
     </div>
   );
 }

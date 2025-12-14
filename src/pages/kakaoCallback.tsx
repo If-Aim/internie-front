@@ -8,13 +8,11 @@ export default function KakaoCallback() {
   const ranRef = React.useRef(false);
 
   React.useEffect(() => {
-    // React.StrictMode에서 두 번 실행 방지
     if (ranRef.current) return;
     ranRef.current = true;
 
     const code = searchParams.get("code");
     
-    // 코드가 없으면 로그인 화면으로 튕기기
     if (!code) {
       navigate("/login", { replace: true });
       return;
@@ -25,7 +23,6 @@ export default function KakaoCallback() {
         const code = searchParams.get("code");
         const origin = window.location.origin;
         const currentRedirectUri = `${origin}/oauth/kakao/callback`;
-        console.log("보내는 데이터:", { code, redirect_uri: currentRedirectUri });
 
         const res = await fetch(`/auth/kakao`, {
           method: "POST",
@@ -46,12 +43,9 @@ export default function KakaoCallback() {
           return;
         }
 
-        // [핵심] 헤더에서 토큰 꺼내기
-        // Authorization 헤더 확인 (대소문자 상관없이 가져옴)
         const accessToken = res.headers.get("Authorization") || res.headers.get("authorization");
 
         if (accessToken) {
-          // 토큰 저장 (Bearer 포함 여부는 백엔드 응답에 따라 다르지만 보통 포함됨)
           localStorage.setItem("accessToken", accessToken);
           console.log("로그인 성공! 토큰 저장됨.");
           navigate("/", { replace: true });

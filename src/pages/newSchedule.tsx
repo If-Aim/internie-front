@@ -1,7 +1,7 @@
 // src/pages/newSchedule.tsx
 import "../styles/schedule.css";
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 type Stage = "intro" | "form" | "outro";
 const TIME_OPTIONS: string[] = Array.from({ length: 24 }, (_, h) => {
@@ -34,7 +34,6 @@ export default function NewSchedule() {
     const [endDate, setEndDate] = React.useState<Date>(() => new Date());
     const [title, setTitle] = React.useState("");
     const [memo, setMemo] = React.useState("");
-    const { eventId } = useParams<{ eventId: string }>();
 
 
     React.useEffect(() => {
@@ -126,7 +125,6 @@ export default function NewSchedule() {
           endDate: toYmd(endDate)    
         };
 
-        console.log("보내는 데이터:", payload); // 디버깅용
         
         const res = await fetch(`/events`, {
           method: "POST",
@@ -152,7 +150,7 @@ export default function NewSchedule() {
         
         setTimeout(() => {
           nav("/", { replace: true });
-        }, 1600);
+        }, 15000);
 
       } catch (err) {
         console.error("에러 발생:", err);

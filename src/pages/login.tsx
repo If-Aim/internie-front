@@ -19,7 +19,6 @@ export default function Login() {
 
   return (
     <>
-      {/* 빈 헤더 공간 */}
       <div className="header-spacer" aria-hidden="true" />
       
       <main className="login-wrap">
