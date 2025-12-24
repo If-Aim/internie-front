@@ -8,6 +8,7 @@ import NewSchedule from "./pages/newSchedule";
 import QuestionsPage from "./pages/questionsPage";
 import ProtectedRoute from "./protectedRoute";
 import EditSchedule from "./pages/editSchedule";
+import MyPage from "./pages/myPage";
 
 import "./App.css";
 
@@ -282,7 +283,7 @@ function MonthHeader({ value, onChange }: MonthHeaderProps) {
 }
 
 type EmptyStateProps = { onAddClick: () => void; };
-function EmptyState({ onAddClick }: EmptyStateProps): React.ReactElement {
+function EmptyState({ /*onAddClick*/ }: EmptyStateProps): React.ReactElement {
   return (
     <div className="empty">
       <img className="empty-illust" src="/internie_mascot_normal.png" alt="" />
@@ -346,7 +347,7 @@ function Home(): React.ReactElement {
   
   const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
   const [isMenuOpen, setMenuOpen] = React.useState(false);
-  const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
+  const [currentUserId/*, setCurrentUserId*/] = React.useState<number | null>(null);
 
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
@@ -599,6 +600,7 @@ export default function App(): React.ReactElement {
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
         <Route element={<ProtectedRoute />}> {/*보호된 라우트 (로그인상태에서만 접근가능) */}
           <Route path="/" element={<Home />} />
+          <Route path="/mypage" element={<MyPage />} />
           <Route path="/schedule/new" element={<NewSchedule />} />
           <Route path="/schedule/:eventId" element={<EditSchedule />} />
           <Route path="/schedule/:scheduleId/questions" element={<QuestionsPage />} />

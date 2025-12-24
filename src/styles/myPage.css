@@ -1,0 +1,91 @@
+.mypage {
+  min-height: 100vh;
+  background: #eef5ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 20px 28px;
+  box-sizing: border-box;
+}
+
+.mypage-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.mypage-email {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.mypage-avatar-wrap {
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.mypage-avatar {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+}
+
+.mypage-greeting {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0b0b0c;
+  margin-top: 6px;
+}
+
+.mypage-name {
+  font-weight: 900;
+}
+
+.mypage-actions {
+  width: 100%;
+  max-width: 520px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.mypage-action-btn {
+  height: 64px;
+  border: 0;
+  border-radius: 12px;
+  background: #e0e0e0;
+  color: #7a7a7a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.mypage-action-btn:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.mypage-bottom {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mypage-logout {
+  width: 100%;
+  max-width: 680px;
+  height: 78px;
+  border: 0;
+  border-radius: 16px;
+  background: #0b63ff;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+}
