@@ -1,6 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
 
-:root {--bg: #eaf1fa; --black: #111;--kakao: #fee500;--white: #fff;--radius: 10px;--shadow: 0 4px 4px rgba(0,0,0,.25);--header-h: 50px;}
+:root {--bg: #F0F6FF; --black: #111;--kakao: #fee500;--white: #fff;--radius: 10px;--shadow: 0 4px 4px rgba(0,0,0,.25);--header-h: 50px;}
 * { box-sizing: border-box; }
 body { background: var(--bg); }
 .header-spacer {height: var(--header-h); padding: 0;}

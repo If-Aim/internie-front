@@ -11,29 +11,7 @@ import EditSchedule from "./pages/editSchedule";
 
 import "./App.css";
 
-type ScheduleItem = {
-  instanceId: string;
-  eventId: string;
-  title: string;
-  subtitle: string;
-  date: string; /* 'YYYY-MM-DD' */
-  startDate: string;
-  endDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  eventDayId?: string | number | null;
-};
-type RawEvent = {
-  id: string | number;
-  title: string;
-  content?: string;
-  startDate: string;
-  endDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-};
-
-/*날짜 관련 함수*/
+/*날짜 관련*/
 function toYmd(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -55,14 +33,13 @@ function expandEventToDailyItems(
 ): ScheduleItem[] {
   const [yStr, mStr] = ym.split("-");
   const y = Number(yStr);
-  const m = Number(mStr); // 1~12
+  const m = Number(mStr);
   const monthStart = new Date(y, m - 1, 1);
-  const monthEnd = new Date(y, m, 0); // 이번 달 마지막 날
+  const monthEnd = new Date(y, m, 0); 
 
   const start = ymdToDate(e.startDate);
   const end = ymdToDate(e.endDate);
 
-  // 월 범위로 클램프
   const s = start > monthStart ? start : monthStart;
   const ed = end < monthEnd ? end : monthEnd;
 
@@ -82,7 +59,6 @@ function expandEventToDailyItems(
       endDate: e.endDate,
       startTime: e.startTime ?? null,
       endTime: e.endTime ?? null,
-      eventDayId: null,
     });
   }
   return out;
@@ -113,6 +89,17 @@ function dateLabel(iso: string): string {
 
   return same ? `${day}일 오늘` : `${day}일 ${w}요일`;
 }
+function shiftYm(ym: string, diffMonths: number): string {
+  const [yStr, mStr] = ym.split("-");
+  const y = Number(yStr);
+  const m = Number(mStr);
+
+  const d = new Date(y, m - 1 + diffMonths, 1);
+  const ny = d.getFullYear();
+  const nm = d.getMonth() + 1;
+  return `${ny}-${String(nm).padStart(2, "0")}`;
+}
+
 
 /*시간 관련 함수*/
 function hhmm(t?: string | null): string {
@@ -125,6 +112,26 @@ function timeRangeText(startTime?: string | null, endTime?: string | null): stri
   return `${hhmm(startTime)}–${hhmm(endTime)}`;
 }
 
+type ScheduleItem = {
+  instanceId: string;
+  eventId: string;
+  title: string;
+  subtitle: string;
+  date: string; /* 'YYYY-MM-DD' */
+  startDate: string;
+  endDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+};
+type RawEvent = {
+  id: string | number;
+  title: string;
+  content?: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+};
 
 async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   const Token = localStorage.getItem("accessToken");
@@ -222,86 +229,6 @@ function SideMenu({ isOpen, onClose, onLogout, userId }: SideMenuProps) {
   );
 }
 
-type MonthHeaderProps = { value: string; onChange: (ym: string) => void };
-function MonthHeader({ value, onChange }: MonthHeaderProps) {
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement | null>(null);
-  const currentYm = React.useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  }, []);
-  const [, mStr] = value.split("-");
-  const label = `${Number(mStr)}월`;
-  const months = React.useMemo(() => {
-    const [yStr, mStr] = currentYm.split("-");
-    const y = Number(yStr);
-    const m = Number(mStr);
-    const list: { ym: string; text: string }[] = [];
-    for (let mm = m; mm >= 1; mm--) {
-      const ym = `${y}-${String(mm).padStart(2, "0")}`;
-      list.push({ ym, text: `${mm}월` });
-    }
-    return list;
-  }, [currentYm]);
-
-  React.useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("click", onDoc);
-    return () => document.removeEventListener("click", onDoc);
-  }, []);
-
-  return (
-    <div className="month-row" ref={ref} style={{ position: "relative" }}>
-      <div className="month-left">
-        <div className="h1">{label}</div>
-        <button className="month-btn" aria-label="월 선택" onClick={() => setOpen(v => !v)}>
-          <img className="icon" src="/chevron-right.svg" alt="월 선택" />
-        </button>
-      </div>
-
-      {open && (
-        <div className="month-pop" role="menu" aria-label="월 선택" style={{ left: 0, top: "100%", marginTop: 8 }}>
-          <div className="month-menu">
-            {months.map(m => (
-              <button
-                key={m.ym}
-                className="month-item"
-                aria-current={m.ym === value ? "true" : undefined}
-                onClick={() => { onChange(m.ym); setOpen(false); }}
-              >
-                {m.text}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-type EmptyStateProps = { onAddClick: () => void; };
-function EmptyState({ onAddClick }: EmptyStateProps): React.ReactElement {
-  return (
-    <div className="empty">
-      <img className="empty-illust" src="/internie_mascot_normal.png" alt="" />
-
-      <p className="empty-sub">아직 일정이 없어요.<br /> 일정을 추가해 볼까요?</p>
-
-      <button
-        type="button"
-        className="empty-sync"
-        onClick={() => {
-          // 나중에 캘린더 연동 기능 넣기
-        }}
-      >
-        캘린더 연동하기
-      </button>
-    </div>
-  );
-}
-
 type EventCardProps = Pick<ScheduleItem, "title" | "subtitle"> & {
   selected: boolean;
   onClick: () => void;
@@ -337,6 +264,130 @@ function EventCard({ title, subtitle, selected, onClick, onEditClick }: EventCar
   );
 }
 
+type MonthHeaderProps = { value: string; onChange: (ym: string) => void };
+function MonthHeader({ value, onChange }: MonthHeaderProps) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement | null>(null);
+
+  const [yStr, mStr] = value.split("-");
+  const year = Number(yStr);
+  const month = Number(mStr);
+  // 연도 리스트: 예) 현재연도 기준 -5 ~ +1
+  const years = React.useMemo(() => {
+    const nowY = new Date().getFullYear();
+    const start = nowY - 5;
+    const end = nowY + 1;
+    const list: number[] = [];
+    for (let y = start; y <= end; y++) list.push(y);
+    return list;
+  }, []);
+  //const label = `${Number(mStr)}월`;
+  const months = React.useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+
+
+  React.useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", onDoc);
+    return () => document.removeEventListener("click", onDoc);
+  }, []);
+
+  const setYear = (y: number) => onChange(`${y}-${String(month).padStart(2, "0")}`);
+  const setMonth = (m: number) => onChange(`${year}-${String(m).padStart(2, "0")}`);
+
+  return (
+    <div className="month-row" ref={ref} style={{ position: "relative" }}>
+      <div className="month-left">
+        <button className="month-nav" aria-label="이전 달" onClick={() => onChange(shiftYm(value, -1))}>
+          〈
+        </button>
+
+        <button className="month-nav" aria-label="다음 달" onClick={() => onChange(shiftYm(value, 1))}>
+          〉
+        </button>
+        <button
+          className="month-btn"
+          type="button"
+          aria-label="연도/월 선택"
+          onClick={() => setOpen((v) => !v)}
+        >
+          {year}년 {month}월
+          <img className="icon" src="/chevron-right.svg" alt="" style={{ marginLeft: 6 }} />
+        </button>
+      </div>
+
+      {open && (
+        <div
+          className="month-pop"
+          role="dialog"
+          aria-label="연도/월 선택"
+          style={{ left: 0, top: "100%", marginTop: 8 }}
+        >
+          <div className="month-menu" style={{ display: "flex", gap: 12, padding: 12 }}>
+            {/* 연도 컬럼 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, opacity: 0.7 }}>연도</div>
+              {years.map((y) => (
+                <button
+                  key={y}
+                  type="button"
+                  className="month-item"
+                  aria-current={y === year ? "true" : undefined}
+                  onClick={() => setYear(y)}
+                >
+                  {y}년
+                </button>
+              ))}
+            </div>
+
+            {/* 월 컬럼 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, opacity: 0.7 }}>월</div>
+              {months.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className="month-item"
+                  aria-current={m === month ? "true" : undefined}
+                  onClick={() => {
+                    setMonth(m);
+                    setOpen(false); // 월 선택하면 닫기
+                  }}
+                >
+                  {m}월
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type EmptyStateProps = { onAddClick: () => void; };
+function EmptyState({ onAddClick }: EmptyStateProps): React.ReactElement {
+  return (
+    <div className="empty">
+      <img className="empty-illust" src="/internie_mascot_normal.png" alt="" />
+
+      <p className="empty-sub">아직 일정이 없어요.<br /> 일정을 추가해 볼까요?</p>
+
+      <button
+        type="button"
+        className="empty-sync"
+        onClick={() => {
+          // 나중에 캘린더 연동 기능 넣기
+        }}
+      >
+        캘린더 연동하기
+      </button>
+    </div>
+  );
+}
 
 function Home(): React.ReactElement {
   const navigate = useNavigate();
@@ -506,6 +557,15 @@ function Home(): React.ReactElement {
         <EmptyState onAddClick={() => navigate("/schedule/new")} />
       )}
       <div className="bottom-spacer" />
+      {/*파란색 일정 추가 버튼
+      <button
+        type="button"
+        className="fab-add"
+        aria-label="새 일정 추가"
+        onClick={() => navigate("/schedule/new")}
+      >
+        <img className="icon" src="/plus-01-white.svg" alt="" />
+      </button>*/}
       
       {/* 기록하기 모달(팝업) */}
       {isRecordModalOpen && selectedItem && (
@@ -528,6 +588,8 @@ function Home(): React.ReactElement {
     </div>
   );
 }
+
+
 
 type EventModalProps = {
   item: ScheduleItem;
@@ -597,7 +659,7 @@ export default function App(): React.ReactElement {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
-        <Route element={<ProtectedRoute />}> {/*보호된 라우트 (로그인상태에서만 접근가능) */}
+        <Route element={<ProtectedRoute />}> {/*보호되 라우트 (로그인상태에서만 접근가능) */}
           <Route path="/" element={<Home />} />
           <Route path="/schedule/new" element={<NewSchedule />} />
           <Route path="/schedule/:eventId" element={<EditSchedule />} />

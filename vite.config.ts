@@ -36,6 +36,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/api': {
+        target: 'https://aim-internie-app.p-e.kr',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

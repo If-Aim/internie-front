@@ -35,126 +35,78 @@ export default function QuestionsPage() {
   const streamRef = React.useRef<MediaStream | null>(null);
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const audioChunksRef = React.useRef<Blob[]>([]);
+  const [eventDayId, setEventDayId] = React.useState<number | null>(null);
 
-  const uploadAudio = async (audioBlob: Blob) => {
-    if (!current) return;
-    /*const url = URL.createObjectURL(audioBlob);
-    const a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = `recording_${current.id}_${new Date().getTime()}.webm`;
-    document.body.appendChild(a);
-    a.click();
+  React.useEffect(() => {
+    const n = Number(scheduleId); // scheduleId === eventDayId
+    if (!Number.isFinite(n)) {
+      console.error("eventDayId가 숫자가 아닙니다:", scheduleId);
+      return;
+    }
+    setEventDayId(n);
+  }, [scheduleId]);
+
+  const uploadAudioToSTT = async (audioBlob: Blob) => {
+    if (!eventDayId) {
+      console.error("eventDayId가 없습니다. 먼저 eventDay를 생성해야 합니다.");
+      return;
+    }
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    const auth = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
     
-    // 5. 뒷정리 (메모리 해제)
-    setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-    }, 100);*/
-    // 1. 파일 객체 생성 (확장자는 webm 또는 mp3 등 백엔드 요구사항에 맞춤)
     const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
 
-    // 2. FormData 생성
     const formData = new FormData();
-    formData.append("file", audioFile); // 백엔드에서 받는 키 이름이 'file'인지 확인 필요!
-    // formData.append("questionId", current.id); // 필요시 질문 ID 등 추가
+    formData.append("audioFile", audioFile); // ✅ 스펙의 key: audioFile
 
-    const token = localStorage.getItem("accessToken"); // 토큰 이름 확인
+    const res = await fetch(`/api/stt/upload/${eventDayId}`, {
+      method: "POST",
+      headers: {
+        "Authorization": auth,
+        // ❌ "Content-Type": "multipart/form-data" 넣지 마세요.
+      },
+      body: formData,
+    });
 
-    try {
-      // TODO: 실제 백엔드 업로드 API 주소로 변경해주세요!
-      // 예: `/questions/${current.id}/answers` 
-      const res = await fetch(`/questions/${current.id}/answers`, {
-        method: "POST",
-        headers: {
-            // FormData는 Content-Type을 설정하지 않아야 브라우저가 알아서 boundary를 설정함
-            "Authorization": token ? token : "", 
-        },
-        body: formData,
-      });
-
-      if (res.ok) {
-        console.log("업로드 성공!");
-        // 여기서 다음 단계로 넘어가는 등의 처리를 할 수도 있음
-      } else {
-        console.error("업로드 실패:", res.status);
-      }
-    } catch (e) {
-      console.error("업로드 중 에러:", e);
+    if (res.status === 401) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
     }
+
+    if (!res.ok) {
+      console.error("STT 업로드 실패:", res.status);
+      return;
+    }
+
+    // 성공 응답이 JSON인지/plain text인지 백엔드 구현에 따라 달라질 수 있어 방어적으로 처리
+    const contentType = res.headers.get("content-type") || "";
+    const result = contentType.includes("application/json") ? await res.json() : await res.text();
+    console.log("STT 결과:", result);
   };
   const [showOutro, setShowOutro] = React.useState(false);
 
   // 질문 불러오기
   React.useEffect(() => {
     const fetchQuestions = async () => {
-      
-      // ==========================================
-      // [1] 실제 API 호출 코드는 잠시 주석 처리합니다.
-      // (나중에 백엔드 API가 완성되면 이 주석만 풀고 아래 가짜 데이터를 지우면 됩니다)
-      // ==========================================
-      /*
-      const token = localStorage.getItem("accessToken"); 
-      if (!token) {
-        alert("로그인이 필요합니다.");
-        navigate("/login");
-        return;
-      }
-      if (!scheduleId) return;
-
-      try {
-        const res = await fetch(`/event-days/${scheduleId}/questions`, { 
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": token, 
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setQuestions(data); 
-        } else {
-          console.error("질문 불러오기 실패:", res.status);
-        }
-      } catch (e) {
-        console.error("에러 발생:", e);
-      }
-      */
-
-      // ==========================================
-      // [2] 임시 가짜 데이터 (Mock Data) 사용
-      // ==========================================
-      console.log("⚠️ [임시] 가짜 질문 데이터를 사용합니다.");
-
-      // 위에 정의된 QuestionDto 타입(id, order, text, totalCount)에 맞춰야 합니다.
+      // 질문은 일단 mock 그대로
       const mockQuestions: QuestionDto[] = [
-        {
-          id: "temp_q1",
-          order: 1,
-          text: "오늘 가장 기억에 남는 일은 무엇인가요?",
-          totalCount: 3,
-        },
-        {
-          id: "temp_q2",
-          order: 2,
-          text: "그 일을 통해 무엇을 배웠나요?",
-          totalCount: 3,
-        },
-        {
-          id: "temp_q3",
-          order: 3,
-          text: "앞으로 어떻게 내 삶에 적용해볼 수 있을까요?",
-          totalCount: 3,
-        },
+        { id: "temp_q1", order: 1, text: "오늘 가장 기억에 남는 일은 무엇인가요?", totalCount: 3 },
+        { id: "temp_q2", order: 2, text: "그 일을 통해 무엇을 배웠나요?", totalCount: 3 },
+        { id: "temp_q3", order: 3, text: "앞으로 어떻게 내 삶에 적용해볼 수 있을까요?", totalCount: 3 },
       ];
-
-      // 핵심: API에서 받아온 것처럼 setQuestions를 해줘야 화면에 뜹니다!
-      setQuestions(mockQuestions); 
+      setQuestions(mockQuestions);
     };
 
     fetchQuestions();
-  }, [scheduleId, navigate]);
+  }, []);
   
   const current = questions[index] ?? null;
   const total = (current?.totalCount ?? questions.length) || 1;
@@ -262,7 +214,8 @@ export default function QuestionsPage() {
         // 녹음이 정지되면 파일을 만들고 업로드
         recorder.onstop = () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-          uploadAudio(audioBlob); // 위에서 만든 업로드 함수 호출
+          uploadAudioToSTT(audioBlob); 
+          setShowOutro(true);
         };
 
         recorder.start();
@@ -402,8 +355,11 @@ export default function QuestionsPage() {
                         style={{ opacity: 1, cursor: isMicOn ? 'pointer' : 'default',}}
                         onClick={() => {
                           if (recordStage === "recording" && isMicOn) {
+                            const mr = mediaRecorderRef.current;
+                            if (mr && mr.state !== "inactive") {
+                              mr.stop();
+                            }
                             setRecordStage("closed");
-                            setShowOutro(true);
                           }
                         }}
                       >
