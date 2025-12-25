@@ -2,10 +2,11 @@
 
 :root {--bg: #F0F6FF; --black: #111;--kakao: #fee500;--white: #fff;--radius: 10px;--shadow: 0 4px 4px rgba(0,0,0,.25);--header-h: 50px;}
 * { box-sizing: border-box; }
-body { background: var(--bg); }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); }
 .header-spacer {height: var(--header-h); padding: 0;}
-.login-wrap {max-width: 360px;width: min(360px, calc(100svw - 92px));margin: 0 auto;display: flex;flex-direction: column;gap: 20px;
-    justify-content: center;align-items: center;min-width:300px;}
+.login-wrap {max-width: 360px;width: min(360px, calc(100svw - 92px));margin: 0 auto;display: flex;
+flex-direction: column;gap: 20px;justify-content: center;align-items: center;min-width:300px;}
 .brand {margin: 0 0 67px;text-align: center;}
 .btn {display: flex;align-items: center;gap: 1px;padding: 15px 70px;border-radius: var(--radius);width:300px;
 border: 0;font-size: 16px;font-weight: 700;box-shadow: var(--shadow);cursor: pointer;line-height: 20px;max-width:100%;min-width: 300px;
