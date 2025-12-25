@@ -10,7 +10,6 @@ const kakaoAuthUrl =
 	+ `&client_id=${encodeURIComponent(kakaoClientId)}`
 	+ `&redirect_uri=${encodeURIComponent(kakaoRedirectUri)}`;
 
-
 const GOOGLE_AUTH_URL = "/auth/google"; // 백엔드 라우트에 맞게 수정
 
 export default function Login() {
