@@ -28,7 +28,7 @@ transform: translateX(-100%);animation: drawerSlideIn 0.3s cubic-bezier(0.25, 1,
 background: none;border: 0;border-bottom: 1px solid #f0f2f5;cursor: pointer;text-align: left;}
 .drawer-menu-item:last-child { border-bottom: none; }
 .drawer-menu-item:active { opacity: 0.7; }
-.bottom-spacer {height: 85px;}
+.bottom-spacer {height: 110px;}
 
 /*리스트 하단 기록하기 버튼*/
 .bottom-cta{position: fixed;left: 0;right: 0;bottom: 0;padding: 37px 20px 53px 20px;background: #F0F6FF;z-index: 20;}
