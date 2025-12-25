@@ -162,7 +162,7 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 
 /*달력 안 시간 선택부분*/
 .date-range-time-label{font-size: 12px;}
-.timewheel{padding: 25px 18px 58px;}
+.timewheel{padding: 25px 18px 30px;}
 .timewheel-period{text-align: center;font-size: 14px;font-weight: 500;margin: 0 0 10px;color:#AEAEAE;}
 .timewheel-row{display: flex;gap: 5px;overflow-x: auto;padding: 0 12px 6px;-webkit-overflow-scrolling: touch;}
 .timewheel-row::-webkit-scrollbar{height: 6px;}
