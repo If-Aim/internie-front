@@ -2,6 +2,7 @@
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/schedule.css";
+import { api, ApiError } from "../api/client";
 
 type Stage = "form" | "outro";
 
@@ -629,7 +630,7 @@ export default function EditSchedule() {
     if (stripTime(newDate) > stripTime(endDate)) setEndDate(newDate);
   };
 
-  // (단일 endOnly에서만 사용) — 기존 통신/로직 유지: alert 유지
+  // alert 유지
   const handleEndDateChange = (newDate: Date) => {
     if (stripTime(newDate) < stripTime(startDate)) {
       alert("마감일은 시작일보다 빠를 수 없습니다.");
@@ -681,7 +682,6 @@ export default function EditSchedule() {
     setEndTime(newTime);
   };
 
-  // ✅ 백엔드 통신 로직은 그대로 유지
   const handleSave = async () => {
     if (!eventId) {
       alert("잘못된 접근입니다. (Event ID 누락)");
@@ -691,14 +691,6 @@ export default function EditSchedule() {
       alert("일정 제목을 입력해주세요.");
       return;
     }
-
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      nav("/login");
-      return;
-    }
-    const auth = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 
     try {
       const payload: {
@@ -715,36 +707,16 @@ export default function EditSchedule() {
         endDate: toYmd(endDate),
       };
 
-      // ✅ 종일이면 시간 필드 제외(= NewSchedule 기준)
       if (!isAllDay && startTime && endTime) {
         payload.startTime = uiLabelToApiTime(startTime);
         payload.endTime = uiLabelToApiTime(endTime);
       }
 
-      const res = await fetch(`/events/${eventId}`, {
+      const updatedEventFromServer = await api<any>(`/events/${eventId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: auth,
-        },
         body: JSON.stringify(payload),
       });
 
-      const raw = await res.text();
-      let data: any = null;
-      try {
-        data = raw ? JSON.parse(raw) : null;
-      } catch {
-        data = raw;
-      }
-
-      if (!res.ok) {
-        console.error("수정 실패:", res.status, data);
-        alert(`수정 실패: ${res.status}\n${typeof data === "string" ? data : JSON.stringify(data)}`);
-        return;
-      }
-
-      const updatedEventFromServer = data;
       const finalEventForUI = {
         ...updatedEventFromServer,
         id: updatedEventFromServer.id ?? eventId,
@@ -761,7 +733,6 @@ export default function EditSchedule() {
     }
   };
 
-  // ✅ 삭제 통신 로직은 그대로 유지
   const handleDelete = async () => {
     if (!eventId) {
       alert("잘못된 접근입니다. (Event ID 누락)");
@@ -771,48 +742,35 @@ export default function EditSchedule() {
     const ok = window.confirm("이 일정을 삭제할까요? 삭제하면 되돌릴 수 없습니다.");
     if (!ok) return;
 
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      nav("/login");
-      return;
-    }
-    const auth = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-
     try {
-      const res = await fetch(`/events/${eventId}`, {
-        method: "DELETE",
-        headers: { Authorization: auth },
-        credentials: "include",
-      });
+      await api<void>(`/events/${eventId}`, { method: "DELETE" });
 
-      if (res.status === 204) {
-        nav("/", { replace: true, state: { refetch: true, deletedEventId: eventId } });
-        return;
-      }
-
-      const errorText = await res.text();
-      if (res.status === 500 || res.status === 409) {
-        alert("세부일정을 기록한 일정은 삭제할 수 없습니다.");
-        return;
-      }
-      if (res.status === 401) {
-        alert("이벤트를 삭제할 권한이 없습니다.");
-        return;
-      }
-      if (res.status === 403) {
-        alert("인증/로그인이 필요합니다.");
-        nav("/login");
-        return;
-      }
-      if (res.status === 404) {
-        alert("해당 이벤트를 찾을 수 없습니다.");
-        return;
-      }
-
-      throw new Error(`삭제 실패 (${res.status}): ${errorText}`);
+      nav("/", { replace: true, state: { refetch: true, deletedEventId: eventId } });
     } catch (err) {
       console.error(err);
+
+      if (err instanceof ApiError) {
+        if (err.status === 500 || err.status === 409) {
+          alert("세부일정을 기록한 일정은 삭제할 수 없습니다.");
+          return;
+        }
+        if (err.status === 401) {
+          alert("이벤트를 삭제할 권한이 없습니다.");
+          return;
+        }
+        if (err.status === 403) {
+          alert("인증/로그인이 필요합니다.");
+          return;
+        }
+        if (err.status === 404) {
+          alert("해당 이벤트를 찾을 수 없습니다.");
+          return;
+        }
+
+        alert(`삭제 실패 (${err.status})\n${err.bodyText ?? ""}`);
+        return;
+      }
+
       const msg = err instanceof Error ? err.message : "알 수 없는 오류";
       alert(`일정을 삭제하지 못했습니다.\n(${msg})`);
     }

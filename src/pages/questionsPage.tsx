@@ -1,6 +1,8 @@
 // src/pages/questionsPage.tsx
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiUpload, ApiError } from "../api/client";
+
 import "../styles/questions.css";
 
 type Stage = "asking" | "completed";
@@ -59,37 +61,25 @@ export default function QuestionsPage() {
       return;
     }
 
-    const auth = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-    
     const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
-
     const formData = new FormData();
-    formData.append("audioFile", audioFile); // ✅ 스펙의 key: audioFile
+    formData.append("audioFile", audioFile);
 
-    const res = await fetch(`/api/stt/upload/${eventDayId}`, {
-      method: "POST",
-      headers: {
-        "Authorization": auth,
-        // ❌ "Content-Type": "multipart/form-data" 넣지 마세요.
-      },
-      body: formData,
-    });
+    try {
+      const result = await apiUpload<any>(`/api/stt/upload/${eventDayId}`, formData);
 
-    if (res.status === 401) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-      return;
+      console.log("STT 결과:", result);
+    } catch (err) {
+      console.error(err);
+
+      if (err instanceof ApiError) {
+        if (err.status === 401 || err.status === 403) return;
+        alert(`STT 업로드 실패: ${err.status}\n${err.bodyText ?? ""}`);
+        return;
+      }
+
+      alert("STT 업로드 중 네트워크 오류가 발생했습니다.");
     }
-
-    if (!res.ok) {
-      console.error("STT 업로드 실패:", res.status);
-      return;
-    }
-
-    // 성공 응답이 JSON인지/plain text인지 백엔드 구현에 따라 달라질 수 있어 방어적으로 처리
-    const contentType = res.headers.get("content-type") || "";
-    const result = contentType.includes("application/json") ? await res.json() : await res.text();
-    console.log("STT 결과:", result);
   };
   const [showOutro, setShowOutro] = React.useState(false);
 

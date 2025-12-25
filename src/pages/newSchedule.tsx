@@ -1,6 +1,8 @@
 // src/pages/newSchedule.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api/client";
+
 import "../styles/schedule.css";
 
 type Stage = "form" | "outro";
@@ -699,12 +701,6 @@ export default function NewSchedule() {
       alert("일정 제목을 입력해주세요.");
       return;
     }
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      nav("/login");
-      return;
-    }
     try {
       const payload: {
         title: string;
@@ -724,24 +720,22 @@ export default function NewSchedule() {
         payload.startTime = toApiTime(startTime);
         payload.endTime = toApiTime(endTime);
       }
-      
-      const res = await fetch(`/events`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `${token}` 
-        },
-        body: JSON.stringify(payload),
-      });
+      try {
+        await api(`/events`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
 
-      if (!res.ok) {
-      // 에러 처리
-        if (res.status === 401) {
-          alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
-          nav("/login");
-          return;
-        }
-        throw new Error(`저장 실패: ${res.status}`);
+        // 성공 시
+        setStage("outro");
+
+        setTimeout(() => {
+          nav("/", { replace: true });
+        }, 1500);
+
+      } catch (err) {
+        console.error("에러 발생:", err);
+        alert("일정을 저장하지 못했습니다.");
       }
 
       //성공 시

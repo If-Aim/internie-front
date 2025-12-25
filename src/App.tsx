@@ -2,6 +2,7 @@
 import React from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
+import { api } from "./api/client";
 import Login from "./pages/login";
 import KakaoCallback from "./pages/kakaoCallback";
 import NewSchedule from "./pages/newSchedule";
@@ -127,29 +128,6 @@ function timeRangeText(startTime?: string | null, endTime?: string | null): stri
 }
 
 
-async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {
-  const Token = localStorage.getItem("accessToken");
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-  if (Token) {
-    headers["Authorization"] = `${Token}`;
-  }
-
-  const res = await fetch(path, {
-    ...init,
-    headers,
-    credentials: "include",
-  });
-
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("accessToken"); 
-    
-    window.location.href = "/login"; 
-  }
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json()) as T;
-}
 
 type HeaderProps = {
   onMenuClick: () => void;
