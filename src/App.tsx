@@ -443,7 +443,7 @@ function Home(): React.ReactElement {
         userId={currentUserId}
       />
 
-      {/* <div className="spacer-50" aria-hidden="true" />*/}
+      <div className="spacer-50" aria-hidden="true" />
       
       <Header onMenuClick={() => setMenuOpen(true)} onAddClick={() => navigate("/schedule/new")} />
       
