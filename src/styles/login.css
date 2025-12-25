@@ -7,7 +7,7 @@ body { margin: 0; background: var(--bg); }
 .page{min-height: 100vh;min-height: 100dvh;min-height: 100svh;
 display: flex;flex-direction: column;}
 .header-spacer {height: var(--header-h); padding: 0;}
-.login-wrap {max-width: 360px;width: min(360px, calc(100svw - 92px));margin: 0 auto;display: flex;
+.login-wrap {max-width: 360px;width: min(360px, calc(100svw - 92px));margin: 0 auto;display: flex;flex: 1;
 flex-direction: column;gap: 20px;justify-content: center;align-items: center;min-width:300px;}
 .brand {margin: 0 0 67px;text-align: center;}
 .btn {display: flex;align-items: center;gap: 1px;padding: 15px 70px;border-radius: var(--radius);width:300px;
