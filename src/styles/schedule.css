@@ -120,8 +120,8 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 .sheet-card--date{position: fixed;left: 0;right: 0;bottom: 0;width: 100%;max-width: 100%;
 background: #fff; border-radius: 24px 24px 0 0;overflow: hidden;
 transform: translateY(0);animation: sheetUp 180ms ease-out;}
-.sheet-card--date.sheet-card--date--5w{height: 751px;}
-.sheet-card--date.sheet-card--date--6w{height:751px;max-height: 790px;overflow: auto;}
+.sheet-card--date.sheet-card--date--5w{height: 711px;}
+.sheet-card--date.sheet-card--date--6w{height:711px;max-height: 790px;overflow: auto;}
 
 @keyframes sheetUp{
   from{ transform: translateY(18px); opacity: .92; }
@@ -162,7 +162,7 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 
 /*달력 안 시간 선택부분*/
 .date-range-time-label{font-size: 12px;}
-.timewheel{padding: 25px 18px 75px;}
+.timewheel{padding: 25px 18px 58px;}
 .timewheel-period{text-align: center;font-size: 14px;font-weight: 500;margin: 0 0 10px;color:#AEAEAE;}
 .timewheel-row{display: flex;gap: 5px;overflow-x: auto;padding: 0 12px 6px;-webkit-overflow-scrolling: touch;}
 .timewheel-row::-webkit-scrollbar{height: 6px;}
