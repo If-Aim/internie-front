@@ -120,8 +120,8 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 .sheet-card--date{position: fixed;left: 0;right: 0;bottom: 0;width: 100%;max-width: 100%;
 background: #fff; border-radius: 24px 24px 0 0;overflow: hidden;
 transform: translateY(0);animation: sheetUp 180ms ease-out;}
-.sheet-card--date.sheet-card--date--5w{height: 711px;}
-.sheet-card--date.sheet-card--date--6w{height:711px;max-height: 790px;overflow: auto;}
+.sheet-card--date.sheet-card--date--5w{height: 700px;}
+.sheet-card--date.sheet-card--date--6w{height:700px;max-height: 790px;overflow: auto;}
 
 @keyframes sheetUp{
   from{ transform: translateY(18px); opacity: .92; }
