@@ -12,7 +12,7 @@
 /* 월 선택 팝업 */
 .month-pop {position: absolute; z-index: 1000;background: #fff; border: 1px solid #eee;border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);padding: 10px; min-width: 120px;}
 .month-menu { display: flex; flex-direction: column; max-height: 200px; overflow-y: auto; }
-.month-item {background: none; border: 0; text-align: left; padding: 8px 12px;font-size: 16px; cursor: pointer; border-radius: 6px;}
+.month-item {background: none; border: 0; text-align: left; padding: 8px 12px;font-size: 16px; cursor: pointer; border-radius: 6px;color:#000;}
 .month-item:hover { background-color: #f5f5f5; }
 .month-item[aria-current="true"] { color: var(--primary); font-weight: 700; background-color: #eff6ff; }
 
@@ -54,7 +54,7 @@ align-items:center;justify-content:center;cursor: pointer;}
 /* 본문 */
 .new-event{padding:10px 22px 94px 36px;}
 .title-input{width:100%;border:0;outline:0;background:transparent;
-font-size:24px;line-height:20px;color:#222;margin:30px 0 47px; font-weight: 700;
+font-size:24px;line-height:20px;color:#222;margin:30px 0 38px; font-weight: 700;
 font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
             Roboto, Helvetica, Arial, "Apple SD Gothic Neo", sans-serif;
 -webkit-appearance: none;
@@ -121,7 +121,7 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 background: #fff; border-radius: 24px 24px 0 0;overflow: hidden;
 transform: translateY(0);animation: sheetUp 180ms ease-out;}
 .sheet-card--date.sheet-card--date--5w{height: 700px;}
-.sheet-card--date.sheet-card--date--6w{height:730px;max-height: 790px;overflow: auto;}
+.sheet-card--date.sheet-card--date--6w{height:700px;max-height: 790px;overflow: auto;}
 
 @keyframes sheetUp{
   from{ transform: translateY(18px); opacity: .92; }
