@@ -1,6 +1,7 @@
 // src/pages/kakaoCallback.tsx
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function KakaoCallback() {
   const [searchParams] = useSearchParams();
@@ -24,7 +25,7 @@ export default function KakaoCallback() {
         const origin = window.location.origin;
         const currentRedirectUri = `${origin}/oauth/kakao/callback`;
 
-        const res = await fetch(`/auth/kakao`, {
+        const res = await fetch(`${VITE_API_BASE_URL}/auth/kakao`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
