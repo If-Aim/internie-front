@@ -106,7 +106,7 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 
 /* 세로 스크롤 리스트 */
 .time-list {max-height: 150px;overflow-y: auto;overflow-x: hidden;}
-.time-item {width: 100%;line-height:20px;padding: 2px 4px;border: 0;background: transparent;text-align: left;font-size: 14px;cursor: pointer;color: #AEAEAE;}
+.time-item {width: 100%;line-height:20px;padding: 2px 4px;border: 0;background: transparent;text-align: left;font-size: 14px;cursor: pointer;color: #AEAEAE;font-weight:500;}
 .time-item.is-disabled{opacity: 0.35;cursor: default;}
 .time-item.is-selected {border-radius: 5px;background: #1463ff;color: #fff;}
 .sheet-divider {width: 1px;background: #e0e3eb;}
