@@ -71,7 +71,7 @@ cursor: pointer;z-index: 100;}
 .event-modal-primary { background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; line-height: 50px;padding: 5px 24px; cursor: pointer; width: 100%; }
 
 /* 빈 상태 (Empty State) */
-.empty { margin-top: 141px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.empty { margin-top: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .empty-illust { width: 119px; height: auto; margin-bottom: 9px; }
 .empty-sub { font-size: 16px; color: #979797; margin: 25px 0; }
 .empty-sync { width: 160px; padding: 12px 20px; border-radius: 5px; border: none; background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; }
