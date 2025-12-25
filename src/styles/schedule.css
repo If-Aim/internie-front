@@ -66,7 +66,7 @@ appearance: none;
 .row .col{flex:1;align-self: stretch;display:flex;flex-direction:column;justify-content:flex-end;}
 .row + .row{margin-top:20px}
 .row .row-head{ display:flex; align-items:center; gap:15px; }
-.row-today{font-size:16px;margin-bottom:2px;font-weight: 700;line-height:20px;}
+.row-today{font-size:16px;margin-bottom:2px;font-weight: 700;line-height:20px;color:#000;}
 .row.row--today{ gap:2px; }
 .row-sub{padding-left:39px;font-size:14px;color:var(--muted);font-weight: 500;line-height:20px;}
 .row-sub-btn{border: none;background: transparent;padding: 0 39px;text-align: left;width: 100%;cursor: pointer;}
@@ -121,7 +121,7 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 background: #fff; border-radius: 24px 24px 0 0;overflow: hidden;
 transform: translateY(0);animation: sheetUp 180ms ease-out;}
 .sheet-card--date.sheet-card--date--5w{height: 700px;}
-.sheet-card--date.sheet-card--date--6w{height:700px;max-height: 790px;overflow: auto;}
+.sheet-card--date.sheet-card--date--6w{height:730px;max-height: 790px;overflow: auto;}
 
 @keyframes sheetUp{
   from{ transform: translateY(18px); opacity: .92; }
@@ -167,8 +167,7 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 .timewheel-row{display: flex;gap: 5px;overflow-x: auto;padding: 0 12px 6px;-webkit-overflow-scrolling: touch;}
 .timewheel-row::-webkit-scrollbar{height: 6px;}
 .timewheel-row::-webkit-scrollbar-thumb{border-radius: 999px;background: rgba(0,0,0,0.15);}
-.timewheel-item{flex: 0 0 auto;min-width: 73px;height: 73px;border: 0;background: transparent;
-font-size: 16px;font-weight: 700;cursor: pointer;}
+.timewheel-item{flex: 0 0 auto;min-width: 73px;height: 73px;border: 0;background: transparent;font-size: 16px;font-weight: 700;cursor: pointer;color:#000;}
 .timewheel-item.is-selected{background: #0166FF;color: #fff;opacity: 1;width: 73px;height: 73px;border-radius: 9px;}
 .timewheel-item.is-left-edge{color: #000000;opacity: 0.5;}
 /* 확인 버튼 */

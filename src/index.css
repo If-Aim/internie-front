@@ -41,7 +41,7 @@ body {background: var(--bg);color: var(--ink);}
 .screen {min-height: 100vh;min-width: 300px;display: flex;flex-direction: column;}
 
 /* [공통 스페이서] 모바일 상태 창 고려 */
-.spacer-50 {height: 50px;width: 100%;flex-shrink: 0;background: transparent;}
+.spacer-50 {height: 30px;width: 100%;flex-shrink: 0;background: transparent;}
 .topbar {display: flex;align-items: center;justify-content: space-between;padding: 0;}
 .iconbtn {background: transparent;border: 0;cursor: pointer;padding: 0;}
 .icon {width: 24px;height: 24px;display: block;}
