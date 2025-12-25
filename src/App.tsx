@@ -402,7 +402,7 @@ function Home(): React.ReactElement {
   React.useEffect(() => {
     if (!selectedItem) setIsRecordModalOpen(false);
   }, [selectedItem]);
-  
+
   React.useEffect(() => {
     if (!isMenuOpen) return;
 
@@ -459,7 +459,7 @@ function Home(): React.ReactElement {
   };
 
   return (
-    <div className="wrap">
+    <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
       <SideMenu 
         isOpen={isMenuOpen} 
         onClose={() => setMenuOpen(false)} 
