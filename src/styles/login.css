@@ -4,6 +4,8 @@
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); }
+.page{min-height: 100vh;min-height: 100dvh;min-height: 100svh;
+display: flex;flex-direction: column;}
 .header-spacer {height: var(--header-h); padding: 0;}
 .login-wrap {max-width: 360px;width: min(360px, calc(100svw - 92px));margin: 0 auto;display: flex;
 flex-direction: column;gap: 20px;justify-content: center;align-items: center;min-width:300px;}

@@ -17,9 +17,8 @@ export default function Login() {
   const go = (url: string) => { window.location.href = url; };
 
   return (
-    <>
+    <div className="page">
       <div className="header-spacer" aria-hidden="true" />
-      
       <main className="login-wrap">
         <h1 className="brand">
           <img src="/internie_Logo.svg" alt="internie" width={183} height={35} />
@@ -27,7 +26,7 @@ export default function Login() {
 
         <button type="button" className="btn btn-kakao" onClick={() => go(kakaoAuthUrl)} aria-label="카카오로 시작하기">
           <span className="ico ico-kakao" aria-hidden="true">
-              <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
+            <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
           </span>
           <span className="btn-text">카카오로 시작하기</span>
         </button>
@@ -38,11 +37,11 @@ export default function Login() {
           onClick={() => go(GOOGLE_AUTH_URL)}
           aria-label="Google로 시작하기">
           <span className="ico ico-google" aria-hidden="true">
-              <img src="/google_Logo.svg" alt="" width={20} height={20} />
+            <img src="/google_Logo.svg" alt="" width={20} height={20} />
           </span>
           <span className="btn-text">Google로 시작하기</span>
         </button>
       </main>
-    </>
+    </div>
   );
 }
