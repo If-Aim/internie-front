@@ -1,27 +1,12 @@
-.drawer-backdrop {
-  position: fixed;
-  inset: 0; /* top, left, right, bottom: 0 */
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 2100; /* 기존 모달(1200)보다 높게 */
-  opacity: 0;
-  animation: drawerFadeIn 0.3s forwards;
-}
+html, body{overflow-x: hidden;}
 
-/* 메뉴 패널 */
-.drawer-panel {
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: 280px;
-  background: #fff;
-  z-index: 2101;
-  box-shadow: 2px 0 16px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(-100%);
-  animation: drawerSlideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
+.drawer-backdrop {position: fixed;inset: 0;background: rgba(0, 0, 0, 0.45);
+z-index: 2100;opacity: 0;animation: drawerFadeIn 0.3s forwards;}
 
-/* 닫기 애니메이션용 클래스 (필요시 JS로 제어) */
+.drawer-panel {position: fixed;top: 0; left: 0; bottom: 0;width: 280px;background: #fff;
+z-index: 2101;box-shadow: 2px 0 16px rgba(0,0,0,0.15);display: flex;flex-direction: column;
+transform: translateX(-100%);animation: drawerSlideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;}
+
 .drawer-panel.closing {
   animation: drawerSlideOut 0.2s forwards;
 }
@@ -30,82 +15,30 @@
 @keyframes drawerSlideIn { to { transform: translateX(0); } }
 @keyframes drawerSlideOut { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 
-/* 상단 프로필 영역 */
-.drawer-header {
-  padding: 50px 24px 30px; /* 상단 여백 넉넉히 */
-  background: var(--bg); /* 기존 배경색(#f6f8fb) 활용 */
-}
-
-.profile-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.profile-img {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid #e0e3eb;
-  object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.profile-info .name {
-  font-size: 20px;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 4px;
-}
-
-.profile-info .email {
-  font-size: 14px;
-  color: var(--muted); /* #AEAEAE */
-  font-weight: 500;
-}
+/* 메뉴 프로필 쪽 */
+.drawer-header {padding: 50px 24px 30px;background: var(--bg);}
+.profile-wrap {display: flex;flex-direction: column;gap: 12px;}
+.profile-img {width: 56px; height: 56px;border-radius: 50%;background: #fff;border: 1px solid #e0e3eb;object-fit: cover;box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+.profile-info .name {font-size: 20px;font-weight: 700;color: #111;margin-bottom: 4px;}
+.profile-info .email {font-size: 14px;color: var(--muted);font-weight: 500;}
 
 /* 메뉴 바디 */
-.drawer-body {
-  flex: 1;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
-.drawer-menu-item {display: flex;align-items: center;width: 100%;
-padding: 14px 0;font-size: 16px;font-weight: 500;color: #333;
-background: none;border: 0;border-bottom: 1px solid #f0f2f5;
-cursor: pointer;text-align: left;}
+.drawer-body {flex: 1;padding: 24px;display: flex;flex-direction: column;}
+.drawer-menu-item {display: flex;align-items: center;width: 100%;padding: 14px 0;font-size: 16px;font-weight: 500;color: #333;
+background: none;border: 0;border-bottom: 1px solid #f0f2f5;cursor: pointer;text-align: left;}
 .drawer-menu-item:last-child { border-bottom: none; }
 .drawer-menu-item:active { opacity: 0.7; }
 .bottom-spacer {height: 85px;}
-/*리스트 하단 기록하기 버튼*/
 
+/*리스트 하단 기록하기 버튼*/
 .bottom-cta{position: fixed;left: 0;right: 0;bottom: 0;padding: 37px 20px 53px 20px;background: #F0F6FF;z-index: 20;}
 .record-btn{width: 100%;height: 60px;border-radius: 10px;font-size: 16px;font-weight: 800;border: none;background: #E3E3E3;color: #707070;}
 .record-btn.enabled{background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; line-height:50px; padding: 5px 24px; cursor: pointer; width: 100%; }
 .record-btn:disabled{cursor: not-allowed;}
 
 /* 하단 로그아웃 버튼 영역 */
-.drawer-footer {
-  padding: 24px;
-}
-
-.btn-logout {
-  width: 100%;
-  height: 52px;
-  border-radius: var(--radius); /* 10px */
-  background: #fff;
-  border: 1px solid #e0e3eb;
-  color: var(--danger); /* #ef4444 */
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
+.drawer-footer {padding: 24px;}
+.btn-logout {width: 100%;height: 52px;border-radius: var(--radius);background: #fff;border: 1px solid #e0e3eb;color: var(--danger);font-size: 16px;font-weight: 600;
+cursor: pointer;display: flex;align-items: center;justify-content: center;transition: background 0.2s;}
 .btn-logout:hover { background: #fff5f5; border-color: #fee2e2; }
 .btn-logout:active { transform: translateY(1px); }
