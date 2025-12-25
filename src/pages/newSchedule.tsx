@@ -202,7 +202,6 @@ function TimeSheet({
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
@@ -780,12 +779,7 @@ export default function NewSchedule() {
             {/* 일정 */}
             <section className="row">
                 <div className="col">
-                    <button
-                        type="button"
-                        className="row-head row-head-btn"
-                        onClick={openStartOnlyRangeSheet}
-                        aria-label="기간 선택하기"
-                    >
+                    <button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="기간 선택하기" >
                         <img className="icon" src="/clock-01.svg" alt="날짜" />
                         <div className="row-today">
                             <strong>{startDateLabel}</strong>
@@ -807,19 +801,13 @@ export default function NewSchedule() {
             {/* 날짜 */}
             <section className="row row--today">
                 <div className="col">
-                  <button
-                    type="button"
-                    className="row-head row-head-btn"
-                    onClick={openEndOnlyRangeSheet}
-                    aria-label="기간 선택하기"
-                  >
+                  <button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="기간 선택하기" >
                     <img className="icon" src="/check-broken.svg" alt="날짜" />
                     <div className="row-today">
                       <strong>{endDateLabel}</strong>
                     </div>
                   </button>
-                  <button type="button" className="row-sub row-sub-btn" 
-                  onClick={openFullRangeSheet} aria-label="시작일-마감일 설정">
+                  <button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="시작일-마감일 설정">
                   {isRangeSelected ? dateRangeLabel : "시작일-마감일"}
                   </button>
                 </div>
@@ -832,12 +820,7 @@ export default function NewSchedule() {
 
             {/* 메모추가 */}
             <div className="memo-box">
-                <textarea
-                  className="memo-input"
-                  placeholder="메모 추가하기..."
-                  aria-label="메모 추가"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
+                <textarea className="memo-input" placeholder="메모 추가하기..." aria-label="메모 추가" value={memo} onChange={(e) => setMemo(e.target.value)}
                 />
             </div>
           </main>
