@@ -518,6 +518,7 @@ function Home(): React.ReactElement {
           onRecord={handleRecord}
         />
       )}
+      {hasItems && (
       <div className="bottom-cta">
         <button
           type="button"
@@ -528,6 +529,7 @@ function Home(): React.ReactElement {
           기록하기
         </button>
       </div>
+      )}
     </div>
   );
 }
