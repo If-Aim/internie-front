@@ -855,7 +855,7 @@ export default function NewSchedule() {
       {/* 아웃트로 화면 */}
       {stage === "outro" && (
           <>
-          <div className="spacer-50" aria-hidden="true" />
+          {/*<div className="spacer-50" aria-hidden="true" />*/}
           <main className="outro">
               <img src="/internie_mascot_normal.png" alt="" className="outro-img"/>
               <p className="outro-text">인터니가 질문을 준비하고 있어요!<br />오늘은 어떤 역량을 얻을 수 있을까요?</p>
