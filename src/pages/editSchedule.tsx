@@ -880,6 +880,7 @@ export default function EditSchedule() {
                 onChange={(e) => setMemo(e.target.value)}
               />
             </div>
+            <div className="bottom-spacer-schedule"></div>
           </main>
 
           <footer className="footer-fixed">
