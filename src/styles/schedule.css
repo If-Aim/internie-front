@@ -24,7 +24,7 @@ padding: 16px;margin-bottom: 11px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 cursor: pointer;transition: transform 0.2s, box-shadow 0.2s;
 border: 2px solid transparent;}
 .card:active { transform: scale(0.98); }
-.card.card--selected { border-color: transparent; }
+.card.card--selected { border-color: var(--primary); }
 .card-edit-btn{position: absolute;right: 16px;top: 50%;transform: translateY(-50%);
 width: 44px;height: 44px;border: 0;background: transparent;display:flex;
 align-items:center;justify-content:center;cursor: pointer;}
