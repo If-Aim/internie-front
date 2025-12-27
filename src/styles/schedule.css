@@ -30,7 +30,7 @@ width: 44px;height: 44px;border: 0;background: transparent;display:flex;
 align-items:center;justify-content:center;cursor: pointer;}
 .card.card--locked {cursor: default;box-shadow: none;outline: none;border: none;}
 .card.card--locked.card--selected{ border-color: transparent; box-shadow: none; outline: none;}
-
+.card.card--selected.card-locked{ border-color: transparent;}
 .item { display: flex; align-items: center; gap: 25px; }
 .thumb {width: 28px; height: 28px;margin-left: 8px; border-radius: 5px;background-color: #E3E3E3;flex-shrink: 0;}
 .thumb.thumb--selected { background-color: var(--primary); }
