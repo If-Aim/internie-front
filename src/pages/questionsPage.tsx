@@ -1,6 +1,6 @@
 // src/pages/questionsPage.tsx
 import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api, apiUpload, ApiError } from "../api/client";
 
 import "../styles/questions.css";
@@ -43,19 +43,6 @@ function applyExperienceName(q: string, title: string) {
 }
 
 export default function QuestionsPage() {
-  /* 스타일 점검용 */
-  /*=====================*/
-  const location = useLocation();
-
-  React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const debugStage = params.get("stage");
-
-    if (debugStage === "completed") {
-      setStage("completed");
-    }
-  }, [location.search]);
-  /*=====================*/
   const navigate = useNavigate();
   const { scheduleId } = useParams<{ scheduleId: string }>();
 
@@ -323,7 +310,7 @@ export default function QuestionsPage() {
     if (stage === "completed") {
       const timer = setTimeout(() => {
         navigate("/");
-      }, 5000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
