@@ -30,6 +30,7 @@ export default function QuestionsPage() {
   const [isMicOn, setIsMicOn] = React.useState(false);
   const [levels, setLevels] = React.useState<number[]>(() => Array(BARS).fill(0));
   const [ringLevel, setRingLevel] = React.useState(0);
+  //const [title, setTitle] = React.useState<string>("");
 
   const audioCtxRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
