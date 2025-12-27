@@ -312,17 +312,15 @@ type EventCardProps = Pick<ScheduleItem, "title" | "subtitle"> & {
   onEditClick: () => void; 
 };
 function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: EventCardProps): React.ReactElement {
-  const clickable = !locked;
-
   return (
     <article
       className={"card" + (selected ? " card--selected" : "") + (locked ? " card-locked" : "")}
-      onClick={()=> {if (!clickable) return; onClick();}}
-      style={{ position: "relative", cursor: clickable ? "pointer" : "default" }}
+      onClick={onClick}
+      style={{ position: "relative", cursor: "pointer" }}
       aria-disabled={locked ? "true" : undefined}
     >
       <div className="item">
-        <div className={"thumb" + (selected ? " thumb--selected" : "") + (locked ? "thumb-locked" : "")} />
+        <div className={"thumb" + (selected ? " thumb--selected" : "")} />
         <div>
           <div className="title">{title}</div>
           <div className="subtitle">{subtitle}</div>
@@ -481,7 +479,7 @@ function Home(): React.ReactElement {
   const handleRecord = async () => {
     if (!selectedItem) return;
     if (selectedItem.isLocked) return;
-    
+
     try {
       const body = {
         date: selectedItem.date,
