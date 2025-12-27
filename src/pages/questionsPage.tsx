@@ -323,7 +323,7 @@ export default function QuestionsPage() {
     if (stage === "completed") {
       const timer = setTimeout(() => {
         navigate("/");
-      }, 240_000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     }
