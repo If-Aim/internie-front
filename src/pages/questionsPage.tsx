@@ -1,12 +1,24 @@
 // src/pages/questionsPage.tsx
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiUpload, ApiError } from "../api/client";
+import { api, apiUpload, ApiError } from "../api/client";
 
 import "../styles/questions.css";
 
 type Stage = "asking" | "completed";
 type RecordStage = "closed" | "preparing" | "recording";
+
+type EventDayResponse = {
+  eventDayId: number;
+  title: string;
+  eventId: number;
+  date: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  memo?: string | null;
+  completed: boolean;
+  transcriptions: Array<any>;
+};
 
 type QuestionDto = {
   id: string;
@@ -15,8 +27,20 @@ type QuestionDto = {
   totalCount: number; 
 };
 
+type EventDayQuestionsResponse = {
+  eventDayId: number;
+  questionId: number;
+  questionList: string[];
+};
+
 const BARS = 40; // 파형 바 개수
 const SENSITIVITY = 10; // 감도 조절 상수
+
+function applyExperienceName(q: string, title: string) {
+  // 백엔드가 이미 치환해서 내려줬으면 그대로 사용
+  if (!q.includes("(@experience_name)")) return q;
+  return q.split("(@experience_name)").join(title);
+}
 
 export default function QuestionsPage() {
   const navigate = useNavigate();
@@ -30,8 +54,9 @@ export default function QuestionsPage() {
   const [isMicOn, setIsMicOn] = React.useState(false);
   const [levels, setLevels] = React.useState<number[]>(() => Array(BARS).fill(0));
   const [ringLevel, setRingLevel] = React.useState(0);
-  //const [title, setTitle] = React.useState<string>("");
-
+  const [eventDayTitle, setEventDayTitle] = React.useState<string>("");
+  const [isLoadingQuestions, setIsLoadingQuestions] = React.useState(false);
+  
   const audioCtxRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
   const dataArrayRef = React.useRef<Float32Array | null>(null);
@@ -86,22 +111,62 @@ export default function QuestionsPage() {
 
   // 질문 불러오기
   React.useEffect(() => {
-    const fetchQuestions = async () => {
-      // 질문은 일단 mock 그대로
-      const mockQuestions: QuestionDto[] = [
-        { id: "temp_q1", order: 1, text: "오늘 가장 기억에 남는 일은 무엇인가요?", totalCount: 3 },
-        { id: "temp_q2", order: 2, text: "그 일을 통해 무엇을 배웠나요?", totalCount: 3 },
-        { id: "temp_q3", order: 3, text: "앞으로 어떻게 내 삶에 적용해볼 수 있을까요?", totalCount: 3 },
-      ];
-      setQuestions(mockQuestions);
+    if (!eventDayId) return;
+
+    let cancelled = false;
+
+    const fetchAll = async () => {
+      try {
+        setIsLoadingQuestions(true);
+        const day = await api<EventDayResponse>(`/event-days/${eventDayId}`);
+        if (cancelled) return;
+
+        const title = day.title ?? "";
+        setEventDayTitle(title);
+
+        const data = await api<EventDayQuestionsResponse>(`/event-days/${eventDayId}/questions`);
+        if (cancelled) return;
+
+        const list = Array.isArray(data.questionList) ? data.questionList : [];
+        const totalCount = list.length || 1;
+
+        const mapped: QuestionDto[] = list.map((text, i) => ({
+          id: `${data.questionId}_${i + 1}`,
+          order: i + 1,
+          text: applyExperienceName(text, title),
+          totalCount,
+        }));
+
+        setQuestions(mapped);
+        if (mapped.length === 0) {
+          alert("표시할 질문이 없습니다.");
+        }
+        setIndex(0);
+        setStage("asking");
+      } catch (err) {
+        if (err instanceof ApiError) {
+          if (err.status === 401 || err.status === 403) return;
+          alert(`질문 조회 실패: ${err.status}\n${err.bodyText ?? ""}`);
+          return;
+        }
+        alert("질문 조회 중 네트워크 오류가 발생했습니다.");
+      } finally {
+        if (!cancelled) setIsLoadingQuestions(false);
+      }
     };
 
-    fetchQuestions();
-  }, []);
+    fetchAll();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventDayId]);
   
   const current = questions[index] ?? null;
-  const total = (current?.totalCount ?? questions.length) || 1;
-  const currentNo = current?.order ?? index + 1;
+  const total = isLoadingQuestions
+    ? Math.max(questions.length, 1)
+    : (current?.totalCount ?? questions.length) || 1;
+  const currentNo = isLoadingQuestions ? 0 : (current?.order ?? index + 1);
 
   const isLastQuestion = index === questions.length - 1;
   React.useEffect(() => {
@@ -254,37 +319,26 @@ export default function QuestionsPage() {
   return (
     <div className="screen">
       {/* 기록화면 */}
-      {stage === "asking" && current && (
+      {stage === "asking" && (
           <div className="wrap">
             <div className="spacer-50" aria-hidden="true" />
             <header className="topbar-question">
               <button className="iconbtn" aria-label="메뉴">
                 <img className="icon" src="/menu-01.svg" alt="" />
               </button>
-              <h1 className="topbar-title">업그라운더 1기</h1>
+              <h1 className="topbar-title">{eventDayTitle || "기록"}</h1>
               <div style={{ width: 24 }} />
             </header>
 
             <main className="question-page">
-              {/* 여기 마스코트 + 카드 배치 */}
-              <img
-                src="/internie_mascot_normal.png"
-                alt=""
-                className="mascot"
-                width={119}
-              />
+              <img src="/internie_mascot_normal.png" alt="" className="mascot" width={119} />
               <div className="progress-card">
                 <div className="progress-bar">
-                  <div
-                    className="progress-bar-fill"
-                    style={{ width: `${(currentNo / total) * 100}%` }}
-                  />
+                  <div className="progress-bar-fill" style={{ width: `${total > 0 ? (currentNo / total) * 100 : 0}%` }} />
                 </div>
                 <div className="progress-label-row">
                   <span>진행률</span>
-                  <span>
-                    {currentNo}/{total}
-                  </span>
+                  <span> {currentNo}/{total} </span>
                 </div>
 
                 <div className="question-card">
@@ -292,11 +346,15 @@ export default function QuestionsPage() {
                     <div className="q-badge">Q</div>
                     <div className="q-title">질문</div>
                   </div>
-                  <p className="question-text">{current.text}</p>
+                  <p className="question-text">
+                    {isLoadingQuestions
+                      ? "질문을 불러오는 중이에요…"
+                      : current?.text ?? ""}
+                  </p>
                 </div>
               </div>
 
-              {recordStage === "closed" && !showOutro && (
+              {!isLoadingQuestions && recordStage === "closed" && !showOutro && (
                 <button
                   className="mic-button"
                   type="button"
@@ -309,7 +367,7 @@ export default function QuestionsPage() {
                 </button>
               )}
 
-              {recordStage !== "closed" && !showOutro && (
+              {!isLoadingQuestions && recordStage !== "closed" && !showOutro && (
                 <div className="recording-sheet">
                   <div className="recording-sheet-inner">
                     {/* 흰색 파형 박스 */}

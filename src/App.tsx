@@ -18,12 +18,14 @@ type ScheduleItem = {
   eventId: string;
   title: string;
   subtitle: string;
-  date: string; /* 'YYYY-MM-DD' */
+  date: string;
   startDate: string;
   endDate: string;
   startTime?: string | null;
   endTime?: string | null;
   eventDayId?: string | number | null;
+  isLocked?: boolean;
+  transcriptionCount?: number;
 };
 type RawEvent = {
   id: string | number;
@@ -35,6 +37,28 @@ type RawEvent = {
   endTime?: string | null;
 };
 
+type Transcription = {
+  id: number;
+  text: string;
+  audioUrl?: string;
+};
+
+type EventDay = {
+  eventDayId: number;
+  title: string;
+  eventId: string | number;
+  date: string; // YYYY-MM-DD
+  startTime?: string | null;
+  endTime?: string | null;
+  memo?: string | null;
+  completed: boolean;
+  transcriptions?: Transcription[];
+};
+
+type EventDayMonthResponse = {
+  totalCount: number;
+  eventDayList: EventDay[];
+};
 /*날짜 관련 함수*/
 function toYmd(d: Date): string {
   const y = d.getFullYear();
@@ -64,7 +88,6 @@ function expandEventToDailyItems(
   const start = ymdToDate(e.startDate);
   const end = ymdToDate(e.endDate);
 
-  // 월 범위로 클램프
   const s = start > monthStart ? start : monthStart;
   const ed = end < monthEnd ? end : monthEnd;
 
@@ -121,13 +144,14 @@ function hhmm(t?: string | null): string {
   if (!t) return "";
   return t.slice(0, 5); // "16:00:00" -> "16:00"
 }
-
+function toHHmm(t?: string | null): string | undefined {
+  if (!t) return undefined;
+  return t.length >= 5 ? t.slice(0, 5) : t;
+}
 function timeRangeText(startTime?: string | null, endTime?: string | null): string {
   if (!startTime || !endTime) return "";
   return `${hhmm(startTime)}–${hhmm(endTime)}`;
 }
-
-
 
 type HeaderProps = {
   onMenuClick: () => void;
@@ -283,18 +307,22 @@ function EmptyState({ /*onAddClick*/ }: EmptyStateProps): React.ReactElement {
 
 type EventCardProps = Pick<ScheduleItem, "title" | "subtitle"> & {
   selected: boolean;
+  locked: boolean;
   onClick: () => void;
   onEditClick: () => void; 
 };
-function EventCard({ title, subtitle, selected, onClick, onEditClick }: EventCardProps): React.ReactElement {
+function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: EventCardProps): React.ReactElement {
+  const clickable = !locked;
+
   return (
     <article
-      className={"card" + (selected ? " card--selected" : "")}
-      onClick={onClick}
-      style={{ position: "relative" }}
+      className={"card" + (selected ? " card--selected" : "") + (locked ? " card-locked" : "")}
+      onClick={()=> {if (!clickable) return; onClick();}}
+      style={{ position: "relative", cursor: clickable ? "pointer" : "default" }}
+      aria-disabled={locked ? "true" : undefined}
     >
       <div className="item">
-        <div className={"thumb" + (selected ? " thumb--selected" : "")} />
+        <div className={"thumb" + (selected ? " thumb--selected" : "") + (locked ? "thumb-locked" : "")} />
         <div>
           <div className="title">{title}</div>
           <div className="subtitle">{subtitle}</div>
@@ -340,15 +368,20 @@ function Home(): React.ReactElement {
   const hasItems = byDate.length > 0;
   const [refetchTick] = React.useState(0);
   const pendingUpdatedEventRef = React.useRef<any>(null);
-
+  const isSelectedLocked = !!selectedItem?.isLocked;
 
   React.useEffect(() => {
     (async () => {
       try {
         const [y, m] = month.split("-");
-        const data = await api<any>(`/events/${y}/${m}`);
-        const rawList = data.eventList || [];
-        
+
+        const [eventsData, eventDaysData] = await Promise.all([ //전체일정, 세부일정 동시 조회
+          api<any>(`/events/${y}/${m}`),
+          api<EventDayMonthResponse>(`/event-days/${y}/${m}`),
+        ]);
+
+        const rawList = eventsData.eventList || [];
+
         let events: RawEvent[] = rawList.map((e: any): RawEvent => ({
           id: e.id,
           title: e.title,
@@ -358,7 +391,6 @@ function Home(): React.ReactElement {
           startTime: e.startTime ?? null,
           endTime: e.endTime ?? null,
         }));
-
         const u = pendingUpdatedEventRef.current;
         if (u) {
           events = events.map((ev) =>
@@ -385,14 +417,33 @@ function Home(): React.ReactElement {
             (u.endTime == null || e.endTime === u.endTime)
           );
 
-          if (serverHasLatest) {
-            pendingUpdatedEventRef.current = null;
-          }
+          if (serverHasLatest) pendingUpdatedEventRef.current = null;
         }
-
+        const eventDayByKey = new Map<string, EventDay>();
+        for (const ed of eventDaysData.eventDayList ?? []) {
+          const key = `${String(ed.eventId)}__${ed.date}`;
+          eventDayByKey.set(key, ed);
+        }
         const expanded = events.flatMap((ev) => expandEventToDailyItems(ev, month));
 
-        setItems(expanded);
+        const merged = expanded.map((it) => {
+          const key = `${String(it.eventId)}__${it.date}`;
+          const ed = eventDayByKey.get(key);
+
+          if (!ed) return it;
+
+          const count = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
+          const locked = count > 0; 
+
+          return {
+            ...it,
+            eventDayId: ed.eventDayId,
+            transcriptionCount: count,
+            isLocked: locked,
+          };
+        });
+
+        setItems(merged);
       } catch (e) {
         console.error(e);
       }
@@ -429,12 +480,16 @@ function Home(): React.ReactElement {
 
   const handleRecord = async () => {
     if (!selectedItem) return;
-
+    if (selectedItem.isLocked) return;
+    
     try {
       const body = {
+        date: selectedItem.date,
         title: selectedItem.title,
         memo: selectedItem.subtitle,
-        date: selectedItem.date,
+        startTime: toHHmm(selectedItem.startTime ?? null),
+        endTime: toHHmm(selectedItem.endTime ?? null),
+        subtitle: selectedItem.subtitle ?? "", 
       };
 
       const response = await api<any>(`/event-days/events/${selectedItem.eventId}`, {
@@ -450,7 +505,7 @@ function Home(): React.ReactElement {
       alert("일정을 기록하는 중 오류가 발생했습니다.");
     }
   };
-
+  const canRecord = !!selectedItem && !isSelectedLocked;
   // 로그아웃 핸들러
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -479,30 +534,34 @@ function Home(): React.ReactElement {
         byDate.map(([date, arr]) => (
           <section key={date} style={{marginTop: "19px", marginBottom: "27px"}}>
             <h2 className="h2" style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginBottom: "13px" }}>{dateLabel(date)}</h2>
-            {arr.map((it) => (
-              <EventCard
-                key={it.instanceId}
-                title={it.title}
-                subtitle={timeRangeText(it.startTime, it.endTime)}
-                selected={selectedItem?.instanceId === it.instanceId}
-                onClick={() => setSelectedItem(prev => (prev?.instanceId === it.instanceId ? null : it))}
-                onEditClick={() =>
-                  navigate(`/schedule/${it.eventId}`, {
-                    state: {
-                      event: {
-                        id: it.eventId,
-                        title: it.title,
-                        content: it.subtitle,
-                        startDate: it.startDate,
-                        endDate: it.endDate,
-                        startTime: it.startTime ?? null,
-                        endTime: it.endTime ?? null,
+            {arr.map((it) => {
+              const locked = !!it.isLocked;
+              return (
+                <EventCard
+                  key={it.instanceId}
+                  title={it.title}
+                  subtitle={timeRangeText(it.startTime, it.endTime)}
+                  selected={selectedItem?.instanceId === it.instanceId}
+                  locked={locked}
+                  onClick={() => setSelectedItem(prev => (prev?.instanceId === it.instanceId ? null : it))}
+                  onEditClick={() =>
+                    navigate(`/schedule/${it.eventId}`, {
+                      state: {
+                        event: {
+                          id: it.eventId,
+                          title: it.title,
+                          content: it.subtitle,
+                          startDate: it.startDate,
+                          endDate: it.endDate,
+                          startTime: it.startTime ?? null,
+                          endTime: it.endTime ?? null,
+                        },
                       },
-                    },
-                  })
-                }
-              />
-            ))}
+                    })
+                  }
+                />
+              );
+            })}
           </section>
         ))
       ) : (
@@ -522,9 +581,9 @@ function Home(): React.ReactElement {
       <div className="bottom-cta">
         <button
           type="button"
-          className={`record-btn ${selectedItem ? "enabled" : ""}`}
-          disabled={!selectedItem}
-          onClick={() => setIsRecordModalOpen(true)}
+          className={`record-btn ${canRecord ? "enabled" : ""}`}
+          disabled={!canRecord}
+          onClick={() => {if (!canRecord) return; setIsRecordModalOpen(true);}}
         >
           기록하기
         </button>

@@ -1,5 +1,7 @@
 /* src/styles/schedule.css */
 /* 공통 변수는 index.css에서 가져옵니다 */
+.screen{height: 100dvh;display: flex;flex-direction: column;overflow: hidden;}
+
 .topbar_newschedule {display: flex;align-items: center;justify-content: space-between;padding: 0 20px; margin: 0px 0 9px 0;}
 .topbar-title { font-size: 16px; font-weight: 700; margin: 0; line-height: 20px; }
 
@@ -26,6 +28,8 @@ border: 2px solid transparent;}
 .card-edit-btn{position: absolute;right: 16px;top: 50%;transform: translateY(-50%);
 width: 44px;height: 44px;border: 0;background: transparent;display:flex;
 align-items:center;justify-content:center;cursor: pointer;}
+.card.card--locked {cursor: default;box-shadow: none;outline: none;border: none;}
+.card.card--locked.card--selected{border: 0 !important;box-shadow: none;outline: none;}
 
 .item { display: flex; align-items: center; gap: 25px; }
 .thumb {width: 28px; height: 28px;margin-left: 8px; border-radius: 5px;background-color: #E3E3E3;flex-shrink: 0;}
@@ -52,7 +56,7 @@ align-items:center;justify-content:center;cursor: pointer;}
 .btn-primary {width: 100%; padding: 16px; font-size: 16px; font-weight: 700;color: #fff; background: var(--primary);border: 0; border-radius: 10px; cursor: pointer;}
 .btn-delete {width:100%;height:60px;padding: 16px;font-size:16px;font-weight:700;border-radius: 10px;border:0;background: #BDD8FF;color:#000;margin-bottom:12px;}
 /* 본문 */
-.new-event{padding:10px 22px 94px 36px;}
+.new-event{flex: 1;overflow-y: auto;-webkit-overflow-scrolling: touch;padding:10px 22px 94px 36px;}
 .title-input{width:100%;border:0;outline:0;background:transparent;
 font-size:24px;line-height:20px;color:#222;margin:30px 0 38px; font-weight: 700;
 font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
