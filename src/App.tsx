@@ -165,7 +165,7 @@ type HeaderProps = {
 };
 function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
   return (
-    <div className="topbar">
+    <div className="topbar topbar-main">
       {/* side menu */}
       <button className="iconbtn" aria-label="menu" onClick={onMenuClick}>
         <img className="icon" src="/menu-01.svg" alt="메뉴" />

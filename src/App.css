@@ -1,19 +1,19 @@
 html, body{overflow-x: hidden;}
-
+.topbar-main {position: sticky;top: 0;z-index: 1000;}
 .drawer-panel {position: fixed;top: 0; left: 0; bottom: 0;width: 95%;background: #fff;z-index: 2101;
 box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);display: flex;flex-direction: column;will-change: transform;user-select: none;touch-action: pan-y;}
 .drawer-backdrop {position: fixed;inset: 0;z-index: 2100;}
 /* 메뉴 프로필 쪽 */
-.drawer-header {padding: 50px 24px 30px;background: var(--bg);}
-.profile-wrap {display: flex;flex-direction: column;gap: 12px;}
-.profile-img {width: 56px; height: 56px;border-radius: 50%;background: #fff;border: 1px solid #e0e3eb;object-fit: cover;box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
-.profile-info .name {font-size: 20px;font-weight: 700;color: #111;margin-bottom: 4px;}
-.profile-info .email {font-size: 14px;color: var(--muted);font-weight: 500;}
+.drawer-header {padding: 79px 36px 18px;background: #EAF1FA;}
+.profile-wrap {display: flex;flex-direction: row;gap: 20px;}
+.profile-img {width: 60px; height: 60px;border-radius: 50%;background: #fff;object-fit: cover;padding:5px;}
+.profile-info .name {font-size: 24px;line-height:20px;font-weight: 700;color: #111;margin-bottom: 5px;}
+.profile-info .email {font-size: 13px;color: rgba(0, 0, 0, 0.50);font-weight: 500;line-height:20px;}
 
 /* 메뉴 바디 */
-.drawer-body {flex: 1;padding: 24px;display: flex;flex-direction: column;}
-.drawer-menu-item {display: flex;align-items: center;width: 100%;padding: 14px 0;font-size: 16px;font-weight: 500;color: #333;
-background: none;border: 0;border-bottom: 1px solid #f0f2f5;cursor: pointer;text-align: left;}
+.drawer-body {flex: 1;padding: 36px 32px;display: flex;flex-direction: column;}
+.drawer-menu-item {display: flex;align-items: center;width: 100%;padding: 20px 0;gap:14px;font-size: 16px;font-weight: 700;color: #000;
+background: none;border: 0;cursor: pointer;text-align: left;}
 .drawer-menu-item:last-child { border-bottom: none; }
 .drawer-menu-item:active { opacity: 0.7; }
 .bottom-spacer {height: 180px;}
