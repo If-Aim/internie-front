@@ -10,7 +10,7 @@ const kakaoAuthUrl =
 	+ `&client_id=${encodeURIComponent(kakaoClientId)}`
 	+ `&redirect_uri=${encodeURIComponent(kakaoRedirectUri)}`;
 
-const GOOGLE_AUTH_URL = "/auth/google"; // 추후 추가
+//const GOOGLE_AUTH_URL = "/auth/google"; // 추후 추가
 
 export default function Login() {
 
@@ -31,7 +31,7 @@ export default function Login() {
           <span className="btn-text">카카오로 시작하기</span>
         </button>
 
-        <button
+        {/*<button
           type="button"
           className="btn btn-google"
           onClick={() => go(GOOGLE_AUTH_URL)}
@@ -40,7 +40,7 @@ export default function Login() {
             <img src="/google_Logo.svg" alt="" width={20} height={20} />
           </span>
           <span className="btn-text">Google로 시작하기</span>
-        </button>
+        </button>*/}
       </main>
     </div>
   );

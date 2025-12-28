@@ -181,6 +181,7 @@ type SideMenuProps = {
   userId: number | null; 
 };
 function SideMenu({ isOpen, onClose, onLogout, userId }: SideMenuProps) {
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   const user = {
@@ -207,7 +208,7 @@ function SideMenu({ isOpen, onClose, onLogout, userId }: SideMenuProps) {
         </div>
         
         <div className="drawer-body">
-          <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
+          <button className="drawer-menu-item" onClick={() => { navigate("/mypage"); onClose(); }}>
             마이페이지
           </button>
           <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
