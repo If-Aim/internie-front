@@ -495,26 +495,7 @@ function Home(): React.ReactElement {
   const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
   const [userName, setUserName] = React.useState<string>("사용자");
   const [userProfileImg, setUserProfileImg] = React.useState<string>("/internie_mascot_normal.png");
-  React.useEffect(() => {
-    (async () => {
-      try {
-        // userId 확보
-        const meEvents = await api<any>("/events/me");
-        const uid = meEvents?.eventList?.[0]?.userId;
-
-        if (!uid) return; // 이벤트가 0개면 userId를 못 얻는 한계(임시방편)
-        setCurrentUserId(uid);
-
-        // user 정보 조회
-        const me = await api<{ userId: number; name: string; profileImage: string }>(`/users/${uid}`);
-
-        setUserName(me?.name ?? "사용자");
-        setUserProfileImg(me?.profileImage ?? "/internie_mascot_normal.png");
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, []);
+ 
   React.useEffect(() => {
     (async () => {
       try {
@@ -527,6 +508,19 @@ function Home(): React.ReactElement {
 
         const rawList = eventsData.eventList || [];
 
+        if (!currentUserId) {
+          const uid = rawList?.[0]?.userId;
+          if (uid) {
+            setCurrentUserId(uid);
+            try {
+              const me = await api<{ userId: number; name: string; profileImage: string }>(`/users/${uid}`);
+              setUserName(me?.name ?? "사용자");
+              setUserProfileImg(me?.profileImage ?? "/internie_mascot_normal.png");
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
         let events: RawEvent[] = rawList.map((e: any): RawEvent => ({
           id: e.id,
           title: e.title,
