@@ -509,15 +509,19 @@ function Home(): React.ReactElement {
         const rawList = eventsData.eventList || [];
 
         if (!currentUserId) {
-          const uid = rawList?.[0]?.userId;
-          if (uid) {
+          const uidRaw = rawList?.[0]?.userId;
+          const uid = Number(uidRaw);
+
+          if (Number.isFinite(uid) && uid > 0) {
             setCurrentUserId(uid);
             try {
               const me = await api<{ userId: number; name: string; profileImage: string }>(`/users/${uid}`);
               setUserName(me?.name ?? "사용자");
               setUserProfileImg(me?.profileImage ?? "/internie_mascot_normal.png");
             } catch (e) {
-              console.error(e);
+              console.error("Failed to load user:", e);
+              setUserName("사용자");
+              setUserProfileImg("/internie_mascot_normal.png");
             }
           }
         }
