@@ -663,7 +663,7 @@ function Home(): React.ReactElement {
         />
 
         {/*<div className="spacer-50" aria-hidden="true" />      */}
-        <div className="row" style={{ marginTop: 23}}>
+        <div className="row" style={{ marginTop: 18}}>
           <MonthHeader value={month} onChange={setMonth} />
         </div>
 
