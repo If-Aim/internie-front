@@ -116,6 +116,45 @@ export async function apiUpload<T = unknown>(
   return (await res.json()) as T;
 }
 
+export function getUserIdFromAccessToken(): string | null {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null;
+
+  const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
+  const parts = raw.split(".");
+  if (parts.length < 2) return null;
+
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+
+    const payload = JSON.parse(json) as any;
+
+    return (
+      (payload.userId != null ? String(payload.userId) : null) ||
+      (payload.id != null ? String(payload.id) : null) ||
+      (payload.sub != null ? String(payload.sub) : null) ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+export type UserMe = {
+  userId: number;
+  name: string;
+  profileImage: string;
+};
+
+export async function getUserById(userId: string | number): Promise<UserMe> {
+  return api<UserMe>(`/users/${userId}`);
+}
 
 export class ApiError extends Error {
   status: number;

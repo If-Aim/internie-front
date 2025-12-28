@@ -18,8 +18,13 @@ export default function MyPage({
 
   return (
     <div className="mypage">
-      <div className="mypage-top">
+      <header className="mypage-header">
         {/*<div className="mypage-email">{email}</div>*/}
+        <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate("/")}>
+          <img src="/x-01.svg" alt="" />
+        </button>
+      </header>
+      <div className="mypage-top">
 
         <div className="mypage-profileimg-wrap">
           <img className="mypage-profileimg" src={avatarUrl} alt="" />

@@ -1,11 +1,14 @@
 .mypage { min-height: 100vh; background: #F0F6FF; display: flex; flex-direction: column;
 justify-content: space-between; padding: 50px 20px 28px; box-sizing: border-box; }
+.mypage-header { display: flex; align-items: center; justify-content: space-between;padding: 16px 20px;}
+.mypage-close { width: 32px; height: 32px; border: none; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+/*.mypage-close img { width: 20px; height: 20px;}*/
+
 .mypage-top { display: flex; flex-direction: column; align-items: center; gap: 18px;}
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; }
 .mypage-profileimg-wrap { width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; }
 .mypage-profileimg { width: 102px; height: 102px; object-fit: contain; }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;margin-top: 30px;}
-.mypage-name { font-weight: 900; }
 .mypage-actions { width: 100%; max-width: 520px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px;}
 .mypage-action-btn {height: 64px;border: 0;border-radius: 12px;background: #e0e0e0;color: #7a7a7a;font-size: 18px;font-weight: 700;}
 .mypage-action-btn:disabled {opacity: 1;cursor: default;}

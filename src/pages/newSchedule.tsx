@@ -341,22 +341,22 @@ function CalendarRange({
     return x >= s.getTime() && x <= e.getTime();
   };
   const handlePick = (picked: Date) => {
-    const pTime = picked.getTime();
-    const sTime = s.getTime();
-    const eTime = e.getTime();
 
-    if (mode === "startOnly") {
+    if (mode === "startOnly") { // 시작일 선택
       onChangeStart(picked);
-      if (pTime > eTime) onChangeEnd(picked);
       return;
     }
+    if (mode === "endOnly") { // 마감일 선택
+      const pTime = picked.getTime();
+      const sTime = s.getTime();
 
-    if (mode === "endOnly") {
       if (pTime < sTime) {
-        onChangeStart(picked);
-        onChangeEnd(picked);
+        alert("마감일은 시작일보다 빠를 수 없습니다.");
+        onChangeStart(picked); 
+        onChangeEnd(picked); 
         return;
       }
+
       onChangeEnd(picked);
       return;
     }
@@ -701,50 +701,40 @@ export default function NewSchedule() {
       alert("일정 제목을 입력해주세요.");
       return;
     }
+
+    const payload: {
+      title: string;
+      content: string;
+      startDate: string;
+      endDate: string;
+      startTime?: string;
+      endTime?: string;
+    } = {
+      title,
+      content: memo,
+      startDate: toYmd(startDate),
+      endDate: toYmd(endDate),
+    };
+
+    if (isAllDay) {
+      payload.startTime = "00:00:00";
+      payload.endTime = "24:00:00";
+    } else if (startTime && endTime) {
+      payload.startTime = toApiTime(startTime);
+      payload.endTime = toApiTime(endTime);
+    }
+    
     try {
-      const payload: {
-        title: string;
-        content: string;
-        startDate: string;
-        endDate: string;
-        startTime?: string;
-        endTime?: string;
-      } = {
-        title,
-        content: memo,
-        startDate: toYmd(startDate),
-        endDate: toYmd(endDate),
-      };
+      await api(`/events`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-      if (!isAllDay && startTime && endTime) {
-        payload.startTime = toApiTime(startTime);
-        payload.endTime = toApiTime(endTime);
-      }
-      try {
-        await api(`/events`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-
-        // 성공 시
-        setStage("outro");
-
-        setTimeout(() => {
-          nav("/", { replace: true });
-        }, 1500);
-
-      } catch (err) {
-        console.error("에러 발생:", err);
-        alert("일정을 저장하지 못했습니다.");
-      }
-
-      //성공 시
+      // 성공 시
       setStage("outro");
-      
       setTimeout(() => {
         nav("/", { replace: true });
       }, 1500);
-
     } catch (err) {
       console.error("에러 발생:", err);
       alert("일정을 저장하지 못했습니다.");

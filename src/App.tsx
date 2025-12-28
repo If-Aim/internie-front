@@ -148,11 +148,17 @@ function toHHmm(t?: string | null): string | undefined {
   if (!t) return undefined;
   return t.length >= 5 ? t.slice(0, 5) : t;
 }
-function timeRangeText(startTime?: string | null, endTime?: string | null): string {
+function isAllDayTime(startTime?: string | null, endTime?: string | null): boolean { //"종일" 처리
+  if (!startTime || !endTime) return false;
+  const s = startTime.slice(0, 5);
+  const e = endTime.slice(0, 5);
+  return s === "00:00" && (e === "24:00" || e === "23:59");
+}
+function timeRangeText(startTime?: string | null, endTime?: string | null): string { //"종일" 처리
   if (!startTime || !endTime) return "";
+  if (isAllDayTime(startTime, endTime)) return "종일";
   return `${hhmm(startTime)}–${hhmm(endTime)}`;
 }
-
 type HeaderProps = {
   onMenuClick: () => void;
   onAddClick: () => void;
@@ -160,7 +166,7 @@ type HeaderProps = {
 function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
   return (
     <div className="topbar">
-      {/* menu drawer */}
+      {/* side menu */}
       <button className="iconbtn" aria-label="menu" onClick={onMenuClick}>
         <img className="icon" src="/menu-01.svg" alt="메뉴" />
       </button>
@@ -177,50 +183,169 @@ function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
 type SideMenuProps = {
   isOpen: boolean;
   onClose: () => void;
-  onLogout: () => void;
   userId: number | null; 
+  userName: string;
+  userProfileImg: string;
 };
-function SideMenu({ isOpen, onClose, onLogout, userId }: SideMenuProps) {
+function SideMenu({ isOpen, onClose/*, userId*/, userName, userProfileImg }: SideMenuProps) {
   const navigate = useNavigate();
-  if (!isOpen) return null;
 
-  const user = {
-    nickname: "null",  //나중에 닉네임 또는 본명? 불러오기
-    profileImage: "/internie_mascot_normal.png" //나중에 프로필 이미지 불러오기 
+  const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
+  const rafRef = React.useRef<number | null>(null);
+  const panelRef = React.useRef<HTMLDivElement | null>(null);
+  const [x, setX] = React.useState<number>(() => -widthRef.current); 
+  const startXRef = React.useRef(0);
+  const startPanelXRef = React.useRef(0); 
+  const lastXRef = React.useRef(0);
+  const lastTRef = React.useRef(0);
+  const vxRef = React.useRef(0); 
+
+  const [dragging, setDragging] = React.useState(false);
+  const [closing, setClosing] = React.useState(false);
+
+  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+
+  React.useEffect(() => {
+    const w = panelRef.current?.offsetWidth ?? widthRef.current;
+    widthRef.current = w;
+
+    if (dragging) return;
+
+    setX(isOpen ? 0 : -w);
+  }, [isOpen, dragging]);
+
+  const openProgress = React.useMemo(() => {
+    const w = widthRef.current || 1;
+    return clamp(1 - Math.abs(x) / w, 0, 1);
+  }, [x]);
+
+  const closeWithSnap = React.useCallback(() => {
+    if (closing) return;
+
+    const w = widthRef.current;
+    setDragging(false);
+    setClosing(true);
+
+    setX(-w);
+
+    window.setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, 260);
+  }, [onClose, closing]);
+
+  const openWithSnap = React.useCallback(() => {
+    setDragging(false);
+    setX(0);
+  }, []);
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!panelRef.current) return;
+
+    if (!isOpen) return;
+
+    panelRef.current.setPointerCapture(e.pointerId);
+
+    const w = panelRef.current.offsetWidth;
+    widthRef.current = w;
+
+    setDragging(true);
+
+    startXRef.current = e.clientX;
+    startPanelXRef.current = x;
+    lastXRef.current = e.clientX;
+    lastTRef.current = performance.now();
+    vxRef.current = 0;
   };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    if (!panelRef.current) return;
+
+    const now = performance.now();
+    const dx = e.clientX - startXRef.current;
+
+    const w = widthRef.current;
+    const nextX = clamp(startPanelXRef.current + dx, -w, 0);
+
+    const dt = now - lastTRef.current;
+    if (dt > 0) {
+      const v = (e.clientX - lastXRef.current) / dt; 
+      vxRef.current = v;
+      lastXRef.current = e.clientX;
+      lastTRef.current = now;
+    }
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => setX(nextX));
+  };
+
+  const onPointerUpOrCancel = (e: React.PointerEvent) => {
+    if (!dragging) return;
+
+    const w = widthRef.current;
+    const progress = clamp(1 - Math.abs(x) / w, 0, 1);
+
+    const v = vxRef.current;
+    const flingLeft = v < -0.6; 
+    const passedThreshold = progress < 0.6; //60% 미만이면 닫힌 상태
+
+    setDragging(false);
+
+    if (flingLeft || passedThreshold) {
+      closeWithSnap();
+    } else {
+      openWithSnap();
+    }
+
+    try {
+      panelRef.current?.releasePointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const canInteract = isOpen || dragging || closing;
 
   return (
     <>
-      <div className="drawer-backdrop" onClick={onClose} aria-hidden="true" />
-      <div className="drawer-panel">
+      <div className="drawer-backdrop" onClick={() => {if (!canInteract) return; closeWithSnap()}} aria-hidden="true" 
+      style={{
+        opacity: openProgress,
+        pointerEvents: canInteract ? "auto" : "none",
+        transition: dragging ? "none" : "opacity 220ms ease",
+      }}  
+      />
+      <div ref={panelRef} className="drawer-panel" 
+      style={{
+        transform: `translateX(${x}px)`,
+        transition: dragging ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+        pointerEvents: canInteract ? "auto" : "none",
+      }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUpOrCancel}
+        onPointerCancel={onPointerUpOrCancel}
+      >
         <div className="drawer-header">
           <div className="profile-wrap">
-            <img 
-              src={user.profileImage} 
-              alt="프로필" 
-              className="profile-img" 
-            />
+            <img src={userProfileImg} alt="프로필" className="profile-img" />
             <div className="profile-info">
-              <div className="name">{user.nickname}</div>
-              <div className="email">User ID: {userId ?? "-"}</div>
+              <div className="name">{userName}</div>
+              {/*<div className="email">User ID: {userId ?? "-"}</div>*/}
             </div>
           </div>
         </div>
         
         <div className="drawer-body">
-          <button className="drawer-menu-item" onClick={() => { navigate("/mypage"); onClose(); }}>
-            마이페이지
+          <button className="drawer-menu-item" onClick={() => { navigate("/mypage"); closeWithSnap(); }}>
+            <img className="icon" src="/user-profile-02.svg" alt="마이페이지"/> <span>마이페이지</span>
           </button>
           <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
-            설정
+            <img className="icon" src="/arrow-refresh-01.svg" alt="최근활동"/> <span>최근 활동</span>
+          </button>
+          <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
+            <img className="icon" src="/settings.svg" alt="설정 및 개인정보"/> <span>설정 및 개인정보</span>
           </button>
         </div>
 
-        <div className="drawer-footer">
-          <button className="btn-logout" onClick={onLogout}>
-            로그아웃
-          </button>
-        </div>
       </div>
     </>
   );
@@ -369,6 +494,23 @@ function Home(): React.ReactElement {
   const pendingUpdatedEventRef = React.useRef<any>(null);
   const isSelectedLocked = !!selectedItem?.isLocked;
 
+  const [userName, setUserName] = React.useState<string>("사용자");
+  const [userProfileImg, setUserProfileImg] = React.useState<string>("/internie_mascot_normal.png");
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const { getUserIdFromAccessToken, getUserById } = await import("./api/client");
+        const uid = getUserIdFromAccessToken();
+        if (!uid) return;
+
+        const me = await getUserById(uid);
+        setUserName(me.name ?? "사용자");
+        setUserProfileImg(me.profileImage ?? "/internie_mascot_normal.png");
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
   React.useEffect(() => {
     (async () => {
       try {
@@ -505,20 +647,15 @@ function Home(): React.ReactElement {
     }
   };
   const canRecord = !!selectedItem && !isSelectedLocked;
-  // 로그아웃 핸들러
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    setMenuOpen(false); 
-    navigate("/login"); 
-  };
 
   return (
     <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
       <SideMenu 
         isOpen={isMenuOpen} 
         onClose={() => setMenuOpen(false)} 
-        onLogout={handleLogout}
         userId={currentUserId}
+        userName={userName}
+        userProfileImg={userProfileImg}
       />
 
       <div className="spacer-50" aria-hidden="true" />
