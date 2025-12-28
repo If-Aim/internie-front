@@ -651,83 +651,83 @@ function Home(): React.ReactElement {
   const canRecord = !!selectedItem && !isSelectedLocked;
 
   return (
-    <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
-      <SideMenu 
-        isOpen={isMenuOpen} 
-        onClose={() => setMenuOpen(false)} 
-        userId={currentUserId}
-        userName={userName}
-        userProfileImg={userProfileImg}
-      />
-
-      <div className="spacer-50" aria-hidden="true" />
-      
+    <>
       <Header onMenuClick={() => setMenuOpen(true)} onAddClick={() => navigate("/schedule/new")} />
-      
-      <div className="row" style={{ marginTop: 23}}>
-        <MonthHeader value={month} onChange={setMonth} />
-      </div>
-
-      {hasItems ? (
-        byDate.map(([date, arr]) => (
-          <section key={date} style={{marginTop: "19px", marginBottom: "27px"}}>
-            <h2 className="h2" style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginBottom: "13px" }}>{dateLabel(date)}</h2>
-            {arr.map((it) => {
-              const locked = !!it.isLocked;
-              return (
-                <EventCard
-                  key={it.instanceId}
-                  title={it.title}
-                  subtitle={timeRangeText(it.startTime, it.endTime)}
-                  selected={selectedItem?.instanceId === it.instanceId}
-                  locked={locked}
-                  onClick={() => setSelectedItem(prev => (prev?.instanceId === it.instanceId ? null : it))}
-                  onEditClick={() =>
-                    navigate(`/schedule/${it.eventId}`, {
-                      state: {
-                        event: {
-                          id: it.eventId,
-                          title: it.title,
-                          content: it.subtitle,
-                          startDate: it.startDate,
-                          endDate: it.endDate,
-                          startTime: it.startTime ?? null,
-                          endTime: it.endTime ?? null,
-                        },
-                      },
-                    })
-                  }
-                />
-              );
-            })}
-          </section>
-        ))
-      ) : (
-        <EmptyState onAddClick={() => navigate("/schedule/new")} />
-      )}
-      <div className="bottom-spacer" />
-      
-      {/* 기록하기 모달(팝업) */}
-      {isRecordModalOpen && selectedItem && (
-        <EventModal
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-          onRecord={handleRecord}
+      <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
+        <SideMenu 
+          isOpen={isMenuOpen} 
+          onClose={() => setMenuOpen(false)} 
+          userId={currentUserId}
+          userName={userName}
+          userProfileImg={userProfileImg}
         />
-      )}
-      {hasItems && (
-      <div className="bottom-cta">
-        <button
-          type="button"
-          className={`record-btn ${canRecord ? "enabled" : ""}`}
-          disabled={!canRecord}
-          onClick={() => {if (!canRecord) return; setIsRecordModalOpen(true);}}
-        >
-          기록하기
-        </button>
+
+        {/*<div className="spacer-50" aria-hidden="true" />      */}
+        <div className="row" style={{ marginTop: 23}}>
+          <MonthHeader value={month} onChange={setMonth} />
+        </div>
+
+        {hasItems ? (
+          byDate.map(([date, arr]) => (
+            <section key={date} style={{marginTop: "19px", marginBottom: "27px"}}>
+              <h2 className="h2" style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginBottom: "13px" }}>{dateLabel(date)}</h2>
+              {arr.map((it) => {
+                const locked = !!it.isLocked;
+                return (
+                  <EventCard
+                    key={it.instanceId}
+                    title={it.title}
+                    subtitle={timeRangeText(it.startTime, it.endTime)}
+                    selected={selectedItem?.instanceId === it.instanceId}
+                    locked={locked}
+                    onClick={() => setSelectedItem(prev => (prev?.instanceId === it.instanceId ? null : it))}
+                    onEditClick={() =>
+                      navigate(`/schedule/${it.eventId}`, {
+                        state: {
+                          event: {
+                            id: it.eventId,
+                            title: it.title,
+                            content: it.subtitle,
+                            startDate: it.startDate,
+                            endDate: it.endDate,
+                            startTime: it.startTime ?? null,
+                            endTime: it.endTime ?? null,
+                          },
+                        },
+                      })
+                    }
+                  />
+                );
+              })}
+            </section>
+          ))
+        ) : (
+          <EmptyState onAddClick={() => navigate("/schedule/new")} />
+        )}
+        <div className="bottom-spacer" />
+        
+        {/* 기록하기 모달(팝업) */}
+        {isRecordModalOpen && selectedItem && (
+          <EventModal
+            item={selectedItem}
+            onClose={() => setSelectedItem(null)}
+            onRecord={handleRecord}
+          />
+        )}
+        {hasItems && (
+        <div className="bottom-cta">
+          <button
+            type="button"
+            className={`record-btn ${canRecord ? "enabled" : ""}`}
+            disabled={!canRecord}
+            onClick={() => {if (!canRecord) return; setIsRecordModalOpen(true);}}
+          >
+            기록하기
+          </button>
+        </div>
+        )}
       </div>
-      )}
-    </div>
+    </>
   );
 }
 
