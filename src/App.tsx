@@ -446,7 +446,7 @@ function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: 
       aria-disabled={locked ? "true" : undefined}
     >
       <div className="item">
-        <div className={"thumb" + (selected ? " thumb--selected" : "")} />
+        <div className={"thumb" + ((selected || locked) ? " thumb--selected" : "")} />
         <div>
           <div className="title">{title}</div>
           <div className="subtitle">{subtitle}</div>
