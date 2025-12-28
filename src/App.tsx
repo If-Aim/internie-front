@@ -187,7 +187,7 @@ type SideMenuProps = {
   userName: string;
   userProfileImg: string;
 };
-function SideMenu({ isOpen, onClose/*, userId*/, userName, userProfileImg }: SideMenuProps) {
+function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: SideMenuProps) {
   const navigate = useNavigate();
 
   const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
@@ -477,8 +477,6 @@ function Home(): React.ReactElement {
   
   const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
   const [isMenuOpen, setMenuOpen] = React.useState(false);
-  const [currentUserId/*, setCurrentUserId*/] = React.useState<number | null>(null);
-
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
   const byDate = React.useMemo<[string, ScheduleItem[]][]>(() => {
@@ -494,18 +492,24 @@ function Home(): React.ReactElement {
   const pendingUpdatedEventRef = React.useRef<any>(null);
   const isSelectedLocked = !!selectedItem?.isLocked;
 
+  const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
   const [userName, setUserName] = React.useState<string>("사용자");
   const [userProfileImg, setUserProfileImg] = React.useState<string>("/internie_mascot_normal.png");
   React.useEffect(() => {
     (async () => {
       try {
-        const { getUserIdFromAccessToken, getUserById } = await import("./api/client");
-        const uid = getUserIdFromAccessToken();
-        if (!uid) return;
+        // userId 확보
+        const meEvents = await api<any>("/events/me");
+        const uid = meEvents?.eventList?.[0]?.userId;
 
-        const me = await getUserById(uid);
-        setUserName(me.name ?? "사용자");
-        setUserProfileImg(me.profileImage ?? "/internie_mascot_normal.png");
+        if (!uid) return; // 이벤트가 0개면 userId를 못 얻는 한계(임시방편)
+        setCurrentUserId(uid);
+
+        // user 정보 조회
+        const me = await api<{ userId: number; name: string; profileImage: string }>(`/users/${uid}`);
+
+        setUserName(me?.name ?? "사용자");
+        setUserProfileImg(me?.profileImage ?? "/internie_mascot_normal.png");
       } catch (e) {
         console.error(e);
       }
