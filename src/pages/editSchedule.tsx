@@ -759,7 +759,7 @@ export default function EditSchedule() {
 
       nav("/", { replace: true, state: { refetch: true, deletedEventId: eventId } });
     } catch (err) {
-      console.error(err);
+      //console.error(err);
 
       if (err instanceof ApiError) {
         if (err.status === 500 || err.status === 409) {

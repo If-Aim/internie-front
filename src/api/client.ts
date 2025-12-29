@@ -126,6 +126,7 @@ export async function deleteEventDay(eventDayId: string | number): Promise<void>
   return api<void>(`/event-days/${eventDayId}`, { method: "DELETE" });
 }
 
+/* - mypage관련 - */
 // user 관련
 export function getUserIdFromAccessToken(): string | null {
   const token = localStorage.getItem("accessToken");
@@ -167,7 +168,33 @@ export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
 }
 
+// 최근 기록한 일정 관련
+export type Transcription = {
+  id: number;
+  text: string;
+  audioUrl?: string;
+};
 
+export type EventDay = {
+  eventDayId: number;
+  title: string;
+  eventId: string | number;
+  date: string; // YYYY-MM-DD
+  startTime?: string | null;
+  endTime?: string | null;
+  memo?: string | null;
+  completed: boolean;
+  transcriptions?: Transcription[];
+};
+
+export type EventDayMonthResponse = {
+  totalCount: number;
+  eventDayList: EventDay[];
+};
+
+export async function getEventDaysByMonth(y: string, m: string): Promise<EventDayMonthResponse> {
+  return api<EventDayMonthResponse>(`/event-days/${y}/${m}`);
+}
 
 // 에러 처리
 export class ApiError extends Error {
