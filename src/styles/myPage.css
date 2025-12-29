@@ -20,8 +20,7 @@ padding: 20px 20px 53px; box-sizing: border-box; }
 .mypage-meta-title {font-size: 16px; font-weight: 700; color: #000; } 
 .mypage-meta-time { margin-top: 5px; font-size: 14px; font-weight: 500; color:rgba(0, 0, 0, 0.50); }
 
-.mypage-links { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;color: #6b7280; font-weight: 700; }
+.mypage-links { margin-top: 22px;margin-bottom: calc(60px + 32px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 14px;color: #6b7280; font-weight: 700; }
 .mypage-link { border: 0; background: transparent; font-size: 16px; color: #6b7280; }
-.mypage-bottom {height:200px;width: 100%;display: flex;justify-content: center;}
 
 .mypage-logout {position: fixed;left:20px;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));height: 60px;border: 0;border-radius: 10px;background: var(--primary);color: #ffffff;font-size: 16px;font-weight: 700;}
