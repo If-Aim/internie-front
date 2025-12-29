@@ -359,7 +359,7 @@ function MonthHeader({ value, onChange }: MonthHeaderProps) {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   }, []);
-  const [/*yStr,*/ mStr] = value.split("-");
+  const [, mStr] = value.split("-");
   const label = `${Number(mStr)}월`;
   const months = React.useMemo(() => {
     const base = new Date();
