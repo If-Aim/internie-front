@@ -35,7 +35,7 @@ export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
   //const [email, setEmail] = React.useState("internie@gmail.com"); 임시
-  const [name, setName] = React.useState("사용자");
+  const [name, setName] = React.useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = React.useState("/internie_mascot_normal.png");
 
   const [recent, setRecent] = React.useState<EventDay[]>([]);
@@ -106,9 +106,11 @@ export default function MyPage({ onLogout }: Props) {
           <img className="mypage-profileimg" src={avatarUrl} alt="" />
         </div>
 
-        <div className="mypage-greeting">
-          안녕하세요, <span className="mypage-name">{name}</span>님
-        </div>
+        { name && (
+          <div className="mypage-greeting">
+            안녕하세요, <span className="mypage-name">{name}</span>님
+          </div>
+        )}
       </section>
 
       <section className="mypage-cards">

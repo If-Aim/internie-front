@@ -13,16 +13,15 @@ justify-content: space-between; padding: 20px 20px 53px; box-sizing: border-box;
 .mypage-card {border: 0; background: #fff; border-radius: 10px; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); }
 .mypage-card.wide {height: 80px; padding: 0 21px; display: flex; align-items: center; gap: 14px;}
 .mypage-badge { width: 42px; height: 42px; border-radius: 999px; background: #1D4ED8;}
-.mypage-card-title {font-size: 22px; font-weight: 700; color: #707070;}
+.mypage-card-title {font-size: 16px; font-weight: 700; color: #707070;}
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
 .mypage-card.square {width:100%;aspect-ratio: 1/1;background:#fff;border:0;}
 .mypage-cardgrid-meta {display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: -8px; padding: 0 2px;}
 .mypage-meta-title {font-size: 16px; font-weight: 700; color: #000; } 
 .mypage-meta-time { margin-top: 5px; font-size: 14px; font-weight: 500; color:rgba(0, 0, 0, 0.50); }
 
-.mypage-links { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;
-color: #6b7280; font-weight: 700; }
-.mypage-link { border: 0; background: transparent; font-size: 22px; color: #6b7280; }
+.mypage-links { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;color: #6b7280; font-weight: 700; }
+.mypage-link { border: 0; background: transparent; font-size: 16px; color: #6b7280; }
 
 .mypage-bottom {width: 100%;display: flex;justify-content: center;}
 .mypage-logout { width: 100%;height: 60px;border: 0;border-radius: 10px;background: var(--primary);color: #ffffff;font-size: 16px;font-weight: 700;}
