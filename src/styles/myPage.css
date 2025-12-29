@@ -1,4 +1,4 @@
-.mypage { min-height: 100svh; overflow-y: auto;-webkit-overflow-scrolling: touch;background: var(--bg); display: flex; flex-direction: column;
+.mypage { height: 100svh; overflow-y: auto;-webkit-overflow-scrolling: touch;background: var(--bg); display: flex; flex-direction: column;
 padding: 20px 20px 53px; box-sizing: border-box; }
 .mypage-header { position:relative;display: flex; align-items: center; justify-content: center;padding: 16px 20px;}
 .mypage-close { position: absolute; right:2px; top:14px; width: 24px; height: 24px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center;}
@@ -22,6 +22,6 @@ padding: 20px 20px 53px; box-sizing: border-box; }
 
 .mypage-links { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;color: #6b7280; font-weight: 700; }
 .mypage-link { border: 0; background: transparent; font-size: 16px; color: #6b7280; }
-.mypage-bottom {height:200px;width: 100%;display: flex;justify-content: center;}
+/*.mypage-bottom {height:200px;width: 100%;display: flex;justify-content: center;}*/
 
 .mypage-logout {position: fixed;left:20px;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));height: 60px;border: 0;border-radius: 10px;background: var(--primary);color: #ffffff;font-size: 16px;font-weight: 700;}

@@ -146,12 +146,11 @@ export default function MyPage({ onLogout }: Props) {
           계정 관리하기
         </button>
       </section>
+      {/*<div className="mypage-bottom"> </div>*/}
 
-      <div className="mypage-bottom">
-        <button type="button" className="mypage-logout" onClick={() => (onLogout ? onLogout() : navigate("/login"))} >
-          로그아웃
-        </button>
-      </div>
+      <button type="button" className="mypage-logout" onClick={() => (onLogout ? onLogout() : navigate("/login"))} >
+        로그아웃
+      </button>
     </div>
   );
 }
