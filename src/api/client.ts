@@ -152,8 +152,8 @@ export type UserMe = {
   profileImage: string;
 };
 
-export async function getUserById(userId: string | number): Promise<UserMe> {
-  return api<UserMe>(`/users/${userId}`);
+export async function getUserMe(): Promise<UserMe> {
+  return api<UserMe>("/users/me");
 }
 
 export class ApiError extends Error {

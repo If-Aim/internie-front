@@ -2,7 +2,7 @@
 import React from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
-import { api } from "./api/client";
+import { api, getUserMe } from "./api/client";
 import Login from "./pages/login";
 import KakaoCallback from "./pages/kakaoCallback";
 import NewSchedule from "./pages/newSchedule";
@@ -488,43 +488,41 @@ function Home(): React.ReactElement {
   }, [items]); 
 
   const hasItems = byDate.length > 0;
-  const [refetchTick] = React.useState(0);
   const pendingUpdatedEventRef = React.useRef<any>(null);
   const isSelectedLocked = !!selectedItem?.isLocked;
 
   const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
   const [userName, setUserName] = React.useState<string>("사용자");
   const [userProfileImg, setUserProfileImg] = React.useState<string>("/internie_mascot_normal.png");
- 
-  React.useEffect(() => {
+  
+  React.useEffect(() => {// 사용자 정보 불러오기
+    (async () => {
+      try {
+        const me = await getUserMe();
+        setCurrentUserId(me.userId);
+        setUserName(me.name ?? "사용자");
+        setUserProfileImg(me.profileImage ?? "/internie_mascot_normal.png");
+      } catch (e) {
+        console.error("getUserMe failed:", e);
+        setCurrentUserId(null);
+        setUserName("사용자");
+        setUserProfileImg("/internie_mascot_normal.png");
+      }
+    })();
+  }, []);
+
+  React.useEffect(() => { //전체일정, 세부일정 조회
     (async () => {
       try {
         const [y, m] = month.split("-");
 
-        const [eventsData, eventDaysData] = await Promise.all([ //전체일정, 세부일정 동시 조회
+        const [eventsData, eventDaysData] = await Promise.all([ 
           api<any>(`/events/${y}/${m}`),
           api<EventDayMonthResponse>(`/event-days/${y}/${m}`),
         ]);
 
         const rawList = eventsData.eventList || [];
 
-        if (!currentUserId) {
-          const uidRaw = rawList?.[0]?.userId;
-          const uid = Number(uidRaw);
-
-          if (Number.isFinite(uid) && uid > 0) {
-            setCurrentUserId(uid);
-            try {
-              const me = await api<{ userId: number; name: string; profileImage: string }>(`/users/${uid}`);
-              setUserName(me?.name ?? "사용자");
-              setUserProfileImg(me?.profileImage ?? "/internie_mascot_normal.png");
-            } catch (e) {
-              console.error("Failed to load user:", e);
-              setUserName("사용자");
-              setUserProfileImg("/internie_mascot_normal.png");
-            }
-          }
-        }
         let events: RawEvent[] = rawList.map((e: any): RawEvent => ({
           id: e.id,
           title: e.title,
@@ -591,7 +589,7 @@ function Home(): React.ReactElement {
         console.error(e);
       }
     })();
-  }, [month, refetchTick]);
+  }, [month]);
 
   React.useEffect(() => {
     if (!selectedItem) setIsRecordModalOpen(false);
