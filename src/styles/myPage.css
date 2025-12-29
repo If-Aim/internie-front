@@ -1,4 +1,4 @@
-.mypage { min-height: 100vh; background: #F0F6FF; display: flex; flex-direction: column;
+.mypage { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column;
 justify-content: space-between; padding: 50px 20px 53px; box-sizing: border-box; }
 .mypage-header { position:relative;display: flex; align-items: center; justify-content: center;padding: 16px 20px;}
 .mypage-close { position: absolute; right:2px; top:14px; width: 24px; height: 24px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center;}
@@ -10,12 +10,12 @@ justify-content: space-between; padding: 50px 20px 53px; box-sizing: border-box;
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
 
 .mypage-cards { margin-top: 18px; display: flex; flex-direction: column; gap: 21px; }
-.mypage-card {border: 0; background: #fff; border-radius: 18px; box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12); }
-.mypage-card.wide {height: 86px; padding: 0 18px; display: flex; align-items: center; gap: 14px;}
+.mypage-card {border: 0; background: #fff; border-radius: 18px; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); }
+.mypage-card.wide {height: 80px; padding: 0 21px; display: flex; align-items: center; gap: 14px;}
 .mypage-badge { width: 42px; height: 42px; border-radius: 999px; background: #1D4ED8;}
-.mypage-card-title {font-size: 22px; font-weight: 700; color: #6b7280;}
+.mypage-card-title {font-size: 22px; font-weight: 700; color: #707070;}
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
-.mypage-card.square {width:100%;aspect-ratio: 1/1;border-radius:10px;background:#fff;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);border:0;}
+.mypage-card.square {width:100%;aspect-ratio: 1/1;border-radius:10px;background:#fff;border:0;}
 .mypage-cardgrid-meta {display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: -8px; padding: 0 2px;}
 .mypage-meta-title {font-size: 16px; font-weight: 700; color: #000; } 
 .mypage-meta-time { margin-top: 5px; font-size: 14px; font-weight: 500; color:rgba(0, 0, 0, 0.50); }
