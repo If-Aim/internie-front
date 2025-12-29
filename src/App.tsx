@@ -693,6 +693,8 @@ function Home(): React.ReactElement {
                         state: {
                           event: {
                             id: it.eventId,
+                            eventDayId: it.eventDayId ?? null,
+                            transcriptionCount: it.transcriptionCount ?? 0,
                             title: it.title,
                             content: it.subtitle,
                             startDate: it.startDate,

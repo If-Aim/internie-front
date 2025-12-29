@@ -22,6 +22,7 @@ export async function apiPublic(
     credentials: "include",
   });
 }
+//auth
 export async function api<T = unknown>(
   path: string,
   init: RequestInit = {}
@@ -69,6 +70,7 @@ export async function api<T = unknown>(
   return (await res.json()) as T;
 }
 
+// 업로드용 API
 export async function apiUpload<T = unknown>(
   path: string,
   formData: FormData,
@@ -116,6 +118,15 @@ export async function apiUpload<T = unknown>(
   return (await res.json()) as T;
 }
 
+// 이벤트 삭제
+export async function deleteEvent(eventId: string | number): Promise<void> {
+  return api<void>(`/events/${eventId}`, { method: "DELETE" });
+}
+export async function deleteEventDay(eventDayId: string | number): Promise<void> {
+  return api<void>(`/event-days/${eventDayId}`, { method: "DELETE" });
+}
+
+// user 관련
 export function getUserIdFromAccessToken(): string | null {
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
@@ -156,6 +167,9 @@ export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
 }
 
+
+
+// 에러 처리
 export class ApiError extends Error {
   status: number;
   bodyText?: string;

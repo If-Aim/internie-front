@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/schedule.css";
-import { api, ApiError } from "../api/client";
+import { api, ApiError, deleteEvent, deleteEventDay } from "../api/client";
 
 type Stage = "form" | "outro";
 
@@ -16,6 +16,8 @@ type EditState =
         endDate: string; // 'YYYY-MM-DD'
         startTime?: string; // 'HH:mm:ss' (optional)
         endTime?: string; // 'HH:mm:ss' (optional)
+        eventDayId?: string | number | null;
+        transcriptionCount?: number;
       };
     }
   | null;
@@ -738,12 +740,22 @@ export default function EditSchedule() {
       alert("잘못된 접근입니다. (Event ID 누락)");
       return;
     }
+    const transcriptionCount = passed?.transcriptionCount ?? 0;
+    if (transcriptionCount > 0) {
+      alert("녹음 기록이 있는 일정은 삭제할 수 없습니다.");
+      return;
+    }
 
     const ok = window.confirm("이 일정을 삭제할까요? 삭제하면 되돌릴 수 없습니다.");
     if (!ok) return;
 
+    //세부일정은 있지만 녹음 기록이 없는 경우 일정 삭제 처리
+    const eventDayId = passed?.eventDayId ?? null;
     try {
-      await api<void>(`/events/${eventId}`, { method: "DELETE" });
+      if (eventDayId != null) {
+        await deleteEventDay(eventDayId);
+      }
+      await deleteEvent(eventId);
 
       nav("/", { replace: true, state: { refetch: true, deletedEventId: eventId } });
     } catch (err) {
@@ -751,7 +763,7 @@ export default function EditSchedule() {
 
       if (err instanceof ApiError) {
         if (err.status === 500 || err.status === 409) {
-          alert("세부일정을 기록한 일정은 삭제할 수 없습니다.");
+          alert("기록한 일정은 삭제할 수 없습니다.");
           return;
         }
         if (err.status === 401) {
