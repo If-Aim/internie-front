@@ -359,16 +359,25 @@ function MonthHeader({ value, onChange }: MonthHeaderProps) {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   }, []);
-  const [, mStr] = value.split("-");
+  const [/*yStr,*/ mStr] = value.split("-");
   const label = `${Number(mStr)}월`;
   const months = React.useMemo(() => {
-    const [yStr, mStr] = currentYm.split("-");
-    const y = Number(yStr);
-    const m = Number(mStr);
+    const base = new Date();
+    base.setDate(1);
+
     const list: { ym: string; text: string }[] = [];
-    for (let mm = m; mm >= 1; mm--) {
-      const ym = `${y}-${String(mm).padStart(2, "0")}`;
-      list.push({ ym, text: `${mm}월` });
+
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+
+      const ym = `${y}-${String(m).padStart(2, "0")}`;
+
+      // 표시 텍스트: "12월" 로 연도 미포함
+      const text = `${m}월`;
+
+      list.push({ ym, text });
     }
     return list;
   }, [currentYm]);
