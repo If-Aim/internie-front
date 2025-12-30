@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import "../styles/login.css";
 
 //const origin = window.location.origin;
@@ -13,7 +15,7 @@ const kakaoAuthUrl =
 //const GOOGLE_AUTH_URL = "/auth/google"; // 추후 추가
 
 export default function Login() {
-
+  const { t } = useTranslation();
   const go = (url: string) => { window.location.href = url; };
 
   return (
@@ -24,11 +26,11 @@ export default function Login() {
           <img src="/internie_Logo.svg" alt="internie" width={183} height={35} />
         </h1>
 
-        <button type="button" className="btn btn-kakao" onClick={() => go(kakaoAuthUrl)} aria-label="카카오로 시작하기">
+        <button type="button" className="btn btn-kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
           <span className="ico ico-kakao" aria-hidden="true">
             <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
           </span>
-          <span className="btn-text">카카오로 시작하기</span>
+          <span className="btn-text">{t("login.startWithKakao")}</span>
         </button>
 
         {/*<button

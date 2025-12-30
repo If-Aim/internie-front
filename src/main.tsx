@@ -1,3 +1,5 @@
+import "./i18n"; // 언어
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
