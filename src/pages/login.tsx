@@ -23,7 +23,7 @@ export default function Login() {
   };
   return (
     <div className="page">
-      {/* ✅ 임시 언어 토글 */}
+      {/* 임시 언어 토글 */}
       <button
         type="button"
         className="lang-toggle"
