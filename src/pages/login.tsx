@@ -15,11 +15,23 @@ const kakaoAuthUrl =
 //const GOOGLE_AUTH_URL = "/auth/google"; // 추후 추가
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const go = (url: string) => { window.location.href = url; };
-
+  const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
+  const toggleLang = async () => {
+    await i18n.changeLanguage(isKo ? "en" : "ko");
+  };
   return (
     <div className="page">
+      {/* ✅ 임시 언어 토글 */}
+      <button
+        type="button"
+        className="lang-toggle"
+        onClick={toggleLang}
+        aria-label={isKo ? "Switch language to English" : "언어를 한국어로 변경"}
+      >
+        {isKo ? "EN" : "KO"}
+      </button>
       <div className="header-spacer" aria-hidden="true" />
       <main className="login-wrap">
         <h1 className="brand">
