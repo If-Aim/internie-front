@@ -1,6 +1,47 @@
-{
+{ 
+  "comment_login": "로그인 관련",
   "login": {
     "startWithKakao": "카카오로 시작하기",
     "startWithKakaoAria": "카카오로 시작하기"
+  },
+  
+  "comment_App.tsx": "App.tsx 관련",
+  "common": {
+    "close": "닫기",
+    "record": "기록하기",
+    "menu": "메뉴",
+    "add": "추가", 
+    "allDay": "종일"
+  },
+  "menu": {
+    "mypage": "마이페이지",
+    "recent": "최근 활동",
+    "settings": "설정 및 개인정보"
+  },
+  "empty": {
+    "title": "아직 일정이 없어요",
+    "subtitle": "일정을 추가해 볼까요?",
+    "sync": "캘린더 연동하기"
+  },
+  "modal": {
+    "desc1": "오늘의 경험을 기록하고",
+    "desc2": "역량 점수를 얻으세요!"
+  },
+  "error": {
+    "record": "일정을 기록하는 중 오류가 발생했습니다."
+  },
+  "schedule": {
+    "edit": "일정 수정"
+  },
+  "calendar": {
+    "selectMonth": "월 선택"
+  },
+  "home": {
+    "date": {
+      "today": "{{day}}일 오늘",
+      "weekday": "{{day}}일 {{weekday}}"
+    }
   }
+
+  
 }

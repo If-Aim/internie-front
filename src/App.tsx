@@ -1,4 +1,6 @@
 // src/App.tsx
+import { useTranslation } from "react-i18next";
+
 import React from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
@@ -112,31 +114,29 @@ function expandEventToDailyItems(
   }
   return out;
 }
-function parseIsoDate(iso: string) {
+function formatDateYmdLocale(iso: string, locale: string): string {
   const d = new Date(`${iso}T00:00:00`);
-  return {
-    date: d,
-    y: d.getFullYear(),
-    m: d.getMonth() + 1,
-    day: d.getDate(),
-    weekday: d.getDay(),
-  };
+  return new Intl.DateTimeFormat(locale, { year: "numeric", month: "long", day: "numeric" }).format(d);
 }
-function formatKoreanDateYmd(iso: string): string {
-  const { y, m, day } = parseIsoDate(iso);
-  return `${y}년 ${m}월 ${day}일`;
-}
-function dateLabel(iso: string): string {
-  const { date, day, weekday } = parseIsoDate(iso);
-  const w = ["일", "월", "화", "수", "목", "금", "토"][weekday];
-
+function dateLabel(
+  iso: string,
+  locale: string,
+  t: (k: string, opts?: any) => string
+): string {
+  const d = new Date(`${iso}T00:00:00`);
   const today = new Date();
-  const same =
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
 
-  return same ? `${day}일 오늘` : `${day}일 ${w}요일`;
+  const same =
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate();
+
+  const dayNum = d.getDate();
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: "short" }).format(d);
+
+  return same
+    ? t("home.date.today", { day: dayNum })
+    : t("home.date.weekday", { day: dayNum, weekday });
 }
 
 /*시간 관련 함수*/
@@ -154,9 +154,13 @@ function isAllDayTime(startTime?: string | null, endTime?: string | null): boole
   const e = endTime.slice(0, 5);
   return s === "00:00" && (e === "24:00" || e === "23:59");
 }
-function timeRangeText(startTime?: string | null, endTime?: string | null): string { //"종일" 처리
+function timeRangeText(
+  startTime?: string | null,
+  endTime?: string | null,
+  t?: (key: string, opts?: any) => string
+): string {
   if (!startTime || !endTime) return "";
-  if (isAllDayTime(startTime, endTime)) return "종일";
+  if (isAllDayTime(startTime, endTime)) return t ? t("common.allDay") : "All day";
   return `${hhmm(startTime)}–${hhmm(endTime)}`;
 }
 type HeaderProps = {
@@ -164,17 +168,19 @@ type HeaderProps = {
   onAddClick: () => void;
 };
 function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
+  const { t } = useTranslation();
+
   return (
     <div className="topbar topbar-main">
       {/* side menu */}
-      <button className="iconbtn" aria-label="menu" onClick={onMenuClick}>
-        <img className="icon" src="/menu-01.svg" alt="메뉴" />
+      <button className="iconbtn" aria-label={t("common.menu")} onClick={onMenuClick}>
+        <img className="icon" src="/menu-01.svg" alt={t("common.menu")} />
       </button>
 
       <div className="app-title">internie</div>
 
-      <button className="iconbtn" aria-label="add" onClick={onAddClick}>
-        <img className="icon" src="/plus-01.svg" alt="추가" />
+      <button className="iconbtn" aria-label={t("common.add")} onClick={onAddClick}>
+        <img className="icon" src="/plus-01.svg" alt={t("common.add")} />
       </button>
     </div>
   );
@@ -189,7 +195,7 @@ type SideMenuProps = {
 };
 function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: SideMenuProps) {
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
   const rafRef = React.useRef<number | null>(null);
   const panelRef = React.useRef<HTMLDivElement | null>(null);
@@ -326,7 +332,7 @@ function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: Sid
       >
         <div className="drawer-header">
           <div className="profile-wrap">
-            <img src={userProfileImg} alt="프로필" className="profile-img" />
+            <img src={userProfileImg} alt={t("menu.profile")} className="profile-img" />
             <div className="profile-info">
               <div className="name">{userName}</div>
               {/*<div className="email">User ID: {userId ?? "-"}</div>*/}
@@ -336,13 +342,13 @@ function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: Sid
         
         <div className="drawer-body">
           <button className="drawer-menu-item" onClick={() => { navigate("/mypage"); closeWithSnap(); }}>
-            <img className="icon" src="/user-profile-02.svg" alt="마이페이지"/> <span>마이페이지</span>
+            <img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} /> <span>{t("menu.mypage")}</span>
           </button>
           <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
-            <img className="icon" src="/arrow-refresh-01.svg" alt="최근활동"/> <span>최근 활동</span>
+            <img className="icon" src="/arrow-refresh-01.svg" alt={t("menu.recent_activity")} /> <span>{t("menu.recent_activity")}</span>
           </button>
           <button className="drawer-menu-item" onClick={() => { /* TODO */ }}>
-            <img className="icon" src="/settings.svg" alt="설정 및 개인정보"/> <span>설정 및 개인정보</span>
+            <img className="icon" src="/settings.svg" alt={t("menu.settings")} /> <span>{t("menu.settings")}</span>
           </button>
         </div>
 
@@ -350,37 +356,38 @@ function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: Sid
     </>
   );
 }
-
+// TODO: 월 표기 수정 (다국어 지원 방향) 
 type MonthHeaderProps = { value: string; onChange: (ym: string) => void };
 function MonthHeader({ value, onChange }: MonthHeaderProps) {
+  const {t, i18n} = useTranslation();
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement | null>(null);
-  const currentYm = React.useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  }, []);
-  const [, mStr] = value.split("-");
-  const label = `${Number(mStr)}월`;
+
+  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+  const label = React.useMemo(() => {
+    const [yy, mm] = value.split("-").map(Number);
+    const d = new Date(yy, mm - 1, 1);
+    return new Intl.DateTimeFormat(locale, { month: "short" }).format(d);
+  }, [value, locale]);
+  
   const months = React.useMemo(() => {
     const base = new Date();
     base.setDate(1);
 
+    const fmt = new Intl.DateTimeFormat(locale, { month: "short" });
     const list: { ym: string; text: string }[] = [];
 
     for (let i = 0; i < 12; i++) {
       const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
       const y = d.getFullYear();
       const m = d.getMonth() + 1;
-
       const ym = `${y}-${String(m).padStart(2, "0")}`;
 
-      // 표시 텍스트: "12월" 로 연도 미포함
-      const text = `${m}월`;
-
+      const text = fmt.format(d); 
       list.push({ ym, text });
     }
     return list;
-  }, [currentYm]);
+  }, [locale]);
 
   React.useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -394,13 +401,13 @@ function MonthHeader({ value, onChange }: MonthHeaderProps) {
     <div className="month-row" ref={ref} style={{ position: "relative" }}>
       <div className="month-left">
         <div className="h1">{label}</div>
-        <button className="month-btn" aria-label="월 선택" onClick={() => setOpen(v => !v)}>
-          <img className="icon" src="/chevron-right.svg" alt="월 선택" />
+        <button className="month-btn" aria-label={t("calendar.selectMonth")} onClick={() => setOpen(v => !v)}>
+          <img className="icon" src="/chevron-right.svg" alt={t("calendar.selectMonth")} />
         </button>
       </div>
 
       {open && (
-        <div className="month-pop" role="menu" aria-label="월 선택" style={{ left: 0, top: "100%", marginTop: 8 }}>
+        <div className="month-pop" role="menu" aria-label={t("calendar.selectMonth")} style={{ left: 0, top: "100%", marginTop: 8 }}>
           <div className="month-menu">
             {months.map(m => (
               <button
@@ -421,11 +428,12 @@ function MonthHeader({ value, onChange }: MonthHeaderProps) {
 
 type EmptyStateProps = { onAddClick: () => void; };
 function EmptyState({ /*onAddClick*/ }: EmptyStateProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="empty">
       <img className="empty-illust" src="/internie_mascot_normal.png" alt="" />
 
-      <p className="empty-sub">아직 일정이 없어요.<br /> 일정을 추가해 볼까요?</p>
+      <p className="empty-sub">{t("empty.title")}<br/>{t("empty.subtitle")}</p>
 
       <button
         type="button"
@@ -434,7 +442,7 @@ function EmptyState({ /*onAddClick*/ }: EmptyStateProps): React.ReactElement {
           // 나중에 캘린더 연동 기능 넣기
         }}
       >
-        캘린더 연동하기
+        {t("empty.sync")}
       </button>
     </div>
   );
@@ -447,6 +455,7 @@ type EventCardProps = Pick<ScheduleItem, "title" | "subtitle"> & {
   onEditClick: () => void; 
 };
 function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: EventCardProps): React.ReactElement {
+  const {t} = useTranslation();
   return (
     <article
       className={"card" + (selected ? " card--selected" : "") + (locked ? " card-locked" : "")}
@@ -465,13 +474,13 @@ function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: 
       <button
         type="button"
         className="card-edit-btn"
-        aria-label="일정 수정"
+        aria-label={t("schedule.edit")}
         onClick={(e) => {
           e.stopPropagation(); 
           onEditClick();
         }}
       >
-        <img className="icon" src="/chevron-right.svg" alt="일정 수정" style={{ transform: "rotate(-90deg)" }} />
+        <img className="icon" src="/chevron-right.svg" alt={t("schedule.edit")} style={{ transform: "rotate(-90deg)" }} />
       </button>
     </article>
   );
@@ -480,6 +489,7 @@ function EventCard({ title, subtitle, selected, locked, onClick, onEditClick }: 
 
 function Home(): React.ReactElement {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const [month, setMonth] = React.useState<string>(currentMonth);
@@ -501,7 +511,7 @@ function Home(): React.ReactElement {
   const isSelectedLocked = !!selectedItem?.isLocked;
 
   const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
-  const [userName, setUserName] = React.useState<string>("사용자");
+  const [userName, setUserName] = React.useState<string>("User");
   const [userProfileImg, setUserProfileImg] = React.useState<string>("/internie_mascot_normal.png");
   
   React.useEffect(() => {// 사용자 정보 불러오기
@@ -509,12 +519,12 @@ function Home(): React.ReactElement {
       try {
         const me = await getUserMe();
         setCurrentUserId(me.userId);
-        setUserName(me.name ?? "사용자");
+        setUserName(me.name ?? "User");
         setUserProfileImg(me.profileImage ?? "/internie_mascot_normal.png");
       } catch (e) {
         console.error("getUserMe failed:", e);
         setCurrentUserId(null);
-        setUserName("사용자");
+        setUserName("User");
         setUserProfileImg("/internie_mascot_normal.png");
       }
     })();
@@ -652,7 +662,7 @@ function Home(): React.ReactElement {
       navigate(`/schedule/${newEventDayId}/questions`);
 
     } catch (error) {
-      alert("일정을 기록하는 중 오류가 발생했습니다.");
+      alert(t("error.record"));
     }
   };
   const canRecord = !!selectedItem && !isSelectedLocked;
@@ -677,14 +687,14 @@ function Home(): React.ReactElement {
         {hasItems ? (
           byDate.map(([date, arr]) => (
             <section key={date} style={{marginTop: "19px", marginBottom: "27px"}}>
-              <h2 className="h2" style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginBottom: "13px" }}>{dateLabel(date)}</h2>
+              <h2 className="h2" style={{ fontSize: "16px", color: "#979797", fontWeight: 500, lineHeight: "20px",marginBottom: "13px" }}>{dateLabel(date, i18n.language === "en" ? "en-US" : "ko-KR", t)}</h2>
               {arr.map((it) => {
                 const locked = !!it.isLocked;
                 return (
                   <EventCard
                     key={it.instanceId}
                     title={it.title}
-                    subtitle={timeRangeText(it.startTime, it.endTime)}
+                    subtitle={timeRangeText(it.startTime, it.endTime, t)}
                     selected={selectedItem?.instanceId === it.instanceId}
                     locked={locked}
                     onClick={() => setSelectedItem(prev => (prev?.instanceId === it.instanceId ? null : it))}
@@ -731,7 +741,7 @@ function Home(): React.ReactElement {
             disabled={!canRecord}
             onClick={() => {if (!canRecord) return; setIsRecordModalOpen(true);}}
           >
-            기록하기
+            {t("common.record")}
           </button>
         </div>
         )}
@@ -746,7 +756,8 @@ type EventModalProps = {
   onRecord: () => void;
 };
 function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactElement {
-  const dateText = formatKoreanDateYmd(item.date);
+  const { t, i18n } = useTranslation();
+  const dateText = formatDateYmdLocale(item.date, i18n.language === "en" ? "en-US" : "ko-KR");
 
   return (
     <div
@@ -767,7 +778,7 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
           <button
             type="button"
             className="event-modal-close"
-            aria-label="닫기"
+            aria-label={t("common.close")}
             onClick={onClose}
             
           >
@@ -777,8 +788,8 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
 
         <main className="event-modal-body">
           <p className="event-modal-text">
-            오늘의 경험을 기록하고<br />
-            역량 점수를 얻으세요!
+            {t("modal.desc1")}<br />
+            {t("modal.desc2")}
           </p>
 
           <div className="event-modal-cards">
@@ -793,7 +804,7 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
             className="event-modal-primary"
             onClick={onRecord}
           >
-            기록하기
+           {t("common.record")}
           </button>
         </footer>
       </div>

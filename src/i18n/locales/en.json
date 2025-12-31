@@ -1,6 +1,46 @@
 {
+  "comment_login": "로그인 관련",
   "login": {
     "startWithKakao": "Login with Kakao",
     "startWithKakaoAria": "Login with Kakao"
+  },
+
+  "comment_App.tsx": "App.tsx 관련",
+  "common": {
+    "close": "Close",
+    "record": "Record",
+    "menu": "Menu",
+    "add": "Add", 
+    "allDay": "All Day"
+  },
+  "menu": {
+    "mypage": "My Page",
+    "recent": "Recent Activity",
+    "settings": "Settings and Privacy"
+  },
+  "empty": {
+    "title": "No schedules yet.",
+    "subtitle": "Would you like to add one?",
+    "sync": "Sync Calendar"
+  },
+  "modal": {
+    "desc1": "Record today's experience",
+    "desc2": "and earn a competency score!"
+  },
+  "error": {
+    "record": "An error occurred while recording the schedule."
+  },
+  "schedule": {
+    "edit": "Edit Schedule"
+  },
+  "calendar": {
+    "selectMonth": "Select Month"
+  },
+  "home": {
+    "date": {
+      "today": "{{day}} Today",
+      "weekday": "{{day}} {{weekday}}"
+    }
   }
+
 }
