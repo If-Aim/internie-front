@@ -37,7 +37,7 @@ align-items:center;justify-content:center;cursor: pointer;}
 
 .card .item .title{margin-top:3px;line-height:20px;}
 .title { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 5px; }
-.subtitle {min-height: 16px; font-size: 14px; color: #888; }
+.subtitle {min-height: 16px; font-size: 14px; color: #888; font-weight:500;}
 
 /* 일정 추가 폼 스타일 */
 .form-group { margin-bottom: 24px; }
