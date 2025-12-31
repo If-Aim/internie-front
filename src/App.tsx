@@ -356,7 +356,7 @@ function SideMenu({ isOpen, onClose, /*userId, */userName, userProfileImg }: Sid
     </>
   );
 }
-// TODO: 월 표기 수정 (다국어 지원 방향) 
+
 type MonthHeaderProps = { value: string; onChange: (ym: string) => void };
 function MonthHeader({ value, onChange }: MonthHeaderProps) {
   const {t, i18n} = useTranslation();
