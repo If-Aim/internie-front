@@ -356,15 +356,17 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg }: SideMenuProps) 
         </div>
 
         <div className="drawer-body">
-          <button
-            className="drawer-menu-item"
-            onClick={() => {
-              navigate("/student/mypage"); 
-              closeWithSnap();
-            }}
-          >
+          <button className="drawer-menu-item" onClick={() => { navigate("/student/mypage");  closeWithSnap(); }} >
             <img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
             <span>{t("menu.mypage")}</span>
+          </button>
+          <button className="drawer-menu-item" onClick={() => {}}>
+            <img className="icon" src="/arrow-refresh-01.svg" alt={t("menu.recent")} />{" "}
+            <span>{t("menu.recent")}</span>
+          </button>
+          <button className="drawer-menu-item" onClick={() => {}}>
+            <img className="icon" src="/settings.svg" alt={t("menu.settings")} />{" "}
+            <span>{t("menu.settings")}</span>
           </button>
         </div>
       </div>
