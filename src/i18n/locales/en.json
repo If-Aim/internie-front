@@ -15,7 +15,7 @@
   },
   "menu": {
     "mypage": "My Page",
-    "recent": "Recent Activity",
+    "recent_activity": "Recent Activity",
     "settings": "Settings and Privacy"
   },
   "empty": {
