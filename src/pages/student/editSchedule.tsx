@@ -1,9 +1,9 @@
 // src/pages/editSchedule.tsx
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import "../styles/schedule.css";
 import { api, ApiError, deleteEvent, deleteEventDay } from "../../api/client";
 
+import "../../styles/schedule.css";
 type Stage = "form" | "outro";
 
 type EditState =

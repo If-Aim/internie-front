@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 
-import "../styles/schedule.css";
+import "../../styles/schedule.css";
 
 type Stage = "form" | "outro";
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserMe, getEventDaysByMonth } from "../../api/client";
 import type { EventDay } from "../../api/client";
 
-import "../styles/myPage.css";
+import "../../styles/myPage.css";
 
 type Props = { onLogout?: () => void; };
 
