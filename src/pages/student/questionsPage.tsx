@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api, apiUpload, ApiError } from "../../api/client";
 
-import "../styles/questions.css";
+import "../../styles/questions.css";
 
 type Stage = "asking" | "completed";
 type RecordStage = "closed" | "preparing" | "recording";
