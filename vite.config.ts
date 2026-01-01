@@ -30,7 +30,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-
+      '/user': {
+        target: 'https://aim-internie-app.p-e.kr',
+        changeOrigin: true,
+        secure: false,
+      },
       '/questions': {
         target: 'https://aim-internie-app.p-e.kr',
         changeOrigin: true,

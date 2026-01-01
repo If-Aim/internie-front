@@ -1,7 +1,7 @@
 // src/pages/newSchedule.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { api } from "../../api/client";
 
 import "../styles/schedule.css";
 

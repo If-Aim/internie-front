@@ -1,3 +1,4 @@
+// src/main.tsx
 import "./i18n"; // 언어
 
 import { StrictMode } from 'react'

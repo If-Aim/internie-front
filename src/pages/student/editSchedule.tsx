@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/schedule.css";
-import { api, ApiError, deleteEvent, deleteEventDay } from "../api/client";
+import { api, ApiError, deleteEvent, deleteEventDay } from "../../api/client";
 
 type Stage = "form" | "outro";
 

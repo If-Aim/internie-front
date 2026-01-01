@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 
 import "../styles/login.css";
 
-//const origin = window.location.origin;
 const kakaoClientId = import.meta.env.VITE_KAKAO_REST_API_KEY;
 const origin = window.location.origin; 
 const kakaoRedirectUri = `${origin}/oauth/kakao/callback`;

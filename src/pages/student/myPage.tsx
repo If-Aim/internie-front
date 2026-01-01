@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth } from "../api/client";
-import type { EventDay } from "../api/client";
+import { getUserMe, getEventDaysByMonth } from "../../api/client";
+import type { EventDay } from "../../api/client";
 
 import "../styles/myPage.css";
 
