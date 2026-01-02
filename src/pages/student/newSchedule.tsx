@@ -377,7 +377,7 @@ function CalendarRange({
       const sTime = s.getTime();
 
       if (pTime < sTime) {
-        alert("마감일은 시작일보다 빠를 수 없습니다.");
+        alert(t("error.failSetEndDate"));
         onChangeStart(picked); 
         onChangeEnd(picked); 
         return;
