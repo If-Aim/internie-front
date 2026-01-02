@@ -8,12 +8,22 @@ import { api } from "../../api/client";
 import "../../styles/schedule.css";
 
 type Stage = "form" | "outro";
+type TimeWheelVariant = "sheet" | "calendar";
 
-// TODO: 시간 부분 다국어 처리
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
   `${String(h).padStart(2, "0")}:00`
 ); 
 function displayTimeLabel(hhmm: string, locale: string) {
+  const [hh, mm] = hhmm.split(":").map(Number);
+  const d = new Date(2000, 0, 1, hh, mm, 0);
+
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
+}
+function displayTimeOnlyLabel(hhmm: string, locale: string) {
   const [hh, mm] = hhmm.split(":").map(Number);
   const d = new Date(2000, 0, 1, hh, mm, 0);
 
@@ -23,12 +33,13 @@ function displayTimeLabel(hhmm: string, locale: string) {
     hour12: true,
   }).formatToParts(d);
 
-  const hour = parts.find((p) => p.type === "hour")?.value ?? "";
-  const minute = parts.find((p) => p.type === "minute")?.value ?? "";
-  const literal = parts.find((p) => p.type === "literal")?.value ?? ":"; 
-
-  return `${hour}${literal}${minute}`;
+  return parts
+    .filter((p) => p.type !== "dayPeriod")
+    .map((p) => p.value)
+    .join("")
+    .trim();
 }
+
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 const toApiHHmmss = (hhmm: string) => `${hhmm}:00`;
@@ -275,7 +286,7 @@ function DateRangeSheet({
 
           <div className="date-range-time date-range-time--single">
             <div className="date-range-time-col">
-              <TimeWheel value={startTime} onChange={onChangeStartTime} />
+              <TimeWheel value={startTime} onChange={onChangeStartTime} variant="calendar" />
             </div>
           </div>
         </div>
@@ -484,13 +495,14 @@ function getDayPeriodLabel(hhmm: string | null, locale: string) {
 function TimeWheel({
   value,
   onChange,
+  variant = "sheet",
 }: {
   value: string | null;
   onChange: (t: string | null) => void;
+  variant?: TimeWheelVariant;
 }) {
   const { i18n } = useTranslation();
   const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-
   const selectedPeriod = value ? getDayPeriodLabel(value, locale) : (locale.startsWith("ko") ? "오후" : "PM");
 
   const rowRef = React.useRef<HTMLDivElement | null>(null);
@@ -547,7 +559,7 @@ function TimeWheel({
 
   return (
     <div className="timewheel">
-      <div className="timewheel-period">{selectedPeriod}</div>
+      {variant === "calendar" && (<div className="timewheel-period">{selectedPeriod}</div>)}
 
       <div
         ref={rowRef}
@@ -565,15 +577,16 @@ function TimeWheel({
               ref={(el) => { itemRefs.current[idx] = el; }}
               type="button"
               className={"timewheel-item" + (isSelected ? " is-selected" : "")}
-              style={{
-                opacity: isSelected ? 1 : opacities[idx],
-              }}
+              style={{ opacity: isSelected ? 1 : opacities[idx] }}
               onClick={() => {
                 onChange(opt);
                 requestAnimationFrame(computeOpacities);
               }}
             >
-              {displayTimeLabel(opt, locale)}
+              {variant === "calendar"
+                ? displayTimeOnlyLabel(opt, locale) 
+                : displayTimeLabel(opt, locale)
+              }
             </button>
           );
         })}
