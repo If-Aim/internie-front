@@ -17,11 +17,17 @@ function displayTimeLabel(hhmm: string, locale: string) {
   const [hh, mm] = hhmm.split(":").map(Number);
   const d = new Date(2000, 0, 1, hh, mm, 0);
 
-  return new Intl.DateTimeFormat(locale, {
+  const parts = new Intl.DateTimeFormat(locale, {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  }).format(d);
+  }).formatToParts(d);
+
+  const hour = parts.find((p) => p.type === "hour")?.value ?? "";
+  const minute = parts.find((p) => p.type === "minute")?.value ?? "";
+  const literal = parts.find((p) => p.type === "literal")?.value ?? ":"; 
+
+  return `${hour}${literal}${minute}`;
 }
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
