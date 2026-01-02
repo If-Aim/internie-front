@@ -645,16 +645,26 @@ export default function NewSchedule() {
       day: "numeric",
     }).format(d);
   }, [locale]);
-  const formatMonthDay = React.useCallback((d: Date) => {
-    return new Intl.DateTimeFormat(locale, {
-      month: "numeric",
-      day: "numeric",
-    }).format(d);
-  }, [locale]);
+  function formatRangeDate(d: Date, locale: string) {
+    if (locale.startsWith("ko")) {
+      return new Intl.DateTimeFormat("ko-KR", {
+        month: "long",
+        day: "numeric",
+      }).format(d); // 12월 12일
+    }
 
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+    }).format(d); // Jan 3
+  }
+  function getRangeSeparator(locale: string) {
+    return locale.startsWith("ko") ? " ~ " : " - ";
+  }
+  
   const startDateLabel = formatFullDate(startDate);
   const endDateLabel = formatFullDate(endDate);
-  const dateRangeLabel = `${formatMonthDay(startDate)} ~ ${formatMonthDay(endDate)}`;
+  const dateRangeLabel = `${formatRangeDate(startDate, locale)}${getRangeSeparator(locale)}${formatRangeDate(endDate, locale)}`;
   
   //기간 변경 시
   const handleStartDateChange = (newDate: Date) => {
