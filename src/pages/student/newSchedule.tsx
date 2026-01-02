@@ -23,23 +23,33 @@ function displayTimeLabel(hhmm: string, locale: string) {
     hour12: true,
   }).format(d);
 }
-function displayTimeOnlyLabel(hhmm: string, locale: string) {
+function displayTimeWheelLabel(hhmm: string, locale: string) {
   const [hh, mm] = hhmm.split(":").map(Number);
   const d = new Date(2000, 0, 1, hh, mm, 0);
 
-  const parts = new Intl.DateTimeFormat(locale, {
+  if (locale.startsWith("ko")) {
+    return new Intl.DateTimeFormat("ko-KR", {
+      hour: "numeric",
+      hour12: true, 
+    })
+      .formatToParts(d)
+      .filter((p) => p.type === "hour")
+      .map((p) => p.value)
+      .join("")
+      .trim() + "시";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  }).formatToParts(d);
-
-  return parts
+  })
+    .formatToParts(d)
     .filter((p) => p.type !== "dayPeriod")
     .map((p) => p.value)
     .join("")
     .trim();
 }
-
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 const toApiHHmmss = (hhmm: string) => `${hhmm}:00`;
@@ -583,10 +593,7 @@ function TimeWheel({
                 requestAnimationFrame(computeOpacities);
               }}
             >
-              {variant === "calendar"
-                ? displayTimeOnlyLabel(opt, locale) 
-                : displayTimeLabel(opt, locale)
-              }
+              {displayTimeWheelLabel(opt, locale)}
             </button>
           );
         })}
@@ -650,18 +657,17 @@ export default function NewSchedule() {
       return new Intl.DateTimeFormat("ko-KR", {
         month: "long",
         day: "numeric",
-      }).format(d); // 12월 12일
+      }).format(d); 
     }
-
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
-    }).format(d); // Jan 3
+    }).format(d);
   }
   function getRangeSeparator(locale: string) {
     return locale.startsWith("ko") ? " ~ " : " - ";
   }
-  
+
   const startDateLabel = formatFullDate(startDate);
   const endDateLabel = formatFullDate(endDate);
   const dateRangeLabel = `${formatRangeDate(startDate, locale)}${getRangeSeparator(locale)}${formatRangeDate(endDate, locale)}`;
