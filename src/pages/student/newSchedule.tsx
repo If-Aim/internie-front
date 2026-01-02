@@ -329,7 +329,7 @@ function CalendarRange({
   onWeeksChange?: (weeks: 5 | 6) => void;
   resetKey: number;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const s = clampToStartOfDay(startDate);
   const e = clampToStartOfDay(endDate);
   const sameDay = isSameDay(s, e);
@@ -359,8 +359,7 @@ function CalendarRange({
     onWeeksChange?.(weeks);
   }, [weeks, onWeeksChange]);
 
-  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-  const monthLabel = cursor.toLocaleString(locale, { month: "long" });
+  const monthLabel = cursor.toLocaleString("en-US", { month: "long" });
   const title = `${monthLabel} ${cursor.getFullYear()}`;
 
   const inRange = (d: Date) => {
