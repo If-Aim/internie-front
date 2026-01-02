@@ -1,4 +1,6 @@
 // src/pages/newSchedule.tsx
+import { useTranslation } from "react-i18next";
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
@@ -7,30 +9,23 @@ import "../../styles/schedule.css";
 
 type Stage = "form" | "outro";
 
-const TIME_OPTIONS: string[] = Array.from({ length: 24 }, (_, h) => {
-  const period = h < 12 ? "오전" : "오후";
-  const hour12 = h % 12 === 0 ? 12 : h % 12; 
-  return `${period} ${hour12}:00`;
-});
+// TODO: 시간 부분 다국어 처리
+const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
+  `${String(h).padStart(2, "0")}:00`
+); 
+function displayTimeLabel(hhmm: string, locale: string) {
+  const [hh, mm] = hhmm.split(":").map(Number);
+  const d = new Date(2000, 0, 1, hh, mm, 0);
 
-const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-const HOURS = Array.from({ length: 24 }, (_, h) => h);
-
-
-function toApiTime(t: string): string {
-  const m = t.match(/^(오전|오후)\s+(\d{1,2}):(\d{2})$/);
-  if (!m) throw new Error("유효하지 않은 시간 형식입니다.");
-
-  const period = m[1];
-  const hh12 = Number(m[2]); 
-  const mm = m[3];
-
-  let hh24 = hh12 % 12;     
-  if (period === "오후") hh24 += 12; 
-
-  const HH = String(hh24).padStart(2, "0");
-  return `${HH}:${mm}:00`;
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
 }
+const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+const toApiHHmmss = (hhmm: string) => `${hhmm}:00`;
 function toYmd(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -117,12 +112,14 @@ function TimeSheet({
   setStartTime,
   setEndTime,
 }: TimeSheetProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
   return (
     <div
       className="sheet-backdrop"
       role="dialog"
       aria-modal="true"
-      aria-label="시간 선택"
+      aria-label="set time"
       onClick={onClose}
     >
       <div
@@ -130,13 +127,13 @@ function TimeSheet({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sheet-header">
-          <span className="sheet-title">시간</span>
+          <span className="sheet-title">{t("common.time")}</span>
           <button
             className="sheet-close-btn"
-            aria-label="닫기"
+            aria-label={t("common.close")}
             onClick={onClose}
           >
-            ✕
+            <img className="icon" alt="" src="/x-01.svg" />
           </button>
         </div>
 
@@ -155,20 +152,20 @@ function TimeSheet({
                     onClose(); 
                   }}
                 >
-                  종일
+                  {t("common.allDay")}
                 </button>
-                {TIME_OPTIONS.map((t) => (
+                {TIME_OPTIONS.map((opt) => (
                   <button
-                    key={t}
+                    key={(opt)}
                     type="button"
-                    className={"time-item" + (t === startTime ? " is-selected" : "")}
+                    className={"time-item" + ((opt) === startTime ? " is-selected" : "")}
                     onClick={() => {
                       setIsAllDay(false);
-                      onChangeStart(t);
+                      onChangeStart(opt);
                       setStep("end");
                     }}
                   >
-                    {t} ~
+                    {displayTimeLabel(opt, locale)} ~
                   </button>
                 ))}
               </div>
@@ -176,27 +173,27 @@ function TimeSheet({
           ) : (
             <div className="sheet-col">
               <div className="time-list">
-                {TIME_OPTIONS.map((t) => {
+                {TIME_OPTIONS.map((opt) => {
                   const startIdx = getTimeIndex(startTime);
-                  const endIdx = getTimeIndex(t);
+                  const endIdx = getTimeIndex(opt);
                   const isDisabled = startTime ? endIdx < startIdx : false;
 
                   return (
                     <button
-                      key={t}
+                      key={opt}
                       type="button"
                       disabled={isDisabled}
                       className={
                         "time-item" +
-                        (t === endTime ? " is-selected" : "") +
+                        (opt === endTime ? " is-selected" : "") +
                         (isDisabled ? " is-disabled" : "")
                       }
                       onClick={() => {
-                        onChangeEnd(t);
+                        onChangeEnd(opt);
                         onClose();
                       }}
                     >
-                      ~ {t}
+                      ~ {displayTimeLabel(opt, locale)}
                     </button>
                   );
                 })}
@@ -231,6 +228,7 @@ function DateRangeSheet({
   onChangeStartTime,
   onClose,
 }: DateRangeSheetProps) {
+  const { t } = useTranslation();
   const [weeks, setWeeks] = React.useState<5 | 6>(5);
   const [resetKey, setResetKey] = React.useState(0);
   React.useEffect(() => {
@@ -241,7 +239,7 @@ function DateRangeSheet({
       className="sheet-backdrop sheet-backdrop--cal"
       role="dialog"
       aria-modal="true"
-      aria-label="기간 선택"
+      aria-label="set date range"
       onClick={onClose}
     >
       <div className={
@@ -250,9 +248,9 @@ function DateRangeSheet({
         } 
         onClick={(e) => e.stopPropagation()}>
         <div className="sheet-header">
-          <span className="sheet-title">기간</span>
-          <button className="sheet-close-btn" aria-label="닫기" onClick={onClose} >
-            ✕
+          <span className="sheet-title">{t("common.dateRange")}</span>
+          <button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose} >
+            <img className="icon" alt="" src="/x-01.svg" />
           </button>
         </div>
 
@@ -277,7 +275,7 @@ function DateRangeSheet({
         </div>
 
         <button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
-          확인
+          {t("common.confirm")}
         </button>
       </div>
     </div>
@@ -304,6 +302,7 @@ function CalendarRange({
   onWeeksChange?: (weeks: 5 | 6) => void;
   resetKey: number;
 }) {
+  const { t, i18n } = useTranslation();
   const s = clampToStartOfDay(startDate);
   const e = clampToStartOfDay(endDate);
   const sameDay = isSameDay(s, e);
@@ -333,7 +332,8 @@ function CalendarRange({
     onWeeksChange?.(weeks);
   }, [weeks, onWeeksChange]);
 
-  const monthLabel = cursor.toLocaleString("en-US", { month: "long" });
+  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+  const monthLabel = cursor.toLocaleString(locale, { month: "long" });
   const title = `${monthLabel} ${cursor.getFullYear()}`;
 
   const inRange = (d: Date) => {
@@ -381,13 +381,11 @@ function CalendarRange({
     }
   };
 
-  
-
   return (
     <div className={"cal" + (isSixWeeks ? " cal--6w" : " cal--5w")}>
       <div className="cal-header">
         <div className="cal-header-top">
-          <button type="button" className="cal-close-btn" aria-label="닫기" onClick={onClose}>
+          <button type="button" className="cal-close-btn" aria-label={t("common.close")} onClick={onClose}>
             <img className="icon" src="/x-01.svg" alt="" />
           </button>
         </div>
@@ -463,21 +461,18 @@ function CalendarRange({
 }
 
 //달력 내 시간 부분
-function toKoreanHourLabel(h24: number) {
-  const period = h24 < 12 ? "오전" : "오후";
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return { period, text: `${period} ${h12}:00`, hourText: `${h12}시` };
-}
+function getDayPeriodLabel(hhmm: string | null, locale: string) {
+  if (!hhmm) return "";
+  const [hh, mm] = hhmm.split(":").map(Number);
+  const d = new Date(2000, 0, 1, hh, mm, 0);
 
-function parseHourFromTimeLabel(t: string | null): number | null {
-  if (!t) return null;
-  const m = t.match(/^(오전|오후)\s+(\d{1,2}):00$/);
-  if (!m) return null;
-  const period = m[1];
-  const hh12 = Number(m[2]);
-  let hh24 = hh12 % 12;
-  if (period === "오후") hh24 += 12;
-  return hh24;
+  const parts = new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true, 
+  }).formatToParts(d);
+
+  return parts.find((p) => p.type === "dayPeriod")?.value ?? "";
 }
 
 function TimeWheel({
@@ -487,15 +482,17 @@ function TimeWheel({
   value: string | null;
   onChange: (t: string | null) => void;
 }) {
-  const selectedHour = parseHourFromTimeLabel(value);
-  const selectedPeriod = selectedHour === null ? "오후" : selectedHour < 12 ? "오전" : "오후";
+  const { i18n } = useTranslation();
+  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+
+  const selectedPeriod = value ? getDayPeriodLabel(value, locale) : (locale.startsWith("ko") ? "오후" : "PM");
 
   const rowRef = React.useRef<HTMLDivElement | null>(null);
   const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const rafRef = React.useRef<number | null>(null);
 
   const [opacities, setOpacities] = React.useState<number[]>(
-    () => Array.from({ length: HOURS.length }, () => 1)
+    () => Array.from({ length: TIME_OPTIONS.length }, () => 1)
   );
   const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
   //시간 휠 그라데이션
@@ -505,7 +502,7 @@ function TimeWheel({
     const left = row.scrollLeft;
     const startOffset = 40;
     const fadeWidth = 140; 
-    const next = HOURS.map((_, idx) => {
+    const next = TIME_OPTIONS.map((_, idx) => {
       const el = itemRefs.current[idx];
       if (!el) return 1;
 
@@ -516,7 +513,6 @@ function TimeWheel({
 
       const raw = (distanceFromLeftEdge - startOffset) / fadeWidth;
       const t = clamp(raw, 0, 1);
-
       const eased = t * t * (3 - 2 * t);
 
       const minO = 0.12;
@@ -551,16 +547,15 @@ function TimeWheel({
         ref={rowRef}
         className="timewheel-row"
         role="listbox"
-        aria-label="시간 선택"
+        aria-label="set time"
         onScroll={onScroll}
       >
-        {HOURS.map((h24, idx) => {
-          const { text, hourText } = toKoreanHourLabel(h24);
-          const isSelected = selectedHour === h24;
+        {TIME_OPTIONS.map((opt, idx) => {
+          const isSelected = opt === value;
 
           return (
             <button
-              key={h24}
+              key={opt}
               ref={(el) => { itemRefs.current[idx] = el; }}
               type="button"
               className={"timewheel-item" + (isSelected ? " is-selected" : "")}
@@ -568,11 +563,11 @@ function TimeWheel({
                 opacity: isSelected ? 1 : opacities[idx],
               }}
               onClick={() => {
-                onChange(text);
+                onChange(opt);
                 requestAnimationFrame(computeOpacities);
               }}
             >
-              {hourText}
+              {displayTimeLabel(opt, locale)}
             </button>
           );
         })}
@@ -585,6 +580,9 @@ function TimeWheel({
 export default function NewSchedule() {
   type RangeSheetMode = "range" | "startOnly" | "endOnly";
   const nav = useNavigate();
+  const {t, i18n} = useTranslation();
+  const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+
   const [stage, setStage] = React.useState<Stage>("form");
   const [showSheet, setShowSheet] = React.useState(false);
   const [timeStep, setTimeStep] = React.useState<"start" | "end">("start");
@@ -621,20 +619,22 @@ export default function NewSchedule() {
     setShowDateRangeSheet(true);
   };
 
-  const formatKoreanDate = React.useCallback((d: Date) => {
-      const y = d.getFullYear();
-      const m = d.getMonth() + 1;
-      const day = d.getDate();
-      return `${y}년 ${m}월 ${day}일`;
-  }, []);
+  const formatFullDate = React.useCallback((d: Date) => {
+    return new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(d);
+  }, [locale]);
   const formatMonthDay = React.useCallback((d: Date) => {
-    const m = d.getMonth() + 1;
-    const day = d.getDate();
-    return `${m}월 ${day}일`;
-  }, []);
+    return new Intl.DateTimeFormat(locale, {
+      month: "numeric",
+      day: "numeric",
+    }).format(d);
+  }, [locale]);
 
-  const startDateLabel = formatKoreanDate(startDate);
-  const endDateLabel = formatKoreanDate(endDate);
+  const startDateLabel = formatFullDate(startDate);
+  const endDateLabel = formatFullDate(endDate);
   const dateRangeLabel = `${formatMonthDay(startDate)} ~ ${formatMonthDay(endDate)}`;
   
   //기간 변경 시
@@ -647,7 +647,7 @@ export default function NewSchedule() {
   // 마감일 변경 시 처리
   const handleEndDateChange = (newDate: Date) => {
       if (stripTime(newDate) < stripTime(startDate)) {
-          alert("마감일은 시작일보다 빠를 수 없습니다.");
+          alert(t("error.failSetEndDate"));
           return;
       }
       setEndDate(newDate);
@@ -689,7 +689,7 @@ export default function NewSchedule() {
       const isSameDay = startDate.getTime() === endDate.getTime();
       if (isSameDay && startTime) {
           if (getTimeIndex(newTime) < getTimeIndex(startTime)) {
-              alert("종료 시간은 시작 시간보다 빠를 수 없습니다.");
+              alert(t("error.failSetEndTime"));
               return;
           }
       }
@@ -698,7 +698,7 @@ export default function NewSchedule() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert("일정 제목을 입력해주세요.");
+      alert(t("schedule_new.alertAddTitle"));
       return;
     }
 
@@ -718,10 +718,10 @@ export default function NewSchedule() {
 
     if (isAllDay) {
       payload.startTime = "00:00:00";
-      payload.endTime = "24:00:00";
+      payload.endTime = "23:59:59";
     } else if (startTime && endTime) {
-      payload.startTime = toApiTime(startTime);
-      payload.endTime = toApiTime(endTime);
+      payload.startTime = toApiHHmmss(startTime);
+      payload.endTime = toApiHHmmss(endTime);
     }
     
     try {
@@ -736,8 +736,8 @@ export default function NewSchedule() {
         nav("/", { replace: true });
       }, 1500);
     } catch (err) {
-      console.error("에러 발생:", err);
-      alert("일정을 저장하지 못했습니다.");
+      console.error("Error:", err);
+      alert(t("error.failAddSchedule"));
     }
   };
 
@@ -748,35 +748,35 @@ export default function NewSchedule() {
           <>
           <div className="spacer-50" aria-hidden="true" />
           <header className="topbar_newschedule">
-              <button className="iconbtn" aria-label="메뉴">
+              <button className="iconbtn" aria-label={t("common.menu")}>
               <img className="icon" src="/menu-01.svg" alt="" />
               </button>
-              <h1 className="topbar-title">일정 추가</h1>
-              <button className="iconbtn" aria-label="닫기" onClick={() => nav(-1)}>
+              <h1 className="topbar-title">{t("schedule_new.title")}</h1>
+              <button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
               <img className="icon" src="/x-01.svg" alt="" />
               </button>
           </header>
 
           <main className="new-event">
-            <input className="title-input" placeholder="새로운 이벤트..." aria-label="이벤트 제목" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
             {/* 일정 */}
             <section className="row">
                 <div className="col">
-                    <button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="기간 선택하기" >
-                        <img className="icon" src="/clock-01.svg" alt="날짜" />
+                    <button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
+                        <img className="icon" src="/clock-01.svg" alt="" />
                         <div className="row-today">
                             <strong>{startDateLabel}</strong>
                         </div>
                     </button>
                     <button type="button" className="row-sub row-sub-btn"
                     onClick={() => { setTimeStep("start"); setShowSheet(true); }}
-                    aria-label={hasTime ? "시간 수정하기" : "시간 추가하기"}>
-                    {isAllDay ? "종일" : hasTime ? `${startTime} ~ ${endTime}` : "시간 추가하기"}
+                    aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}>
+                    {isAllDay ? t("common.allDay") : hasTime ? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}` : t("schedule_new.addTime")}
                     </button>
                 </div>
                 <div className="add-btn-wrapper">
-                    <button className="add-date" aria-label={hasTime ? "시간 수정하기" : "시간 추가하기"} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
+                    <button className="add-date" aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
                     <img className="add" src="/plus-02.svg" alt="" />
                     </button>
                 </div>
@@ -785,18 +785,18 @@ export default function NewSchedule() {
             {/* 날짜 */}
             <section className="row row--today">
                 <div className="col">
-                  <button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="기간 선택하기" >
-                    <img className="icon" src="/check-broken.svg" alt="날짜" />
+                  <button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
+                    <img className="icon" src="/check-broken.svg" alt="date" />
                     <div className="row-today">
                       <strong>{endDateLabel}</strong>
                     </div>
                   </button>
-                  <button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="시작일-마감일 설정">
-                  {isRangeSelected ? dateRangeLabel : "시작일-마감일"}
+                  <button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set start-end date">
+                  {isRangeSelected ? dateRangeLabel : t("schedule_new.dateRange")}
                   </button>
                 </div>
                 <div className="add-btn-wrapper">
-                    <button className="add-date" aria-label="시작일-마감일설정" onClick={openFullRangeSheet}>
+                    <button className="add-date" aria-label="set start-end date" onClick={openFullRangeSheet}>
                     <img className="add" src="/plus-02.svg" alt="" />
                     </button>
                 </div>
@@ -804,13 +804,13 @@ export default function NewSchedule() {
 
             {/* 메모추가 */}
             <div className="memo-box">
-                <textarea className="memo-input" placeholder="메모 추가하기..." aria-label="메모 추가" value={memo} onChange={(e) => setMemo(e.target.value)}
+                <textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)}
                 />
             </div>
           </main>
 
           <footer className="footer-fixed">
-              <button className="btn-primary" onClick={handleSave}>저장하기</button>
+              <button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
           </footer>
           {/* 시간 선택 바텀시트 */}
           {showSheet && (
@@ -848,7 +848,7 @@ export default function NewSchedule() {
           {/*<div className="spacer-50" aria-hidden="true" />*/}
           <main className="outro">
               <img src="/internie_mascot_normal.png" alt="" className="outro-img"/>
-              <p className="outro-text">인터니가 질문을 준비하고 있어요!<br />오늘은 어떤 역량을 얻을 수 있을까요?</p>
+              <p className="outro-text">{t("outroDesc1")}<br />{t("outroDesc2")}</p>
           </main>
           </>
       )}

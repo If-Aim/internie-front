@@ -5,13 +5,17 @@
     "startWithKakaoAria": "Login with Kakao"
   },
 
-  "comment_App.tsx": "App.tsx 관련",
+  "comment_main": "기본 컴포넌트 관련",
   "common": {
+    "time": "Time",
     "close": "Close",
     "record": "Record",
     "menu": "Menu",
     "add": "Add", 
-    "allDay": "All Day"
+    "allDay": "All Day",
+    "confirm": "Confirm",
+    "save": "Save",
+    "dateRange": "Period"
   },
   "menu": {
     "mypage": "My Page",
@@ -27,9 +31,6 @@
     "desc1": "Record today's experience",
     "desc2": "and earn a competency score!"
   },
-  "error": {
-    "record": "An error occurred while recording the schedule."
-  },
   "schedule": {
     "edit": "Edit Schedule"
   },
@@ -41,6 +42,25 @@
       "today": "{{day}} Today",
       "weekday": "{{day}} {{weekday}}"
     }
-  }
+  },
+  "schedule_new": {
+    "alertAddTitle": "Please add a title.",
+    "title": "Add Schedule",
 
+    "titlePlaceholder": "New event...",
+    "memoPlaceholder": "Add a note...",
+
+    "dateRange": "Start–End date",
+    "addTime": "Add time",
+    "editTime": "Edit time",
+
+    "outroDesc1": "Internie is getting your questions ready!",
+    "outroDesc2": "What skill will you earn today?"
+  },
+  "error": {
+    "record": "Something went wrong while starting your record.",
+    "failAddSchedule": "Couldn’t save your schedule.",
+    "failSetEndTime": "End time can’t be earlier than start time.",
+    "failSetEndDate": "End date can’t be earlier than start date."
+  }
 }

@@ -5,13 +5,17 @@
     "startWithKakaoAria": "카카오로 시작하기"
   },
   
-  "comment_App.tsx": "App.tsx 관련",
+  "comment_main": "기본 컴포넌트 관련",
   "common": {
+    "time": "시간",
     "close": "닫기",
     "record": "기록하기",
     "menu": "메뉴",
     "add": "추가", 
-    "allDay": "종일"
+    "allDay": "종일",
+    "confirm": "확인",
+    "save": "저장하기",
+    "dateRange": "기간"
   },
   "menu": {
     "mypage": "마이페이지",
@@ -27,9 +31,6 @@
     "desc1": "오늘의 경험을 기록하고",
     "desc2": "역량 점수를 얻으세요!"
   },
-  "error": {
-    "record": "일정을 기록하는 중 오류가 발생했습니다."
-  },
   "schedule": {
     "edit": "일정 수정"
   },
@@ -41,7 +42,25 @@
       "today": "{{day}}일 오늘",
       "weekday": "{{day}}일 {{weekday}}"
     }
-  }
+  },
+  "schedule_new": {
+    "alertAddTitle": "일정 제목을 입력해주세요.",
+    "title": "일정 추가",
 
-  
+    "titlePlaceholder": "새로운 이벤트...",
+    "memoPlaceholder": "메모 추가하기...",
+
+    "dateRange": "시작일-마감일",
+    "addTime": "시간 추가하기",
+    "editTime": "시간 수정하기",
+    
+    "outroDesc1": "인터니가 질문을 준비하고 있어요!",
+    "outroDesc2": "오늘은 어떤 역량을 얻을 수 있을까요?"
+  },
+  "error": {
+    "record": "일정을 기록하는 중 오류가 발생했습니다.",
+    "failAddSchedule": "일정을 저장하지 못했습니다.",
+    "failSetEndTime": "종료 시간은 시작 시간보다 빠를 수 없습니다.",
+    "failSetEndDate": "마감일은 시작일보다 빠를 수 없습니다."
+  }
 }
