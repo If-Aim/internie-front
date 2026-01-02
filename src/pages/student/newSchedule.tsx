@@ -193,7 +193,7 @@ function TimeSheet({
                 {TIME_OPTIONS.map((opt) => {
                   const startIdx = getTimeIndex(startTime);
                   const endIdx = getTimeIndex(opt);
-                  const isDisabled = startTime ? endIdx < startIdx : false;
+                  const isDisabled = startTime ? endIdx <= startIdx : false;
 
                   return (
                     <button
