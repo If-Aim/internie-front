@@ -882,7 +882,7 @@ export default function NewSchedule() {
           {/*<div className="spacer-50" aria-hidden="true" />*/}
           <main className="outro">
               <img src="/internie_mascot_normal.png" alt="" className="outro-img"/>
-              <p className="outro-text">{t("outroDesc1")}<br />{t("outroDesc2")}</p>
+              <p className="outro-text">{t("schedule_new.outroDesc1")}<br />{t("schedule_new.outroDesc2")}</p>
           </main>
           </>
       )}
