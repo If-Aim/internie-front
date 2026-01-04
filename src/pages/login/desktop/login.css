@@ -9,13 +9,13 @@ border-bottom: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0px 4px 4px rgba(0,
 
 .login-desktop-main {flex: 1;display: flex;align-items: center;justify-content: center;padding: 48px 24px 72px;}
 .login-desktop-container {width: 520px;max-width: 100%;text-align: center;}
-.login-desktop-title {margin: 0;font-size: 34px;line-height: 1.25;font-weight: 800;letter-spacing: -0.02em;color: #0f172a;}
-.login-desktop-subtitle {margin: 10px 0 26px;font-size: 15px;line-height: 1.5;color: rgba(15, 23, 42, 0.65);}
+.login-desktop-title {margin: 0;font-size: 32px;line-height: 50px;font-weight: 700;color: #000;}
+.login-desktop-subtitle {margin: 0 10px 49px;font-size: 20px;line-height: 50px;color: #000}
 
-.login-desktop-tabs {display: grid;grid-template-columns: 1fr 1fr;gap: 14px;margin: 0 auto 18px;}
-.login-desktop-tab {height: 54px;border-radius: 12px;border: 1px solid rgba(15, 23, 42, 0.12);background: #ffffff;
-font-size: 16px;font-weight: 700;color: rgba(15, 23, 42, 0.75);box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);cursor: pointer;}
-.login-desktop-tab.is-active {background: #0b63f6;border-color: #0b63f6;color: #ffffff;}
+.login-desktop-tabs {display: grid;grid-template-columns: 1fr 1fr;gap: 20px;margin: 0 auto 37px;}
+.login-desktop-tab {height: 60px;border-radius: 10px;border: none;background: #ffffff;font-size: 20px;font-weight: 500;
+color: #000;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);cursor: pointer;}
+.login-desktop-tab.is-active {background: var(--primary);border: none;color: #ffffff;}
 .login-desktop-tab:disabled {cursor: not-allowed;opacity: 0.95;}
 
 .login-desktop-card {background: #ffffff;border-radius: 14px;border: 1px solid rgba(15, 23, 42, 0.10);box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);padding: 26px 26px 22px;}
