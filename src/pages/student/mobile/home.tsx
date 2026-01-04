@@ -137,8 +137,9 @@ function dateLabel(
     d.getDate() === today.getDate();
 
   const dayNum = d.getDate();
-  const weekday = new Intl.DateTimeFormat(locale, { weekday: "short" }).format(d);
-
+  const weekdayFormat: Intl.DateTimeFormatOptions["weekday"] = locale.startsWith("ko") ? "long" : "short";
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: weekdayFormat, }).format(d);
+  
   return same
     ? t("home.date.today", { day: dayNum })
     : t("home.date.weekday", { day: dayNum, weekday });
