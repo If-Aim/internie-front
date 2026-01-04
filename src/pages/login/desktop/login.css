@@ -1,0 +1,45 @@
+/* src/pages/login/desktop/login.css */
+.login-desktop-page { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+
+.login-desktop-header { position: sticky; top: 0; z-index: 50; 
+height: 110px; background: var(--bg-white); display: flex; align-items: center;
+border-bottom: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
+.login-desktop-header-inner { width: min(1200px, calc(100% - 64px)); margin: 0 auto; display: flex; align-items: center; }
+.login-desktop-logo {height: 22px; width: auto; display: block; }
+
+.login-desktop-main {flex: 1;display: flex;align-items: center;justify-content: center;padding: 48px 24px 72px;}
+.login-desktop-container {width: 520px;max-width: 100%;text-align: center;}
+.login-desktop-title {margin: 0;font-size: 34px;line-height: 1.25;font-weight: 800;letter-spacing: -0.02em;color: #0f172a;}
+.login-desktop-subtitle {margin: 10px 0 26px;font-size: 15px;line-height: 1.5;color: rgba(15, 23, 42, 0.65);}
+
+.login-desktop-tabs {display: grid;grid-template-columns: 1fr 1fr;gap: 14px;margin: 0 auto 18px;}
+.login-desktop-tab {height: 54px;border-radius: 12px;border: 1px solid rgba(15, 23, 42, 0.12);background: #ffffff;
+font-size: 16px;font-weight: 700;color: rgba(15, 23, 42, 0.75);box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);cursor: pointer;}
+.login-desktop-tab.is-active {background: #0b63f6;border-color: #0b63f6;color: #ffffff;}
+.login-desktop-tab:disabled {cursor: not-allowed;opacity: 0.95;}
+
+.login-desktop-card {background: #ffffff;border-radius: 14px;border: 1px solid rgba(15, 23, 42, 0.10);box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);padding: 26px 26px 22px;}
+.login-desktop-input {width: 100%;height: 52px;border-radius: 12px;border: 1px solid transparent;background: #efefef;
+padding: 0 16px;font-size: 14px;color: rgba(15, 23, 42, 0.85);outline: none;}
+.login-desktop-input + .login-desktop-input {margin-top: 12px;}
+.login-desktop-input:disabled {color: rgba(15, 23, 42, 0.45);}
+.login-desktop-btn {width: 100%;height: 52px;border-radius: 12px;border: none;font-size: 15px;font-weight: 800;cursor: pointer;}
+.login-desktop-btn.primary {margin-top: 18px;background: #0b63f6;color: #ffffff;box-shadow: 0 10px 18px rgba(11, 99, 246, 0.24);}
+.login-desktop-btn.primary:disabled {cursor: not-allowed;opacity: 0.55;box-shadow: none;}
+
+/* Kakao */
+.login-desktop-btn.kakao {margin-top: 12px;background: #fee500;color: #1b1b1b;display: flex;align-items: center;justify-content: center;gap: 10px;}
+.login-desktop-btn.kakao img {display: block;}
+
+.login-desktop-join {margin-top: 14px;font-size: 13px;color: rgba(15, 23, 42, 0.60);}
+.login-desktop-join button {border: none;background: transparent;font-weight: 800;color: rgba(15, 23, 42, 0.70);cursor: pointer;padding: 0 2px;}
+.login-desktop-join button:disabled {cursor: not-allowed;opacity: 0.6;}
+
+@media (max-width: 560px) {
+  .login-desktop-container {
+    width: 100%;
+  }
+  .login-desktop-title {
+    font-size: 28px;
+  }
+}

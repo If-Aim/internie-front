@@ -1,9 +1,9 @@
-// src/pages/editSchedule.tsx
+// src/pages/student/mobile/schedule/editSchedule.tsx
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { api, ApiError, deleteEvent, deleteEventDay } from "../../api/client";
+import { api, ApiError, deleteEvent, deleteEventDay } from "../../../../api/client";
 
-import "../../styles/schedule.css";
+import "./schedule.css";
 type Stage = "form" | "outro";
 
 type EditState =
@@ -14,8 +14,8 @@ type EditState =
         content?: string;
         startDate: string; // 'YYYY-MM-DD'
         endDate: string; // 'YYYY-MM-DD'
-        startTime?: string; // 'HH:mm:ss' (optional)
-        endTime?: string; // 'HH:mm:ss' (optional)
+        startTime?: string; // 'HH:mm:ss'
+        endTime?: string; // 'HH:mm:ss'
         eventDayId?: string | number | null;
         transcriptionCount?: number;
       };

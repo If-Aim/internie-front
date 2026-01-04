@@ -1,4 +1,4 @@
-/* src/styles/schedule.css */
+/* src/pages/student/mobile/schedule/schedule.css */
 /* 공통 변수는 index.css에서 가져옵니다 */
 .screen{height: 100dvh;display: flex;flex-direction: column;overflow: hidden;min-height: 0;}
 

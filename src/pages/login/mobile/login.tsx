@@ -1,15 +1,15 @@
 import { useTranslation } from "react-i18next";
 
-import "../styles/login.css";
+import "./login.css";
 
 const kakaoClientId = import.meta.env.VITE_KAKAO_REST_API_KEY;
 const origin = window.location.origin; 
 const kakaoRedirectUri = `${origin}/oauth/kakao/callback`;
 const kakaoAuthUrl =
-	"https://kauth.kakao.com/oauth/authorize"
-	+ `?response_type=code`
-	+ `&client_id=${encodeURIComponent(kakaoClientId)}`
-	+ `&redirect_uri=${encodeURIComponent(kakaoRedirectUri)}`;
+    "https://kauth.kakao.com/oauth/authorize"
+    + `?response_type=code`
+    + `&client_id=${encodeURIComponent(kakaoClientId)}`
+    + `&redirect_uri=${encodeURIComponent(kakaoRedirectUri)}`;
 
 //const GOOGLE_AUTH_URL = "/auth/google"; // 추후 추가
 

@@ -1,11 +1,11 @@
-// src/pages/newSchedule.tsx
+// src/pages/student/mobile/schedule/newSchedule.tsx
 import { useTranslation } from "react-i18next";
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../api/client";
+import { api } from "../../../../api/client";
 
-import "../../styles/schedule.css";
+import "./schedule.css";
 
 type Stage = "form" | "outro";
 type TimeWheelVariant = "sheet" | "calendar";
@@ -768,7 +768,7 @@ export default function NewSchedule() {
       setStage("outro");
       setTimeout(() => {
         nav("/", { replace: true });
-      }, 1500);
+      }, 2500);
     } catch (err) {
       console.error("Error:", err);
       alert(t("error.failAddSchedule"));

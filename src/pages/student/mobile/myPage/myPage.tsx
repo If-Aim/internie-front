@@ -1,9 +1,10 @@
+// src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth } from "../../api/client";
-import type { EventDay } from "../../api/client";
+import { getUserMe, getEventDaysByMonth } from "../../../../api/client";
+import type { EventDay } from "../../../../api/client";
 
-import "../../styles/myPage.css";
+import "./myPage.css";
 
 type Props = { onLogout?: () => void; };
 
@@ -23,9 +24,8 @@ function toHHmm(t?: string | null) {
   return t.length >= 5 ? t.slice(0, 5) : t;
 }
 function sortKey(ed: EventDay) {
-  // date: "2025-12-30"
-  const dateKey = ed.date.replaceAll("-", ""); // "20251230"
-  const timeKey = (ed.startTime ?? "00:00").slice(0, 5).replace(":", ""); // "0930"
+  const dateKey = ed.date.replaceAll("-", "");
+  const timeKey = (ed.startTime ?? "00:00").slice(0, 5).replace(":", "");
   const txCount = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
   return { dateKey, timeKey, txCount };
 }
@@ -34,7 +34,7 @@ function sortKey(ed: EventDay) {
 export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
-  //const [email, setEmail] = React.useState("internie@gmail.com"); 임시
+  //const [email, setEmail] = React.useState("internie@gmail.com"); 임시 이메일 표시
   const [name, setName] = React.useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = React.useState("/internie_mascot_normal.png");
 
@@ -49,7 +49,7 @@ export default function MyPage({ onLogout }: Props) {
         if (!mounted) return;
 
         setName(me.name ?? "사용자");
-        setAvatarUrl(me.profileImage ? me.profileImage : "/internie_mascot_normal.png"); //프로필 이미지 없을 때
+        setAvatarUrl(me.profileImage ? me.profileImage : "/internie_mascot_normal.png"); // 프로필 이미지 없을 때
       } catch {
       }
     })();

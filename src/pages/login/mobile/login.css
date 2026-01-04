@@ -24,10 +24,6 @@ font-family: Pretendard, system-ui, -apple-system, Arial;}
 height: 28px;padding: 0 10px;font-size: 12px;font-weight: 600;line-height: 28px;
 border-radius: 999px;border: 1px solid rgba(0, 0, 0, 0.12);background: rgba(255, 255, 255, 0.9);color: #111;
 cursor: pointer;}
-
 .lang-toggle:active {transform: translateY(1px);}
-
 .lang-toggle:focus {outline: none;box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);}
 
-
-/*@media (min-height: 740px) {.brand { margin-top: 255px; }}*/

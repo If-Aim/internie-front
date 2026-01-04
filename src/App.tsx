@@ -2,9 +2,9 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import Login from "./pages/login";
+import Login from "./pages/login/login";
 import KakaoCallback from "./pages/kakaoCallback";
-import StudentApp from "./pages/student/studentApp";
+import StudentApp from "./pages/student/mobile/studentApp";
 
 export default function App(): React.ReactElement {
   return (

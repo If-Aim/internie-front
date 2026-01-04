@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { api, getUserMe } from "../../api/client";
+import { api, getUserMe } from "../../../api/client";
 
-import "../../App.css"; 
+import "../../../App.css"; 
 
 type ScheduleItem = {
   instanceId: string;
