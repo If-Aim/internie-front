@@ -23,7 +23,7 @@ export default function Login(): React.ReactElement {
       <header className="login-desktop-header">
         <div className="login-desktop-header-inner">
           <img
-            src="/internie_Logo.svg"
+            src="/internie_Logo_thin.png"
             alt="internie"
             className="login-desktop-logo"
           />

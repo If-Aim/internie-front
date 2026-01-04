@@ -4,7 +4,7 @@
 .login-desktop-header { position: sticky; top: 0; z-index: 50; 
 height: 110px; background: var(--bg-white); display: flex; align-items: center;
 border-bottom: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
-.login-desktop-header-inner { width: min(1200px, calc(100% - 64px)); margin: 0 auto; display: flex; align-items: center; }
+.login-desktop-header-inner { width: min(1200px, calc(100% - 64px)); margin: 0 50px; display: flex; align-items: center; }
 .login-desktop-logo {height: 22px; width: auto; display: block; }
 
 .login-desktop-main {flex: 1;display: flex;align-items: center;justify-content: center;padding: 48px 24px 72px;}
