@@ -19,50 +19,82 @@ export default function Login(): React.ReactElement {
   };
 
   return (
-    <div className="page desktop">
-      <header className="topbar">
-        <img src="/internie_Logo.svg" alt="internie" className="topbar-logo" />
+    <div className="login-desktop-page">
+      <header className="login-desktop-header">
+        <div className="login-desktop-header-inner">
+          <img
+            src="/internie_Logo.svg"
+            alt="internie"
+            className="login-desktop-logo"
+          />
+        </div>
       </header>
 
-      <main className="login-desktop-wrap">
-        {/* TODO: 로그인 구현 완료 후 문구 변경 */}
-        <h2 className="title">PC버전은 현재 준비중입니다</h2>
-        <p className="subtitle">모바일에서 카카오 로그인으로 이용하실 수 있습니다.</p>
+      <main className="login-desktop-main">
+        <div className="login-desktop-container">
+          <h2 className="login-desktop-title">
+            PC버전은 현재 준비중입니다
+          </h2>
+          <p className="login-desktop-subtitle">
+            모바일에서 카카오 로그인으로 이용하실 수 있습니다.
+          </p>
 
-        <div className="role-tabs">
-          <button type="button" className="tab active" disabled>
-            학생 회원
-          </button>
-          <button type="button" className="tab" disabled>
-            기업 회원
-          </button>
-        </div>
+          <div className="login-desktop-tabs">
+            <button
+              type="button"
+              className="login-desktop-tab is-active"
+              disabled
+            >
+              학생 회원
+            </button>
+            <button
+              type="button"
+              className="login-desktop-tab"
+              disabled
+            >
+              기업 회원
+            </button>
+          </div>
 
-        <section className="login-card">
-          <div className="form">
-            <input disabled placeholder="이메일을 입력하세요" />
-            <input disabled placeholder="비밀번호를 입력하세요" />
-            <button type="button" className="btn primary" disabled>
+          <section className="login-desktop-card">
+            <input
+              className="login-desktop-input"
+              disabled
+              placeholder="이메일을 입력하세요"
+            />
+            <input
+              className="login-desktop-input"
+              disabled
+              placeholder="비밀번호를 입력하세요"
+              type="password"
+            />
+
+            <button
+              type="button"
+              className="login-desktop-btn primary"
+              disabled
+            >
               로그인하기
             </button>
 
             <button
               type="button"
-              className="btn btn-kakao"
+              className="login-desktop-btn kakao"
               onClick={() => go(kakaoAuthUrl)}
               aria-label={t("login.startWithKakaoAria")}
             >
-              <span className="ico ico-kakao" aria-hidden="true">
-                <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
-              </span>
-              <span className="btn-text">{t("login.startWithKakao")}</span>
+              <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
+              <span>{t("login.startWithKakao")}</span>
             </button>
 
-            <div className="join">
-              <span>계정이 없으신가요?</span> <button disabled>회원가입</button>
+            <div className="login-desktop-join">
+              <span>계정이 없으신가요?</span>{" "}
+              <button type="button" disabled>
+                회원가입
+              </button>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </main>
     </div>
   );
