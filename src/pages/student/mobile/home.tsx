@@ -54,6 +54,17 @@ type EventDayMonthResponse = {
   eventDayList: EventDay[];
 };
 
+type MonthFilterSheetProps = {
+  open: boolean;
+  valueYm: string;
+  sortOrder: "past" | "latest";
+  onClose: () => void;
+  onApply: (nextYm: string, nextSort: "past" | "latest") => void;
+};
+
+type SortOrder = "past" | "latest";
+type SheetView = "main" | "monthPicker";
+
 /*날짜 관련 함수*/
 function toYmd(d: Date): string {
   const y = d.getFullYear();
@@ -144,11 +155,20 @@ function dateLabel(
     ? t("home.date.today", { day: dayNum })
     : t("home.date.weekday", { day: dayNum, weekday });
 }
+function ymToDisplayWithLang(ym: string, lang: string) {
+  const [y, m] = ym.split("-").map(Number);
+  const d = new Date(y, m - 1, 1);
 
+  if (lang.startsWith("ko")) {
+    return `${y}.${String(m).padStart(2, "0")}.`;
+  }
+  // 영어는 "Oct 2025"
+  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(d);
+}
 /*시간 관련 함수*/
 function hhmm(t?: string | null): string {
   if (!t) return "";
-  return t.slice(0, 5); // "16:00:00" -> "16:00"
+  return t.slice(0, 5);
 }
 function toHHmm(t?: string | null): string | undefined {
   if (!t) return undefined;
@@ -188,6 +208,201 @@ function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
       <button className="iconbtn" aria-label={t("common.add")} onClick={onAddClick}>
         <img className="icon" src="/plus-01.svg" alt={t("common.add")} />
       </button>
+    </div>
+  );
+}
+
+function MonthFilterSheet({
+  open,
+  valueYm,
+  sortOrder,
+  onClose,
+  onApply,
+}: MonthFilterSheetProps) {
+  const { t, i18n } = useTranslation();
+  const [tmpYm, setTmpYm] = React.useState(valueYm);
+  const [tmpSort, setTmpSort] = React.useState<"past" | "latest">(sortOrder);
+  const [view, setView] = React.useState<SheetView>("main");
+  const [pickerYm, setPickerYm] = React.useState(tmpYm);
+
+  React.useEffect(() => {
+    if (open) {
+      setTmpYm(valueYm);
+      setTmpSort(sortOrder);
+      setView("main");
+      setPickerYm(valueYm);
+    }
+  }, [open, valueYm, sortOrder]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+
+    return () => {
+      const y = Math.abs(parseInt(document.body.style.top || "0", 10));
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, y);
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose} role="presentation">
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className={`sheet-pages ${view === "monthPicker" ? "to-picker" : ""}`}>
+          {/* 조회 화면 */}
+          <div className="sheet-page">
+            <div className="sheet-header">
+              <div className="sheet-title">{t("filter.title")}</div>
+              <button className="sheet-close" onClick={onClose} aria-label={t("common.close")}>
+                <img className="icon" alt="" src="/x-01.svg" />
+              </button>
+            </div>
+
+            <div className="sheet-body">
+              <div className="sheet-section">
+                <div className="sheet-label">{t("filter.period")}</div>
+
+                <label className="month-input">
+                  <div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
+                  <button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setView("monthPicker");}}><img className="month-input-icon" src="/calender-07.svg" alt="" /></button>
+                  <input className="month-input-native" type="month" value={tmpYm} onChange={(e) => setTmpYm(e.target.value)} aria-label="month" />
+                </label>
+              </div>
+
+              <div className="sheet-section">
+                <div className="sheet-label">{t("filter.sort")}</div>
+
+                <div className="sort-row">
+                  <button
+                    type="button"
+                    className={`sort-btn ${tmpSort === "past" ? "active" : ""}`}
+                    onClick={() => setTmpSort("past")}
+                  >
+                    {t("filter.sortPast")}
+                  </button>
+                  <button
+                    type="button"
+                    className={`sort-btn ${tmpSort === "latest" ? "active" : ""}`}
+                    onClick={() => setTmpSort("latest")}
+                  >
+                    {t("filter.sortLatest")}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="sheet-footer">
+              <button
+                type="button"
+                className="sheet-apply"
+                onClick={() => onApply(tmpYm, tmpSort)}
+              >
+                {t("filter.apply")}
+              </button>
+            </div>
+          </div>
+          {/* month 선택 화면 */}
+          <div className="sheet-page">
+            <div className="picker-header">
+              <button
+                type="button"
+                className="picker-back"
+                aria-label="back"
+                onClick={() => setView("main")}
+              >
+                <img src="/chevron-right.svg" alt="" className="picker-back-icon"/>
+              </button>
+
+              {/* 연도 변경 기능은 비워둠 */}
+              <div className="picker-year">
+                {pickerYm.split("-")[0]}{i18n.language.startsWith("ko") ? "년" : ""}
+              </div>
+
+              <button
+                type="button"
+                className="picker-close"
+                aria-label={t("common.close")}
+                onClick={onClose}
+              >
+                <img className="icon" alt="" src="/x-01.svg" />
+              </button>
+            </div>
+
+            <div className="picker-body">
+              <MonthGrid
+                ym={pickerYm}
+                lang={i18n.language}
+                onPick={(nextYm) => setPickerYm(nextYm)}
+              />
+            </div>
+
+            <div className="picker-footer">
+              <button
+                type="button"
+                className="picker-confirm"
+                onClick={() => {
+                  setTmpYm(pickerYm); 
+                  setView("main");
+                }}
+              >
+                {t("filter.confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MonthGrid({
+  ym,
+  lang,
+  onPick,
+}: {
+  ym: string;
+  lang: string;
+  onPick: (ym: string) => void;
+}) {
+  const [yStr, mStr] = ym.split("-");
+  const y = Number(yStr);
+  const selectedM = Number(mStr);
+
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  const label = (m: number) => {
+    if (lang.startsWith("ko")) return `${m}월`;
+    const d = new Date(2025, m - 1, 1);
+    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(d);
+  };
+
+  return (
+    <div className="month-grid">
+      {months.map((m) => {
+        const active = m === selectedM;
+        const nextYm = `${y}-${String(m).padStart(2, "0")}`;
+        return (
+          <button
+            key={m}
+            type="button"
+            className={`month-cell ${active ? "active" : ""}`}
+            onClick={() => onPick(nextYm)}
+          >
+            {label(m)}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -375,83 +590,29 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg }: SideMenuProps) 
   );
 }
 
-type MonthHeaderProps = { value: string; onChange: (ym: string) => void };
-function MonthHeader({ value, onChange }: MonthHeaderProps) {
+type MonthHeaderProps = { value: string; onOpen: () => void;};
+function MonthHeader({ value, onOpen }: MonthHeaderProps) {
   const { t, i18n } = useTranslation();
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement | null>(null);
 
   const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
   const label = React.useMemo(() => {
     const [yy, mm] = value.split("-").map(Number);
     const d = new Date(yy, mm - 1, 1);
+    if (i18n.language.startsWith("ko")) return `${mm}월`;
     return new Intl.DateTimeFormat(locale, { month: "short" }).format(d);
-  }, [value, locale]);
-
-  const months = React.useMemo(() => {
-    const base = new Date();
-    base.setDate(1);
-
-    const fmt = new Intl.DateTimeFormat(locale, { month: "short" });
-    const list: { ym: string; text: string }[] = [];
-
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
-      const y = d.getFullYear();
-      const m = d.getMonth() + 1;
-      const ym = `${y}-${String(m).padStart(2, "0")}`;
-      const text = fmt.format(d);
-      list.push({ ym, text });
-    }
-    return list;
-  }, [locale]);
-
-  React.useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target))
-        setOpen(false);
-    };
-    document.addEventListener("click", onDoc);
-    return () => document.removeEventListener("click", onDoc);
-  }, []);
-
+  }, [value, locale, i18n.language]);
   return (
-    <div className="month-row" ref={ref} style={{ position: "relative" }}>
+    <div className="month-row" style={{ position: "relative" }}>
       <div className="month-left">
         <div className="h1">{label}</div>
         <button
           className="month-btn"
           aria-label={t("calendar.selectMonth")}
-          onClick={() => setOpen((v) => !v)}
+          onClick={onOpen}
         >
           <img className="icon" src="/chevron-right.svg" alt={t("calendar.selectMonth")} />
         </button>
       </div>
-
-      {open && (
-        <div
-          className="month-pop"
-          role="menu"
-          aria-label={t("calendar.selectMonth")}
-          style={{ left: 0, top: "100%", marginTop: 8 }}
-        >
-          <div className="month-menu">
-            {months.map((m) => (
-              <button
-                key={m.ym}
-                className="month-item"
-                aria-current={m.ym === value ? "true" : undefined}
-                onClick={() => {
-                  onChange(m.ym);
-                  setOpen(false);
-                }}
-              >
-                {m.text}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -576,6 +737,8 @@ function Home(): React.ReactElement {
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   const [month, setMonth] = React.useState<string>(currentMonth);
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [sortOrder, setSortOrder] = React.useState<SortOrder>("latest");
   const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
   const [isMenuOpen, setMenuOpen] = React.useState(false);
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
@@ -584,8 +747,13 @@ function Home(): React.ReactElement {
   const byDate = React.useMemo<[string, ScheduleItem[]][]>(() => {
     const g: Record<string, ScheduleItem[]> = {};
     for (const it of items) (g[it.date] ??= []).push(it);
-    return Object.entries(g).sort((a, b) => (a[0] < b[0] ? 1 : -1));
-  }, [items]);
+    const entries = Object.entries(g);
+    entries.sort((a, b) => {
+      if (sortOrder === "latest") return a[0] < b[0] ? 1 : -1;
+      return a[0] < b[0] ? -1 : 1;
+    });
+    return entries;
+  }, [items, sortOrder]);
 
   const hasItems = byDate.length > 0;
   const pendingUpdatedEventRef = React.useRef<any>(null);
@@ -746,7 +914,7 @@ function Home(): React.ReactElement {
 
       const newEventDayId = response.eventDayId;
       setSelectedItem(null);
-      navigate(`/student/schedule/${newEventDayId}/questions`); // 이후 /student/...로 변경 예정
+      navigate(`/student/schedule/${newEventDayId}/questions`);
     } catch (error) {
       alert(t("error.record"));
     }
@@ -767,7 +935,7 @@ function Home(): React.ReactElement {
         />
 
         <div className="row" style={{ marginTop: 18 }}>
-          <MonthHeader value={month} onChange={setMonth} />
+          <MonthHeader value={month} onOpen={() => setIsFilterOpen(true)} />
         </div>
 
         {hasItems ? (
@@ -843,6 +1011,19 @@ function Home(): React.ReactElement {
             </button>
           </div>
         )}
+
+        <MonthFilterSheet
+          open={isFilterOpen}
+          valueYm={month}
+          sortOrder={sortOrder}
+          onClose={() => setIsFilterOpen(false)}
+          onApply={(nextYm, nextSort) => {
+            setMonth(nextYm);
+            setSortOrder(nextSort);
+            setIsFilterOpen(false);
+          }}
+        />
+
       </div>
     </>
   );

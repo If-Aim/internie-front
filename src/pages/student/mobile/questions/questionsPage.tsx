@@ -44,7 +44,12 @@ function applyExperienceName(q: string, title: string) {
 
 export default function QuestionsPage() {
   const navigate = useNavigate();
-  const { scheduleId } = useParams<{ scheduleId: string }>();
+  const { eventDayId } = useParams<{ eventDayId: string }>();
+  const eventDayIdNum = Number(eventDayId);
+  if (!Number.isFinite(eventDayIdNum)) {
+    console.error("eventDayId가 유효하지 않습니다:", eventDayId);
+    return null; 
+  }
 
   const [questions, setQuestions] = React.useState<QuestionDto[]>([]);
   const [index, setIndex] = React.useState(0);
@@ -63,16 +68,6 @@ export default function QuestionsPage() {
   const streamRef = React.useRef<MediaStream | null>(null);
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const audioChunksRef = React.useRef<Blob[]>([]);
-  const [eventDayId, setEventDayId] = React.useState<number | null>(null);
-
-  React.useEffect(() => {
-    const n = Number(scheduleId); // scheduleId === eventDayId
-    if (!Number.isFinite(n)) {
-      console.error("eventDayId가 숫자가 아닙니다:", scheduleId);
-      return;
-    }
-    setEventDayId(n);
-  }, [scheduleId]);
 
   const uploadAudioToSTT = async (audioBlob: Blob) => {
     if (!eventDayId) {
@@ -92,7 +87,7 @@ export default function QuestionsPage() {
     formData.append("audioFile", audioFile);
 
     try {
-      const result = await apiUpload<any>(`/api/stt/upload/${eventDayId}`, formData);
+      const result = await apiUpload<any>(`/api/stt/upload/${eventDayIdNum}`, formData);
 
       console.log("STT 결과:", result);
     } catch (err) {
@@ -111,20 +106,19 @@ export default function QuestionsPage() {
 
   // 질문 불러오기
   React.useEffect(() => {
-    if (!eventDayId) return;
 
     let cancelled = false;
 
     const fetchAll = async () => {
       try {
         setIsLoadingQuestions(true);
-        const day = await api<EventDayResponse>(`/event-days/${eventDayId}`);
+        const day = await api<EventDayResponse>(`/event-days/${eventDayIdNum}`);
         if (cancelled) return;
 
         const title = day.title ?? "";
         setEventDayTitle(title);
 
-        const data = await api<EventDayQuestionsResponse>(`/event-days/${eventDayId}/questions`);
+        const data = await api<EventDayQuestionsResponse>(`/event-days/${eventDayIdNum}/questions`);
         if (cancelled) return;
 
         const list = Array.isArray(data.questionList) ? data.questionList : [];
@@ -160,7 +154,7 @@ export default function QuestionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [eventDayId]);
+  }, [eventDayIdNum]);
   
   const current = questions[index] ?? null;
   const total = isLoadingQuestions
@@ -268,9 +262,9 @@ export default function QuestionsPage() {
         };
 
         // 녹음이 정지되면 파일을 만들고 업로드
-        recorder.onstop = () => {
+        recorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-          uploadAudioToSTT(audioBlob); 
+          await uploadAudioToSTT(audioBlob);
           setShowOutro(true);
         };
 
@@ -309,7 +303,7 @@ export default function QuestionsPage() {
   React.useEffect(() => {
     if (stage === "completed") {
       const timer = setTimeout(() => {
-        navigate("/");
+        navigate("/student");
       }, 3000);
 
       return () => clearTimeout(timer);

@@ -37,12 +37,23 @@
   "calendar": {
     "selectMonth": "월 선택"
   },
+  "filter": {
+    "title": "조회하기",
+    "period": "기간 선택",
+    "sort": "정렬 선택",
+    "sortPast": "과거순",
+    "sortLatest": "최신순",
+    "apply": "조회하기",
+    "confirm": "확인"
+  },
   "home": {
     "date": {
       "today": "{{day}}일 오늘",
       "weekday": "{{day}}일 {{weekday}}"
     }
   },
+
+  "comment_schedule": "일정 관련",
   "schedule_new": {
     "alertAddTitle": "일정 제목을 입력해주세요.",
     "title": "일정 추가",
@@ -56,6 +67,13 @@
     
     "outroDesc1": "인터니가 질문을 준비하고 있어요!",
     "outroDesc2": "오늘은 어떤 역량을 얻을 수 있을까요?"
+  },
+  "schedule_detail": {
+    "titleFallback": "새로운 이벤트",
+    "empty": "기록이 없어요",
+    "question": "질문",
+    "answer": "답변",
+    "noAnswer": "답변이 없어요"
   },
   "error": {
     "record": "일정을 기록하는 중 오류가 발생했습니다.",

@@ -8,6 +8,7 @@ import Home from "./home";
 import MyPage from "./myPage/myPage";
 import NewSchedule from "./schedule/newSchedule";
 import EditSchedule from "./schedule/editSchedule";
+import DetailSchedule from "./schedule/detailSchedule";
 import QuestionsPage from "./questions/questionsPage";
 
 export default function StudentApp(): React.ReactElement {
@@ -21,7 +22,8 @@ export default function StudentApp(): React.ReactElement {
 
         <Route path="schedule/new" element={<NewSchedule />} />
         <Route path="schedule/:eventId" element={<EditSchedule />} />
-        <Route path="schedule/:scheduleId/questions" element={<QuestionsPage />} />
+        <Route path="schedule/:eventDayId/detail" element={<DetailSchedule />} />
+        <Route path="schedule/:eventDayId/questions" element={<QuestionsPage />} />
 
         <Route path="*" element={<Navigate to="." replace />} />
       </Route>

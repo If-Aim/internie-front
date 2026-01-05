@@ -118,6 +118,33 @@ export async function apiUpload<T = unknown>(
   return (await res.json()) as T;
 }
 
+// 맞춤 질문 조회
+export type EventDayQuestionsResponse = {
+  eventDayId: number;
+  questionId: number;
+  questionList: string[];
+};
+
+export async function getEventDayQuestions(eventDayId: string | number): Promise<EventDayQuestionsResponse> {
+  return api<EventDayQuestionsResponse>(`/event-days/${eventDayId}/questions`);
+}
+
+// eventDay 상세
+export type EventDayDetailResponse = {
+  eventDayId: number;
+  eventId: number;
+  date: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  memo?: string | null;
+  completed: boolean;
+  transcriptions: Transcription[];
+};
+
+export async function getEventDayDetail(eventDayId: string | number): Promise<EventDayDetailResponse> {
+  return api<EventDayDetailResponse>(`/event-days/${eventDayId}`);
+}
+
 // 이벤트 삭제
 export async function deleteEvent(eventId: string | number): Promise<void> {
   return api<void>(`/events/${eventId}`, { method: "DELETE" });

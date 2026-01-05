@@ -37,12 +37,23 @@
   "calendar": {
     "selectMonth": "Select Month"
   },
+  "filter": {
+    "title": "Filter",
+    "period": "Period",
+    "sort": "Sort",
+    "sortPast": "Oldest",
+    "sortLatest": "Newest",
+    "apply": "Apply",
+    "confirm": "Confirm"
+  },
   "home": {
     "date": {
       "today": "{{day}} Today",
       "weekday": "{{day}} {{weekday}}"
     }
   },
+
+  "comment_schedule": "일정 관련",
   "schedule_new": {
     "alertAddTitle": "Please add a title.",
     "title": "Add Schedule",
@@ -56,6 +67,13 @@
 
     "outroDesc1": "Internie is getting your questions ready!",
     "outroDesc2": "What skill will you earn today?"
+  },
+  "schedule_detail": {
+    "titleFallback": "New Event",
+    "empty": "No records",
+    "question": "Question",
+    "answer": "Answer",
+    "noAnswer": "No answer"
   },
   "error": {
     "record": "Something went wrong while starting your record.",

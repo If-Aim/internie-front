@@ -30,3 +30,30 @@ background: none;border: 0;cursor: pointer;text-align: left;}
 cursor: pointer;display: flex;align-items: center;justify-content: center;transition: background 0.2s;}
 .btn-logout:hover { background: #fff5f5; border-color: #fee2e2; }
 .btn-logout:active { transform: translateY(1px); }
+
+/*기간 조회 모달*/
+.sheet-backdrop{position: fixed;inset: 0;background: rgba(0,0,0,0.25);display: flex;justify-content: center;align-items: flex-end;z-index: 9999;}
+.sheet{width: 100%;max-width: 520px;background: #fff;border-top-left-radius: 24px;border-top-right-radius: 24px;padding: 20px 18px 18px;box-shadow: 0 -8px 30px rgba(0,0,0,0.15);animation: sheetUp 180ms ease-out;}
+@keyframes sheetUp{
+  from { transform: translateY(20px); opacity: 0.9; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.sheet-header{display: flex;align-items: center;justify-content: space-between;margin-bottom: 12px;}
+.sheet-title{font-size: 28px;font-weight: 800;letter-spacing: -0.02em;}
+.sheet-close{width: 44px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
+.sheet-body{padding: 6px 2px 14px;}
+.sheet-section{margin-top: 18px;}
+.sheet-label{font-size: 18px;font-weight: 700;color: #6f6f6f;margin-bottom: 10px;}
+
+.month-input{position: relative;height: 60px;border: 1px solid #e6e6e6;border-radius: 12px;display: flex;align-items: center;padding: 0 16px;justify-content: space-between;background: #fff;}
+.month-input-text{font-size: 26px;font-weight: 500;color: #9a9a9a;}
+.month-input-icon{width: 26px;height: 26px;opacity: 0.8;}
+.month-input-native{position: absolute;inset: 0;opacity: 0;cursor: pointer;}
+.picker-back-icon{width: 24px;height: 24px;transform: rotate(90deg);}
+
+.sort-row{display: flex;gap: 15px;}
+.sort-btn{flex: 1;height: 50px;border-radius: 10px;border: 1px solid #DFDFDF;background: #fff;font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);}
+.sort-btn.active{color: var(--primary);}
+
+.sheet-footer{padding-top: 10px;}
+.sheet-apply{width: 100%;height: 72px;border-radius: 16px;border: none;background: #0a61ff;color: #fff;font-size: 26px;font-weight: 800;}
