@@ -107,7 +107,7 @@ export default function DetailSchedule(): React.ReactElement {
             </div>
 
             <div className="detail-body">
-                <div ref={scrollerRef} className="detail-carousel" onScroll={onScroll} >
+                <div ref={scrollerRef} className="detail-snap-scroller" onScroll={onScroll} >
                     {loading && (
                         <section className="detail-card detail-card--single">
                             <div className="detail-center muted">{t("common.loading", "Loading...")}</div>
