@@ -132,6 +132,7 @@ export async function getEventDayQuestions(eventDayId: string | number): Promise
 // eventDay 상세
 export type EventDayDetailResponse = {
   eventDayId: number;
+  title: string;
   eventId: number;
   date: string;
   startTime?: string | null;

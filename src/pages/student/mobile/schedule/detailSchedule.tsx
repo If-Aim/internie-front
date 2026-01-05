@@ -23,6 +23,10 @@ function formatRecordedAt(date: string, startTime?: string | null) {
   const hhmm = startTime ? startTime.slice(0, 5) : "00:00";
   return `${y}.${pad2(m)}.${pad2(d)} ${hhmm}`;
 }
+function applyExperienceName(q: string, title: string) {
+  if (!q.includes("(@experience_name)")) return q;
+  return q.replaceAll("(@experience_name)", title);
+}
 
 export default function DetailSchedule(): React.ReactElement {
   const { t, i18n } = useTranslation();
@@ -45,7 +49,7 @@ export default function DetailSchedule(): React.ReactElement {
     const w = el.clientWidth || 1;
     setPage(Math.round(el.scrollLeft / w));
   }, []);
-
+  
   React.useEffect(() => {
     (async () => {
       try {
@@ -59,7 +63,7 @@ export default function DetailSchedule(): React.ReactElement {
           getEventDayDetail(eventDayId),
         ]);
 
-        setTitle(t("schedule_detail.titleFallback", "새로운 이벤트"));
+        setTitle(dRes.title || t("schedule_detail.titleFallback", "새로운 이벤트"));
 
         setRecordedAtText(formatRecordedAt(dRes.date, dRes.startTime));
 
@@ -68,7 +72,7 @@ export default function DetailSchedule(): React.ReactElement {
 
         const merged: SlideItem[] = questions.map((q, i) => ({
           idx: i + 1,
-          question: q,
+          question: applyExperienceName(q, dRes.title),
           answerText: (trans[i]?.text ?? "").trim(),
         }));
 
