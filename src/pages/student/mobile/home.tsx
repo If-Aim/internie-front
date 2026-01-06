@@ -325,7 +325,7 @@ function MonthFilterSheet({
 
               <button
                 type="button"
-                className="picker-close"
+                className="period-sheet-picker-close"
                 aria-label={t("common.close")}
                 onClick={onClose}
               >
