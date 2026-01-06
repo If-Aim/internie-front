@@ -259,7 +259,7 @@ function MonthFilterSheet({
   return (
     <div className="period-sheet-backdrop" onClick={onClose} role="presentation">
       <div className="period-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className={`sheet-pages ${view === "monthPicker" ? "to-picker" : ""}`}>
+        <div className={`period-sheet-pages ${view === "monthPicker" ? "to-picker" : ""}`}>
           {/* 조회 화면 */}
           <div className="period-sheet-page">
             <div className="period-sheet-header">
@@ -303,13 +303,7 @@ function MonthFilterSheet({
             </div>
 
             <div className="period-sheet-footer">
-              <button
-                type="button"
-                className="sheet-apply"
-                onClick={() => onApply(tmpYm, tmpSort)}
-              >
-                {t("filter.apply")}
-              </button>
+              <button type="button" className="period-sheet-apply" onClick={() => onApply(tmpYm, tmpSort)} > {t("filter.apply")} </button>
             </div>
           </div>
           {/* month 선택 화면 */}
@@ -317,11 +311,11 @@ function MonthFilterSheet({
             <div className="period-sheet-picker-header">
               <button
                 type="button"
-                className="picker-back"
+                className="period-sheet-picker-back"
                 aria-label="back"
                 onClick={() => setView("main")}
               >
-                <img src="/chevron-right.svg" alt="" className="picker-back-icon"/>
+                <img src="/chevron-right.svg" alt="" className="period-sheet-picker-back-icon"/>
               </button>
 
               {/* 연도 변경 기능은 비워둠 */}
@@ -348,16 +342,7 @@ function MonthFilterSheet({
             </div>
 
             <div className="period-sheet-picker-footer">
-              <button
-                type="button"
-                className="picker-confirm"
-                onClick={() => {
-                  setTmpYm(pickerYm); 
-                  setView("main");
-                }}
-              >
-                {t("filter.confirm")}
-              </button>
+              <button type="button" className="period-sheet-picker-confirm" onClick={() => {setTmpYm(pickerYm); setView("main");}}> {t("filter.confirm")}</button>
             </div>
           </div>
         </div>
