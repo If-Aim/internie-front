@@ -275,7 +275,7 @@ function MonthFilterSheet({
 
                 <label className="month-input">
                   <div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
-                  <button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setView("monthPicker");}}><img className="month-input-icon" src="/calender-07.svg" alt="" /></button>
+                  <button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setView("monthPicker");}}><img className="month-input-icon" src="/calendar-07.svg" alt="" /></button>
                   <input className="month-input-native" type="month" value={tmpYm} onChange={(e) => setTmpYm(e.target.value)} aria-label="month" />
                 </label>
               </div>
