@@ -257,21 +257,21 @@ function MonthFilterSheet({
   if (!open) return null;
 
   return (
-    <div className="sheet-backdrop" onClick={onClose} role="presentation">
-      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+    <div className="period-sheet-backdrop" onClick={onClose} role="presentation">
+      <div className="period-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className={`sheet-pages ${view === "monthPicker" ? "to-picker" : ""}`}>
           {/* 조회 화면 */}
-          <div className="sheet-page">
-            <div className="sheet-header">
-              <div className="sheet-title">{t("filter.title")}</div>
-              <button className="sheet-close" onClick={onClose} aria-label={t("common.close")}>
+          <div className="period-sheet-page">
+            <div className="period-sheet-header">
+              <div className="period-sheet-title">{t("filter.title")}</div>
+              <button className="period-sheet-close" onClick={onClose} aria-label={t("common.close")}>
                 <img className="icon" alt="" src="/x-01.svg" />
               </button>
             </div>
 
-            <div className="sheet-body">
-              <div className="sheet-section">
-                <div className="sheet-label">{t("filter.period")}</div>
+            <div className="period-sheet-body">
+              <div className="period-sheet-section">
+                <div className="period-sheet-label">{t("filter.period")}</div>
 
                 <label className="month-input">
                   <div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
@@ -280,8 +280,8 @@ function MonthFilterSheet({
                 </label>
               </div>
 
-              <div className="sheet-section">
-                <div className="sheet-label">{t("filter.sort")}</div>
+              <div className="period-sheet-section">
+                <div className="period-sheet-label">{t("filter.sort")}</div>
 
                 <div className="sort-row">
                   <button
@@ -302,7 +302,7 @@ function MonthFilterSheet({
               </div>
             </div>
 
-            <div className="sheet-footer">
+            <div className="period-sheet-footer">
               <button
                 type="button"
                 className="sheet-apply"
@@ -313,8 +313,8 @@ function MonthFilterSheet({
             </div>
           </div>
           {/* month 선택 화면 */}
-          <div className="sheet-page">
-            <div className="picker-header">
+          <div className="period-sheet-page">
+            <div className="period-sheet-picker-header">
               <button
                 type="button"
                 className="picker-back"
@@ -325,7 +325,7 @@ function MonthFilterSheet({
               </button>
 
               {/* 연도 변경 기능은 비워둠 */}
-              <div className="picker-year">
+              <div className="period-sheet-picker-year">
                 {pickerYm.split("-")[0]}{i18n.language.startsWith("ko") ? "년" : ""}
               </div>
 
@@ -339,7 +339,7 @@ function MonthFilterSheet({
               </button>
             </div>
 
-            <div className="picker-body">
+            <div className="period-sheet-picker-body">
               <MonthGrid
                 ym={pickerYm}
                 lang={i18n.language}
@@ -347,7 +347,7 @@ function MonthFilterSheet({
               />
             </div>
 
-            <div className="picker-footer">
+            <div className="period-sheet-picker-footer">
               <button
                 type="button"
                 className="picker-confirm"
