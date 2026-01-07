@@ -54,13 +54,24 @@ cursor: pointer;display: flex;align-items: center;justify-content: center;transi
 .period-sheet-picker-year{font-size: 22px;font-weight: 800;}
 .period-sheet-picker-body{padding: 10px 16px 0;flex: 1;}
 
+.wheel-wrap{position: relative;display: flex;justify-content: center;gap: 36px;--wheel-item-h: 64px;height: calc(var(--wheel-item-h) * 5);padding: 6px 0 0;}
+.wheel-col{width: 44%;max-width: 220px;}
+.wheel{height: 100%;overflow-y: auto;-webkit-overflow-scrolling: touch;overscroll-behavior: contain;scroll-snap-type: y mandatory;scrollbar-width: none;}
+.wheel::-webkit-scrollbar{ display: none; }
+.wheel-item{height: var(--wheel-item-h);display: flex;align-items: center;justify-content: center;font-size: 34px;font-weight: 800;letter-spacing: -0.02em;color: #cfcfcf;scroll-snap-align: center;user-select: none;}
+.wheel-item.active{color: #000;}
+.wheel-pad{color: transparent;}
+.wheel-highlight{position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);
+width: calc(100% - 20px);height: var(--wheel-item-h);border-radius: 18px;
+background: rgba(0,0,0,0.04);pointer-events: none;}
+.wheel-fade{position: absolute;left: 0;right: 0;height: calc(var(--wheel-item-h) * 2);pointer-events: none;}
+.wheel-fade-top{top: 0;background: linear-gradient(to bottom, #fff 20%, rgba(255,255,255,0));}
+.wheel-fade-bottom{bottom: 0;background: linear-gradient(to top, #fff 20%, rgba(255,255,255,0));}
+
 .month-input{position: relative;height: 60px;border: 1px solid #e6e6e6;border-radius: 12px;display: flex;align-items: center;padding: 0 16px;justify-content: space-between;background: #fff;}
 .month-input-text{font-size: 26px;font-weight: 500;color: #9a9a9a;position: relative;z-index: 2;}
 .month-input-icon{width: 26px;height: 26px;opacity: 0.8;display: block;}
 .month-input-native{position: absolute;inset: 0;opacity: 0;cursor: pointer;z-index: 1;}
-.month-grid{display: grid;grid-template-columns: repeat(3, 1fr);gap: 18px 22px;padding-top: 18px;}
-.month-cell{height: 58px;border: none;background: transparent;font-size: 28px;font-weight: 700;color: #9a9a9a;border-radius: 14px;}
-.month-cell.active{background: rgba(10, 97, 255, 0.18);color: #000;}
 .period-sheet-picker-footer{padding: 14px 18px 18px;}
 .period-sheet-picker-confirm{width: 100%;height: 72px;border-radius: 16px;border: none;background: #0a61ff;color: #fff;font-size: 26px;font-weight: 800;}
 .month-icon-btn{width: 44px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;position: relative;z-index: 3;}

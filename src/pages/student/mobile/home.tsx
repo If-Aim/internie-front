@@ -334,10 +334,12 @@ function MonthFilterSheet({
             </div>
 
             <div className="period-sheet-picker-body">
-              <MonthGrid
+              <MonthWheelPicker
                 ym={pickerYm}
                 lang={i18n.language}
-                onPick={(nextYm) => setPickerYm(nextYm)}
+                onChange={(nextYm) => setPickerYm(nextYm)}
+                minYear={2010}
+                maxYear={2030}
               />
             </div>
 
@@ -351,43 +353,163 @@ function MonthFilterSheet({
   );
 }
 
-function MonthGrid({
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function monthLabel(m: number, lang: string) {
+  if (lang.startsWith("ko")) return `${m}월`;
+  const d = new Date(2025, m - 1, 1);
+  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(d);
+}
+
+function MonthWheelPicker({
   ym,
   lang,
-  onPick,
+  onChange,
+  minYear,
+  maxYear,
 }: {
   ym: string;
   lang: string;
-  onPick: (ym: string) => void;
+  onChange: (nextYm: string) => void;
+  minYear: number;
+  maxYear: number;
 }) {
+  const ITEM_H = 56;
+  const PAD_ITEMS = 2;
+  const years = React.useMemo(() => {
+    const out: number[] = [];
+    for (let y = minYear; y <= maxYear; y++) out.push(y);
+    return out;
+  }, [minYear, maxYear]);
+
+  const months = React.useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+
   const [yStr, mStr] = ym.split("-");
-  const y = Number(yStr);
-  const selectedM = Number(mStr);
+  const selectedYear = Number(yStr);
+  const selectedMonth = Number(mStr);
 
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const yearRef = React.useRef<HTMLDivElement | null>(null);
+  const monthRef = React.useRef<HTMLDivElement | null>(null);
+  const lockRef = React.useRef(false);
 
-  const label = (m: number) => {
-    if (lang.startsWith("ko")) return `${m}월`;
-    const d = new Date(2025, m - 1, 1);
-    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(d);
-  };
+  const setWheelToValue = React.useCallback(() => {
+    const yIdx = clamp(years.indexOf(selectedYear), 0, years.length - 1);
+    const mIdx = clamp(selectedMonth - 1, 0, 11);
+
+    const yTop = (yIdx + PAD_ITEMS) * ITEM_H;
+    const mTop = (mIdx + PAD_ITEMS) * ITEM_H;
+
+    if (yearRef.current) yearRef.current.scrollTop = yTop;
+    if (monthRef.current) monthRef.current.scrollTop = mTop;
+  }, [years, selectedYear, selectedMonth, ITEM_H]);
+
+  React.useEffect(() => {
+    // 열린 직후/값 변경 시 휠 위치 맞추기
+    setWheelToValue();
+  }, [setWheelToValue]);
+
+  const pickFromScroll = React.useCallback(
+    (kind: "year" | "month") => {
+      if (lockRef.current) return;
+
+      const el = kind === "year" ? yearRef.current : monthRef.current;
+      if (!el) return;
+
+      const rawIndex = Math.round(el.scrollTop / ITEM_H) - PAD_ITEMS;
+
+      if (kind === "year") {
+        const idx = clamp(rawIndex, 0, years.length - 1);
+        const nextY = years[idx];
+        const nextYm = `${nextY}-${pad2(selectedMonth)}`;
+        onChange(nextYm);
+      } else {
+        const idx = clamp(rawIndex, 0, 11);
+        const nextM = idx + 1;
+        const nextYm = `${selectedYear}-${pad2(nextM)}`;
+        onChange(nextYm);
+      }
+    },
+    [ITEM_H, PAD_ITEMS, years, selectedYear, selectedMonth, onChange]
+  );
+
+  const onYearScroll = () => pickFromScroll("year");
+  const onMonthScroll = () => pickFromScroll("month");
+
+  const onSnapEnd = React.useCallback(() => {
+    lockRef.current = true;
+    try {
+      setWheelToValue();
+    } finally {
+      window.setTimeout(() => {
+        lockRef.current = false;
+      }, 0);
+    }
+  }, [setWheelToValue]);
 
   return (
-    <div className="month-grid">
-      {months.map((m) => {
-        const active = m === selectedM;
-        const nextYm = `${y}-${String(m).padStart(2, "0")}`;
-        return (
-          <button
-            key={m}
-            type="button"
-            className={`month-cell ${active ? "active" : ""}`}
-            onClick={() => onPick(nextYm)}
-          >
-            {label(m)}
-          </button>
-        );
-      })}
+    <div className="wheel-wrap" style={{ ["--wheel-item-h" as any]: `${ITEM_H}px` }}>
+      <div className="wheel-col">
+        <div
+          ref={yearRef}
+          className="wheel"
+          onScroll={onYearScroll}
+          onPointerUp={onSnapEnd}
+          onTouchEnd={onSnapEnd}
+        >
+          {Array.from({ length: PAD_ITEMS }).map((_, i) => (
+            <div key={`y_pad_top_${i}`} className="wheel-item wheel-pad" />
+          ))}
+          {years.map((y) => {
+            const active = y === selectedYear;
+            return (
+              <div key={y} className={`wheel-item ${active ? "active" : ""}`}>
+                {y}
+                {lang.startsWith("ko") ? "년" : ""}
+              </div>
+            );
+          })}
+          {Array.from({ length: PAD_ITEMS }).map((_, i) => (
+            <div key={`y_pad_bot_${i}`} className="wheel-item wheel-pad" />
+          ))}
+        </div>
+      </div>
+
+      <div className="wheel-col">
+        <div
+          ref={monthRef}
+          className="wheel"
+          onScroll={onMonthScroll}
+          onPointerUp={onSnapEnd}
+          onTouchEnd={onSnapEnd}
+        >
+          {Array.from({ length: PAD_ITEMS }).map((_, i) => (
+            <div key={`m_pad_top_${i}`} className="wheel-item wheel-pad" />
+          ))}
+          {months.map((m) => {
+            const active = m === selectedMonth;
+            return (
+              <div key={m} className={`wheel-item ${active ? "active" : ""}`}>
+                {monthLabel(m, lang)}
+              </div>
+            );
+          })}
+          {Array.from({ length: PAD_ITEMS }).map((_, i) => (
+            <div key={`m_pad_bot_${i}`} className="wheel-item wheel-pad" />
+          ))}
+        </div>
+      </div>
+
+      {/* 가운데 선택 라인/하이라이트 */}
+      <div className="wheel-highlight" aria-hidden="true" />
+      {/* 위/아래 그라데이션 마스크 */}
+      <div className="wheel-fade wheel-fade-top" aria-hidden="true" />
+      <div className="wheel-fade wheel-fade-bottom" aria-hidden="true" />
     </div>
   );
 }
