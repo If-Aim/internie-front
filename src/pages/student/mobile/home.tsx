@@ -380,8 +380,14 @@ function MonthWheelPicker({
   minYear: number;
   maxYear: number;
 }) {
-  const ITEM_H = 56;
   const PAD_ITEMS = 2;
+  const itemRef = React.useRef<HTMLDivElement | null>(null);
+  const [itemH, setItemH] = React.useState(64);
+  React.useEffect(() => {
+    if (!itemRef.current) return;
+    const h = itemRef.current.offsetHeight;
+    if (h > 0) setItemH(h);
+  }, []);
   const years = React.useMemo(() => {
     const out: number[] = [];
     for (let y = minYear; y <= maxYear; y++) out.push(y);
@@ -402,12 +408,12 @@ function MonthWheelPicker({
     const yIdx = clamp(years.indexOf(selectedYear), 0, years.length - 1);
     const mIdx = clamp(selectedMonth - 1, 0, 11);
 
-    const yTop = (yIdx + PAD_ITEMS) * ITEM_H;
-    const mTop = (mIdx + PAD_ITEMS) * ITEM_H;
+    const yTop = (yIdx + PAD_ITEMS) * itemH;
+    const mTop = (mIdx + PAD_ITEMS) * itemH;
 
     if (yearRef.current) yearRef.current.scrollTop = yTop;
     if (monthRef.current) monthRef.current.scrollTop = mTop;
-  }, [years, selectedYear, selectedMonth, ITEM_H]);
+  }, [years, selectedYear, selectedMonth, itemH]);
 
   React.useEffect(() => {
     // 열린 직후/값 변경 시 휠 위치 맞추기
@@ -421,7 +427,7 @@ function MonthWheelPicker({
       const el = kind === "year" ? yearRef.current : monthRef.current;
       if (!el) return;
 
-      const rawIndex = Math.round(el.scrollTop / ITEM_H) - PAD_ITEMS;
+      const rawIndex = Math.round(el.scrollTop / itemH) - PAD_ITEMS;
 
       if (kind === "year") {
         const idx = clamp(rawIndex, 0, years.length - 1);
@@ -435,7 +441,7 @@ function MonthWheelPicker({
         onChange(nextYm);
       }
     },
-    [ITEM_H, PAD_ITEMS, years, selectedYear, selectedMonth, onChange]
+    [itemH, PAD_ITEMS, years, selectedYear, selectedMonth, onChange]
   );
 
   const onYearScroll = () => pickFromScroll("year");
@@ -453,7 +459,7 @@ function MonthWheelPicker({
   }, [setWheelToValue]);
 
   return (
-    <div className="wheel-wrap" style={{ ["--wheel-item-h" as any]: `${ITEM_H}px` }}>
+    <div className="wheel-wrap" style={{ ["--wheel-item-h" as any]: `${itemH}px` }}>
       <div className="wheel-col">
         <div
           ref={yearRef}
@@ -465,10 +471,10 @@ function MonthWheelPicker({
           {Array.from({ length: PAD_ITEMS }).map((_, i) => (
             <div key={`y_pad_top_${i}`} className="wheel-item wheel-pad" />
           ))}
-          {years.map((y) => {
+          {years.map((y, idx) => {
             const active = y === selectedYear;
             return (
-              <div key={y} className={`wheel-item ${active ? "active" : ""}`}>
+              <div key={y} ref={idx === 0 ? itemRef : null} className={`wheel-item ${active ? "active" : ""}`}>
                 {y}
                 {lang.startsWith("ko") ? "년" : ""}
               </div>
