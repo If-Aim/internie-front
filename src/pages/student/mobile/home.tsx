@@ -305,7 +305,7 @@ function MonthFilterSheet({
           open={isMonthPickerOpen}
           ym={pickerYm}
           lang={i18n.language}
-          minYear={2010}
+          minYear={2020}
           maxYear={2030}
           onClose={() => setIsMonthPickerOpen(false)}
           onConfirm={(nextYm) => { setPickerYm(nextYm); setTmpYm(nextYm); setIsMonthPickerOpen(false); }} 
