@@ -54,7 +54,7 @@ cursor: pointer;display: flex;align-items: center;justify-content: center;transi
 .period-sheet-picker-year{font-size: 22px;font-weight: 800;}
 .period-sheet-picker-body{padding: 10px 16px 0;flex: 1;}
 
-.wheel-wrap{position: relative;display: flex;justify-content: center;gap: 36px;--wheel-item-h: 64px;height: calc(var(--wheel-item-h) * 5);padding: 6px 0 0;}
+.wheel-wrap{position: relative;display: flex;justify-content: center;gap: 36px;--wheel-item-h: 64px;height: calc(var(--wheel-item-h) * 5);padding: 0;}
 .wheel-col{width: 44%;max-width: 220px;}
 .wheel{height: 100%;overflow-y: auto;-webkit-overflow-scrolling: touch;overscroll-behavior: contain;scroll-snap-type: y mandatory;scrollbar-width: none;}
 .wheel::-webkit-scrollbar{ display: none; }

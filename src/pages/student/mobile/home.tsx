@@ -403,16 +403,21 @@ function MonthWheelPicker({
   const yearRef = React.useRef<HTMLDivElement | null>(null);
   const monthRef = React.useRef<HTMLDivElement | null>(null);
   const lockRef = React.useRef(false);
+  const centerOffset = (el: HTMLDivElement) => (el.clientHeight - itemH) / 2;
 
   const setWheelToValue = React.useCallback(() => {
     const yIdx = clamp(years.indexOf(selectedYear), 0, years.length - 1);
     const mIdx = clamp(selectedMonth - 1, 0, 11);
 
-    const yTop = (yIdx + PAD_ITEMS) * itemH;
-    const mTop = (mIdx + PAD_ITEMS) * itemH;
+    const yEl = yearRef.current;
+    const mEl = monthRef.current;
+    if (!yEl || !mEl) return;
 
-    if (yearRef.current) yearRef.current.scrollTop = yTop;
-    if (monthRef.current) monthRef.current.scrollTop = mTop;
+    const yTop = (yIdx + PAD_ITEMS) * itemH - centerOffset(yEl);
+    const mTop = (mIdx + PAD_ITEMS) * itemH - centerOffset(mEl);
+
+    yEl.scrollTop = yTop;
+    mEl.scrollTop = mTop;
   }, [years, selectedYear, selectedMonth, itemH]);
 
   React.useEffect(() => {
@@ -427,7 +432,8 @@ function MonthWheelPicker({
       const el = kind === "year" ? yearRef.current : monthRef.current;
       if (!el) return;
 
-      const rawIndex = Math.round(el.scrollTop / itemH) - PAD_ITEMS;
+      const idxWithPads = Math.round((el.scrollTop + centerOffset(el)) / itemH);
+      const rawIndex = idxWithPads - PAD_ITEMS;
 
       if (kind === "year") {
         const idx = clamp(rawIndex, 0, years.length - 1);
