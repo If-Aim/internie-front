@@ -33,17 +33,17 @@ cursor: pointer;display: flex;align-items: center;justify-content: center;transi
 
 /*기간 조회 모달*/
 .period-sheet-backdrop{position: fixed;inset: 0;background: rgba(0,0,0,0.25);display: flex;justify-content: center;align-items: flex-end;z-index: 9999;}
-.period-sheet{width: 100%;max-width: 520px;background: #fff;border-top-left-radius: 24px;border-top-right-radius: 24px;padding: 37px 20px 18px;box-shadow: 0 -8px 30px rgba(0,0,0,0.15);animation: sheetUp 180ms ease-out;}
+.period-sheet{width: 100%;max-width: 520px;background: #fff;border-top-left-radius: 24px;border-top-right-radius: 24px;padding: 37px 20px 53px;box-shadow: 0 -8px 30px rgba(0,0,0,0.15);animation: sheetUp 180ms ease-out;}
 @keyframes sheetUp{
   from { transform: translateY(20px); opacity: 0.9; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-.period-sheet-header{display: flex;align-items: center;justify-content: space-between;margin-bottom: 12px;}
-.period-sheet-title{font-size: 28px;font-weight: 800;letter-spacing: -0.02em;}
-.period-sheet-close{width: 44px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
-.period-sheet-body{padding: 6px 2px 14px;}
-.period-sheet-section{margin-top: 18px;}
-.period-sheet-label{font-size: 18px;font-weight: 700;color: #6f6f6f;margin-bottom: 10px;}
+.period-sheet-header{display: flex;align-items: center;justify-content: space-between;margin-bottom: 5px;padding:0 0 0 12px;}
+.period-sheet-title{font-size: 24px;font-weight: 700;letter-spacing: -0.02em;}
+.period-sheet-close{width: 24px;height: 24px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
+.period-sheet-body{padding: 10px 9px 14px 12px;}
+.period-sheet-section{margin-top: 20px;}
+.period-sheet-label{font-size: 16px;font-weight: 500;color: #000;margin-bottom: 11px;padding:0 0 0 9px}
 
 .period-sheet-pages{display: flex;width: 200%;transform: translateX(0);transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);}
 .period-sheet-pages.to-picker{transform: translateX(-50%);}
@@ -54,41 +54,40 @@ cursor: pointer;display: flex;align-items: center;justify-content: center;transi
 .period-sheet-picker-year{font-size: 22px;font-weight: 800;}
 .period-sheet-picker-body{padding: 10px 16px 0;flex: 1;}
 
-.wheel-wrap{position: relative;display: flex;justify-content: center;gap: 36px;--wheel-item-h: 64px;height: calc(var(--wheel-item-h) * 5);padding: 0;}
-.wheel-col{width: 44%;max-width: 220px;}
+.wheel-wrap{position: relative;display: flex;justify-content: center;--wheel-item-h: 52px;height: calc(var(--wheel-item-h) * 5);padding: 0;}
+.wheel-col{width: 40%;max-width: 220px;}
 .wheel{height: 100%;overflow-y: auto;-webkit-overflow-scrolling: touch;overscroll-behavior: contain;scroll-snap-type: y mandatory;scrollbar-width: none;}
 .wheel::-webkit-scrollbar{ display: none; }
-.wheel-item{height: var(--wheel-item-h);display: flex;align-items: center;justify-content: center;font-size: 34px;font-weight: 800;letter-spacing: -0.02em;color: #cfcfcf;scroll-snap-align: center;user-select: none;}
+.wheel-item{height: var(--wheel-item-h);display: flex;align-items: center;justify-content: center;font-size: 20px;font-weight: 700;color: rgba(0, 0, 0, 0.50);scroll-snap-align: center;user-select: none;}
 .wheel-item.active{color: #000;}
 .wheel-pad{color: transparent;}
 .wheel-highlight{position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);
 width: calc(100% - 20px);height: var(--wheel-item-h);border-radius: 18px;
-background: rgba(0,0,0,0.04);pointer-events: none;}
+pointer-events: none;}
 .wheel-fade{position: absolute;left: 0;right: 0;height: calc(var(--wheel-item-h) * 2);pointer-events: none;}
 .wheel-fade-top{top: 0;background: linear-gradient(to bottom, #fff 20%, rgba(255,255,255,0));}
 .wheel-fade-bottom{bottom: 0;background: linear-gradient(to top, #fff 20%, rgba(255,255,255,0));}
 
-.month-input{position: relative;height: 60px;border: 1px solid #e6e6e6;border-radius: 12px;display: flex;align-items: center;padding: 0 16px;justify-content: space-between;background: #fff;}
-.month-input-text{font-size: 26px;font-weight: 500;color: #9a9a9a;position: relative;z-index: 2;}
-.month-input-icon{width: 26px;height: 26px;opacity: 0.8;display: block;}
+.month-input{position: relative;height: 60px;border: 1px solid #DFDFDF;border-radius: 10px;display: flex;align-items: center;padding: 0 21px 0 19px;justify-content: space-between;background: #fff;}
+.month-input-text{font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);position: relative;z-index: 2;}
+.month-input-icon{width: 24px;height: 24px;display: block;}
 .month-input-native{position: absolute;inset: 0;opacity: 0;cursor: pointer;z-index: 1;}
 .monthpicker-backdrop{position: fixed;inset: 0;background: rgba(0,0,0,0.25);display: flex;justify-content: center;align-items: flex-end;z-index: 10000;}
-.monthpicker-sheet{width: 100%;max-width: 520px;background: #fff;border-top-left-radius: 24px;border-top-right-radius: 24px;padding: 16px 18px 18px;box-shadow: 0 -8px 30px rgba(0,0,0,0.15);animation: sheetUp 180ms ease-out;}
-.monthpicker-header{display: flex;align-items: center;justify-content: space-between;min-height: 64px;}
+.monthpicker-sheet{width: 100%;background: #fff;border-top-left-radius: 20px;border-top-right-radius: 20px;padding: 20px 20px 53px;animation: sheetUp 180ms ease-out;}
+.monthpicker-header{display: flex;align-items: center;justify-content: space-between;margin: 1px 0 0 0}
+
 .monthpicker-title{font-size: 22px;font-weight: 800;}
-.monthpicker-close{width: 44px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
+
+.monthpicker-close{width: 28px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
 .monthpicker-body{padding: 10px 0 0;}
 .monthpicker-footer{padding: 14px 0 0;}
-.monthpicker-confirm{width: 100%;height: 72px;border-radius: 16px;border: none;background: #0a61ff;color: #fff;font-size: 26px;font-weight: 800;}
+.monthpicker-confirm{width: 100%;height: 60px;border-radius: 10px;border: none;background: var(--primary);color: #fff;font-size: 16px;font-weight: 700;}
 
 .month-icon-btn{width: 44px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;position: relative;z-index: 3;}
 
-.period-sheet-picker-footer{padding: 14px 18px 18px;}
-.period-sheet-picker-confirm{width: 100%;height: 72px;border-radius: 16px;border: none;background: #0a61ff;color: #fff;font-size: 26px;font-weight: 800;}
-.period-sheet-picker-back-icon{width: 24px;height: 24px;transform: rotate(90deg);}
 .period-sheet-footer{padding-top: 10px;}
-.period-sheet-apply{width: 100%;height: 72px;border-radius: 16px;border: none;background: #0a61ff;color: #fff;font-size: 26px;font-weight: 800}
+.period-sheet-apply{width: 100%;height: 60px;border-radius: 10px;border: none;background: var(--primary);color: #fff;font-size: 16px;font-weight: 700}
 
-.sort-row{display: flex;gap: 15px;}
-.sort-btn{flex: 1;height: 50px;border-radius: 10px;border: 1px solid #DFDFDF;background: #fff;font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);}
-.sort-btn.active{color: var(--primary)}
+.sort-row{display: flex;gap: 10px;}
+.sort-btn{flex: 1;height: 60px;border-radius: 10px;border: 1px solid #DFDFDF;background: #fff;font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);}
+.sort-btn.active{border: 2px solid var(--primary); color: #000}

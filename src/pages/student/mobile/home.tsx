@@ -344,7 +344,7 @@ function MonthWheelPicker({
 }) {
   const PAD_ITEMS = 2;
   const itemRef = React.useRef<HTMLDivElement | null>(null);
-  const [itemH, setItemH] = React.useState(64);
+  const [itemH, setItemH] = React.useState(52);
   React.useEffect(() => {
     if (!itemRef.current) return;
     const h = itemRef.current.offsetHeight;
