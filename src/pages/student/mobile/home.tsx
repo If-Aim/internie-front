@@ -63,7 +63,6 @@ type MonthFilterSheetProps = {
 };
 
 type SortOrder = "past" | "latest";
-type SheetView = "main" | "monthPicker";
 
 /*날짜 관련 함수*/
 function toYmd(d: Date): string {
@@ -222,14 +221,13 @@ function MonthFilterSheet({
   const { t, i18n } = useTranslation();
   const [tmpYm, setTmpYm] = React.useState(valueYm);
   const [tmpSort, setTmpSort] = React.useState<"past" | "latest">(sortOrder);
-  const [view, setView] = React.useState<SheetView>("main");
   const [pickerYm, setPickerYm] = React.useState(tmpYm);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
       setTmpYm(valueYm);
       setTmpSort(sortOrder);
-      setView("main");
       setPickerYm(valueYm);
     }
   }, [open, valueYm, sortOrder]);
@@ -259,95 +257,59 @@ function MonthFilterSheet({
   return (
     <div className="period-sheet-backdrop" onClick={onClose} role="presentation">
       <div className="period-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className={`period-sheet-pages ${view === "monthPicker" ? "to-picker" : ""}`}>
-          {/* 조회 화면 */}
-          <div className="period-sheet-page">
-            <div className="period-sheet-header">
-              <div className="period-sheet-title">{t("filter.title")}</div>
-              <button className="period-sheet-close" onClick={onClose} aria-label={t("common.close")}>
-                <img className="icon" alt="" src="/x-01.svg" />
-              </button>
-            </div>
+        <div className="period-sheet-header">
+          <div className="period-sheet-title">{t("filter.title")}</div>
+          <button className="period-sheet-close" onClick={onClose} aria-label={t("common.close")}>
+            <img className="icon" alt="" src="/x-01.svg" />
+          </button>
+        </div>
 
-            <div className="period-sheet-body">
-              <div className="period-sheet-section">
-                <div className="period-sheet-label">{t("filter.period")}</div>
+        <div className="period-sheet-body">
+          <div className="period-sheet-section">
+            <div className="period-sheet-label">{t("filter.period")}</div>
 
-                <label className="month-input">
-                  <div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
-                  <button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setView("monthPicker");}}><img className="month-input-icon" src="/calendar-07.svg" alt="" /></button>
-                  <input className="month-input-native" type="month" value={tmpYm} onChange={(e) => setTmpYm(e.target.value)} aria-label="month" />
-                </label>
-              </div>
-
-              <div className="period-sheet-section">
-                <div className="period-sheet-label">{t("filter.sort")}</div>
-
-                <div className="sort-row">
-                  <button
-                    type="button"
-                    className={`sort-btn ${tmpSort === "past" ? "active" : ""}`}
-                    onClick={() => setTmpSort("past")}
-                  >
-                    {t("filter.sortPast")}
-                  </button>
-                  <button
-                    type="button"
-                    className={`sort-btn ${tmpSort === "latest" ? "active" : ""}`}
-                    onClick={() => setTmpSort("latest")}
-                  >
-                    {t("filter.sortLatest")}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="period-sheet-footer">
-              <button type="button" className="period-sheet-apply" onClick={() => onApply(tmpYm, tmpSort)} > {t("filter.apply")} </button>
-            </div>
+            <label className="month-input">
+              <div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
+              <button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setIsMonthPickerOpen(true);}}><img className="month-input-icon" src="/calendar-07.svg" alt="" /></button>
+              <input className="month-input-native" type="month" value={tmpYm} onChange={(e) => setTmpYm(e.target.value)} aria-label="month" />
+            </label>
           </div>
-          {/* month 선택 화면 */}
-          <div className="period-sheet-page">
-            <div className="period-sheet-picker-header">
+
+          <div className="period-sheet-section">
+            <div className="period-sheet-label">{t("filter.sort")}</div>
+
+            <div className="sort-row">
               <button
                 type="button"
-                className="period-sheet-picker-back"
-                aria-label="back"
-                onClick={() => setView("main")}
+                className={`sort-btn ${tmpSort === "past" ? "active" : ""}`}
+                onClick={() => setTmpSort("past")}
               >
-                <img src="/chevron-right.svg" alt="" className="period-sheet-picker-back-icon"/>
+                {t("filter.sortPast")}
               </button>
-
-              {/* 연도 변경 기능은 비워둠 */}
-              <div className="period-sheet-picker-year">
-                {pickerYm.split("-")[0]}{i18n.language.startsWith("ko") ? "년" : ""}
-              </div>
-
               <button
                 type="button"
-                className="period-sheet-picker-close"
-                aria-label={t("common.close")}
-                onClick={onClose}
+                className={`sort-btn ${tmpSort === "latest" ? "active" : ""}`}
+                onClick={() => setTmpSort("latest")}
               >
-                <img className="icon" alt="" src="/x-01.svg" />
+                {t("filter.sortLatest")}
               </button>
-            </div>
-
-            <div className="period-sheet-picker-body">
-              <MonthWheelPicker
-                ym={pickerYm}
-                lang={i18n.language}
-                onChange={(nextYm) => setPickerYm(nextYm)}
-                minYear={2010}
-                maxYear={2030}
-              />
-            </div>
-
-            <div className="period-sheet-picker-footer">
-              <button type="button" className="period-sheet-picker-confirm" onClick={() => {setTmpYm(pickerYm); setView("main");}}> {t("filter.confirm")}</button>
             </div>
           </div>
         </div>
+
+        <div className="period-sheet-footer">
+          <button type="button" className="period-sheet-apply" onClick={() => onApply(tmpYm, tmpSort)} > {t("filter.apply")} </button>
+        </div>
+
+        <MonthPickerModal
+          open={isMonthPickerOpen}
+          ym={pickerYm}
+          lang={i18n.language}
+          minYear={2010}
+          maxYear={2030}
+          onClose={() => setIsMonthPickerOpen(false)}
+          onConfirm={(nextYm) => { setPickerYm(nextYm); setTmpYm(nextYm); setIsMonthPickerOpen(false); }} 
+        />
       </div>
     </div>
   );
@@ -421,7 +383,6 @@ function MonthWheelPicker({
   }, [years, selectedYear, selectedMonth, itemH]);
 
   React.useEffect(() => {
-    // 열린 직후/값 변경 시 휠 위치 맞추기
     setWheelToValue();
   }, [setWheelToValue]);
 
@@ -517,11 +478,64 @@ function MonthWheelPicker({
         </div>
       </div>
 
-      {/* 가운데 선택 라인/하이라이트 */}
       <div className="wheel-highlight" aria-hidden="true" />
-      {/* 위/아래 그라데이션 마스크 */}
       <div className="wheel-fade wheel-fade-top" aria-hidden="true" />
       <div className="wheel-fade wheel-fade-bottom" aria-hidden="true" />
+    </div>
+  );
+}
+function MonthPickerModal({
+  open,
+  ym,
+  lang,
+  minYear,
+  maxYear,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  ym: string;
+  lang: string;
+  minYear: number;
+  maxYear: number;
+  onClose: () => void;
+  onConfirm: (ym: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [localYm, setLocalYm] = React.useState(ym);
+
+  React.useEffect(() => {
+    if (open) setLocalYm(ym);
+  }, [open, ym]);
+
+  if (!open) return null;
+
+  return (
+    <div className="monthpicker-backdrop" onClick={onClose} role="presentation">
+      <div className="monthpicker-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="monthpicker-header">
+          <div className="monthpicker-title">{t("filter.period")}</div>
+          <button className="monthpicker-close" onClick={onClose} aria-label={t("common.close")}>
+            <img className="icon" alt="" src="/x-01.svg" />
+          </button>
+        </div>
+
+        <div className="monthpicker-body">
+          <MonthWheelPicker
+            ym={localYm}
+            lang={lang}
+            onChange={setLocalYm}
+            minYear={minYear}
+            maxYear={maxYear}
+          />
+        </div>
+
+        <div className="monthpicker-footer">
+          <button className="monthpicker-confirm" type="button" onClick={() => onConfirm(localYm)}>
+            {t("filter.confirm")}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

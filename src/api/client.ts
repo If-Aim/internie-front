@@ -11,16 +11,31 @@ export async function apiPublic(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
+  const token = localStorage.getItem("accessToken");
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
 
-  return fetch(buildUrl(path), {
+  if (token) {
+    headers["Authorization"] = token.startsWith("Bearer ")
+      ? token
+      : `Bearer ${token}`;
+  }
+
+  const res = await fetch(buildUrl(path), {
     ...init,
     headers,
     credentials: "include",
   });
+
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem("accessToken");
+    window.location.href = "/login";
+  }
+
+  return res;
 }
 //auth
 export async function api<T = unknown>(
