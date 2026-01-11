@@ -61,12 +61,31 @@
     "titlePlaceholder": "New event...",
     "memoPlaceholder": "Add a note...",
 
-    "dateRange": "Start–End date",
+    "dateRange": "Start – End",
     "addTime": "Add time",
     "editTime": "Edit time",
 
     "outroDesc1": "Internie is getting your questions ready!",
     "outroDesc2": "What skill will you earn today?"
+  },
+  "schedule_edit": {
+    "title": "Edit Schedule",
+    "titlePlaceholder": "Schedule Title...",
+    "memoPlaceholder": "Add a note...",
+
+    "alertAddTitle": "Please add a title.",
+    "confirmDelete": "Delete this schedule? This cannot be undone.",
+
+    "dateRange": "Start – End",
+    "addTime": "Add time",
+    "editTime": "Edit time",
+    "delete": "삭제하기",
+    "save": "저장하기",
+    "complete": "Updated successfully.",
+
+    "cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
+    "noPermissionDelete": "You don't have permission to delete this event.",
+    "deleteFailWithStatus": "Delete failed ({{status}})\n{{body}}"
   },
   "schedule_detail": {
     "titleFallback": "New Event",
@@ -76,9 +95,13 @@
     "noAnswer": "No answer"
   },
   "error": {
+    "authRequired": "인증/로그인이 필요합니다.",
+    "notFound": "해당 일정을 찾을 수 없습니다.",
     "record": "Something went wrong while starting your record.",
     "failAddSchedule": "Couldn’t save your schedule.",
     "failSetEndTime": "End time can’t be earlier than start time.",
-    "failSetEndDate": "End date can’t be earlier than start date."
+    "failSetEndDate": "End date can’t be earlier than start date.",
+    "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",
+    "invalidAccessMissingEventId": "잘못된 접근입니다. (Event ID 누락)"
   }
 }
