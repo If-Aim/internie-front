@@ -79,8 +79,8 @@
     "dateRange": "Start – End",
     "addTime": "Add time",
     "editTime": "Edit time",
-    "delete": "삭제하기",
-    "save": "저장하기",
+    "delete": "Delete",
+    "save": "Save",
     "complete": "Updated successfully.",
 
     "cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
