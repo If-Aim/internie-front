@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -39,6 +39,17 @@ export default function MyPage({ onLogout }: Props) {
   const [avatarUrl, setAvatarUrl] = React.useState("/internie_mascot_normal.png");
 
   const [recent, setRecent] = React.useState<EventDay[]>([]);
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch (e) {
+    } finally {
+      localStorage.removeItem("accessToken");
+      if (onLogout) onLogout();
+      navigate("/login", { replace: true });
+    }
+  }
 
   React.useEffect(() => {
     let mounted = true;
@@ -147,7 +158,7 @@ export default function MyPage({ onLogout }: Props) {
         </button>
       </section>
 
-      <button type="button" className="mypage-logout" onClick={() => (onLogout ? onLogout() : navigate("/login"))} >
+      <button type="button" className="mypage-logout" onClick={handleLogout}>
         로그아웃
       </button>
     </div>

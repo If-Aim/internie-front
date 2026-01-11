@@ -84,6 +84,9 @@ export async function api<T = unknown>(
 
   return (await res.json()) as T;
 }
+export async function logout(): Promise<void> {
+  await api<void>("/auth/logout", { method: "POST" });
+}
 
 // 업로드용 API
 export async function apiUpload<T = unknown>(
