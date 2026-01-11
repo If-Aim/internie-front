@@ -778,9 +778,9 @@ export default function EditSchedule() {
       setStage("outro");
       nav("/", { replace: true, state: { refetch: true, updatedEvent: finalEventForUI } });
     } catch (err) {
-      console.error("에러 발생:", err);
-      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
-      alert(`일정을 수정하지 못했습니다.\n(${msg})`);
+      //console.error("Error:", err);
+      const msg = err instanceof Error ? err.message : t("error.unknown");
+      alert(t("schedule_edit.editeFailedWithMessage", { message: msg }));
     }
   };
 
@@ -832,8 +832,8 @@ export default function EditSchedule() {
         return;
       }
 
-      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
-      alert(`일정을 삭제하지 못했습니다.\n(${msg})`);
+      const msg = err instanceof Error ? err.message : t("error.unknown");
+      alert(t("schedule_edit.deleteFailedWithMessage", { message: msg }));
     }
   };
 
@@ -849,7 +849,7 @@ export default function EditSchedule() {
 
             <h1 className="topbar-title">{t("schedule_edit.title")}</h1>
 
-            <button className="iconbtn" aria-label="닫기" onClick={() => nav(-1)}>
+            <button className="iconbtn" aria-label="" onClick={() => nav(-1)}>
               <img className="icon" src="/x-01.svg" alt="" />
             </button>
           </header>

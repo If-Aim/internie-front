@@ -82,7 +82,8 @@
     "delete": "Delete",
     "save": "Save",
     "complete": "Updated successfully.",
-
+    
+    "deleteFailedWithMessage": "Failed to delete the schedule.\n({{message}})",
     "cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
     "cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
     "noPermissionDelete": "You don't have permission to delete this event.",
@@ -96,6 +97,7 @@
     "noAnswer": "No answer"
   },
   "error": {
+    "unknown": "An unknown error occurred.",
     "authRequired": "Authentication is required. Please log in.",
     "notFound": "The requested schedule could not be found.",
     "record": "Something went wrong while starting your record.",
