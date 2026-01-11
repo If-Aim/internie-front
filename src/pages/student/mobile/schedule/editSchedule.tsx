@@ -791,7 +791,7 @@ export default function EditSchedule() {
     }
     const transcriptionCount = passed?.transcriptionCount ?? 0;
     if (transcriptionCount > 0) {
-      alert("녹음 기록이 있는 일정은 삭제할 수 없습니다.");
+      alert(t("schedule_edit.cannotDeleteWithRecording"));
       return;
     }
 

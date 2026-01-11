@@ -83,6 +83,7 @@
     "save": "저장하기",
     "complete": "수정이 완료되었습니다.",
 
+    "cannotDeleteWithRecording": "녹음 기록이 있는 일정은 삭제할 수 없습니다.",
     "cannotDeleteHasRecord": "기록한 일정은 삭제할 수 없습니다.",
     "noPermissionDelete": "일정을 삭제할 권한이 없습니다.",
     "deleteFailWithStatus": "삭제 실패 ({{status}})\n{{body}}"

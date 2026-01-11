@@ -83,6 +83,7 @@
     "save": "저장하기",
     "complete": "Updated successfully.",
 
+    "cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
     "cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
     "noPermissionDelete": "You don't have permission to delete this event.",
     "deleteFailWithStatus": "Delete failed ({{status}})\n{{body}}"
