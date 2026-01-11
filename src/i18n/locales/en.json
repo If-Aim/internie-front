@@ -58,7 +58,7 @@
     "alertAddTitle": "Please add a title.",
     "title": "Add Schedule",
 
-    "titlePlaceholder": "New event...",
+    "titlePlaceholder": "New schedule...",
     "memoPlaceholder": "Add a note...",
 
     "dateRange": "Start – End",
@@ -96,13 +96,13 @@
     "noAnswer": "No answer"
   },
   "error": {
-    "authRequired": "인증/로그인이 필요합니다.",
-    "notFound": "해당 일정을 찾을 수 없습니다.",
+    "authRequired": "Authentication is required. Please log in.",
+    "notFound": "The requested schedule could not be found.",
     "record": "Something went wrong while starting your record.",
     "failAddSchedule": "Couldn’t save your schedule.",
     "failSetEndTime": "End time can’t be earlier than start time.",
     "failSetEndDate": "End date can’t be earlier than start date.",
-    "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",
-    "invalidAccessMissingEventId": "잘못된 접근입니다. (Event ID 누락)"
+    "cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",
+    "invalidAccessMissingEventId": "Invalid access. The event ID is missing."
   }
 }
