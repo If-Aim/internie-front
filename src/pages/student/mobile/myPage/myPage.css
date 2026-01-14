@@ -5,8 +5,9 @@ padding: 20px 20px 53px; box-sizing: border-box; }
 
 .mypage-top { display: flex; flex-direction: column; align-items: center; gap: 30px;}
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; line-height:20px; }
-.mypage-profileimg-wrap { width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; }
+.mypage-profileimg-wrap { position: relative; width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; }
 .mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: contain; }
+.mypage-school-badge { position: absolute; right: 4px; bottom: 4px; width: 50px; height: 50px; padding:5px;border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
 
 .mypage-cards { margin-top: 18px; display: flex; flex-direction: column; gap: 21px; }

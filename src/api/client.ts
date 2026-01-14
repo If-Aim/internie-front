@@ -13,53 +13,107 @@ function getAuthHeader(): Record<string, string> {
     Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
   };
 }
-function handleAuthFail(res: Response) {
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("accessToken");
-    throw new ApiError(res.status, `HTTP ${res.status}`);
+
+export async function refreshAccessToken(): Promise<string> {
+  const res = await fetch(buildUrl("/auth/refresh"), {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const bodyText = await res.text().catch(() => "");
+    throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
   }
+
+  const newAuth = res.headers.get("Authorization");
+  if (!newAuth) {
+    throw new ApiError(200, "No Authorization header in refresh response");
+  }
+
+  localStorage.setItem("accessToken", newAuth);
+  return newAuth;
 }
+async function requestWithAutoRefresh(
+  path: string,
+  init: RequestInit = {},
+  opts?: { expectJson?: boolean } // api()에서만 JSON 기대
+): Promise<Response> {
+  const expectJson = opts?.expectJson ?? false;
+
+  // 헤더 구성(기존 init.headers 존중 + Authorization 주입)
+  const baseHeaders: Record<string, string> = {
+    ...(init.headers as Record<string, string> | undefined),
+    ...getAuthHeader(),
+  };
+
+  // JSON 기대 시에만 Content-Type 기본 주입 (logout 같은 바디 없는 요청 안전)
+  if (expectJson) {
+    if (!("Content-Type" in baseHeaders)) {
+      baseHeaders["Content-Type"] = "application/json";
+    }
+  }
+
+  const doFetch = async (): Promise<Response> => {
+    return fetch(buildUrl(path), {
+      ...init,
+      headers: baseHeaders,
+      credentials: "include",
+    });
+  };
+
+  let res = await doFetch();
+
+  if (res.status === 401 || res.status === 403) {
+    try {
+      await refreshAccessToken();
+
+      const retryHeaders: Record<string, string> = {
+        ...(init.headers as Record<string, string> | undefined),
+        ...getAuthHeader(),
+      };
+      if (expectJson) {
+        if (!("Content-Type" in retryHeaders)) {
+          retryHeaders["Content-Type"] = "application/json";
+        }
+      }
+
+      res = await fetch(buildUrl(path), {
+        ...init,
+        headers: retryHeaders,
+        credentials: "include",
+      });
+    } catch (e) {
+      localStorage.removeItem("accessToken");
+      throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem("accessToken");
+      const bodyText = await res.text().catch(() => "");
+      throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+    }
+  }
+
+  return res;
+}
+
 
 export async function apiPublic(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(init.headers as Record<string, string> | undefined),
-    ...getAuthHeader(),
-  };
-
-  const res = await fetch(buildUrl(path), {
-    ...init,
-    headers,
-    credentials: "include",
-  });
-
-  handleAuthFail(res);
+  const res = await requestWithAutoRefresh(path, init, { expectJson: false });
   return res;
 }
 
-//auth
+/* Auth */ 
 export async function api<T = unknown>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(init.headers as Record<string, string> | undefined),
-    ...getAuthHeader(),
-  };
+  const res = await requestWithAutoRefresh(path, init, { expectJson: true });
 
-  const res = await fetch(buildUrl(path), {
-    ...init,
-    headers,
-    credentials: "include",
-  });
-
-  handleAuthFail(res);
-
-  if (res.status === 204) { return undefined as T;}
+  if (res.status === 204) return undefined as T;
 
   if (!res.ok) {
     const bodyText = await res.text().catch(() => "");
@@ -75,9 +129,19 @@ export async function api<T = unknown>(
   return (await res.json()) as T;
 }
 
+//로그아웃
 export async function logout(): Promise<void> {
-  await api<void>("/auth/logout", { method: "POST" });
+  const token = localStorage.getItem("accessToken");
+  if (!token) return;
+
+  await apiPublic("/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+    },
+  });
 }
+
 
 // 업로드용 API
 export async function apiUpload<T = unknown>(
@@ -85,20 +149,19 @@ export async function apiUpload<T = unknown>(
   formData: FormData,
   init: RequestInit = {}
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    ...(init.headers as Record<string, string> | undefined),
-    ...getAuthHeader(),
-  };
-
-  const res = await fetch(buildUrl(path), {
-    ...init,
-    method: init.method ?? "POST",
-    headers,
-    body: formData,
-    credentials: "include",
-  });
-
-  handleAuthFail(res);
+  const res = await requestWithAutoRefresh(
+    path,
+    {
+      ...init,
+      method: init.method ?? "POST",
+      body: formData,
+      headers: {
+        ...(init.headers as Record<string, string> | undefined),
+        ...getAuthHeader(),
+      },
+    },
+    { expectJson: false }
+  );
 
   if (res.status === 204) return undefined as T;
 

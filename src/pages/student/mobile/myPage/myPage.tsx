@@ -7,6 +7,13 @@ import type { EventDay } from "../../../../api/client";
 import "./myPage.css";
 
 type Props = { onLogout?: () => void; };
+type Me = {
+  name?: string;
+  profileImage?: string | null;
+  verificationImage?: string | null;
+  role?: string;
+  status?: "APPROVED" | "PENDING" | "REJECTED" | null;
+};
 
 // 최근 기록 관련 유틸
 function currentYm() {
@@ -34,10 +41,17 @@ function sortKey(ed: EventDay) {
 export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
+  const [me, setMe] = React.useState<Me | null>(null);
   //const [email, setEmail] = React.useState("internie@gmail.com"); 임시 이메일 표시
-  const [name, setName] = React.useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = React.useState("/internie_mascot_normal.png");
-
+  const [name] = React.useState<string | null>(null);
+  const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
+  const isDefaultProfile =
+    !me?.profileImage ||
+    me.profileImage.includes("kakao") || // 카카오 기본 이미지
+    me.profileImage.includes("default");
+  const avatarSrc = isDefaultProfile
+    ? "/internie_mascot_normal.png"
+    : me?.profileImage!;
   const [recent, setRecent] = React.useState<EventDay[]>([]);
 
   async function handleLogout() {
@@ -56,11 +70,10 @@ export default function MyPage({ onLogout }: Props) {
 
     (async () => {
       try {
-        const me = await getUserMe();
+        const res = await getUserMe();
         if (!mounted) return;
 
-        setName(me.name ?? "사용자");
-        setAvatarUrl(me.profileImage ? me.profileImage : "/internie_mascot_normal.png"); // 프로필 이미지 없을 때
+        setMe(res);
       } catch {
       }
     })();
@@ -114,7 +127,10 @@ export default function MyPage({ onLogout }: Props) {
 
       <section className="mypage-top">
         <div className="mypage-profileimg-wrap">
-          <img className="mypage-profileimg" src={avatarUrl} alt="" />
+          <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
+          {isVerifiedStudent && (
+            <img className="mypage-school-badge" src="/school_mark.png" alt="재학생 인증" />
+          )}
         </div>
 
         { name && (
@@ -125,11 +141,13 @@ export default function MyPage({ onLogout }: Props) {
       </section>
 
       <section className="mypage-cards">
-        {/* 재학생 인증카드 */}
-        <button type="button" className="mypage-card wide" disabled>
-          <span className="mypage-badge" aria-hidden="true" />
-          <span className="mypage-card-title">(재학생 인증)</span>
-        </button>
+        {/* 재학생 인증 */}
+        {!isVerifiedStudent && (
+          <button type="button" className="mypage-card wide">
+            <span className="mypage-badge" />
+            <span className="mypage-card-title">재학생 인증하기</span>
+          </button>
+        )}
 
         {/* 최근 기록한? 일정 카드 */}
         <div className="mypage-cardgrid">
@@ -152,10 +170,20 @@ export default function MyPage({ onLogout }: Props) {
       </section>
 
       <section className="mypage-links">
-        <button type="button" className="mypage-link" disabled>(프로필 공유)</button>
-        <button type="button" className="mypage-link" onClick={() => navigate("/account")} disabled>
-          계정 관리하기
-        </button>
+        {isVerifiedStudent ? (
+          <>
+            <button type="button" className="mypage-link">
+              프로필 공유하기
+            </button>
+            <button type="button" className="mypage-link" onClick={() => navigate("/account")} >
+              프로필 수정하기
+            </button>
+          </>
+        ) : (
+          <button type="button" className="mypage-link" disabled>
+            목표 기업 설정
+          </button>
+        )}
       </section>
 
       <button type="button" className="mypage-logout" onClick={handleLogout}>
