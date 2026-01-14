@@ -1,7 +1,7 @@
 // src/pages/kakaoCallback.tsx
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { apiPublic } from "../api/client";
+import { loginWithKakao } from "../api/client";
 
 export default function KakaoCallback() {
   const [searchParams] = useSearchParams();
@@ -23,10 +23,7 @@ export default function KakaoCallback() {
         const origin = window.location.origin;
         const currentRedirectUri = `${origin}/oauth/kakao/callback`;
 
-        const res = await apiPublic("/auth/kakao", {
-          method: "POST",
-          body: JSON.stringify({ code, redirect_uri: currentRedirectUri }),
-        });
+        const res = await loginWithKakao(code, currentRedirectUri);
 
         if (res.status === 403) {
           alert("서버 보안 설정(403) 때문에 막혔습니다. 백엔드 개발자에게 문의해주세요.");
@@ -50,9 +47,7 @@ export default function KakaoCallback() {
           return;
         }
 
-        // Bearer 포함 여부 상관없이 저장(다음 요청에서 client.ts가 Bearer 보정)
         localStorage.setItem("accessToken", auth);
-
         navigate("/", { replace: true });
       } catch (e) {
         console.error("네트워크 에러:", e);
