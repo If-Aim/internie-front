@@ -923,9 +923,21 @@ function Home(): React.ReactElement {
   const [userProfileImg, setUserProfileImg] = React.useState<string>(
     "/internie_mascot_normal.png"
   );
+  function isDefaultProfileImage(url?: string | null) {
+    if (!url) return true;
 
+    const lowered = url.toLowerCase();
+    if (lowered.includes("kakaocdn")) return true;
+    if (lowered.includes("kakao")) return true;
+
+    if (lowered.includes("default")) return true;
+
+    return false;
+  }
+  
   React.useEffect(() => {
     (async () => {
+      
       if (!isAuthed) {
         setCurrentUserId(null);
         setUserName("User");
@@ -936,7 +948,13 @@ function Home(): React.ReactElement {
         const me = await getUserMe();
         setCurrentUserId(me.userId);
         setUserName(me.name ?? "User");
-        setUserProfileImg(me.profileImage ?? "/internie_mascot_normal.png");
+
+        const profile = me.profileImage;
+        setUserProfileImg(
+          isDefaultProfileImage(profile)
+            ? "/internie_mascot_normal.png"
+            : profile
+        );
       } catch (e) {
         console.error("getUserMe failed:", e);
         setCurrentUserId(null);
@@ -944,7 +962,7 @@ function Home(): React.ReactElement {
         setUserProfileImg("/internie_mascot_normal.png");
       }
     })();
-  }, []);
+  }, [isAuthed]);
 
   React.useEffect(() => {
     (async () => {
