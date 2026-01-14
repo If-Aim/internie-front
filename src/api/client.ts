@@ -96,19 +96,10 @@ async function requestWithAutoRefresh(
 }
 
 export async function loginWithKakao(code: string, redirectUri: string) {
-  console.log("[loginWithKakao] called", { code, redirectUri }); //디버깅용
-
-  const body = new URLSearchParams({
-    code,
-    redirect_uri: redirectUri,
-  }).toString();
-
   return apiPublic("/auth/kakao", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-    },
-    body,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, redirectUri }),
   });
 }
 

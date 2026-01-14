@@ -21,26 +21,17 @@ export default function KakaoCallback() {
     (async () => {
       try {
         const origin = window.location.origin;
-        const currentRedirectUri = `${origin}/oauth/kakao/callback`;
+        const redirectUri = `${origin}/oauth/kakao/callback`;
 
-        const res = await loginWithKakao(code, currentRedirectUri);
-
-        if (res.status === 403) {
-          alert("서버 보안 설정(403) 때문에 막혔습니다. 백엔드 개발자에게 문의해주세요.");
-          navigate("/login", { replace: true });
-          return;
-        }
+        const res = await loginWithKakao(code, redirectUri);
 
         if (!res.ok) {
-          console.error("로그인 실패:", res.status);
+          console.error("로그인 실패:", res.status, await res.text().catch(() => ""));
           navigate("/login", { replace: true });
           return;
         }
 
-        const auth =
-          res.headers.get("authorization") ||
-          res.headers.get("Authorization");
-
+        const auth = res.headers.get("Authorization") || res.headers.get("authorization");
         if (!auth) {
           console.error("헤더에 Authorization이 없습니다.");
           navigate("/login", { replace: true });
