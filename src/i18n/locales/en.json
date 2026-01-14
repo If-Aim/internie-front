@@ -18,9 +18,10 @@
     "dateRange": "Period"
   },
   "menu": {
-    "mypage": "My Page",
+    "mypage": "Profile",
     "recent": "Recent Activity",
-    "settings": "Settings and Privacy"
+    "settings": "Settings & Privacy",
+    "language": "Language"
   },
   "empty": {
     "title": "No schedules yet.",

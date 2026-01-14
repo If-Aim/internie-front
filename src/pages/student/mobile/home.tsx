@@ -719,6 +719,10 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, onRequireAuth }: 
             <img className="icon" src="/settings.svg" alt={t("menu.settings")} />{" "}
             <span>{t("menu.settings")}</span>
           </button>
+          <button className="drawer-menu-item" onClick={() => {}}>
+            <img className="icon" src="/settings.svg" alt={t("menu.language")} />{" "}
+            <span>{t("menu.language")}</span>
+          </button>
         </div>
       </div>
     </>

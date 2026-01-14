@@ -18,9 +18,10 @@
     "dateRange": "기간"
   },
   "menu": {
-    "mypage": "마이페이지",
+    "mypage": "기본 정보",
     "recent": "최근 활동",
-    "settings": "설정 및 개인정보"
+    "settings": "설정 및 개인정보",
+    "language": "언어 변경"
   },
   "empty": {
     "title": "아직 일정이 없어요",
