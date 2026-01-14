@@ -96,10 +96,21 @@ async function requestWithAutoRefresh(
 }
 
 export async function loginWithKakao(code: string, redirectUri: string) {
-  return apiPublic("/auth/kakao", {
+  // 1차 시도
+  const res1 = await apiPublic("/auth/kakao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code, redirectUri }),
+  });
+
+  if (res1.status !== 415) return res1;
+
+  // 2차 시도
+  const body = new URLSearchParams({ code, redirectUri }).toString();
+  return apiPublic("/auth/kakao", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body,
   });
 }
 
