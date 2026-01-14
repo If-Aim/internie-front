@@ -26,10 +26,10 @@ function prevYm(y: string, m: string) {
   if (mm === 1) return { y: String(yy - 1), m: "12" };
   return { y, m: String(mm - 1).padStart(2, "0") };
 }
-function toHHmm(t?: string | null) {
-  if (!t) return "00:00";
-  return t.length >= 5 ? t.slice(0, 5) : t;
-}
+// function toHHmm(t?: string | null) { 최근 기록 관련 부분
+//   if (!t) return "00:00";
+//   return t.length >= 5 ? t.slice(0, 5) : t;
+// }
 function sortKey(ed: EventDay) {
   const dateKey = ed.date.replaceAll("-", "");
   const timeKey = (ed.startTime ?? "00:00").slice(0, 5).replace(":", "");
@@ -42,8 +42,8 @@ export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
   const [me, setMe] = React.useState<Me | null>(null);
-  //const [email, setEmail] = React.useState("internie@gmail.com"); 임시 이메일 표시
-  const [name] = React.useState<string | null>(null);
+  const displayName = me?.name ?? "사용자";
+  const displayEmail = (me as any)?.email ?? "이메일 부분";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const isDefaultProfile =
     !me?.profileImage ||
@@ -52,7 +52,7 @@ export default function MyPage({ onLogout }: Props) {
   const avatarSrc = isDefaultProfile
     ? "/internie_mascot_normal.png"
     : me?.profileImage!;
-  const [recent, setRecent] = React.useState<EventDay[]>([]);
+  const [/*recent*/, setRecent] = React.useState<EventDay[]>([]);
 
   async function handleLogout() {
     try {
@@ -118,7 +118,7 @@ export default function MyPage({ onLogout }: Props) {
   return (
     <div className="mypage">
       <header className="mypage-header">
-        <div className="mypage-email">마이페이지{/*{email}*/}</div>
+        <div className="mypage-email">마이페이지</div>
 
         <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate("/")} >
           <img src="/x-01.svg" alt="메인화면으로 이동" />
@@ -132,44 +132,66 @@ export default function MyPage({ onLogout }: Props) {
             <img className="mypage-school-badge" src="/school_mark.png" alt="재학생 인증" />
           )}
         </div>
-
-        { name && (
-          <div className="mypage-greeting">
-            안녕하세요, <span className="mypage-name">{name}</span>님
-          </div>
-        )}
+        <div className="mypage-greeting">
+          안녕하세요, <span className="mypage-name">{displayName}</span>님
+        </div>
+        <div className="mypage-email-sub">{displayEmail}</div>
       </section>
 
       <section className="mypage-cards">
         {/* 재학생 인증 */}
-        {!isVerifiedStudent && (
-          <button type="button" className="mypage-card wide">
-            <span className="mypage-badge" />
-            <span className="mypage-card-title">재학생 인증하기</span>
-          </button>
-        )}
+        {isVerifiedStudent ? (
+          <>
+            <div className="mypage-actions">
+              <button type="button" className="mypage-action-btn" /* onClick={...} */ disabled>
+                프로필 공유하기
+              </button>
+              <button
+                type="button"
+                className="mypage-action-btn"
+                onClick={() => navigate("/account")}
+              >
+                프로필 수정하기
+              </button>
+            </div>
 
-        {/* 최근 기록한? 일정 카드 */}
-        <div className="mypage-cardgrid">
-          {/* TODO: 카드 클릭 시 조회 화면으로 이동 */}
-          <button type="button" className="mypage-card square" disabled />
-          <button type="button" className="mypage-card square" disabled />
-        </div>
+            {/*
+            <section className="mypage-cards">
+              ...최근 기록 카드...
+            </section>
+            */}
+          </>
+        ) : (
+          <>
+            <button type="button" className="mypage-card wide" /* onClick={...} */ disabled>
+              <span className="mypage-badge" />
+              <span className="mypage-card-title">재학생 인증하기</span>
+            </button>
 
-        {/* 카드 아래 텍스트(사진처럼 카드 아래에 제목/시간) */}
-        <div className="mypage-cardgrid-meta">
-          <div className="mypage-meta">
-            <div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
-            <div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
-          </div>
-          <div className="mypage-meta">
-            <div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
-            <div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
-          </div>
-        </div>
+            <div className="mypage-goal-title">목표 기업 설정</div>
+
+            {/* 최근 기록한? 일정 카드 
+            <div className="mypage-cardgrid">
+              TODO: 카드 클릭 시 조회 화면으로 이동 
+              <button type="button" className="mypage-card square" disabled />
+              <button type="button" className="mypage-card square" disabled />
+            </div>
+            <div className="mypage-cardgrid-meta"> //카드 아래 텍스트(사진처럼 카드 아래에 제목/시간)
+              <div className="mypage-meta">
+                <div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
+                <div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
+              </div>
+              <div className="mypage-meta">
+                <div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
+                <div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
+              </div>
+            </div>
+            */}
+          </>
+        )}        
       </section>
 
-      <section className="mypage-links">
+      {/* <section className="mypage-links">
         {isVerifiedStudent ? (
           <>
             <button type="button" className="mypage-link">
@@ -184,7 +206,7 @@ export default function MyPage({ onLogout }: Props) {
             목표 기업 설정
           </button>
         )}
-      </section>
+      </section> */}
 
       <button type="button" className="mypage-logout" onClick={handleLogout}>
         로그아웃

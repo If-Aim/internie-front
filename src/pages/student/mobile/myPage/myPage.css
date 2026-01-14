@@ -1,14 +1,19 @@
 .mypage { height: 100svh; overflow-y: auto;-webkit-overflow-scrolling: touch;background: var(--bg); display: flex; flex-direction: column;
-padding: 20px 20px 53px; box-sizing: border-box; }
+padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: border-box; }
 .mypage-header { position:relative;display: flex; align-items: center; justify-content: center;padding: 16px 20px;}
 .mypage-close { position: absolute; right:2px; top:14px; width: 24px; height: 24px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center;}
 
 .mypage-top { display: flex; flex-direction: column; align-items: center; gap: 30px;}
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; line-height:20px; }
+.mypage-email-sub { margin-top: -18px; font-size: 16px; font-weight: 500; color: #000; line-height: 20px; }
 .mypage-profileimg-wrap { position: relative; width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; }
 .mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: contain; }
 .mypage-school-badge { position: absolute; right: 4px; bottom: 4px; width: 50px; height: 50px; padding:5px;border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
+
+.mypage-actions { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mypage-action-btn { height: 56px; border: 0; border-radius: 10px; background: #E6E6E6;  color: #9A9A9A; font-size: 16px; font-weight: 700; } 
+.mypage-goal-title { margin-top: 28px; text-align: center; font-size: 22px; font-weight: 800; color: rgba(0, 0, 0, 0.45); }
 
 .mypage-cards { margin-top: 18px; display: flex; flex-direction: column; gap: 21px; }
 .mypage-card {border: 0; background: #fff; border-radius: 10px; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); }
