@@ -36,17 +36,15 @@ export async function refreshAccessToken(): Promise<string> {
 async function requestWithAutoRefresh(
   path: string,
   init: RequestInit = {},
-  opts?: { expectJson?: boolean } // api()에서만 JSON 기대
+  opts?: { expectJson?: boolean } 
 ): Promise<Response> {
   const expectJson = opts?.expectJson ?? false;
 
-  // 헤더 구성(기존 init.headers 존중 + Authorization 주입)
   const baseHeaders: Record<string, string> = {
     ...(init.headers as Record<string, string> | undefined),
     ...getAuthHeader(),
   };
 
-  // JSON 기대 시에만 Content-Type 기본 주입 (logout 같은 바디 없는 요청 안전)
   if (expectJson) {
     if (!("Content-Type" in baseHeaders)) {
       baseHeaders["Content-Type"] = "application/json";
@@ -97,6 +95,13 @@ async function requestWithAutoRefresh(
   return res;
 }
 
+export async function loginWithKakao(code: string, redirectUri: string) {
+  return apiPublic("/auth/kakao", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, redirectUri }),
+  });
+}
 
 export async function apiPublic(
   path: string,
