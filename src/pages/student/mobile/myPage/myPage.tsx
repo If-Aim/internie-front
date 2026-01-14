@@ -42,8 +42,8 @@ export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
   const [me, setMe] = React.useState<Me | null>(null);
-  const displayName = me?.name ?? "사용자";
-  const displayEmail = (me as any)?.email ?? "이메일 부분";
+  const displayName = me?.name ?? "";
+  const displayEmail = (me as any)?.email ?? "이메일";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const isDefaultProfile =
     !me?.profileImage ||
