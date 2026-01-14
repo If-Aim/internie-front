@@ -14,10 +14,9 @@ import QuestionsPage from "./questions/questionsPage";
 export default function StudentApp(): React.ReactElement {
   return (
     <Routes>
+      <Route index element={<Home />} />
       {/* 로그인 필요 */}
       <Route element={<ProtectedRoute />}>
-        <Route index element={<Home />} />
-
         <Route path="mypage" element={<MyPage />} />
 
         <Route path="schedule/new" element={<NewSchedule />} />

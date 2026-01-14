@@ -6,23 +6,29 @@ function buildUrl(path: string) {
     ? path
     : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return {};
+  return {
+    Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+  };
+}
+function handleAuthFail(res: Response) {
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem("accessToken");
+    throw new ApiError(res.status, `HTTP ${res.status}`);
+  }
+}
 
 export async function apiPublic(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
-  const token = localStorage.getItem("accessToken");
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
+    ...getAuthHeader(),
   };
-
-  if (token) {
-    headers["Authorization"] = token.startsWith("Bearer ")
-      ? token
-      : `Bearer ${token}`;
-  }
 
   const res = await fetch(buildUrl(path), {
     ...init,
@@ -30,30 +36,20 @@ export async function apiPublic(
     credentials: "include",
   });
 
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-  }
-
+  handleAuthFail(res);
   return res;
 }
+
 //auth
 export async function api<T = unknown>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("accessToken");
-
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
+    ...getAuthHeader(),
   };
-
-  if (token) {
-    headers["Authorization"] = token.startsWith("Bearer ")
-      ? token
-      : `Bearer ${token}`;
-  }
 
   const res = await fetch(buildUrl(path), {
     ...init,
@@ -61,15 +57,9 @@ export async function api<T = unknown>(
     credentials: "include",
   });
 
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-    throw new ApiError(res.status, `HTTP ${res.status}`);
-  }
+  handleAuthFail(res);
 
-  if (res.status === 204) {
-    return undefined as T;
-  }
+  if (res.status === 204) { return undefined as T;}
 
   if (!res.ok) {
     const bodyText = await res.text().catch(() => "");
@@ -84,6 +74,7 @@ export async function api<T = unknown>(
 
   return (await res.json()) as T;
 }
+
 export async function logout(): Promise<void> {
   await api<void>("/auth/logout", { method: "POST" });
 }
@@ -94,17 +85,10 @@ export async function apiUpload<T = unknown>(
   formData: FormData,
   init: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("accessToken");
-
   const headers: Record<string, string> = {
     ...(init.headers as Record<string, string> | undefined),
+    ...getAuthHeader(),
   };
-
-  if (token) {
-    headers["Authorization"] = token.startsWith("Bearer ")
-      ? token
-      : `Bearer ${token}`;
-  }
 
   const res = await fetch(buildUrl(path), {
     ...init,
@@ -114,11 +98,7 @@ export async function apiUpload<T = unknown>(
     credentials: "include",
   });
 
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-    throw new ApiError(res.status, `HTTP ${res.status}`);
-  }
+  handleAuthFail(res);
 
   if (res.status === 204) return undefined as T;
 

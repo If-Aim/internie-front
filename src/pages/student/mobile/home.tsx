@@ -546,8 +546,10 @@ type SideMenuProps = {
   userId: number | null;
   userName: string;
   userProfileImg: string;
+
+  onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
 };
-function SideMenu({ isOpen, onClose, userName, userProfileImg }: SideMenuProps) {
+function SideMenu({ isOpen, onClose, userName, userProfileImg, onRequireAuth }: SideMenuProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
@@ -705,7 +707,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg }: SideMenuProps) 
         </div>
 
         <div className="drawer-body">
-          <button className="drawer-menu-item" onClick={() => { navigate("/student/mypage");  closeWithSnap(); }} >
+          <button className="drawer-menu-item" onClick={() => {onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
             <img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
             <span>{t("menu.mypage")}</span>
           </button>
@@ -866,6 +868,30 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
 function Home(): React.ReactElement {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  const [loginGateOpen, setLoginGateOpen] = React.useState(false);
+  const [pendingPath, setPendingPath] = React.useState<string | null>(null);
+
+  const isAuthed = !!localStorage.getItem("accessToken");
+
+  const openLoginGate = (pathAfterLogin?: string) => {
+    setPendingPath(pathAfterLogin ?? null);
+    setLoginGateOpen(true);
+  };
+
+  const goLogin = () => {
+    setLoginGateOpen(false);
+    navigate("/login", { replace: false, state: { from: pendingPath ?? "/student" } });
+  };
+
+  const requireAuth = (pathAfterLogin: string, action?: () => void) => {
+    if (!isAuthed) {
+      openLoginGate(pathAfterLogin);
+      return;
+    }
+    action?.();
+  };
+
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -900,6 +926,12 @@ function Home(): React.ReactElement {
 
   React.useEffect(() => {
     (async () => {
+      if (!isAuthed) {
+        setCurrentUserId(null);
+        setUserName("User");
+        setUserProfileImg("/internie_mascot_normal.png");
+        return;
+      }
       try {
         const me = await getUserMe();
         setCurrentUserId(me.userId);
@@ -916,9 +948,9 @@ function Home(): React.ReactElement {
 
   React.useEffect(() => {
     (async () => {
+      if (!isAuthed) { setItems([]); return; }
       try {
         const [y, m] = month.split("-");
-
         const [eventsData, eventDaysData] = await Promise.all([
           api<any>(`/events/${y}/${m}`),
           api<EventDayMonthResponse>(`/event-days/${y}/${m}`),
@@ -1028,6 +1060,7 @@ function Home(): React.ReactElement {
 
   const handleRecord = async () => {
     if (!selectedItem) return;
+    if (!isAuthed) { openLoginGate(`/student`); return; }
     if (selectedItem.isLocked) return;
 
     try {
@@ -1057,7 +1090,7 @@ function Home(): React.ReactElement {
 
   return (
     <>
-      <Header onMenuClick={() => setMenuOpen(true)} onAddClick={() => navigate("/student/schedule/new")} />
+      <Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} />
       <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
         <SideMenu
           isOpen={isMenuOpen}
@@ -1065,6 +1098,7 @@ function Home(): React.ReactElement {
           userId={currentUserId}
           userName={userName}
           userProfileImg={userProfileImg}
+          onRequireAuth={(path, action) => requireAuth(path, action)}
         />
 
         <div className="row" style={{ marginTop: 18 }}>
@@ -1137,7 +1171,7 @@ function Home(): React.ReactElement {
               disabled={!canRecord}
               onClick={() => {
                 if (!canRecord) return;
-                setIsRecordModalOpen(true);
+                requireAuth(`/student`, () => {setIsRecordModalOpen(true);});
               }}
             >
               {t("common.record")}
@@ -1158,6 +1192,37 @@ function Home(): React.ReactElement {
         />
 
       </div>
+
+      {/* 로그인 유도 팝업 */}
+      {loginGateOpen && (
+        <div className="event-modal-backdrop" onClick={() => setLoginGateOpen(false)} role="presentation">
+          <div className="event-modal-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <header className="event-modal-header">
+              <div>
+                <div className="event-modal-title">로그인이 필요한 서비스입니다</div>
+                <div className="event-modal-date">로그인 하시겠습니까?</div>
+              </div>
+              <button
+                type="button"
+                className="event-modal-close"
+                aria-label={t("common.close")}
+                onClick={() => setLoginGateOpen(false)}
+              >
+                <img className="icon" alt="" src="/x-01.svg" />
+              </button>
+            </header>
+
+            <footer className="event-modal-footer" style={{ display: "flex", gap: 10 }}>
+              <button type="button" className="event-modal-primary" onClick={goLogin}>
+                로그인
+              </button>
+              <button type="button" className="event-modal-primary" onClick={() => setLoginGateOpen(false)}>
+                나중에
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
     </>
   );
 }
