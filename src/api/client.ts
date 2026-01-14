@@ -96,20 +96,18 @@ async function requestWithAutoRefresh(
 }
 
 export async function loginWithKakao(code: string, redirectUri: string) {
-  // 1차 시도
-  const res1 = await apiPublic("/auth/kakao", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code, redirectUri }),
-  });
+  console.log("[loginWithKakao] called", { code, redirectUri }); //디버깅용
 
-  if (res1.status !== 415) return res1;
+  const body = new URLSearchParams({
+    code,
+    redirect_uri: redirectUri,
+  }).toString();
 
-  // 2차 시도
-  const body = new URLSearchParams({ code, redirectUri }).toString();
   return apiPublic("/auth/kakao", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    },
     body,
   });
 }
@@ -118,8 +116,19 @@ export async function apiPublic(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
-  const res = await requestWithAutoRefresh(path, init, { expectJson: false });
-  return res;
+  const headers: Record<string, string> = {
+    ...(init.headers as Record<string, string> | undefined),
+    ...getAuthHeader(),
+  };
+
+  return requestWithAutoRefresh(
+    path,
+    {
+      ...init,
+      headers,
+    },
+    { expectJson: false }
+  );
 }
 
 /* Auth */ 
