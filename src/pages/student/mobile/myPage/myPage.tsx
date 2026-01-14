@@ -118,7 +118,7 @@ export default function MyPage({ onLogout }: Props) {
   return (
     <div className="mypage">
       <header className="mypage-header">
-        <div className="mypage-email">마이페이지</div>
+        <div className="mypage-email">{/*마이페이지*/}</div>
 
         <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate("/")} >
           <img src="/x-01.svg" alt="메인화면으로 이동" />
