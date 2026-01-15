@@ -74,9 +74,9 @@ background: #d9d9d9;color: #868686;font-size: 16px;font-weight: 700;}
 
 .event-modal-bubble {position: relative;background: #BDD8FF;border-radius: 10px;padding: 15px 10px;max-width: 86%;text-align: center;}
 .event-modal-bubble::after {content: "";position: absolute;left: 50%;transform: translateX(-50%);bottom: -10px;
-width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid transparent;border-top: 10px solid #cfe2ff;}
+width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid transparent;border-top: 10px solid #BDD8FF;}
 .event-modal-bubble-text {font-size: 16px;font-weight: 700;line-height: 26px;color: #0b0b0b;}
-.event-modal-mascot {width: 120px;height: auto;display: block;}
+.event-modal-mascot {width: 120px;height: auto;display: block;margin-bottom:10px;}
 
 .event-modal-footer { display: flex; justify-content: flex-end; }
 .event-modal-primary { background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; line-height: 50px;padding: 5px 24px; cursor: pointer; width: 100%; }
