@@ -70,7 +70,7 @@ cursor: pointer;z-index: 100;}
 .event-modal-weekdays {display: flex;justify-content: center;gap: 10px;padding: 10px 14px 14px;}
 .event-modal-weekday {width: 34px;height: 34px;min-width:34px;border-radius: 999px;display: inline-flex;align-items: center;justify-content: center;user-select: none;
 background: #d9d9d9;color: #868686;font-size: 16px;font-weight: 700;}
-.event-modal-weekday.is-active {background: var(--primary);color: #ffffff;}
+.event-modal-weekday.is-active {background: var(--primary);color: #ffffff;outline:none;}
 
 .event-modal-bubble {position: relative;background: #BDD8FF;border-radius: 10px;padding: 15px 20px;max-width: 100%;text-align: center;}
 .event-modal-bubble::after {content: "";position: absolute;left: 50%;transform: translateX(-50%);bottom: -10px;
