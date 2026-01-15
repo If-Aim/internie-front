@@ -828,7 +828,12 @@ type EventModalProps = {
   item: ScheduleItem;
   onClose: () => void;
   onRecord: () => void;
+  eventDaysForThisEvent: EventDay[];
 };
+function hasRecord(ed: EventDay): boolean {
+  const count = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
+  return count > 0 || ed.completed === true;
+}
 function getWeekdayIndex(iso: string): number {
   // 0=Sun ... 6=Sat
   const d = new Date(`${iso}T00:00:00`);
@@ -840,13 +845,21 @@ function weekdayLabels(lang: string): string[] {
   if (lang.startsWith("ko")) return ["월", "화", "수", "목", "금", "토", "일"];
   return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 }
-function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactElement {
+function EventModal({ item, onClose, onRecord, eventDaysForThisEvent }: EventModalProps): React.ReactElement {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith("en") ? "en-US" : "ko-KR";
   const dateText = formatDateYmdLocale(item.date, locale);
-  const activeIdx = getWeekdayIndex(item.date);
   const labels = weekdayLabels(i18n.language);
 
+  const recordedWeekdaySet = React.useMemo(() => {
+    const s = new Set<number>(); // 0=월 ... 6=일
+    for (const ed of eventDaysForThisEvent) {
+      if (!hasRecord(ed)) continue;
+      s.add(getWeekdayIndex(ed.date));
+    }
+    return s;
+  }, [eventDaysForThisEvent]);
+  
   return (
     <div className="event-modal-backdrop" onClick={onClose} aria-modal="true" role="dialog">
       <div className="event-modal-sheet" onClick={(e) => e.stopPropagation()}>
@@ -861,15 +874,17 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
           </button>
         </header>
         <div className="event-modal-weekdays" aria-label="weekday">
-          {labels.map((w, idx) => (
-            <div
-              key={w}
-              className={`event-modal-weekday ${idx === activeIdx ? "is-active" : ""}`}
-              aria-current={idx === activeIdx ? "date" : undefined}
-            >
-              {w}
-            </div>
-          ))}
+          {labels.map((w, idx) => {
+            const isRecorded = recordedWeekdaySet.has(idx);
+            return (
+              <div
+                key={w}
+                className={`event-modal-weekday ${isRecorded ? "is-active" : ""}`}
+              >
+                {w}
+              </div>
+            );
+          })}
         </div>
 
         <main className="event-modal-body">
@@ -936,6 +951,7 @@ function Home(): React.ReactElement {
   const [isMenuOpen, setMenuOpen] = React.useState(false);
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
+  const [eventDaysByEventId, setEventDaysByEventId] = React.useState<Map<string, EventDay[]>>(new Map());
 
   const byDate = React.useMemo<[string, ScheduleItem[]][]>(() => {
     const g: Record<string, ScheduleItem[]> = {};
@@ -1051,10 +1067,18 @@ function Home(): React.ReactElement {
         }
 
         const eventDayByKey = new Map<string, EventDay>();
+        const nextEventDaysByEventId = new Map<string, EventDay[]>();
+
         for (const ed of eventDaysData.eventDayList ?? []) {
           const key = `${String(ed.eventId)}__${ed.date}`;
           eventDayByKey.set(key, ed);
+
+          const eid = String(ed.eventId);
+          const arr = eventDaysByEventId.get(eid) ?? [];
+          arr.push(ed);
+          eventDaysByEventId.set(eid, arr);
         }
+        setEventDaysByEventId(nextEventDaysByEventId);
 
         const expanded = events.flatMap((ev) => expandEventToDailyItems(ev, month));
 
@@ -1212,7 +1236,12 @@ function Home(): React.ReactElement {
         <div className="bottom-spacer" />
 
         {isRecordModalOpen && selectedItem && (
-          <EventModal item={selectedItem} onClose={() => setSelectedItem(null)} onRecord={handleRecord} />
+          <EventModal
+            item={selectedItem}
+            onClose={() => setSelectedItem(null)}
+            onRecord={handleRecord}
+            eventDaysForThisEvent={eventDaysByEventId.get(String(selectedItem.eventId)) ?? []}
+          />
         )}
 
         {hasItems && (
