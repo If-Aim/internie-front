@@ -829,15 +829,30 @@ type EventModalProps = {
   onClose: () => void;
   onRecord: () => void;
 };
+function getWeekdayIndex(iso: string): number {
+  // 0=Sun ... 6=Sat
+  const d = new Date(`${iso}T00:00:00`);
+  const js = d.getDay();
+
+  return (js + 6) % 7;
+}
+function weekdayLabels(lang: string): string[] {
+  if (lang.startsWith("ko")) return ["월", "화", "수", "목", "금", "토", "일"];
+  return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+}
 function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactElement {
   const { t, i18n } = useTranslation();
-  const dateText = formatDateYmdLocale(item.date, i18n.language === "en" ? "en-US" : "ko-KR");
+  const locale = i18n.language.startsWith("en") ? "en-US" : "ko-KR";
+  const dateText = formatDateYmdLocale(item.date, locale);
+  const activeIdx = getWeekdayIndex(item.date);
+  const labels = weekdayLabels(i18n.language);
 
   return (
     <div className="event-modal-backdrop" onClick={onClose} aria-modal="true" role="dialog">
       <div className="event-modal-sheet" onClick={(e) => e.stopPropagation()}>
         <header className="event-modal-header">
-          <div>
+          <div className="event-modal-header-spacer" aria-hidden="true" />
+          <div className="event-modal-header-center">
             <div className="event-modal-title">{item.title}</div>
             <div className="event-modal-date">{dateText}</div>
           </div>
@@ -845,18 +860,33 @@ function EventModal({ item, onClose, onRecord }: EventModalProps): React.ReactEl
             <img className="icon" alt="" src="/x-01.svg" />
           </button>
         </header>
+        <div className="event-modal-weekdays" aria-label="weekday">
+          {labels.map((w, idx) => (
+            <div
+              key={w}
+              className={`event-modal-weekday ${idx === activeIdx ? "is-active" : ""}`}
+              aria-current={idx === activeIdx ? "date" : undefined}
+            >
+              {w}
+            </div>
+          ))}
+        </div>
 
         <main className="event-modal-body">
-          <p className="event-modal-text">
-            {t("modal.desc1")}
-            <br />
-            {t("modal.desc2")}
-          </p>
-
-          <div className="event-modal-cards">
-            <div className="event-modal-card-placeholder" />
-            <div className="event-modal-card-placeholder" />
+          <div className="event-modal-bubble" role="note" aria-label="description">
+            <div className="event-modal-bubble-text">
+              {t("modal.desc1")}
+              <br />
+              {t("modal.desc2")}
+            </div>
           </div>
+
+          <img
+            className="event-modal-mascot"
+            src="/internie_mascot_normal.png"
+            alt=""
+            draggable={false}
+          />
         </main>
 
         <footer className="event-modal-footer">
