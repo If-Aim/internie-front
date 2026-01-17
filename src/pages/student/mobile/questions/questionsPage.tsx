@@ -61,7 +61,8 @@ export default function QuestionsPage() {
   const [ringLevel, setRingLevel] = React.useState(0);
   const [eventDayTitle, setEventDayTitle] = React.useState<string>("");
   const [isLoadingQuestions, setIsLoadingQuestions] = React.useState(false);
-  
+  const [isUploading, setIsUploading] = React.useState(false);
+
   const audioCtxRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
   const dataArrayRef = React.useRef<Float32Array | null>(null);
@@ -86,9 +87,9 @@ export default function QuestionsPage() {
     const formData = new FormData();
     formData.append("audioFile", audioFile);
 
+    setIsUploading(true);
     try {
       const result = await apiUpload<any>(`/api/stt/upload/${eventDayIdNum}`, formData);
-
       console.log("STT 결과:", result);
     } catch (err) {
       console.error(err);
@@ -100,6 +101,8 @@ export default function QuestionsPage() {
       }
 
       alert("STT 업로드 중 네트워크 오류가 발생했습니다.");
+    } finally {
+      setIsUploading(false);
     }
   };
   const [showOutro, setShowOutro] = React.useState(false);
@@ -264,8 +267,9 @@ export default function QuestionsPage() {
         // 녹음이 정지되면 파일을 만들고 업로드
         recorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-          await uploadAudioToSTT(audioBlob);
           setShowOutro(true);
+
+          void uploadAudioToSTT(audioBlob);
         };
 
         recorder.start();
@@ -288,6 +292,8 @@ export default function QuestionsPage() {
 
   React.useEffect(() => {
     if (!showOutro) return;
+    if (isUploading) return;
+
     const timer = window.setTimeout(() => {
       if (isLastQuestion) {
         setStage("completed"); 
@@ -296,9 +302,9 @@ export default function QuestionsPage() {
         setStage("asking");
       }
       setShowOutro(false);
-    }, 2000);
+    }, 500);
     return () => clearTimeout(timer);
-  }, [showOutro, isLastQuestion, navigate]);
+  }, [showOutro, isUploading, isLastQuestion, navigate]);
 
   React.useEffect(() => {
     if (stage === "completed") {
@@ -421,7 +427,7 @@ export default function QuestionsPage() {
             <div className="record-outro-icon">
               <img src="/check-02.svg" alt="완료" />
             </div>
-            <p className="record-outro-text">기록완료!</p>
+            <p className="record-outro-text">{isUploading ? "기록 저장 중..." : "기록완료!"}</p>
           </div>
         </div>
       )}
