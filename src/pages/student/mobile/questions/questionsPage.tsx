@@ -344,7 +344,7 @@ export default function QuestionsPage() {
                 <div className="question-card">
                   <div className="question-header">
                     <div className="q-badge">Q</div>
-                    <div className="q-title">질문</div>
+                    {/* <div className="q-title">질문</div> */}
                   </div>
                   <p className="question-text">
                     {isLoadingQuestions
@@ -427,7 +427,7 @@ export default function QuestionsPage() {
             <div className="record-outro-icon">
               <img src="/check-02.svg" alt="완료" />
             </div>
-            <p className="record-outro-text">{isUploading ? "기록 저장 중..." : "기록완료!"}</p>
+            <p className="record-outro-text">기록완료!</p>
           </div>
         </div>
       )}
