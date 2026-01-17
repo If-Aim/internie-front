@@ -41,6 +41,16 @@ function applyExperienceName(q: string, title: string) {
   if (!q.includes("(@experience_name)")) return q;
   return q.split("(@experience_name)").join(title);
 }
+//역량 분석 로딩 dots
+function LoadingDots() {
+  return (
+    <div className="loading-dots" role="status" aria-live="polite" aria-label="로딩 중">
+      <span className="loading-dot" />
+      <span className="loading-dot" />
+      <span className="loading-dot" />
+    </div>
+  );
+}
 
 export default function QuestionsPage() {
   const navigate = useNavigate();
@@ -433,19 +443,21 @@ export default function QuestionsPage() {
       )}
       {stage === "completed" && (
         <div className="wrap">
-          <div className="spacer-50" aria-hidden="true" />
+          {/* <div className="spacer-50" aria-hidden="true" /> */}
           <header className="topbar-completion">
-            <button className="iconbtn" aria-label="메뉴">
+            {/* <button className="iconbtn" aria-label="메뉴">
               <img className="icon" src="/menu-01.svg" alt="" />
             </button>
             <h1 className="topbar-title">활동 보고서</h1>
-            <div style={{ width: 24 }} />
+            <div style={{ width: 24 }} /> */}
           </header>
           <main className="completion-page">
-            <div className="completion-content">          
-              <h2 className="completion-title">역량 분석 중..</h2>
+            <div className="completion-content">
+              <LoadingDots />
+              <h2 className="completion-title">역량 분석 중</h2>
               <p className="completion-desc">
-                인터니가 사용자님의 답변을 분석 중이에요!
+                인터니가 답변을 분석 중이에요!<br />
+                완료까지 약 5분 정도 소요될 수 있어요
               </p>
             </div>
           </main>
