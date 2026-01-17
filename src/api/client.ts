@@ -25,7 +25,7 @@ export async function refreshAccessToken(): Promise<string> {
     throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
   }
 
-  const newAuth = res.headers.get("Authorization");
+  const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
   if (!newAuth) {
     throw new ApiError(200, "No Authorization header in refresh response");
   }
@@ -107,19 +107,10 @@ export async function apiPublic(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
-  const headers: Record<string, string> = {
-    ...(init.headers as Record<string, string> | undefined),
-    ...getAuthHeader(),
-  };
-
-  return requestWithAutoRefresh(
-    path,
-    {
-      ...init,
-      headers,
-    },
-    { expectJson: false }
-  );
+  return fetch(buildUrl(path), {
+    ...init,
+    credentials: "include", 
+  });
 }
 
 /* Auth */ 
