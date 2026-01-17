@@ -443,7 +443,7 @@ export default function QuestionsPage() {
       )}
       {stage === "completed" && (
         <div className="wrap">
-          {/* <div className="spacer-50" aria-hidden="true" /> */}
+          <div className="spacer-50" aria-hidden="true" />
           <header className="topbar-completion">
             {/* <button className="iconbtn" aria-label="메뉴">
               <img className="icon" src="/menu-01.svg" alt="" />
