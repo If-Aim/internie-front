@@ -1074,9 +1074,9 @@ function Home(): React.ReactElement {
           eventDayByKey.set(key, ed);
 
           const eid = String(ed.eventId);
-          const arr = eventDaysByEventId.get(eid) ?? [];
+          const arr = nextEventDaysByEventId.get(eid) ?? [];
           arr.push(ed);
-          eventDaysByEventId.set(eid, arr);
+          nextEventDaysByEventId.set(eid, arr);
         }
         setEventDaysByEventId(nextEventDaysByEventId);
 
