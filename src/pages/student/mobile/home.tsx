@@ -831,7 +831,8 @@ type EventModalProps = {
   eventDaysForThisEvent: EventDay[];
 };
 function hasRecord(ed: EventDay): boolean {
-  return ed.completed === true;
+  const count = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
+  return count > 0 || ed.completed === true;
 }
 function getWeekdayIndex(iso: string): number {
   // 0=Sun ... 6=Sat
