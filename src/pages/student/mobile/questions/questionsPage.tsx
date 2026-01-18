@@ -37,7 +37,6 @@ const BARS = 40; // 파형 바 개수
 const SENSITIVITY = 10; // 감도 조절 상수
 
 function applyExperienceName(q: string, title: string) {
-  // 백엔드가 이미 치환해서 내려줬으면 그대로 사용
   if (!q.includes("(@experience_name)")) return q;
   return q.split("(@experience_name)").join(title);
 }
@@ -153,6 +152,10 @@ export default function QuestionsPage() {
       } catch (err) {
         if (err instanceof ApiError) {
           if (err.status === 401 || err.status === 403) return;
+          if (err.status === 404) {
+            alert("모든 질문을 완료했습니다.\n다음 일정에서 다시 진행해 주세요.");
+            return;
+          }
           alert(`질문 조회 실패: ${err.status}\n${err.bodyText ?? ""}`);
           return;
         }
