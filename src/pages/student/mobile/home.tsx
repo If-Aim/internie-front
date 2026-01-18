@@ -1210,12 +1210,12 @@ function Home(): React.ReactElement {
   return (
     <>
       {recordStage === "preparing" && (
-        <div className="completion-page" aria-modal="true" role="dialog">
-          <div className="completion-content">
+        <div className="preparing-page" aria-modal="true" role="dialog">
+          <div className="preparing-content">
             <LoadingDots />
 
-            <p className="completion-title">{t("modal.questionsPreparingTitle")}</p>
-            <p className="completion-desc">{t("modal.questionsPreparingDesc1")}<br/>{t("modal.questionsPreparingDesc2")}</p>
+            <p className="preparing-title">{t("modal.questionsPreparingTitle")}</p>
+            <p className="preparing-desc">{t("modal.questionsPreparingDesc1")}<br/>{t("modal.questionsPreparingDesc2")}</p>
           </div>
         </div>
       )}
@@ -1297,7 +1297,7 @@ function Home(): React.ReactElement {
           />
         )}
 
-        {hasItems && (
+        {hasItems && recordStage !== "preparing" && (
           <div className="bottom-cta">
             <button
               type="button"
