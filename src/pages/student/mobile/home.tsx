@@ -1163,7 +1163,7 @@ function Home(): React.ReactElement {
     const startedAt = Date.now();
     const delayRecording = (path: string) => {
       const elapsed = Date.now() - startedAt;
-      const remain = Math.max(0, 50000 - elapsed); // 3초
+      const remain = Math.max(0, 3000 - elapsed); // 3초
 
       window.setTimeout(()=>{
         setRecordStage("idle")
