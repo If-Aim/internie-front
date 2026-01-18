@@ -68,7 +68,7 @@ pointer-events: none;}
 .wheel-fade-top{top: 0;background: linear-gradient(to bottom, #fff 20%, rgba(255,255,255,0));}
 .wheel-fade-bottom{bottom: 0;background: linear-gradient(to top, #fff 20%, rgba(255,255,255,0));}
 
-.month-input{position: relative;height: 60px;border: 1px solid #DFDFDF;border-radius: 10px;display: flex;align-items: center;padding: 0 21px 0 19px;justify-content: space-between;background: #fff;}
+.month-input{position: relative;height: 60px;border: 1px solid #DFDFDF;border-radius: 10px;display: flex;align-items: center;padding: 0 15px 0 19px;justify-content: space-between;background: #fff;}
 .month-input-text{font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);position: relative;z-index: 2;}
 .month-input-icon{width: 24px;height: 24px;display: block;}
 .month-input-native{position: absolute;inset: 0;opacity: 0;cursor: pointer;z-index: 1;}
