@@ -7,7 +7,6 @@ import { api } from "../../../../api/client";
 
 import "./schedule.css";
 
-type Stage = "form" | "outro";
 type TimeWheelVariant = "sheet" | "calendar";
 
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
@@ -608,7 +607,6 @@ export default function NewSchedule() {
   const {t, i18n} = useTranslation();
   const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
 
-  const [stage, setStage] = React.useState<Stage>("form");
   const [showSheet, setShowSheet] = React.useState(false);
   const [timeStep, setTimeStep] = React.useState<"start" | "end">("start");
 
@@ -765,10 +763,7 @@ export default function NewSchedule() {
       });
 
       // 성공 시
-      setStage("outro");
-      setTimeout(() => {
-        nav("/", { replace: true });
-      }, 2500);
+      nav("/", { replace: true });
     } catch (err) {
       console.error("Error:", err);
       alert(t("error.failAddSchedule"));
@@ -778,114 +773,102 @@ export default function NewSchedule() {
   return (
       <div className="screen">
       {/* 일정 작성 화면 */}
-      {stage === "form" && (
-          <>
-          <div className="spacer-50" aria-hidden="true" />
-          <header className="topbar_newschedule">
-              <button className="iconbtn" aria-label={t("common.menu")}>
-              <img className="icon" src="/menu-01.svg" alt="" />
-              </button>
-              <h1 className="topbar-title">{t("schedule_new.title")}</h1>
-              <button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
-              <img className="icon" src="/x-01.svg" alt="" />
-              </button>
-          </header>
+        <>
+        <div className="spacer-50" aria-hidden="true" />
+        <header className="topbar_newschedule">
+            <button className="iconbtn" aria-label={t("common.menu")}>
+            <img className="icon" src="/menu-01.svg" alt="" />
+            </button>
+            <h1 className="topbar-title">{t("schedule_new.title")}</h1>
+            <button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
+            <img className="icon" src="/x-01.svg" alt="" />
+            </button>
+        </header>
 
-          <main className="new-event">
-            <input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <main className="new-event">
+          <input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-            {/* 일정 */}
-            <section className="row">
-                <div className="col">
-                    <button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
-                        <img className="icon" src="/clock-01.svg" alt="" />
-                        <div className="row-today">
-                            <strong>{startDateLabel}</strong>
-                        </div>
-                    </button>
-                    <button type="button" className="row-sub row-sub-btn"
-                    onClick={() => { setTimeStep("start"); setShowSheet(true); }}
-                    aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}>
-                    {isAllDay ? t("common.allDay") : hasTime ? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}` : t("schedule_new.addTime")}
-                    </button>
-                </div>
-                <div className="add-btn-wrapper">
-                    <button className="add-date" aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
-                    <img className="add" src="/plus-02.svg" alt="" />
-                    </button>
-                </div>
-            </section>
-
-            {/* 날짜 */}
-            <section className="row row--today">
-                <div className="col">
-                  <button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
-                    <img className="icon" src="/check-broken.svg" alt="date" />
-                    <div className="row-today">
-                      <strong>{endDateLabel}</strong>
-                    </div>
+          {/* 일정 */}
+          <section className="row">
+              <div className="col">
+                  <button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
+                      <img className="icon" src="/clock-01.svg" alt="" />
+                      <div className="row-today">
+                          <strong>{startDateLabel}</strong>
+                      </div>
                   </button>
-                  <button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set start-end date">
-                  {isRangeSelected ? dateRangeLabel : t("schedule_new.dateRange")}
+                  <button type="button" className="row-sub row-sub-btn"
+                  onClick={() => { setTimeStep("start"); setShowSheet(true); }}
+                  aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}>
+                  {isAllDay ? t("common.allDay") : hasTime ? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}` : t("schedule_new.addTime")}
                   </button>
-                </div>
-                <div className="add-btn-wrapper">
-                    <button className="add-date" aria-label="set start-end date" onClick={openFullRangeSheet}>
-                    <img className="add" src="/plus-02.svg" alt="" />
-                    </button>
-                </div>
-            </section>
+              </div>
+              <div className="add-btn-wrapper">
+                  <button className="add-date" aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
+                  <img className="add" src="/plus-02.svg" alt="" />
+                  </button>
+              </div>
+          </section>
 
-            {/* 메모추가 */}
-            <div className="memo-box">
-                <textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)}
-                />
-            </div>
-          </main>
+          {/* 날짜 */}
+          <section className="row row--today">
+              <div className="col">
+                <button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
+                  <img className="icon" src="/check-broken.svg" alt="date" />
+                  <div className="row-today">
+                    <strong>{endDateLabel}</strong>
+                  </div>
+                </button>
+                <button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set start-end date">
+                {isRangeSelected ? dateRangeLabel : t("schedule_new.dateRange")}
+                </button>
+              </div>
+              <div className="add-btn-wrapper">
+                  <button className="add-date" aria-label="set start-end date" onClick={openFullRangeSheet}>
+                  <img className="add" src="/plus-02.svg" alt="" />
+                  </button>
+              </div>
+          </section>
 
-          <footer className="footer-fixed">
-              <button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
-          </footer>
-          {/* 시간 선택 바텀시트 */}
-          {showSheet && (
-              <TimeSheet
-                step={timeStep}
-                setStep={setTimeStep}
-                startTime={startTime}
-                endTime={endTime}
-                onChangeStart={handleStartTimeChange}
-                onChangeEnd={handleEndTimeChange}
-                isAllDay={isAllDay}
-                setIsAllDay={setIsAllDay}
-                setStartTime={setStartTime}
-                setEndTime={setEndTime}
-                onClose={() => setShowSheet(false)}
+          {/* 메모추가 */}
+          <div className="memo-box">
+              <textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)}
               />
-          )}
-          {showDateRangeSheet && (
-            <DateRangeSheet
-              mode={rangeSheetMode}
-              startDate={startDate}
-              endDate={endDate}
-              onChangeStart={handleStartDateChange}
-              onChangeEnd={rangeSheetMode === "range" ? handleEndDateChangeForRange : handleEndDateChange}
+          </div>
+        </main>
+
+        <footer className="footer-fixed">
+            <button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
+        </footer>
+        {/* 시간 선택 바텀시트 */}
+        {showSheet && (
+            <TimeSheet
+              step={timeStep}
+              setStep={setTimeStep}
               startTime={startTime}
-              onChangeStartTime={(t) => { if (t) handleStartTimeChange(t); else setStartTime(null); }}
-              onClose={() => setShowDateRangeSheet(false)}
+              endTime={endTime}
+              onChangeStart={handleStartTimeChange}
+              onChangeEnd={handleEndTimeChange}
+              isAllDay={isAllDay}
+              setIsAllDay={setIsAllDay}
+              setStartTime={setStartTime}
+              setEndTime={setEndTime}
+              onClose={() => setShowSheet(false)}
             />
-          )}
-          </>
-      )}
-      {/* 아웃트로 화면 */}
-      {stage === "outro" && (
-          <>
-          {/*<div className="spacer-50" aria-hidden="true" />*/}
-          <main className="outro">
-              <img src="/internie_mascot_normal.png" alt="" className="outro-img"/>
-              <p className="outro-text">{t("schedule_new.outroDesc1")}<br />{t("schedule_new.outroDesc2")}</p>
-          </main>
-          </>
-      )}
+        )}
+        {showDateRangeSheet && (
+          <DateRangeSheet
+            mode={rangeSheetMode}
+            startDate={startDate}
+            endDate={endDate}
+            onChangeStart={handleStartDateChange}
+            onChangeEnd={rangeSheetMode === "range" ? handleEndDateChangeForRange : handleEndDateChange}
+            startTime={startTime}
+            onChangeStartTime={(t) => { if (t) handleStartTimeChange(t); else setStartTime(null); }}
+            onClose={() => setShowDateRangeSheet(false)}
+          />
+        )}
+        </>
     </div>
   );
 }

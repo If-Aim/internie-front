@@ -210,6 +210,23 @@ function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
     </div>
   );
 }
+/**
+ * 로딩중 점 애니메이션  
+ */
+function LoadingDots() {
+  return (
+    <div
+      className="loading-dots"
+      role="status"
+      aria-live="polite"
+      aria-label="loading"
+    >
+      <span className="loading-dot" />
+      <span className="loading-dot" />
+      <span className="loading-dot" />
+    </div>
+  );
+}
 
 function MonthFilterSheet({
   open,
@@ -952,6 +969,7 @@ function Home(): React.ReactElement {
   const [items, setItems] = React.useState<ScheduleItem[]>([]);
   const [selectedItem, setSelectedItem] = React.useState<ScheduleItem | null>(null);
   const [eventDaysByEventId, setEventDaysByEventId] = React.useState<Map<string, EventDay[]>>(new Map());
+  const [recordStage, setRecordStage] = React.useState<"idle" | "preparing">("idle");
 
   const byDate = React.useMemo<[string, ScheduleItem[]][]>(() => {
     const g: Record<string, ScheduleItem[]> = {};
@@ -1138,15 +1156,19 @@ function Home(): React.ReactElement {
     if (!selectedItem) return;
     if (!isAuthed) { openLoginGate(`/student`); return; }
     if (selectedItem.isLocked) return;
-    if (selectedItem.eventDayId) {
-      const count = selectedItem.transcriptionCount ?? 0;
-      if (count >= TOTAL_QUESTIONS) return; 
 
-      setSelectedItem(null);
-      navigate(`/student/schedule/${selectedItem.eventDayId}/questions`);
-      return;
-    }
+    setIsRecordModalOpen(false);
+    setRecordStage("preparing");
+
     try {
+      if (selectedItem.eventDayId) {
+        const count = selectedItem.transcriptionCount ?? 0;
+        if (count >= TOTAL_QUESTIONS) return; 
+
+        setSelectedItem(null);
+        navigate(`/student/schedule/${selectedItem.eventDayId}/questions`);
+        return;
+      }
       const body = {
         date: selectedItem.date,
         title: selectedItem.title,
@@ -1166,6 +1188,8 @@ function Home(): React.ReactElement {
       navigate(`/student/schedule/${newEventDayId}/questions`);
     } catch (error) {
       alert(t("error.record"));
+    } finally {
+      setRecordStage("idle");
     }
   };
 
@@ -1173,6 +1197,16 @@ function Home(): React.ReactElement {
 
   return (
     <>
+      {recordStage === "preparing" && (
+        <div className="completion-page" aria-modal="true" role="dialog">
+          <div className="completion-content">
+            <LoadingDots />
+
+            <p className="completion-title">{t("modal.questionsPreparingTitle")}</p>
+            <p className="completion-desc">{t("modal.questionsPreparingDesc1")}<br/>{t("modal.questionsPreparingDesc2")}</p>
+          </div>
+        </div>
+      )}
       <Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} />
       <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
         <SideMenu

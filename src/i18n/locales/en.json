@@ -30,7 +30,11 @@
   },
   "modal": {
     "desc1": "Record today's experience",
-    "desc2": "and earn a competency score!"
+    "desc2": "and earn a competency score!",
+    
+    "questionsPreparingTitle": "Preparing your questions",
+    "questionsPreparingDesc1": "Internie is getting your questions ready!",
+    "questionsPreparingDesc2": "What skill will you earn today?"
   },
   "schedule": {
     "edit": "Edit Schedule"
@@ -64,10 +68,7 @@
 
     "dateRange": "Start – End",
     "addTime": "Add time",
-    "editTime": "Edit time",
-
-    "outroDesc1": "Internie is getting your questions ready!",
-    "outroDesc2": "What skill will you earn today?"
+    "editTime": "Edit time"
   },
   "schedule_edit": {
     "title": "Edit Schedule",
