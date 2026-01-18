@@ -26,6 +26,17 @@ type EditState =
   }
 | null;
 
+type EventDay = {
+  eventDayId: number;
+  eventId: string | number;
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+  transcriptions?: Array<any>;
+};
+type EventDayMonthResponse = {
+  totalCount: number;
+  eventDayList: EventDay[];
+};
 type RangeSheetMode = "range" | "startOnly" | "endOnly";
 
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
@@ -136,7 +147,20 @@ function getMonthGrid(base: Date) {
 
   return { year, month, days };
 }
-
+// 녹음 존재 시 기간 수정 block
+function ymFromDate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+function monthRange(start: Date, end: Date) {
+  const out: string[] = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  while (cur <= last) {
+    out.push(ymFromDate(cur));
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return out;
+}
 // 달력 내 시간 부분
 function TimeWheel({
   value,
@@ -619,7 +643,12 @@ export default function EditSchedule() {
 
   const [startDate, setStartDate] = React.useState<Date>(() => (passed?.startDate ? ymdToDate(passed.startDate) : new Date()));
   const [endDate, setEndDate] = React.useState<Date>(() => (passed?.endDate ? ymdToDate(passed.endDate) : new Date()));
-
+  React.useEffect(() => {
+    if (!passed?.startDate || !passed?.endDate) return;
+    setStartDate(ymdToDate(passed.startDate));
+    setEndDate(ymdToDate(passed.endDate));
+  }, [passed?.startDate, passed?.endDate]);
+  
   const [startTime, setStartTime] = React.useState<string | null>(() =>
     passed?.startTime ? passed.startTime.slice(0, 5) : null
   );
@@ -634,12 +663,69 @@ export default function EditSchedule() {
   const [title, setTitle] = React.useState<string>(() => passed?.title ?? "");
   const [memo, setMemo] = React.useState<string>(() => passed?.content ?? "");
 
+  const [firstRecordedDate, setFirstRecordedDate] = React.useState<Date | null>(null); // 첫 녹음(기록) 일자 조회
+  const [lastRecordedDate, setLastRecordedDate] = React.useState<Date | null>(null); // 마지막 녹음(기록) 일자 조회
+
   React.useEffect(() => {
     if (!passed) {
       alert(t("error.cannotLoadSchedule"));
       nav("/", { replace: true });
     }
   }, [passed, nav]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!eventId || !passed?.startDate || !passed?.endDate) return;
+      try {
+        const baseStart = ymdToDate(passed.startDate);
+        const baseEnd = ymdToDate(passed.endDate);
+
+        const months = monthRange(baseStart, baseEnd);
+
+        const lists = await Promise.all(
+          months.map((ym) => {
+            const [y, m] = ym.split("-");
+            return api<EventDayMonthResponse>(`/event-days/${y}/${m}`);
+          })
+        );
+
+        if (cancelled) return;
+
+        const all = lists.flatMap((r) => r.eventDayList ?? []);
+        const my = all.filter((ed) => String(ed.eventId) === String(eventId));
+
+        // 녹음 1개 이상 또는 completed=true를 "기록 있음"으로 봄
+        const recorded = my.filter((ed) => {
+          const c = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
+          return ed.completed === true || c > 0;
+        });
+
+        if (recorded.length === 0) {
+          setFirstRecordedDate(null);
+          setLastRecordedDate(null);
+          return;
+        }
+
+        let min = recorded[0].date;
+        let max = recorded[0].date;
+        for (const ed of recorded) {
+          if (ed.date < min) min = ed.date;
+          if (ed.date > max) max = ed.date; 
+        }
+        setFirstRecordedDate(ymdToDate(min));
+        setLastRecordedDate(ymdToDate(max));
+      } catch (e) {
+        setFirstRecordedDate(null);
+        setLastRecordedDate(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId, passed?.startDate, passed?.endDate]);
 
   const openStartOnlyRangeSheet = () => {
     setRangeSheetMode("startOnly");
@@ -677,12 +763,25 @@ export default function EditSchedule() {
   const isRangeSelected = stripTime(startDate).getTime() !== stripTime(endDate).getTime();
 
   const handleStartDateChange = (newDate: Date) => {
+    const nd = stripTime(newDate);
+    if (firstRecordedDate && nd > stripTime(firstRecordedDate)) {
+      alert("첫 녹음이 있는 날짜 이후로는 시작일을 변경할 수 없습니다."); // TODO: 언어 치환
+      return;
+    }
     setStartDate(newDate);
     if (stripTime(newDate) > stripTime(endDate)) setEndDate(newDate);
   };
 
   const handleEndDateChange = (newDate: Date) => {
-    if (stripTime(newDate) < stripTime(startDate)) {
+    const nd = stripTime(newDate);
+
+    // 마지막 기록(녹음)일보다 앞당길 수 없음
+    if (lastRecordedDate && nd < stripTime(lastRecordedDate)) {
+      alert("기록이 있는 날짜 이전으로는 마감일을 변경할 수 없습니다."); //TODO: 언어 치환
+      return;
+    }
+
+    if (nd < stripTime(startDate)) {
       alert(t("error.failSetEndDate"));
       return;
     }
@@ -692,6 +791,13 @@ export default function EditSchedule() {
   const handleEndDateChangeForRange = (newDate: Date) => {
     const nd = stripTime(newDate);
     const sd = stripTime(startDate);
+
+    if (lastRecordedDate && nd < stripTime(lastRecordedDate)) {
+      alert("녹음이 있는 날짜 이전으로는 종료일을 변경할 수 없습니다."); //TODO: 언어 치환
+      setEndDate(lastRecordedDate); 
+      return;
+    }
+
     if (nd < sd) {
       setEndDate(startDate);
       return;
@@ -739,7 +845,14 @@ export default function EditSchedule() {
       alert(t("schedule_edit.alertAddTitle"));
       return;
     }
-
+    if (firstRecordedDate && stripTime(startDate) > stripTime(firstRecordedDate)) {
+      alert("첫 녹음이 있는 날짜 이후로는 시작일을 변경할 수 없습니다."); //TODO: 언어 치환
+      return;
+    }
+    if (lastRecordedDate && stripTime(endDate) < stripTime(lastRecordedDate)) {
+      alert("녹음이 있는 날짜 이전으로는 종료일을 변경할 수 없습니다."); //TODO: 언어 치환
+      return;
+    }
     try {
       const payload: {
         title: string;
