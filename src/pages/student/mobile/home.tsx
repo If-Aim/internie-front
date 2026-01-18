@@ -63,7 +63,7 @@ type MonthFilterSheetProps = {
 };
 
 type SortOrder = "past" | "latest";
-
+const TOTAL_QUESTIONS = 4; // 질문 갯수
 /*날짜 관련 함수*/
 function toYmd(d: Date): string {
   const y = d.getFullYear();
@@ -1089,7 +1089,7 @@ function Home(): React.ReactElement {
           if (!ed) return it;
 
           const count = Array.isArray(ed.transcriptions) ? ed.transcriptions.length : 0;
-          const locked = count > 0;
+          const locked = ed.completed === true || count >= TOTAL_QUESTIONS;
 
           return {
             ...it,
@@ -1138,7 +1138,14 @@ function Home(): React.ReactElement {
     if (!selectedItem) return;
     if (!isAuthed) { openLoginGate(`/student`); return; }
     if (selectedItem.isLocked) return;
+    if (selectedItem.eventDayId) {
+      const count = selectedItem.transcriptionCount ?? 0;
+      if (count >= TOTAL_QUESTIONS) return; 
 
+      setSelectedItem(null);
+      navigate(`/student/schedule/${selectedItem.eventDayId}/questions`);
+      return;
+    }
     try {
       const body = {
         date: selectedItem.date,

@@ -71,6 +71,7 @@ export default function QuestionsPage() {
   const [eventDayTitle, setEventDayTitle] = React.useState<string>("");
   const [isLoadingQuestions, setIsLoadingQuestions] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [lastUploadOk, setLastUploadOk] = React.useState<boolean | null>(null);
 
   const audioCtxRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
@@ -79,17 +80,17 @@ export default function QuestionsPage() {
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
   const audioChunksRef = React.useRef<Blob[]>([]);
 
-  const uploadAudioToSTT = async (audioBlob: Blob) => {
+  const uploadAudioToSTT = async (audioBlob: Blob): Promise<boolean> => {
     if (!eventDayId) {
       console.error("eventDayId가 없습니다. 먼저 eventDay를 생성해야 합니다.");
-      return;
+      return false;
     }
 
     const token = localStorage.getItem("accessToken");
     if (!token) {
       alert("로그인이 필요합니다.");
       navigate("/login");
-      return;
+      return false;
     }
 
     const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
@@ -100,16 +101,18 @@ export default function QuestionsPage() {
     try {
       const result = await apiUpload<any>(`/api/stt/upload/${eventDayIdNum}`, formData);
       console.log("STT 결과:", result);
+      return true;
     } catch (err) {
       console.error(err);
 
       if (err instanceof ApiError) {
-        if (err.status === 401 || err.status === 403) return;
+        if (err.status === 401 || err.status === 403) {return false;}
         alert(`STT 업로드 실패: ${err.status}\n${err.bodyText ?? ""}`);
-        return;
+        return false;
       }
 
       alert("STT 업로드 중 네트워크 오류가 발생했습니다.");
+      return false;
     } finally {
       setIsUploading(false);
     }
@@ -147,7 +150,14 @@ export default function QuestionsPage() {
         if (mapped.length === 0) {
           alert("표시할 질문이 없습니다.");
         }
-        setIndex(0);
+        const answeredCount = Array.isArray(day.transcriptions) ? day.transcriptions.length : 0;
+        const nextIndex = Math.max(0, Math.min(answeredCount, mapped.length - 1));
+        if (day.completed === true || answeredCount >= mapped.length) {
+          setStage("completed");
+          return;
+        }
+
+        setIndex(nextIndex);
         setStage("asking");
       } catch (err) {
         if (err instanceof ApiError) {
@@ -282,7 +292,8 @@ export default function QuestionsPage() {
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
           setShowOutro(true);
 
-          void uploadAudioToSTT(audioBlob);
+          const recordOk = await uploadAudioToSTT(audioBlob);
+          setLastUploadOk(recordOk);
         };
 
         recorder.start();
@@ -306,8 +317,16 @@ export default function QuestionsPage() {
   React.useEffect(() => {
     if (!showOutro) return;
     if (isUploading) return;
+    if (lastUploadOk == null) return;
 
     const timer = window.setTimeout(() => {
+      if (!lastUploadOk) {
+        // 실패 시 다음 질문으로 진행 x
+        alert("업로드에 실패했습니다.\n네트워크를 확인하고 다시 시도해 주세요.");
+        setShowOutro(false);
+        setLastUploadOk(null);
+        return;
+      }
       if (isLastQuestion) {
         setStage("completed"); 
       } else {
@@ -315,9 +334,10 @@ export default function QuestionsPage() {
         setStage("asking");
       }
       setShowOutro(false);
+      setLastUploadOk(null);
     }, 500);
     return () => clearTimeout(timer);
-  }, [showOutro, isUploading, isLastQuestion, navigate]);
+  }, [showOutro, isUploading, isLastQuestion, lastUploadOk, navigate]);
 
   React.useEffect(() => {
     if (stage === "completed") {
