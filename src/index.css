@@ -62,12 +62,12 @@ cursor: pointer;z-index: 100;}
 .event-modal-sheet {width: 100%; /*max-width: 480px;*/background: var(--bg-login);border-radius: 20px 20px 0 0;padding: 33px 20px 53px 20px;}
 .event-modal-header {display: flex;align-items: baseline;justify-content: space-between;padding: 0 18px 4px;}
 .event-modal-header-spacer {width: 24px;height: 24px;}
-.event-modal-header-center {flex: 1;display: flex;flex-direction: column;align-items: center;gap: 6px;}
-.event-modal-title { margin-left:10px;font-size: 24px; font-weight: 700; color: #000; line-height: 20px;}
-.event-modal-date { /*margin-left:10px;margin-top: 17px;*/ font-size: 16px; color: rgba(0, 0, 0, 0.5); font-weight:500;line-height: 20px;}
+.event-modal-header-center {flex: 1;display: flex;flex-direction: column;align-items: center;gap: 17px;}
+.event-modal-title { font-size: 24px; font-weight: 700; color: #000; line-height: 20px;}
+.event-modal-date { font-size: 16px; color: rgba(0, 0, 0, 0.5); font-weight:500;line-height: 20px;}
 .event-modal-close { padding:0; border: none; background: transparent;  cursor: pointer; margin-right:2px;}
 
-.event-modal-weekdays {display: flex;justify-content: center;gap: 10px;padding: 10px 14px 14px;}
+.event-modal-weekdays {display: flex;justify-content: center;gap: 8px;padding: 10px 14px 14px;}
 .event-modal-weekday {width: 34px;height: 34px;min-width:34px;border-radius: 999px;display: inline-flex;align-items: center;justify-content: center;user-select: none;
 background: #d9d9d9;color: #868686;font-size: 16px;font-weight: 700;}
 .event-modal-weekday.is-active {background: var(--primary);color: #ffffff;outline:none;}
