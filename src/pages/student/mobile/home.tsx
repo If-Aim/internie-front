@@ -1160,15 +1160,29 @@ function Home(): React.ReactElement {
     setIsRecordModalOpen(false);
     setRecordStage("preparing");
 
+    const startedAt = Date.now();
+    const delayRecording = (path: string) => {
+      const elapsed = Date.now() - startedAt;
+      const remain = Math.max(0, 3000 - elapsed); // 3초
+
+      window.setTimeout(()=>{
+        setRecordStage("idle")
+        setSelectedItem(null);
+        navigate(path);
+      }, remain);
+    };
+
     try {
       if (selectedItem.eventDayId) {
         const count = selectedItem.transcriptionCount ?? 0;
-        if (count >= TOTAL_QUESTIONS) return; 
-
-        setSelectedItem(null);
-        navigate(`/student/schedule/${selectedItem.eventDayId}/questions`);
+        if (count >= TOTAL_QUESTIONS) {
+          setRecordStage("idle");
+          return;
+        } 
+        delayRecording(`/student/schedule/${selectedItem.eventDayId}/questions`);
         return;
       }
+
       const body = {
         date: selectedItem.date,
         title: selectedItem.title,
@@ -1184,12 +1198,10 @@ function Home(): React.ReactElement {
       });
 
       const newEventDayId = response.eventDayId;
-      setSelectedItem(null);
-      navigate(`/student/schedule/${newEventDayId}/questions`);
+      delayRecording(`/student/schedule/${newEventDayId}/questions`);
     } catch (error) {
-      alert(t("error.record"));
-    } finally {
       setRecordStage("idle");
+      alert(t("error.record"));
     }
   };
 
