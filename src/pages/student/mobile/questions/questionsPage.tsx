@@ -72,6 +72,7 @@ export default function QuestionsPage() {
   const [isLoadingQuestions, setIsLoadingQuestions] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const [lastUploadOk, setLastUploadOk] = React.useState<boolean | null>(null);
+  const [micLocked, setMicLocked] = React.useState(false);
 
   const audioCtxRef = React.useRef<AudioContext | null>(null);
   const analyserRef = React.useRef<AnalyserNode | null>(null);
@@ -314,6 +315,15 @@ export default function QuestionsPage() {
     };
   }, [recordStage]);
 
+  React.useEffect(() => { // 실제 녹음 시작 후 3초간 버튼 비활성화
+    if (recordStage === "recording" && isMicOn) {
+      setMicLocked(true);
+      const t = window.setTimeout(() => setMicLocked(false), 3000); // 3초
+      return () => window.clearTimeout(t);
+    }
+    setMicLocked(false);
+  }, [recordStage, isMicOn]);
+
   React.useEffect(() => {
     if (!showOutro) return;
     if (isUploading) return;
@@ -418,13 +428,13 @@ export default function QuestionsPage() {
 
                     {/* 텍스트 */}
                     <p className="recording-text">
-                      {recordStage === "recording" && isMicOn ? "지금 말하세요" : "녹음 준비중이에요"}
+                      {recordStage === "recording" && isMicOn ? "지금 말하세요" : "인터니가 기록을\n준비하고 있어요!"}
                     </p>
 
                     <div
                       className={
                         "recording-mic-ring" +
-                        (recordStage === "recording" && isMicOn ? " recording-mic-ring--active" : "")
+                        (recordStage === "recording" && isMicOn && !micLocked ? " recording-mic-ring--active" : " recording-mic-ring--disabled")
                       }
                       style={{
                         background: isMicOn ? `rgba(255, 255, 255, ${ringLevel * 0.4})` : "transparent"
@@ -432,20 +442,23 @@ export default function QuestionsPage() {
                     >
                       <button
                         type="button"
-                        className={"recording-mic-btn" + (recordStage === "recording" ? " recording-mic-btn--active" : "")}
-                        disabled={!isMicOn}
-                        style={{ opacity: 1, cursor: isMicOn ? 'pointer' : 'default',}}
+                        className={"recording-mic-btn" + (recordStage === "recording" && isMicOn && !micLocked ? " recording-mic-btn--active" : "")}
+                        disabled={recordStage !== "recording" || !isMicOn || micLocked}
                         onClick={() => {
                           if (recordStage === "recording" && isMicOn) {
                             const mr = mediaRecorderRef.current;
-                            if (mr && mr.state !== "inactive") {
-                              mr.stop();
-                            }
+                            if (mr && mr.state !== "inactive") mr.stop();
                             setRecordStage("closed");
                           }
                         }}
                       >
-                        <img src="/microphone-01-blue.svg" alt="마이크" />
+                        <img
+                          src={micLocked || !isMicOn || recordStage !== "recording"
+                            ? "/microphone-01-gray.svg"
+                            : "/microphone-01-blue.svg"
+                          }
+                          alt="마이크"
+                        />
                       </button>
                     </div>
                   </div>

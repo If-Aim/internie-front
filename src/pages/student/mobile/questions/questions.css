@@ -28,13 +28,17 @@ display: flex;align-items: center;justify-content: center;margin-right: 12px;}
 .mic-button {position: fixed;bottom: 34px;left: 50%;transform: translateX(-50%);width: 105px;height: 105px;
 border-radius: 50%;background: var(--primary);border: none;display: flex;justify-content: center;align-items: center;}
 .mic-button img {width: 40px;height: 40px;}
-.recording-mic-btn {position:fixed;bottom:34px;width: 105px;height: 105px;border-radius: 50%;border: none;background: #ffffff;display: flex;align-items: center;justify-content: center;z-index: 998px;}
-.recording-mic-btn img {width: 40px;height: 40px;z-index: 999px;}
+.recording-mic-btn {position:fixed;bottom:34px;width: 105px;height: 105px;border-radius: 50%;border: none;background: #ffffff;display: flex;align-items: center;justify-content: center;z-index: 998;}
+.recording-mic-btn img {width: 40px;height: 40px;z-index: 999;}
 
 /* 마이크 바깥 하늘색 링 */
-.recording-mic-ring {position: fixed;bottom:10px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
+.recording-mic-ring {position: fixed;bottom:34px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
 border-radius: 999px;background: rgba(255, 255, 255, 0.1);transition: opacity 0.1s linear;}
 .recording-mic-ring--active {background: rgba(70, 144, 255, 0.32);}
+.recording-mic-ring--disabled {background: #CCCCCC;border: none;box-shadow: none;cursor: pointer;}
+.recording-mic-btn--disabled,.recording-mic-btn:disabled {border: 14px solid #CCCCCC;cursor: not-allowed;}
+.recording-mic-btn--disabled img,.recording-mic-btn:disabled img {filter: grayscale(1) brightness(0.55);opacity: 0.95;}
+.recording-mic-btn--active img {filter: none;opacity: 1;}
 
 .recording-sheet {position: fixed;left: 0;right: 0;bottom: 0;height:360px; background: #0166FF;border-radius: 10px 10px 0 0;
 display: flex;justify-content: center;align-items: flex-start;padding-top: 32px;z-index: 1200;}
@@ -61,7 +65,7 @@ position: fixed;inset: 0;z-index: 2000; display: flex;align-items: center;justif
 /* 가운데 컨텐츠 */
 .record-outro-card {display: flex;flex-direction: column;align-items: center;justify-content: center;animation: outro-pop 0.25s ease-out;}
 
-/* 파란 동그라미 (기록 완료) */
+/* 기록 완료 */
 .record-outro-icon {width: 50px;height: 50px;border-radius: 999px;margin-bottom: 3px;
 background: #0166FF;display: flex;align-items: center;
 justify-content: center;box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);}
