@@ -30,7 +30,7 @@ border-radius: 50%;background: var(--primary);border: none;display: flex;justify
 .mic-button img {width: 40px;height: 40px;}
 .recording-mic-btn {position:fixed;bottom:34px;width: 105px;height: 105px;border-radius: 50%;border: none;background: #ffffff;display: flex;align-items: center;justify-content: center;z-index: 998;}
 .recording-mic-btn img {width: 40px;height: 40px;z-index: 999;}
-.recording-mic-btn::before {content: "";position: absolute;width: calc(100% + 28px);height: calc(100% + 28px);border-radius: 50%;border: 14px solid transparent;left: -14px;top: -14px;pointer-events: none;}
+.recording-mic-btn::before {content: "";position: absolute;width: calc(100% + 28px);height: calc(100% + 28px);border-radius: 50%;border: 14px solid transparent;left: -28px;top: -28px;pointer-events: none;}
 .recording-mic-btn--disabled::before,.recording-mic-btn:disabled::before{border-color: #CCCCCC;}
 
 /* 마이크 바깥 하늘색 링 */
@@ -38,7 +38,6 @@ border-radius: 50%;background: var(--primary);border: none;display: flex;justify
 border-radius: 999px;background: rgba(255, 255, 255, 0.1);transition: opacity 0.1s linear;}
 .recording-mic-ring--active {background: rgba(70, 144, 255, 0.32);}
 .recording-mic-ring--disabled {background: #CCCCCC;border: none;box-shadow: none;}
-.recording-mic-btn--disabled,.recording-mic-btn:disabled {border: 14px solid #CCCCCC;cursor: not-allowed;}
 .recording-mic-btn--disabled img,.recording-mic-btn:disabled img {opacity: 1;}
 .recording-mic-btn--active img {filter: none;opacity: 1;}
 
