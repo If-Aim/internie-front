@@ -32,7 +32,7 @@ border-radius: 50%;background: var(--primary);border: none;display: flex;justify
 .recording-mic-btn img {width: 40px;height: 40px;z-index: 999;}
 
 /* 마이크 바깥 하늘색 링 */
-.recording-mic-ring {position: fixed;bottom:34px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
+.recording-mic-ring {position: fixed;bottom:20px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
 border-radius: 999px;background: rgba(255, 255, 255, 0.1);transition: opacity 0.1s linear;}
 .recording-mic-ring--active {background: rgba(70, 144, 255, 0.32);}
 .recording-mic-ring--disabled {background: #CCCCCC;border: none;box-shadow: none;cursor: pointer;}
