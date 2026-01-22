@@ -213,7 +213,7 @@ padding-top: var(--shadow-pad);padding-bottom: var(--shadow-pad);}
 .qa-q-text{font-size: 18px;font-weight: 800;color: #111;}
 .qa-a-text{font-size: 16px;font-weight: 600;color: #222;line-height: 1.5;white-space: pre-wrap;}
 
-.detail-dots{position: relative;display: flex;justify-content: center;gap: 8px;z-index: 20;}
+.detail-dots{position: relative;display: flex;justify-content: center;gap: 8px;z-index: 20;margin-bottom:20px;}
 .dot{width: 10px;height: 10px;border-radius: 999px;background: #D9D9D9;}
 .dot.active{background: var(--primary);}
 
