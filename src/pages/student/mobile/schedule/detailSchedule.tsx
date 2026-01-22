@@ -42,14 +42,34 @@ export default function DetailSchedule(): React.ReactElement {
 
     const scrollerRef = React.useRef<HTMLDivElement | null>(null);
     const [page, setPage] = React.useState(0);
-
+    const rafRef = React.useRef<number | null>(null);
+    
     const onScroll = React.useCallback(() => {
         const el = scrollerRef.current;
         if (!el) return;
-        const w = el.clientWidth || 1;
-        setPage(Math.round(el.scrollLeft / w));
+
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+            const firstPage = el.querySelector<HTMLElement>(".detail-page");
+            if (!firstPage) return;
+
+            const styles = window.getComputedStyle(el);
+            const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+
+            const step = firstPage.offsetWidth + gap;
+            if (step <= 0) return;
+
+            const raw = Math.round(el.scrollLeft / step);
+            const max = Math.max(0, slides.length - 1);
+            setPage(Math.min(max, Math.max(0, raw)));
+        });
+    }, [slides.length]);
+
+    React.useEffect(() => {
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
-  
     React.useEffect(() => {
         (async () => {
             try {
