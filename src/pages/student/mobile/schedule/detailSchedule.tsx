@@ -123,7 +123,14 @@ export default function DetailSchedule(): React.ReactElement {
                 </button>
             </div>
 
-            <div className="detail-body">
+            <div className="detail-body">             
+                {!loading && !error && hasAnyAnswer && (
+                    <div className="detail-dots">
+                    {slides.map((_, i) => (
+                        <span key={i} className={"dot" + (i === page ? " active" : "")} />
+                    ))}
+                    </div>
+                )}
                 <div ref={scrollerRef} className="detail-snap-scroller" onScroll={onScroll} >
                     {loading && (
                         <section className="detail-card detail-card--single">
@@ -144,7 +151,6 @@ export default function DetailSchedule(): React.ReactElement {
                         </div>
                     </section>
                     )}
-
                     {!loading && !error && hasAnyAnswer && (
                         slides.map((s) => (
                             <section key={s.idx} className="detail-page">
@@ -177,15 +183,6 @@ export default function DetailSchedule(): React.ReactElement {
                         ))
                     )}
                 </div>
-
-
-                {!loading && !error && hasAnyAnswer && (
-                    <div className="detail-dots">
-                    {slides.map((_, i) => (
-                        <span key={i} className={"dot" + (i === page ? " active" : "")} />
-                    ))}
-                    </div>
-                )}
             </div>
         </div>
     );
