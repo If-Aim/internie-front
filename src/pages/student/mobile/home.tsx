@@ -1260,8 +1260,10 @@ function Home(): React.ReactElement {
                     locked={locked}
                     onClick={() => {
                     if (locked && it.eventDayId) {
-                      setSelectedItem(null);
+                      setMenuOpen(false);
+                      setIsFilterOpen(false);
                       setIsRecordModalOpen(false);
+                      setSelectedItem(null);
                       navigate(`/student/schedule/${it.eventDayId}/detail`);
                       return;
                     }
