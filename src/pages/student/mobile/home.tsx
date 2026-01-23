@@ -1258,7 +1258,15 @@ function Home(): React.ReactElement {
                     subtitle={timeRangeText(it.startTime, it.endTime, t)}
                     selected={selectedItem?.instanceId === it.instanceId}
                     locked={locked}
-                    onClick={() => setSelectedItem((prev) => (prev?.instanceId === it.instanceId ? null : it))}
+                    onClick={() => {
+                    if (locked && it.eventDayId) {
+                      setSelectedItem(null);
+                      setIsRecordModalOpen(false);
+                      navigate(`/student/schedule/${it.eventDayId}/detail`);
+                      return;
+                    }
+                    setSelectedItem((prev) => (prev?.instanceId === it.instanceId ? null : it));
+                    }}
                     onEditClick={() =>
                       navigate(`/student/schedule/${it.eventId}`, {
                         state: {
