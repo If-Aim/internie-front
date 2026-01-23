@@ -124,13 +124,15 @@ export default function DetailSchedule(): React.ReactElement {
             </div>
 
             <div className="detail-body">             
-                {!loading && !error && hasAnyAnswer && (
-                    <div className="detail-dots">
-                    {slides.map((_, i) => (
-                        <span key={i} className={"dot" + (i === page ? " active" : "")} />
-                    ))}
-                    </div>
-                )}
+                <div
+                    className={"detail-dots" + (!loading && !error && hasAnyAnswer ? "" : " detail-dots--placeholder")}
+                    aria-hidden={!(!loading && !error && hasAnyAnswer)}
+                >
+                    {!loading && !error && hasAnyAnswer &&
+                        slides.map((_, i) => (
+                            <span key={i} className={"dot" + (i === page ? " active" : "")} />
+                        ))}
+                </div>
                 <div ref={scrollerRef} className="detail-snap-scroller" onScroll={onScroll} >
                     {loading && (
                         <section className="detail-card detail-card--single">
