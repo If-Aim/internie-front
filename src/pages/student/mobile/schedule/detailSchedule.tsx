@@ -106,6 +106,14 @@ export default function DetailSchedule(): React.ReactElement {
         })();
     }, [eventDayId, t]);
 
+    React.useEffect(() => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+    }, []);
     // 4개 중 답변 텍스트가 하나도 없으면 empty
     const hasAnyAnswer = React.useMemo(
         () => slides.some((s) => s.answerText.length > 0),
@@ -113,7 +121,7 @@ export default function DetailSchedule(): React.ReactElement {
     );
 
     const close = () => navigate(-1);
-
+    
     return (
         <div className="detail-screen">
             <div className="detail-topbar">
