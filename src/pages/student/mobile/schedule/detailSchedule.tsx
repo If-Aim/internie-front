@@ -157,14 +157,9 @@ export default function DetailSchedule(): React.ReactElement {
                                 <div className="detail-card">
                                     <div className="qa-wrap">
                                         <div className="qa-q">
-                                            <div className="qa-q-label">
-                                                {t("schedule_detail.question", "질문")} {s.idx}
-                                            </div>
                                             <div className="qa-q-text">{s.question}</div>
                                         </div>
-
                                         <div className="qa-a">
-                                            <div className="qa-a-label">{t("schedule_detail.answer", "답변")}</div>
                                             <div className="qa-a-text">
                                                 {s.answerText.length > 0 ? s.answerText : t("schedule_detail.noAnswer", "답변이 없어요")}
                                             </div>

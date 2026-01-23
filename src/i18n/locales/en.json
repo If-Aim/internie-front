@@ -94,8 +94,6 @@
   "schedule_detail": {
     "titleFallback": "New Event",
     "empty": "No records",
-    "question": "Question",
-    "answer": "Answer",
     "noAnswer": "No answer"
   },
   "error": {

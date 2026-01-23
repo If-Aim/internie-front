@@ -93,8 +93,6 @@
   "schedule_detail": {
     "titleFallback": "새로운 이벤트",
     "empty": "기록이 없어요",
-    "question": "질문",
-    "answer": "답변",
     "noAnswer": "답변이 없어요"
   },
   "error": {

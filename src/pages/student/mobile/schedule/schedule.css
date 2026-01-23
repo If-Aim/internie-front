@@ -196,7 +196,7 @@ word-wrap: break-word;text-align: center;width: 100%;margin-top: 40px;}
 .detail-center{height: calc(100% - 44px);display: flex;align-items: center;justify-content: center;}
 .detail-page {flex: 0 0 var(--card-w);scroll-snap-align: center;display: flex;justify-content:center;}
 
-.detail-empty{font-size: 18px;font-weight: 700;color: #7a7a7a;}
+.detail-empty{font-size: 12px;font-weight: 500;color: #979797;}
 .muted{color: #7a7a7a;}
 
 .detail-snap-scroller{--card-w:300px; --card-h: 70vh; --gap:16px; --shadow-pad: 14px; display:flex; gap: var(--gap);
