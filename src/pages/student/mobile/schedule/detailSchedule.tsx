@@ -105,32 +105,7 @@ export default function DetailSchedule(): React.ReactElement {
             }
         })();
     }, [eventDayId, t]);
-    React.useEffect(() => {
-        const prev = {
-            position: document.body.style.position,
-            top: document.body.style.top,
-            left: document.body.style.left,
-            right: document.body.style.right,
-            width: document.body.style.width,
-            overflow: document.body.style.overflow,
-        };
 
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-
-        return () => {
-            document.body.style.position = prev.position;
-            document.body.style.top = prev.top;
-            document.body.style.left = prev.left;
-            document.body.style.right = prev.right;
-            document.body.style.width = prev.width;
-            document.body.style.overflow = prev.overflow;
-        };
-        }, []);
     // 4개 중 답변 텍스트가 하나도 없으면 empty
     const hasAnyAnswer = React.useMemo(
         () => slides.some((s) => s.answerText.length > 0),
@@ -138,7 +113,7 @@ export default function DetailSchedule(): React.ReactElement {
     );
 
     const close = () => navigate(-1);
-    
+
     return (
         <div className="detail-screen">
             <div className="detail-topbar">
