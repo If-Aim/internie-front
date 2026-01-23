@@ -1,4 +1,5 @@
 // src/pages/student/mobile/studentApp.tsx
+// 학생화면 라우트
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 

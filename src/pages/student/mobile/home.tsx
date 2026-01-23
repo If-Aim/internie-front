@@ -1213,7 +1213,6 @@ function Home(): React.ReactElement {
         <div className="preparing-page" aria-modal="true" role="dialog">
           <div className="preparing-content">
             <LoadingDots />
-
             <p className="preparing-title">{t("modal.questionsPreparingTitle")}</p>
             <p className="preparing-desc">{t("modal.questionsPreparingDesc1")}<br/>{t("modal.questionsPreparingDesc2")}</p>
           </div>
