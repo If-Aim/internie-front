@@ -623,6 +623,14 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
     if (!panelRef.current) return;
     if (!isOpen) return;
 
+    const target = e.target as HTMLElement;
+    if (
+      target.closest(
+        "button, a, input, textarea, select, [role='button']"
+      )
+    ) {
+      return;
+    }
     panelRef.current.setPointerCapture(e.pointerId);
 
     const w = panelRef.current.offsetWidth;
