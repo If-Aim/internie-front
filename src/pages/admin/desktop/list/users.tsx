@@ -1,3 +1,5 @@
+// src/pages/admin/desktop/list/users.tsx
+// 사용자 목록 페이지 (PC)
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getAdminUsers, type AdminUser, ApiError } from "../../../../api/client";
