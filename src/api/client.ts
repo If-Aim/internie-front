@@ -253,15 +253,39 @@ export function getUserIdFromAccessToken(): string | null {
     return null;
   }
 }
-
-export type UserMe = {
+export type UserBase = {
   userId: number;
   name: string;
-  profileImage: string;
+  nickname: string | null;
+  profileImage: string | null;
+  verificationImage: string | null;
+  role: string;
+  status: string;
 };
-
+export type UserMe = UserBase;
 export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
+}
+
+/* - admin 관련 - */
+export type AdminUser = UserBase;
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  // GET /admin/users
+  return api<AdminUser[]>("/admin/users", { method: "GET" });
+}
+
+/**
+ * 관리자 여부만 확인
+ */
+export async function checkIsAdmin(): Promise<boolean> {
+  try {
+    const me = await getUserMe();
+    return me.role === "ROLE_ADMIN";
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) return false;
+    throw e;
+  }
 }
 
 // 최근 기록한 일정 관련

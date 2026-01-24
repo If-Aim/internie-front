@@ -563,10 +563,10 @@ type SideMenuProps = {
   userId: number | null;
   userName: string;
   userProfileImg: string;
-
+  userRole: string | null;
   onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
 };
-function SideMenu({ isOpen, onClose, userName, userProfileImg, onRequireAuth }: SideMenuProps) {
+function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequireAuth }: SideMenuProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
@@ -740,6 +740,20 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, onRequireAuth }: 
             <img className="icon" src="/settings.svg" alt={t("menu.language")} />{" "}
             <span>{t("menu.language")}</span>
           </button>
+          {userRole === "ROLE_ADMIN" && (
+            <button
+              className="drawer-menu-item"
+              onClick={() => {
+                onRequireAuth("/admin/users", () => {
+                  navigate("/admin/users"); // TODO: 경로 설정
+                  closeWithSnap();
+                });
+              }}
+            >
+              <img className="icon" src="/users.svg" alt="사용자조회" />
+              <span>사용자조회</span>
+            </button>
+          )}
         </div>
       </div>
     </>
@@ -991,6 +1005,8 @@ function Home(): React.ReactElement {
   const [userProfileImg, setUserProfileImg] = React.useState<string>(
     "/internie_mascot_normal.png"
   );
+  const [userRole, setUserRole] = React.useState<string | null>(null);
+
   function isDefaultProfileImage(url?: string | null) {
     if (!url) return true;
 
@@ -1010,24 +1026,27 @@ function Home(): React.ReactElement {
         setCurrentUserId(null);
         setUserName("User");
         setUserProfileImg("/internie_mascot_normal.png");
+        setUserRole(null);
         return;
       }
       try {
         const me = await getUserMe();
         setCurrentUserId(me.userId);
         setUserName(me.name ?? "User");
+        setUserRole(me.role ?? null);
 
         const profile = me.profileImage;
         setUserProfileImg(
           isDefaultProfileImage(profile)
             ? "/internie_mascot_normal.png"
-            : profile
+            : (profile ?? "/internie_mascot_normal.png")
         );
       } catch (e) {
         console.error("getUserMe failed:", e);
         setCurrentUserId(null);
         setUserName("User");
         setUserProfileImg("/internie_mascot_normal.png");
+        setUserRole(null);
       }
     })();
   }, [isAuthed]);
@@ -1226,6 +1245,7 @@ function Home(): React.ReactElement {
           userId={currentUserId}
           userName={userName}
           userProfileImg={userProfileImg}
+          userRole={userRole}
           onRequireAuth={(path, action) => requireAuth(path, action)}
         />
 
