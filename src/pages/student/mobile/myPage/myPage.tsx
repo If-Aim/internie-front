@@ -1,19 +1,12 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
 
 type Props = { onLogout?: () => void; };
-type Me = {
-  name?: string;
-  profileImage?: string | null;
-  verificationImage?: string | null;
-  role?: string;
-  status?: "APPROVED" | "PENDING" | "REJECTED" | null;
-};
 
 // 최근 기록 관련 유틸
 function currentYm() {
@@ -41,7 +34,7 @@ function sortKey(ed: EventDay) {
 export default function MyPage({ onLogout }: Props) {
   const navigate = useNavigate();
 
-  const [me, setMe] = React.useState<Me | null>(null);
+  const [me, setMe] = React.useState<UserMe | null>(null);
   const displayName = me?.name ?? "";
   const displayEmail = (me as any)?.email ?? "이메일";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
