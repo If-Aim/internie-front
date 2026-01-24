@@ -1,3 +1,4 @@
+// src/protectedRoute.tsx
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
