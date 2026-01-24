@@ -4,7 +4,7 @@
 
 /* TopBar */
 .admin-topbar {display: flex;justify-content: space-between;align-items: center;}
-.admin-topbar .brand{width:130px;height:auto;}
+.admin-topbar .brand #img{width:130px;height:auto;}
 .admin-info {display: flex;align-items: center;gap: 12px;font-weight: 600;}
 .avatar {width: 42px;height: 42px;border-radius: 50%;background: #d9d9d9;}
 /* Layout */
