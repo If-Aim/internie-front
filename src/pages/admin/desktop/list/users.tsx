@@ -36,13 +36,11 @@ export default function AdminUsersPage(): React.ReactElement {
         if (!mounted) return;
         setUsers(list);
       } catch (e) {
-        if (!mounted) return;
-
         if (e instanceof ApiError && e.status === 403) {
-          navigate("/student", { replace: true });
-          return;
+            alert("관리자만 접근할 수 있는 페이지입니다.");
+            navigate("/student", { replace: true });
+            return;
         }
-
         setErrorMsg("사용자 목록을 불러오지 못했습니다.");
       } finally {
         if (mounted) setLoading(false);
