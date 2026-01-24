@@ -1,4 +1,5 @@
 // src/adminRoute.tsx
+// 관리자용 protectedRoute
 import { Navigate, Outlet } from "react-router-dom";
 import React from "react";
 import { checkIsAdmin } from "./api/client";
