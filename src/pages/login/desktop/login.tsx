@@ -67,23 +67,10 @@ export default function Login(): React.ReactElement {
           </div>
 
           <section className="login-desktop-card">
-            <input
-              className="login-desktop-input"
-              disabled
-              placeholder="이메일을 입력하세요"
-            />
-            <input
-              className="login-desktop-input"
-              disabled
-              placeholder="비밀번호를 입력하세요"
-              type="password"
-            />
+            <input className="login-desktop-input" disabled placeholder="이메일을 입력하세요"/>
+            <input className="login-desktop-input" disabled placeholder="비밀번호를 입력하세요" type="password" />
 
-            <button
-              type="button"
-              className="login-desktop-btn primary"
-              disabled
-            >
+            <button type="button" className="login-desktop-btn primary" disabled>
               로그인하기
             </button>
 

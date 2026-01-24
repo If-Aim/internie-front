@@ -5,8 +5,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/login/login";
 import KakaoCallback from "./pages/kakaoCallback";
 import StudentApp from "./pages/student/studentApp";
-
 import AdminApp from "./pages/admin/adminApp";
+
 export default function App(): React.ReactElement {
   return (
     <Routes>

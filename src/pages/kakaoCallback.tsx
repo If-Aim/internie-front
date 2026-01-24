@@ -39,7 +39,7 @@ export default function KakaoCallback() {
         }
 
         localStorage.setItem("accessToken", auth);
-        navigate("/", { replace: true });
+        navigate("/student", { replace: true });
       } catch (e) {
         console.error("네트워크 에러:", e);
         navigate("/login", { replace: true });
