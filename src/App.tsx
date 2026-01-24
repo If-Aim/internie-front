@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/login/login";
 import KakaoCallback from "./pages/kakaoCallback";
 import StudentApp from "./pages/student/studentApp";
+import AdminRoute from "./adminRoute";
 import AdminApp from "./pages/admin/adminApp";
 
 export default function App(): React.ReactElement {
@@ -17,7 +18,9 @@ export default function App(): React.ReactElement {
       <Route path="/" element={<Navigate to="/student" replace />} />
 
       {/* 관리자용 라우트 */}
-      <Route path="/admin/*" element={<AdminApp />} />
+      <Route element={<AdminRoute />}>
+        <Route path="/admin/*" element={<AdminApp />} />
+      </Route>
 
       <Route path="/mypage" element={<Navigate to="/student/mypage" replace />} />
       <Route path="/schedule/new" element={<Navigate to="/student/schedule/new" replace />} />
