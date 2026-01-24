@@ -724,7 +724,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
         </div>
 
         <div className="drawer-body">
-          <button className="drawer-menu-item" onClick={() => {onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
+          <button className="drawer-menu-item" onClick={() => {console.log("mypage click"); onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
             <img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
             <span>{t("menu.mypage")}</span>
           </button>
@@ -745,12 +745,12 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
               className="drawer-menu-item"
               onClick={() => {
                 onRequireAuth("/admin/users", () => {
-                  navigate("/admin/users"); // TODO: 경로 설정
+                  navigate("/admin/users");
                   closeWithSnap();
                 });
               }}
             >
-              <img className="icon" src="/users.svg" alt="사용자조회" />
+              <img className="icon" src="/Next (Stroke).svg" alt="사용자조회" />
               <span>사용자조회</span>
             </button>
           )}
