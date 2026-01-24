@@ -46,7 +46,7 @@ export default function Login(): React.ReactElement {
             PC버전은 현재 준비중입니다
           </h2>
           <p className="login-desktop-subtitle">
-            모바일에서 카카오 로그인으로 이용하실 수 있습니다.
+            모바일환경에서 최적화되어있습니다.
           </p>
 
           <div className="login-desktop-tabs">
