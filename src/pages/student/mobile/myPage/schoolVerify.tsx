@@ -157,33 +157,21 @@ export default function SchoolVerify() {
                                 setQuery(e.target.value);
                             }}
                         />
-                        {selectedSchool ? (
-                            <span className="sv-check" aria-hidden>
-                                <img src="/check-02.svg" alt="" />
-                            </span>
-                        ) : (
-                            <div className="sv-searchIcon" aria-hidden>
-                                <img src="/search-01.svg" alt="" />
-                            </div>
-                        )}
+                        <span className={`sv-rightIcon ${selectedSchool ? "is-check" : "is-search"}`} aria-hidden>
+                            <img src={selectedSchool ? "/check-02.svg" : "/search-01.svg"} alt="" />
+                        </span>
                         {query.trim() !== "" && !selectedSchool && (
                             <div className="sv-dropdown" role="listbox" aria-label="검색 결과">
-                                {filtered.length === 0 ? (
-                                    <button type="button" className="sv-item disabled" disabled>
-                                        검색 결과가 없습니다
-                                    </button>
-                                ) : (
-                                filtered.map((s) => (
+                                {filtered.map((s) => (
                                     <button
-                                        type="button"
-                                        key={s.id}
-                                        className="sv-item"
-                                        onClick={() => onPickSchool(s)}
+                                    type="button"
+                                    key={s.id}
+                                    className="sv-item"
+                                    onClick={() => onPickSchool(s)}
                                     >
-                                        <span>{s.name}</span>
+                                    <span>{s.name}</span>
                                     </button>
-                                ))
-                                )}
+                                ))}
                             </div>
                         )}
                     </div>
