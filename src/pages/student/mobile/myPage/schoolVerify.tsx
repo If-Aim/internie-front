@@ -108,7 +108,7 @@ export default function SchoolVerify() {
 
         try {
             await applyMyVerification(file); 
-            setStep("DONE");
+            navigate(-1);
         } catch (e) {
             if (e instanceof ApiError) {
                 const msg = e.bodyText?.includes("이미 승인된 사용자")
@@ -123,10 +123,6 @@ export default function SchoolVerify() {
         } finally {
             setSubmitting(false);
         }
-    }
-
-    function onDone() {
-        navigate(-1);
     }
 
     return (
@@ -241,18 +237,16 @@ export default function SchoolVerify() {
                             </button>
                         )}
                     </div>
-
-                    <div className="sv-hint">재학생 인증까지 약 1주일 정도 소요될 수 있어요</div>
                 </main>
 
                 <footer className="sv-footer">
                     <button
                         type="button"
                         className="sv-primary"
-                        disabled={!file || submitting}
-                        onClick={onSubmit}
+                        disabled={!file}
+                        onClick={() => setStep("DONE")}
                     >
-                        {submitting ? "제출 중..." : "제출하기"}
+                        다음
                     </button>
                 </footer>
                 </>
@@ -270,11 +264,19 @@ export default function SchoolVerify() {
                             <div className="sv-doneCard">(학생증 사진)</div>
                         )}
                     </div>
+                    <div className="sv-hint">
+                        재학생 인증까지<br/>약 1주일 정도 소요될 수 있어요.
+                    </div>
                 </main>
 
                 <footer className="sv-footer">
-                    <button type="button" className="sv-primary" onClick={onDone}>
-                        확인
+                    <button
+                        type="button"
+                        className="sv-primary"
+                        disabled={!file || submitting}
+                        onClick={onSubmit}
+                    >
+                        {submitting ? "제출 중..." : "제출하기"}
                     </button>
                 </footer>
                 </>
