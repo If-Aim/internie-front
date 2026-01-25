@@ -196,26 +196,22 @@ export default function SchoolVerify() {
 
             {step === "UPLOAD" && (
                 <>
-                <main className="sv-body">
+                    <main className="sv-body">
                     <h1 className="sv-title">재학생 인증을 위한 학생증 사진이 필요해요</h1>
 
                     <div className="sv-cardPreview">
-                    {previewUrl ? (
-                            <img className="sv-previewImg" src={previewUrl} alt="학생증 미리보기" />
+                        {previewUrl ? (
+                        <img className="sv-previewImg" src={previewUrl} alt="" />
                         ) : (
-                            <img
-                                className="sv-previewGuide"
-                                src="/studentcard_guide.png"
-                                alt="학생증 촬영 가이드"
-                            />
+                        <img className="sv-previewGuide" src="/studentcard_guide.png" alt="학생증 촬영 가이드" />
                         )}
                     </div>
 
                     {errorMsg && <div className="sv-error">{errorMsg}</div>}
+                    </main>
 
-                    <div className="sv-actions">
-                        {/* 사진 선택 */}
-                        <label className="sv-secondary">
+                    <footer className="sv-footer sv-footer--upload">
+                        <label className="sv-secondary sv-footerBtn">
                             사진 선택하기
                             <input
                                 type="file"
@@ -225,8 +221,7 @@ export default function SchoolVerify() {
                             />
                         </label>
 
-                        {/* 학생증 촬영하기 (모바일에서 카메라 유도) */}
-                        <label className="sv-primary sv-primary--alt">
+                        <label className="sv-primary sv-primary--alt sv-footerBtn">
                             학생증 촬영하기
                             <input
                                 type="file"
@@ -236,25 +231,7 @@ export default function SchoolVerify() {
                                 onChange={onFileChange}
                             />
                         </label>
-
-                        {file && (
-                            <button type="button" className="sv-link" onClick={resetFile}>
-                                선택한 사진 지우기
-                            </button>
-                        )}
-                    </div>
-                </main>
-
-                <footer className="sv-footer">
-                    <button
-                        type="button"
-                        className="sv-primary"
-                        disabled={!file}
-                        onClick={() => setStep("DONE")}
-                    >
-                        다음
-                    </button>
-                </footer>
+                    </footer>
                 </>
             )}
 
