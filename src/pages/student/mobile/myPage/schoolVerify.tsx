@@ -56,6 +56,8 @@ export default function SchoolVerify() {
         return MOCK_SCHOOLS.filter((s) => s.name.includes(q)).slice(0, 10);
     }, [query]);
 
+    const isDropdownOpen = query.trim() !== "" && !selectedSchool;
+
     function onClose() {
         navigate(-1);
     }
@@ -140,7 +142,7 @@ export default function SchoolVerify() {
                 <main className="sv-body">
                     <h1 className="sv-title">학교를 선택해주세요</h1>
 
-                    <div className="sv-searchWrap">
+                    <div className={`sv-searchWrap ${isDropdownOpen ? "is-open" : ""}`}>
                         <input
                             className="sv-input"
                             value={query}
@@ -160,16 +162,16 @@ export default function SchoolVerify() {
                         <span className={`sv-rightIcon ${selectedSchool ? "is-check" : "is-search"}`} aria-hidden>
                             <img src={selectedSchool ? "/check-02.svg" : "/search-01.svg"} alt="" />
                         </span>
-                        {query.trim() !== "" && !selectedSchool && (
+                        {isDropdownOpen && (
                             <div className="sv-dropdown" role="listbox" aria-label="검색 결과">
                                 {filtered.map((s) => (
                                     <button
-                                    type="button"
-                                    key={s.id}
-                                    className="sv-item"
-                                    onClick={() => onPickSchool(s)}
+                                        type="button"
+                                        key={s.id}
+                                        className="sv-item"
+                                        onClick={() => onPickSchool(s)}
                                     >
-                                    <span>{s.name}</span>
+                                        <span>{s.name}</span>
                                     </button>
                                 ))}
                             </div>
