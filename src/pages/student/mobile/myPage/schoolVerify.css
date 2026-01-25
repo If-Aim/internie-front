@@ -1,0 +1,43 @@
+/* src/pages/student/mobile/verify/schoolVerify.css */
+.sv-screen {min-height: 100dvh;background: #eef3fb;display: flex;flex-direction: column;}
+.sv-header {height: 56px;display: flex;justify-content: flex-end;align-items: center;padding: 0 16px;}
+.sv-close {width: 44px;height: 44px;border: none;background: transparent;font-size: 30px;line-height: 1;cursor: pointer;display: grid;place-items: center;}
+.sv-body {flex: 1;display: flex;flex-direction: column;align-items: center;padding: 64px 20px 0;}
+.sv-title {margin: 0 0 28px;font-size: 18px;font-weight: 700;color: #111;text-align: center;line-height: 1.4;}
+
+.sv-searchWrap {width: min(520px, 100%);position: relative;}
+.sv-input {width: 100%;height: 64px;border-radius: 14px;border: none;outline: none;background: #fff;padding: 0 56px 0 16px;font-size: 16px;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);}
+.sv-searchIcon {position: absolute;right: 18px;top: 50%;transform: translateY(-50%);width: 28px;height: 28px;display: grid;place-items: center;}
+.sv-searchIcon img {width: 22px;height: 22px;display: block;}
+.sv-dropdown {margin-top: 10px;width: 100%;background: #fff;border-radius: 14px;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);overflow: hidden;}
+.sv-item {width: 100%;text-align: left;padding: 14px 16px;background: #fff;border: none;font-size: 15px;cursor: pointer;display: flex;align-items: center;justify-content: space-between;}
+
+.sv-item + .sv-item {border-top: 1px solid rgba(0, 0, 0, 0.06);}
+.sv-item.active {background: rgba(0, 102, 255, 0.08);font-weight: 700;}
+.sv-item.disabled {color: rgba(0, 0, 0, 0.45);cursor: default;}
+.sv-check {width: 22px;height: 22px;display: grid;place-items: center;border-radius: 999px;background: #0b63ff;color: #fff;font-size: 14px;}
+
+.sv-footer {padding: 18px 16px 24px;}
+.sv-primary {width: 100%;height: 64px;border-radius: 14px;border: none;background: #0b63ff;color: #fff;font-size: 18px;font-weight: 700;cursor: pointer;}
+.sv-primary:disabled {opacity: 0.45;cursor: not-allowed;}
+
+/* 업로드 화면 */
+.sv-cardPreview {width: min(520px, 100%);margin-top: 8px;display: flex;justify-content: center;}
+.sv-previewEmpty {width: 100%;height: 190px;border-radius: 16px;background: rgba(255, 255, 255, 0.55);border: 2px dashed rgba(0, 0, 0, 0.12);display: grid;place-items: center;position: relative;}
+.sv-emptyBox {width: 220px;height: 120px;border-radius: 12px;background: rgba(0, 0, 0, 0.06);}
+.sv-emptyText {position: absolute;bottom: 18px;font-size: 12px;color: rgba(0, 0, 0, 0.45);}
+.sv-previewImg {width: 100%;max-width: 520px;border-radius: 16px;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);object-fit: cover;}
+.sv-actions {width: min(520px, 100%);margin-top: 18px;display: flex;flex-direction: column;gap: 12px;}
+.sv-secondary {width: 100%;height: 54px;border-radius: 14px;border: none;background: rgba(11, 99, 255, 0.18);color: #0b63ff;font-size: 16px;font-weight: 700;display: grid;
+place-items: center;cursor: pointer;}
+
+.sv-primary--alt {height: 54px;}
+.sv-fileInput {display: none;}
+.sv-link {border: none;background: transparent;color: rgba(0, 0, 0, 0.6);font-size: 13px;cursor: pointer;text-decoration: underline;padding: 6px 0;}
+.sv-hint {margin-top: 14px;font-size: 12px;color: rgba(0, 0, 0, 0.45);}
+.sv-error {width: min(520px, 100%);margin-top: 12px;padding: 10px 12px;border-radius: 12px;background: rgba(255, 0, 0, 0.08);color: rgba(160, 0, 0, 0.9);font-size: 13px;}
+
+.sv-done {padding-top: 84px;}
+.sv-doneBox {width: min(520px, 100%);display: grid;place-items: center;margin-top: 18px;}
+.sv-doneCard {width: 100%;height: 170px;border-radius: 16px;background: #fff;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);display: grid;place-items: center;color: rgba(0, 0, 0, 0.35);font-size: 14px;}
+.sv-doneImg {width: 100%;max-width: 520px;height: 170px;border-radius: 16px;object-fit: cover;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);background: #fff;}

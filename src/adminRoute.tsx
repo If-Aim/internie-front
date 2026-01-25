@@ -1,8 +1,8 @@
 // src/adminRoute.tsx
 // 관리자용 protectedRoute
-import { Navigate, Outlet } from "react-router-dom";
 import React from "react";
-import { checkIsAdmin } from "./api/client";
+import { Navigate, Outlet } from "react-router-dom";
+import { ApiError, checkIsAdmin } from "./api/client";
 
 export default function AdminRoute() {
   const [allowed, setAllowed] = React.useState<boolean | null>(null);
@@ -13,8 +13,9 @@ export default function AdminRoute() {
       try {
         const ok = await checkIsAdmin();
         if (mounted) setAllowed(ok);
-      } catch {
+      } catch (e) {
         if (mounted) setAllowed(false);
+        if (!(e instanceof ApiError)) console.error(e);
       }
     })();
     return () => { mounted = false; };

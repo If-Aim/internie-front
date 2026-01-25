@@ -267,11 +267,47 @@ export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
 }
 
+// 재학생 인증
+export type ApplyVerificationResponse = UserBase;
+
+export async function applyMyVerification(
+  file: File
+): Promise<ApplyVerificationResponse> {
+  const userId = getUserIdFromAccessToken();
+
+  if (!userId) {
+    throw new ApiError(401, "로그인 정보에서 userId를 찾을 수 없습니다.");
+  }
+
+  const formData = new FormData();
+  formData.append("verificationImage", file); 
+
+  return apiUpload<ApplyVerificationResponse>(
+    `/users/${userId}/apply-verification`,
+    formData,
+    { method: "POST" }
+  );
+}
+
 /* - admin 관련 - */
 export type AdminUser = UserBase;
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   return api<AdminUser[]>("/admin/users", { method: "GET" });
+}
+// 학생증 제출자 목록 조회
+export async function getAdminPendingUsers(): Promise<AdminUser[]> {
+  return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
+}
+
+// 사용자 승인
+export async function approveAdminUser(userId: number | string): Promise<AdminUser> {
+  return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "POST" });
+}
+
+// 사용자 거절
+export async function rejectAdminUser(userId: number | string): Promise<AdminUser> {
+  return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
 }
 
 /**

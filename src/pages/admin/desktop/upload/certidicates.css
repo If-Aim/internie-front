@@ -1,0 +1,35 @@
+/* src/pages/admin/desktop/upload/certificates.css */
+
+.cert-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 34px;align-items: start;}
+
+.cert-left-header{display:flex;justify-content: flex-end;align-items: baseline;padding: 8px 6px 18px;}
+.cert-count{font-size: 40px;font-weight: 700;}
+.cert-count-blue{ color:var(--primary); }
+
+.cert-list{display:flex;flex-direction: column;gap: 39px;max-height: calc(100vh - 180px);overflow:auto;padding-right: 6px;}
+.cert-row{width:100%;background:#fff;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25); padding: 15px 26px 14px 18px;
+display:grid;grid-template-columns: 34px 120px 1fr 70px 16px;gap: 21px;align-items:center;text-align:left;cursor:pointer;}
+.cert-row--selected{border: 2px solid var(--primary);}
+.cert-index{width: 30px;height: 30px;border-radius: 50%;background: var(--primary);
+color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 700;font-size: 16px;}
+.cert-name{ font-weight: 700; font-size: 24px; }
+.cert-school{ color:#9ca3af; font-weight: 800; }
+.cert-done{font-size: 24px;justify-self:end;color: var(--primary);font-weight: 700;}
+.cert-done--empty{ color: transparent; }
+.cert-chevron{ justify-self:end; width:31px;}
+
+.cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
+height: 520px;display:flex;align-items:center;justify-content:center;position: relative;}
+.cert-upload-btn{border:none;background:#E3E3E3;color:#707070;font-weight: 700;border-radius: 16px;
+height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:pointer;}
+.cert-upload-btn:disabled{opacity: 0.6;cursor: not-allowed;}
+.cert-upload-icon img{display:inline-flex;width: 24px;justify-content:center;}
+.cert-upload-hint{position:absolute;bottom: 18px;left: 0;right: 0;text-align:center;color:#6b7280;font-weight: 700;}
+.cert-upload-hint--ok{color: var(--primary);}
+.cert-loading,.cert-error,.cert-empty{padding: 12px 6px;font-weight: 700;color:#707070;}
+
+/* responsive */
+@media (max-width: 1100px){
+  .cert-grid{ grid-template-columns: 1fr; }
+  .cert-list{ max-height: none; }
+}
