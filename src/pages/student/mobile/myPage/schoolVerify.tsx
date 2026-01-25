@@ -144,43 +144,46 @@ export default function SchoolVerify() {
                         <input
                             className="sv-input"
                             value={query}
-                            onChange={(e) => {
-                            setQuery(e.target.value);
-                            setSelectedSchool(null);
-                            }}
                             placeholder="학교 검색"
                             inputMode="search"
                             aria-label="학교 검색"
+                            onFocus={() => {
+                                if (selectedSchool) {
+                                    setSelectedSchool(null);
+                                    setQuery("");
+                                }
+                            }}
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                            }}
                         />
-                        <div className="sv-searchIcon" aria-hidden>
-                            <img src="/search-01.svg" alt="" />
-                        </div>
-
-                        {query.trim() !== "" && (
+                        {selectedSchool ? (
+                            <span className="sv-check" aria-hidden>
+                                <img src="/check-02.svg" alt="" />
+                            </span>
+                        ) : (
+                            <div className="sv-searchIcon" aria-hidden>
+                                <img src="/search-01.svg" alt="" />
+                            </div>
+                        )}
+                        {query.trim() !== "" && !selectedSchool && (
                             <div className="sv-dropdown" role="listbox" aria-label="검색 결과">
-                            {filtered.length === 0 ? (
-                                <button type="button" className="sv-item disabled" disabled>
-                                    검색 결과가 없습니다
-                                </button>
-                            ) : (
+                                {filtered.length === 0 ? (
+                                    <button type="button" className="sv-item disabled" disabled>
+                                        검색 결과가 없습니다
+                                    </button>
+                                ) : (
                                 filtered.map((s) => (
-                                <button
-                                    type="button"
-                                    key={s.id}
-                                    className={`sv-item ${selectedSchool?.id === s.id ? "active" : ""}`}
-                                    onClick={() => onPickSchool(s)}
-                                    role="option"
-                                    aria-selected={selectedSchool?.id === s.id}
-                                >
-                                    <span>{s.name}</span>
-                                    {selectedSchool?.id === s.id && (
-                                    <span className="sv-check" aria-hidden>
-                                        <img src="/check-02.svg" alt="" />
-                                    </span>
-                                    )}
-                                </button>
+                                    <button
+                                        type="button"
+                                        key={s.id}
+                                        className="sv-item"
+                                        onClick={() => onPickSchool(s)}
+                                    >
+                                        <span>{s.name}</span>
+                                    </button>
                                 ))
-                            )}
+                                )}
                             </div>
                         )}
                     </div>
