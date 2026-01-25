@@ -156,7 +156,7 @@ export default function MyPage({ onLogout }: Props) {
           </>
         ) : (
           <>
-            <button type="button" className="mypage-card wide" onClick={() => navigate("/verify")}>
+            <button type="button" className="mypage-card wide" onClick={() => navigate("verify")}>
               <span className="mypage-badge" />
               <span className="mypage-card-title">재학생 인증하기</span>
             </button>
