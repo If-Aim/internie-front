@@ -76,6 +76,8 @@ export default function SchoolVerify() {
     function resetFile() {
         setFile(null);
         setPreviewUrl("");
+        setErrorMsg("");
+        setStep("UPLOAD");
     }
 
     function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -89,6 +91,10 @@ export default function SchoolVerify() {
 
         setErrorMsg("");
         setFile(f);
+
+        setStep("DONE");
+
+        e.currentTarget.value = "";
     }
 
     React.useEffect(() => {
@@ -270,6 +276,9 @@ export default function SchoolVerify() {
                 </main>
 
                 <footer className="sv-footer">
+                    <button type="button" className="sv-link" onClick={resetFile}>
+                        사진 다시 선택하기
+                    </button>
                     <button
                         type="button"
                         className="sv-primary"
