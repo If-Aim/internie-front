@@ -20,9 +20,8 @@ export default function StudentApp(): React.ReactElement {
       <Route index element={<Home />} />
       {/* 로그인 필요 */}
       <Route element={<ProtectedRoute />}>
-        <Route path="mypage" element={<MyPage />}>
-          <Route path="verify" element={<SchoolVerify />} />
-        </Route>
+        <Route path="mypage" element={<MyPage />} />
+        <Route path="/student/verify" element={<SchoolVerify />} />
 
         <Route path="schedule/new" element={<NewSchedule />} />
         <Route path="schedule/:eventId" element={<EditSchedule />} />

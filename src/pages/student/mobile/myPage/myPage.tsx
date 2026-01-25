@@ -38,7 +38,7 @@ export default function MyPage({ onLogout }: Props) {
   if (location.pathname.endsWith("/mypage/verify")) {
     return <Outlet />;
   }
-
+  
   const [me, setMe] = React.useState<UserMe | null>(null);
   const displayName = me?.name ?? "";
   const displayEmail = (me as any)?.email ?? "이메일";
@@ -161,7 +161,7 @@ export default function MyPage({ onLogout }: Props) {
           </>
         ) : (
           <>
-            <button type="button" className="mypage-card wide" onClick={() => navigate("verify")}>
+            <button type="button" className="mypage-card wide" onClick={() => navigate("/student/verify")}>
               <span className="mypage-badge" />
               <span className="mypage-card-title">재학생 인증하기</span>
             </button>
