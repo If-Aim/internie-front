@@ -1,6 +1,6 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
@@ -32,7 +32,12 @@ function sortKey(ed: EventDay) {
 
 // 마이페이지 컴포넌트
 export default function MyPage({ onLogout }: Props) {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  if (location.pathname.endsWith("/mypage/verify")) {
+    return <Outlet />;
+  }
 
   const [me, setMe] = React.useState<UserMe | null>(null);
   const displayName = me?.name ?? "";

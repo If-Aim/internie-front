@@ -7,11 +7,12 @@ import ProtectedRoute from "../../../protectedRoute";
 
 import Home from "./home";
 import MyPage from "./myPage/myPage";
+import SchoolVerify from "./myPage/schoolVerify";
+
 import NewSchedule from "./schedule/newSchedule";
 import EditSchedule from "./schedule/editSchedule";
 import DetailSchedule from "./schedule/detailSchedule";
 import QuestionsPage from "./questions/questionsPage";
-import SchoolVerify from "./myPage/schoolVerify";
 
 export default function StudentApp(): React.ReactElement {
   return (
@@ -19,8 +20,9 @@ export default function StudentApp(): React.ReactElement {
       <Route index element={<Home />} />
       {/* 로그인 필요 */}
       <Route element={<ProtectedRoute />}>
-        <Route path="mypage" element={<MyPage />} />
-        <Route path="verify" element={<SchoolVerify />} />
+        <Route path="mypage" element={<MyPage />}>
+          <Route path="verify" element={<SchoolVerify />} />
+        </Route>
 
         <Route path="schedule/new" element={<NewSchedule />} />
         <Route path="schedule/:eventId" element={<EditSchedule />} />
