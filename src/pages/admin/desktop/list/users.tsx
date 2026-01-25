@@ -33,6 +33,7 @@ export default function AdminUsersPage(): React.ReactElement {
     (async () => {
       try {
         const list = await getAdminUsers();
+        console.log("admin users raw:", list, "length:", list?.length);
         if (!mounted) return;
         setUsers(list);
       } catch (e) {
@@ -100,6 +101,9 @@ export default function AdminUsersPage(): React.ReactElement {
                 </div>
               ))
             )}
+            <div style={{ fontSize: 12, opacity: 0.7 }}>
+              debug: loading={String(loading)} / users={users.length} / error={errorMsg ?? "-"}
+            </div>
           </div>
         </section>
       </main>

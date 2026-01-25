@@ -271,7 +271,6 @@ export async function getUserMe(): Promise<UserMe> {
 export type AdminUser = UserBase;
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
-  // GET /admin/users
   return api<AdminUser[]>("/admin/users", { method: "GET" });
 }
 
