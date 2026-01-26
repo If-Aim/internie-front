@@ -293,8 +293,15 @@ export async function applyMyVerification(
 export type AdminUser = UserBase;
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
-  return api<AdminUser[]>("/admin/users", { method: "GET" });
+  const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
+  console.log("GET /admin/users final url:", res.url, "status:", res.status);
+
+  const text = await res.clone().text();
+  console.log("GET /admin/users raw body:", text);
+
+  return JSON.parse(text) as AdminUser[];
 }
+
 // 학생증 제출자 목록 조회
 export async function getAdminPendingUsers(): Promise<AdminUser[]> {
   return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
