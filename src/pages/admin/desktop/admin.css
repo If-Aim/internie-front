@@ -20,8 +20,8 @@
 .admin-surface{max-width: 1280px;margin: 0 auto;}
 .admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 34px;align-items: start;}
 
-.admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 8px 6px 18px;}
-.admin-section-title{font-size: 32px;font-weight: 900;}
+.admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 9px 13px 35px 0;}
+.admin-section-title{font-size: 32px;font-weight: 700;}
 .admin-section-count{font-size: 40px;font-weight: 700;}
 .admin-count-strong{color: var(--primary);}
 .admin-count-total{color: #000;}
@@ -30,14 +30,14 @@
 .admin-list{display:flex;flex-direction: column;gap: 18px;padding-right: 6px;max-height: calc(100vh - 180px);overflow: auto;}
 .admin-list::-webkit-scrollbar-track {background: transparent !important;}
 .admin-list-item{width: 100%;background: #fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 11px;
+padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 9px;
 align-items: center;cursor: pointer;text-align: left;}
 .admin-list-item--selected{border: 2px solid var(--primary);}
 .admin-badge{width: 30px;height: 30px;border-radius: 50%;background: var(--primary);
 color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 700;font-size: 16px;}
-.admin-user-name{font-weight: 700;font-size: 24px;}
-.admin-user-school{color: #A3A3A3;font-weight: 800;}
-.admin-user-status-pill {font-weight: 700;font-size: 24px;}
+.admin-user-name{margin-left:2px;font-weight: 700;font-size: 24px;}
+.admin-user-school{font-size:20px;color: #A3A3A3;font-weight: 700;justify-self: center;}
+.admin-user-status-pill {font-weight: 700;font-size: 24px;justify-self: right;}
 .admin-user-status-pill.status--approved {color: var(--primary);}
 .admin-user-status-pill.status--pending {color: #878787;}
 .admin-user-status-pill.status--rejected {color: #878787;}
