@@ -16,7 +16,7 @@
 .admin-topbar-right img{width:50px;border-radius: 50%;}
 
 /* ===== Body ===== */
-.admin-body{padding: 28px;}
+.admin-body{padding: 66px 51px 77px 50px;}
 .admin-surface{max-width: 1280px;margin: 0 auto;}
 .admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 34px;align-items: start;}
 
