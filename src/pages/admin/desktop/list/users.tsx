@@ -4,6 +4,7 @@ import React from "react";
 // import { useNavigate } from "react-router-dom";
 import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser } from "../../../../api/client";
 import "./users.css";
+import "../admin.css";
 
 function statusLabel(status: string) {
   switch (status) {
