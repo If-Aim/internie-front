@@ -148,7 +148,7 @@ export default function SchoolVerify() {
                         <input
                             className="sv-input"
                             value={query}
-                            placeholder="학교 검색"
+                            placeholder=""
                             inputMode="search"
                             aria-label="학교 검색"
                             onFocus={() => {
