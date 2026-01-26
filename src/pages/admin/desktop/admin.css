@@ -27,7 +27,7 @@
 .admin-count-total{color: #000;}
 
 /* ===== 목록 ===== */
-.admin-list{display:flex;flex-direction: column;gap: 18px;padding-right: 6px;max-height: calc(100vh - 180px);overflow: auto;}
+.admin-list{display:flex;flex-direction: column;gap: 18px;padding-right: 0;max-height: calc(100vh - 180px);overflow: auto;}
 .admin-list::-webkit-scrollbar-track {background: transparent !important;}
 .admin-list-item{width: 100%;background: #fff;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 11px;
