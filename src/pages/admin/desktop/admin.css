@@ -38,8 +38,8 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 .admin-user-name{font-weight: 700;font-size: 24px;}
 .admin-user-school{color: #A3A3A3;font-weight: 800;}
 .admin-user-status{color: #878787;font-weight: 700;justify-self: end;}
-.admin-user-status--approve{color: var(--primary);}
-.admin-user-status--reject{color: #878787;}
+.admin-user-status--approved{color: var(--primary);}
+.admin-user-status--rejected{color: #878787;}
 .admin-chevron img{justify-self: end;width:31px; height:auto;transform:rotate(-90deg);}
 
 /* ===== Right detail card ===== */
