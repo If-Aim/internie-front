@@ -18,7 +18,7 @@
 /* ===== Body ===== */
 .admin-body{padding: 66px 51px 77px 50px;}
 .admin-surface{max-width: 1280px;margin: 0 auto;}
-.admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 34px;align-items: start;}
+.admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 79px;align-items: start;}
 
 .admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 9px 13px 35px 0;}
 .admin-section-title{font-size: 32px;font-weight: 700;}
@@ -27,7 +27,7 @@
 .admin-count-total{color: #000;}
 
 /* ===== 목록 ===== */
-.admin-list{display:flex;flex-direction: column;gap: 18px;padding-right: 6px;max-height: calc(100vh - 180px);overflow: auto;}
+.admin-list{display:flex;flex-direction: column;gap: 21px;padding-right: 6px;max-height: calc(100vh - 180px);overflow: auto;}
 .admin-list::-webkit-scrollbar-track {background: transparent !important;}
 .admin-list-item{width: 100%;background: #fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 9px;
@@ -48,8 +48,8 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 /* ===== Right detail card ===== */
 .admin-detail-card{background: #fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);padding: 34px 46px;}
 
-.admin-detail-name{margin: 34 0 50px;font-size: 40px;font-weight: 700;text-align: center;}
-.admin-detail-photo{height: 400px;border-radius: 10px;background: #d9d9d9;display:flex;
+.admin-detail-name{margin: 34px 0 50px;font-size: 40px;font-weight: 700;text-align: center;}
+.admin-detail-photo{width:400px;height: 400px;justify-self:center;border-radius: 10px;background: #d9d9d9;display:flex;
 align-items:center;justify-content:center;color: #000;font-weight: 700;}
 .admin-detail-actions{display:grid;grid-template-columns: 1fr 1fr;gap: 10px;margin-top: 100px;}
 .admin-btn{height: 60px;border-radius: 10px;font-weight: 700;font-size: 20px;border: none;cursor: pointer;}

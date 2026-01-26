@@ -222,7 +222,7 @@ export default function AdminUsersPage(): React.ReactElement {
                   onClick={handleReject}
                   disabled={actionLoading}
                 >
-                  {actionLoading ? "처리 중…" : "거절"}
+                  {actionLoading ? "처리 중…" : "재요청"}
                 </button>
 
                 <button
