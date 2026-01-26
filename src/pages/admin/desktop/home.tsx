@@ -52,19 +52,19 @@ export default function AdminHome(): React.ReactElement {
             to="/admin/users"
             className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
           >
-            학생증
+            <span>학생증</span>
           </NavLink>
           <NavLink
             to="/admin/certificates"
             className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
           >
-            수료증
+            <span>수료증</span>
           </NavLink>
           <NavLink
             to="/admin/reports"
             className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
           >
-            보고서
+            <span>보고서</span>
           </NavLink>
         </nav>
 
