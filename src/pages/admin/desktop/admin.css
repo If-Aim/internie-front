@@ -41,6 +41,8 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 .admin-user-status-pill.status--approved {color: var(--primary);}
 .admin-user-status-pill.status--pending {color: #878787;}
 .admin-user-status-pill.status--rejected {color: #878787;}
+.admin-user-status-pill.status--etc {font-size:14px;color: #878787;}
+
 .admin-chevron img{justify-self: end;width:31px; height:auto;transform:rotate(-90deg);}
 
 /* ===== Right detail card ===== */
