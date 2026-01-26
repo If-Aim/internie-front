@@ -758,7 +758,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
                 });
               }}
             >
-              <img className="icon" src="/Next (Stroke).svg" alt="사용자조회" />
+              <img className="icon" src="/chevron-right.svg" alt="사용자조회" />
               <span>사용자조회</span>
             </button>
           )}

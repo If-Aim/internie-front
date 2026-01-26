@@ -134,7 +134,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 
                   {done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}
 
-                  <span className="cert-chevron"><img src="/Next (Stroke).svg" alt="admin avatar" /></span>
+                  <span className="cert-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
                 </button>
               );
             })

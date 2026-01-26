@@ -29,7 +29,7 @@
 /* ===== 목록 ===== */
 .admin-list{display:flex;flex-direction: column;gap: 18px;padding-right: 6px;max-height: calc(100vh - 180px);overflow: auto;}
 .admin-list::-webkit-scrollbar-track {background: transparent !important;}
-.admin-list-item{width: 100%;background: #fff;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
+.admin-list-item{width: 100%;background: #fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 11px;
 align-items: center;cursor: pointer;text-align: left;}
 .admin-list-item--selected{border: 2px solid var(--primary);}
@@ -40,7 +40,7 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 .admin-user-status{color: #878787;font-weight: 700;justify-self: end;}
 .admin-user-status--approve{color: var(--primary);}
 .admin-user-status--reject{color: #878787;}
-.admin-chevron{justify-self: end;width:31px; height:auto;}
+.admin-chevron img{justify-self: end;width:31px; height:auto;transform:rotate(-90deg);}
 
 /* ===== Right detail card ===== */
 .admin-detail-card{background: #fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);padding: 34px 46px;}

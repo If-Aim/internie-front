@@ -83,7 +83,7 @@ export default function AdminReportsPage(): React.ReactElement {
                   <span className="report-school">{displaySchoolOrNickname(u)}</span>
 
                   <span className="report-chevron">
-                    <img src="/Next (Stroke).svg" alt="" />
+                    <img src="/chevron-right.svg" alt="" />
                   </span>
                 </button>
               );

@@ -17,6 +17,7 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 .cert-done{font-size: 24px;justify-self:end;color: var(--primary);font-weight: 700;}
 .cert-done--empty{ color: transparent; }
 .cert-chevron{ justify-self:end; width:31px;}
+.cert-chevron img{ transform:rotate(-90deg);}
 
 .cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 height: 520px;display:flex;align-items:center;justify-content:center;position: relative;}
