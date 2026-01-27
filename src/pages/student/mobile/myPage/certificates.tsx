@@ -44,39 +44,39 @@ export default function Certificates() {
   };
 
   return (
-    <div className="cert-page">
-      <header className="cert-header">
-        <div className="cert-header-left" />
-        <div className="cert-header-title">수료증</div>
-        <button type="button" className="cert-header-close" aria-label="닫기" onClick={handleClose}>
+    <div className="cert-s-page">
+      <header className="cert-s-header">
+        <div className="cert-s-header-left" />
+        <div className="cert-s-header-title">수료증</div>
+        <button type="button" className="cert-s-header-close" aria-label="닫기" onClick={handleClose}>
           <img src="/x-01.svg" alt="" />
         </button>
       </header>
 
-      <main className="cert-body">
-        <div className="cert-list">
+      <main className="cert-s-body">
+        <div className="cert-s-list">
           {items.map(item => (
-            <div key={item.id} className="cert-card">
-              <div className="cert-thumb" aria-hidden="true" />
+            <div key={item.id} className="cert-s-card">
+              <div className="cert-s-thumb" aria-hidden="true" />
 
-              <div className="cert-info">
-                <div className="cert-name" title={item.filename}>
+              <div className="cert-s-info">
+                <div className="cert-s-name" title={item.filename}>
                   {item.filename}
                 </div>
-                <div className="cert-date">{formatDateDot(item.createdAt)}</div>
+                <div className="cert-s-date">{formatDateDot(item.createdAt)}</div>
               </div>
 
-              <div className="cert-actions">
+              <div className="cert-s-actions">
                 <button
                   type="button"
-                  className="cert-icon-btn"
+                  className="cert-s-icon-btn"
                   aria-label="다운로드"
                   onClick={() => handleDownload(item)}
                 >
                   <img src="/download-02.svg" alt="" />
                 </button>
 
-                <button type="button" className="cert-icon-btn" aria-label="삭제" onClick={() => handleDelete(item.id)} >
+                <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={() => handleDelete(item.id)} >
                   <img src="/trash-02.svg" alt="" />
                 </button>
               </div>
