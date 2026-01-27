@@ -180,7 +180,7 @@ export default function MyPage({ onLogout }: Props) {
           <>
             <button
               type="button"
-              className={`mypage-card wide ${status === "PENDING" ? "is-pending" : ""} ${status === "REJECTED" ? "is-rejected" : ""}`}
+              className={`mypage-card wide ${status === "PENDING" ? "is-pending" : ""} ${status === "REJECTED" ? "is-rejected" : ""}${status === "APPROVED" ? "is-approved" : ""}`}
               onClick={verifyUi.onClick}
               disabled={verifyUi.disabled}
             >
