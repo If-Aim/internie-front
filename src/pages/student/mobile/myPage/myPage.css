@@ -30,6 +30,8 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-cards.bottom-spacer {height: 30px;width: 100%;flex-shrink: 0;}
 
 .mypage-card-title {font-size: 16px; font-weight: 700; color: #707070;}
+.mypage-card.wide.is-approved.mypage-card-title {color: #000;}
+
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
 .mypage-card.square {width:100%;aspect-ratio: 1/1;background:#fff;border:0;}
 .mypage-cardgrid-meta {display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: -8px; padding: 0 2px;}
