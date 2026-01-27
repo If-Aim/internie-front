@@ -2,7 +2,7 @@
 .cert-s-page{min-height: 100dvh;background: #F0F6FF;display: flex;flex-direction: column;}
 
 
-.cert-s-header{height: 50px;display: grid;grid-template-columns: 44px 1fr 44px;align-items: center;padding: 20px 2px 0;}
+.cert-s-header{height: 50px;display: grid;grid-template-columns: 44px 1fr 44px;align-items: center;padding: 24px 12px 0;}
 
 .cert-s-header-title{justify-self: center;font-size: 16px;font-weight: 700;}
 .cert-s-header-close{width: 44px;height: 44px;border: none;background: transparent;display: flex;align-items: center;justify-content: center;}
