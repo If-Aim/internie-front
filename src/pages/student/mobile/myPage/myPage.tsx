@@ -51,6 +51,12 @@ export default function MyPage({ onLogout }: Props) {
     ? "/internie_mascot_normal.png"
     : me?.profileImage!;
   const [/*recent*/, setRecent] = React.useState<EventDay[]>([]);
+  const [targetCompany, /*setTargetCompany*/] = React.useState<string | null>(null);
+
+  // mypage-menu-item 서비스 준비중 팝업알림
+  function handleServicePreparing() {
+    alert("서비스 준비중입니다.");
+  }
 
   async function handleLogout() {
     try {
@@ -141,18 +147,10 @@ export default function MyPage({ onLogout }: Props) {
         {isVerifiedStudent ? (
           <>
             <div className="mypage-actions">
-              <button type="button" className="mypage-action-btn" /* onClick={...} */ disabled>
-                프로필 공유하기
-              </button>
-              <button
-                type="button"
-                className="mypage-action-btn"
-                onClick={() => navigate("/account")}
-              >
+              <button type="button" className="mypage-action-btn" onClick={() => navigate("/account")} >
                 프로필 수정하기
               </button>
             </div>
-
             {/*
             <section className="mypage-cards">
               ...최근 기록 카드...
@@ -165,8 +163,6 @@ export default function MyPage({ onLogout }: Props) {
               <span className="mypage-badge" />
               <span className="mypage-card-title">재학생 인증하기</span>
             </button>
-
-            <div className="mypage-goal-title">목표 기업 설정</div>
 
             {/* 최근 기록한? 일정 카드 
             <div className="mypage-cardgrid">
@@ -186,7 +182,23 @@ export default function MyPage({ onLogout }: Props) {
             </div>
             */}
           </>
-        )}        
+        )}
+        <div className="mypage-menu">
+          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
+            <span className="mypage-menu-title">나의 목표 기업</span>
+            <span className="mypage-menu-right">
+              <span className="mypage-menu-value">{targetCompany ?? "미설정"}</span>
+              <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+            </span>
+          </button>
+
+          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
+            <span className="mypage-menu-title">나의 수료증</span>
+            <span className="mypage-menu-right">
+              <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+            </span>
+          </button>
+        </div>      
       </section>
 
       {/* <section className="mypage-links">
