@@ -64,7 +64,7 @@ export default function MyPage({ onLogout }: Props) {
         return {
           label: "프로필 수정하기",
           disabled: false,
-          onClick: () => navigate("/account"), // 프로필 수정 화면으로
+          onClick: handleServicePreparing,// () => navigate("/account"), TODO: 프로필 수정 화면으로
         };
       case "UNVERIFIED":
       default:
