@@ -215,7 +215,7 @@ export default function MyPage({ onLogout }: Props) {
             </span>
           </button>
 
-          <button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> {/* 추후 onClick 이벤트 변경: {() => navigate("/certificate")} */}
+          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}> {/* 추후 onClick 이벤트 변경: {() => navigate("cert")} */}
             <span className="mypage-menu-title">나의 수료증</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
