@@ -8,11 +8,13 @@ import ProtectedRoute from "../../../protectedRoute";
 import Home from "./home";
 import MyPage from "./myPage/myPage";
 import SchoolVerify from "./myPage/schoolVerify";
+import Cert from "./myPage/certificates"
 
 import NewSchedule from "./schedule/newSchedule";
 import EditSchedule from "./schedule/editSchedule";
 import DetailSchedule from "./schedule/detailSchedule";
 import QuestionsPage from "./questions/questionsPage";
+
 
 export default function StudentApp(): React.ReactElement {
   return (
@@ -21,6 +23,7 @@ export default function StudentApp(): React.ReactElement {
       {/* 로그인 필요 */}
       <Route element={<ProtectedRoute />}>
         <Route path="mypage" element={<MyPage />} />
+        <Route path="mypage/cert" element={<Cert />} />
         <Route path="verify" element={<SchoolVerify />} />
 
         <Route path="schedule/new" element={<NewSchedule />} />

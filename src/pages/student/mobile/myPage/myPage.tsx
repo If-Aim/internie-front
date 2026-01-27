@@ -7,6 +7,7 @@ import type { EventDay } from "../../../../api/client";
 import "./myPage.css";
 
 type Props = { onLogout?: () => void; };
+type VerifyStatus = "UNVERIFIED" | "PENDING" | "APPROVED" | "REJECTED";
 
 // 최근 기록 관련 유틸
 function currentYm() {
@@ -43,6 +44,38 @@ export default function MyPage({ onLogout }: Props) {
   const displayName = me?.name ?? "";
   const displayEmail = (me as any)?.email ?? "이메일";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
+  const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
+  
+  const verifyUi = (() => {
+    switch (status) {
+      case "PENDING":
+        return {
+          label: "인증 요청중",
+          disabled: true,
+          onClick: () => {}, // 눌러도 아무 동작 안 하게
+        };
+      case "REJECTED":
+        return {
+          label: "인증이 실패했어요",
+          disabled: false,
+          onClick: () => navigate("/student/verify"), // 다시 신청 화면으로
+        };
+      case "APPROVED":
+        return {
+          label: "프로필 수정하기",
+          disabled: false,
+          onClick: () => navigate("/account"), // 프로필 수정 화면으로
+        };
+      case "UNVERIFIED":
+      default:
+        return {
+          label: "재학생 인증하기",
+          disabled: false,
+          onClick: () => navigate("/student/verify"),
+        };
+    }
+  })();
+
   const isDefaultProfile =
     !me?.profileImage ||
     me.profileImage.includes("kakao") || // 카카오 기본 이미지
@@ -144,24 +177,15 @@ export default function MyPage({ onLogout }: Props) {
 
       <section className="mypage-cards">
         {/* 재학생 인증 */}
-        {isVerifiedStudent ? (
           <>
-            <div className="mypage-actions">
-              <button type="button" className="mypage-action-btn" onClick={() => navigate("/account")} >
-                프로필 수정하기
-              </button>
-            </div>
-            {/*
-            <section className="mypage-cards">
-              ...최근 기록 카드...
-            </section>
-            */}
-          </>
-        ) : (
-          <>
-            <button type="button" className="mypage-card wide" onClick={() => navigate("/student/verify")} disabled>
+            <button
+              type="button"
+              className={`mypage-card wide ${status === "PENDING" ? "is-pending" : ""} ${status === "REJECTED" ? "is-rejected" : ""}`}
+              onClick={verifyUi.onClick}
+              disabled={verifyUi.disabled}
+            >
               <span className="mypage-badge" />
-              <span className="mypage-card-title">재학생 인증하기</span>
+              <span className="mypage-card-title">{verifyUi.label}</span>
             </button>
 
             {/* 최근 기록한? 일정 카드 
@@ -182,7 +206,6 @@ export default function MyPage({ onLogout }: Props) {
             </div>
             */}
           </>
-        )}
         <div className="mypage-menu">
           <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
             <span className="mypage-menu-title">나의 목표 기업</span>
@@ -192,7 +215,7 @@ export default function MyPage({ onLogout }: Props) {
             </span>
           </button>
 
-          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
+          <button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> {/* 추후 onClick 이벤트 변경: {() => navigate("/certificate")} */}
             <span className="mypage-menu-title">나의 수료증</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
