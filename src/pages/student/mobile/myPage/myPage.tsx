@@ -198,7 +198,8 @@ export default function MyPage({ onLogout }: Props) {
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
             </span>
           </button>
-        </div>      
+        </div>
+        <div className="bottom-spacer"></div>
       </section>
 
       {/* <section className="mypage-links">

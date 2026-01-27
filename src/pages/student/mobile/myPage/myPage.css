@@ -15,7 +15,7 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-action-btn { height: 56px; border: 0; border-radius: 10px; background: #E6E6E6;  color: #9A9A9A; font-size: 16px; font-weight: 700; } 
 .mypage-goal-title { text-align: center; font-size: 16px; font-weight: 700; color: #707070; }
 
-.mypage-cards { margin-top: 18px; display: flex; align-items: center;flex-direction: column; gap: 50px; }
+.mypage-cards { margin-top: 18px; display: flex; align-items: center;flex-direction: column;}
 .mypage-card {border: 0; background: #E3E3E3; border-radius: 10px; }
 .mypage-card.wide {width:160px;height: 50px; padding: 0 21px; align-items: center; gap: 14px;}
 .mypage-card.wide--selected{background: #d6d6d6;}
@@ -26,6 +26,7 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-menu-right{display: flex;align-items: center;gap: 5px;}
 .mypage-menu-value{font-size: 16px;font-weight: 600;justify-self: right;}
 .mypage-menu-chevron{width: 18px;height: 18px;transform:rotate(-90deg);}
+.mypage-cards.bottom-spacer {height: 50px;width: 100%;flex-shrink: 0;}
 
 .mypage-card-title {font-size: 16px; font-weight: 700; color: #707070;}
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
