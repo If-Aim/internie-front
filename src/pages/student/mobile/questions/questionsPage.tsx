@@ -94,6 +94,12 @@ export default function QuestionsPage() {
       return false;
     }
 
+    const MAX_BYTES = 8 * 1024 * 1024; // 8MB
+    if (audioBlob.size > MAX_BYTES) {
+      alert("녹음이 너무 길어서 업로드할 수 없어요.\n40초 이내로 다시 녹음해 주세요.");
+      return false;
+    }
+
     const audioFile = new File([audioBlob], "voice_record.webm", { type: "audio/webm" });
     const formData = new FormData();
     formData.append("audioFile", audioFile);
@@ -278,7 +284,15 @@ export default function QuestionsPage() {
           setRingLevel(amp);
         }, 60); // 60ms 간격 (약 16fps 정도)
 
-        const recorder = new MediaRecorder(stream);
+        const mimeType =
+          MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+            ? "audio/webm;codecs=opus"
+            : "audio/webm";
+
+        const recorder = new MediaRecorder(stream, {
+          mimeType,
+          audioBitsPerSecond: 32000, // 32kbps 
+        });
         mediaRecorderRef.current = recorder;
         audioChunksRef.current = []; 
 
@@ -290,7 +304,7 @@ export default function QuestionsPage() {
 
         // 녹음이 정지되면 파일을 만들고 업로드
         recorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
           setShowOutro(true);
 
           const recordOk = await uploadAudioToSTT(audioBlob);

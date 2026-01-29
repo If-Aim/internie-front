@@ -64,7 +64,7 @@ export default function AdminHome(): React.ReactElement {
             to="/admin/reports"
             className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
           >
-            <span>보고서</span>
+            <span>기록 열람</span>
           </NavLink>
         </nav>
 
