@@ -97,11 +97,13 @@ export default function MyPage({ onLogout }: Props) {
       const me = await getUserMe();
 
       if (!(me as any).admin_file_url && !(me as any).adminFileUrl) {
-        alert("발급된 수료증이 없습니다."); // 요청하신 문구
+        alert("발급된 수료증이 없습니다."); 
         return;
       }
 
       const url = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
+      console.log("[cert] download click, url =", url);
+      
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (e) {
       if (e instanceof ApiError && e.status === 404) {
