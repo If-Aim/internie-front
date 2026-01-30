@@ -317,6 +317,20 @@ export async function rejectAdminUser(userId: number | string): Promise<AdminUse
   return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
 }
 
+// 수료증 업로드
+export async function uploadAdminUserFile(userId: number, file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const res = await apiUpload(`/admin/users/${userId}/files`, form, { method: "POST" });
+
+  if (typeof res === "string") return res;
+
+  if (res && typeof (res as any).url === "string") return (res as any).url;
+
+  return String(res ?? "");
+}
+
 /**
  * 관리자 여부만 확인
  */

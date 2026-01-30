@@ -1,16 +1,8 @@
 // src/pages/admin/desktop/upload/certificates.tsx
 // 수료증 업로드 화면 (탭)
 import React from "react";
-import { ApiError, type AdminUser, getAdminUsers, apiUpload} from "../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile } from "../../../../api/client";
 import "./certificates.css";
-
-async function uploadCertificateApi(userId: number, file: File) {
-    const form = new FormData();
-    form.append("file", file);
-
-    // 수료증 업로드 API 연결
-    return apiUpload(`/admin/users/${userId}/certificates`, form, { method: "POST" });
-}
 
 function displaySchoolOrNickname(u: AdminUser) {
   return (u.nickname ?? "").trim() || "-";
@@ -25,7 +17,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
   const [loading, setLoading] = React.useState(true);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-  const [uploadedMap, setUploadedMap] = React.useState<Record<number, boolean>>({});
+  const [uploadedUrlMap, setUploadedUrlMap] = React.useState<Record<number, string>>({});
 
   const [uploading, setUploading] = React.useState(false);
 
@@ -35,8 +27,8 @@ export default function AdminCertificatesPage(): React.ReactElement {
   );
 
   const completedCount = React.useMemo(() => {
-    return users.filter((u) => uploadedMap[u.userId]).length;
-  }, [users, uploadedMap]);
+    return users.filter((u) => uploadedUrlMap[u.userId]).length;
+  }, [users, uploadedUrlMap]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -80,9 +72,9 @@ export default function AdminCertificatesPage(): React.ReactElement {
 
     setUploading(true);
     try {
-      await uploadCertificateApi(selectedUser.userId, file);
+      const uploadedUrl = await uploadAdminUserFile(selectedUser.userId, file);
 
-      setUploadedMap((prev) => ({ ...prev, [selectedUser.userId]: true }));
+      setUploadedUrlMap((prev) => ({ ...prev, [selectedUser.userId]: uploadedUrl }));
       alert("수료증 업로드가 완료되었습니다.");
     } catch (e) {
       if (e instanceof ApiError) {
@@ -119,7 +111,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
           ) : (
             users.map((u, idx) => {
               const isSelected = u.userId === selectedId;
-              const done = !!uploadedMap[u.userId];
+              const done = !!uploadedUrlMap[u.userId];
 
               return (
                 <button
@@ -170,9 +162,10 @@ export default function AdminCertificatesPage(): React.ReactElement {
             <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
           )}
 
-          {selectedUser && uploadedMap[selectedUser.userId] && (
+          {selectedUser && uploadedUrlMap[selectedUser.userId] && (
             <p className="cert-upload-hint cert-upload-hint--ok">
               해당 사용자는 수료증 업로드가 완료되었습니다.
+              <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">파일 보기</a>
             </p>
           )}
         </div>
