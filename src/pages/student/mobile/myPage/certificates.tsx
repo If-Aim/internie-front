@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./certificates.css";
-import { ApiError, downloadMyAdminFile } from "../../../../api/client";
+// import { ApiError } from "../../../../api/client";
 
 type CertItem = { 
   id: string;
@@ -27,30 +27,16 @@ export default function Certificates() {
     navigate(-1); // 또는 navigate("/student/mypage") 등
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (downloading) return;
 
     setDownloading(true);
     try {
-      const { blob, filename } = await downloadMyAdminFile();
+      console.log("[cert] click (navigate) /users/me/admin-file");
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename || "admin-file";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 404) {
-        alert("관리자 파일이 없습니다.");
-        return;
-      }
-      alert("다운로드에 실패했습니다.");
-      console.error(e);
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
     } finally {
-      setDownloading(false);
+      setTimeout(() => setDownloading(false), 800);
     }
   };
 
