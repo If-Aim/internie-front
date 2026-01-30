@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe, ApiError } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -89,6 +89,28 @@ export default function MyPage({ onLogout }: Props) {
   // mypage-menu-item 서비스 준비중 팝업알림
   function handleServicePreparing() {
     alert("서비스 준비중입니다.");
+  }
+
+  // 마이페이지 자체에서 수료증 다운
+  async function handleDownloadCertificate() {
+    try {
+      const me = await getUserMe();
+
+      if (!(me as any).admin_file_url && !(me as any).adminFileUrl) {
+        alert("발급된 수료증이 없습니다."); // 요청하신 문구
+        return;
+      }
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        alert("발급된 수료증이 없습니다."); 
+        return;
+      }
+      alert("다운로드에 실패했습니다.");
+      console.error(e);
+    }
   }
 
   async function handleLogout() {
@@ -215,7 +237,7 @@ export default function MyPage({ onLogout }: Props) {
             </span>
           </button>
 
-          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}> {/* 추후 onClick 이벤트 변경: {() => navigate("cert")} */}
+          <button type="button" className="mypage-menu-item" onClick={handleDownloadCertificate}> {/* 추후 onClick 이벤트 변경: {() => navigate("cert")} */}
             <span className="mypage-menu-title">나의 수료증</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
