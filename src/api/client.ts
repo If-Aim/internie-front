@@ -461,3 +461,17 @@ export class ApiError extends Error {
     this.bodyText = bodyText;
   }
 }
+
+
+// debug
+export async function debugFetchS3Head(url: string): Promise<void> {
+  try {
+    const res = await fetch(url, { method: "GET" }); // presigned URL 직접
+    console.log("[s3][debug] ok =", res.ok, "status =", res.status, "type =", res.type);
+    console.log("[s3][debug] content-type =", res.headers.get("content-type"));
+    console.log("[s3][debug] allow-origin =", res.headers.get("access-control-allow-origin"));
+    console.log("[s3][debug] expose =", res.headers.get("access-control-expose-headers"));
+  } catch (e) {
+    console.error("[s3][debug] fetch error", e);
+  }
+}

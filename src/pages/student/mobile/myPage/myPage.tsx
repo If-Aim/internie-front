@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe, ApiError, getMyAdminFilePresignedUrl  } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe, ApiError, getMyAdminFilePresignedUrl, debugFetchS3Head } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -97,6 +97,7 @@ export default function MyPage({ onLogout }: Props) {
       console.log("[cert] click");
 
       const presignedUrl = await getMyAdminFilePresignedUrl();
+      await debugFetchS3Head("https://internie-image-bucket.s3....");
       console.log("[cert] presigned url =", presignedUrl);
 
       window.open(presignedUrl, "_blank", "noopener,noreferrer");
