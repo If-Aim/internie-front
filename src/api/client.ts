@@ -376,6 +376,36 @@ function parseFilenameFromContentDisposition(cd: string): string | null {
   return null;
 }
 
+// 관리자 업로드 파일: 302 Location(presigned URL)만 뽑아오기
+export async function getMyAdminFilePresignedUrl(): Promise<string> {
+  const res = await requestWithAutoRefresh(
+    "/users/me/admin-file",
+    {
+      method: "GET",
+      redirect: "manual",
+    },
+    { expectJson: false }
+  );
+
+  const loc = res.headers.get("location") || res.headers.get("Location");
+  if (!loc) {
+    // 디버깅용 로그
+    console.log("[cert] redirect manual response", {
+      status: res.status,
+      type: (res as any).type,
+      url: res.url,
+      location: loc,
+      expose: res.headers.get("access-control-expose-headers"),
+    });
+
+    throw new ApiError(
+      res.status || 0,
+      "Location header not accessible. Need 'Access-Control-Expose-Headers: Location' or same-origin."
+    );
+  }
+
+  return loc;
+}
 
 
 /**
