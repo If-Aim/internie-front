@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe, ApiError, debugAdminFileStatus } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -93,35 +93,11 @@ export default function MyPage({ onLogout }: Props) {
 
   // 마이페이지 자체에서 수료증 다운
   async function handleDownloadCertificate() {
-    console.log("[cert] clicked"); // 디버깅용 
-    try {
-      await debugAdminFileStatus(); // 디버깅용 
+    const url = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
+    console.log("[cert] opening (navigation):", url);
 
-      const me = await getUserMe();
-
-      // ==== 디버깅용 로그 ====
-      console.log("[cert] me keys:", Object.keys(me as any));
-      console.log("[cert] admin_file_url:", (me as any).admin_file_url, "adminFileUrl:", (me as any).adminFileUrl);
-      // ==== 디버깅용 로그 ====
-
-      if (!(me as any).admin_file_url && !(me as any).adminFileUrl) {
-        alert("발급된 수료증이 없습니다."); 
-        return;
-      }
-
-      const url = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
-      console.log("[cert] download click, url =", url);
-
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e) {
-      console.log("[cert] error:", e); // 디버깅용 
-      if (e instanceof ApiError && e.status === 404) {
-        alert("발급된 수료증이 없습니다."); 
-        return;
-      }
-      alert("다운로드에 실패했습니다.");
-      console.error(e);
-    }
+    const w = window.open(url, "_blank", "noopener,noreferrer");
+    if (!w) alert("팝업이 차단되었습니다. 팝업 차단을 해제해주세요.");
   }
 
   async function handleLogout() {
