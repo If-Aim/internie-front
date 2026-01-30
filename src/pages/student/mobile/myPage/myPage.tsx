@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe, ApiError, downloadMyAdminFile } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -93,13 +93,28 @@ export default function MyPage({ onLogout }: Props) {
 
   // 마이페이지 자체에서 수료증 다운
   async function handleDownloadCertificate() {
-    const url = `${import.meta.env.VITE_API_BASE_URL}/users/me/admin-file`;
-    console.log("[cert] opening (navigation):", url);
+    try {
+      const { blob, filename } = await downloadMyAdminFile();
 
-    const w = window.open(url, "_blank", "noopener,noreferrer");
-    if (!w) alert("팝업이 차단되었습니다. 팝업 차단을 해제해주세요.");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "admin-file";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        alert("발급된 수료증이 없습니다.");
+        return;
+      }
+      alert("다운로드에 실패했습니다.");
+      console.error(e);
+    }
   }
 
+  // 로그아웃
   async function handleLogout() {
     try {
       await logout();

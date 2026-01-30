@@ -290,7 +290,7 @@ export async function applyMyVerification(
 }
 
 // 관리자 업로드 파일 다운로드
-export async function downloadMyAdminFile(): Promise<{ blob: Blob; filename: string; contentType: string }> {
+export async function downloadMyAdminFile(): Promise<{ blob: Blob; filename: string }> {
   return apiBlob("/users/me/admin-file", { method: "GET" });
 }
 
@@ -430,20 +430,4 @@ export class ApiError extends Error {
     this.status = status;
     this.bodyText = bodyText;
   }
-}
-
-// 디버깅 2026.01.30
-export async function debugAdminFileStatus(): Promise<void> {
-  const res = await requestWithAutoRefresh(
-    "/users/me/admin-file",
-    { method: "GET" },
-    { expectJson: false }
-  );
-
-  console.log("[cert][debug] status =", res.status);
-  console.log("[cert][debug] url =", res.url);
-  console.log("[cert][debug] content-type =", res.headers.get("content-type"));
-  console.log("[cert][debug] content-disposition =", res.headers.get("content-disposition"));
-  console.log("[cert][debug] location =", res.headers.get("location"));
-
 }
