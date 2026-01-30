@@ -289,6 +289,11 @@ export async function applyMyVerification(
   );
 }
 
+// 관리자 업로드 파일 다운로드
+export async function downloadMyAdminFile(): Promise<{ blob: Blob; filename: string; contentType: string }> {
+  return apiBlob("/users/me/admin-file", { method: "GET" });
+}
+
 /* - admin 관련 - */
 export type AdminUser = UserBase;
 
@@ -317,6 +322,7 @@ export async function rejectAdminUser(userId: number | string): Promise<AdminUse
   return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
 }
 
+
 // 수료증 업로드
 export async function uploadAdminUserFile(userId: number, file: File): Promise<string> {
   const form = new FormData();
@@ -330,6 +336,47 @@ export async function uploadAdminUserFile(userId: number, file: File): Promise<s
 
   return String(res ?? "");
 }
+
+// blob 요청
+async function apiBlob(
+  path: string,
+  init: RequestInit = {}
+): Promise<{ blob: Blob; filename: string; contentType: string }> {
+  const res = await requestWithAutoRefresh(path, init, { expectJson: false });
+
+  if (!res.ok) {
+    const bodyText = await res.text().catch(() => "");
+    throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+  }
+
+  const blob = await res.blob();
+  const contentType = res.headers.get("content-type") ?? "";
+
+  const cd = res.headers.get("content-disposition") ?? "";
+  const filename = parseFilenameFromContentDisposition(cd) ?? "admin-file";
+
+  return { blob, filename, contentType };
+}
+
+function parseFilenameFromContentDisposition(cd: string): string | null {
+  // filename*=UTF-8''...
+  const m5987 = cd.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (m5987?.[1]) {
+    try {
+      return decodeURIComponent(m5987[1].trim().replace(/"/g, ""));
+    } catch {
+      return m5987[1].trim().replace(/"/g, "");
+    }
+  }
+
+  // filename="..."
+  const m = cd.match(/filename\s*=\s*("?)([^"]+)\1/i);
+  if (m?.[2]) return m[2].trim();
+
+  return null;
+}
+
+
 
 /**
  * 관리자 여부만 확인

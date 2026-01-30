@@ -1,46 +1,61 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./certificates.css";
+import { ApiError, downloadMyAdminFile } from "../../../../api/client";
 
-type CertItem = { // TODO:추후 API 참고 후 변경
+type CertItem = { 
   id: string;
   filename: string;
-  createdAt: string; // "2026-01-19"
-  fileUrl?: string;  // 다운로드 URL (있으면 실제 다운로드)
+  createdAt: string;
 };
 
 function formatDateDot(iso: string) {
-  // "2026-01-19" -> "2026.01.19."
   const [y, m, d] = iso.split("-");
   return `${y}.${m}.${d}.`;
 }
 
 const mockCertificates: CertItem[] = [
-  { id: "1", filename: "썬데이나마...pdf", createdAt: "2026-01-19", fileUrl: "" },
-  { id: "2", filename: "썬데이나마...pdf", createdAt: "2026-01-19", fileUrl: "" },
-  { id: "3", filename: "썬데이나마...pdf", createdAt: "2026-01-19", fileUrl: "" },
+  { id: "admin-file", filename: "관리자 업로드 파일", createdAt: "2026-01-19" },
 ];
 
 export default function Certificates() {
   const navigate = useNavigate();
-  const [items, setItems] = React.useState<CertItem[]>(mockCertificates);
+  const [items] = React.useState<CertItem[]>(mockCertificates);
+  const [downloading, setDownloading] = React.useState(false);
 
   const handleClose = () => {
     navigate(-1); // 또는 navigate("/student/mypage") 등
   };
 
-  const handleDownload = (item: CertItem) => {
-    if (item.fileUrl) {
-      window.open(item.fileUrl, "_blank", "noopener,noreferrer");
-      return;
+  const handleDownload = async () => {
+    if (downloading) return;
+
+    setDownloading(true);
+    try {
+      const { blob, filename } = await downloadMyAdminFile();
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "admin-file";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        alert("관리자 파일이 없습니다.");
+        return;
+      }
+      alert("다운로드에 실패했습니다.");
+      console.error(e);
+    } finally {
+      setDownloading(false);
     }
-    alert("서비스 준비중입니다."); // TODO: API 연결 후 삭제
   };
 
-  const handleDelete = (id: string) => {
-    const ok = window.confirm("해당 수료증을 삭제할까요?");
-    if (!ok) return;
-    setItems(prev => prev.filter(x => x.id !== id));
+  const handleDelete = (/*id: string*/) => { // 백엔드 삭제 API 미구현
+    alert("서비스 준비중입니다.");
   };
 
   return (
@@ -71,12 +86,13 @@ export default function Certificates() {
                   type="button"
                   className="cert-s-icon-btn"
                   aria-label="다운로드"
-                  onClick={() => handleDownload(item)}
+                  onClick={handleDownload}
+                  disabled={downloading}
                 >
                   <img src="/download-02.svg" alt="" />
                 </button>
 
-                <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={() => handleDelete(item.id)} >
+                <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={handleDelete} >
                   <img src="/trash-02.svg" alt="" />
                 </button>
               </div>
