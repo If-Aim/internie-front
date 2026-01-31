@@ -1,43 +1,37 @@
 /* src/pages/admin/desktop/upload/certificates.css */
-.cert-grid{display: grid;grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);gap: 79px;align-items: stretch;height: 100%;min-height: 0;}
-.cert-left,.cert-right{min-height: 0;}
 
-/* ===== Left ===== */
-.cert-left{display: flex;flex-direction: column;min-height: 0;}
-.cert-left-header{flex: 0 0 auto;}
+.cert-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 79px;align-items: start;}
+
+.cert-left-header{display:flex;justify-content: flex-start;align-items: baseline;padding: 9px 0 19px;}
 .cert-title{font-size: 32px;font-weight: 700;color:#000;line-height:50px;}
-.cert-list{display:flex;flex-direction: column;gap: 21px;overflow: auto;padding-right: 20px;
-flex: 1 1 auto;min-height: 0;padding-bottom: 21px;}
-.cert-row{width:100%;height:79px;background:#fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);padding: 15px 26px 14px 17px;
-display:grid;grid-template-columns: 34px 180px 1fr 50px 16px;gap: 11px;align-items:center;
-text-align:left;cursor:pointer;}
-.cert-row--selected{border: 2px solid var(--primary);}
-.cert-index{width: 25px;height: 25px;border-radius: 50%;background: var(--primary);color: #fff;display:flex;align-items:center;
-justify-content:center;font-weight: 700;font-size: 16px;}
-.cert-name{ font-weight: 700; font-size: 24px; color:black; }
-.cert-school{ color:#A3A3A3; font-weight: 700; font-size:20px; }
 
+.cert-list{display:flex;flex-direction: column;gap: 21px;max-height: calc(100vh - 180px);overflow:auto;padding-right: 20px;}
+.cert-row{width:100%;height:79px;background:#fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25); padding: 15px 26px 14px 17px;
+display:grid;grid-template-columns: 34px 180px 1fr 50px 16px;gap: 11px;align-items:center;text-align:left;cursor:pointer;}
+.cert-row--selected{border: 2px solid var(--primary);}
+.cert-index{width: 25px;height: 25px;border-radius: 50%;background: var(--primary);
+color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 700;font-size: 16px;}
+.cert-name{ font-weight: 700; font-size: 24px; color:black;}
+.cert-school{ color:#A3A3A3; font-weight: 700; font-size:20px;}
 .cert-done{font-size: 24px;justify-self:end;color: var(--primary);font-weight: 700;}
 .cert-done--empty{ color: transparent; }
+.cert-chevron{ justify-self:end; width:24px;}
+.cert-chevron img{ transform:rotate(-90deg);}
 
-.cert-chevron{ justify-self:end; width:24px; }
-.cert-chevron img{ transform:rotate(-90deg); }
-
-/* ===== Right ===== */
-.cert-right{display: flex;flex-direction: column;min-height: 0;overflow:auto;}
 .cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-display:flex;align-items:center;justify-content:center;position: relative;flex: 1 1 auto;min-height: 771px;}
+height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
 .cert-upload-btn{border:none;background:#E3E3E3;color:#707070;font-weight: 700;border-radius: 16px;
 height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:pointer;}
 .cert-upload-btn:disabled{opacity: 0.6;cursor: not-allowed;}
 .cert-upload-icon img{display:inline-flex;width: 24px;justify-content:center;}
-
 .cert-upload-hint{position:absolute;bottom: 18px;left: 0;right: 0;text-align:center;color:#6b7280;font-weight: 700;}
 .cert-upload-hint--ok{color: var(--primary);}
 .cert-loading,.cert-error,.cert-empty{padding: 12px 6px;font-weight: 700;color:#707070;}
 
+/* responsive */
 @media (max-width: 1100px){
-  .cert-list{max-height: none;}
+  .cert-grid{ grid-template-columns: 1fr; }
+  .cert-list{ max-height: none; }
 }
 
 /* 스크롤바 */
