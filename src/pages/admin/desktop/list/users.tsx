@@ -60,11 +60,7 @@ export default function AdminUsersPage(): React.ReactElement {
       try {
         setLoading(true);
         setErrorMsg(null);
-
         const list = await getAdminUsers(); 
-        console.log("typeof list:", typeof list);
-        console.log("isArray:", Array.isArray(list));
-        console.log("list raw:", list);
         if (!mounted) return;
 
         setUsers(list);
