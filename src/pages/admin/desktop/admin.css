@@ -60,9 +60,6 @@ align-items:center;justify-content:center;color: #000;font-weight: 700;}
 
 /* ===== Responsive ===== */
 @media (max-width: 1100px){
-.admin-grid{
-grid-template-columns: 1fr;
-}
 .admin-list{
 max-height: none;
 }

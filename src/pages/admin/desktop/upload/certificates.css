@@ -1,11 +1,10 @@
 /* src/pages/admin/desktop/upload/certificates.css */
-
-.cert-grid{display: grid;grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);gap: 79px;align-items: start;height: calc(100vh - 72px - 66px - 77px);min-height: 0;}
+.cert-grid{display: grid;grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);gap: 79px;align-items: stretch;height: 100%;min-height: 0;}
 .cert-left,.cert-right{min-height: 0;}
 
 /* ===== Left ===== */
 .cert-left{display: flex;flex-direction: column;min-height: 0;}
-.cert-left-header{display:flex;justify-content: flex-start;align-items: baseline;padding: 9px 0 19px;flex: 0 0 auto;}
+.cert-left-header{flex: 0 0 auto;}
 .cert-title{font-size: 32px;font-weight: 700;color:#000;line-height:50px;}
 .cert-list{display:flex;flex-direction: column;gap: 21px;overflow: auto;padding-right: 20px;
 flex: 1 1 auto;min-height: 0;padding-bottom: 21px;}
@@ -37,9 +36,8 @@ height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:
 .cert-upload-hint--ok{color: var(--primary);}
 .cert-loading,.cert-error,.cert-empty{padding: 12px 6px;font-weight: 700;color:#707070;}
 
-@media (max-width: 900px){
-  .cert-grid{ grid-template-columns: 1fr; }
-  .cert-list{ flex: 0 0 auto; min-height: 240px; }
+@media (max-width: 1100px){
+  .cert-list{max-height: none;}
 }
 
 /* 스크롤바 */

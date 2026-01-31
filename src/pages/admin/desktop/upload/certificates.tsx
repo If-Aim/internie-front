@@ -90,8 +90,9 @@ export default function AdminCertificatesPage(): React.ReactElement {
     <div className="cert-grid">
       {/* 목록 */}
       <section className="cert-left">
-        <div className="cert-left-header">
+        <div className="cert-left-header"> 
           <div className="cert-title">수료증 업로드 현황</div>
+
         </div>
 
         <div className="cert-list">
@@ -117,15 +118,9 @@ export default function AdminCertificatesPage(): React.ReactElement {
                   <span className="cert-name">{u.name}</span>
                   <span className="cert-school">{displaySchoolOrNickname(u)}</span>
 
-                  {done ? (
-                    <span className="cert-done">완료</span>
-                  ) : (
-                    <span className="cert-done cert-done--empty" />
-                  )}
+                  {done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}
 
-                  <span className="cert-chevron">
-                    <img src="/chevron-right.svg" alt="admin avatar" />
-                  </span>
+                  <span className="cert-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
                 </button>
               );
             })
@@ -142,9 +137,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
             onClick={openFilePicker}
             disabled={!selectedUser || uploading}
           >
-            <span className="cert-upload-icon">
-              <img src="/upload-03.svg" alt="admin avatar" />
-            </span>
+            <span className="cert-upload-icon"><img src="/upload-03.svg" alt="admin avatar" /></span>
             <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
           </button>
 
@@ -159,14 +152,14 @@ export default function AdminCertificatesPage(): React.ReactElement {
             }}
           />
 
-          {!selectedUser && <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>}
+          {!selectedUser && (
+            <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
+          )}
 
           {selectedUser && uploadedUrlMap[selectedUser.userId] && (
             <p className="cert-upload-hint cert-upload-hint--ok">
               해당 사용자는 수료증 업로드가 완료되었습니다.
-              <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">
-                파일 보기
-              </a>
+              <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">파일 보기</a>
             </p>
           )}
         </div>
