@@ -27,7 +27,7 @@ justify-content:center;font-weight: 700;font-size: 16px;}
 /* ===== Right ===== */
 .cert-right{display: flex;flex-direction: column;min-height: 0;overflow:auto;}
 .cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-display:flex;align-items:center;justify-content:center;position: relative;flex: 1 1 auto;min-height: 0;}
+display:flex;align-items:center;justify-content:center;position: relative;flex: 1 1 auto;min-height: 771px;}
 .cert-upload-btn{border:none;background:#E3E3E3;color:#707070;font-weight: 700;border-radius: 16px;
 height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:pointer;}
 .cert-upload-btn:disabled{opacity: 0.6;cursor: not-allowed;}
