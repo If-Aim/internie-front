@@ -1,7 +1,7 @@
 // src/api/client.ts
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function buildUrl(path: string) {
+export function buildUrl(path: string) {
   return path.startsWith("http")
     ? path
     : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;

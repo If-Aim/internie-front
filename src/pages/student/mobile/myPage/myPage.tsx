@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe, downloadMyAdminFile, ApiError } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe, buildUrl } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -94,32 +94,14 @@ export default function MyPage({ onLogout }: Props) {
   }
 
   // 마이페이지 자체에서 수료증 다운
-  const handleDownload = async () => {
-    try {
-      console.log("[cert] download start");
-
-      const { blob, filename } = await downloadMyAdminFile();
-
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-
-      a.remove();
-      URL.revokeObjectURL(url);
-
-      console.log("[cert] download success:", filename);
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 404) {
-        alert("발급된 수료증이 없습니다.");
-        return;
-      }
-      alert("다운로드에 실패했습니다.");
-      console.error("[cert] error", e);
-    }
+  const handleDownload = () => {
+    const a = document.createElement("a");
+    a.href = buildUrl("/users/me/admin-file"); // 백엔드 엔드포인트 그대로
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   // 로그아웃
