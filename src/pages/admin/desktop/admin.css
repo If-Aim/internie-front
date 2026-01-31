@@ -27,10 +27,10 @@
 .admin-count-total{color: #000;}
  
 /* ===== 목록 ===== */
-.admin-list{display:flex;flex-direction: column;gap: 21px;padding-right: 13px;max-height: calc(100vh - 180px);overflow: auto;}
+.admin-list{display:flex;flex-direction: column;gap: 21px;padding-right: 20px;max-height: calc(100vh - 180px);overflow: auto;}
 .admin-list::-webkit-scrollbar {width: 7px;color:#D9D9D9;}
 .admin-list::-webkit-scrollbar-track {background: transparent;}
-.admin-list::-webkit-scrollbar-thumb {background-color: rgba(0, 0, 0, 0.35);border-radius: 999px;border: none;background-clip: content-box;}
+.admin-list::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}
 .admin-list-item{width: 100%;background: #fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 9px;
 align-items: center;cursor: pointer;text-align: left;}
