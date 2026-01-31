@@ -28,12 +28,6 @@ height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:
 .cert-upload-hint--ok{color: var(--primary);}
 .cert-loading,.cert-error,.cert-empty{padding: 12px 6px;font-weight: 700;color:#707070;}
 
-/* responsive */
-@media (max-width: 1100px){
-  .cert-grid{ grid-template-columns: 1fr; }
-  .cert-list{ max-height: none; }
-  .cert-right{  overflow: visible;}
-}
 
 /* 스크롤바 */
 .cert-list::-webkit-scrollbar {width: 7px;color: #d9d9d9;}
