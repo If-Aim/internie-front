@@ -1,6 +1,6 @@
 /* src/pages/admin/desktop/upload/certificates.css */
 
-.cert-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 34px;align-items: start;}
+.cert-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 79px;align-items: start;}
 
 .cert-left-header{display:flex;justify-content: flex-start;align-items: baseline;padding: 9px 0 19px;}
 .cert-title{font-size: 32px;font-weight: 700;color:#000;line-height:50px;}
@@ -33,3 +33,8 @@ height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:
   .cert-grid{ grid-template-columns: 1fr; }
   .cert-list{ max-height: none; }
 }
+
+/* 스크롤바 */
+.cert-list::-webkit-scrollbar {width: 7px;color: #d9d9d9;}
+.cert-list::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}
+.cert-list::-webkit-scrollbar-track {background: transparent;}
