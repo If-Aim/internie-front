@@ -149,7 +149,6 @@ export async function logout(): Promise<void> {
   });
 }
 
-
 // 업로드용 API
 export async function apiUpload<T = unknown>(
   path: string,
@@ -289,6 +288,39 @@ export async function applyMyVerification(
   );
 }
 
+// 관리자 업로드 파일 다운로드
+export async function downloadMyAdminFile(): Promise<{ blob: Blob; filename: string }> {
+  const res = await requestWithAutoRefresh(
+    "/users/me/admin-file",
+    { method: "GET",},
+    { expectJson: false }
+  );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new ApiError(res.status, "파일 다운로드 실패", text);
+  }
+
+  const blob = await res.blob();
+
+  const cd = res.headers.get("content-disposition") ?? "";
+  let filename = "certificate";
+
+  const match =
+    cd.match(/filename\*=UTF-8''(.+)/i) ||
+    cd.match(/filename="(.+)"/i);
+
+  if (match?.[1]) {
+    try {
+      filename = decodeURIComponent(match[1]);
+    } catch {
+      filename = match[1];
+    }
+  }
+
+  return { blob, filename };
+}
+
 
 
 /* - admin 관련 - */
@@ -334,36 +366,6 @@ export async function uploadAdminUserFile(userId: number, file: File): Promise<s
   return String(res ?? "");
 }
 
-// 관리자 업로드 파일: 302 Location(presigned URL)만 뽑아오기
-export async function getMyAdminFilePresignedUrl(): Promise<string> {
-  const res = await requestWithAutoRefresh(
-    "/users/me/admin-file",
-    {
-      method: "GET",
-      redirect: "manual",
-    },
-    { expectJson: false }
-  );
-
-  const loc = res.headers.get("location") || res.headers.get("Location");
-  if (!loc) {
-    // 디버깅용 로그
-    console.log("[cert] redirect manual response", {
-      status: res.status,
-      type: (res as any).type,
-      url: res.url,
-      location: loc,
-      expose: res.headers.get("access-control-expose-headers"),
-    });
-
-    throw new ApiError(
-      res.status || 0,
-      "Location header not accessible. Need 'Access-Control-Expose-Headers: Location' or same-origin."
-    );
-  }
-
-  return loc;
-}
 
 
 /**
@@ -417,19 +419,5 @@ export class ApiError extends Error {
     this.name = "ApiError";
     this.status = status;
     this.bodyText = bodyText;
-  }
-}
-
-
-// debug
-export async function debugFetchS3Head(url: string): Promise<void> {
-  try {
-    const res = await fetch(url, { method: "GET" }); // presigned URL 직접
-    console.log("[s3][debug] ok =", res.ok, "status =", res.status, "type =", res.type);
-    console.log("[s3][debug] content-type =", res.headers.get("content-type"));
-    console.log("[s3][debug] allow-origin =", res.headers.get("access-control-allow-origin"));
-    console.log("[s3][debug] expose =", res.headers.get("access-control-expose-headers"));
-  } catch (e) {
-    console.error("[s3][debug] fetch error", e);
   }
 }
