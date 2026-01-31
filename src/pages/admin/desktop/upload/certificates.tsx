@@ -87,94 +87,90 @@ export default function AdminCertificatesPage(): React.ReactElement {
   };
 
   return (
-    <div className="admin-body">
-      <div className="admin-surface">
-        <div className="cert-grid">
-          {/* 목록 */}
-          <section className="cert-left">
-            <div className="cert-left-header">
-              <div className="cert-title">수료증 업로드 현황</div>
-            </div>
-
-            <div className="cert-list">
-              {loading ? (
-                <p className="cert-loading">불러오는 중…</p>
-              ) : errorMsg ? (
-                <p className="cert-error">{errorMsg}</p>
-              ) : users.length === 0 ? (
-                <p className="cert-empty">등록된 사용자가 없습니다.</p>
-              ) : (
-                users.map((u, idx) => {
-                  const isSelected = u.userId === selectedId;
-                  const done = !!uploadedUrlMap[u.userId];
-
-                  return (
-                    <button
-                      key={u.userId}
-                      type="button"
-                      className={isSelected ? "cert-row cert-row--selected" : "cert-row"}
-                      onClick={() => setSelectedId(u.userId)}
-                    >
-                      <span className="cert-index">{idx + 1}</span>
-                      <span className="cert-name">{u.name}</span>
-                      <span className="cert-school">{displaySchoolOrNickname(u)}</span>
-
-                      {done ? (
-                        <span className="cert-done">완료</span>
-                      ) : (
-                        <span className="cert-done cert-done--empty" />
-                      )}
-
-                      <span className="cert-chevron">
-                        <img src="/chevron-right.svg" alt="admin avatar" />
-                      </span>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </section>
-
-          {/* 업로드 영역 */}
-          <section className="cert-right">
-            <div className="cert-upload-card">
-              <button
-                type="button"
-                className="cert-upload-btn"
-                onClick={openFilePicker}
-                disabled={!selectedUser || uploading}
-              >
-                <span className="cert-upload-icon">
-                  <img src="/upload-03.svg" alt="admin avatar" />
-                </span>
-                <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
-              </button>
-
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void handleFileSelected(f);
-                }}
-              />
-
-              {!selectedUser && <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>}
-
-              {selectedUser && uploadedUrlMap[selectedUser.userId] && (
-                <p className="cert-upload-hint cert-upload-hint--ok">
-                  해당 사용자는 수료증 업로드가 완료되었습니다.
-                  <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">
-                    파일 보기
-                  </a>
-                </p>
-              )}
-            </div>
-          </section>
+    <div className="cert-grid">
+      {/* 목록 */}
+      <section className="cert-left">
+        <div className="cert-left-header">
+          <div className="cert-title">수료증 업로드 현황</div>
         </div>
-      </div>
+
+        <div className="cert-list">
+          {loading ? (
+            <p className="cert-loading">불러오는 중…</p>
+          ) : errorMsg ? (
+            <p className="cert-error">{errorMsg}</p>
+          ) : users.length === 0 ? (
+            <p className="cert-empty">등록된 사용자가 없습니다.</p>
+          ) : (
+            users.map((u, idx) => {
+              const isSelected = u.userId === selectedId;
+              const done = !!uploadedUrlMap[u.userId];
+
+              return (
+                <button
+                  key={u.userId}
+                  type="button"
+                  className={isSelected ? "cert-row cert-row--selected" : "cert-row"}
+                  onClick={() => setSelectedId(u.userId)}
+                >
+                  <span className="cert-index">{idx + 1}</span>
+                  <span className="cert-name">{u.name}</span>
+                  <span className="cert-school">{displaySchoolOrNickname(u)}</span>
+
+                  {done ? (
+                    <span className="cert-done">완료</span>
+                  ) : (
+                    <span className="cert-done cert-done--empty" />
+                  )}
+
+                  <span className="cert-chevron">
+                    <img src="/chevron-right.svg" alt="admin avatar" />
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      {/* 업로드 영역 */}
+      <section className="cert-right">
+        <div className="cert-upload-card">
+          <button
+            type="button"
+            className="cert-upload-btn"
+            onClick={openFilePicker}
+            disabled={!selectedUser || uploading}
+          >
+            <span className="cert-upload-icon">
+              <img src="/upload-03.svg" alt="admin avatar" />
+            </span>
+            <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+          </button>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFileSelected(f);
+            }}
+          />
+
+          {!selectedUser && <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>}
+
+          {selectedUser && uploadedUrlMap[selectedUser.userId] && (
+            <p className="cert-upload-hint cert-upload-hint--ok">
+              해당 사용자는 수료증 업로드가 완료되었습니다.
+              <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">
+                파일 보기
+              </a>
+            </p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
