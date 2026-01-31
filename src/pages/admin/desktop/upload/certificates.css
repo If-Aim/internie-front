@@ -30,6 +30,7 @@ height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:
 
 /* responsive */
 @media (max-width: 1100px){
+  .cert-grid{ grid-template-columns: 1fr; }
   .cert-list{ max-height: none; }
 }
 
