@@ -26,10 +26,6 @@ export default function AdminCertificatesPage(): React.ReactElement {
     [users, selectedId]
   );
 
-  const completedCount = React.useMemo(() => {
-    return users.filter((u) => uploadedUrlMap[u.userId]).length;
-  }, [users, uploadedUrlMap]);
-
   React.useEffect(() => {
     let mounted = true;
 
@@ -94,11 +90,8 @@ export default function AdminCertificatesPage(): React.ReactElement {
     <div className="cert-grid">
       {/* 목록 */}
       <section className="cert-left">
-        <div className="cert-left-header">
-          <div className="cert-title" />
-          <div className="cert-count">
-            <span className="cert-count-blue">{completedCount}명</span>/{users.length}명
-          </div>
+        <div className="cert-left-header"> 
+          <div className="cert-title">수료증 업로드 현황</div>
         </div>
 
         <div className="cert-list">
