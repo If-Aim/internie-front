@@ -4,6 +4,127 @@ import React from "react";
 import { ApiError, type AdminUser, getAdminUsers } from "../../../../api/client";
 import "./reports.css";
 
+type CalCell = { key: string; day: number | null; dateStr: string | null };
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function ymd(y: number, m: number, d: number) {
+  // m: 1~12
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+
+function buildMonthCells(year: number, month1to12: number): CalCell[] {
+  // monthIndex: 0~11
+  const monthIndex = month1to12 - 1;
+  const first = new Date(year, monthIndex, 1);
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+
+  // 스크린샷 기준: Mo Tu We Th Fr Sa Su (월요일 시작)
+  // JS getDay(): 0=Sun..6=Sat  → 월요일 시작으로 변환
+  const jsDow = first.getDay(); // 0..6
+  const mondayStartOffset = (jsDow + 6) % 7; // Mon=0..Sun=6
+
+  const cells: CalCell[] = [];
+
+  // 앞쪽 빈 칸
+  for (let i = 0; i < mondayStartOffset; i++) {
+    cells.push({ key: `e-${year}-${month1to12}-${i}`, day: null, dateStr: null });
+  }
+
+  // 날짜 칸
+  for (let d = 1; d <= lastDay; d++) {
+    cells.push({
+      key: `d-${year}-${month1to12}-${d}`,
+      day: d,
+      dateStr: ymd(year, month1to12, d),
+    });
+  }
+
+  // 7의 배수로 맞추기(행 맞춤)
+  while (cells.length % 7 !== 0) {
+    cells.push({ key: `t-${year}-${month1to12}-${cells.length}`, day: null, dateStr: null });
+  }
+
+  return cells;
+}
+
+function monthLabel(year: number, month1to12: number) {
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
+  ];
+  return `${months[month1to12 - 1]} ${year}`;
+}
+
+function ReportCalendar(): React.ReactElement {
+  const today = new Date();
+  const [year, setYear] = React.useState(today.getFullYear());
+  const [month, setMonth] = React.useState(today.getMonth() + 1); // 1~12
+
+  const [selectedDate, setSelectedDate] = React.useState<string>(() =>
+    ymd(today.getFullYear(), today.getMonth() + 1, today.getDate())
+  );
+
+  const cells = React.useMemo(() => buildMonthCells(year, month), [year, month]);
+
+  function goPrev() {
+    setMonth((m) => {
+      if (m === 1) {
+        setYear((y) => y - 1);
+        return 12;
+      }
+      return m - 1;
+    });
+  }
+
+  function goNext() {
+    setMonth((m) => {
+      if (m === 12) {
+        setYear((y) => y + 1);
+        return 1;
+      }
+      return m + 1;
+    });
+  }
+
+  return (
+    <div className="cal-card">
+      <div className="cal-head">
+        <div className="cal-title">{monthLabel(year, month)}</div>
+        <div className="cal-nav">
+          <button type="button" className="cal-nav-btn" onClick={goPrev} aria-label="prev month">
+            <img src="/Previous (Stroke).svg" alt="" />
+          </button>
+          <button type="button" className="cal-nav-btn" onClick={goNext} aria-label="next month">
+            <img src="/Next (Stroke).svg" alt="" />
+          </button>
+        </div>
+      </div>
+
+      <div className="cal-dow">
+        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+      </div>
+
+      <div className="cal-grid" role="grid" aria-label="calendar">
+        {cells.map((c) => {
+          const isSelected = c.dateStr && c.dateStr === selectedDate;
+          return (
+            <button
+              key={c.key}
+              type="button"
+              className={isSelected ? "cal-cell cal-cell--selected" : "cal-cell"}
+              disabled={c.day == null}
+              onClick={() => c.dateStr && setSelectedDate(c.dateStr)}
+            >
+              {c.day ?? ""}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function displaySchoolOrNickname(u: AdminUser) {
   // 목업에서 학교명 자리가 필요하지만 현재 응답엔 school이 없음 → nickname을 우선 표시
   return (u.nickname ?? "").trim() || "-";
@@ -58,7 +179,7 @@ export default function AdminReportsPage(): React.ReactElement {
       {/* 목록 */}
       <section className="admin-col admin-col--left">
         <div className="admin-section-head">
-          {/* 날짜는 일단 렌더링 x */}<p>사용자 목록</p>
+          <div className="admin-section-title">사용자 목록</div>
         </div>
 
         <div className="admin-list">
@@ -93,11 +214,11 @@ export default function AdminReportsPage(): React.ReactElement {
       {/* 보고서 프리뷰 */}
       <section className="admin-col admin-col--right">
         <div className="report-card">
-          <div className="report-photo">
-            <span>(보고서 사진 또는 파일?)</span>
-          </div>
-
-          {!selectedUser && <p className="admin-hint">목록에서 사용자를 선택해주세요.</p>}
+          {!selectedUser ? (
+            <p className="admin-hint">목록에서 사용자를 선택해주세요.</p>
+          ) : (
+            <ReportCalendar />
+          )}
         </div>
       </section>
     </div>
