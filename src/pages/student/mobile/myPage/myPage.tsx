@@ -213,7 +213,7 @@ export default function MyPage({ onLogout }: Props) {
             <button
               type="button"
               className={`mypage-card wide ${status === "PENDING" ? "is-pending" : ""} ${status === "REJECTED" ? "is-rejected" : ""}${status === "APPROVED" ? "is-approved" : ""}`}
-              onClick={verifyUi.onClick}
+              onClick={handleServicePreparing} // verifyUi.onClick 추후 변경
               disabled={verifyUi.disabled}
             >
               <span className="mypage-badge" />
