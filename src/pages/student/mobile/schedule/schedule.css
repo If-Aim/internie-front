@@ -9,7 +9,7 @@
 .month-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .month-left { display: flex; align-items: center; gap: 4px; }
 .month-left .h1 { font-size: 24px; font-weight: 700; color: #000; line-height:50px; }
-.month-btn { background: none; border: 0; padding: 0; cursor: pointer; display: flex; align-items: center; }
+.month-btn { width: 44px;height: 44px;background: none; border: 0; padding: 0; cursor: pointer; display: flex; align-items: center; }
 
 /* 월 선택 팝업 */
 .month-pop {position: absolute; z-index: 1000;background: #fff; border: 1px solid #eee;border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);padding: 10px; min-width: 120px;}
