@@ -118,7 +118,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
                   <span className="admin-user-name">{u.name}</span>
                   <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
 
-                  {done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}
+                  <span className="admin-cert-status">{done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}</span>
 
                   <span className="admin-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
                 </button>
@@ -129,8 +129,8 @@ export default function AdminCertificatesPage(): React.ReactElement {
       </section>
 
       {/* 업로드 영역 */}
-      <section className="cert-right">
-        <div className="cert-upload-card">
+      <section className="admin-col admin-col--right">
+        <div className="admin-detail-card">
           <button
             type="button"
             className="cert-upload-btn"

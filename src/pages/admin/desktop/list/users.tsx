@@ -179,7 +179,7 @@ export default function AdminUsersPage(): React.ReactElement {
                   <span className={`admin-user-status-pill ${statusClass(u.status)}`}>
                     {statusLabel(u.status)}
                   </span>
-                  <span className="admin-chevron"><img className="admin-chevron" src="/chevron-right.svg" alt="admin avatar" /></span>
+                  <span className="admin-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
                 </button>
               );
             })
