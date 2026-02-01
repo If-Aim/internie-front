@@ -87,21 +87,21 @@ export default function AdminCertificatesPage(): React.ReactElement {
   };
 
   return (
-    <div className="cert-grid">
+    <div className="admin-grid">
       {/* 목록 */}
-      <section className="cert-left">
-        <div className="cert-left-header"> 
-          <div className="cert-title">수료증 업로드 현황</div>
+      <section className="admin-col admin-col--left">
+        <div className="admin-section-head"> 
+          <div className="admin-section-title">수료증 업로드 현황</div>
 
         </div>
 
-        <div className="cert-list">
+        <div className="admin-list">
           {loading ? (
-            <p className="cert-loading">불러오는 중…</p>
+            <p className="loading">불러오는 중…</p>
           ) : errorMsg ? (
-            <p className="cert-error">{errorMsg}</p>
+            <p className="error">{errorMsg}</p>
           ) : users.length === 0 ? (
-            <p className="cert-empty">등록된 사용자가 없습니다.</p>
+            <p className="empty">등록된 사용자가 없습니다.</p>
           ) : (
             users.map((u, idx) => {
               const isSelected = u.userId === selectedId;
@@ -111,16 +111,16 @@ export default function AdminCertificatesPage(): React.ReactElement {
                 <button
                   key={u.userId}
                   type="button"
-                  className={isSelected ? "cert-row cert-row--selected" : "cert-row"}
+                  className={isSelected ? "admin-list-item admin-list-item--selected" : "admin-list-item"}
                   onClick={() => setSelectedId(u.userId)}
                 >
-                  <span className="cert-index">{idx + 1}</span>
-                  <span className="cert-name">{u.name}</span>
-                  <span className="cert-school">{displaySchoolOrNickname(u)}</span>
+                  <span className="admin-badge">{idx + 1}</span>
+                  <span className="admin-user-name">{u.name}</span>
+                  <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
 
                   {done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}
 
-                  <span className="cert-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
+                  <span className="admin-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
                 </button>
               );
             })
