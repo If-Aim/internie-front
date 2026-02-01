@@ -328,10 +328,8 @@ export type AdminUser = UserBase;
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
-  console.log("GET /admin/users final url:", res.url, "status:", res.status);
 
   const text = await res.clone().text();
-  console.log("GET /admin/users raw body:", text);
 
   return JSON.parse(text) as AdminUser[];
 }
