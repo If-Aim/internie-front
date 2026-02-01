@@ -54,20 +54,20 @@ export default function AdminReportsPage(): React.ReactElement {
   }, []);
 
   return (
-    <div className="report-grid">
+    <div className="admin-grid">
       {/* 목록 */}
-      <section className="report-left">
-        <div className="report-left-header">
-          {/* 날짜는 일단 렌더링 x */}<p>보고서</p>
+      <section className="admin-col admin-col--left">
+        <div className="admin-section-head">
+          {/* 날짜는 일단 렌더링 x */}<p>사용자 목록</p>
         </div>
 
-        <div className="report-list">
+        <div className="admin-list">
           {loading ? (
-            <p className="report-loading">불러오는 중…</p>
+            <p className="loading">불러오는 중…</p>
           ) : errorMsg ? (
-            <p className="report-error">{errorMsg}</p>
+            <p className="error">{errorMsg}</p>
           ) : users.length === 0 ? (
-            <p className="report-empty">등록된 사용자가 없습니다.</p>
+            <p className="empty">등록된 사용자가 없습니다.</p>
           ) : (
             users.map((u, idx) => {
               const isSelected = u.userId === selectedId;
@@ -75,16 +75,14 @@ export default function AdminReportsPage(): React.ReactElement {
                 <button
                   key={u.userId}
                   type="button"
-                  className={isSelected ? "report-row report-row--selected" : "report-row"}
+                  className={isSelected ? "admin-list-item admin-list-item--selected" : "admin-list-item"}
                   onClick={() => setSelectedId(u.userId)}
                 >
-                  <span className="report-index">{idx + 1}</span>
-                  <span className="report-name">{u.name}</span>
-                  <span className="report-school">{displaySchoolOrNickname(u)}</span>
-
-                  <span className="report-chevron">
-                    <img src="/chevron-right.svg" alt="" />
-                  </span>
+                  <span className="admin-badge">{idx + 1}</span>
+                  <span className="admin-user-name">{u.name}</span>
+                  <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
+                  
+                  <span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
                 </button>
               );
             })
@@ -99,7 +97,7 @@ export default function AdminReportsPage(): React.ReactElement {
             <span>(보고서 사진 또는 파일?)</span>
           </div>
 
-          {!selectedUser && <p className="report-hint">목록에서 사용자를 선택해주세요.</p>}
+          {!selectedUser && <p className="admin-hint">목록에서 사용자를 선택해주세요.</p>}
         </div>
       </section>
     </div>
