@@ -130,7 +130,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 
       {/* 업로드 영역 */}
       <section className="admin-col admin-col--right">
-        <div className="admin-detail-card">
+        <div className="cert-upload-card">
           <button
             type="button"
             className="cert-upload-btn"
