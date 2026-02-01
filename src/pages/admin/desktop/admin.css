@@ -2,7 +2,7 @@
 .admin-page{min-height: 100vh;background: var(--bg);color: #000;display: flex;flex-direction: column;}
 
 /* ===== Topbar ===== */
-.admin-topbar{height: 110px;background: #fff;display: grid;grid-template-columns: 1fr auto 1fr;align-items: center;padding: 0 40px;border-bottom: 1px solid var(--line);box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
+.admin-topbar{height: 90px;background: #fff;display: grid;grid-template-columns: 1fr auto 1fr;align-items: center;padding: 0 40px;border-bottom: 1px solid var(--line);box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
 .admin-topbar-left{display:flex;align-items:center;gap: 12px;}
 .admin-logo{height: 48px;width: auto;display:block;}
 .admin-topbar-tabs{display:flex;gap: 4px;align-items:center;justify-content:center;}
