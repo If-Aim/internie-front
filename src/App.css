@@ -32,7 +32,7 @@ cursor: pointer;display: flex;align-items: center;justify-content: center;transi
 .btn-logout:active { transform: translateY(1px); }
 
 /*기간 조회 모달*/
-.period-sheet-backdrop{position: fixed;inset: 0;background: rgba(0,0,0,0.50);display: flex;justify-content: center;align-items: flex-end;z-index: 9999;backdrop-filter:blur(5px);}
+.period-sheet-backdrop{position: fixed;inset: 0;background: rgba(0,0,0,0.50);display: flex;justify-content: center;align-items: flex-end;z-index: 99999;backdrop-filter:blur(5px);}
 .period-sheet{width: 100%;max-width: 520px;background: #fff;border-top-left-radius: 24px;border-top-right-radius: 24px;padding: 37px 20px 53px;box-shadow: 0 -8px 30px rgba(0,0,0,0.15);animation: sheetUp 180ms ease-out;}
 @keyframes sheetUp{
   from { transform: translateY(20px); opacity: 0.9; }

@@ -7,29 +7,32 @@ import { api, getUserMe } from "../../../api/client";
 
 import "../../../App.css"; 
 
+type TimeRange = {
+  startTime?: string | null;
+  endTime?: string | null;
+};
+
+type DateRange = {
+  startDate: string; 
+  endDate: string;
+};
+
 type ScheduleItem = {
   instanceId: string;
   eventId: string;
   title: string;
   subtitle: string;
   date: string;
-  startDate: string;
-  endDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
   eventDayId?: string | number | null;
   isLocked?: boolean;
   transcriptionCount?: number;
-};
+} & TimeRange & DateRange;
+
 type RawEvent = {
   id: string | number;
   title: string;
   content?: string;
-  startDate: string;
-  endDate: string;
-  startTime?: string | null;
-  endTime?: string | null;
-};
+} & TimeRange & DateRange;
 
 type Transcription = {
   id: number;
@@ -42,12 +45,10 @@ type EventDay = {
   title: string;
   eventId: string | number;
   date: string; // YYYY-MM-DD
-  startTime?: string | null;
-  endTime?: string | null;
   memo?: string | null;
   completed: boolean;
   transcriptions?: Transcription[];
-};
+} & TimeRange;
 
 type EventDayMonthResponse = {
   totalCount: number;
@@ -63,6 +64,7 @@ type MonthFilterSheetProps = {
 };
 
 type SortOrder = "past" | "latest";
+
 const TOTAL_QUESTIONS = 4; // 질문 갯수
 /*날짜 관련 함수*/
 function toYmd(d: Date): string {
@@ -81,15 +83,7 @@ function addDays(d: Date, n: number): Date {
   return x;
 }
 function expandEventToDailyItems(
-  e: {
-    id: string | number;
-    title: string;
-    content?: string;
-    startDate: string;
-    endDate: string;
-    startTime?: string | null;
-    endTime?: string | null;
-  },
+  e: RawEvent,
   ym: string
 ): ScheduleItem[] {
   const [yStr, mStr] = ym.split("-");
@@ -403,44 +397,56 @@ function MonthWheelPicker({
     setWheelToValue();
   }, [setWheelToValue]);
 
-  const pickFromScroll = React.useCallback(
-    (kind: "year" | "month") => {
-      if (lockRef.current) return;
+  const onYearScroll = () => {
+    if (lockRef.current) return;
+    scheduleSnap("year");
+  };
+  const onMonthScroll = () => {
+    if (lockRef.current) return;
+    scheduleSnap("month");
+  };
 
+  const snapTimerRef = React.useRef<number | null>(null);
+  const smoothScrollTo = (el: HTMLDivElement, top: number) => {
+    el.scrollTo({ top, behavior: "smooth" });
+  };
+  const scheduleSnap = React.useCallback(
+    (kind: "year" | "month") => {
       const el = kind === "year" ? yearRef.current : monthRef.current;
       if (!el) return;
 
-      const idxWithPads = Math.round((el.scrollTop + centerOffset(el)) / itemH);
-      const rawIndex = idxWithPads - PAD_ITEMS;
+      if (snapTimerRef.current) window.clearTimeout(snapTimerRef.current);
 
-      if (kind === "year") {
-        const idx = clamp(rawIndex, 0, years.length - 1);
-        const nextY = years[idx];
-        const nextYm = `${nextY}-${pad2(selectedMonth)}`;
-        onChange(nextYm);
-      } else {
-        const idx = clamp(rawIndex, 0, 11);
-        const nextM = idx + 1;
-        const nextYm = `${selectedYear}-${pad2(nextM)}`;
-        onChange(nextYm);
-      }
+      snapTimerRef.current = window.setTimeout(() => {
+        lockRef.current = true;
+        try {
+          const idxWithPads = Math.round((el.scrollTop + centerOffset(el)) / itemH);
+          const rawIndex = idxWithPads - PAD_ITEMS;
+
+          if (kind === "year") {
+            const idx = clamp(rawIndex, 0, years.length - 1);
+            const targetTop = (idx + PAD_ITEMS) * itemH - centerOffset(el);
+            smoothScrollTo(el, targetTop);
+
+            const nextY = years[idx];
+            onChange(`${nextY}-${pad2(selectedMonth)}`);
+          } else {
+            const idx = clamp(rawIndex, 0, 11);
+            const targetTop = (idx + PAD_ITEMS) * itemH - centerOffset(el);
+            smoothScrollTo(el, targetTop);
+
+            const nextM = idx + 1;
+            onChange(`${selectedYear}-${pad2(nextM)}`);
+          }
+        } finally {
+          window.setTimeout(() => {
+            lockRef.current = false;
+          }, 180);
+        }
+      }, 120); // 값이 커질수록 덜 민감도↓
     },
-    [itemH, PAD_ITEMS, years, selectedYear, selectedMonth, onChange]
+    [PAD_ITEMS, itemH, years, selectedYear, selectedMonth, onChange]
   );
-
-  const onYearScroll = () => pickFromScroll("year");
-  const onMonthScroll = () => pickFromScroll("month");
-
-  const onSnapEnd = React.useCallback(() => {
-    lockRef.current = true;
-    try {
-      setWheelToValue();
-    } finally {
-      window.setTimeout(() => {
-        lockRef.current = false;
-      }, 0);
-    }
-  }, [setWheelToValue]);
 
   return (
     <div className="wheel-wrap" style={{ ["--wheel-item-h" as any]: `${itemH}px` }}>
@@ -449,8 +455,6 @@ function MonthWheelPicker({
           ref={yearRef}
           className="wheel"
           onScroll={onYearScroll}
-          onPointerUp={onSnapEnd}
-          onTouchEnd={onSnapEnd}
         >
           {Array.from({ length: PAD_ITEMS }).map((_, i) => (
             <div key={`y_pad_top_${i}`} className="wheel-item wheel-pad" />
@@ -475,8 +479,6 @@ function MonthWheelPicker({
           ref={monthRef}
           className="wheel"
           onScroll={onMonthScroll}
-          onPointerUp={onSnapEnd}
-          onTouchEnd={onSnapEnd}
         >
           {Array.from({ length: PAD_ITEMS }).map((_, i) => (
             <div key={`m_pad_top_${i}`} className="wheel-item wheel-pad" />
