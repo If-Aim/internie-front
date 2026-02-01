@@ -186,12 +186,13 @@ function timeRangeText(
 type HeaderProps = {
   onMenuClick: () => void;
   onAddClick: () => void;
+  isBackdropOpen: boolean;
 };
-function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
+function Header({ onMenuClick, onAddClick, isBackdropOpen }: HeaderProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
-    <div className="topbar topbar-main">
+    <div className={"topbar topbar-main" + (isBackdropOpen ? " topbar--glass" : "")}>
       <button className="iconbtn" aria-label={t("common.menu")} onClick={onMenuClick}>
         <img className="icon" src="/menu-01.svg" alt={t("common.menu")} />
       </button>
@@ -1247,7 +1248,7 @@ function Home(): React.ReactElement {
           </div>
         </div>
       )}
-      <Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} />
+      <Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} isBackdropOpen={isFilterOpen || isMenuOpen || isRecordModalOpen || loginGateOpen} />
       <div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
         <SideMenu
           isOpen={isMenuOpen}
