@@ -7,4 +7,3 @@ height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:
 .cert-upload-icon img{display:inline-flex;width: 24px;justify-content:center;}
 .cert-upload-hint{position:absolute;bottom: 18px;left: 0;right: 0;text-align:center;color:#6b7280;font-weight: 700;}
 .cert-upload-hint--ok{color: var(--primary);}
-.cert-loading,.cert-error,.cert-empty{padding: 12px 6px;font-weight: 700;color:#707070;}

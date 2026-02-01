@@ -1,1 +1,3 @@
 /* src/pages/admin/desktop/download/reports.css */
+.report-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
+height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}

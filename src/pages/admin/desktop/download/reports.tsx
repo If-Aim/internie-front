@@ -81,7 +81,7 @@ export default function AdminReportsPage(): React.ReactElement {
                   <span className="admin-badge">{idx + 1}</span>
                   <span className="admin-user-name">{u.name}</span>
                   <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
-                  
+                  <span className="admin-user-status-pill"></span>
                   <span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
                 </button>
               );
@@ -91,7 +91,7 @@ export default function AdminReportsPage(): React.ReactElement {
       </section>
 
       {/* 보고서 프리뷰 */}
-      <section className="report-right">
+      <section className="admin-col admin-col--right">
         <div className="report-card">
           <div className="report-photo">
             <span>(보고서 사진 또는 파일?)</span>
