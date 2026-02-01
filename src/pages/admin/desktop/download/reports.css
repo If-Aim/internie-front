@@ -8,6 +8,7 @@ height: 771px;display:flex;align-items:center;justify-content:center;position: r
 .cal-title{font-size: 16px;font-weight: 600;color: #111;}
 .cal-nav{position: absolute;right: 0;display: flex;gap: 14px;}
 .cal-nav-btn{width: 44px;height: 44px;border: none;background: transparent;border-radius: 10px;cursor: pointer;color: #111;}
+.cal-nav-btn img{width: 16px;height: auto;}
 .cal-nav-btn:hover{background: rgba(17, 24, 39, 0.06);}
 .cal-dow{display: grid;grid-template-columns: repeat(7, 1fr);gap: 40px;margin: 56px 15px 0px;text-align: center;
 font-size: 22px;font-weight: 500;color: #333333;}
