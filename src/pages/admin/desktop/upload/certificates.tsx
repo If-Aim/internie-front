@@ -187,80 +187,72 @@ export default function AdminCertificatesPage(): React.ReactElement {
       {/* 업로드 영역 */}
       <section className="admin-col admin-col--right">
         <div className="cert-upload-card">
-          <div className="cert-files-area">
-            {!selectedUser && (
-              <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
-            )}
+          {selectedUser && hasFiles &&(
+            <>
+            <div className="cert-files-area">
+              {filesLoading ? (
+                <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
+              ) : (
+                <ul className="cert-file-list">
+                  {selectedUserFiles.map((f) => (
+                    <li key={f.fileId} className="cert-file-item">
+                      <div className="cert-file-left">
+                        <div className="cert-file-name" title={f.filename}>
+                          {f.filename}
+                        </div>
+                        <div className="cert-file-date" />
+                      </div>
 
-            {selectedUser && hasFiles &&(
-              <>
-                {filesLoading ? (
-                  <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
-                ) : (
-                  <div className="cert-files-area">
-                    <ul className="cert-file-list">
-                      {selectedUserFiles.map((f) => (
-                        <li key={f.fileId} className="cert-file-item">
-                          <div className="cert-file-left">
-                            <div className="cert-file-name" title={f.filename}>
-                              {f.filename}
-                            </div>
-                            <div className="cert-file-date" />
-                          </div>
-
-                          <button
-                            type="button"
-                            className="cert-trash-btn"
-                            onClick={() => void handleDeleteFile(f.fileId)}
-                            aria-label="수료증 삭제"
-                            title="삭제"
-                          >
-                            <img src="/trash-02.svg" alt="" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </>
-            )}
-            {selectedUser && !hasFiles && (
-              <div className="cert-center">
-                {filesLoading ? (
-                  <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
-                ) : (
-                  <button
-                    type="button"
-                    className="cert-upload-btn"
-                    onClick={openFilePicker}
-                    disabled={uploading}
-                  >
-                    <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
-                    <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          {selectedUser && hasFiles && (
-            <div className="cert-upload-footer">
-              <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
-                <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
-                <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
-              </button>
+                      <button
+                        type="button"
+                        className="cert-trash-btn"
+                        onClick={() => void handleDeleteFile(f.fileId)}
+                        aria-label="수료증 삭제"
+                        title="삭제"
+                      >
+                        <img src="/trash-02.svg" alt="" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            </>
+          )}
+          {selectedUser && !hasFiles && (
+            <div className="cert-center">
+              {filesLoading ? (
+                <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
+              ) : (
+                <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
+                  <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+                  <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+                </button>
+              )}
             </div>
           )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".pdf,.png,.jpg,.jpeg"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void handleFileSelected(f);
-            }}
-          />
         </div>
+        {selectedUser && hasFiles && (
+          <div className="cert-upload-footer">
+            <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
+              <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+              <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+            </button>
+          </div>
+        )}
+        {!selectedUser && (
+          <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void handleFileSelected(f);
+          }}
+        />
       </section>
     </div>
   );
