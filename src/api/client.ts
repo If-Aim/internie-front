@@ -304,7 +304,7 @@ export async function getMyAdminFiles(): Promise<AdminUserFile[]> {
 export async function getMyAdminFileDownloadUrl(
   fileId: number | string
 ): Promise<string> {
-  const res = await api<{ url: string }>(`/users/me/admin-file/${fileId}`, {
+  const res = await api<{ url: string }>(`/users/me/admin-files/${fileId}`, {
     method: "GET",
   });
 
