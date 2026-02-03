@@ -220,7 +220,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
             </>
           )}
           {selectedUser && !hasFiles && (
-            <div className="cert-center">
+            <div className="cert-center cert-center--absolute">
               {filesLoading ? (
                 <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
               ) : (
