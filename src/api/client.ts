@@ -349,21 +349,59 @@ export async function rejectAdminUser(userId: number | string): Promise<AdminUse
   return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
 }
 
+export type AdminUserFile = {
+  fileId: number;
+  url: string;
+  filename: string;
+};
 
-// 수료증 업로드
-export async function uploadAdminUserFile(userId: number, file: File): Promise<string> {
+// 관리자 파일 업로드
+export async function uploadAdminUserFile(
+  userId: number,
+  file: File
+): Promise<AdminUserFile[]> {
   const form = new FormData();
   form.append("file", file);
 
   const res = await apiUpload(`/admin/users/${userId}/files`, form, { method: "POST" });
 
-  if (typeof res === "string") return res;
+  if (Array.isArray(res)) {
+    return res
+      .filter((it: any) => it && typeof it.url === "string")
+      .map((it: any) => ({
+        fileId: Number(it.fileId),
+        url: String(it.url),
+        filename: String(it.filename ?? ""),
+      }));
+  }
 
-  if (res && typeof (res as any).url === "string") return (res as any).url;
+  if (res && typeof res === "object" && typeof (res as any).url === "string") {
+    return [
+      {
+        fileId: Number((res as any).fileId ?? 0),
+        url: String((res as any).url),
+        filename: String((res as any).filename ?? ""),
+      },
+    ];
+  }
 
-  return String(res ?? "");
+  throw new Error(`Unexpected upload response: ${JSON.stringify(res)}`);
 }
 
+// 관리자 업로드 파일 목록 조회 
+export async function getAdminUserFiles(userId: number | string): Promise<AdminUserFile[]> {
+  return api<AdminUserFile[]>(`/admin/users/${userId}/files`, { method: "GET" });
+}
+
+// 관리자 업로드 파일 삭제
+export async function deleteAdminUserFile(
+  userId: number | string,
+  fileId: number | string
+): Promise<AdminUserFile[]> {
+  return api<AdminUserFile[]>(`/admin/users/${userId}/files/${fileId}`, {
+    method: "DELETE",
+  });
+}
 
 
 /**

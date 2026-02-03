@@ -1,7 +1,7 @@
 // src/pages/admin/desktop/upload/certificates.tsx
 // 수료증 업로드 화면 (탭)
 import React from "react";
-import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile } from "../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile, getAdminUserFiles, type AdminUserFile } from "../../../../api/client";
 import "./certificates.css";
 
 function displaySchoolOrNickname(u: AdminUser) {
@@ -16,8 +16,9 @@ export default function AdminCertificatesPage(): React.ReactElement {
 
   const [loading, setLoading] = React.useState(true);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
-
-  const [uploadedUrlMap, setUploadedUrlMap] = React.useState<Record<number, string>>({});
+  
+  const [userFilesMap, setUserFilesMap] = React.useState<Record<number, AdminUserFile[]>>({});
+  const [filesLoading, setFilesLoading] = React.useState(false);
 
   const [uploading, setUploading] = React.useState(false);
 
@@ -25,6 +26,11 @@ export default function AdminCertificatesPage(): React.ReactElement {
     () => users.find((u) => u.userId === selectedId) ?? null,
     [users, selectedId]
   );
+  
+  const selectedUserFiles = React.useMemo(() => {
+    if (!selectedUser) return [];
+    return userFilesMap[selectedUser.userId] ?? [];
+  }, [selectedUser, userFilesMap]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -58,6 +64,35 @@ export default function AdminCertificatesPage(): React.ReactElement {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (!selectedUser) return;
+
+    let mounted = true;
+
+    (async () => {
+      try {
+        setFilesLoading(true);
+
+        const files = await getAdminUserFiles(selectedUser.userId);
+        if (!mounted) return;
+
+        setUserFilesMap((prev) => ({ ...prev, [selectedUser.userId]: files }));
+      } catch (e) {
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          alert("관리자 권한이 필요합니다.");
+          return;
+        }
+        console.error(e);
+      } finally {
+        if (mounted) setFilesLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedUser]);
+
   const openFilePicker = () => {
     if (!selectedUser) return;
     fileRef.current?.click();
@@ -68,9 +103,9 @@ export default function AdminCertificatesPage(): React.ReactElement {
 
     setUploading(true);
     try {
-      const uploadedUrl = await uploadAdminUserFile(selectedUser.userId, file);
+      const files = await uploadAdminUserFile(selectedUser.userId, file);
 
-      setUploadedUrlMap((prev) => ({ ...prev, [selectedUser.userId]: uploadedUrl }));
+      setUserFilesMap((prev) => ({ ...prev, [selectedUser.userId]: files }));
       alert("수료증 업로드가 완료되었습니다.");
     } catch (e) {
       if (e instanceof ApiError) {
@@ -105,7 +140,8 @@ export default function AdminCertificatesPage(): React.ReactElement {
           ) : (
             users.map((u, idx) => {
               const isSelected = u.userId === selectedId;
-              const done = !!uploadedUrlMap[u.userId];
+              const files = userFilesMap[u.userId] ?? [];
+              const done = files.length > 0;
 
               return (
                 <button
@@ -156,11 +192,31 @@ export default function AdminCertificatesPage(): React.ReactElement {
             <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
           )}
 
-          {selectedUser && uploadedUrlMap[selectedUser.userId] && (
-            <p className="cert-upload-hint cert-upload-hint--ok">
-              해당 사용자는 수료증 업로드가 완료되었습니다.
-              <a href={uploadedUrlMap[selectedUser.userId]} target="_blank" rel="noreferrer">파일 보기</a>
-            </p>
+          {selectedUser && (
+            <>
+              {filesLoading ? (
+                <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
+              ) : selectedUserFiles.length === 0 ? (
+                <p className="cert-upload-hint">업로드된 수료증이 없습니다.</p>
+              ) : (
+                <div className="cert-files">
+                  <p className="cert-upload-hint cert-upload-hint--ok">
+                    업로드된 수료증 {selectedUserFiles.length}건
+                  </p>
+
+                  <ul className="cert-file-list">
+                    {selectedUserFiles.map((f) => (
+                      <li key={f.fileId} className="cert-file-item">
+                        <span className="cert-file-name">{f.filename}</span>
+                        <a href={f.url} target="_blank" rel="noreferrer">
+                          파일 보기
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
