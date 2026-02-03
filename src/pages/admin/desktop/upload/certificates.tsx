@@ -190,7 +190,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
           {selectedUser && hasFiles &&(
             <>
             <div className="cert-files-area">
-              <div className="admin-section-head">수료증 발급 현황</div>
+              <div className="cert-upload-head">수료증 발급 현황</div>
               {filesLoading ? (
                 <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
               ) : (
@@ -220,6 +220,15 @@ export default function AdminCertificatesPage(): React.ReactElement {
             </div>
             </>
           )}
+          {selectedUser && hasFiles && (
+            <div className="cert-upload-footer">
+              <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
+                <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+                <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+              </button>
+            </div>
+          )}
+
           {selectedUser && !hasFiles && (
             <div className="cert-center cert-center--absolute">
               {filesLoading ? (
@@ -233,14 +242,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
             </div>
           )}
         </div>
-        {selectedUser && hasFiles && (
-          <div className="cert-upload-footer">
-            <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
-              <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
-              <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
-            </button>
-          </div>
-        )}
+
         {!selectedUser && (
           <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
         )}
