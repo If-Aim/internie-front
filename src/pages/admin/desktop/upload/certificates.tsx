@@ -21,7 +21,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
   const [filesLoading, setFilesLoading] = React.useState(false);
 
   const [uploading, setUploading] = React.useState(false);
-
+  
   const selectedUser = React.useMemo(
     () => users.find((u) => u.userId === selectedId) ?? null,
     [users, selectedId]
@@ -31,6 +31,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
     if (!selectedUser) return [];
     return userFilesMap[selectedUser.userId] ?? [];
   }, [selectedUser, userFilesMap]);
+  const hasFiles = selectedUserFiles.length > 0;
 
   React.useEffect(() => {
     let mounted = true;
@@ -191,12 +192,12 @@ export default function AdminCertificatesPage(): React.ReactElement {
               <p className="cert-upload-hint">목록에서 사용자를 선택해주세요.</p>
             )}
 
-            {selectedUser && (
+            {selectedUser && hasFiles &&(
               <>
                 {filesLoading ? (
                   <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
                 ) : (
-                  <div className="cert-files">
+                  <div className="cert-files-area">
                     <ul className="cert-file-list">
                       {selectedUserFiles.map((f) => (
                         <li key={f.fileId} className="cert-file-item">
@@ -223,23 +224,42 @@ export default function AdminCertificatesPage(): React.ReactElement {
                 )}
               </>
             )}
+            {selectedUser && !hasFiles && (
+              <div className="cert-center">
+                {filesLoading ? (
+                  <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
+                ) : (
+                  <button
+                    type="button"
+                    className="cert-upload-btn"
+                    onClick={openFilePicker}
+                    disabled={uploading}
+                  >
+                    <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+                    <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
-          <div className="cert-upload-footer">
-            <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={!selectedUser || uploading} >
-              <span className="cert-upload-icon"><img src="/upload-03.svg" alt="admin avatar" /></span>
-              <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
-            </button>
-          </div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              style={{ display: "none" }}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void handleFileSelected(f);
-              }}
-            />
+          {selectedUser && hasFiles && (
+            <div className="cert-upload-footer">
+              <button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
+                <span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+                <span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
+              </button>
+            </div>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFileSelected(f);
+            }}
+          />
         </div>
       </section>
     </div>
