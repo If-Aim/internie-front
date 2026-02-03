@@ -240,18 +240,15 @@ export default function Certificates() {
                 </div>
 
                 <div className="cert-s-actions">
-                  <button
-                    type="button"
-                    className={
-                      downloadingId === item.fileId
-                        ? "cert-s-icon-btn is-active"
-                        : "cert-s-icon-btn"
-                    }
-                    aria-label="다운로드"
-                    onClick={() => void handleDownload(item.fileId)}
-                    disabled={downloadingId === item.fileId}
-                  >
-                    <img src="/download-02.svg" alt="" />
+                  <button type="button" className="cert-s-icon-btn" aria-label="다운로드" onClick={() => void handleDownload(item.fileId)} disabled={downloadingId === item.fileId} >
+                    <img
+                      src={
+                        downloadingId === item.fileId
+                          ? "/download-02-blue.svg"
+                          : "/download-02.svg"
+                      }
+                      alt=""
+                    />
                   </button>
                   <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={handleDelete} > 
                     <img src="/trash-02.svg" alt="" />
