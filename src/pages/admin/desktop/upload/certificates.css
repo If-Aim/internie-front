@@ -1,9 +1,21 @@
 /* src/pages/admin/desktop/upload/certificates.css */
-.cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
-.cert-upload-btn{border:none;background:#E3E3E3;color:#707070;font-weight: 700;border-radius: 16px;
-height: 50px;padding: 15px 10px;display:flex;align-items:center;gap: 4px;cursor:pointer;}
+.cert-upload-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);height: 771px;position: relative;
+display:flex;flex-direction: column;padding: 36px 40px;}
+.cert-files-area{flex: 1 1 auto;min-height: 0;overflow: auto;}
+.cert-file-list{list-style: none;padding: 0;margin: 0;display: flex;flex-direction: column;gap: 18px;}
+.cert-file-item{display: flex;align-items: center;justify-content: space-between;background: #fff;
+border-radius: 10px;box-shadow: 0 4px 10px rgba(17,24,39,0.12);padding: 18px 18px;}
+.cert-file-left{display: flex;flex-direction: column;gap: 8px;min-width: 0;}
+.cert-file-name{font-weight: 700;color: #111;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+.cert-file-date{height: 16px; line-height: 16px;font-size: 13px;color: #9ca3af;}
+.cert-trash-btn{border: none;background: transparent;cursor: pointer;width: 40px;height: 40px;border-radius: 10px;display: inline-flex;
+align-items: center;justify-content: center;}
+.cert-trash-btn:hover{background: rgba(0,0,0,0.04);}
+.cert-trash-btn img{width: 24px;height: 24px;}
+.cert-upload-footer{flex: 0 0 auto;display: flex;justify-content: center;padding-top: 18px;}
+.cert-upload-btn{border:none;background:#E3E3E3;color:#707070;font-weight: 700;border-radius: 16px;height: 50px;padding: 0 18px;display:flex;
+align-items:center;gap: 8px;cursor:pointer;}
 .cert-upload-btn:disabled{opacity: 0.6;cursor: not-allowed;}
 .cert-upload-icon img{display:inline-flex;width: 24px;justify-content:center;}
-.cert-upload-hint{position:absolute;bottom: 18px;left: 0;right: 0;text-align:center;color:#6b7280;font-weight: 700;}
-.cert-upload-hint--ok{color: var(--primary);}
+
+.cert-upload-hint{margin-top: 12px;text-align:center;color:#6b7280;font-weight: 700;}
