@@ -3,6 +3,39 @@ import { useNavigate } from "react-router-dom";
 import "./certificates.css";
 import { ApiError, type AdminUserFile, getMyAdminFiles, getMyAdminFileDownloadUrl } from "../../../../api/client";
 
+import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min?url";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+async function renderPdfFirstPageThumbnail(
+  signedUrl: string,
+  width = 60 // 썸네일 가로 크기
+): Promise<string> {
+  const res = await fetch(signedUrl);
+  const arrayBuffer = await res.arrayBuffer();
+
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  const page = await pdf.getPage(1);
+
+  const viewport = page.getViewport({ scale: 1 });
+  const scale = width / viewport.width;
+  const scaledViewport = page.getViewport({ scale });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = scaledViewport.width;
+  canvas.height = scaledViewport.height;
+
+  await page.render({
+    canvas,
+    viewport: scaledViewport,
+  }).promise;
+
+  return canvas.toDataURL("image/png");
+}
+
+
 export default function Certificates() {
   const navigate = useNavigate();
 
@@ -11,6 +44,14 @@ export default function Certificates() {
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   const [downloadingId, setDownloadingId] = React.useState<number | null>(null);
+  const [previewMap, setPreviewMap] = React.useState<Record<number, string>>({});
+
+  function getFileType(filename: string) {
+    const ext = filename.split(".").pop()?.toLowerCase();
+    if (ext === "jpg" || ext === "jpeg" || ext === "png") return "image";
+    if (ext === "pdf") return "pdf";
+    return "other";
+  }
 
   const handleClose = () => {
     navigate(-1);
@@ -49,15 +90,91 @@ export default function Certificates() {
     };
   }, []);
 
+  // 수료증 미리보기
+  React.useEffect(() => {
+    if (items.length === 0) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const results = await Promise.all(
+          items.map(async (item) => {
+            try {
+              const signedUrl = await getMyAdminFileDownloadUrl(item.fileId);
+              const type = getFileType(item.filename);
+
+              if (type === "image") {
+                const res = await fetch(signedUrl);
+                const blob = await res.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                return { fileId: item.fileId, previewUrl: objectUrl };
+              }
+
+              // PDF → 첫 페이지 썸네일
+              if (type === "pdf") {
+                const dataUrl = await renderPdfFirstPageThumbnail(signedUrl);
+                return { fileId: item.fileId, previewUrl: dataUrl };
+              }
+
+              return null;
+            } catch {
+              return null; // 미리보기 실패는 무시
+            }
+          })
+        );
+
+        if (cancelled) {
+          results.forEach((r) => {
+            if (r?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(r.previewUrl);
+          });
+          return;
+        }
+
+        setPreviewMap((prev) => {
+          const next = { ...prev };
+          results.forEach((r) => {
+            if (r) next[r.fileId] = r.previewUrl;
+          });
+          return next;
+        });
+      } catch (e) {
+        console.error("전체 미리보기 로딩 실패", e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
+
+  React.useEffect(() => {
+    return () => {
+      Object.values(previewMap).forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+    };
+  }, [previewMap]);
   const handleDownload = async (fileId: number) => {
     if (downloadingId != null) return;
 
     setDownloadingId(fileId);
     try {
-      const url = await getMyAdminFileDownloadUrl(fileId);
+      const signedUrl = await getMyAdminFileDownloadUrl(fileId);
+      const res = await fetch(signedUrl, { method: "GET" });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new ApiError(res.status, "파일 다운로드 실패", text);
+      }
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const w = window.open(objectUrl, "_blank", "noreferrer");
+      
+      if (!w) {
+        window.location.href = objectUrl;
+      }
 
-      window.open(url, "_blank", "noreferrer");
-
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
     } catch (e) {
       if (e instanceof ApiError) {
         if (e.status === 404) {
@@ -104,7 +221,13 @@ export default function Certificates() {
           <div className="cert-s-list">
             {items.map((item) => (
               <div key={item.fileId} className="cert-s-card">
-                <div className="cert-s-thumb" aria-hidden="true" />
+                <div className="cert-s-thumb" >
+                  {previewMap[item.fileId] ? (
+                    <img src={previewMap[item.fileId]} alt="" className="cert-s-thumb-img" />
+                  ) : (
+                    <div className="cert-s-thumb-placeholder" />
+                  )}
+                </div>
 
                 <div className="cert-s-info">
                   <div className="cert-s-name" title={item.filename}>
@@ -117,7 +240,17 @@ export default function Certificates() {
                 </div>
 
                 <div className="cert-s-actions">
-                  <button type="button" className="cert-s-icon-btn" aria-label="다운로드" onClick={() => void handleDownload(item.fileId)} disabled={downloadingId === item.fileId} >
+                  <button
+                    type="button"
+                    className={
+                      downloadingId === item.fileId
+                        ? "cert-s-icon-btn is-active"
+                        : "cert-s-icon-btn"
+                    }
+                    aria-label="다운로드"
+                    onClick={() => void handleDownload(item.fileId)}
+                    disabled={downloadingId === item.fileId}
+                  >
                     <img src="/download-02.svg" alt="" />
                   </button>
                   <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={handleDelete} > 
