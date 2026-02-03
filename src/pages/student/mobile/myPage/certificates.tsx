@@ -168,11 +168,8 @@ export default function Certificates() {
       }
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
-      const w = window.open(objectUrl, "_blank", "noreferrer");
       
-      if (!w) {
-        window.location.href = objectUrl;
-      }
+      window.open(objectUrl, "_blank", "noreferrer");
 
       setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
     } catch (e) {
