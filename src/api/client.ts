@@ -288,40 +288,28 @@ export async function applyMyVerification(
   );
 }
 
-// 관리자 업로드 파일 다운로드
-export async function downloadMyAdminFile(): Promise<{ blob: Blob; filename: string }> {
-  const res = await requestWithAutoRefresh(
-    "/users/me/admin-file",
-    { method: "GET",},
-    { expectJson: false }
-  );
+// 수료증 관련 타입
+export type AdminUserFile = {
+  fileId: number;
+  url: string;
+  filename: string;
+};
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new ApiError(res.status, "파일 다운로드 실패", text);
-  }
-
-  const blob = await res.blob();
-
-  const cd = res.headers.get("content-disposition") ?? "";
-  let filename = "certificate";
-
-  const match =
-    cd.match(/filename\*=UTF-8''(.+)/i) ||
-    cd.match(/filename="(.+)"/i);
-
-  if (match?.[1]) {
-    try {
-      filename = decodeURIComponent(match[1]);
-    } catch {
-      filename = match[1];
-    }
-  }
-
-  return { blob, filename };
+// 관리자 업로드 파일 목록 조회
+export async function getMyAdminFiles(): Promise<AdminUserFile[]> {
+  return api<AdminUserFile[]>("/users/me/admin-files", { method: "GET" });
 }
 
+// 관리자 업로드 파일 다운로드
+export async function getMyAdminFileDownloadUrl(
+  fileId: number | string
+): Promise<string> {
+  const res = await api<{ url: string }>(`/users/me/admin-file/${fileId}`, {
+    method: "GET",
+  });
 
+  return res.url;
+}
 
 /* - admin 관련 - */
 export type AdminUser = UserBase;
@@ -348,12 +336,6 @@ export async function approveAdminUser(userId: number | string): Promise<AdminUs
 export async function rejectAdminUser(userId: number | string): Promise<AdminUser> {
   return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
 }
-
-export type AdminUserFile = {
-  fileId: number;
-  url: string;
-  filename: string;
-};
 
 // 관리자 파일 업로드
 export async function uploadAdminUserFile(

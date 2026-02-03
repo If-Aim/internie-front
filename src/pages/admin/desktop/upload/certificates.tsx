@@ -190,6 +190,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
           {selectedUser && hasFiles &&(
             <>
             <div className="cert-files-area">
+              <div className="admin-section-head">수료증 발급 현황</div>
               {filesLoading ? (
                 <p className="cert-upload-hint">파일 목록 불러오는 중…</p>
               ) : (
