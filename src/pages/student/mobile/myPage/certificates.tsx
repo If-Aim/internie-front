@@ -119,7 +119,7 @@ export default function Certificates() {
 
               return null;
             } catch {
-              return null; // 미리보기 실패는 무시
+              return null; 
             }
           })
         );
@@ -188,10 +188,6 @@ export default function Certificates() {
     }
   };
 
-  const handleDelete = () => {
-    alert("서비스 준비중입니다.");
-  };
-
   return (
     <div className="cert-s-page">
       <header className="cert-s-header">
@@ -246,9 +242,6 @@ export default function Certificates() {
                       }
                       alt=""
                     />
-                  </button>
-                  <button type="button" className="cert-s-icon-btn" aria-label="삭제" onClick={handleDelete} > 
-                    <img src="/trash-02.svg" alt="" />
                   </button>
                 </div>
               </div>
