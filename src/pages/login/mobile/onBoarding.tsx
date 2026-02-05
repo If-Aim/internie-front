@@ -104,7 +104,6 @@ export default function OnBoarding(): React.ReactElement {
         navigate("/student", { replace: true });
     }
 
-    // 간단한 유효성 예시
     const canGoStep1 = form.name.trim().length > 0;
 
     return (
@@ -188,7 +187,6 @@ export default function OnBoarding(): React.ReactElement {
             )}
             </div>
 
-            {/* 하단 버튼 영역은 step에 따라 내용만 변경 */}
             <div className="ob-footer">
             {step === 1 && (
                 <button className="ob-btn ob-btn--primary" onClick={next} disabled={!canGoStep1}>
