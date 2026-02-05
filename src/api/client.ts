@@ -288,6 +288,16 @@ export async function applyMyVerification(
   );
 }
 
+// JUMP 사용자 인증
+export async function verifyJumpUser (
+  code: string
+): Promise<UserMe> {
+  return api<UserMe>("/users/me/jump-verify", {
+    method: "POST",
+    body: JSON.stringify({ code } satisfies { code: string }),
+  });
+}
+
 // 수료증 관련 타입
 export type AdminUserFile = {
   fileId: number;

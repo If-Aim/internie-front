@@ -1,0 +1,26 @@
+/* /src/pages/login/mobile/onBoarding.css */
+.ob-step{min-height: 100dvh;display: flex;flex-direction: column;background: #fff;}
+.ob-content{flex: 1 1 auto;padding: 96px 24px 0; }
+.ob-title{margin: 0 0 18px;font-size: 32px;font-weight: 800;line-height: 1.2;letter-spacing: -0.02em;color: #111;}
+.ob-field{margin-top: 18px;}
+.ob-input{width: 100%;height: 56px;padding: 0 18px;border-radius: 14px;border: 1px solid #E6E6E6;background: #fff;
+font-size: 16px;color: #111;outline: none;}
+.ob-input::placeholder{color: #9AA0A6;}
+.ob-input:focus{border-color: #CFCFCF;}
+.ob-field--icon .ob-input{padding-right: 52px; }
+.ob-icon{position: absolute;right: 16px;top: 50%;transform: translateY(-50%);font-size: 22px;line-height: 1;color: #111;}
+.ob-footer{padding: 14px 20px calc(14px + env(safe-area-inset-bottom));background: #fff;}
+.ob-btn--ghost{background: #cfe1ff; color: #111;}
+.ob-btn--primary{background: #E9E9E9;color: #9B9B9B;}
+.ob-btn--primary:not(:disabled){background: #111; color: #fff;}
+.ob-btn:disabled{cursor: not-allowed;}
+.ob-btn:not(:disabled):active{transform: translateY(1px);}
+
+.ob-tag-section{margin-top: 28px;}
+.ob-tag-title{margin: 0 0 12px;font-size: 14px;font-weight: 600;color: #666;}
+.ob-tag-list{display: flex;flex-wrap: wrap;gap: 10px;}
+.ob-tag{padding: 10px 16px;border-radius: 999px;border: 1px solid #E0E0E0;background: #fff;
+font-size: 14px;font-weight: 500;color: #333;cursor: pointer;}
+.ob-tag--active{background: #111;color: #fff;border-color: #111;}
+.ob-tag:active{transform: translateY(1px);}
+

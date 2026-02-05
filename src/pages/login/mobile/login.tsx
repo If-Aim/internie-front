@@ -1,3 +1,4 @@
+// src/pages/login/mobile/login.tsx
 import { useTranslation } from "react-i18next";
 
 import "./login.css";
