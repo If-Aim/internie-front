@@ -15,7 +15,6 @@ type FormState = {
     verifyCode: string;
 };
 
-const TAG_SUGGESTIONS = ["기획", "개발", "디자인", "마케팅", "영업", "인사"];
 
 export default function OnBoarding(): React.ReactElement {
     const navigate = useNavigate();
@@ -58,18 +57,6 @@ export default function OnBoarding(): React.ReactElement {
     // function back() { 
     //     setStep((s) => (s > 1 ? ((s - 1) as Step) : s));
     // }  추후 필요 시 사용  ("이전") 버튼용
-
-    function toggleTag(tag: string) {
-        setForm((prev) => {
-        const has = prev.selectedTags.includes(tag);
-            return {
-                ...prev,
-                selectedTags: has
-                    ? prev.selectedTags.filter((t) => t !== tag)
-                    : [...prev.selectedTags, tag],
-            };
-        });
-  }
 
     function skipGoals() {
         setForm((prev) => ({ ...prev, roleKeyword: "", companyKeyword: "", selectedTags: [] }));
@@ -146,26 +133,6 @@ export default function OnBoarding(): React.ReactElement {
                         placeholder="희망하는 기업을 입력하세요"
                         />
                         <span className="ob-icon" aria-hidden="true"><img src="/search-01.svg" alt="" /></span>
-                    </div>
-
-                    <div className="ob-tag-section">
-                        <p className="ob-tag-title">관심 키워드를 선택하세요</p>
-
-                        <div className="ob-tag-list">
-                            {TAG_SUGGESTIONS.map((tag) => {
-                            const active = form.selectedTags.includes(tag);
-                            return (
-                                <button
-                                key={tag}
-                                type="button"
-                                className={`ob-tag ${active ? "ob-tag--active" : ""}`}
-                                onClick={() => toggleTag(tag)}
-                                >
-                                {tag}
-                                </button>
-                            );
-                            })}
-                        </div>
                     </div>
                 </>
             )}

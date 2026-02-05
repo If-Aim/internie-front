@@ -18,12 +18,3 @@ font-size: 16px;font-weight:400;color: #000;outline: none;}
 .ob-btn--primary:not(:disabled){background: var(--primary); color: #fff;}
 .ob-btn:disabled{cursor: not-allowed;}
 .ob-btn:not(:disabled):active{transform: translateY(1px);}
-
-.ob-tag-section{margin-top: 28px;}
-.ob-tag-title{margin: 0 0 12px;font-size: 14px;font-weight: 600;color: #666;}
-.ob-tag-list{display: flex;flex-wrap: wrap;gap: 10px;}
-.ob-tag{padding: 10px 16px;border-radius: 999px;border: 1px solid #E0E0E0;background: #fff;
-font-size: 14px;font-weight: 500;color: #333;cursor: pointer;}
-.ob-tag--active{background: #111;color: #fff;border-color: #111;}
-.ob-tag:active{transform: translateY(1px);}
-
