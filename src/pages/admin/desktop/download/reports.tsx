@@ -88,24 +88,24 @@ function ReportCalendar(): React.ReactElement {
   }
 
   return (
-    <div className="cal-card">
-      <div className="cal-head">
-        <div className="cal-title">{monthLabel(year, month)}</div>
-        <div className="cal-nav">
-          <button type="button" className="cal-nav-btn" onClick={goPrev} aria-label="prev month">
+    <div className="admin-cal-card">
+      <div className="admin-cal-head">
+        <div className="admin-cal-title">{monthLabel(year, month)}</div>
+        <div className="admin-cal-nav">
+          <button type="button" className="admin-cal-nav-btn" onClick={goPrev} aria-label="prev month">
             <img src="/Previous (Stroke).svg" alt="" />
           </button>
-          <button type="button" className="cal-nav-btn" onClick={goNext} aria-label="next month">
+          <button type="button" className="admin-cal-nav-btn" onClick={goNext} aria-label="next month">
             <img src="/Next (Stroke).svg" alt="" />
           </button>
         </div>
       </div>
 
-      <div className="cal-dow">
+      <div className="admin-cal-dow">
         <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
       </div>
 
-      <div className="cal-grid" role="grid" aria-label="calendar">
+      <div className="admin-cal-grid" role="grid" aria-label="calendar">
         {cells.map((c) => {
           const isSelected = c.dateStr && c.dateStr === selectedDate;
           return (

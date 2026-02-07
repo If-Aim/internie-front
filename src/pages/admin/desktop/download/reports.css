@@ -3,19 +3,19 @@
 height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
 
 .report-card--calendar{background: transparent;padding: 0;}
-.cal-card{width: 100%;min-height: 520px;background: #fff;border-radius: 16px;border: none;padding: 44px 56px 52px;}
-.cal-head{display: flex;align-items: center;justify-content: flex-start;position: relative;margin: 8px 0 0 15px;}
-.cal-title{font-size: 16px;font-weight: 600;color: #111;}
-.cal-nav{position: absolute;right: 0;display: flex;gap: 14px;}
-.cal-nav-btn{width: 44px;height: 44px;border: none;background: transparent;border-radius: 10px;cursor: pointer;color: #111;}
-.cal-nav-btn img{width: auto;height: 16px;}
-.cal-nav-btn:hover{background: rgba(17, 24, 39, 0.06);}
-.cal-dow{display: grid;grid-template-columns: repeat(7, 1fr);gap: 40px;margin: 56px 15px 0px;text-align: center;
+.admin-cal-card{width: 100%;min-height: 520px;background: #fff;border-radius: 16px;border: none;padding: 44px 56px 52px;}
+.admin-cal-head{display: flex;align-items: center;justify-content: flex-start;position: relative;margin: 8px 0 0 15px;}
+.admin-cal-title{font-size: 16px;font-weight: 600;color: #111;}
+.admin-cal-nav{position: absolute;right: 0;display: flex;gap: 14px;}
+.admin-cal-nav-btn{width: 44px;height: 44px;border: none;background: transparent;border-radius: 10px;cursor: pointer;color: #111;}
+.admin-cal-nav-btn img{width: auto;height: 16px;}
+.admin-cal-nav-btn:hover{background: rgba(17, 24, 39, 0.06);}
+.admin-cal-dow{display: grid;grid-template-columns: repeat(7, 1fr);gap: 40px;margin: 56px 15px 0px;text-align: center;
 font-size: 22px;font-weight: 500;color: #333333;}
-.cal-grid{display: grid;grid-template-columns: repeat(7, 1fr);gap: 12px 12px;margin-top: 30px;}
+.admin-cal-grid{display: grid;grid-template-columns: repeat(7, 1fr);gap: 12px 12px;margin-top: 30px;}
 
-.cal-cell{height: 55px;border: none;background: transparent;border-radius: 6px;cursor: pointer;font-size: 20px;font-weight: 500;color: #666666;}
-.cal-cell:hover:not(:disabled){background: rgba(17, 24, 39, 0.06);color: #000;}
-.cal-cell:disabled{cursor: default;color: transparent;}
-.cal-cell--selected{background: var(--primary); color: #fff;}
-.cal-cell--selected:hover{background: var(--primary);}
+.admin-cal-cell{height: 55px;border: none;background: transparent;border-radius: 6px;cursor: pointer;font-size: 20px;font-weight: 500;color: #666666;}
+.admin-cal-cell:hover:not(:disabled){background: rgba(17, 24, 39, 0.06);color: #000;}
+.admin-cal-cell--disabled{cursor: default;color: transparent;}
+.admin-cal-cell--selected{background: var(--primary); color: #fff;}
+.admin-cal-cell--selected:hover{background: var(--primary);}
