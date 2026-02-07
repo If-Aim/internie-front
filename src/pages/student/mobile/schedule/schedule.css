@@ -157,7 +157,7 @@ font-size: 16px;font-weight: 500;cursor: pointer;text-align:center;color:#666666
 
 /* 기간 선택용 */
 .cal-range{position: absolute;left: 50%;transform: translateX(-50%);top: 50%;transform: translate(-50%, -50%);
-height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-radius: 0px;z-index: 0;}
+height: 39px;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-radius: 0px;z-index: 0;}
 .cal-day{position: relative;z-index: 1;}
 .cal-cell.is-start .cal-range{clip-path: inset(0 0 0 50%);border-top-left-radius: 6px;border-bottom-left-radius: 6px;}
 .cal-cell.is-end .cal-range{clip-path: inset(0 50% 0 0); border-top-right-radius: 6px;border-bottom-right-radius: 6px;}
