@@ -67,7 +67,7 @@ export default function VerifyCodePage() {
     }, []);
 
     return (
-        <div className="mypage">
+        <div className="mypage user-modify">
             <header className="mypage-header">
                 <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)} >
                     <img src="/chevron-left.svg" alt="previous" />
@@ -90,11 +90,9 @@ export default function VerifyCodePage() {
                 {error && <div className="ob-error">{error}</div>}
             </div>
 
-            <div className="profile-edit-bottom">
-                <button className="profile-edit-save" onClick={submit} disabled={submitting || isJumpVerified} >
-                    확인
-                </button>
-            </div>
+            <button className="submit-code" onClick={submit} disabled={submitting || isJumpVerified} >
+                확인
+            </button>
         </div>
     );
 }
