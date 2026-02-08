@@ -142,10 +142,10 @@ export default function EditProfilePage(): React.ReactElement {
                 imageFile: selectedImageFile ?? undefined,
                 // nickname: ... (추후)
             });
-
+            console.log("updated.profileImage =", updated.profileImage);
             setMe(updated);
             setAvatarVersion(Date.now());
-            
+
             const nextInitial: ProfileForm = {
                 ...form,
                 name: trimmedName,
