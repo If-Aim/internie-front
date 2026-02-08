@@ -45,6 +45,6 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 
 /* 인증코드 관련 */
 .user-verify-code{padding:20px 20px 50px; background-color: #fff;}
-.user-verify-code .profile-edit-label{color:#000; font-size:24px; font-weight:700;}
+.user-verify-code .profile-edit-label{color:#000; font-size:24px; font-weight:700;margin-left:12px;}
 .submit-code { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(53px + env(safe-area-inset-bottom)); width: 92%; height: 60px;
 border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}

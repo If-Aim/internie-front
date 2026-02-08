@@ -75,20 +75,18 @@ export default function VerifyCodePage() {
                 <div className="mypage-email"></div>
             </header>
 
-            <div className="profile-edit">
-                <div className="profile-edit-field">
-                    <div className="profile-edit-label">인증코드를 입력하세요</div>
-                    <input
-                        className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
-                        value={isJumpVerified ? "JUMP 인증 완료" : code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder={isJumpVerified ? undefined : "인증코드를 입력해주세요."}
-                        readOnly={isJumpVerified}
-                        disabled={submitting}
-                    />
-                </div>
-                {error && <div className="ob-error">{error}</div>}
+            <div className="profile-edit-field">
+                <div className="profile-edit-label">인증코드를 입력하세요</div>
+                <input
+                    className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
+                    value={isJumpVerified ? "JUMP 인증 완료" : code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder={isJumpVerified ? undefined : "인증코드"}
+                    readOnly={isJumpVerified}
+                    disabled={submitting}
+                />
             </div>
+            {error && <div className="ob-error">{error}</div>}
 
             <button className="submit-code" onClick={submit} disabled={submitting || isJumpVerified} >
                 완료
