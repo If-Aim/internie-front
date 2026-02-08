@@ -1362,7 +1362,6 @@ function Home(): React.ReactElement {
             setIsFilterOpen(false);
           }}
         />
-
       </div>
 
       {/* 로그인 유도 팝업 */}
