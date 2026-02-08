@@ -17,9 +17,9 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-action-btn { height: 56px; border: 0; border-radius: 10px; background: #E6E6E6;  color: #9A9A9A; font-size: 16px; font-weight: 700; } 
 .mypage-goal-title { text-align: center; font-size: 16px; font-weight: 700; color: #707070; }
 
-.mypage-cards { margin-top: 18px; display: flex; align-items: center;flex-direction: column;}
+.mypage-cards { display: flex; align-items: center;flex-direction: column;}
 .mypage-card {border: 0; background: #BDD8FF; border-radius: 10px; }
-.mypage-card.wide {width:160px;height: 50px; padding: 0 21px; align-items: center; gap: 14px;}
+.mypage-card.wide {width:160px;height: 50px; margin-top: 18px; padding: 0 21px; align-items: center; gap: 14px;}
 .mypage-card.wide--selected{background: #d6d6d6;}
 
 .mypage-menu{margin-top: 25px;padding:0 17px;display: flex;flex-direction: column;gap: 10px;width: 100%;}
