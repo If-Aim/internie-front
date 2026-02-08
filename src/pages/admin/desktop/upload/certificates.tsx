@@ -161,7 +161,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
             users.map((u, idx) => {
               const isSelected = u.userId === selectedId;
               const files = userFilesMap[u.userId] ?? [];
-              const done = files.length > 0;
+              const count = files.length;
 
               return (
                 <button
@@ -174,9 +174,8 @@ export default function AdminCertificatesPage(): React.ReactElement {
                   <span className="admin-user-name">{u.name}</span>
                   <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
 
-                  <span className="admin-cert-status">{done ? <span className="cert-done">완료</span> : <span className="cert-done cert-done--empty" />}</span>
-
-                  <span className="admin-chevron"><img src="/chevron-right.svg" alt="admin avatar" /></span>
+                  <span className="admin-cert-status"><span className={count > 0 ? "cert-count" : "cert-count cert-count--zero"}>수료증: {count}</span></span>
+                  <span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
                 </button>
               );
             })
