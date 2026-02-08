@@ -49,3 +49,4 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .user-verify-code .profile-edit-field{margin-left:12px; gap:32px;}
 .submit-code { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(53px + env(safe-area-inset-bottom)); width: 92%; height: 60px;
 border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}
+.ob-error{margin-top: 8px; margin-left: 12px; font-size: 14px; color: #000; font-weight: 700;}
