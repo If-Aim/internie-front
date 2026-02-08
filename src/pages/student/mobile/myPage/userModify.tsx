@@ -30,6 +30,7 @@ export default function EditProfilePage(): React.ReactElement {
     const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
     const [saving, setSaving] = React.useState(false);
+    const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
 
     React.useEffect(() => {
         let mounted = true;
@@ -79,8 +80,13 @@ export default function EditProfilePage(): React.ReactElement {
         (me.profileImage ?? "").includes("kakao") ||
         (me.profileImage ?? "").includes("default");
 
-    const serverAvatarSrc: string =
+    const rawServerAvatarSrc =
         isDefaultProfile ? "/internie_mascot_normal.png" : (me?.profileImage ?? "/internie_mascot_normal.png");
+
+    const serverAvatarSrc =
+        rawServerAvatarSrc.startsWith("http")
+            ? `${rawServerAvatarSrc}${rawServerAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion || 0}`
+            : rawServerAvatarSrc;
 
     const avatarSrc = previewUrl ?? serverAvatarSrc;
 
@@ -138,7 +144,8 @@ export default function EditProfilePage(): React.ReactElement {
             });
 
             setMe(updated);
-
+            setAvatarVersion(Date.now());
+            
             const nextInitial: ProfileForm = {
                 ...form,
                 name: trimmedName,

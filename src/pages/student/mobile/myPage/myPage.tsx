@@ -43,6 +43,8 @@ export default function MyPage({ onLogout }: Props) {
   }
   
   const [me, setMe] = React.useState<UserMe | null>(null);
+  const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
+
   const displayName = me?.name ?? "";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
@@ -88,9 +90,14 @@ export default function MyPage({ onLogout }: Props) {
     !me?.profileImage ||
     me.profileImage.includes("kakao") || // 카카오 기본 이미지
     me.profileImage.includes("default");
-  const avatarSrc = isDefaultProfile
+  const rawAvatarSrc = isDefaultProfile
     ? "/internie_mascot_normal.png"
-    : me?.profileImage!;
+    : (me?.profileImage ?? "/internie_mascot_normal.png");
+
+  const avatarSrc =
+    rawAvatarSrc.startsWith("http")
+      ? `${rawAvatarSrc}${rawAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion || 0}`
+      : rawAvatarSrc;
   const [/*recent*/, setRecent] = React.useState<EventDay[]>([]);
   const [targetCompany, /*setTargetCompany*/] = React.useState<string | null>(null);
 
@@ -118,14 +125,13 @@ export default function MyPage({ onLogout }: Props) {
       try {
         const res = await getUserMe();
         if (!mounted) return;
-
         setMe(res);
-      } catch {
-      }
+        setAvatarVersion(Date.now());
+      } catch {}
     })();
 
     return () => { mounted = false; };
-  }, []);
+  }, [location.pathname]);
 
   React.useEffect(() => {
     let mounted = true;
