@@ -36,7 +36,7 @@ input, button, select, textarea {
 
 body {background: var(--bg);color: var(--ink);}
 #root {height: 100%;}
-.wrap {min-width: 300px;padding: 0 20px 64px 20px;height: 100%;overflow-y: auto;-webkit-overflow-scrolling: touch; }
+.wrap {min-width: 300px;padding: 0 20px 120px;height: 100%;overflow-y: auto;-webkit-overflow-scrolling: touch; }
 .wrap.lock-scroll {overflow: hidden;-webkit-overflow-scrolling: auto;}
 .screen {min-height: 100vh;min-width: 300px;display: flex;flex-direction: column;}
 
