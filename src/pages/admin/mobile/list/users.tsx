@@ -61,11 +61,7 @@ export default function AdminUsersMobile(): React.ReactElement {
           padding: 24,
         }}
       >
-        <img
-          src="/internie_mascot_normal.png"
-          alt=""
-          style={{ width: 120, marginBottom: 16 }}
-        />
+        <img src="/internie_mascot_normal.png" alt="" style={{ width: 120, marginBottom: 16 }} />  
         <h2 style={{ marginBottom: 8 }}>모바일 관리자 화면 준비중</h2>
         <p style={{ color: "#666", fontSize: 14 }}>
           관리자 기능은 PC 환경에서 이용해주세요.

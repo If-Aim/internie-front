@@ -937,12 +937,7 @@ function EventModal({ item, onClose, onRecord, eventDaysForThisEvent }: EventMod
             </div>
           </div>
 
-          <img
-            className="event-modal-mascot"
-            src="/internie_mascot_normal.png"
-            alt=""
-            draggable={false}
-          />
+          <img className="event-modal-mascot" src="/internie_mascot_normal.png" alt="" draggable={false} />
         </main>
 
         <footer className="event-modal-footer">
@@ -1021,9 +1016,6 @@ function Home(): React.ReactElement {
     if (!url) return true;
 
     const lowered = url.toLowerCase();
-    if (lowered.includes("kakaocdn")) return true;
-    if (lowered.includes("kakao")) return true;
-
     if (lowered.includes("default")) return true;
 
     return false;

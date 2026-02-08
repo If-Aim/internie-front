@@ -88,7 +88,6 @@ export default function MyPage({ onLogout }: Props) {
 
   const isDefaultProfile =
     !me?.profileImage ||
-    me.profileImage.includes("kakao") || // 카카오 기본 이미지
     me.profileImage.includes("default");
   const rawAvatarSrc = isDefaultProfile
     ? "/internie_mascot_normal.png"

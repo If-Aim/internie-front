@@ -77,7 +77,6 @@ export default function EditProfilePage(): React.ReactElement {
 
     const isDefaultProfile =
         !me?.profileImage ||
-        (me.profileImage ?? "").includes("kakao") ||
         (me.profileImage ?? "").includes("default");
 
     const rawServerAvatarSrc =
