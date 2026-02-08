@@ -1,6 +1,6 @@
 /* src/pages/student/mobile/myPage/userModify.css */
 .user-modify .mypage-header{ padding: 18px 0; height: 56px; display: flex; align-items: center; justify-content: center; }
-.user-modify .mypage-previous{ top: 50%; transform: translateY(-50%); width: 40px; height: 40px; }
+.user-modify .mypage-close{ top: 50%; transform: translateY(-50%); width: 40px; height: 40px; }
 .user-modify .mypage-email{ font-size: 16px; font-weight: 600; line-height: 1; color:#000;}
 .edit-profile .mypage-header{ position: static !important; top: auto !important; }
 .profile-edit{padding: 18px 18px 28px;}
