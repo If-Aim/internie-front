@@ -242,7 +242,7 @@ export default function MyPage({ onLogout }: Props) {
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
             </span>
           </button>
-          <button type="button" className="mypage-menu-item"onClick={() => navigate("verifyCode")}>
+          <button type="button" className="mypage-menu-item"onClick={() => navigate("verify-code")}>
             <span className="mypage-menu-title">인증코드 입력하기</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
