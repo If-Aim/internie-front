@@ -77,7 +77,6 @@ export default function VerifyCodePage() {
 
             <div className="profile-edit">
                 <div className="profile-edit-field">
-                    <div className="profile-edit-label">인증코드</div>
                     <input
                         className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
                         value={isJumpVerified ? "JUMP 인증 완료" : code}
