@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserMe, updateMyName, updateMyProfileImage, type UserMe } from "../../../../api/client";
 import "./myPage.css";
+import "./userModify.css";
 
 export default function EditProfilePage(): React.ReactElement {
     const navigate = useNavigate();
