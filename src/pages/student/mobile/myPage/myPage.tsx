@@ -31,8 +31,6 @@ function sortKey(ed: EventDay) {
   return { dateKey, timeKey, txCount };
 }
 
-
-
 // 마이페이지 컴포넌트
 export default function MyPage({ onLogout }: Props) {
   const location = useLocation();
@@ -48,7 +46,7 @@ export default function MyPage({ onLogout }: Props) {
   const displayName = me?.name ?? "";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
-  
+
   const verifyUi = (() => {
     switch (status) {
       case "PENDING":
@@ -116,7 +114,7 @@ export default function MyPage({ onLogout }: Props) {
       navigate("/login", { replace: true });
     }
   }
-
+  
   React.useEffect(() => {
     let mounted = true;
 
@@ -244,7 +242,7 @@ export default function MyPage({ onLogout }: Props) {
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
             </span>
           </button>
-          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}> {/* 추후 onClick 이벤트 변경: {() => navigate("onBoarding-step3")} */}
+          <button type="button" className="mypage-menu-item"onClick={() => navigate("verifyCode")}>
             <span className="mypage-menu-title">인증코드 입력하기</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />

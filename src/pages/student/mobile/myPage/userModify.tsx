@@ -193,14 +193,14 @@ export default function EditProfilePage(): React.ReactElement {
                     <input className="profile-edit-input" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} disabled={saving} />
                 </div>
 
-                <div className="profile-edit-field" onClick={handleServicePreparing}> {/*추후 재학생 인증 기능 활성화 시 onClick 제거 */}
+                <div className="profile-edit-field">
                     <div className="profile-edit-label">E-mail</div>
-                    <input className="profile-edit-input is-readonly" value={displayEmail} disabled />
+                    <input className="profile-edit-input is-readonly" value={displayEmail} readOnly onClick={handleServicePreparing} />
                 </div>
 
-                <div className="profile-edit-field" onClick={handleServicePreparing}> {/*추후 재학생 인증 기능 활성화 시 onClick 제거 */}
+                <div className="profile-edit-field">
                     <div className="profile-edit-label">생년월일</div>
-                    <input className="profile-edit-input is-readonly" value={birth} disabled />
+                    <input className="profile-edit-input is-readonly" value={birth} readOnly onClick={handleServicePreparing} />
                 </div>
 
                 <div className="profile-edit-field">
