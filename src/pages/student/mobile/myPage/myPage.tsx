@@ -171,7 +171,6 @@ export default function MyPage({ onLogout }: Props) {
           <img src="/chevron-left.svg" alt="previous" />
         </button>
         <div className="mypage-email"></div>
-
       </header>
 
       <section className="mypage-top">

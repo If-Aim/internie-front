@@ -69,10 +69,10 @@ export default function VerifyCodePage() {
     return (
         <div className="mypage">
             <header className="mypage-header">
-                <button type="button" onClick={() => navigate(-1)}>
-                    <img src="/chevron-left.svg" alt="뒤로" />
+                <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)} >
+                    <img src="/chevron-left.svg" alt="previous" />
                 </button>
-                <div className="mypage-email">인증코드 입력</div>
+                <div className="mypage-email">인증코드</div>
             </header>
 
             <div className="profile-edit">
