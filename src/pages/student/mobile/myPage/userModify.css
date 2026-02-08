@@ -25,4 +25,5 @@ background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; word-bre
 /* ===== 저장 버튼 ===== */
 .edit-profile .profile-edit-bottom{ position: static !important; }
 .profile-edit-save{ width: 100%; height: 60px; border-radius: 10px; border: 0; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; }
-.profile-edit-save:disabled{ opacity: 0.55; }
+.profile-edit-save.is-disabled,
+.profile-edit-save:disabled{ background: #F1F1F1; color: #A2A2A2; }
