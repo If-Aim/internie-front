@@ -112,7 +112,7 @@ function ReportCalendar(): React.ReactElement {
             <button
               key={c.key}
               type="button"
-              className={isSelected ? "cal-cell cal-cell--selected" : "cal-cell"}
+              className={isSelected ? "admin-cal-cell admin-cal-cell--selected" : "admin-cal-cell"}
               disabled={c.day == null}
               onClick={() => c.dateStr && setSelectedDate(c.dateStr)}
             >
