@@ -193,7 +193,7 @@ export default function MyPage({ onLogout }: Props) {
                 ${status === "PENDING" ? "is-pending" : ""} 
                 ${status === "REJECTED" ? "is-rejected" : ""}
               `}
-              onClick={verifyUi.onClick}
+              onClick={handleServicePreparing}
               disabled={verifyUi.disabled}
             >
               <span className="mypage-badge" />
