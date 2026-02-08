@@ -774,12 +774,11 @@ export default function NewSchedule() {
       <div className="screen">
       {/* 일정 작성 화면 */}
         <>
-        <div className="spacer-50" aria-hidden="true" />
-        <header className="topbar_newschedule">
+        <header className="topbar topbar-main">
             <button className="iconbtn" aria-label={t("common.menu")}>
-            <img className="icon" src="/menu-01.svg" alt="" />
+              <img className="icon" src="/menu-01.svg" alt="" />
             </button>
-            <h1 className="topbar-title">{t("schedule_new.title")}</h1>
+            <h1 className="app-title">{t("schedule_new.title")}</h1>
             <button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
             <img className="icon" src="/x-01.svg" alt="" />
             </button>
