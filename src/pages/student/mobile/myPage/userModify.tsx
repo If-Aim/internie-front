@@ -161,7 +161,9 @@ export default function EditProfilePage(): React.ReactElement {
             setSaving(false);
         }
     }
-
+    function handleServicePreparing() {
+        alert("서비스 준비중입니다.");
+    }
     if (!me || !initialForm) return <div />;
 
     return (
@@ -179,10 +181,10 @@ export default function EditProfilePage(): React.ReactElement {
                 <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
             </div>
 
-            <button type="button" className="profile-edit-avatar-btn" onClick={() => fileRef.current?.click()} disabled={saving} >
+            <button type="button" className="profile-edit-avatar-btn" onClick={handleServicePreparing} >{/*추후 onClick={handleServicePreparing} -> onClick={()=> fileRef.current?.click()} disabled={saving}로 변경 */}
                 편집
             </button>
-            <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} />
+            <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
             </section>
 
             <section className="profile-edit-form">
@@ -191,12 +193,12 @@ export default function EditProfilePage(): React.ReactElement {
                     <input className="profile-edit-input" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} disabled={saving} />
                 </div>
 
-                <div className="profile-edit-field">
+                <div className="profile-edit-field" onClick={handleServicePreparing}> {/*추후 재학생 인증 기능 활성화 시 onClick 제거 */}
                     <div className="profile-edit-label">E-mail</div>
                     <input className="profile-edit-input is-readonly" value={displayEmail} disabled />
                 </div>
 
-                <div className="profile-edit-field">
+                <div className="profile-edit-field" onClick={handleServicePreparing}> {/*추후 재학생 인증 기능 활성화 시 onClick 제거 */}
                     <div className="profile-edit-label">생년월일</div>
                     <input className="profile-edit-input is-readonly" value={birth} disabled />
                 </div>
