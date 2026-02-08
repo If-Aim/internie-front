@@ -89,11 +89,11 @@ export default function EditProfilePage(): React.ReactElement {
                 <section className="mypage-top">
                     <div className="mypage-profileimg-wrap">
                         <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
-                        <button type="button" className="profile-edit-avatar-btn" onClick={() => fileRef.current?.click()} disabled={saving} >
-                            편집
-                        </button>
-                        <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} />
                     </div>
+                    <button type="button" className="profile-edit-avatar-btn" onClick={() => fileRef.current?.click()} disabled={saving} >
+                        편집
+                    </button>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} />
                 </section>
 
                 <section className="profile-edit-form">
@@ -117,12 +117,11 @@ export default function EditProfilePage(): React.ReactElement {
                         <input className="profile-edit-input is-readonly" value={schoolMajor} disabled />
                     </div>
                 </section>
-
-                <div className="profile-edit-bottom">
-                    <button className="profile-edit-save" onClick={onSave} disabled={saving}>
-                        저장하기
-                    </button>
-                </div>
+            </div>
+            <div className="profile-edit-bottom">
+                <button className="profile-edit-save" onClick={onSave} disabled={saving}>
+                    저장하기
+                </button>
             </div>
         </div>
     );
