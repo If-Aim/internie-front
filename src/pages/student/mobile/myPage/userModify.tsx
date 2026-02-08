@@ -76,7 +76,7 @@ export default function EditProfilePage(): React.ReactElement {
     if (!me) return <div />;
 
     return (
-        <div className="edit-profile">
+        <div className="mypage">
             <header className="mypage-header">
                 <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)}>
                     <img src="/chevron-left.svg" alt="previous" />
@@ -85,14 +85,12 @@ export default function EditProfilePage(): React.ReactElement {
             </header>
 
             <div className="profile-edit">
-                <section className="profile-edit-top">
-                    <div className="profile-edit-avatar-wrap">
-                        <img className="profile-edit-avatar" src={avatarSrc} alt="" />
-
+                <section className="mypage-top">
+                    <div className="mypage-profileimg-wrap">
+                        <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
                         <button type="button" className="profile-edit-avatar-btn" onClick={() => fileRef.current?.click()} disabled={saving} >
                             편집
                         </button>
-
                         <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} />
                     </div>
                 </section>
