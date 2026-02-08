@@ -954,15 +954,14 @@ export default function EditSchedule() {
     <div className="screen">
       {stage === "form" && (
         <>
-          <div className="spacer-50" aria-hidden="true" />
-          <header className="topbar_newschedule">
-            <button className="iconbtn" aria-label="메뉴">
+          <header className="topbar topbar-main">
+            <button className="iconbtn" aria-label={t("common.menu")}>
               <img className="icon" src="/menu-01.svg" alt="" />
             </button>
 
             <h1 className="topbar-title">{t("schedule_edit.title")}</h1>
 
-            <button className="iconbtn" aria-label="" onClick={() => nav(-1)}>
+            <button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
               <img className="icon" src="/x-01.svg" alt="" />
             </button>
           </header>
