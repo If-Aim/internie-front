@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/userModify.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, updateMyName, updateMyProfileImage, type UserMe } from "../../../../api/client";
+import { getUserMe, updateMyProfile, type UserMe } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
 
@@ -45,7 +45,7 @@ export default function EditProfilePage(): React.ReactElement {
 
         try {
             setSaving(true);
-            const updated = await updateMyName(name.trim());
+            const updated = await updateMyProfile({ name: name.trim() });
             setMe(updated);
         } catch (e: any) {
             alert("이름 수정에 실패했습니다.");
@@ -66,7 +66,7 @@ export default function EditProfilePage(): React.ReactElement {
 
         try {
             setSaving(true);
-            const updated = await updateMyProfileImage(file);
+            const updated = await updateMyProfile({ imageFile: file });
             setMe(updated);
         } catch (err) {
             alert("프로필 이미지 업로드에 실패했습니다.");
@@ -77,7 +77,7 @@ export default function EditProfilePage(): React.ReactElement {
     if (!me) return <div />;
 
     return (
-        <div className="mypage">
+        <div className="mypage user-modify">
             <header className="mypage-header">
                 <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)}>
                     <img src="/chevron-left.svg" alt="previous" />

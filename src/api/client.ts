@@ -298,20 +298,21 @@ export async function verifyJumpUser (
   });
 }
 
-// 이름 수정
-export async function updateMyName(name: string): Promise<UserMe> {
-  return api<UserMe>("/users/me/name", {
-    method: "PUT",
-    body: JSON.stringify({ name }),
-  });
-}
+export type UpdateMyProfileInput = {
+  name?: string | null;
+  nickname?: string | null;
+  imageFile?: File | null;
+};
 
-// 프로필 이미지 수정
-export async function updateMyProfileImage(file: File): Promise<UserMe> {
+export async function updateMyProfile(input: UpdateMyProfileInput): Promise<UserMe> {
   const formData = new FormData();
-  formData.append("imageFile", file); 
 
-  return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PUT" });
+  if (input.name != null) formData.append("name", input.name);
+  if (input.nickname != null) formData.append("nickname", input.nickname);
+
+  if (input.imageFile != null) formData.append("imagefile", input.imageFile);
+
+  return apiUpload<UserMe>("/users/me", formData, { method: "PUT" });
 }
 
 // 수료증 관련 타입
