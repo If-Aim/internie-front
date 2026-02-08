@@ -4,15 +4,17 @@
 .user-modify .mypage-email{ font-size: 16px; font-weight: 600; line-height: 1; color:#000;}
 .edit-profile .mypage-header{ position: static !important; top: auto !important; }
 .profile-edit{padding: 18px 18px 28px;}
+.profile-edit .mypage-profileimg-wrap{border:1px solid #DFDFDF;}
+.profile-edit .mypage-top{gap:18px !important;}
 .profile-edit-top{ display: flex; justify-content: center; padding-top: 18px; padding-bottom: 20px; }
 
 /* 편집 버튼 */
-.profile-edit-avatar-btn{ position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); min-width:60px;height: 44px; padding: 0 22px; border-radius: 12px; border: 0;  white-space: nowrap;
+.profile-edit-avatar-btn{  min-width:60px;height: 44px; padding: 0 22px; border-radius: 12px; border: 0;  white-space: nowrap;
 background: #D9D9D9; color: #555; font-size: 16px; font-weight: 700; word-break: keep-all; line-height: 20px;}
 .profile-edit-avatar-btn:disabled{ opacity: 0.6; }
 
 /* ===== 입력 폼 ===== */
-.profile-edit-form{ margin-top: 30px; display: flex; flex-direction: column; gap: 18px; }
+.profile-edit-form{ margin-top: 28px; display: flex; flex-direction: column; gap: 18px; }
 .profile-edit-field{ display: flex; flex-direction: column; gap: 10px; }
 .profile-edit-label{ font-size: 18px; font-weight: 700; color: #000; }
 
