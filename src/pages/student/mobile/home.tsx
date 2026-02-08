@@ -1237,9 +1237,6 @@ function Home(): React.ReactElement {
 
   return (
     <>
-      {(isFilterOpen || isMenuOpen || isRecordModalOpen || loginGateOpen) && (
-        <div className="topbar-blur-overlay" aria-hidden="true" />
-      )}
       {recordStage === "preparing" && (
         <div className="preparing-page" aria-modal="true" role="dialog">
           <div className="preparing-content">

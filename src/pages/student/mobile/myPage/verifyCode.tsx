@@ -53,12 +53,12 @@ export default function VerifyCodePage() {
                 const user = await getUserMe();
                 if (!mounted) return;
                 setMe(user);
-
-                // 이미 인증 완료라면 input 값 세팅
                 if (user.role === "ROLE_JUMP_STUDENT") {
                     setCode("JUMP 인증 완료");
                 }
-            } catch {}
+            } catch {
+                
+            }
         })();
 
         return () => {
