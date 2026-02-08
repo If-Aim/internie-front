@@ -312,7 +312,7 @@ export async function updateMyProfile(input: UpdateMyProfileInput): Promise<User
 
   if (input.imageFile != null) formData.append("imagefile", input.imageFile);
 
-  return apiUpload<UserMe>("/users/me", formData, { method: "PUT" });
+  return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
 
 // 수료증 관련 타입
