@@ -44,7 +44,6 @@ export default function MyPage({ onLogout }: Props) {
   
   const [me, setMe] = React.useState<UserMe | null>(null);
   const displayName = me?.name ?? "";
-  const displayEmail = (me as any)?.email ?? "이메일";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
   
@@ -76,6 +75,13 @@ export default function MyPage({ onLogout }: Props) {
           onClick: () => navigate("/student/verify"),
         };
     }
+  })();
+
+  const mypageSubText = (() => {
+    if (status === "APPROVED") {
+      return "재학생 인증 완료";
+    }
+    return "재학생 인증이 필요합니다.";
   })();
 
   const isDefaultProfile =
@@ -158,57 +164,60 @@ export default function MyPage({ onLogout }: Props) {
   return (
     <div className="mypage">
       <header className="mypage-header">
-        <div className="mypage-email">{/*마이페이지*/}</div>
-
-        <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate("/")} >
-          <img src="/x-01.svg" alt="메인화면으로 이동" />
+        <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate("/")} >
+          <img src="/chevron-left.svg" alt="previous" />
         </button>
+        <div className="mypage-email">마이페이지</div>
+
       </header>
 
       <section className="mypage-top">
         <div className="mypage-profileimg-wrap">
           <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
           {isVerifiedStudent && (
-            <img className="mypage-school-badge" src="/school_mark.png" alt="재학생 인증" />
+            <img className="mypage-verify-badge" src="/school-verified-01.svg" alt="재학생 인증 완료" />
           )}
         </div>
         <div className="mypage-greeting">
           안녕하세요, <span className="mypage-name">{displayName}</span>님
         </div>
-        <div className="mypage-email-sub">{displayEmail}</div>
+        <div className="mypage-email-sub">{mypageSubText}</div>
       </section>
 
       <section className="mypage-cards">
         {/* 재학생 인증 */}
-          <>
+          {status !== "APPROVED" && (
             <button
               type="button"
-              className={`mypage-card wide ${status === "PENDING" ? "is-pending" : ""} ${status === "REJECTED" ? "is-rejected" : ""}${status === "APPROVED" ? "is-approved" : ""}`}
-              onClick={handleServicePreparing} // verifyUi.onClick 추후 변경
+              className={`mypage-card wide 
+                ${status === "PENDING" ? "is-pending" : ""} 
+                ${status === "REJECTED" ? "is-rejected" : ""}
+              `}
+              onClick={verifyUi.onClick}
               disabled={verifyUi.disabled}
             >
               <span className="mypage-badge" />
               <span className="mypage-card-title">{verifyUi.label}</span>
             </button>
+          )}
 
-            {/* 최근 기록한? 일정 카드 
-            <div className="mypage-cardgrid">
-              TODO: 카드 클릭 시 조회 화면으로 이동 
-              <button type="button" className="mypage-card square" disabled />
-              <button type="button" className="mypage-card square" disabled />
+          {/* 최근 기록한? 일정 카드 
+          <div className="mypage-cardgrid">
+            TODO: 카드 클릭 시 조회 화면으로 이동 
+            <button type="button" className="mypage-card square" disabled />
+            <button type="button" className="mypage-card square" disabled />
+          </div>
+          <div className="mypage-cardgrid-meta"> //카드 아래 텍스트(사진처럼 카드 아래에 제목/시간)
+            <div className="mypage-meta">
+              <div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
+              <div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
             </div>
-            <div className="mypage-cardgrid-meta"> //카드 아래 텍스트(사진처럼 카드 아래에 제목/시간)
-              <div className="mypage-meta">
-                <div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
-                <div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
-              </div>
-              <div className="mypage-meta">
-                <div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
-                <div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
-              </div>
+            <div className="mypage-meta">
+              <div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
+              <div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
             </div>
-            */}
-          </>
+          </div>
+          */}
         <div className="mypage-menu">
           <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
             <span className="mypage-menu-title">나의 목표 기업</span>
@@ -224,26 +233,21 @@ export default function MyPage({ onLogout }: Props) {
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
             </span>
           </button>
+          <button type="button" className="mypage-menu-item" onClick={() => navigate("modify")}> 
+            <span className="mypage-menu-title">프로필 수정하기</span>
+            <span className="mypage-menu-right">
+              <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+            </span>
+          </button>
+          <button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> {/* 추후 onClick 이벤트 변경: {() => navigate("onBoarding-step3")} */}
+            <span className="mypage-menu-title">인증코드 입력하기</span>
+            <span className="mypage-menu-right">
+              <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+            </span>
+          </button>
         </div>
         <div className="bottom-spacer"></div>
       </section>
-
-      {/* <section className="mypage-links">
-        {isVerifiedStudent ? (
-          <>
-            <button type="button" className="mypage-link">
-              프로필 공유하기
-            </button>
-            <button type="button" className="mypage-link" onClick={() => navigate("/account")} >
-              프로필 수정하기
-            </button>
-          </>
-        ) : (
-          <button type="button" className="mypage-link" disabled>
-            목표 기업 설정
-          </button>
-        )}
-      </section> */}
 
       <button type="button" className="mypage-logout" onClick={handleLogout}>
         로그아웃

@@ -1,7 +1,7 @@
 .mypage { height: 100svh; overflow-y: auto;-webkit-overflow-scrolling: touch;background: var(--bg); display: flex; flex-direction: column;
 padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: border-box; }
 .mypage-header { position:relative;display: flex; align-items: center; justify-content: center;padding: 40px 20px;}
-.mypage-close { position: absolute; right:2px; top:14px; width: 24px; height: 24px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center;}
+.mypage-previous { position: absolute; left:2px; top:14px; width: 24px; height: 24px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center;}
 
 .mypage-top { display: flex; flex-direction: column; align-items: center; gap: 30px;}
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; line-height:20px; }
@@ -10,18 +10,18 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: contain; }
 .mypage-school-badge { position: absolute; right: 4px; bottom: 4px; width: 50px; height: 50px; padding:5px;border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
+.mypage-verify-badge{ position: absolute; right: 6px; bottom: 6px; width: 27px; height: 27px; display: block; }
 
 .mypage-actions { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mypage-action-btn { height: 56px; border: 0; border-radius: 10px; background: #E6E6E6;  color: #9A9A9A; font-size: 16px; font-weight: 700; } 
 .mypage-goal-title { text-align: center; font-size: 16px; font-weight: 700; color: #707070; }
 
 .mypage-cards { margin-top: 18px; display: flex; align-items: center;flex-direction: column;}
-.mypage-card {border: 0; background: #E3E3E3; border-radius: 10px; }
+.mypage-card {border: 0; background: #BDD8FF; border-radius: 10px; }
 .mypage-card.wide {width:160px;height: 50px; padding: 0 21px; align-items: center; gap: 14px;}
 .mypage-card.wide--selected{background: #d6d6d6;}
-.mypage-card.wide.is-approved {background: #BDD8FF;color:#000;}
 
-.mypage-menu{margin-top: 30px;display: flex;flex-direction: column;gap: 10px;width: 100%;}
+.mypage-menu{margin-top: 30px;padding:0 17px;display: flex;flex-direction: column;gap: 10px;width: 100%;}
 .mypage-menu-item{width: 100%;height: 60px;padding: 0 18px;color:black;background: #ffffff;border: none;border-radius: 10px;display: flex;align-items: center;justify-content: space-between;}
 .mypage-menu-title{font-size: 16px;font-weight: 600;}
 .mypage-menu-right{display: flex;align-items: center;gap: 5px;}
@@ -29,8 +29,7 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-menu-chevron{width: 18px;height: 18px;transform:rotate(-90deg);}
 .mypage-cards.bottom-spacer {height: 30px;width: 100%;flex-shrink: 0;}
 
-.mypage-card-title {font-size: 16px; font-weight: 700; color: #707070;}
-.mypage-card.wide.is-approved .mypage-card-title {color: #000000;}
+.mypage-card-title {font-size: 16px; font-weight: 700; color: #000;}
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
 .mypage-card.square {width:100%;aspect-ratio: 1/1;background:#fff;border:0;}
 .mypage-cardgrid-meta {display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: -8px; padding: 0 2px;}

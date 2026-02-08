@@ -298,6 +298,22 @@ export async function verifyJumpUser (
   });
 }
 
+// 이름 수정
+export async function updateMyName(name: string): Promise<UserMe> {
+  return api<UserMe>("/users/me/name", {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+}
+
+// 프로필 이미지 수정
+export async function updateMyProfileImage(file: File): Promise<UserMe> {
+  const formData = new FormData();
+  formData.append("imageFile", file); 
+
+  return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PUT" });
+}
+
 // 수료증 관련 타입
 export type AdminUserFile = {
   fileId: number;
@@ -320,6 +336,8 @@ export async function getMyAdminFileDownloadUrl(
 
   return res.url;
 }
+
+
 
 /* - admin 관련 - */
 export type AdminUser = UserBase;

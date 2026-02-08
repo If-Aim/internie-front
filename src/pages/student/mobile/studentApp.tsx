@@ -9,6 +9,7 @@ import Home from "./home";
 import MyPage from "./myPage/myPage";
 import SchoolVerify from "./myPage/schoolVerify";
 import Cert from "./myPage/certificates"
+import UserModify from "./myPage/userModify";
 
 import NewSchedule from "./schedule/newSchedule";
 import EditSchedule from "./schedule/editSchedule";
@@ -24,6 +25,7 @@ export default function StudentApp(): React.ReactElement {
       <Route element={<ProtectedRoute />}>
         <Route path="mypage" element={<MyPage />} />
         <Route path="mypage/cert" element={<Cert />} />
+        <Route path="mypage/modify" element={<UserModify />} />
         <Route path="verify" element={<SchoolVerify />} />
 
         <Route path="schedule/new" element={<NewSchedule />} />
