@@ -67,16 +67,17 @@ export default function VerifyCodePage() {
     }, []);
 
     return (
-        <div className="mypage user-modify">
+        <div className="mypage user-verify-code">
             <header className="mypage-header">
                 <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)} >
                     <img src="/chevron-left.svg" alt="previous" />
                 </button>
-                <div className="mypage-email">인증코드</div>
+                <div className="mypage-email"></div>
             </header>
 
             <div className="profile-edit">
                 <div className="profile-edit-field">
+                    <div className="profile-edit-label">인증코드를 입력하세요</div>
                     <input
                         className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
                         value={isJumpVerified ? "JUMP 인증 완료" : code}
@@ -90,7 +91,7 @@ export default function VerifyCodePage() {
             </div>
 
             <button className="submit-code" onClick={submit} disabled={submitting || isJumpVerified} >
-                확인
+                완료
             </button>
         </div>
     );
