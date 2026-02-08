@@ -298,6 +298,7 @@ export async function verifyJumpUser (
   });
 }
 
+// 프로필 수정
 export type UpdateMyProfileInput = {
   name?: string | null;
   nickname?: string | null;
@@ -310,8 +311,11 @@ export async function updateMyProfile(input: UpdateMyProfileInput): Promise<User
   if (input.name != null) formData.append("name", input.name);
   if (input.nickname != null) formData.append("nickname", input.nickname);
 
-  if (input.imageFile != null) formData.append("imagefile", input.imageFile);
-
+  if (input.imageFile != null) {
+    formData.append("imageFile", input.imageFile);
+    formData.append("imagefile", input.imageFile);
+  }
+  
   return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
 

@@ -144,6 +144,7 @@ export default function EditProfilePage(): React.ReactElement {
             console.log("updated.profileImage =", updated.profileImage);
             setMe(updated);
             setAvatarVersion(Date.now());
+            window.dispatchEvent(new Event("profile-updated")); // 프로필 변경 알림
 
             const nextInitial: ProfileForm = {
                 ...form,

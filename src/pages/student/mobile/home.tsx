@@ -1011,6 +1011,7 @@ function Home(): React.ReactElement {
     "/internie_mascot_normal.png"
   );
   const [userRole, setUserRole] = React.useState<string | null>(null);
+  const [profileTick, setProfileTick] = React.useState(0);
 
   function isDefaultProfileImage(url?: string | null) {
     if (!url) return true;
@@ -1020,7 +1021,13 @@ function Home(): React.ReactElement {
 
     return false;
   }
-  
+
+  React.useEffect(() => {
+    const onUpdated = () => setProfileTick((v) => v + 1);
+    window.addEventListener("profile-updated", onUpdated);
+    return () => window.removeEventListener("profile-updated", onUpdated);
+  }, []);
+
   React.useEffect(() => {
     (async () => {
       
@@ -1051,7 +1058,7 @@ function Home(): React.ReactElement {
         setUserRole(null);
       }
     })();
-  }, [isAuthed]);
+  }, [isAuthed, profileTick]);
 
   React.useEffect(() => {
     (async () => {
