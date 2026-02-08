@@ -167,7 +167,7 @@ export default function MyPage({ onLogout }: Props) {
         <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate("/")} >
           <img src="/chevron-left.svg" alt="previous" />
         </button>
-        <div className="mypage-email">마이페이지</div>
+        <div className="mypage-email"></div>
 
       </header>
 
@@ -239,7 +239,7 @@ export default function MyPage({ onLogout }: Props) {
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
             </span>
           </button>
-          <button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> {/* 추후 onClick 이벤트 변경: {() => navigate("onBoarding-step3")} */}
+          <button type="button" className="mypage-menu-item" onClick={handleServicePreparing}> {/* 추후 onClick 이벤트 변경: {() => navigate("onBoarding-step3")} */}
             <span className="mypage-menu-title">인증코드 입력하기</span>
             <span className="mypage-menu-right">
               <img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
