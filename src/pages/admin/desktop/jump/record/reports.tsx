@@ -266,11 +266,11 @@ export default function JumpAdminReportsPage(): React.ReactElement {
 
                                 <div className="admin-cal-nav">
                                     <button type="button" className="admin-cal-nav-btn" onClick={goPrevMonth} disabled={calendarLoading} aria-label="prev month" >
-                                        <img src="/Precious (Strock).svg" alt="" />
+                                        <img src="/Previous (Stroke).svg" alt="" />
                                     </button>
 
                                     <button type="button" className="admin-cal-nav-btn" onClick={goNextMonth} disabled={calendarLoading} aria-label="next month" >
-                                        <img src="/Next (Strock).svg" alt="" />
+                                        <img src="/Next (Stroke).svg" alt="" />
                                     </button>
                                 </div>
                             </div>
