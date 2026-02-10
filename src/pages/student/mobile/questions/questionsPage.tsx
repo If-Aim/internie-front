@@ -479,7 +479,6 @@ export default function QuestionsPage() {
               )}
             </main>
             <div className="bottom-spacer" />
-
           </div>
       )}
       {showOutro && (
