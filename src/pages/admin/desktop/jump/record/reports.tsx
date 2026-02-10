@@ -1,6 +1,7 @@
 // src/pages/admin/desktop/jump/record/reports.tsx
 import React from "react";
 import { ApiError, type JumpAdminStudent, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, type JumpAdminEventDayDetailResponse, type JumpAdminDailyStatus, } from "../../../../../api/client";
+import "./reports.css";
 
 // 닉네임대신 학교명 
 function displaySchoolOrNickname(u: JumpAdminStudent) {
