@@ -1,7 +1,7 @@
-// src/pages/admin/desktop/upload/certificates.tsx
+// src/pages/admin/desktop/default/upload/certificates.tsx
 // 수료증 업로드 화면 (탭)
 import React from "react";
-import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile, getAdminUserFiles, deleteAdminUserFile, type AdminUserFile } from "../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile, getAdminUserFiles, deleteAdminUserFile, type AdminUserFile } from "../../../../../api/client";
 import "./certificates.css";
 
 function displaySchoolOrNickname(u: AdminUser) {

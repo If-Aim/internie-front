@@ -760,8 +760,22 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
                 });
               }}
             >
-              <img className="icon" src="/chevron-right.svg" alt="사용자조회" />
+              <img className="icon" src="/chevron-right.svg" alt="" />
               <span>사용자조회</span>
+            </button>
+          )}
+          {userRole === "ROLE_JUMP_ADMIN" && (
+            <button
+              className="drawer-menu-item"
+              onClick={() => {
+                onRequireAuth("/jump-admin/report", () => {
+                  navigate("/jump-admin/report");
+                  closeWithSnap();
+                });
+              }}
+            >
+              <img className="icon" src="/chevron-right.svg" alt="" />
+              <span>JUMP 관리자 페이지</span>
             </button>
           )}
         </div>

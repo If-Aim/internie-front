@@ -1,8 +1,8 @@
-// src/pages/admin/desktop/list/users.tsx
+// src/pages/admin/desktop/default/studentIdCard/users.tsx
 // 사용자 목록 페이지 (PC)
 import React from "react";
 // import { useNavigate } from "react-router-dom";
-import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser } from "../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser } from "../../../../../api/client";
 import "./users.css";
 import "../admin.css";
 

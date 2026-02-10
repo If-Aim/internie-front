@@ -1107,15 +1107,7 @@ export default function EditSchedule() {
         </>
       )}
 
-      {stage === "outro" && (
-        <>
-          <div className="spacer-50" aria-hidden="true" />
-          <main className="outro">
-            <img src="/internie_mascot_normal.png" alt="" className="outro-img" />
-            <p className="outro-text">{t("schedule_edit.complete")}</p>
-          </main>
-        </>
-      )}
+
     </div>
   );
 }

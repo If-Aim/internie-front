@@ -342,8 +342,6 @@ export async function getMyAdminFileDownloadUrl(
   return res.url;
 }
 
-
-
 /* - admin 관련 - */
 export type AdminUser = UserBase;
 
@@ -418,14 +416,86 @@ export async function deleteAdminUserFile(
   });
 }
 
+/* - JUMP admin 관련 - */
+// 점프 학생 목록
+export type JumpAdminStudent = UserBase;
+
+export async function getJumpAdminStudents(): Promise<JumpAdminStudent[]> {
+  return api<JumpAdminStudent[]>("/jump-admin/students", { method: "GET" });
+}
+
+export type JumpAdminDailyStatus = {
+  date: string; // YYYY-MM-DD
+  eventDayIds: number[];
+};
+
+export type JumpAdminStudentCalendarResponse = {
+  year: number;
+  month: number;
+  totalRecordedDays: number;
+  dailyStatuses: JumpAdminDailyStatus[];
+};
+
+export async function getJumpAdminStudentCalendar(
+  studentId: number | string,
+  year: number | string,
+  month: number | string
+): Promise<JumpAdminStudentCalendarResponse> {
+  return api<JumpAdminStudentCalendarResponse>(
+    `/jump-admin/students/${studentId}/calendar/${year}/${month}`,
+    { method: "GET" }
+  );
+}
+
+// 점프 학생 eventDay 상세(질문/전사 포함)
+export type JumpAdminTranscription = {
+  transcriptionId: number;
+  text: string;
+  audioUrl?: string;
+};
+
+export type JumpAdminEventDayQuestions = {
+  eventDayId: number;
+  questionId: number;
+  questionList: string[];
+};
+
+export type JumpAdminEventDayDetailResponse = {
+  eventDayId: number;
+  eventDayTitle: string;
+  eventTitle: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  transcriptions: JumpAdminTranscription[];
+  question?: JumpAdminEventDayQuestions | null;
+};
+
+export async function getJumpAdminEventDayDetail(
+  eventDayId: number | string
+): Promise<JumpAdminEventDayDetailResponse> {
+  return api<JumpAdminEventDayDetailResponse>(`/jump-admin/event-days/${eventDayId}`, {
+    method: "GET",
+  });
+}
 
 /**
- * 관리자 여부만 확인
+ * 관리자 여부 확인
  */
 export async function checkIsAdmin(): Promise<boolean> {
   try {
     const me = await getUserMe();
     return me.role === "ROLE_ADMIN";
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) return false;
+    throw e;
+  }
+}
+
+// 점프 관리자 확인
+export async function checkIsJumpAdmin(): Promise<boolean> {
+  try {
+    const me = await getUserMe();
+    return me.role === "ROLE_JUMP_ADMIN";
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) return false;
     throw e;

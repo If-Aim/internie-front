@@ -1,8 +1,8 @@
-// src/pages/admin/desktop/home.tsx
+// src/pages/admin/desktop/default/home.tsx
 // 관리자 페이지 메인 (PC)
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { ApiError, getUserMe, type UserMe } from "../../../api/client";
+import { ApiError, getUserMe, type UserMe } from "../../../../api/client";
 import "./admin.css";
 
 function getDisplayAdminName(me: UserMe | null): string {
@@ -24,7 +24,6 @@ export default function AdminHome(): React.ReactElement {
         if (!mounted) return;
         setMe(data);
       } catch (e) {
-        // 권한/로그인은 AdminRoute에서 처리하므로 여기서는 표시만 안전하게
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
           if (mounted) setMe(null);
           return;

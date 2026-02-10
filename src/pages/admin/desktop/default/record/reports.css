@@ -1,4 +1,4 @@
-/* src/pages/admin/desktop/download/reports.css */
+/* src/pages/admin/desktop/default/record/reports.css */
 .report-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
 height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
 
@@ -19,3 +19,11 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .admin-cal-cell--disabled{cursor: default;color: transparent;}
 .admin-cal-cell--selected{background: var(--primary); color: #fff;}
 .admin-cal-cell--selected:hover{background: var(--primary);}
+
+.admin-cal-cell--recorded { background: rgba(0, 102, 255, 0.2); color: #111; }
+
+/* 기록 있는 날짜 - hover 시 */
+.admin-cal-cell--recorded:hover:not(:disabled):not(.admin-cal-cell--selected) {
+  background: var(--primary);
+  color: #fff;
+}

@@ -1,4 +1,4 @@
-/* src/pages/admin/desktop/admin.css */
+/* src/pages/admin/desktop/default/admin.css */
 .admin-page{min-height: 100vh;background: var(--bg);color: #000;display: flex;flex-direction: column;}
 
 /* ===== Topbar ===== */

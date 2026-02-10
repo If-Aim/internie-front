@@ -1,7 +1,7 @@
-// src/pages/admin/desktop/download/reports.tsx
+// src/pages/admin/desktop/default/record/reports.tsx
 // 보고서 화면(탭)
 import React from "react";
-import { ApiError, type AdminUser, getAdminUsers } from "../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers } from "../../../../../api/client";
 import "./reports.css";
 
 type CalCell = { key: string; day: number | null; dateStr: string | null };

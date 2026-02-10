@@ -1,13 +1,13 @@
-// src/pages/admin/desktop/adminApp.tsx
+// src/pages/admin/desktop/default/adminApp.tsx
 // 관리자화면 라우트
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import AdminRoute from "../../../adminRoute";
+import AdminRoute from "../../../../adminRoute";
 import AdminHome from "./home";
-import Users from "./list/users";
+import Users from "./studentIdCard/users";
 import Certificates from "./upload/certificates";
-import Reports from "./download/reports";
+import Reports from "./record/reports";
 
 
 export default function DesktopAdminApp(): React.ReactElement {
