@@ -378,7 +378,6 @@ export default function QuestionsPage() {
       {/* 기록화면 */}
       {stage === "asking" && (
           <div className="wrap">
-            <div className="spacer-50" aria-hidden="true" />
             <header className="topbar-question">
               <button className="iconbtn" aria-label="메뉴">
                 <img className="icon" src="/menu-01.svg" alt="" />
@@ -479,6 +478,8 @@ export default function QuestionsPage() {
                 </div>
               )}
             </main>
+            <div className="bottom-spacer" />
+
           </div>
       )}
       {showOutro && (
