@@ -276,18 +276,10 @@ export default function JumpAdminReportsPage(): React.ReactElement {
     );
     return (
         <div>
-            <div className="jump-admin-section-head">
-                <div className="jump-admin-section-title">Student List</div>
-
-                <div className="jump-admin-section-count" aria-label="student count">
-                    <span className="jump-admin-count-strong">{students.length}</span>
-                    <span className="jump-admin-count-total"> / {students.length}</span>
-                </div>
-            </div>
-
             <div className="jump-admin-grid">
                 {/* ===== 왼쪽 ===== */}
                 <div>
+                    <div className="jump-admin-section-title">Student List</div>
                     {!isDetailMode ? (
                     <>
                         {loadingStudents ? (

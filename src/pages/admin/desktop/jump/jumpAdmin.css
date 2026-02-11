@@ -21,7 +21,7 @@
 .jump-admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 79px;align-items: start;}
 
 .jump-admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 9px 13px 35px 0;}
-.jump-admin-section-title{font-size: 32px;font-weight: 700;}
+.jump-admin-section-title{font-size: 32px;font-weight: 700;line-height:50px;margin-bottom:39px;}
 .jump-admin-section-count{font-size: 40px;font-weight: 700;}
 .jump-admin-count-strong{color: var(--primary);}
 .jump-admin-count-total{color: #000;}
