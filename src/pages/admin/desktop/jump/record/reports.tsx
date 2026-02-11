@@ -71,10 +71,9 @@ export default function JumpAdminReportsPage(): React.ReactElement {
 
     const [detailLoading, setDetailLoading] = React.useState(false);
     const [detail, setDetail] = React.useState<JumpAdminEventDayDetailResponse | null>(null);
-
-    const [rightTab, setRightTab] = React.useState<"SCHEDULE" | "RESULT">("SCHEDULE");
-    
     const isDetailMode = !!selectedStudentId && !!selectedDate && !!selectedEventDayId;
+
+    const [currentIndex, setCurrentIndex] = React.useState<number>(0);
 
     React.useEffect(() => {
         let mounted = true;
@@ -110,25 +109,25 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         let mounted = true;
 
         (async () => {
-        try {
-            setCalendarLoading(true);
-            setDailyStatuses([]);
+            try {
+                setCalendarLoading(true);
+                setDailyStatuses([]);
 
-            setSelectedDate(null);
-            setSelectedEventDayId(null);
-            setDetail(null);
+                setSelectedDate(null);
+                setSelectedEventDayId(null);
+                setDetail(null);
 
-            const res = await getJumpAdminStudentCalendar(selectedStudentId, year, month);
-            if (!mounted) return;
+                const res = await getJumpAdminStudentCalendar(selectedStudentId, year, month);
+                if (!mounted) return;
 
-            setDailyStatuses(res.dailyStatuses ?? []);
-        } catch (e) {
-            if (!mounted) return;
-            if (!(e instanceof ApiError)) console.error(e);
-            setDailyStatuses([]);
-        } finally {
-            if (mounted) setCalendarLoading(false);
-        }
+                setDailyStatuses(res.dailyStatuses ?? []);
+            } catch (e) {
+                if (!mounted) return;
+                if (!(e instanceof ApiError)) console.error(e);
+                setDailyStatuses([]);
+            } finally {
+                if (mounted) setCalendarLoading(false);
+            }
         })();
 
         return () => {
@@ -146,6 +145,7 @@ export default function JumpAdminReportsPage(): React.ReactElement {
             try {
                 setDetailLoading(true);
                 setDetail(null);
+                setCurrentIndex(0);
 
                 const res = await getJumpAdminEventDayDetail(selectedEventDayId);
                 if (!mounted) return;
@@ -360,31 +360,10 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                         )}
 
                         <div className="jump-report-tabs" role="tablist" aria-label="detail tabs" >
-                            <button
-                                type="button"
-                                role="tab"
-                                aria-selected={rightTab === "SCHEDULE"}
-                                onClick={() => setRightTab("SCHEDULE")}
-                                className={
-                                    rightTab === "SCHEDULE"
-                                        ? "jump-report-tab jump-report-tab--active"
-                                        : "jump-report-tab"
-                                }
-                            >
+                            <button type="button" role="tab" aria-selected="true" className="jump-report-tab jump-report-tab--active" >
                                 일정명
                             </button>
-
-                            <button
-                                type="button"
-                                role="tab"
-                                aria-selected={rightTab === "RESULT"}
-                                onClick={() => setRightTab("RESULT")}
-                                className={
-                                    rightTab === "RESULT"
-                                        ? "jump-report-tab jump-report-tab--active"
-                                        : "jump-report-tab"
-                                }
-                            >
+                            <button type="button" role="tab" onClick={() => { alert("서비스 준비중입니다."); }} className="jump-report-tab">
                                 기록 결과
                             </button>
                         </div>
@@ -396,79 +375,89 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                                 <div className="jump-report-empty">상세 데이터가 없습니다.</div>
                             ) : (
                                 <>
-                                    {(() => {
-                                        const title =
-                                            (detail.eventTitle ?? "").trim() ||
+                                    <div className="jump-report-title">
+                                        {(detail.eventTitle ?? "").trim() ||
                                             (detail.eventDayTitle ?? "").trim() ||
-                                            `eventDay #${detail.eventDayId}`;
+                                            `eventDay #${detail.eventDayId}`}
+                                    </div>
 
-                                        return (
-                                            <div className="jump-report-title">
-                                                {title}
-                                            </div>
-                                        );
-                                    })()}
+                                    <div className="jump-report-panel">
+                                        {(() => {
+                                            const qs = detail.question?.questionList ?? [];
+                                            const ts = detail.transcriptions ?? [];
+                                            const len = Math.max(qs.length, ts.length);
 
-                                    {rightTab === "SCHEDULE" ? (
-                                        <div className="jump-report-panel">
-                                            {detail.question?.questionList?.length ? (
-                                                <div className="jump-report-qa-list">
-                                                    {detail.question.questionList.map((q, i) => (
-                                                        <div key={i} className="jump-report-qa-item" >
-                                                            <div className="jump-report-qa-head">
-                                                                {`Q${i + 1}. 질문`}
-                                                            </div>
-                                                            <div className="jump-report-qa-text">
-                                                                {q}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="jump-report-empty">
-                                                    질문 정보가 없습니다.
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="jump-report-panel">
-                                            {(() => {
-                                                const qs = detail.question?.questionList ?? [];
-                                                const ts = detail.transcriptions ?? [];
-                                                const len = Math.max( qs.length, ts.length );
-                                                if (len === 0)
-                                                    return (
-                                                        <div className="jump-report-empty">기록이 없습니다.</div>
-                                                    );
-
+                                            if (len === 0)
                                                 return (
-                                                    <div className="jump-report-qa-list">
-                                                        {Array.from({ length: len }).map(
-                                                            (_, i) => {
-                                                                const q = qs[i] ?? `Q${i + 1}`;
-                                                                const a = ts[i]?.text ??"";
+                                                    <div className="jump-report-empty">기록이 없습니다.</div>
+                                                );
 
+                                            return (
+                                                <div className="jump-report-qa-list">
+                                                    <div className="jump-report-panel">
+                                                        {(() => {
+                                                            const qs = detail.question?.questionList ?? [];
+                                                            const ts = detail.transcriptions ?? [];
+                                                            const len = Math.max(qs.length, ts.length);
+
+                                                            if (len === 0)
                                                                 return (
-                                                                    <div key={i} className="jump-report-qa-item" >
+                                                                    <div className="jump-report-empty">
+                                                                        기록이 없습니다.
+                                                                    </div>
+                                                                );
+
+                                                            const rawQ = qs[currentIndex] ?? `Q${currentIndex + 1}`;
+
+                                                            const title =
+                                                                (detail.eventTitle ?? "").trim() ||
+                                                                (detail.eventDayTitle ?? "").trim() ||
+                                                                "";
+
+                                                            const q = rawQ.replace(
+                                                                /\(@experience_name\)/g,
+                                                                title
+                                                            );
+
+                                                            const a = ts[currentIndex]?.text ?? "";
+
+                                                            return (
+                                                                <div className="jump-report-qa-item jump-report-qa-item--single">
+
+                                                                    <div className="jump-report-qa-content">
                                                                         <div className="jump-report-qa-head">
-                                                                            {`Q${i + 1}. 질문`}
+                                                                            {`Q${currentIndex + 1}. 질문`}
                                                                         </div>
+
                                                                         <div className="jump-report-qa-text jump-report-qa-text--q">
                                                                             {q}
                                                                         </div>
+
                                                                         <div className="jump-report-qa-text jump-report-qa-text--a">
-                                                                            {a ||
-                                                                                "답변이 없습니다."}
+                                                                            {a || "답변이 없습니다."}
                                                                         </div>
                                                                     </div>
-                                                                );
-                                                            }
-                                                        )}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        className="jump-report-next-btn"
+                                                                        onClick={() => {
+                                                                            if (currentIndex < len - 1) {
+                                                                                setCurrentIndex((prev) => prev + 1);
+                                                                            }
+                                                                        }}
+                                                                        disabled={currentIndex >= len - 1}
+                                                                    >
+                                                                        <img src="/Next (Stroke).svg" alt="next" />
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </div>
-                                                );
-                                            })()}
-                                        </div>
-                                    )}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
                                 </>
                             )}
                         </div>
