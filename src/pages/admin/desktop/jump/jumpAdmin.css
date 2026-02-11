@@ -48,8 +48,6 @@ color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 
 .jump-admin-chevron img{justify-self: end;width:31px; height:auto;transform:rotate(-90deg);}
 
 /* ===== Right detail card ===== */
-.jump-admin-detail-card{background: #fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);padding: 34px 46px;}
-
 .jump-admin-detail-name{margin: 34px 0 50px;font-size: 40px;font-weight: 700;text-align: center;}
 .jump-admin-detail-photo{width:400px;height: 400px;justify-self:center;border-radius: 10px;background: #d9d9d9;display:flex;
 align-items:center;justify-content:center;color: #000;font-weight: 700;}

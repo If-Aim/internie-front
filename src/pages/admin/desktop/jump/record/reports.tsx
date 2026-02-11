@@ -330,152 +330,150 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                 </div>
 
                 {/* ===== RIGHT COLUMN ===== */}
-                <div className="jump-admin-detail-card">
-                    {!isDetailMode ? (
-                        CalendarCard
-                    ) : (
-                        <div className="jump-report-detail">
+                {!isDetailMode ? (
+                    CalendarCard
+                ) : (
+                    <div className="jump-report-detail">
 
-                            {selectedDate && eventDayIdsForSelectedDate.length > 1 && (
-                                <div className="jump-report-choose">
-                                    <div className="jump-report-choose-title">
-                                        해당 날짜 기록 선택
-                                    </div>
-                                    <div className="jump-report-choose-list">
-                                        {eventDayIdsForSelectedDate.map((id) => (
-                                            <button
-                                                key={id}
-                                                type="button"
-                                                onClick={() => setSelectedEventDayId(id)}
-                                                className={
-                                                    selectedEventDayId === id
-                                                        ? "jump-report-chip jump-report-chip--active"
-                                                        : "jump-report-chip"
-                                                }
-                                            >
-                                                eventDay #{id}
-                                            </button>
-                                        ))}
-                                    </div>
+                        {selectedDate && eventDayIdsForSelectedDate.length > 1 && (
+                            <div className="jump-report-choose">
+                                <div className="jump-report-choose-title">
+                                    해당 날짜 기록 선택
                                 </div>
-                            )}
-
-                            <div className="jump-report-tabs" role="tablist" aria-label="detail tabs" >
-                                <button
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={rightTab === "SCHEDULE"}
-                                    onClick={() => setRightTab("SCHEDULE")}
-                                    className={
-                                        rightTab === "SCHEDULE"
-                                            ? "jump-report-tab jump-report-tab--active"
-                                            : "jump-report-tab"
-                                    }
-                                >
-                                    일정명
-                                </button>
-
-                                <button
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={rightTab === "RESULT"}
-                                    onClick={() => setRightTab("RESULT")}
-                                    className={
-                                        rightTab === "RESULT"
-                                            ? "jump-report-tab jump-report-tab--active"
-                                            : "jump-report-tab"
-                                    }
-                                >
-                                    기록 결과
-                                </button>
+                                <div className="jump-report-choose-list">
+                                    {eventDayIdsForSelectedDate.map((id) => (
+                                        <button
+                                            key={id}
+                                            type="button"
+                                            onClick={() => setSelectedEventDayId(id)}
+                                            className={
+                                                selectedEventDayId === id
+                                                    ? "jump-report-chip jump-report-chip--active"
+                                                    : "jump-report-chip"
+                                            }
+                                        >
+                                            eventDay #{id}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
+                        )}
 
-                            <div className="jump-report-body">
-                                {detailLoading ? (
-                                    <div className="jump-report-empty">상세 로딩 중...</div>
-                                ) : !detail ? (
-                                    <div className="jump-report-empty">상세 데이터가 없습니다.</div>
-                                ) : (
-                                    <>
-                                        {(() => {
-                                            const title =
-                                                (detail.eventTitle ?? "").trim() ||
-                                                (detail.eventDayTitle ?? "").trim() ||
-                                                `eventDay #${detail.eventDayId}`;
+                        <div className="jump-report-tabs" role="tablist" aria-label="detail tabs" >
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={rightTab === "SCHEDULE"}
+                                onClick={() => setRightTab("SCHEDULE")}
+                                className={
+                                    rightTab === "SCHEDULE"
+                                        ? "jump-report-tab jump-report-tab--active"
+                                        : "jump-report-tab"
+                                }
+                            >
+                                일정명
+                            </button>
 
-                                            return (
-                                                <div className="jump-report-title">
-                                                    {title}
-                                                </div>
-                                            );
-                                        })()}
-
-                                        {rightTab === "SCHEDULE" ? (
-                                            <div className="jump-report-panel">
-                                                {detail.question?.questionList?.length ? (
-                                                    <div className="jump-report-qa-list">
-                                                        {detail.question.questionList.map((q, i) => (
-                                                            <div key={i} className="jump-report-qa-item" >
-                                                                <div className="jump-report-qa-head">
-                                                                    {`Q${i + 1}. 질문`}
-                                                                </div>
-                                                                <div className="jump-report-qa-text">
-                                                                    {q}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <div className="jump-report-empty">
-                                                        질문 정보가 없습니다.
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="jump-report-panel">
-                                                {(() => {
-                                                    const qs = detail.question?.questionList ?? [];
-                                                    const ts = detail.transcriptions ?? [];
-                                                    const len = Math.max( qs.length, ts.length );
-                                                    if (len === 0)
-                                                        return (
-                                                            <div className="jump-report-empty">기록이 없습니다.</div>
-                                                        );
-
-                                                    return (
-                                                        <div className="jump-report-qa-list">
-                                                            {Array.from({ length: len }).map(
-                                                                (_, i) => {
-                                                                    const q = qs[i] ?? `Q${i + 1}`;
-                                                                    const a = ts[i]?.text ??"";
-
-                                                                    return (
-                                                                        <div key={i} className="jump-report-qa-item" >
-                                                                            <div className="jump-report-qa-head">
-                                                                                {`Q${i + 1}. 질문`}
-                                                                            </div>
-                                                                            <div className="jump-report-qa-text jump-report-qa-text--q">
-                                                                                {q}
-                                                                            </div>
-                                                                            <div className="jump-report-qa-text jump-report-qa-text--a">
-                                                                                {a ||
-                                                                                    "답변이 없습니다."}
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                }
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={rightTab === "RESULT"}
+                                onClick={() => setRightTab("RESULT")}
+                                className={
+                                    rightTab === "RESULT"
+                                        ? "jump-report-tab jump-report-tab--active"
+                                        : "jump-report-tab"
+                                }
+                            >
+                                기록 결과
+                            </button>
                         </div>
-                    )}
-                </div>
+
+                        <div className="jump-report-body">
+                            {detailLoading ? (
+                                <div className="jump-report-empty">상세 로딩 중...</div>
+                            ) : !detail ? (
+                                <div className="jump-report-empty">상세 데이터가 없습니다.</div>
+                            ) : (
+                                <>
+                                    {(() => {
+                                        const title =
+                                            (detail.eventTitle ?? "").trim() ||
+                                            (detail.eventDayTitle ?? "").trim() ||
+                                            `eventDay #${detail.eventDayId}`;
+
+                                        return (
+                                            <div className="jump-report-title">
+                                                {title}
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {rightTab === "SCHEDULE" ? (
+                                        <div className="jump-report-panel">
+                                            {detail.question?.questionList?.length ? (
+                                                <div className="jump-report-qa-list">
+                                                    {detail.question.questionList.map((q, i) => (
+                                                        <div key={i} className="jump-report-qa-item" >
+                                                            <div className="jump-report-qa-head">
+                                                                {`Q${i + 1}. 질문`}
+                                                            </div>
+                                                            <div className="jump-report-qa-text">
+                                                                {q}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="jump-report-empty">
+                                                    질문 정보가 없습니다.
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="jump-report-panel">
+                                            {(() => {
+                                                const qs = detail.question?.questionList ?? [];
+                                                const ts = detail.transcriptions ?? [];
+                                                const len = Math.max( qs.length, ts.length );
+                                                if (len === 0)
+                                                    return (
+                                                        <div className="jump-report-empty">기록이 없습니다.</div>
+                                                    );
+
+                                                return (
+                                                    <div className="jump-report-qa-list">
+                                                        {Array.from({ length: len }).map(
+                                                            (_, i) => {
+                                                                const q = qs[i] ?? `Q${i + 1}`;
+                                                                const a = ts[i]?.text ??"";
+
+                                                                return (
+                                                                    <div key={i} className="jump-report-qa-item" >
+                                                                        <div className="jump-report-qa-head">
+                                                                            {`Q${i + 1}. 질문`}
+                                                                        </div>
+                                                                        <div className="jump-report-qa-text jump-report-qa-text--q">
+                                                                            {q}
+                                                                        </div>
+                                                                        <div className="jump-report-qa-text jump-report-qa-text--a">
+                                                                            {a ||
+                                                                                "답변이 없습니다."}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
