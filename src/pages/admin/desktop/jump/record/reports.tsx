@@ -64,16 +64,16 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         for (const ds of dailyStatuses) m.set(ds.date, ds.eventDayIds ?? []);
         return m;
     }, [dailyStatuses]);
-
     
     const [selectedDate, setSelectedDate] = React.useState<string | null>(null); // YYYY-MM-DD
     const [selectedEventDayId, setSelectedEventDayId] = React.useState<number | null>(null);
 
     const [detailLoading, setDetailLoading] = React.useState(false);
     const [detail, setDetail] = React.useState<JumpAdminEventDayDetailResponse | null>(null);
-    const isDetailMode = !!selectedStudentId && !!selectedDate && !!selectedEventDayId;
+    const isDetailMode = !!selectedStudentId && !!selectedDate
 
     const [currentIndex, setCurrentIndex] = React.useState<number>(0);
+    const prevStudentIdRef = React.useRef<number | null>(null);
 
     React.useEffect(() => {
         let mounted = true;
@@ -102,20 +102,25 @@ export default function JumpAdminReportsPage(): React.ReactElement {
             mounted = false;
         };
     }, []);
-
     React.useEffect(() => {
         if (!selectedStudentId) return;
 
         let mounted = true;
 
+        const prevStudentId = prevStudentIdRef.current;
+        const isStudentChanged = prevStudentId !== null && prevStudentId !== selectedStudentId;
+
         (async () => {
             try {
                 setCalendarLoading(true);
-                setDailyStatuses([]);
 
-                setSelectedDate(null);
-                setSelectedEventDayId(null);
-                setDetail(null);
+                if (isStudentChanged) {
+                    setDailyStatuses([]);
+                    setSelectedDate(null);
+                    setSelectedEventDayId(null);
+                    setDetail(null);
+                    setCurrentIndex(0);
+                }
 
                 const res = await getJumpAdminStudentCalendar(selectedStudentId, year, month);
                 if (!mounted) return;
@@ -124,11 +129,14 @@ export default function JumpAdminReportsPage(): React.ReactElement {
             } catch (e) {
                 if (!mounted) return;
                 if (!(e instanceof ApiError)) console.error(e);
+
                 setDailyStatuses([]);
             } finally {
                 if (mounted) setCalendarLoading(false);
             }
         })();
+
+        prevStudentIdRef.current = selectedStudentId;
 
         return () => {
             mounted = false;
@@ -198,6 +206,7 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         const ids = recordedMap.get(ymd) ?? [];
         setSelectedEventDayId(ids.length ? ids[0] : null);
         setDetail(null);
+        setCurrentIndex(0);
     }
 
     const eventDayIdsForSelectedDate = React.useMemo(() => {
@@ -274,6 +283,31 @@ export default function JumpAdminReportsPage(): React.ReactElement {
             </div>
         </div>
     );
+
+    const qa = React.useMemo(() => {
+        if (!detail) return null;
+
+        const qs = detail.question?.questionList ?? [];
+        const ts = detail.transcriptions ?? [];
+        const len = Math.max(qs.length, ts.length);
+
+        const title =
+            (detail.eventTitle ?? "").trim() ||
+            (detail.eventDayTitle ?? "").trim() ||
+            "";
+
+        if (len === 0) {
+            return { len: 0, q: "", a: "", title };
+        }
+
+        const rawQ = qs[currentIndex] ?? `Q${currentIndex + 1}`;
+        const q = rawQ.replace(/\(@experience_name\)/g, title);
+
+        const a = (ts[currentIndex]?.text ?? "").trim();
+
+        return { len, q, a, title };
+    }, [detail, currentIndex]);
+
     return (
         <div>
             <div className="jump-admin-grid">
@@ -359,104 +393,68 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                             </div>
                         )}
 
-                        <div className="jump-report-tabs" role="tablist" aria-label="detail tabs" >
-                            <button type="button" role="tab" aria-selected="true" className="jump-report-tab jump-report-tab--active" >
-                                일정명
-                            </button>
-                            <button type="button" role="tab" onClick={() => { alert("서비스 준비중입니다."); }} className="jump-report-tab">
+                        <div className="jump-report-tabs" role="tablist" aria-label="detail tabs">
+                            <div
+                                role="tab"
+                                aria-selected="true"
+                                className="jump-report-tab jump-report-tab--active jump-report-tab--title"
+                                title={
+                                    (detail?.eventTitle ?? "").trim() ||
+                                    (detail?.eventDayTitle ?? "").trim() ||
+                                    ""
+                                }
+                            >
+                                {(detail?.eventTitle ?? "").trim() ||
+                                    (detail?.eventDayTitle ?? "").trim() ||
+                                    "일정명"}
+                            </div>
+
+                            <button type="button" role="tab" aria-selected="false" className="jump-report-tab" onClick={() => alert("서비스 준비중입니다.")} >
                                 기록 결과
                             </button>
                         </div>
 
                         <div className="jump-report-body">
-                            {detailLoading ? (
+                            {!selectedDate ? (
+                                <div className="jump-report-empty">날짜를 선택해주세요.</div>
+                            ) : !selectedEventDayId ? (
+                                <div className="jump-report-empty">선택한 날짜에는 기록이 없습니다.</div>
+                            ) : detailLoading ? (
                                 <div className="jump-report-empty">상세 로딩 중...</div>
                             ) : !detail ? (
                                 <div className="jump-report-empty">상세 데이터가 없습니다.</div>
+                            ) : !qa || qa.len === 0 ? (
+                                <div className="jump-report-empty">기록이 없습니다.</div>
                             ) : (
                                 <>
-                                    <div className="jump-report-title">
-                                        {(detail.eventTitle ?? "").trim() ||
-                                            (detail.eventDayTitle ?? "").trim() ||
-                                            `eventDay #${detail.eventDayId}`}
+                                    {/* 질문 바 (목업: Q1. 질문) */}
+                                    <div className="jump-report-qbar">
+                                        <div className="jump-report-qbar-left">
+                                            <span className="jump-report-qbar-qno">{`Q${currentIndex + 1}.`}</span>
+                                            <span className="jump-report-qbar-label">질문</span>
+                                        </div>
+                                        <div className="jump-report-qbar-text">{qa.q}</div>
                                     </div>
 
-                                    <div className="jump-report-panel">
-                                        {(() => {
-                                            const qs = detail.question?.questionList ?? [];
-                                            const ts = detail.transcriptions ?? [];
-                                            const len = Math.max(qs.length, ts.length);
+                                    {/* 답변 박스 (목업: 큰 회색 영역 + 우측 Next 버튼) */}
+                                    <div className="jump-report-answerbox">
+                                        <div className="jump-report-answertext">
+                                            {qa.a || "답변이 없습니다."}
+                                        </div>
 
-                                            if (len === 0)
-                                                return (
-                                                    <div className="jump-report-empty">기록이 없습니다.</div>
-                                                );
-
-                                            return (
-                                                <div className="jump-report-qa-list">
-                                                    <div className="jump-report-panel">
-                                                        {(() => {
-                                                            const qs = detail.question?.questionList ?? [];
-                                                            const ts = detail.transcriptions ?? [];
-                                                            const len = Math.max(qs.length, ts.length);
-
-                                                            if (len === 0)
-                                                                return (
-                                                                    <div className="jump-report-empty">
-                                                                        기록이 없습니다.
-                                                                    </div>
-                                                                );
-
-                                                            const rawQ = qs[currentIndex] ?? `Q${currentIndex + 1}`;
-
-                                                            const title =
-                                                                (detail.eventTitle ?? "").trim() ||
-                                                                (detail.eventDayTitle ?? "").trim() ||
-                                                                "";
-
-                                                            const q = rawQ.replace(
-                                                                /\(@experience_name\)/g,
-                                                                title
-                                                            );
-
-                                                            const a = ts[currentIndex]?.text ?? "";
-
-                                                            return (
-                                                                <div className="jump-report-qa-item jump-report-qa-item--single">
-
-                                                                    <div className="jump-report-qa-content">
-                                                                        <div className="jump-report-qa-head">
-                                                                            {`Q${currentIndex + 1}. 질문`}
-                                                                        </div>
-
-                                                                        <div className="jump-report-qa-text jump-report-qa-text--q">
-                                                                            {q}
-                                                                        </div>
-
-                                                                        <div className="jump-report-qa-text jump-report-qa-text--a">
-                                                                            {a || "답변이 없습니다."}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <button
-                                                                        type="button"
-                                                                        className="jump-report-next-btn"
-                                                                        onClick={() => {
-                                                                            if (currentIndex < len - 1) {
-                                                                                setCurrentIndex((prev) => prev + 1);
-                                                                            }
-                                                                        }}
-                                                                        disabled={currentIndex >= len - 1}
-                                                                    >
-                                                                        <img src="/Next (Stroke).svg" alt="next" />
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
+                                        <button
+                                            type="button"
+                                            className="jump-report-next-btn"
+                                            onClick={() => {
+                                                if (currentIndex < qa.len - 1) {
+                                                    setCurrentIndex((prev) => prev + 1);
+                                                }
+                                            }}
+                                            disabled={currentIndex >= qa.len - 1}
+                                            aria-label="next question"
+                                        >
+                                            <img src="/Next (Stroke).svg" alt="" />
+                                        </button>
                                     </div>
                                 </>
                             )}
