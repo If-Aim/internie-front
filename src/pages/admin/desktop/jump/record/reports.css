@@ -15,7 +15,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .admin-cal-grid{display: grid;grid-template-columns: repeat(7, 1fr);gap: 12px 12px;margin-top: 30px;}
 
 .admin-cal-cell{height: 55px;border: none;background: transparent;border-radius: 6px;cursor: pointer;font-size: 20px;font-weight: 500;color: #666666;}
-.admin-cal-cell:hover:not(:disabled):not(.admin-cal-cell--recorded):not(.admin-cal-cell--selected){background: rgba(0,0,0,0.25);}
+.admin-cal-cell:hover:not(:disabled):not(.admin-cal-cell--recorded):not(.admin-cal-cell--selected){background: rgba(0,0,0,0.1);}
 .admin-cal-cell--disabled{cursor: default;color: transparent;}
 .admin-cal-cell--selected{background: var(--primary); color: #fff;}
 .admin-cal-cell--selected:hover{background: var(--primary);}
