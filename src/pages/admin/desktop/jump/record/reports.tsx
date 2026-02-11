@@ -113,6 +113,7 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         try {
             setCalendarLoading(true);
             setDailyStatuses([]);
+
             setSelectedDate(null);
             setSelectedEventDayId(null);
             setDetail(null);
@@ -121,14 +122,6 @@ export default function JumpAdminReportsPage(): React.ReactElement {
             if (!mounted) return;
 
             setDailyStatuses(res.dailyStatuses ?? []);
-
-            const dates = (res.dailyStatuses ?? []).map((x) => x.date).sort();
-            const lastDate = dates.length ? dates[dates.length - 1] : null;
-            if (lastDate) {
-                setSelectedDate(lastDate);
-                const ids = res.dailyStatuses.find((x) => x.date === lastDate)?.eventDayIds ?? [];
-                if (ids.length) setSelectedEventDayId(ids[0]);
-            }
         } catch (e) {
             if (!mounted) return;
             if (!(e instanceof ApiError)) console.error(e);
@@ -412,11 +405,18 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                                     <div className="jump-report-empty">상세 데이터가 없습니다.</div>
                                 ) : (
                                     <>
-                                        <div className="jump-report-title">
-                                            {detail.eventDayTitle ||
-                                                detail.eventTitle ||
-                                                `eventDay #${detail.eventDayId}`}
-                                        </div>
+                                        {(() => {
+                                            const title =
+                                                (detail.eventTitle ?? "").trim() ||
+                                                (detail.eventDayTitle ?? "").trim() ||
+                                                `eventDay #${detail.eventDayId}`;
+
+                                            return (
+                                                <div className="jump-report-title">
+                                                    {title}
+                                                </div>
+                                            );
+                                        })()}
 
                                         {rightTab === "SCHEDULE" ? (
                                             <div className="jump-report-panel">
