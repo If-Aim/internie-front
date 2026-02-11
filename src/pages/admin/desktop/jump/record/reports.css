@@ -2,7 +2,7 @@
 .report-card{background:#fff;border-radius: 15px;
 height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
 
-.report-card--calendar{background: transparent;padding: 0;}
+.report-card--calendar{background: #fff;padding: 0;}
 .admin-cal-card{width: 100%;min-height: 520px;background: #fff;border-radius: 16px;border: none;padding: 44px 56px 52px;}
 .admin-cal-head{display: flex;align-items: center;justify-content: flex-start;position: relative;margin: 8px 0 0 15px;}
 .admin-cal-title{font-size: 16px;font-weight: 600;color: #111;}
