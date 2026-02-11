@@ -143,7 +143,6 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         };
     }, [selectedStudentId, year, month]);
 
-    // 선택 eventDayId 변경 시 상세 로드
     React.useEffect(() => {
         if (!selectedEventDayId) return;
 
@@ -442,19 +441,32 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                                             {qa.a || "답변이 없습니다."}
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            className="jump-report-next-btn"
-                                            onClick={() => {
-                                                if (currentIndex < qa.len - 1) {
-                                                    setCurrentIndex((prev) => prev + 1);
-                                                }
-                                            }}
-                                            disabled={currentIndex >= qa.len - 1}
-                                            aria-label="next question"
-                                        >
-                                            <img src="/Next (Stroke).svg" alt="" />
-                                        </button>
+                                        {currentIndex > 0 && (
+                                            <button
+                                                type="button"
+                                                className="jump-report-previous-btn"
+                                                onClick={() => {
+                                                    setCurrentIndex((prev) => Math.max(0, prev - 1));
+                                                }}
+                                                aria-label="previous question"
+                                            >
+                                                <img src="/Previous (Stroke).svg" alt="" />
+                                            </button>
+                                        )}
+
+                                        {currentIndex < qa.len - 1 && (
+                                            <button
+                                                type="button"
+                                                className="jump-report-next-btn"
+                                                onClick={() => {
+                                                    setCurrentIndex((prev) => Math.min(qa.len - 1, prev + 1));
+                                                }}
+                                                aria-label="next question"
+                                            >
+                                                <img src="/Next (Stroke).svg" alt="" />
+                                            </button>
+                                        )}
+
                                     </div>
                                 </>
                             )}
