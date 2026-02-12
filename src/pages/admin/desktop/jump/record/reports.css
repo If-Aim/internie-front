@@ -67,3 +67,24 @@ background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);heigh
 .jump-report-next-btn img{height: 22px;width: auto;}
 .jump-report-next-btn:hover:not(:disabled){background: rgba(0,0,0,0.06);}
 .jump-report-next-btn:disabled{opacity: 0.35;cursor: default;}
+
+/** 
+*   애니메이션 
+*/
+.jump-admin-grid {position: relative;overflow: hidden;}
+.jump-admin-grid > div:first-child {transition: transform 0.45s cubic-bezier(.4,0,.2,1);}
+
+/* 캘린더 카드 우 -> 좌 */
+.jump-admin-grid--detail > div:first-child {transform: translateX(-20px);}
+.jump-report-calendar-card {transition: transform 0.45s cubic-bezier(.4,0,.2,1);}
+.jump-admin-grid--detail .jump-report-calendar-card--right {transform: translateX(-40px);}
+
+/* detail 카드 우 -> 좌 */
+.jump-report-detail {
+  transform: translateX(60px);
+  opacity: 0;
+  transition:
+    transform 0.45s cubic-bezier(.4,0,.2,1),
+    opacity 0.35s ease;
+}
+.jump-admin-grid--detail .jump-report-detail {transform: translateX(0);opacity: 1;}

@@ -311,7 +311,7 @@ export default function JumpAdminReportsPage(): React.ReactElement {
 
     return (
         <div>
-            <div className="jump-admin-grid">
+            <div className={`jump-admin-grid ${isDetailMode ? "jump-admin-grid--detail" : ""}`}>
                 {/* ===== 왼쪽 ===== */}
                 <div>
                     <div className="jump-admin-section-title">Student List</div>
