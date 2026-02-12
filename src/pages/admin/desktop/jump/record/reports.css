@@ -1,6 +1,6 @@
 /* src/pages/admin/desktop/jump/record/reports.css */
 .report-card{background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
+min-height: 771px;display:flex;align-items:center;justify-content:center;position: relative;}
 
 .report-card--calendar{background: #fff;padding: 0;}
 .admin-cal-card{width: 100%;min-height: 520px;background: #fff;border-radius: 16px;border: none;padding: 44px 56px 52px;}
@@ -24,6 +24,8 @@ font-size: 22px;font-weight: 500;color: #333333;}
 /* 기록 있는 날짜 - hover 시 */
 .admin-cal-cell--recorded:hover:not(:disabled):not(.admin-cal-cell--selected){background: var(--primary);color: #fff;}
 
+.jump-report-scroll{overflow-x: auto; overflow-y: auto;}
+.jump-report-scroll-inner{min-width: 1280px;}
 .jump-report-left-stack{display: flex;flex-direction: column;gap: 21px;}
 .jump-report-selected-student{cursor: default;}
 
