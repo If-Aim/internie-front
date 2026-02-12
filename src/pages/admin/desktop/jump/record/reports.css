@@ -27,7 +27,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .jump-report-left-stack{display: flex;flex-direction: column;gap: 21px;}
 .jump-report-selected-student{cursor: default;}
 
-.jump-report-detail{background:#fff; width: 620px; min-height:500px;padding:45px 39px 58px 34px;display: flex;flex-direction: column;gap: 16px;flex: 0 0 620px; border:15px;box-sizing: border-box;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
+.jump-report-detail{background:#fff; width: 620px; min-height:771px;padding:45px 39px 58px 34px;display: flex;flex-direction: column;gap: 16px;flex: 0 0 620px; border-radius:15px;box-sizing: border-box;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
 .jump-report-choose{margin-bottom: 6px;}
 .jump-report-choose-title{font-weight: 700;margin-bottom: 8px;}
 .jump-report-choose-list{display: flex;gap: 8px;flex-wrap: wrap;}
@@ -36,10 +36,10 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .jump-report-chip--active{border: 2px solid var(--primary);}
 
 .jump-report-tabs{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
-.jump-report-tab{height: 54px;border-radius: 10px;border: none;font-weight: 700;cursor: pointer;background: #D2D2D2;
+.jump-report-tab{height: 54px;border-radius: 10px;border: none;font-weight: 700;cursor: pointer;background: #D2D2D2;font-size:20px;
 color: #000;display: flex;align-items: center;justify-content: center;}
 .jump-report-tab--active{background: var(--primary);color: #fff;}
-.jump-report-tab--title{padding: 0 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: default;}
+.jump-report-tab--title{padding: 0 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: default;font-size:20px;font-weight:700;}
 
 .jump-report-body{margin-top: 4px; position:relative;} 
 .jump-report-empty{font-weight: 700;color: #555;}
@@ -57,7 +57,7 @@ overflow-x: auto;overflow-y: hidden;white-space: nowrap;-webkit-overflow-scrolli
 .jump-report-qbar-label{font-weight: 900;}
 .jump-report-qbar-text{flex: 0 0 auto;font-weight: 700;overflow: visible; text-overflow: clip;white-space: nowrap;}
 
-.jump-report-answerbox{margin-top: 12px;background: #DCDCDC;border-radius: 10px;padding: 30px 24px;min-height: 420px;position: relative;}
+.jump-report-answerbox{margin-top: 12px;background: #DCDCDC;border-radius: 10px;padding: 30px 24px;min-height: 510px;position: relative;}
 .jump-report-answertext{font-weight: 700;line-height: 1.6;white-space: pre-wrap;word-break: break-word;}
 
 .jump-report-nav-btn{width: 44px;height: 44px;border: none;background: transparent;cursor: pointer;border-radius: 10px;
