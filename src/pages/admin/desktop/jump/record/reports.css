@@ -27,7 +27,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .jump-report-left-stack{display: flex;flex-direction: column;gap: 21px;}
 .jump-report-selected-student{cursor: default;}
 
-.jump-report-detail{background:#fff; padding:45px 14px 58px 34px;display: flex;flex-direction: column;gap: 16px;}
+.jump-report-detail{background:#fff; padding:45px 39x 58px 34px;display: flex;flex-direction: column;gap: 16px;}
 .jump-report-choose{margin-bottom: 6px;}
 .jump-report-choose-title{font-weight: 700;margin-bottom: 8px;}
 .jump-report-choose-list{display: flex;gap: 8px;flex-wrap: wrap;}
@@ -41,7 +41,7 @@ color: #000;display: flex;align-items: center;justify-content: center;}
 .jump-report-tab--active{background: var(--primary);color: #fff;}
 .jump-report-tab--title{padding: 0 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: default;}
 
-.jump-report-body{margin-top: 4px;}
+.jump-report-body{margin-top: 4px; position:relative;} 
 .jump-report-empty{font-weight: 700;color: #555;}
 
 .jump-report-calendar-card{
@@ -50,23 +50,19 @@ background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);heigh
 .jump-report-calendar-card--right .admin-cal-card{padding: 133px 84px 185px;}
 .jump-report-calendar-card--left .admin-cal-card{width: 100%;min-height: 520px;border-radius: 15px; padding: 62px 84px 52px;}
 
-.jump-report-qbar{height: 54px;border-radius: 10px;background: #DCDCDC;display: flex;align-items: center;padding: 0 18px;gap: 14px;font-weight: 800; overflow-x: auto;overflow-y: hidden;white-space: nowrap;-webkit-overflow-scrolling: touch;}
+.jump-report-qbar{height: 54px;border-radius: 10px;background: #DCDCDC;display: flex;align-items: center;padding: 0 24px;gap: 14px;font-weight: 800; overflow-x: auto;overflow-y: hidden;white-space: nowrap;-webkit-overflow-scrolling: touch;}
 .jump-report-qbar-left{display: flex;align-items: center;gap: 10px;flex: 0 0 auto;}
 .jump-report-qbar-qno{font-weight: 900;}
 .jump-report-qbar-label{font-weight: 900;}
 .jump-report-qbar-text{flex: 0 0 auto;font-weight: 700;overflow: visible; text-overflow: clip;white-space: nowrap;}
 
-.jump-report-answerbox{margin-top: 12px;background: #DCDCDC;border-radius: 10px;padding: 20px 60px 20px 60px;min-height: 420px;position: relative;}
+.jump-report-answerbox{margin-top: 12px;background: #DCDCDC;border-radius: 10px;padding: 30px 24px;min-height: 420px;position: relative;}
 .jump-report-answertext{font-weight: 700;line-height: 1.6;white-space: pre-wrap;word-break: break-word;}
 
-.jump-report-previous-btn{width: 44px;height: 44px;border: none;background: transparent;cursor: pointer;border-radius: 10px;position: absolute;left: 14px;top: 50%;transform: translateY(-50%);}
-.jump-report-previous-btn img{height: 22px;width: auto;}
-.jump-report-previous-btn:hover{background: rgba(0,0,0,0.06);}
-
-.jump-report-next-btn{width: 44px;height: 44px;border: none;background: transparent;cursor: pointer;border-radius: 10px;position: absolute;right: 14px;top: 50%;transform: translateY(-50%);}
-.jump-report-next-btn img{height: 22px;width: auto;}
-.jump-report-next-btn:hover:not(:disabled){background: rgba(0,0,0,0.06);}
-.jump-report-next-btn:disabled{opacity: 0.35;cursor: default;}
+.jump-report-nav-btn{width: 44px;height: 44px;border: none;background: transparent;cursor: pointer;border-radius: 10px;
+position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-items: center;justify-content: center;transition: background .2s ease;}
+.jump-report-prev{left: -12px;}
+.jump-report-next{right: -12px;}
 
 /** 
 *   애니메이션 

@@ -441,34 +441,25 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                                         <div className="jump-report-answertext">
                                             {qa.a || "답변이 없습니다."}
                                         </div>
-
-                                        {currentIndex > 0 && (
-                                            <button
-                                                type="button"
-                                                className="jump-report-previous-btn"
-                                                onClick={() => {
-                                                    setCurrentIndex((prev) => Math.max(0, prev - 1));
-                                                }}
-                                                aria-label="previous question"
-                                            >
-                                                <img src="/Previous (Stroke).svg" alt="" />
-                                            </button>
-                                        )}
-
-                                        {currentIndex < qa.len - 1 && (
-                                            <button
-                                                type="button"
-                                                className="jump-report-next-btn"
-                                                onClick={() => {
-                                                    setCurrentIndex((prev) => Math.min(qa.len - 1, prev + 1));
-                                                }}
-                                                aria-label="next question"
-                                            >
-                                                <img src="/Next (Stroke).svg" alt="" />
-                                            </button>
-                                        )}
-
                                     </div>
+                                    {currentIndex > 0 && (
+                                        <button type="button" className="jump-report-nav-btn jump-report-prev" aria-label="previous question"
+                                            onClick={() => {
+                                                setCurrentIndex((prev) => Math.max(0, prev - 1));
+                                            }}
+                                        >
+                                            <img src="/Previous (Stroke).svg" alt="" />
+                                        </button>
+                                    )}
+                                    {currentIndex < qa.len - 1 && (
+                                        <button type="button" className="jump-report-nav-btn jump-report-next" aria-label="next question"
+                                            onClick={() => {
+                                                setCurrentIndex((prev) => Math.min(qa.len - 1, prev + 1));
+                                            }}
+                                        >
+                                            <img src="/Next (Stroke).svg" alt="" />
+                                        </button>
+                                    )}
                                 </>
                             )}
                         </div>
