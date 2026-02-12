@@ -20,7 +20,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .admin-cal-cell--selected{background: var(--primary); color: #fff;}
 .admin-cal-cell--selected:hover{background: var(--primary);}
 
-.admin-cal-cell--recorded { background:#BDD8FF; color: #000; }
+.admin-cal-cell--recorded { background:#BDD8FF; }
 /* 기록 있는 날짜 - hover 시 */
 .admin-cal-cell--recorded:hover:not(:disabled):not(.admin-cal-cell--selected){background: var(--primary);color: #fff;}
 
@@ -47,8 +47,8 @@ color: #000;display: flex;align-items: center;justify-content: center;}
 .jump-report-calendar-card{
 background:#fff;border-radius: 15px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);height: auto;display: block;padding: 0;}
 .jump-report-calendar-card .admin-cal-card{width: 100%;min-height: 520px;border-radius: 15px; padding: 0;}
-.jump-report-calendar-card--right .admin-cal-card{padding: 44px 56px 52px;}
-.jump-report-calendar-card--left .admin-cal-card{width: 100%;min-height: 520px;border-radius: 15px; padding: 0;}
+.jump-report-calendar-card--right .admin-cal-card{padding: 133px 84px 185px;}
+.jump-report-calendar-card--left .admin-cal-card{width: 100%;min-height: 520px;border-radius: 15px; padding: 62px 84px 52px;}
 
 .jump-report-qbar{height: 54px;border-radius: 10px;background: #DCDCDC;display: flex;align-items: center;padding: 0 18px;gap: 14px;font-weight: 800; overflow-x: auto;overflow-y: hidden;white-space: nowrap;-webkit-overflow-scrolling: touch;}
 .jump-report-qbar-left{display: flex;align-items: center;gap: 10px;flex: 0 0 auto;}
