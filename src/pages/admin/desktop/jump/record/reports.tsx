@@ -213,75 +213,77 @@ export default function JumpAdminReportsPage(): React.ReactElement {
         return recordedMap.get(selectedDate) ?? [];
     }, [selectedDate, recordedMap]);
     
-    const CalendarCard = (
-        <div className="jump-report-calendar-card">
-            <div className="admin-cal-card">
-                <div className="admin-cal-head">
-                    <div className="admin-cal-title">
-                        {new Date(year, month - 1, 1).toLocaleString("en-US", {
-                            month: "long",
-                            year: "numeric",
+    function CalendarCard({ variant }: { variant: "left" | "right" }) {
+        return (
+                <div className={`jump-report-calendar-card jump-report-calendar-card--${variant}`}>
+                <div className="admin-cal-card">
+                    <div className="admin-cal-head">
+                        <div className="admin-cal-title">
+                            {new Date(year, month - 1, 1).toLocaleString("en-US", {
+                                month: "long",
+                                year: "numeric",
+                            })}
+                        </div>
+
+                        <div className="admin-cal-nav">
+                        <button
+                            type="button"
+                            className="admin-cal-nav-btn"
+                            onClick={goPrevMonth}
+                            disabled={calendarLoading}
+                            aria-label="prev month"
+                        >
+                            <img src="/Previous (Stroke).svg" alt="" />
+                        </button>
+
+                        <button
+                            type="button"
+                            className="admin-cal-nav-btn"
+                            onClick={goNextMonth}
+                            disabled={calendarLoading}
+                            aria-label="next month"
+                        >
+                            <img src="/Next (Stroke).svg" alt="" />
+                        </button>
+                        </div>
+                    </div>
+
+                    <div className="admin-cal-dow">
+                        <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
+                    </div>
+
+                    <div className="admin-cal-grid">
+                        {weeks.flat().map((c) => {
+                            const ymd = `${c.y}-${String(c.m).padStart(2, "0")}-${String(c.d).padStart(2, "0")}`;
+                            const isSelected = selectedDate === ymd;
+                            const isDisabled = !c.inMonth;
+                            const hasRecord = (recordedMap.get(ymd)?.length ?? 0) > 0;
+
+                            const className = [
+                                "admin-cal-cell",
+                                isDisabled ? "admin-cal-cell--disabled" : "",
+                                isSelected ? "admin-cal-cell--selected" : "",
+                                !isDisabled && hasRecord ? "admin-cal-cell--recorded" : "",
+                            ].filter(Boolean).join(" ");
+
+                            return (
+                                <button
+                                    key={`${c.y}-${c.m}-${c.d}`}
+                                    type="button"
+                                    className={className}
+                                    onClick={() => onPickDay(c.y, c.m, c.d)}
+                                    disabled={calendarLoading || !selectedStudentId || isDisabled}
+                                    aria-label={ymd}
+                                >
+                                    {c.d}
+                                </button>
+                            );
                         })}
                     </div>
-
-                    <div className="admin-cal-nav">
-                    <button
-                        type="button"
-                        className="admin-cal-nav-btn"
-                        onClick={goPrevMonth}
-                        disabled={calendarLoading}
-                        aria-label="prev month"
-                    >
-                        <img src="/Previous (Stroke).svg" alt="" />
-                    </button>
-
-                    <button
-                        type="button"
-                        className="admin-cal-nav-btn"
-                        onClick={goNextMonth}
-                        disabled={calendarLoading}
-                        aria-label="next month"
-                    >
-                        <img src="/Next (Stroke).svg" alt="" />
-                    </button>
-                    </div>
-                </div>
-
-                <div className="admin-cal-dow">
-                    <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
-                </div>
-
-                <div className="admin-cal-grid">
-                    {weeks.flat().map((c) => {
-                        const ymd = `${c.y}-${String(c.m).padStart(2, "0")}-${String(c.d).padStart(2, "0")}`;
-                        const isSelected = selectedDate === ymd;
-                        const isDisabled = !c.inMonth;
-                        const hasRecord = (recordedMap.get(ymd)?.length ?? 0) > 0;
-
-                        const className = [
-                            "admin-cal-cell",
-                            isDisabled ? "admin-cal-cell--disabled" : "",
-                            isSelected ? "admin-cal-cell--selected" : "",
-                            !isDisabled && hasRecord ? "admin-cal-cell--recorded" : "",
-                        ].filter(Boolean).join(" ");
-
-                        return (
-                            <button
-                                key={`${c.y}-${c.m}-${c.d}`}
-                                type="button"
-                                className={className}
-                                onClick={() => onPickDay(c.y, c.m, c.d)}
-                                disabled={calendarLoading || !selectedStudentId || isDisabled}
-                                aria-label={ymd}
-                            >
-                                {c.d}
-                            </button>
-                        );
-                    })}
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
 
     const qa = React.useMemo(() => {
         if (!detail) return null;
@@ -357,14 +359,14 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                             </div>
                         )}
 
-                        {CalendarCard}
+                        <CalendarCard variant="left" />
                     </div>
                     )}
                 </div>
 
                 {/* ===== RIGHT COLUMN ===== */}
                 {!isDetailMode ? (
-                    CalendarCard
+                    <CalendarCard variant="right" />
                 ) : (
                     <div className="jump-report-detail">
 
