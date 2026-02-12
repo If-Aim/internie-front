@@ -27,7 +27,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .jump-report-left-stack{display: flex;flex-direction: column;gap: 21px;}
 .jump-report-selected-student{cursor: default;}
 
-.jump-report-detail{background:#fff; padding:45px 39x 58px 34px;display: flex;flex-direction: column;gap: 16px;}
+.jump-report-detail{background:#fff; width: 620px; padding:45px 39px 58px 34px;display: flex;flex-direction: column;gap: 16px;flex: 0 0 620px; box-sizing: border-box;}
 .jump-report-choose{margin-bottom: 6px;}
 .jump-report-choose-title{font-weight: 700;margin-bottom: 8px;}
 .jump-report-choose-list{display: flex;gap: 8px;flex-wrap: wrap;}
@@ -68,10 +68,10 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 *   애니메이션 
 */
 .jump-admin-grid {position: relative;overflow: hidden;}
+.jump-admin-grid--detail{grid-template-columns: 1fr 620px;}
 .jump-admin-grid > div:first-child {transition: transform 0.45s cubic-bezier(.4,0,.2,1);}
 
 /* 캘린더 카드 우 -> 좌 */
-.jump-admin-grid--detail > div:first-child {transform: translateX(-20px);}
 .jump-report-calendar-card {transition: transform 0.45s cubic-bezier(.4,0,.2,1);}
 .jump-admin-grid--detail .jump-report-calendar-card--right {transform: translateX(-40px);}
 
