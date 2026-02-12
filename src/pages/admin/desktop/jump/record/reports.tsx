@@ -214,7 +214,7 @@ export default function JumpAdminReportsPage(): React.ReactElement {
     }, [selectedDate, recordedMap]);
     
     const CalendarCard = (
-        <div className="report-card report-card--calendar">
+        <div className="jump-report-calendar-card">
             <div className="admin-cal-card">
                 <div className="admin-cal-head">
                     <div className="admin-cal-title">
@@ -426,16 +426,15 @@ export default function JumpAdminReportsPage(): React.ReactElement {
                                 <div className="jump-report-empty">기록이 없습니다.</div>
                             ) : (
                                 <>
-                                    {/* 질문 바 (목업: Q1. 질문) */}
+                                    {/* 질문 바 */}
                                     <div className="jump-report-qbar">
                                         <div className="jump-report-qbar-left">
                                             <span className="jump-report-qbar-qno">{`Q${currentIndex + 1}.`}</span>
-                                            <span className="jump-report-qbar-label">질문</span>
                                         </div>
                                         <div className="jump-report-qbar-text">{qa.q}</div>
                                     </div>
 
-                                    {/* 답변 박스 (목업: 큰 회색 영역 + 우측 Next 버튼) */}
+                                    {/* 답변 박스 */}
                                     <div className="jump-report-answerbox">
                                         <div className="jump-report-answertext">
                                             {qa.a || "답변이 없습니다."}
