@@ -2,7 +2,7 @@
 // 기본 관리자 + 점프 관리자용 protectedRoute
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { ApiError, checkIsJumpAdmin } from "./api/client";
+import { ApiError, checkIsJumpOrAdmin } from "./api/client";
 
 export default function AdminJumpRoute() {
   const [allowed, setAllowed] = React.useState<boolean | null>(null);
@@ -11,7 +11,7 @@ export default function AdminJumpRoute() {
     let mounted = true;
     (async () => {
       try {
-        const ok = await checkIsJumpAdmin();
+        const ok = await checkIsJumpOrAdmin();
         if (mounted) setAllowed(ok);
       } catch (e) {
         if (mounted) setAllowed(false);
