@@ -492,10 +492,10 @@ export async function checkIsAdmin(): Promise<boolean> {
 }
 
 // 점프 관리자 확인
-export async function checkIsJumpOrAdmin(): Promise<boolean> {
+export async function checkIsJumpAdmin(): Promise<boolean> {
   try {
     const me = await getUserMe();
-    return me.role === "ROLE_JUMP_ADMIN" || me.role === "ROLE_ADMIN"; // 기본 admin + JUMP admin
+    return me.role === "ROLE_JUMP_ADMIN";
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) return false;
     throw e;
