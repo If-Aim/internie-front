@@ -691,13 +691,16 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
       panelRef.current?.releasePointerCapture(e.pointerId);
     } catch {}
   };
-
+  
   const canInteract = isOpen || dragging || closing;
 
   const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
   const toggleLang = async () => {
     await i18n.changeLanguage(isKo ? "en" : "ko");
   };
+  function handleServicePreparing() {
+    alert(isKo ? "Coming Soon" : "서비스 준비중입니다.");
+  }
   return (
     <>
       <div
@@ -742,11 +745,11 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
             <img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
             <span>{t("menu.mypage")}</span>
           </button>
-          <button className="drawer-menu-item" onClick={() => {}}>
+          <button className="drawer-menu-item" onClick={handleServicePreparing}>
             <img className="icon" src="/arrow-refresh-01.svg" alt={t("menu.recent")} />{" "}
             <span>{t("menu.recent")}</span>
           </button>
-          <button className="drawer-menu-item" onClick={() => {}}>
+          <button className="drawer-menu-item" onClick={handleServicePreparing}>
             <img className="icon" src="/settings.svg" alt={t("menu.settings")} />{" "}
             <span>{t("menu.settings")}</span>
           </button>
