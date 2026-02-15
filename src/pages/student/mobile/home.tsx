@@ -570,7 +570,7 @@ type SideMenuProps = {
 };
 function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequireAuth }: SideMenuProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
   const rafRef = React.useRef<number | null>(null);
   const panelRef = React.useRef<HTMLDivElement | null>(null);
@@ -694,6 +694,10 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 
   const canInteract = isOpen || dragging || closing;
 
+  const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
+  const toggleLang = async () => {
+    await i18n.changeLanguage(isKo ? "en" : "ko");
+  };
   return (
     <>
       <div
@@ -746,7 +750,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
             <img className="icon" src="/settings.svg" alt={t("menu.settings")} />{" "}
             <span>{t("menu.settings")}</span>
           </button>
-          <button className="drawer-menu-item" onClick={() => {}}>
+          <button className="drawer-menu-item" onClick={toggleLang}>
             <img className="icon" src="/settings.svg" alt={t("menu.language")} />{" "}
             <span>{t("menu.language")}</span>
           </button>
