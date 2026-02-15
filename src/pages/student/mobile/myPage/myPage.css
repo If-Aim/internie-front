@@ -57,5 +57,5 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .mypage-modal-close{ position: absolute; top: 8px; right: 4px; width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; }
 .mypage-modal-title {font-size:20px; font-weight:700; color:#000;}
 .mypage-modal-reason {font-size:14px; font-weight:700; color:#717171; line-height: 20px;}
-.mypage-modal-body{ flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 50px; }
+.mypage-modal-body{ flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 66px; }
 .mypage-modal-primary{ height: 60px; border: 0; border-radius: 10px; background: var(--primary); color: #fff;font-weight: 700; font-size: 16px; cursor: pointer; }
