@@ -136,7 +136,7 @@ export async function api<T = unknown>(
   return (await res.json()) as T;
 }
 
-//로그아웃
+// 로그아웃
 export async function logout(): Promise<void> {
   const token = localStorage.getItem("accessToken");
   if (!token) return;
@@ -264,6 +264,41 @@ export type UserBase = {
 export type UserMe = UserBase;
 export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
+}
+
+// 학교 조회
+export type UserSchool = {
+  id: number;
+  name: string;
+  campus: string;
+  region: string;
+};
+
+export async function searchSchools(keyword: string): Promise<UserSchool[]> {
+  const q = keyword.trim();
+  if (!q) return [];
+
+  const qs = new URLSearchParams({ keyword: q }).toString();
+  return api<UserSchool[]>(`/schools?${qs}`, { method: "GET" });
+}
+
+// 학교 선택
+export type SelectMySchoolInput = {
+  schoolId: number;
+}; 
+export type SelectMySchoolResponse = UserBase & {
+  school: UserSchool | null;
+};
+
+export async function selectMySchool(input: SelectMySchoolInput): Promise<SelectMySchoolResponse> {
+  if (input.schoolId == null || Number.isNaN(Number(input.schoolId))) {
+    throw new ApiError(400, "schoolId가 올바르지 않습니다.");
+  }
+
+  return api<SelectMySchoolResponse>("/users/me/school", {
+    method: "POST",
+    body: JSON.stringify({ schoolId: Number(input.schoolId) } satisfies SelectMySchoolInput),
+  });
 }
 
 // 재학생 인증

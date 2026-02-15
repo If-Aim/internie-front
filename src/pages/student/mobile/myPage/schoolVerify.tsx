@@ -2,37 +2,11 @@
 // 재학생 인증 페이지 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { applyMyVerification, ApiError } from "../../../../api/client";
+import { applyMyVerification, searchSchools, selectMySchool, ApiError, type UserSchool } from "../../../../api/client";
 import "./schoolVerify.css";
 
-type School = { id: string; name: string };
 type Step = "SCHOOL_SEARCH" | "UPLOAD" | "DONE";
 
-const MOCK_SCHOOLS: School[] = [
-    { id: "1", name: "서울대학교" },
-    { id: "2", name: "연세대학교" },
-    { id: "3", name: "고려대학교" },
-    { id: "4", name: "성균관대학교" },
-    { id: "5", name: "한양대학교" },
-    { id: "6", name: "중앙대학교" },
-    { id: "7", name: "경희대학교" },
-    { id: "8", name: "이화여자대학교" },
-    { id: "9", name: "숭실대학교" },
-    { id: "10", name: "숙명여자대학교" },
-    { id: "11", name: "서강대학교" },
-    { id: "12", name: "한국외국어대학교" },
-    { id: "13", name: "국민대학교" },
-    { id: "14", name: "동국대학교" },
-    { id: "15", name: "명지대학교" },
-    { id: "16", name: "광운대학교" },
-    { id: "17", name: "서경대학교" },
-    { id: "18", name: "삼육대학교" },
-    { id: "19", name: "상명대학교" },
-    { id: "20", name: "세종대학교" },
-    { id: "21", name: "홍익대학교" },
-    { id: "22", name: "단국대학교" },
-    // TODO: 실제 API 연동 시 목록 제거/교체
-];
 export default function SchoolVerify() {
     const navigate = useNavigate();
 
@@ -40,7 +14,9 @@ export default function SchoolVerify() {
 
     // 학교 검색/선택
     const [query, setQuery] = React.useState("");
-    const [selectedSchool, setSelectedSchool] = React.useState<School | null>(null);
+    const [selectedSchool, setSelectedSchool] = React.useState<UserSchool | null>(null);
+    const [schools, setSchools] = React.useState<UserSchool[]>([]);
+    const [searching, setSearching] = React.useState(false);
 
     // 학생증 파일
     const [file, setFile] = React.useState<File | null>(null);
@@ -50,28 +26,41 @@ export default function SchoolVerify() {
     const [submitting, setSubmitting] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState<string>("");
 
-    const filtered = React.useMemo(() => {
-        const q = query.trim();
-        if (!q) return [];
-        return MOCK_SCHOOLS.filter((s) => s.name.includes(q)).slice(0, 10);
-    }, [query]);
+    const isDropdownOpen = query.trim() !== "" && !selectedSchool && (schools.length > 0 || searching);
 
-    const isDropdownOpen = query.trim() !== "" && !selectedSchool;
+    function onClose() { navigate(-1); }
 
-    function onClose() {
-        navigate(-1);
-    }
-
-    function onPickSchool(s: School) {
+    function onPickSchool(s: UserSchool) {
         setSelectedSchool(s);
         setQuery(s.name);
+        setSchools([]);
     }
 
-    function onNextFromSchool() {
+    async function onNextFromSchool() {
         if (!selectedSchool) return;
-        setStep("UPLOAD");
+
+        setSubmitting(true);
         setErrorMsg("");
-    }
+
+        try {
+            await selectMySchool({ schoolId: selectedSchool.id });
+            setStep("UPLOAD");
+        } catch (e) {
+            if (e instanceof ApiError) {
+                const msg =
+                    e.status === 404
+                        ? "찾을 수 없는 학교입니다."
+                        : e.status === 400
+                        ? "학교 정보가 올바르지 않습니다."
+                        : "학교 선택에 실패했습니다.";
+                setErrorMsg(msg);
+            } else {
+                setErrorMsg("학교 선택에 실패했습니다.");
+            }
+        } finally {
+            setSubmitting(false);
+        }
+        }
 
     function resetFile() {
         setFile(null);
@@ -88,14 +77,48 @@ export default function SchoolVerify() {
             setErrorMsg("이미지 파일만 업로드할 수 있습니다.");
             return;
         }
-
         setErrorMsg("");
         setFile(f);
-
         setStep("DONE");
-
         e.currentTarget.value = "";
     }
+    React.useEffect(() => {
+        const q = query.trim();
+        if (selectedSchool) return;
+
+        if (!q) {
+            setSchools([]);
+            setSearching(false);
+            return;
+        }
+
+        let cancelled = false;
+        const timer = window.setTimeout(async () => {
+            setSearching(true);
+            setErrorMsg("");
+
+            try {
+                const res = await searchSchools(q);
+                if (cancelled) return;
+                setSchools(res.slice(0, 10));
+            } catch (e) {
+                if (cancelled) return;
+                if (e instanceof ApiError) {
+                    setErrorMsg(e.status === 400 ? "검색어를 입력해주세요." : "학교 검색에 실패했습니다.");
+                } else {
+                    setErrorMsg("학교 검색에 실패했습니다.");
+                }
+                setSchools([]);
+            } finally {
+                if (!cancelled) setSearching(false);
+            }
+        }, 250);
+
+        return () => {
+            cancelled = true;
+            window.clearTimeout(timer);
+        };
+    }, [query, selectedSchool]);
 
     React.useEffect(() => {
         if (!file) {
@@ -118,10 +141,10 @@ export default function SchoolVerify() {
         } catch (e) {
             if (e instanceof ApiError) {
                 const msg = e.bodyText?.includes("이미 승인된 사용자")
-                ? "이미 승인된 사용자입니다."
-                : e.bodyText?.includes("사용자를 찾을 수 없습니다")
-                ? "사용자를 찾을 수 없습니다."
-                : "업로드에 실패했습니다. 다시 시도해주세요.";
+                    ? "이미 승인된 사용자입니다."
+                    : e.bodyText?.includes("사용자를 찾을 수 없습니다")
+                    ? "사용자를 찾을 수 없습니다."
+                    : "업로드에 실패했습니다. 다시 시도해주세요.";
                 setErrorMsg(msg);
             } else {
                 setErrorMsg("업로드에 실패했습니다. 다시 시도해주세요.");
@@ -166,29 +189,23 @@ export default function SchoolVerify() {
                         </span>
                         {isDropdownOpen && (
                             <div className="sv-dropdown" role="listbox" aria-label="검색 결과">
-                                {filtered.map((s) => (
-                                    <button
-                                        type="button"
-                                        key={s.id}
-                                        className="sv-item"
-                                        onClick={() => onPickSchool(s)}
-                                    >
-                                        <span>{s.name}</span>
-                                    </button>
+                                {searching && <div className="sv-item" aria-disabled>검색 중...</div>}
+                                {!searching && schools.length === 0 && <div className="sv-item" aria-disabled>검색 결과가 없습니다.</div>}
+
+                                {schools.map((s) => (
+                                <button type="button" key={s.id} className="sv-item" onClick={() => onPickSchool(s)} >
+                                    <span>{s.name}</span>
+                                </button>
                                 ))}
                             </div>
                         )}
                     </div>
+                    
                 </main>
 
                 <footer className="sv-footer">
-                    <button
-                        type="button"
-                        className="sv-primary"
-                        disabled={!selectedSchool}
-                        onClick={onNextFromSchool}
-                        >
-                        다음
+                    <button type="button" className="sv-primary" disabled={!selectedSchool || submitting} onClick={onNextFromSchool} >
+                        {submitting ? "저장 중..." : "다음"}
                     </button>
                 </footer>
                 </>
@@ -197,17 +214,17 @@ export default function SchoolVerify() {
             {step === "UPLOAD" && (
                 <>
                     <main className="sv-body">
-                    <h1 className="sv-title">재학생 인증을 위한 학생증 사진이 필요해요</h1>
+                        <h1 className="sv-title">재학생 인증을 위한 학생증 사진이 필요해요</h1>
 
-                    <div className="sv-cardPreview">
-                        {previewUrl ? (
-                        <img className="sv-previewImg" src={previewUrl} alt="" />
-                        ) : (
-                        <img className="sv-previewGuide" src="/studentcard_guide.png" alt="학생증 촬영 가이드" />
-                        )}
-                    </div>
+                        <div className="sv-cardPreview">
+                            {previewUrl ? (
+                            <img className="sv-previewImg" src={previewUrl} alt="" />
+                            ) : (
+                            <img className="sv-previewGuide" src="/studentcard_guide.png" alt="학생증 촬영 가이드" />
+                            )}
+                        </div>
 
-                    {errorMsg && <div className="sv-error">{errorMsg}</div>}
+                        {errorMsg && <div className="sv-error">{errorMsg}</div>}
                     </main>
 
                     <footer className="sv-footer sv-footer--upload">
