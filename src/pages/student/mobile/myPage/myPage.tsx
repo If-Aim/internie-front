@@ -281,8 +281,10 @@ export default function MyPage({ onLogout }: Props) {
               <img src="/x-01.svg"></img>
             </button>
 
-            <div className="mypage-modal-body" />
-
+            <div className="mypage-modal-body">
+              <span className="mypage-modal-title">학생증 인증 실패</span>
+              <span className="mypage-modal-reason">사유:<br/>정보 미제거, 학생증 판별 불가</span> {/* 추후 사유 노출 수정 */}
+            </div>
             <button type="button" className="mypage-modal-primary" onClick={goReVerify} >
               다시 인증하기
             </button>
