@@ -52,7 +52,7 @@ export default function MyPage({ onLogout }: Props) {
     switch (status) {
       case "PENDING":
         return {
-          label: "인증 요청중",
+          label: "인증 요청 중",
           disabled: true,
           onClick: () => {}, 
         };
@@ -115,7 +115,7 @@ export default function MyPage({ onLogout }: Props) {
       navigate("/login", { replace: true });
     }
   }
-  
+
   // 학생증 인증 거절 후 다시 인증하기 버튼
   function goReVerify() {
     setShowRejectModal(false);
