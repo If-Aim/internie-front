@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { applyMyVerification, searchSchools, selectMySchool, ApiError, type UserSchool } from "../../../../api/client";
 import "./schoolVerify.css";
 
-type Step = "SCHOOL_SEARCH" | "UPLOAD" | "DONE";
+type Step = "SCHOOL_SEARCH" | "UPLOAD" | "DONE" | "SUBMITTED";
 
 export default function SchoolVerify() {
     const navigate = useNavigate();
@@ -137,7 +137,7 @@ export default function SchoolVerify() {
 
         try {
             await applyMyVerification(file); 
-            navigate(-1);
+            setStep("SUBMITTED");
         } catch (e) {
             if (e instanceof ApiError) {
                 const msg = e.bodyText?.includes("이미 승인된 사용자")
@@ -267,6 +267,15 @@ export default function SchoolVerify() {
                     </button>
                 </footer>
                 </>
+            )}
+
+            {step === "SUBMITTED" && (
+                <main className="sv-submitted" role="status" aria-live="polite">
+                    <div className="sv-submittedCenter">
+                        <div className="sv-checkCircle" aria-hidden><img src="/check-02.svg" alt="" /></div>
+                        <h1 className="sv-submittedTitle">제출완료!</h1>
+                    </div>
+                </main>
             )}
         </div>
     );
