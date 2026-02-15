@@ -699,7 +699,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
     await i18n.changeLanguage(isKo ? "en" : "ko");
   };
   function handleServicePreparing() {
-    alert(isKo ? "Coming Soon" : "서비스 준비중입니다.");
+    alert(isKo ? "서비스 준비중입니다.": "Coming Soon");
   }
   return (
     <>

@@ -4,7 +4,6 @@
     "startWithKakao": "Login with Kakao",
     "startWithKakaoAria": "Login with Kakao"
   },
-
   "comment_main": "기본 컴포넌트 관련",
   "common": {
     "time": "Time",
@@ -96,6 +95,30 @@
     "empty": "No records",
     "noAnswer": "No answer"
   },
+
+  "comment_mypage": "마이페이지 관련",
+  "mypage": {
+    "greeting": "Hello,",
+    "greeting2": "",
+    "targetCompany": "My Target Company",
+    "certs": "My Certificates",
+    "editProfile": "Edit Profile",
+    "verifyCode": "Verification Code",
+    "logout": "Logout"
+  },
+  "mypage_verifyUi": {
+    "pending": "Verification in Progress",
+    "rejected": "Verification Failed",
+    "unverified": "Verify Student Status",
+    "approved": "Verification Complete",
+    "required": "Verification Required"
+  },
+  "mypage_modal": {
+    "title": "Student ID Verification Failed",
+    "reVerify": "Try Again"
+  },
+
+  "comment_error": "에러 관련",
   "error": {
     "unknown": "An unknown error occurred.",
     "authRequired": "Authentication is required. Please log in.",

@@ -95,6 +95,30 @@
     "empty": "기록이 없어요",
     "noAnswer": "답변이 없어요"
   },
+
+  "comment_mypage": "마이페이지 관련",
+  "mypage": {
+    "greeting": "안녕하세요,",
+    "greeting2": "님",
+    "targetCompany": "나의 목표 기업",
+    "certs": "나의 수료증",
+    "editProfile": "프로필 수정하기",
+    "verifyCode": "인증코드 입력하기",
+    "logout": "로그아웃"
+  },
+  "mypage_verifyUi": {
+    "pending": "인증 요청 중",
+    "rejected": "인증이 실패했어요",
+    "unverified": "재학생 인증하기",
+    "approved": "재학생 인증 완료",
+    "required": "재학생 인증이 필요합니다"
+  },
+  "mypage_modal": {
+    "title": "학생증 인증 실패",
+    "reVerify": "다시 인증하기"
+  },
+
+  "comment_error": "에러 관련",
   "error": {
     "unknown": "알 수 없는 오류",
     "authRequired": "인증/로그인이 필요합니다.",
