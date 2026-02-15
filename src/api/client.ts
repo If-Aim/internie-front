@@ -296,7 +296,7 @@ export async function selectMySchool(input: SelectMySchoolInput): Promise<Select
   }
 
   return api<SelectMySchoolResponse>("/users/me/school", {
-    method: "POST",
+    method: "PATCH",
     body: JSON.stringify({ schoolId: Number(input.schoolId) } satisfies SelectMySchoolInput),
   });
 }
