@@ -169,7 +169,7 @@ export default function SchoolVerify() {
 
                     <div className={`sv-searchWrap ${isDropdownOpen ? "is-open" : ""}`}>
                         <input
-                            className="sv-input"
+                            className={`sv-input ${query ? "has-value" : ""}`}
                             value={query}
                             placeholder=""
                             inputMode="search"
