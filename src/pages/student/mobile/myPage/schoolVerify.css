@@ -5,6 +5,7 @@
 .sv-body {flex: 1;display: flex;flex-direction: column;align-items: center;padding: 24px 20px 0;}
 .sv-title {margin: 0 0 150px;font-size: 16px;font-weight: 700;color: #000;text-align: center;}
 .sv-title-upload {margin: 0 0 100px;font-size: 16px;font-weight: 700;color: #000;text-align: center;line-height: 20px;}
+.sv-done.sv-title{margin: 0 0 110px;font-size: 16px;font-weight: 700;color: #000;text-align: center;line-height: 20px;}
 
 .sv-searchWrap {width: min(520px, 100%);position: relative;}
 .sv-input {width: 100%;height: 61px;border-radius: 10px;border: none;outline: none;color:#707070; font-weight:500;background: #fff;padding: 16px 44px 15px 20px;font-size: 16px;box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
@@ -47,7 +48,6 @@
 .sv-hint {margin-top: 14px;font-size: 12px;color: rgba(0, 0, 0, 0.45);}
 .sv-error {width: min(520px, 100%);margin-top: 12px;padding: 10px 12px;border-radius: 12px;background: rgba(255, 0, 0, 0.08);color: rgba(160, 0, 0, 0.9);font-size: 13px;}
 
-.sv-done {padding-top: 84px;}
 .sv-doneBox {width: min(520px, 100%);display: grid;place-items: center;margin-top: 18px;}
 .sv-doneCard {width: 100%;height: 170px;border-radius: 16px;background: #fff;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);display: grid;place-items: center;color: rgba(0, 0, 0, 0.35);font-size: 14px;}
 .sv-doneImg {width: 100%;max-width: 520px;height: 160px;border-radius: 16px;object-fit: cover;box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);background: #fff;}

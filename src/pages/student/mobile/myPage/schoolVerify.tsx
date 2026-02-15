@@ -230,23 +230,12 @@ export default function SchoolVerify() {
                     <footer className="sv-footer sv-footer--upload">
                         <label className="sv-secondary sv-footerBtn">
                             사진 선택하기
-                            <input
-                                type="file"
-                                accept="image/*"
-                                className="sv-fileInput"
-                                onChange={onFileChange}
-                            />
+                            <input type="file" accept="image/*" className="sv-fileInput" onChange={onFileChange} />
                         </label>
 
                         <label className="sv-primary sv-primary--alt sv-footerBtn">
                             학생증 촬영하기
-                            <input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="sv-fileInput"
-                                onChange={onFileChange}
-                            />
+                            <input type="file" accept="image/*" capture="environment" className="sv-fileInput" onChange={onFileChange} />
                         </label>
                     </footer>
                 </>
@@ -255,7 +244,7 @@ export default function SchoolVerify() {
             {step === "DONE" && (
                 <>
                 <main className="sv-body sv-done">
-                    <h1 className="sv-title">학생증이 등록되었어요!</h1>
+                    <h1 className="sv-title">학생증 업로드 완료!</h1>
 
                     <div className="sv-doneBox">
                         {previewUrl ? (
@@ -270,15 +259,10 @@ export default function SchoolVerify() {
                 </main>
 
                 <footer className="sv-footer">
-                    <button type="button" className="sv-link" onClick={resetFile}>
+                    <button type="button" className="sv-secondary sv-footerBtn" onClick={resetFile}>
                         사진 다시 선택하기
                     </button>
-                    <button
-                        type="button"
-                        className="sv-primary"
-                        disabled={!file || submitting}
-                        onClick={onSubmit}
-                    >
+                    <button type="button" className="sv-primary sv-primary--alt sv-footerBtn" disabled={!file || submitting} onClick={onSubmit} >
                         {submitting ? "제출 중..." : "제출하기"}
                     </button>
                 </footer>
