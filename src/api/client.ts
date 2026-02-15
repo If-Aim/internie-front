@@ -397,12 +397,12 @@ export async function getAdminPendingUsers(): Promise<AdminUser[]> {
 
 // 사용자 승인
 export async function approveAdminUser(userId: number | string): Promise<AdminUser> {
-  return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "POST" });
+  return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "PATCH" });
 }
 
 // 사용자 거절
 export async function rejectAdminUser(userId: number | string): Promise<AdminUser> {
-  return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "POST" });
+  return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "PATCH" });
 }
 
 // 관리자 파일 업로드
