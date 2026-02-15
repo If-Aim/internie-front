@@ -50,3 +50,10 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .submit-code { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(53px + env(safe-area-inset-bottom)); width: 92%; height: 60px;
 border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}
 .ob-error{margin-top: 8px; margin-left: 12px; font-size: 14px; color: #000; font-weight: 700;}
+
+/* mypage modal */
+.mypage-modal-backdrop{ position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.mypage-modal{ width: min(640px, calc(100vw - 48px)); height: min(560px, calc(100vh - 120px)); background: #fff; border-radius: 20px; position: relative; box-shadow: 0 4px 4px rgba(0,0,0,0.25); padding: 36px 40px; display: flex; flex-direction: column; justify-content: flex-end; }
+.mypage-modal-close{ position: absolute; top: 20px; right: 18px; width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; }
+.mypage-modal-body{ flex: 1; }
+.mypage-modal-primary{ height: 60px; border: 0; border-radius: 10px; background: var(--primary); color: #fff;font-weight: 700; font-size: 16px; cursor: pointer; }

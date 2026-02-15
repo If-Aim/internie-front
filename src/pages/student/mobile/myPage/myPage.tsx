@@ -46,6 +46,7 @@ export default function MyPage({ onLogout }: Props) {
   const displayName = me?.name ?? "";
   const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
   const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
+  const [showRejectModal, setShowRejectModal] = React.useState(false);
 
   const verifyUi = (() => {
     switch (status) {
@@ -53,19 +54,19 @@ export default function MyPage({ onLogout }: Props) {
         return {
           label: "인증 요청중",
           disabled: true,
-          onClick: () => {}, // 눌러도 아무 동작 안 하게
+          onClick: () => {}, 
         };
       case "REJECTED":
         return {
           label: "인증이 실패했어요",
           disabled: false,
-          onClick: () => navigate("/student/verify"), // 다시 신청 화면으로
+          onClick: () => navigate("/student/verify"), 
         };
       case "APPROVED":
         return {
           label: "프로필 수정하기",
           disabled: false,
-          onClick: handleServicePreparing,// () => navigate("/account"), TODO: 프로필 수정 화면으로
+          onClick: handleServicePreparing,
         };
       case "UNVERIFIED":
       default:
@@ -114,7 +115,11 @@ export default function MyPage({ onLogout }: Props) {
       navigate("/login", { replace: true });
     }
   }
-  
+  function goReVerify() {
+    setShowRejectModal(false);
+    navigate("/student/verify");
+  }
+
   React.useEffect(() => {
     let mounted = true;
 
@@ -129,6 +134,20 @@ export default function MyPage({ onLogout }: Props) {
 
     return () => { mounted = false; };
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    if (!me) return;
+    if (!location.pathname.includes("/mypage")) return;
+
+    if (me.status === "REJECTED") {
+      const key = `mypage_reject_modal_shown_${me.userId}`;
+      const alreadyShown = sessionStorage.getItem(key) === "1";
+      if (!alreadyShown) {
+        sessionStorage.setItem(key, "1");
+        setShowRejectModal(true);
+      }
+    }
+  }, [me, location.pathname]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -254,6 +273,22 @@ export default function MyPage({ onLogout }: Props) {
       <button type="button" className="mypage-logout" onClick={handleLogout}>
         로그아웃
       </button>
+
+      {showRejectModal && (
+        <div className="mypage-modal-backdrop" role="presentation">
+          <div className="mypage-modal" role="dialog" aria-modal="true">
+            <button type="button" className="mypage-modal-close" aria-label="close" onClick={() => setShowRejectModal(false)} >
+              <img src="/x-01.svg"></img>
+            </button>
+
+            <div className="mypage-modal-body" />
+
+            <button type="button" className="mypage-modal-primary" onClick={goReVerify} >
+              다시 인증하기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
