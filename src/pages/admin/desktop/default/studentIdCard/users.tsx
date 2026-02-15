@@ -32,9 +32,11 @@ function statusClass(status: string) {
   }
 }
 
-function displaySchoolOrNickname(u: AdminUser) {
-  // 백엔드 응답에 school이 없어서, 기존 UI의 "학교" 자리에 닉네임 우선 표시(없으면 '-')
-  return (u.nickname ?? "").trim() || "-";
+function displaySchoolname(u: AdminUser) {
+  if (u.school && u.school.name) {
+    return u.school.name;
+  }
+  return "-";
 }
 
 export default function AdminUsersPage(): React.ReactElement {
@@ -175,7 +177,7 @@ export default function AdminUsersPage(): React.ReactElement {
                 >
                   <span className="admin-badge">{idx + 1}</span>
                   <span className="admin-user-name">{u.name}</span>
-                  <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
+                  <span className="admin-user-school">{displaySchoolname(u)}</span>
                   <span className={`admin-user-status-pill ${statusClass(u.status)}`}>
                     {statusLabel(u.status)}
                   </span>

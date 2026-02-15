@@ -223,6 +223,24 @@ export async function deleteEventDay(eventDayId: string | number): Promise<void>
 
 /* - mypage관련 - */
 // user 관련
+export type UserSchool = {
+  id: number;
+  name: string;
+  campus: string;
+  region: string;
+};
+export type UserBase = {
+  userId: number;
+  name: string;
+  nickname: string | null;
+  profileImage: string | null;
+  verificationImage: string | null;
+  role: string;
+  status: string;
+  school: UserSchool | null;
+};
+export type UserMe = UserBase;
+
 export function getUserIdFromAccessToken(): string | null {
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
@@ -252,28 +270,12 @@ export function getUserIdFromAccessToken(): string | null {
     return null;
   }
 }
-export type UserBase = {
-  userId: number;
-  name: string;
-  nickname: string | null;
-  profileImage: string | null;
-  verificationImage: string | null;
-  role: string;
-  status: string;
-};
-export type UserMe = UserBase;
+
 export async function getUserMe(): Promise<UserMe> {
   return api<UserMe>("/users/me");
 }
 
 // 학교 조회
-export type UserSchool = {
-  id: number;
-  name: string;
-  campus: string;
-  region: string;
-};
-
 export async function searchSchools(keyword: string): Promise<UserSchool[]> {
   const q = keyword.trim();
   if (!q) return [];

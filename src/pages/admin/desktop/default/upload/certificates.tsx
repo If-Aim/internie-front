@@ -4,8 +4,11 @@ import React from "react";
 import { ApiError, type AdminUser, getAdminUsers, uploadAdminUserFile, getAdminUserFiles, deleteAdminUserFile, type AdminUserFile } from "../../../../../api/client";
 import "./certificates.css";
 
-function displaySchoolOrNickname(u: AdminUser) {
-  return (u.nickname ?? "").trim() || "-";
+function displaySchoolname(u: AdminUser) {
+  if (u.school && u.school.name) {
+    return u.school.name;
+  }
+  return "-";
 }
 
 export default function AdminCertificatesPage(): React.ReactElement {
@@ -172,7 +175,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
                 >
                   <span className="admin-badge">{idx + 1}</span>
                   <span className="admin-user-name">{u.name}</span>
-                  <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
+                  <span className="admin-user-school">{displaySchoolname(u)}</span>
 
                   <span className="admin-cert-status"><span className={count > 0 ? "cert-count" : "cert-count cert-count--zero"}>수료증: {count}</span></span>
                   <span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>

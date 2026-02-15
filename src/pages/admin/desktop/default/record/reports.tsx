@@ -14,24 +14,19 @@ function ymd(y: number, m: number, d: number) {
 }
 
 function buildMonthCells(year: number, month1to12: number): CalCell[] {
-  // monthIndex: 0~11
   const monthIndex = month1to12 - 1;
   const first = new Date(year, monthIndex, 1);
   const lastDay = new Date(year, monthIndex + 1, 0).getDate();
 
-  // 스크린샷 기준: Mo Tu We Th Fr Sa Su (월요일 시작)
-  // JS getDay(): 0=Sun..6=Sat  → 월요일 시작으로 변환
-  const jsDow = first.getDay(); // 0..6
-  const mondayStartOffset = (jsDow + 6) % 7; // Mon=0..Sun=6
+  const jsDow = first.getDay(); 
+  const mondayStartOffset = (jsDow + 6) % 7; 
 
   const cells: CalCell[] = [];
 
-  // 앞쪽 빈 칸
   for (let i = 0; i < mondayStartOffset; i++) {
     cells.push({ key: `e-${year}-${month1to12}-${i}`, day: null, dateStr: null });
   }
 
-  // 날짜 칸
   for (let d = 1; d <= lastDay; d++) {
     cells.push({
       key: `d-${year}-${month1to12}-${d}`,
@@ -40,7 +35,6 @@ function buildMonthCells(year: number, month1to12: number): CalCell[] {
     });
   }
 
-  // 7의 배수로 맞추기(행 맞춤)
   while (cells.length % 7 !== 0) {
     cells.push({ key: `t-${year}-${month1to12}-${cells.length}`, day: null, dateStr: null });
   }
@@ -125,9 +119,11 @@ function ReportCalendar(): React.ReactElement {
   );
 }
 
-function displaySchoolOrNickname(u: AdminUser) {
-  // 목업에서 학교명 자리가 필요하지만 현재 응답엔 school이 없음 → nickname을 우선 표시
-  return (u.nickname ?? "").trim() || "-";
+function displaySchoolname(u: AdminUser) {
+  if (u.school && u.school.name) {
+    return u.school.name;
+  }
+  return "-";
 }
 
 export default function AdminReportsPage(): React.ReactElement {
@@ -201,7 +197,7 @@ export default function AdminReportsPage(): React.ReactElement {
                 >
                   <span className="admin-badge">{idx + 1}</span>
                   <span className="admin-user-name">{u.name}</span>
-                  <span className="admin-user-school">{displaySchoolOrNickname(u)}</span>
+                  <span className="admin-user-school">{displaySchoolname(u)}</span>
                   <span className="admin-user-status-pill"></span>
                   <span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
                 </button>
