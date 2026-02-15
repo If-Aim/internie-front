@@ -213,8 +213,8 @@ export default function SchoolVerify() {
 
             {step === "UPLOAD" && (
                 <>
-                    <main className="sv-body">
-                        <h1 className="sv-title-upload">재학생 인증을 위한<br />학생증 사진이 필요해요</h1>
+                    <main className="sv-body sv-upload">
+                        <h1 className="sv-title">재학생 인증을 위한<br />학생증 사진이 필요해요</h1>
 
                         <div className="sv-cardPreview">
                             {previewUrl ? (
