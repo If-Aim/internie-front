@@ -43,7 +43,7 @@
 
 .sv-fileInput {display: none;}
 .sv-link {border: none;background: transparent;color: rgba(0, 0, 0, 0.6);font-size: 13px;cursor: pointer;text-decoration: underline;padding: 6px 0;}
-.sv-hint {text-align: center; margin-top: 39px;font-size: 12px;color: rgba(0, 0, 0, 0.45); line-height:500;}
+.sv-hint {text-align: center; margin-top: 39px;font-size: 12px;color: rgba(0, 0, 0, 0.45); line-height:50px;}
 .sv-error {width: min(520px, 100%); line-height:20px; margin-top: 12px;padding: 10px 12px;border-radius: 12px;background: rgba(255, 0, 0, 0.08);color: rgba(160, 0, 0, 0.9);font-size: 13px;}
 
 .sv-doneBox {width: min(520px, 100%);display: grid;place-items: center;margin-top: 8px;}
