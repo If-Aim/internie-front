@@ -1,5 +1,5 @@
 /* src/pages/student/mobile/verify/schoolVerify.css */
-.sv-screen {height: 100dvh;background: #eef3fb;display: flex;flex-direction: column;}
+.sv-screen {height: 100dvh;background: #F0F6FF;display: flex;flex-direction: column;}
 .sv-header {height: 56px;display: flex;justify-content: flex-end;align-items: center;padding: 40px 2px;}
 .sv-close {width: 44px;height: 44px;border: none;background: transparent;font-size: 30px;line-height: 1;cursor: pointer;display: grid;place-items: center;}
 .sv-body {flex: 1 1 auto; min-height: 0; display: flex;flex-direction: column;align-items: center;padding: 24px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch;}
@@ -51,7 +51,7 @@
 .sv-doneImg {width: 260px; height: 160px;border-radius: 10px;object-fit: cover;box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);background: #fff;}
 
 /* 제출 완료 */
-.sv-submitted{ flex: 1; display: flex; align-items: center; justify-content: center; background: #F3F8FF; }
+.sv-submitted{ flex: 1; display: flex; align-items: center; justify-content: center; background: #F0F6FF; }
 .sv-submittedCenter{ display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .sv-checkCircle{ width: 50px; height: 50px; border-radius: 999px; background: var(--primary); display: flex; align-items: center; justify-content: center;}
 .sv-checkCircle img{ width: 34px; height: 34px; }
