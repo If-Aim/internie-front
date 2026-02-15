@@ -115,11 +115,18 @@ export default function MyPage({ onLogout }: Props) {
       navigate("/login", { replace: true });
     }
   }
+  
+  // 학생증 인증 거절 후 다시 인증하기 버튼
   function goReVerify() {
     setShowRejectModal(false);
     navigate("/student/verify");
   }
+  // 팝업 닫기 감지
+  function closeRejectModal() {
+    if (!me) return;
 
+    setShowRejectModal(false);
+  }
   React.useEffect(() => {
     let mounted = true;
 
@@ -127,6 +134,15 @@ export default function MyPage({ onLogout }: Props) {
       try {
         const res = await getUserMe();
         if (!mounted) return;
+
+        const lastStatusKey = `mypage_last_status_${res.userId}`;
+        const lastStatus = localStorage.getItem(lastStatusKey);
+
+        if (res.status === "REJECTED" && lastStatus !== "REJECTED") {
+          setShowRejectModal(true);
+        }
+
+        localStorage.setItem(lastStatusKey, res.status ?? "");
         setMe(res);
         setAvatarVersion(Date.now());
       } catch {}
@@ -134,20 +150,6 @@ export default function MyPage({ onLogout }: Props) {
 
     return () => { mounted = false; };
   }, [location.pathname]);
-
-  React.useEffect(() => {
-    if (!me) return;
-    if (!location.pathname.includes("/mypage")) return;
-
-    if (me.status === "REJECTED") {
-      const key = `mypage_reject_modal_shown_${me.userId}`;
-      const alreadyShown = sessionStorage.getItem(key) === "1";
-      if (!alreadyShown) {
-        sessionStorage.setItem(key, "1");
-        setShowRejectModal(true);
-      }
-    }
-  }, [me, location.pathname]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -277,7 +279,7 @@ export default function MyPage({ onLogout }: Props) {
       {showRejectModal && (
         <div className="mypage-modal-backdrop" role="presentation">
           <div className="mypage-modal" role="dialog" aria-modal="true">
-            <button type="button" className="mypage-modal-close" aria-label="close" onClick={() => setShowRejectModal(false)} >
+            <button type="button" className="mypage-modal-close" aria-label="close" onClick={closeRejectModal} >
               <img src="/x-01.svg"></img>
             </button>
 
