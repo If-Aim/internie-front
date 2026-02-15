@@ -4,7 +4,7 @@
 .sv-close {width: 44px;height: 44px;border: none;background: transparent;font-size: 30px;line-height: 1;cursor: pointer;display: grid;place-items: center;}
 .sv-body {flex: 1;display: flex;flex-direction: column;align-items: center;padding: 24px 20px 0;}
 .sv-title {margin: 0 0 150px;font-size: 16px;font-weight: 700;color: #000;text-align: center;}
-.sv-upload .sv-title {margin: 0 0 100px;font-size: 16px;font-weight: 700;color: #000;text-align: center;line-height: 20px;}
+.sv-upload .sv-title {margin: 0 0 90px;font-size: 16px;font-weight: 700;color: #000;text-align: center;line-height: 20px;}
 .sv-done .sv-title{margin: 0 0 80px;font-size: 16px;font-weight: 700;color: #000;text-align: center;line-height: 20px;}
 
 .sv-searchWrap {width: min(520px, 100%);position: relative;}
@@ -26,7 +26,6 @@
 .sv-check img{width: 24px;}
 .sv-footer {padding: 18px 20px 24px; gap:12px;}
 
-
 /* 업로드 화면 */
 .sv-cardPreview {width: min(520px, 100%);margin-top: 8px;display: flex;justify-content: center;padding:0 30px;}
 .sv-cardPreview img{width: 100%;display: block;justify-content: center;}
@@ -40,13 +39,14 @@
 .sv-primary {width: 100%;height: 60px;border-radius: 10px;border: none;background: var(--primary);color: #fff;font-size: 16px;font-weight: 700;cursor: pointer;}
 .sv-primary:disabled {cursor: not-allowed;}
 .sv-footer--upload {display: flex;flex-direction: column;gap: 12px;padding: 18px 20px 24px;}
-.sv-footerBtn {width: 100%;}
+.sv-footerBtn {width: 100%; display: flex; align-items: center; justify-content: center;
+height: 56px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
 
 .sv-primary--alt {height: 54px;}
 .sv-fileInput {display: none;}
 .sv-link {border: none;background: transparent;color: rgba(0, 0, 0, 0.6);font-size: 13px;cursor: pointer;text-decoration: underline;padding: 6px 0;}
-.sv-hint {margin-top: 14px;font-size: 12px;color: rgba(0, 0, 0, 0.45);}
-.sv-error {width: min(520px, 100%);margin-top: 12px;padding: 10px 12px;border-radius: 12px;background: rgba(255, 0, 0, 0.08);color: rgba(160, 0, 0, 0.9);font-size: 13px;}
+.sv-hint {text-align: center; margin-top: 39px;font-size: 12px;color: rgba(0, 0, 0, 0.45);}
+.sv-error {width: min(520px, 100%); line-height:20px; margin-top: 12px;padding: 10px 12px;border-radius: 12px;background: rgba(255, 0, 0, 0.08);color: rgba(160, 0, 0, 0.9);font-size: 13px;}
 
 .sv-doneBox {width: min(520px, 100%);display: grid;place-items: center;margin-top: 18px;}
 .sv-doneCard {width: 100%;height: 170px;border-radius: 16px;background: #fff;box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);display: grid;place-items: center;color: rgba(0, 0, 0, 0.35);font-size: 14px;}
