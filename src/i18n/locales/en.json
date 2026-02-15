@@ -101,6 +101,7 @@
     "greeting": "Hello,",
     "greeting2": "",
     "targetCompany": "My Target Company",
+    "notSet": "Not Set",
     "certs": "My Certificates",
     "editProfile": "Edit Profile",
     "verifyCode": "Verification Code",

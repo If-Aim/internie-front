@@ -243,7 +243,7 @@ export default function MyPage({ onLogout }: Props) {
 					<button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
 						<span className="mypage-menu-title">{t("mypage.targetCompany")}</span>
 						<span className="mypage-menu-right">
-							<span className="mypage-menu-value">{targetCompany ?? "미설정"}</span>
+							<span className="mypage-menu-value">{targetCompany ?? t("mypage.notSet")}</span>
 							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
 						</span>
 					</button>

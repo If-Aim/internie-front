@@ -101,6 +101,7 @@
     "greeting": "안녕하세요,",
     "greeting2": "님",
     "targetCompany": "나의 목표 기업",
+    "notSet": "미설정",
     "certs": "나의 수료증",
     "editProfile": "프로필 수정하기",
     "verifyCode": "인증코드 입력하기",
