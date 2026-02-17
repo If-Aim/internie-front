@@ -32,13 +32,13 @@
 .admin-list::-webkit-scrollbar-track {background: transparent;}
 .admin-list::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}
 .admin-list-item{width: 100%;background: #fff;border:none;border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);
-padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px 1fr 110px 16px;gap: 9px;
+padding: 15px 26px 14px 18px;display: grid;grid-template-columns: 34px 120px minmax(0, 1fr) 110px 16px;gap: 9px;
 align-items: center;cursor: pointer;text-align: left;}
 .admin-list-item--selected{border: 2px solid var(--primary);}
 .admin-badge{width: 30px;height: 30px;border-radius: 50%;background: var(--primary);
 color: #fff;display:flex;align-items:center;justify-content:center;font-weight: 700;font-size: 16px;}
 .admin-user-name{margin-left:2px;font-weight: 700;font-size: 24px;}
-.admin-user-school{font-size:20px;color: #A3A3A3;font-weight: 700;justify-self: center;}
+.admin-user-school{font-size:20px;color: #A3A3A3;font-weight: 700;justify-self: center;min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .admin-user-status-pill {font-weight: 700;font-size: 24px;justify-self: right;}
 .admin-user-status-pill.status--approved {color: var(--primary);}
 .admin-user-status-pill.status--pending {color: #878787;}
