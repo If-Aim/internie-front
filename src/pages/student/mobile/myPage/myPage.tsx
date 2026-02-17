@@ -230,12 +230,12 @@ export default function MyPage({ onLogout }: Props) {
 				</div>
 				<div className="mypage-cardgrid-meta"> //카드 아래 텍스트(사진처럼 카드 아래에 제목/시간)
 					<div className="mypage-meta">
-					<div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
-					<div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
+						<div className="mypage-meta-title">{recent[0]?.title ?? "새로운 이벤트"}</div>
+						<div className="mypage-meta-time">{toHHmm(recent[0]?.startTime ?? null)}</div>
 					</div>
 					<div className="mypage-meta">
-					<div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
-					<div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
+						<div className="mypage-meta-title">{recent[1]?.title ?? "새로운 이벤트"}</div>
+						<div className="mypage-meta-time">{toHHmm(recent[1]?.startTime ?? null)}</div>
 					</div>
 				</div>
 				*/}

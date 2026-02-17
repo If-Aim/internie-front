@@ -5,21 +5,21 @@ import MobileAdminApp from "./mobile/adminApp";
 import DesktopAdminApp from "./desktop/default/adminApp";
 
 function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = React.useState(false);
+	const [isDesktop, setIsDesktop] = React.useState(false);
 
-  React.useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    const onChange = () => setIsDesktop(mql.matches);
+	React.useEffect(() => {
+		const mql = window.matchMedia("(min-width: 1024px)");
+		const onChange = () => setIsDesktop(mql.matches);
 
-    onChange();
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+		onChange();
+		mql.addEventListener("change", onChange);
+		return () => mql.removeEventListener("change", onChange);
+	}, []);
 
-  return isDesktop;
+	return isDesktop;
 }
 
 export default function AdminApp(): React.ReactElement {
-  const isDesktop = useIsDesktop();
-  return isDesktop ? <DesktopAdminApp /> : <MobileAdminApp />;
+	const isDesktop = useIsDesktop();
+	return isDesktop ? <DesktopAdminApp /> : <MobileAdminApp />;
 }

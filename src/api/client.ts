@@ -2,455 +2,452 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function buildUrl(path: string) {
-  return path.startsWith("http")
-    ? path
-    : `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    return path.startsWith("http")
+		? path
+		: `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 function getAuthHeader(): Record<string, string> {
-  const token = localStorage.getItem("accessToken");
-  if (!token) return {};
-  return {
-    Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
-  };
+	const token = localStorage.getItem("accessToken");
+	if (!token) return {};
+	return {
+		Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+	};
 }
 
 export async function refreshAccessToken(): Promise<string> {
-  const res = await fetch(buildUrl("/auth/refresh"), {
-    method: "POST",
-    credentials: "include",
-  });
+	const res = await fetch(buildUrl("/auth/refresh"), {
+		method: "POST",
+		credentials: "include",
+	});
 
-  if (!res.ok) {
-    const bodyText = await res.text().catch(() => "");
-    throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-  }
+	if (!res.ok) {
+		const bodyText = await res.text().catch(() => "");
+		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+	}
 
-  const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
-  if (!newAuth) {
-    throw new ApiError(200, "No Authorization header in refresh response");
-  }
+	const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
+	if (!newAuth) {
+		throw new ApiError(200, "No Authorization header in refresh response");
+	}
 
-  localStorage.setItem("accessToken", newAuth);
-  return newAuth;
+	localStorage.setItem("accessToken", newAuth);
+	return newAuth;
 }
 async function requestWithAutoRefresh(
-  path: string,
-  init: RequestInit = {},
-  opts?: { expectJson?: boolean } 
+	path: string,
+	init: RequestInit = {},
+	opts?: { expectJson?: boolean } 
 ): Promise<Response> {
-  const expectJson = opts?.expectJson ?? false;
+	const expectJson = opts?.expectJson ?? false;
 
-  const baseHeaders: Record<string, string> = {
-    ...(init.headers as Record<string, string> | undefined),
-    ...getAuthHeader(),
-  };
+	const baseHeaders: Record<string, string> = {
+		...(init.headers as Record<string, string> | undefined),
+		...getAuthHeader(),
+	};
 
-  if (expectJson) {
-    if (!("Content-Type" in baseHeaders)) {
-      baseHeaders["Content-Type"] = "application/json";
-    }
-  }
+	if (expectJson) {
+		if (!("Content-Type" in baseHeaders)) {
+			baseHeaders["Content-Type"] = "application/json";
+		}
+	}
 
-  const doFetch = async (): Promise<Response> => {
-    return fetch(buildUrl(path), {
-      ...init,
-      headers: baseHeaders,
-      credentials: "include",
-    });
-  };
+	const doFetch = async (): Promise<Response> => {
+		return fetch(buildUrl(path), {
+			...init,
+			headers: baseHeaders,
+			credentials: "include",
+		});
+	};
 
-  let res = await doFetch();
+	let res = await doFetch();
 
-  if (res.status === 401 || res.status === 403) {
-    try {
-      await refreshAccessToken();
+	if (res.status === 401 || res.status === 403) {
+		try {
+			await refreshAccessToken();
 
-      const retryHeaders: Record<string, string> = {
-        ...(init.headers as Record<string, string> | undefined),
-        ...getAuthHeader(),
-      };
-      if (expectJson) {
-        if (!("Content-Type" in retryHeaders)) {
-          retryHeaders["Content-Type"] = "application/json";
-        }
-      }
+			const retryHeaders: Record<string, string> = {
+				...(init.headers as Record<string, string> | undefined),
+				...getAuthHeader(),
+			};
+			if (expectJson) {
+				if (!("Content-Type" in retryHeaders)) {
+					retryHeaders["Content-Type"] = "application/json";
+				}
+			}
 
-      res = await fetch(buildUrl(path), {
-        ...init,
-        headers: retryHeaders,
-        credentials: "include",
-      });
-    } catch (e) {
-      localStorage.removeItem("accessToken");
-      throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
-    }
+			res = await fetch(buildUrl(path), {
+				...init,
+				headers: retryHeaders,
+				credentials: "include",
+			});
+		} catch (e) {
+			localStorage.removeItem("accessToken");
+			throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
+		}
 
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem("accessToken");
-      const bodyText = await res.text().catch(() => "");
-      throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-    }
-  }
+		if (res.status === 401 || res.status === 403) {
+			localStorage.removeItem("accessToken");
+			const bodyText = await res.text().catch(() => "");
+			throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+		}
+	}
 
   return res;
 }
 
 export async function loginWithKakao(code: string, redirectUri: string) {
-  return apiPublic("/auth/kakao", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code, redirectUri }),
-  });
+	return apiPublic("/auth/kakao", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ code, redirectUri }),
+	});
 }
 
 export async function apiPublic(
-  path: string,
-  init: RequestInit = {}
+	path: string,
+	init: RequestInit = {}
 ): Promise<Response> {
-  return fetch(buildUrl(path), {
-    ...init,
-    credentials: "include", 
-  });
+	return fetch(buildUrl(path), {
+		...init,
+		credentials: "include", 
+	});
 }
 
 /* Auth */ 
 export async function api<T = unknown>(
-  path: string,
-  init: RequestInit = {}
+	path: string,
+	init: RequestInit = {}
 ): Promise<T> {
-  const res = await requestWithAutoRefresh(path, init, { expectJson: true });
+	const res = await requestWithAutoRefresh(path, init, { expectJson: true });
 
-  if (res.status === 204) return undefined as T;
+	if (res.status === 204) return undefined as T;
 
-  if (!res.ok) {
-    const bodyText = await res.text().catch(() => "");
-    throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-  }
+	if (!res.ok) {
+		const bodyText = await res.text().catch(() => "");
+		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+	}
 
-  const ct = res.headers.get("content-type") ?? "";
-  if (!ct.includes("application/json")) {
-    const bodyText = await res.text().catch(() => "");
-    throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
-  }
+	const ct = res.headers.get("content-type") ?? "";
+	if (!ct.includes("application/json")) {
+		const bodyText = await res.text().catch(() => "");
+		throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+	}
 
-  return (await res.json()) as T;
+	return (await res.json()) as T;
 }
 
 // 로그아웃
 export async function logout(): Promise<void> {
-  const token = localStorage.getItem("accessToken");
-  if (!token) return;
+	const token = localStorage.getItem("accessToken");
+	if (!token) return;
 
-  await apiPublic("/auth/logout", {
-    method: "POST",
-    headers: {
-      Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
-    },
-  });
+	await apiPublic("/auth/logout", {
+		method: "POST",
+		headers: {
+			Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+		},
+	});
 }
 
 // 업로드용 API
 export async function apiUpload<T = unknown>(
-  path: string,
-  formData: FormData,
-  init: RequestInit = {}
+	path: string,
+	formData: FormData,
+	init: RequestInit = {}
 ): Promise<T> {
-  const res = await requestWithAutoRefresh(
-    path,
-    {
-      ...init,
-      method: init.method ?? "POST",
-      body: formData,
-      headers: {
-        ...(init.headers as Record<string, string> | undefined),
-        ...getAuthHeader(),
-      },
-    },
-    { expectJson: false }
-  );
+	const res = await requestWithAutoRefresh(
+		path,
+		{
+			...init,
+			method: init.method ?? "POST",
+			body: formData,
+			headers: {
+				...(init.headers as Record<string, string> | undefined),
+				...getAuthHeader(),
+			},
+		}, { expectJson: false }
+	);
 
-  if (res.status === 204) return undefined as T;
+	if (res.status === 204) return undefined as T;
 
-  if (!res.ok) {
-    const bodyText = await res.text().catch(() => "");
-    throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-  }
+	if (!res.ok) {
+		const bodyText = await res.text().catch(() => "");
+		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+	}
 
-  const ct = res.headers.get("content-type") ?? "";
-  if (!ct.includes("application/json")) {
-    const bodyText = await res.text().catch(() => "");
-    return bodyText as unknown as T;
-  }
+	const ct = res.headers.get("content-type") ?? "";
+	if (!ct.includes("application/json")) {
+		const bodyText = await res.text().catch(() => "");
+		return bodyText as unknown as T;
+	}
 
-  return (await res.json()) as T;
+	return (await res.json()) as T;
 }
 
 // 맞춤 질문 조회
 export type EventDayQuestionsResponse = {
-  eventDayId: number;
-  questionId: number;
-  questionList: string[];
+	eventDayId: number;
+	questionId: number;
+	questionList: string[];
 };
 
 export async function getEventDayQuestions(eventDayId: string | number): Promise<EventDayQuestionsResponse> {
-  return api<EventDayQuestionsResponse>(`/event-days/${eventDayId}/questions`);
+	return api<EventDayQuestionsResponse>(`/event-days/${eventDayId}/questions`);
 }
 
 // eventDay 상세
 export type EventDayDetailResponse = {
-  eventDayId: number;
-  title: string;
-  eventId: number;
-  date: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  memo?: string | null;
-  completed: boolean;
-  transcriptions: Transcription[];
+	eventDayId: number;
+	title: string;
+	eventId: number;
+	date: string;
+	startTime?: string | null;
+	endTime?: string | null;
+	memo?: string | null;
+	completed: boolean;
+	transcriptions: Transcription[];
 };
 
 export async function getEventDayDetail(eventDayId: string | number): Promise<EventDayDetailResponse> {
-  return api<EventDayDetailResponse>(`/event-days/${eventDayId}`);
+	return api<EventDayDetailResponse>(`/event-days/${eventDayId}`);
 }
 
 // 이벤트 삭제
 export async function deleteEvent(eventId: string | number): Promise<void> {
-  return api<void>(`/events/${eventId}`, { method: "DELETE" });
+	return api<void>(`/events/${eventId}`, { method: "DELETE" });
 }
 export async function deleteEventDay(eventDayId: string | number): Promise<void> {
-  return api<void>(`/event-days/${eventDayId}`, { method: "DELETE" });
+	return api<void>(`/event-days/${eventDayId}`, { method: "DELETE" });
 }
 
 /* - mypage관련 - */
 // user 관련
 export type UserSchool = {
-  id: number;
-  name: string;
-  campus: string;
-  region: string;
+	id: number;
+	name: string;
+	campus: string;
+	region: string;
 };
 export type UserBase = {
-  userId: number;
-  name: string;
-  nickname: string | null;
-  profileImage: string | null;
-  verificationImage: string | null;
-  role: string;
-  status: string;
-  school: UserSchool | null;
+	userId: number;
+	name: string;
+	nickname: string | null;
+	profileImage: string | null;
+	verificationImage: string | null;
+	role: string;
+	status: string;
+	school: UserSchool | null;
 };
 export type UserMe = UserBase;
 
 export function getUserIdFromAccessToken(): string | null {
-  const token = localStorage.getItem("accessToken");
-  if (!token) return null;
+	const token = localStorage.getItem("accessToken");
+	if (!token) return null;
 
-  const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
-  const parts = raw.split(".");
-  if (parts.length < 2) return null;
+	const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
+	const parts = raw.split(".");
+	if (parts.length < 2) return null;
 
-  try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
+	try {
+		const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+		const json = decodeURIComponent(
+		atob(base64)
+			.split("")
+			.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+			.join("")
+		);
 
-    const payload = JSON.parse(json) as any;
+		const payload = JSON.parse(json) as any;
 
-    return (
-      (payload.userId != null ? String(payload.userId) : null) ||
-      (payload.id != null ? String(payload.id) : null) ||
-      (payload.sub != null ? String(payload.sub) : null) ||
-      null
-    );
-  } catch {
-    return null;
-  }
+		return (
+			(payload.userId != null ? String(payload.userId) : null) ||
+			(payload.id != null ? String(payload.id) : null) ||
+			(payload.sub != null ? String(payload.sub) : null) ||
+			null
+		);
+	} catch {
+		return null;
+	}
 }
 
 export async function getUserMe(): Promise<UserMe> {
-  return api<UserMe>("/users/me");
+	return api<UserMe>("/users/me");
 }
 
 // 학교 조회
 export async function searchSchools(keyword: string): Promise<UserSchool[]> {
-  const q = keyword.trim();
-  if (!q) return [];
+	const q = keyword.trim();
+	if (!q) return [];
 
-  const qs = new URLSearchParams({ keyword: q }).toString();
-  return api<UserSchool[]>(`/schools?${qs}`, { method: "GET" });
+	const qs = new URLSearchParams({ keyword: q }).toString();
+	return api<UserSchool[]>(`/schools?${qs}`, { method: "GET" });
 }
 
 // 학교 선택
 export type SelectMySchoolInput = {
-  schoolId: number;
+	schoolId: number;
 }; 
 export type SelectMySchoolResponse = UserBase & {
-  school: UserSchool | null;
+	school: UserSchool | null;
 };
 
 export async function selectMySchool(input: SelectMySchoolInput): Promise<SelectMySchoolResponse> {
-  if (input.schoolId == null || Number.isNaN(Number(input.schoolId))) {
-    throw new ApiError(400, "schoolId가 올바르지 않습니다.");
-  }
+	if (input.schoolId == null || Number.isNaN(Number(input.schoolId))) {
+		throw new ApiError(400, "schoolId가 올바르지 않습니다.");
+	}
 
-  return api<SelectMySchoolResponse>("/users/me/school", {
-    method: "PATCH",
-    body: JSON.stringify({ schoolId: Number(input.schoolId) } satisfies SelectMySchoolInput),
-  });
+	return api<SelectMySchoolResponse>("/users/me/school", {
+		method: "PATCH",
+		body: JSON.stringify({ schoolId: Number(input.schoolId) } satisfies SelectMySchoolInput),
+	});
 }
 
 // 재학생 인증
 export type ApplyVerificationResponse = UserBase;
 
 export async function applyMyVerification(
-  file: File
+	file: File
 ): Promise<ApplyVerificationResponse> {
-  const userId = getUserIdFromAccessToken();
+	const userId = getUserIdFromAccessToken();
 
-  if (!userId) {
-    throw new ApiError(401, "로그인 정보에서 userId를 찾을 수 없습니다.");
-  }
+	if (!userId) {
+		throw new ApiError(401, "로그인 정보에서 userId를 찾을 수 없습니다.");
+	}
 
-  const formData = new FormData();
-  formData.append("verificationImage", file); 
+	const formData = new FormData();
+	formData.append("verificationImage", file); 
 
-  return apiUpload<ApplyVerificationResponse>(
-    `/users/${userId}/apply-verification`,
-    formData,
-    { method: "POST" }
-  );
+	return apiUpload<ApplyVerificationResponse>(
+		`/users/${userId}/apply-verification`,
+		formData,
+		{ method: "POST" }
+	);
 }
 
 // JUMP 사용자 인증
 export async function verifyJumpUser (
-  code: string
+	code: string
 ): Promise<UserMe> {
-  return api<UserMe>("/users/me/jump-verify", {
-    method: "POST",
-    body: JSON.stringify({ code } satisfies { code: string }),
-  });
+	return api<UserMe>("/users/me/jump-verify", {
+		method: "POST",
+		body: JSON.stringify({ code } satisfies { code: string }),
+	});
 }
 
 // 프로필 수정
 export type UpdateMyProfileInput = {
-  name?: string | null;
-  nickname?: string | null;
-  imageFile?: File | null;
+	name?: string | null;
+	nickname?: string | null;
+	imageFile?: File | null;
 };
 
 export async function updateMyProfile(input: UpdateMyProfileInput): Promise<UserMe> {
-  const formData = new FormData();
+	const formData = new FormData();
 
-  if (input.name != null) formData.append("name", input.name);
-  if (input.nickname != null) formData.append("nickname", input.nickname);
+	if (input.name != null) formData.append("name", input.name);
+	if (input.nickname != null) formData.append("nickname", input.nickname);
 
-  if (input.imageFile != null) {
-    formData.append("imageFile", input.imageFile);
-    formData.append("imagefile", input.imageFile);
-  }
-  
-  return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
+	if (input.imageFile != null) {
+		formData.append("imageFile", input.imageFile);
+		formData.append("imagefile", input.imageFile);
+	}
+	
+	return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
 
 // 수료증 관련 타입
 export type AdminUserFile = {
-  fileId: number;
-  url: string;
-  filename: string;
+	fileId: number;
+	url: string;
+	filename: string;
 };
 
 // 관리자 업로드 파일 목록 조회
 export async function getMyAdminFiles(): Promise<AdminUserFile[]> {
-  return api<AdminUserFile[]>("/users/me/admin-files", { method: "GET" });
+	return api<AdminUserFile[]>("/users/me/admin-files", { method: "GET" });
 }
 
 // 관리자 업로드 파일 다운로드
 export async function getMyAdminFileDownloadUrl(
-  fileId: number | string
+	fileId: number | string
 ): Promise<string> {
-  const res = await api<{ url: string }>(`/users/me/admin-files/${fileId}`, {
-    method: "GET",
-  });
+	const res = await api<{ url: string }>(`/users/me/admin-files/${fileId}`, {
+		method: "GET",
+	});
 
-  return res.url;
+	return res.url;
 }
 
 /* - admin 관련 - */
 export type AdminUser = UserBase;
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
-  const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
-
-  const text = await res.clone().text();
-
-  return JSON.parse(text) as AdminUser[];
+	const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
+	const text = await res.clone().text();
+	return JSON.parse(text) as AdminUser[];
 }
 
 // 학생증 제출자 목록 조회
 export async function getAdminPendingUsers(): Promise<AdminUser[]> {
-  return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
+  	return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
 }
 
 // 사용자 승인
 export async function approveAdminUser(userId: number | string): Promise<AdminUser> {
-  return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "PATCH" });
+  	return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "PATCH" });
 }
 
 // 사용자 거절
 export async function rejectAdminUser(userId: number | string): Promise<AdminUser> {
-  return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "PATCH" });
+  	return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "PATCH" });
 }
 
 // 관리자 파일 업로드
 export async function uploadAdminUserFile(
-  userId: number,
-  file: File
+	userId: number,
+	file: File
 ): Promise<AdminUserFile[]> {
-  const form = new FormData();
-  form.append("file", file);
+	const form = new FormData();
+	form.append("file", file);
 
-  const res = await apiUpload(`/admin/users/${userId}/files`, form, { method: "POST" });
+	const res = await apiUpload(`/admin/users/${userId}/files`, form, { method: "POST" });
 
-  if (Array.isArray(res)) {
-    return res
-      .filter((it: any) => it && typeof it.url === "string")
-      .map((it: any) => ({
-        fileId: Number(it.fileId),
-        url: String(it.url),
-        filename: String(it.filename ?? ""),
-      }));
-  }
+	if (Array.isArray(res)) {
+		return res
+		.filter((it: any) => it && typeof it.url === "string")
+		.map((it: any) => ({
+			fileId: Number(it.fileId),
+			url: String(it.url),
+			filename: String(it.filename ?? ""),
+		}));
+	}
 
-  if (res && typeof res === "object" && typeof (res as any).url === "string") {
-    return [
-      {
-        fileId: Number((res as any).fileId ?? 0),
-        url: String((res as any).url),
-        filename: String((res as any).filename ?? ""),
-      },
-    ];
-  }
+	if (res && typeof res === "object" && typeof (res as any).url === "string") {
+		return [
+			{
+				fileId: Number((res as any).fileId ?? 0),
+				url: String((res as any).url),
+				filename: String((res as any).filename ?? ""),
+			},
+		];
+	}
 
-  throw new Error(`Unexpected upload response: ${JSON.stringify(res)}`);
+	throw new Error(`Unexpected upload response: ${JSON.stringify(res)}`);
 }
 
 // 관리자 업로드 파일 목록 조회 
 export async function getAdminUserFiles(userId: number | string): Promise<AdminUserFile[]> {
-  return api<AdminUserFile[]>(`/admin/users/${userId}/files`, { method: "GET" });
+	return api<AdminUserFile[]>(`/admin/users/${userId}/files`, { method: "GET" });
 }
 
 // 관리자 업로드 파일 삭제
 export async function deleteAdminUserFile(
-  userId: number | string,
-  fileId: number | string
+  	userId: number | string,
+  	fileId: number | string
 ): Promise<AdminUserFile[]> {
-  return api<AdminUserFile[]>(`/admin/users/${userId}/files/${fileId}`, {
-    method: "DELETE",
-  });
+  	return api<AdminUserFile[]>(`/admin/users/${userId}/files/${fileId}`, {
+   		method: "DELETE",
+  	});
 }
 
 /* - JUMP admin 관련 - */
@@ -458,124 +455,117 @@ export async function deleteAdminUserFile(
 export type JumpAdminStudent = UserBase;
 
 export async function getJumpAdminStudents(): Promise<JumpAdminStudent[]> {
-  return api<JumpAdminStudent[]>("/jump-admin/students", { method: "GET" });
+  	return api<JumpAdminStudent[]>("/jump-admin/students", { method: "GET" });
 }
 
 export type JumpAdminDailyStatus = {
-  date: string; // YYYY-MM-DD
-  eventDayIds: number[];
+	date: string; // YYYY-MM-DD
+	eventDayIds: number[];
 };
 
 export type JumpAdminStudentCalendarResponse = {
-  year: number;
-  month: number;
-  totalRecordedDays: number;
-  dailyStatuses: JumpAdminDailyStatus[];
+	year: number;
+	month: number;
+	totalRecordedDays: number;
+	dailyStatuses: JumpAdminDailyStatus[];
 };
 
 export async function getJumpAdminStudentCalendar(
-  studentId: number | string,
-  year: number | string,
-  month: number | string
+	studentId: number | string,
+	year: number | string,
+	month: number | string
 ): Promise<JumpAdminStudentCalendarResponse> {
-  return api<JumpAdminStudentCalendarResponse>(
-    `/jump-admin/students/${studentId}/calendar/${year}/${month}`,
-    { method: "GET" }
-  );
+	return api<JumpAdminStudentCalendarResponse>(
+		`/jump-admin/students/${studentId}/calendar/${year}/${month}`,
+		{ method: "GET" }
+	);
 }
 
 // 점프 학생 eventDay 상세(질문/전사 포함)
 export type JumpAdminTranscription = {
-  transcriptionId: number;
-  text: string;
-  audioUrl?: string;
+	transcriptionId: number;
+	text: string;
+	audioUrl?: string;
 };
 
 export type JumpAdminEventDayQuestions = {
-  eventDayId: number;
-  questionId: number;
-  questionList: string[];
+	eventDayId: number;
+	questionId: number;
+	questionList: string[];
 };
 
 export type JumpAdminEventDayDetailResponse = {
-  eventDayId: number;
-  eventDayTitle: string;
-  eventTitle: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  transcriptions: JumpAdminTranscription[];
-  question?: JumpAdminEventDayQuestions | null;
+	eventDayId: number;
+	eventDayTitle: string;
+	eventTitle: string;
+	startTime?: string | null;
+	endTime?: string | null;
+	transcriptions: JumpAdminTranscription[];
+	question?: JumpAdminEventDayQuestions | null;
 };
 
 export async function getJumpAdminEventDayDetail(
-  eventDayId: number | string
+	eventDayId: number | string
 ): Promise<JumpAdminEventDayDetailResponse> {
-  return api<JumpAdminEventDayDetailResponse>(`/jump-admin/event-days/${eventDayId}`, {
-    method: "GET",
-  });
+	return api<JumpAdminEventDayDetailResponse>(`/jump-admin/event-days/${eventDayId}`, {
+		method: "GET",
+	});
 }
 
 /**
  * 관리자 여부 확인
  */
 export async function checkIsAdmin(): Promise<boolean> {
-  try {
-    const me = await getUserMe();
-    return me.role === "ROLE_ADMIN";
-  } catch (e) {
-    if (e instanceof ApiError && e.status === 401) return false;
-    throw e;
-  }
+	try {
+		const me = await getUserMe();
+		return me.role === "ROLE_ADMIN";
+	} catch (e) {
+		if (e instanceof ApiError && e.status === 401) return false;
+		throw e;
+	}
 }
 
 // 점프 관리자 확인
 export async function checkIsJumpAdmin(): Promise<boolean> {
-  try {
-    const me = await getUserMe();
-    return me.role === "ROLE_JUMP_ADMIN";
-  } catch (e) {
-    if (e instanceof ApiError && e.status === 401) return false;
-    throw e;
-  }
+	try {
+		const me = await getUserMe();
+		return me.role === "ROLE_JUMP_ADMIN";
+	} catch (e) {
+		if (e instanceof ApiError && e.status === 401) return false;
+		throw e;
+	}
 }
 
 // 최근 기록한 일정 관련
 export type Transcription = {
-  id: number;
-  text: string;
-  audioUrl?: string;
+	id: number;
+	text: string;
+	audioUrl?: string;
 };
 
-export type EventDay = {
-  eventDayId: number;
-  title: string;
-  eventId: string | number;
-  date: string; // YYYY-MM-DD
-  startTime?: string | null;
-  endTime?: string | null;
-  memo?: string | null;
-  completed: boolean;
-  transcriptions?: Transcription[];
+export type EventDay = Omit<EventDayDetailResponse, "eventId" | "transcriptions"> & {
+	eventId: string | number;
+	transcriptions?: Transcription[];
 };
 
 export type EventDayMonthResponse = {
-  totalCount: number;
-  eventDayList: EventDay[];
+	totalCount: number;
+	eventDayList: EventDay[];
 };
 
 export async function getEventDaysByMonth(y: string, m: string): Promise<EventDayMonthResponse> {
-  return api<EventDayMonthResponse>(`/event-days/${y}/${m}`);
+	return api<EventDayMonthResponse>(`/event-days/${y}/${m}`);
 }
 
 // 에러 처리
 export class ApiError extends Error {
-  status: number;
-  bodyText?: string;
+	status: number;
+	bodyText?: string;
 
-  constructor(status: number, message: string, bodyText?: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.bodyText = bodyText;
-  }
+	constructor(status: number, message: string, bodyText?: string) {
+		super(message);
+		this.name = "ApiError";
+		this.status = status;
+		this.bodyText = bodyText;
+	}
 }

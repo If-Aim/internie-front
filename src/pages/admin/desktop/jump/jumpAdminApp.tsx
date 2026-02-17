@@ -10,16 +10,16 @@ import JumpReports from "./record/reports";
 
 
 export default function DesktopAdminApp(): React.ReactElement {
-  return (
-    <Routes>
-      <Route element={<AdminJumpRoute />}>
-        <Route element={<JumpAdminHome />}>
-          <Route index element={<Navigate to="users" replace />} />
-          <Route path="analysis" element={<JumpUsers />} />
-          <Route path="reports" element={<JumpReports />} />
-          <Route path="*" element={<Navigate to="users" replace />} />
-        </Route>
-      </Route>
-    </Routes>
-  );
+	return (
+		<Routes>
+			<Route element={<AdminJumpRoute />}>
+				<Route element={<JumpAdminHome />}>
+					<Route index element={<Navigate to="users" replace />} />
+					<Route path="analysis" element={<JumpUsers />} />
+					<Route path="reports" element={<JumpReports />} />
+					<Route path="*" element={<Navigate to="users" replace />} />
+				</Route>
+			</Route>
+		</Routes>
+	);
 }

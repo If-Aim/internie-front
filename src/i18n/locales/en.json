@@ -1,134 +1,136 @@
 {
-  "comment_login": "로그인 관련",
-  "login": {
-    "startWithKakao": "Login with Kakao",
-    "startWithKakaoAria": "Login with Kakao"
-  },
-  "comment_main": "기본 컴포넌트 관련",
-  "common": {
-    "time": "Time",
-    "close": "Close",
-    "record": "Record",
-    "menu": "Menu",
-    "add": "Add", 
-    "allDay": "All Day",
-    "confirm": "Confirm",
-    "save": "Save",
-    "dateRange": "Period"
-  },
-  "menu": {
-    "mypage": "Profile",
-    "recent": "Recent Activity",
-    "settings": "Settings & Privacy",
-    "language": "Language"
-  },
-  "empty": {
-    "title": "No schedules yet.",
-    "subtitle": "Would you like to add one?",
-    "sync": "Sync Calendar"
-  },
-  "modal": {
-    "desc1": "Record today's experience",
-    "desc2": "and earn your competency scores!",
-    
-    "questionsPreparingTitle": "Preparing your questions",
-    "questionsPreparingDesc1": "Internie is getting your questions ready!",
-    "questionsPreparingDesc2": "What skill will you earn today?"
-  },
-  "schedule": {
-    "edit": "Edit Schedule"
-  },
-  "calendar": {
-    "selectMonth": "Select Month"
-  },
-  "filter": {
-    "title": "Filter",
-    "period": "Period",
-    "sort": "Sort",
-    "sortPast": "Oldest",
-    "sortLatest": "Newest",
-    "apply": "Apply",
-    "confirm": "Confirm"
-  },
-  "home": {
-    "date": {
-      "today": "{{day}} Today",
-      "weekday": "{{day}} {{weekday}}"
-    }
-  },
+	"comment_login": "로그인 관련",
+	"login": {
+		"startWithKakao": "Login with Kakao",
+		"startWithKakaoAria": "Login with Kakao",
+		"getLoginTitle": "Login Required",
+		"getLoginSub": "Would you like to log in?"
+	},
+	"comment_main": "기본 컴포넌트 관련",
+	"common": {
+		"time": "Time",
+		"close": "Close",
+		"record": "Record",
+		"menu": "Menu",
+		"add": "Add", 
+		"allDay": "All Day",
+		"confirm": "Confirm",
+		"save": "Save",
+		"dateRange": "Period"
+	},
+	"menu": {
+		"mypage": "Profile",
+		"recent": "Recent Activity",
+		"settings": "Settings & Privacy",
+		"language": "Language"
+	},
+	"empty": {
+		"title": "No schedules yet.",
+		"subtitle": "Would you like to add one?",
+		"sync": "Sync Calendar"
+	},
+	"modal": {
+		"desc1": "Record today's experience",
+		"desc2": "and earn your competency scores!",
+		
+		"questionsPreparingTitle": "Preparing your questions",
+		"questionsPreparingDesc1": "Internie is getting your questions ready!",
+		"questionsPreparingDesc2": "What skill will you earn today?"
+	},
+	"schedule": {
+		"edit": "Edit Schedule"
+	},
+	"calendar": {
+		"selectMonth": "Select Month"
+	},
+	"filter": {
+		"title": "Filter",
+		"period": "Period",
+		"sort": "Sort",
+		"sortPast": "Oldest",
+		"sortLatest": "Newest",
+		"apply": "Apply",
+		"confirm": "Confirm"
+	},
+	"home": {
+		"date": {
+			"today": "{{day}} Today",
+			"weekday": "{{day}} {{weekday}}"
+		}
+	},
 
-  "comment_schedule": "일정 관련",
-  "schedule_new": {
-    "alertAddTitle": "Please add a title.",
-    "title": "Add Schedule",
+	"comment_schedule": "일정 관련",
+	"schedule_new": {
+		"alertAddTitle": "Please add a title.",
+		"title": "Add Schedule",
 
-    "titlePlaceholder": "New schedule...",
-    "memoPlaceholder": "Add a note...",
+		"titlePlaceholder": "New schedule...",
+		"memoPlaceholder": "Add a note...",
 
-    "dateRange": "Start – End",
-    "addTime": "Add time",
-    "editTime": "Edit time"
-  },
-  "schedule_edit": {
-    "title": "Edit Schedule",
-    "titlePlaceholder": "Schedule Title...",
-    "memoPlaceholder": "Add a note...",
+		"dateRange": "Start – End",
+		"addTime": "Add time",
+		"editTime": "Edit time"
+	},
+	"schedule_edit": {
+		"title": "Edit Schedule",
+		"titlePlaceholder": "Schedule Title...",
+		"memoPlaceholder": "Add a note...",
 
-    "alertAddTitle": "Please add a title.",
-    "confirmDelete": "Delete this schedule? This cannot be undone.",
+		"alertAddTitle": "Please add a title.",
+		"confirmDelete": "Delete this schedule? This cannot be undone.",
 
-    "dateRange": "Start – End",
-    "addTime": "Add time",
-    "editTime": "Edit time",
-    "delete": "Delete",
-    "save": "Save",
-    "complete": "Updated successfully.",
-    
-    "deleteFailedWithMessage": "Failed to delete the schedule.\n({{message}})",
-    "cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
-    "cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
-    "noPermissionDelete": "You don't have permission to delete this event.",
-    "deleteFailWithStatus": "Delete failed ({{status}})\n{{body}}"
-  },
-  "schedule_detail": {
-    "titleFallback": "New Event",
-    "empty": "No records",
-    "noAnswer": "No answer"
-  },
+		"dateRange": "Start – End",
+		"addTime": "Add time",
+		"editTime": "Edit time",
+		"delete": "Delete",
+		"save": "Save",
+		"complete": "Updated successfully.",
+		
+		"deleteFailedWithMessage": "Failed to delete the schedule.\n({{message}})",
+		"cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
+		"cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
+		"noPermissionDelete": "You don't have permission to delete this event.",
+		"deleteFailWithStatus": "Delete failed ({{status}})\n{{body}}"
+	},
+	"schedule_detail": {
+		"titleFallback": "New Event",
+		"empty": "No records",
+		"noAnswer": "No answer"
+	},
 
-  "comment_mypage": "마이페이지 관련",
-  "mypage": {
-    "greeting": "Hello,",
-    "greeting2": "",
-    "targetCompany": "My Target Company",
-    "notSet": "Not Set",
-    "certs": "My Certificates",
-    "editProfile": "Edit Profile",
-    "verifyCode": "Verification Code",
-    "logout": "Logout"
-  },
-  "mypage_verifyUi": {
-    "pending": "Verification in Progress",
-    "rejected": "Verification Failed",
-    "unverified": "Verify Student Status",
-    "approved": "Verification Complete",
-    "required": "Verification Required"
-  },
-  "mypage_modal": {
-    "title": "Student ID Verification Failed",
-    "reVerify": "Try Again"
-  },
+	"comment_mypage": "마이페이지 관련",
+	"mypage": {
+		"greeting": "Hello,",
+		"greeting2": "",
+		"targetCompany": "My Target Company",
+		"notSet": "Not Set",
+		"certs": "My Certificates",
+		"editProfile": "Edit Profile",
+		"verifyCode": "Verification Code",
+		"logout": "Logout"
+	},
+	"mypage_verifyUi": {
+		"pending": "Verification in Progress",
+		"rejected": "Verification Failed",
+		"unverified": "Verify Student Status",
+		"approved": "Verification Complete",
+		"required": "Verification Required"
+	},
+	"mypage_modal": {
+		"title": "Student ID Verification Failed",
+		"reVerify": "Try Again"
+	},
 
-  "comment_error": "에러 관련",
-  "error": {
-    "unknown": "An unknown error occurred.",
-    "authRequired": "Authentication is required. Please log in.",
-    "notFound": "The requested schedule could not be found.",
-    "record": "Something went wrong while starting your record.",
-    "failAddSchedule": "Couldn’t save your schedule.",
-    "failSetEndTime": "End time can’t be earlier than start time.",
-    "failSetEndDate": "End date can’t be earlier than start date.",
-    "cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",
-    "invalidAccessMissingEventId": "Invalid access. The event ID is missing."
-  }
+	"comment_error": "에러 관련",
+	"error": {
+		"unknown": "An unknown error occurred.",
+		"authRequired": "Authentication is required. Please log in.",
+		"notFound": "The requested schedule could not be found.",
+		"record": "Something went wrong while starting your record.",
+		"failAddSchedule": "Couldn’t save your schedule.",
+		"failSetEndTime": "End time can’t be earlier than start time.",
+		"failSetEndDate": "End date can’t be earlier than start date.",
+		"cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",
+		"invalidAccessMissingEventId": "Invalid access. The event ID is missing."
+	}
 }

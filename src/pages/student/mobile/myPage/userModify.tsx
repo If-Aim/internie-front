@@ -6,15 +6,15 @@ import "./myPage.css";
 import "./userModify.css";
 
 type ProfileForm = {
-  name: string;
-  // nickname: string;        // TODO: 추후 활성화
-  // email: string;           // TODO: 백엔드 필드 생기면
-  // birth: string;           // TODO
-  // schoolMajor: string;     // TODO
+    name: string;
+    // nickname: string;        // TODO: 추후 활성화
+    // email: string;           // TODO: 백엔드 필드 생기면
+    // birth: string;           // TODO
+    // schoolMajor: string;     // TODO
 };
 
 function normalizeText(v: string) {
-  return v.trim();
+    return v.trim();
 }
 
 export default function EditProfilePage(): React.ReactElement {
@@ -168,53 +168,53 @@ export default function EditProfilePage(): React.ReactElement {
 
     return (
         <div className="mypage user-modify">
-        <header className="mypage-header">
-            <div className="mypage-email">프로필 수정하기</div>
-            <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate(-1)}>
-                <img src="/x-01.svg" alt="닫기" />
-            </button>
-        </header>
+            <header className="mypage-header">
+                <div className="mypage-email">프로필 수정하기</div>
+                <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate(-1)}>
+                    <img src="/x-01.svg" alt="닫기" />
+                </button>
+            </header>
 
-        <div className="profile-edit">
-            <section className="mypage-top">
-            <div className="mypage-profileimg-wrap">
-                <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
+            <div className="profile-edit">
+                <section className="mypage-top">
+                    <div className="mypage-profileimg-wrap">
+                        <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
+                    </div>
+
+                    <button type="button" className="profile-edit-avatar-btn" onClick={handleServicePreparing} >{/*추후 onClick={handleServicePreparing} -> onClick={()=> fileRef.current?.click()} disabled={saving}로 변경 */}
+                        편집
+                    </button>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
+                </section>
+
+                <section className="profile-edit-form">
+                    <div className="profile-edit-field">
+                        <div className="profile-edit-label">이름</div>
+                        <input className="profile-edit-input" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} disabled={saving} />
+                    </div>
+
+                    <div className="profile-edit-field">
+                        <div className="profile-edit-label">E-mail</div>
+                        <input className="profile-edit-input is-readonly" value={displayEmail} readOnly onClick={handleServicePreparing} />
+                    </div>
+
+                    <div className="profile-edit-field">
+                        <div className="profile-edit-label">생년월일</div>
+                        <input className="profile-edit-input is-readonly" value={birth} readOnly onClick={handleServicePreparing} />
+                    </div>
+
+                    <div className="profile-edit-field">
+                        <div className="profile-edit-label">학교/전공</div>
+                        <input className="profile-edit-input is-readonly" value={schoolMajor} disabled />
+                    </div>
+                </section>
             </div>
 
-            <button type="button" className="profile-edit-avatar-btn" onClick={handleServicePreparing} >{/*추후 onClick={handleServicePreparing} -> onClick={()=> fileRef.current?.click()} disabled={saving}로 변경 */}
-                편집
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
-            </section>
-
-            <section className="profile-edit-form">
-                <div className="profile-edit-field">
-                    <div className="profile-edit-label">이름</div>
-                    <input className="profile-edit-input" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} disabled={saving} />
-                </div>
-
-                <div className="profile-edit-field">
-                    <div className="profile-edit-label">E-mail</div>
-                    <input className="profile-edit-input is-readonly" value={displayEmail} readOnly onClick={handleServicePreparing} />
-                </div>
-
-                <div className="profile-edit-field">
-                    <div className="profile-edit-label">생년월일</div>
-                    <input className="profile-edit-input is-readonly" value={birth} readOnly onClick={handleServicePreparing} />
-                </div>
-
-                <div className="profile-edit-field">
-                    <div className="profile-edit-label">학교/전공</div>
-                    <input className="profile-edit-input is-readonly" value={schoolMajor} disabled />
-                </div>
-            </section>
+            <div className="profile-edit-bottom">
+                <button className={`profile-edit-save ${!isDirty ? "is-disabled" : ""}`} onClick={onSave} disabled={!isDirty || saving} >
+                    저장하기
+                </button>
+            </div>
         </div>
-
-        <div className="profile-edit-bottom">
-            <button className={`profile-edit-save ${!isDirty ? "is-disabled" : ""}`} onClick={onSave} disabled={!isDirty || saving} >
-                저장하기
-            </button>
-        </div>
-    </div>
-  );
+    );
 }

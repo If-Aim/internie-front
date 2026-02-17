@@ -4,20 +4,20 @@ import MobileLogin from "./mobile/login";
 import DesktopLogin from "./desktop/login";
 
 function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = React.useState(false);
+	const [isDesktop, setIsDesktop] = React.useState(false);
 
-  React.useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    const onChange = () => setIsDesktop(mql.matches);
-    onChange();
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+	React.useEffect(() => {
+		const mql = window.matchMedia("(min-width: 1024px)");
+		const onChange = () => setIsDesktop(mql.matches);
+		onChange();
+		mql.addEventListener("change", onChange);
+		return () => mql.removeEventListener("change", onChange);
+	}, []);
 
-  return isDesktop;
+	return isDesktop;
 }
 
 export default function Login(): React.ReactElement {
-  const isDesktop = useIsDesktop();
-  return isDesktop ? <DesktopLogin /> : <MobileLogin />;
+	const isDesktop = useIsDesktop();
+	return isDesktop ? <DesktopLogin /> : <MobileLogin />;
 }

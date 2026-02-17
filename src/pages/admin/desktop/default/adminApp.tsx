@@ -11,17 +11,17 @@ import Reports from "./record/reports";
 
 
 export default function DesktopAdminApp(): React.ReactElement {
-  return (
-    <Routes>
-      <Route element={<AdminRoute />}>
-        <Route element={<AdminHome />}>
-          <Route index element={<Navigate to="users" replace />} />
-          <Route path="users" element={<Users />} />
-          <Route path="certificates" element={<Certificates />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="*" element={<Navigate to="users" replace />} />
-        </Route>
-      </Route>
-    </Routes>
-  );
+	return (
+		<Routes>
+			<Route element={<AdminRoute />}>
+				<Route element={<AdminHome />}>
+					<Route index element={<Navigate to="users" replace />} />
+					<Route path="users" element={<Users />} />
+					<Route path="certificates" element={<Certificates />} />
+					<Route path="reports" element={<Reports />} />
+					<Route path="*" element={<Navigate to="users" replace />} />
+				</Route>
+			</Route>
+		</Routes>
+	);
 }
