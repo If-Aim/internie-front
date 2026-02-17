@@ -1,7 +1,6 @@
 // src/pages/admin/desktop/default/record/reports.tsx
 // 보고서 화면(탭)
 import React from "react";
-import i18n from "i18next";
 import { ApiError, type AdminUser, getAdminUsers } from "../../../../../api/client";
 import "./reports.css";
 
@@ -46,7 +45,7 @@ function buildMonthCells(year: number, month1to12: number): CalCell[] {
 export function monthLabel(year: number, month1to12: number): string {
 	const date = new Date(year, month1to12 - 1, 1);
 
-	return new Intl.DateTimeFormat(i18n.language, {
+	return new Intl.DateTimeFormat("en-US", {
 		year: "numeric",
 		month: "long",
 	}).format(date);
