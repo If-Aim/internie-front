@@ -18,3 +18,15 @@ font-size: 16px;font-weight:400;color: #000;outline: none;}
 .ob-btn--primary:not(:disabled){background: var(--primary); color: #fff;}
 .ob-btn:disabled{cursor: not-allowed;}
 .ob-btn:not(:disabled):active{transform: translateY(1px);}
+
+
+/* 점프 전용 */
+.ob-jump-logo { margin: 0 5px 8px; display: inline-flex; align-items: center; }
+.ob-jump-logo img { height: 30px; width: auto; display: block; }
+.ob-field--select { position: relative; }
+.ob-select { width: 100%; height: 66px; padding: 0 56px 0 22px; border-radius: 14px; border: 1px solid #E2E2E2; background: #fff;
+font-size: 18px; font-weight: 500; color: #000; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none; }
+
+.ob-select:focus { border-color: #CFCFCF;}
+.ob-select--placeholder { color: #9AA0A6; }
+.ob-select-caret { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; pointer-events: none; }
