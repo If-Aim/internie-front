@@ -2,43 +2,26 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api, apiUpload, ApiError } from "../../../../api/client";
+import type {EventDayDetailResponse, EventDayQuestionsResponse  } from "../../../../api/client";
 
 import "./questions.css";
 
 type Stage = "asking" | "completed";
 type RecordStage = "closed" | "preparing" | "recording";
 
-type EventDayResponse = {
-  eventDayId: number;
-  title: string;
-  eventId: number;
-  date: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  memo?: string | null;
-  completed: boolean;
-  transcriptions: Array<any>;
-};
-
 type QuestionDto = {
-  id: string;
-  order: number;
-  text: string;
-  totalCount: number; 
-};
-
-type EventDayQuestionsResponse = {
-  eventDayId: number;
-  questionId: number;
-  questionList: string[];
+	id: string;
+	order: number;
+	text: string;
+	totalCount: number; 
 };
 
 const BARS = 40; // 파형 바 개수
 const SENSITIVITY = 10; // 감도 조절 상수
 
 function applyExperienceName(q: string, title: string) {
-  if (!q.includes("(@experience_name)")) return q;
-  return q.split("(@experience_name)").join(title);
+	if (!q.includes("(@experience_name)")) return q;
+	return q.split("(@experience_name)").join(title);
 }
 //역량 분석 로딩 dots
 function LoadingDots() {
@@ -134,7 +117,7 @@ export default function QuestionsPage() {
     const fetchAll = async () => {
       try {
         setIsLoadingQuestions(true);
-        const day = await api<EventDayResponse>(`/event-days/${eventDayIdNum}`);
+        const day = await api<EventDayDetailResponse>(`/event-days/${eventDayIdNum}`);
         if (cancelled) return;
 
         const title = day.title ?? "";
