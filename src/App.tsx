@@ -15,30 +15,30 @@ const AdminApp = lazy(() => import("./pages/admin/adminApp"));
 const JumpAdminApp = lazy(() => import("./pages/admin/desktop/jump/jumpAdminApp"));
 
 export default function App(): React.ReactElement {
-  return (
-    <Suspense fallback={<div />}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
+	return (
+		<Suspense fallback={<div />}>
+			<Routes>
+				<Route path="/login" element={<Login />} />
+				<Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/onboarding" element={<OnBoarding />} />
-        </Route>
+				<Route element={<ProtectedRoute />}>
+					<Route path="/onboarding" element={<OnBoarding />} />
+				</Route>
 
-        <Route path="/student/*" element={<StudentApp />} />
-        <Route path="/" element={<Navigate to="/student" replace />} />
+				<Route path="/student/*" element={<StudentApp />} />
+				<Route path="/" element={<Navigate to="/student" replace />} />
 
-        {/* 관리자용 라우트 */}
-        <Route element={<AdminRoute />}>
-          <Route path="/admin/*" element={<AdminApp />} />
-        </Route>
-        {/* 점프 관리자용 라우트 */}
-        <Route element={<AdminJumpRoute />}>
-          <Route path="/jump-admin/*" element={<JumpAdminApp />} />
-        </Route>
+				{/* 관리자용 라우트 */}
+				<Route element={<AdminRoute />}>
+					<Route path="/admin/*" element={<AdminApp />} />
+				</Route>
+				{/* 점프 관리자용 라우트 */}
+				<Route element={<AdminJumpRoute />}>
+					<Route path="/jump-admin/*" element={<JumpAdminApp />} />
+				</Route>
 
-        <Route path="*" element={<Navigate to="/student" replace />} />
-      </Routes>
-    </Suspense>
-  );
+				<Route path="*" element={<Navigate to="/student" replace />} />
+			</Routes>
+		</Suspense>
+	);
 }

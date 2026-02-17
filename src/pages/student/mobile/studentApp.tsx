@@ -18,24 +18,24 @@ import QuestionsPage from "./questions/questionsPage";
 import VerifyCodePage from "./myPage/verifyCode";
 
 export default function StudentApp(): React.ReactElement {
-  return (
-    <Routes>
-      <Route index element={<Home />} />
-      {/* 로그인 필요 */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="mypage" element={<MyPage />} />
-        <Route path="mypage/cert" element={<Cert />} />
-        <Route path="mypage/modify" element={<UserModify />} />
-        <Route path="verify" element={<SchoolVerify />} />
-        <Route path="mypage/verify-code" element={<VerifyCodePage />} />
+	return (
+		<Routes>
+			<Route index element={<Home />} />
+			{/* 로그인 필요 */}
+			<Route element={<ProtectedRoute />}>
+				<Route path="mypage" element={<MyPage />} />
+				<Route path="mypage/cert" element={<Cert />} />
+				<Route path="mypage/modify" element={<UserModify />} />
+				<Route path="verify" element={<SchoolVerify />} />
+				<Route path="mypage/verify-code" element={<VerifyCodePage />} />
 
-        <Route path="schedule/new" element={<NewSchedule />} />
-        <Route path="schedule/:eventId" element={<EditSchedule />} />
-        <Route path="schedule/:eventDayId/detail" element={<DetailSchedule />} />
-        <Route path="schedule/:eventDayId/questions" element={<QuestionsPage />} />
+				<Route path="schedule/new" element={<NewSchedule />} />
+				<Route path="schedule/:eventId" element={<EditSchedule />} />
+				<Route path="schedule/:eventDayId/detail" element={<DetailSchedule />} />
+				<Route path="schedule/:eventDayId/questions" element={<QuestionsPage />} />
 
-        <Route path="*" element={<Navigate to="." replace />} />
-      </Route>
-    </Routes>
-  );
+				<Route path="*" element={<Navigate to="." replace />} />
+			</Route>
+		</Routes>
+	);
 }
