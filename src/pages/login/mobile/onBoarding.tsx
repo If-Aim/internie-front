@@ -35,6 +35,8 @@ export default function OnBoarding(): React.ReactElement {
     const [codeError, setCodeError] = React.useState<string | null>(null);
 
     const [isVerified, setIsVerified] = React.useState(false);
+    const [instOpen, setInstOpen] = React.useState(false);
+    const instWrapRef = React.useRef<HTMLDivElement | null>(null);
 
     const INSTITUTIONS = React.useMemo(() => { // 예시 기관 목록
         return [
@@ -63,6 +65,19 @@ export default function OnBoarding(): React.ReactElement {
             mounted = false;
         };
     }, [navigate]);
+
+    React.useEffect(() => {
+        function onDocDown(e: MouseEvent) {
+            if (!instOpen) return;
+            const el = instWrapRef.current;
+            if (!el) return;
+            if (e.target instanceof Node && !el.contains(e.target)) {
+                setInstOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", onDocDown);
+        return () => document.removeEventListener("mousedown", onDocDown);
+    }, [instOpen]);
 
     function next() {
         setStep((s) => (s < 3 ? ((s + 1) as Step) : s));
@@ -106,6 +121,11 @@ export default function OnBoarding(): React.ReactElement {
         } finally {
             setSubmitting(false);
         }
+    }
+
+    function pickInstitution(name: string) {// 기관 선택
+        setForm((p) => ({ ...p, institution: name }));
+        setInstOpen(false);
     }
 
     function finishInstitution() { // Step 4 완료 처리
@@ -184,27 +204,40 @@ export default function OnBoarding(): React.ReactElement {
 
                         <h1 className="ob-title">기관을 선택하세요</h1>
 
-                        <div className="ob-field ob-field--select">
-                            <select
-                                className={"ob-select" + (form.institution ? "" : " ob-select--placeholder")}
-                                value={form.institution}
-                                onChange={(e) => setForm((p) => ({ ...p, institution: e.target.value }))}
-                            >
-                                <option value="" disabled>
-                                    전체
-                                </option>
+                        <div className="ob-field">
+                            <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
+                                <button
+                                    type="button"
+                                    className="ob-dd-trigger"
+                                    onClick={() => setInstOpen((v) => !v)}
+                                    aria-haspopup="listbox"
+                                    aria-expanded={instOpen}
+                                >
+                                    <span className={"ob-dd-value" + (form.institution ? "" : " ob-dd-value--placeholder")}>
+                                        {form.institution || "전체"}
+                                    </span>
+                                    <span className="ob-dd-caret" aria-hidden="true">
+                                        <img src="/chevron-down.svg" alt="" />
+                                    </span>
+                                </button>
 
-                                {/* 실제 기관 목록 */}
-                                {INSTITUTIONS.map((name) => (
-                                    <option key={name} value={name}>
-                                        {name}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <span className="ob-select-caret" aria-hidden="true">
-                                <img src="/chevron-down.svg" alt="" />
-                            </span>
+                                {instOpen && (
+                                    <div className="ob-dd-menu" role="listbox" aria-label="기관 목록">
+                                        {INSTITUTIONS.map((name) => (
+                                            <button
+                                                key={name}
+                                                type="button"
+                                                className={"ob-dd-item" + (form.institution === name ? " ob-dd-item--active" : "")}
+                                                onClick={() => pickInstitution(name)}
+                                                role="option"
+                                                aria-selected={form.institution === name}
+                                            >
+                                                {name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}
