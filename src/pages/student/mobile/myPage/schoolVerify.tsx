@@ -28,7 +28,7 @@ export default function SchoolVerify() {
 
     const isDropdownOpen = query.trim() !== "" && !selectedSchool && (schools.length > 0 || searching);
 
-    function onClose() { navigate(-1); }
+    function onClose() { navigate("/student/mypage"); }
 
     function onPickSchool(s: UserSchool) {
         setSelectedSchool(s);

@@ -43,7 +43,7 @@ export default function AdminHome(): React.ReactElement {
 		<div className="admin-page">
 			<header className="admin-topbar">
 				<div className="admin-topbar-left">
-					<img className="admin-logo" src="/internie_Logo_thin.png" alt="internie" />
+					<a href="https://www.internie.com/student" target="_blank" rel="noopener noreferrer"><img className="admin-logo" src="/internie_Logo_thin.png" alt="internie" /></a>
 				</div>
 
 				<nav className="admin-topbar-tabs" aria-label="admin tabs">
