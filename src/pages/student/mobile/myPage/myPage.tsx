@@ -283,7 +283,7 @@ export default function MyPage({ onLogout }: Props) {
 						<div className="mypage-modal-body">
 							<span className="mypage-modal-title">{t("mypage_modal.title")}</span>
 							<span className="mypage-modal-reason">사유:<br/>정보 미제거, 학생증 판별 불가</span> {/* 추후 사유 노출 수정 */}
-							</div>
+						</div>
 						<button type="button" className="mypage-modal-primary" onClick={goReVerify} >
 							{t("mypage_modal.reVerify")}
 						</button>

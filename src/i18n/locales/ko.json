@@ -110,7 +110,7 @@
         "logout": "로그아웃"
     },
     "mypage_verifyUi": {
-        "pending": "인증 요청 중",
+        "pending": "재학생 인증 중",
         "rejected": "인증이 실패했어요",
         "unverified": "재학생 인증하기",
         "approved": "재학생 인증 완료",
