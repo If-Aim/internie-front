@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/userModify.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, updateMyProfile, type UserMe } from "../../../../api/client";
+import { getUserMe, updateMyProfile, type UserMe, type UserSchool } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
 
@@ -15,6 +15,17 @@ type ProfileForm = {
 
 function normalizeText(v: string) {
     return v.trim();
+}
+
+function formatSchoolName(school: UserSchool | null): string {
+    if (!school) return "학교 정보 없음";
+    const name = school.name ?? "";
+    const campus = (school.campus ?? "").trim();
+
+    if (!campus || campus === "본교") {
+        return name;
+    }
+    return `${name} (${campus})`;
 }
 
 export default function EditProfilePage(): React.ReactElement {
@@ -75,12 +86,8 @@ export default function EditProfilePage(): React.ReactElement {
         };
     }, [selectedImageFile]);
 
-    const isDefaultProfile =
-        !me?.profileImage ||
-        (me.profileImage ?? "").includes("default");
-
-    const rawServerAvatarSrc =
-        isDefaultProfile ? "/internie_mascot_normal.png" : (me?.profileImage ?? "/internie_mascot_normal.png");
+    const isDefaultProfile = !me?.profileImage || (me.profileImage ?? "").includes("default");
+    const rawServerAvatarSrc = isDefaultProfile ? "/internie_mascot_normal.png" : (me?.profileImage ?? "/internie_mascot_normal.png");
 
     const serverAvatarSrc =
         rawServerAvatarSrc.startsWith("http")
@@ -92,8 +99,8 @@ export default function EditProfilePage(): React.ReactElement {
     // 임시
     const displayEmail = (me as any)?.email ?? "이메일";
     const birth = (me as any)?.birth ?? "생년월일";
-    const schoolMajor = me?.status === "APPROVED" ? "학교명" : "재학생 인증 필요";
-
+    const schoolMajor = me?.status === "APPROVED" ? formatSchoolName(me.school) : "재학생 인증 필요";
+    
     // 변경 여부
     const isDirty = React.useMemo(() => {
         if (!initialForm) return false;

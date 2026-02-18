@@ -2,7 +2,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { getUserMe, getEventDaysByMonth, logout, type UserMe } from "../../../../api/client";
+import { getUserMe, getEventDaysByMonth, logout, type UserMe, type UserSchool } from "../../../../api/client";
 import type { EventDay } from "../../../../api/client";
 
 import "./myPage.css";
@@ -32,6 +32,20 @@ function sortKey(ed: EventDay) {
 	return { dateKey, timeKey, txCount };
 }
 
+function formatSchoolName(school: UserSchool | null): string {
+    if (!school) return "";
+
+    const name = school.name ?? "";
+    const campus = (school.campus ?? "").trim();
+
+    if (!campus || campus === "본교") {
+        return name;
+    }
+
+    return `${name} (${campus})`;
+}
+
+
 // 마이페이지 컴포넌트
 export default function MyPage({ onLogout }: Props) {
 	const { t, i18n } = useTranslation();
@@ -50,7 +64,7 @@ export default function MyPage({ onLogout }: Props) {
 	const isVerifiedStudent = me?.status === "APPROVED";
 	const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
 	const [showRejectModal, setShowRejectModal] = React.useState(false);
-	const schoolName = (me?.school?.name ?? "").trim();
+	const schoolDisplay = status === "APPROVED" ? formatSchoolName(me?.school ?? null) : null;
 
 	const verifyUi = (() => {
 		switch (status) {
@@ -84,8 +98,8 @@ export default function MyPage({ onLogout }: Props) {
 
 	const mypageSubText = (() => {
 		if (status === "APPROVED") {
-			// 학교가 있으면 학교명, 없으면 기존 문구(안전 fallback)
-			return schoolName || t("mypage_verifyUi.approved");
+			const formatted = formatSchoolName(me?.school ?? null);
+			return formatted || t("mypage_verifyUi.approved");
 		}
 		return t("mypage_verifyUi.required");
 	})();
@@ -204,7 +218,7 @@ export default function MyPage({ onLogout }: Props) {
 				<div className="mypage-greeting">
 					{t("mypage.greeting")} <span className="mypage-name">{displayName}</span>{t("mypage.greeting2")}
 				</div>
-				<div className="mypage-email-sub">{mypageSubText}</div>
+				<div className="mypage-email-sub"> {status === "APPROVED" && schoolDisplay ? schoolDisplay : mypageSubText} </div>
 			</section>
 
 			<section className="mypage-cards">
