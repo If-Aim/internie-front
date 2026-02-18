@@ -47,7 +47,7 @@ export default function MyPage({ onLogout }: Props) {
 	const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
 
 	const displayName = me?.name ?? "";
-	const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
+	const isVerifiedStudent = me?.status === "APPROVED";
 	const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
 	const [showRejectModal, setShowRejectModal] = React.useState(false);
 	const schoolName = (me?.school?.name ?? "").trim();
