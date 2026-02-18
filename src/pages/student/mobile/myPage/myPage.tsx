@@ -50,6 +50,7 @@ export default function MyPage({ onLogout }: Props) {
 	const isVerifiedStudent = me?.status === "APPROVED" && Boolean(me?.verificationImage);
 	const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
 	const [showRejectModal, setShowRejectModal] = React.useState(false);
+	const schoolName = (me?.school?.name ?? "").trim();
 
 	const verifyUi = (() => {
 		switch (status) {
@@ -83,7 +84,8 @@ export default function MyPage({ onLogout }: Props) {
 
 	const mypageSubText = (() => {
 		if (status === "APPROVED") {
-			return t("mypage_verifyUi.approved");
+			// 학교가 있으면 학교명, 없으면 기존 문구(안전 fallback)
+			return schoolName || t("mypage_verifyUi.approved");
 		}
 		return t("mypage_verifyUi.required");
 	})();

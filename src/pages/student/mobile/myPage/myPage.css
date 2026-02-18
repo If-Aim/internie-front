@@ -7,11 +7,11 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-top { display: flex; flex-direction: column; align-items: center; gap: 30px;}
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; line-height:20px; }
 .mypage-email-sub { margin-top: -18px; font-size: 16px; font-weight: 500; color: #A2A2A2; line-height: 20px; }
-.mypage-profileimg-wrap { position: relative; width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; }
+.mypage-profileimg-wrap { position: relative; width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; z-index: 0; }
 .mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: contain; }
 .mypage-school-badge { position: absolute; right: 4px; bottom: 4px; width: 50px; height: 50px; padding:5px;border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
-.mypage-verify-badge{ position: absolute; right: 6px; bottom: 6px; width: 27px; height: 27px; display: block; }
+.mypage-verify-badge{ position: absolute; right: 0px; bottom: 0px; width: 27px; height: 27px; z-index: 3; display: block; }
 
 .mypage-actions { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mypage-action-btn { height: 56px; border: 0; border-radius: 10px; background: #E6E6E6;  color: #9A9A9A; font-size: 16px; font-weight: 700; } 
