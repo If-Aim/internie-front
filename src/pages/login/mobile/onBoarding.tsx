@@ -217,7 +217,7 @@ export default function OnBoarding(): React.ReactElement {
                                         {form.institution || "전체"}
                                     </span>
                                     <span className="ob-dd-caret" aria-hidden="true">
-                                        <img src="/chevron-down.svg" alt="" />
+                                        <img src="/chevron-left.svg" alt="" />
                                     </span>
                                 </button>
 
