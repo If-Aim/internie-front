@@ -133,7 +133,9 @@ export default function OnBoarding(): React.ReactElement {
     }
 
     const canGoStep1 = form.name.trim().length > 0;
-    
+    const canGoStep2 = form.roleKeyword.trim().length > 0 || form.companyKeyword.trim().length > 0;
+    const canGoStep3 = form.verifyCode.trim().length > 0;
+
     const canFinishStep4 = isVerified && form.institution.trim().length > 0;
 
     return (
@@ -251,24 +253,24 @@ export default function OnBoarding(): React.ReactElement {
                 )}
 
                 {step === 2 && (
-                    <>
-                    <button className="ob-btn ob-btn--ghost" onClick={skipGoals} type="button">
-                        건너뛰기
-                    </button>
-                    <button className="ob-btn ob-btn--primary" onClick={next} type="button">
-                        다음
-                    </button>
+                    <>  
+                        <button className="ob-btn ob-btn--ghost" onClick={skipGoals} type="button">
+                            건너뛰기
+                        </button>
+                        <button className="ob-btn ob-btn--primary" onClick={next} type="button" disabled={!canGoStep2} >
+                            다음
+                        </button>
                     </>
                 )}
 
                 {step === 3 && (
                     <>
-                    <button className="ob-btn ob-btn--ghost" onClick={skipVerifyAndFinish} type="button">
-                        건너뛰기
-                    </button>
-                    <button className="ob-btn ob-btn--primary" onClick={submitAll} disabled={submitting} type="button">
-                        다음
-                    </button>
+                        <button className="ob-btn ob-btn--ghost" onClick={skipVerifyAndFinish} type="button">
+                            건너뛰기
+                        </button>
+                        <button className="ob-btn ob-btn--primary" onClick={submitAll} disabled={submitting || !canGoStep3} type="button" >
+                            다음
+                        </button>
                     </>
                 )}
                 {step === 4 && isVerified && (
