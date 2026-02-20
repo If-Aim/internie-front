@@ -400,7 +400,7 @@ export async function submitMyOnboarding(
     };
 
     return api<SubmitOnboardingResponse>("/users/me/onboarding", {
-        method: "POST",
+        method: "PATCH",
         body: JSON.stringify(payload),
     });
 }
