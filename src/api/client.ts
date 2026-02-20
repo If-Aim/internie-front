@@ -250,13 +250,13 @@ export type UserBase = {
 
 	interestJob?: string | null;
     interestCompany?: string | null;
+	jumpOrganization?: JumpOrganization | null;
+
+	displayName?: string | null;
+	display_name?: string | null;
+	kakaoName?: string | null;
 };
-export type SubmitOnboardingResponse = UserBase & {
-    kakaoName?: string | null;
-    interestJob?: string | null;
-    interestCompany?: string | null;
-    jumpOrganization?: JumpOrganization | null;
-};
+export type SubmitOnboardingResponse = UserBase;
 
 export type UserMe = UserBase;
 
@@ -292,6 +292,32 @@ export function getUserIdFromAccessToken(): string | null {
 
 export async function getUserMe(): Promise<UserMe> {
 	return api<UserMe>("/users/me");
+}
+
+// 온보딩 완료 판단
+export function getUserDisplayName(me: Partial<UserBase> | null | undefined): string {
+    if (!me) return "";
+    const v = (me.displayName ?? me.display_name ?? me.kakaoName ?? "").trim();
+    return v;
+}
+
+export function isOnboardingDone(me: Partial<UserBase> | null | undefined): boolean {
+    if (!me) return false;
+
+    const dn = String((me as any).displayName ?? (me as any).display_name ?? "").trim();
+
+    if (dn.toUpperCase() === "NULL") return false;
+
+    return dn.length > 0;
+}
+
+export async function routeAfterLogin(): Promise<"/student" | "/onboarding"> {
+    try {
+        const me = await getUserMe();
+        return isOnboardingDone(me) ? "/student" : "/onboarding";
+    } catch {
+        return "/student";
+    }
 }
 
 // 학교 조회

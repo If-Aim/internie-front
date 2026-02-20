@@ -1,7 +1,7 @@
 // src/pages/kakaoCallback.tsx
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { loginWithKakao } from "../api/client";
+import { loginWithKakao, routeAfterLogin } from "../api/client";
 
 export default function KakaoCallback() {
 	const [searchParams] = useSearchParams();
@@ -37,7 +37,10 @@ export default function KakaoCallback() {
 					return;
 				}
 				localStorage.setItem("accessToken", auth);
-				navigate("/student", { replace: true });
+
+				const nextPath = await routeAfterLogin();
+				navigate(nextPath, { replace: true });
+				
 			} catch (e) {
 				console.error("네트워크 에러:", e);
 				navigate("/login", { replace: true });
