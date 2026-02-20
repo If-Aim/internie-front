@@ -134,16 +134,14 @@ export default function MyPage({ onLogout }: Props) {
 	}
 	React.useEffect(() => {
 		let mounted = true;
+
 		(async () => {
 			try {
 				const res = await getUserMe();
 				if (!mounted) return;
-				
-				// 디버깅용
-				if (import.meta.env.DEV) {
-					console.log("[MyPage] /users/me response:", res);
-				}
 
+				// 매 호출마다 콘솔 출력
+				console.log("[MyPage] /users/me response:", res);
 
 				const lastStatusKey = `mypage_last_status_${res.userId}`;
 				const lastStatus = localStorage.getItem(lastStatusKey);
@@ -155,10 +153,13 @@ export default function MyPage({ onLogout }: Props) {
 				localStorage.setItem(lastStatusKey, res.status ?? "");
 				setMe(res);
 				setAvatarVersion(Date.now());
-			} catch {}
+			} catch (e) {
+				console.error("getUserMe failed:", e);
+			}
 		})();
+
 		return () => { mounted = false; };
-	}, [location.pathname]);
+	}, [location.key]);
 
 	React.useEffect(() => {
 		let mounted = true;
