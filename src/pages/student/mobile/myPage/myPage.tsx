@@ -133,14 +133,13 @@ export default function MyPage({ onLogout }: Props) {
 	}
 	React.useEffect(() => {
 		let mounted = true;
+
 		(async () => {
 			try {
 				const res = await getUserMe();
 				if (!mounted) return;
 
-				if (import.meta.env.DEV) {
-					console.log("[MyPage] /users/me response:", res);
-				}
+				console.log("[MyPage] /users/me response:", res);
 
 				const lastStatusKey = `mypage_last_status_${res.userId}`;
 				const lastStatus = localStorage.getItem(lastStatusKey);
@@ -152,11 +151,13 @@ export default function MyPage({ onLogout }: Props) {
 				localStorage.setItem(lastStatusKey, res.status ?? "");
 				setMe(res);
 				setAvatarVersion(Date.now());
-			} catch {}
+			} catch (e) {
+				console.error("getUserMe failed:", e);
+			}
 		})();
 
 		return () => { mounted = false; };
-	}, [location.key]);
+	}, [location.key]);  
 
 	React.useEffect(() => {
 		let mounted = true;
