@@ -9,11 +9,11 @@ import "../admin.css";
 function statusLabel(status: string) {
 	switch (status) {
 		case "APPROVED":
-			return "승인완료";
+			return "인증완료";
 		case "PENDING":
-			return "승인대기";
+			return "인증대기";
 		case "REJECTED":
-			return "승인거절";
+			return "인증거절";
 		default:
 			return status;
 	}

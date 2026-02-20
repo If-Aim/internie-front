@@ -10,7 +10,6 @@ type ProfileForm = {
     // nickname: string;        // TODO: 추후 활성화
     // email: string;           // TODO: 백엔드 필드 생기면
     // birth: string;           // TODO
-    // schoolMajor: string;     // TODO
 };
 
 function normalizeText(v: string) {
@@ -47,7 +46,6 @@ export default function EditProfilePage(): React.ReactElement {
                 // nickname: data.nickname ?? "",
                 // email: (data as any).email ?? "",
                 // birth: (data as any).birth ?? "",
-                // schoolMajor: (data as any).schoolMajor ?? "",
                 };
 
                 setForm(loaded);
@@ -101,7 +99,6 @@ export default function EditProfilePage(): React.ReactElement {
         // if (normalizeText(form.nickname) !== normalizeText(initialForm.nickname)) return true;
         // if (normalizeText(form.email) !== normalizeText(initialForm.email)) return true;
         // if (normalizeText(form.birth) !== normalizeText(initialForm.birth)) return true;
-        // if (normalizeText(form.schoolMajor) !== normalizeText(initialForm.schoolMajor)) return true;
 
         if (selectedImageFile) return true;
 

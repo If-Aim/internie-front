@@ -138,6 +138,12 @@ export default function MyPage({ onLogout }: Props) {
 			try {
 				const res = await getUserMe();
 				if (!mounted) return;
+				
+				// 디버깅용
+				if (import.meta.env.DEV) {
+					console.log("[MyPage] /users/me response:", res);
+				}
+
 
 				const lastStatusKey = `mypage_last_status_${res.userId}`;
 				const lastStatus = localStorage.getItem(lastStatusKey);

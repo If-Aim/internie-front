@@ -1,20 +1,20 @@
 // src/pages/login/mobile/onBoarding.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApiError, getUserMe, verifyJumpUser } from '../../../api/client';
-
+import { ApiError, getUserMe, verifyJumpUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization } from "../../../api/client";
 import "./onBoarding.css"
 
 type Step = 1 | 2 | 3 | 4;
 
 type FormState = {
     name: string;
-    roleKeyword: string;
-    companyKeyword: string;
-    selectedTags: string[];
+    interestJob: string;
+    interestCompany: string;
+    selectedTags: string[]; // 지금 UI에 유지할거면 유지
     verifyCode: string;
 
-    institution: string;
+    jumpOrganizationId: number | null;
+    jumpOrganizationName: string; // 드롭다운 표시용
 };
 
 
@@ -24,11 +24,12 @@ export default function OnBoarding(): React.ReactElement {
 
     const [form, setForm] = React.useState<FormState>({
         name: "",
-        roleKeyword: "",
-        companyKeyword: "",
+        interestJob: "",
+        interestCompany: "",
         selectedTags: [],
         verifyCode: "",
-        institution: "",
+        jumpOrganizationId: null,
+        jumpOrganizationName: "",
     });
 
     const [submitting, setSubmitting] = React.useState(false);
@@ -37,15 +38,7 @@ export default function OnBoarding(): React.ReactElement {
     const [isVerified, setIsVerified] = React.useState(false);
     const [instOpen, setInstOpen] = React.useState(false);
     const instWrapRef = React.useRef<HTMLDivElement | null>(null);
-
-    const INSTITUTIONS = React.useMemo(() => { // 예시 기관 목록
-        return [
-            "전체",
-            "기관 A",
-            "기관 B",
-            "기관 C",
-        ];
-    }, []);
+    const [institutions, setInstitutions] = React.useState<JumpOrganization[]>([]);
 
     React.useEffect(() => {
         let mounted = true;
@@ -88,11 +81,21 @@ export default function OnBoarding(): React.ReactElement {
     // }  추후 필요 시 사용  ("이전") 버튼용
 
     function skipGoals() {
-        setForm((prev) => ({ ...prev, roleKeyword: "", companyKeyword: "", selectedTags: [] }));
+        setForm((prev) => ({ ...prev, interestJob: "", interestCompany: "", selectedTags: [] }));
         setStep(3);
     }
     async function skipVerifyAndFinish() {
         setCodeError(null);
+
+        try {
+            await submitMyOnboarding({
+                name: form.name,
+                interestJob: form.interestJob,
+                interestCompany: form.interestCompany,
+            });
+        } catch {
+
+        }
 
         navigate("/student", { replace: true });
     }
@@ -100,16 +103,28 @@ export default function OnBoarding(): React.ReactElement {
         const code = form.verifyCode.trim();
 
         if (!code) {
+            try {
+                await submitMyOnboarding({
+                    name: form.name,
+                    interestJob: form.interestJob,
+                    interestCompany: form.interestCompany,
+                });
+            } catch {}
             navigate("/student", { replace: true });
             return;
         }
 
         setSubmitting(true);
         setCodeError(null);
+
         try {
             await verifyJumpUser(code);
-
             setIsVerified(true);
+
+            // 점프기관 목록 조회
+            const orgs = await getMyJumpOrganizations();
+            setInstitutions(orgs);
+
             setStep(4);
         } catch (e) {
             if (e instanceof ApiError) {
@@ -123,20 +138,37 @@ export default function OnBoarding(): React.ReactElement {
         }
     }
 
-    function pickInstitution(name: string) {// 기관 선택
-        setForm((p) => ({ ...p, institution: name }));
+    function pickInstitution(org: JumpOrganization) {
+        setForm((p) => ({
+            ...p,
+            jumpOrganizationId: org.id,
+            jumpOrganizationName: org.name,
+        }));
         setInstOpen(false);
     }
 
-    function finishInstitution() { // Step 4 완료 처리
+    async function finishInstitution() {
+        if (!form.jumpOrganizationId) return;
+
+        try {
+            await submitMyOnboarding({
+                name: form.name,
+                interestJob: form.interestJob,
+                interestCompany: form.interestCompany,
+                jumpOrganizationId: form.jumpOrganizationId,
+            });
+        } catch (e) {
+            
+        }
+
         navigate("/student", { replace: true });
     }
 
     const canGoStep1 = form.name.trim().length > 0;
-    const canGoStep2 = form.roleKeyword.trim().length > 0 || form.companyKeyword.trim().length > 0;
+    const canGoStep2 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
     const canGoStep3 = form.verifyCode.trim().length > 0;
 
-    const canFinishStep4 = isVerified && form.institution.trim().length > 0;
+    const canFinishStep4 = isVerified && form.jumpOrganizationId != null;
 
     return (
         <div className="ob-step">
@@ -162,20 +194,20 @@ export default function OnBoarding(): React.ReactElement {
 
                         <div className="ob-field ob-field--icon">
                             <input
-                            className="ob-input"
-                            value={form.roleKeyword}
-                            onChange={(e) => setForm((p) => ({ ...p, roleKeyword: e.target.value }))}
-                            placeholder="관심있는 직무를 입력하세요"
+                                className="ob-input"
+                                value={form.interestJob}
+                                onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
+                                placeholder="관심있는 직무를 입력하세요"
                             />
                             <span className="ob-icon" aria-hidden="true"><img src="/search-01.svg" alt="" /></span>
                         </div>
 
                         <div className="ob-field ob-field--icon">
                             <input
-                            className="ob-input"
-                            value={form.companyKeyword}
-                            onChange={(e) => setForm((p) => ({ ...p, companyKeyword: e.target.value }))}
-                            placeholder="희망하는 기업을 입력하세요"
+                                className="ob-input"
+                                value={form.interestCompany}
+                                onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
+                                placeholder="희망하는 기업을 입력하세요"
                             />
                             <span className="ob-icon" aria-hidden="true"><img src="/search-01.svg" alt="" /></span>
                         </div>
@@ -208,15 +240,9 @@ export default function OnBoarding(): React.ReactElement {
 
                         <div className="ob-field">
                             <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
-                                <button
-                                    type="button"
-                                    className="ob-dd-trigger"
-                                    onClick={() => setInstOpen((v) => !v)}
-                                    aria-haspopup="listbox"
-                                    aria-expanded={instOpen}
-                                >
-                                    <span className={"ob-dd-value" + (form.institution ? "" : " ob-dd-value--placeholder")}>
-                                        {form.institution || "전체"}
+                                <button type="button" className="ob-dd-trigger" onClick={() => setInstOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={instOpen} >
+                                    <span className={"ob-dd-value" + (form.jumpOrganizationName ? "" : " ob-dd-value--placeholder")}>
+                                        {form.jumpOrganizationName || "기관 선택"}
                                     </span>
                                     <span className="ob-dd-caret" aria-hidden="true">
                                         <img src="/chevron-left.svg" alt="" />
@@ -225,16 +251,16 @@ export default function OnBoarding(): React.ReactElement {
 
                                 {instOpen && (
                                     <div className="ob-dd-menu" role="listbox" aria-label="기관 목록">
-                                        {INSTITUTIONS.map((name) => (
+                                        {institutions.map((org) => (
                                             <button
-                                                key={name}
+                                                key={org.id}
                                                 type="button"
-                                                className={"ob-dd-item" + (form.institution === name ? " ob-dd-item--active" : "")}
-                                                onClick={() => pickInstitution(name)}
+                                                className={"ob-dd-item" + (form.jumpOrganizationId === org.id ? " ob-dd-item--active" : "")}
+                                                onClick={() => pickInstitution(org)}
                                                 role="option"
-                                                aria-selected={form.institution === name}
+                                                aria-selected={form.jumpOrganizationId === org.id}
                                             >
-                                                {name}
+                                                {org.name}
                                             </button>
                                         ))}
                                     </div>

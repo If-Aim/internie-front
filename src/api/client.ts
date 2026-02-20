@@ -355,6 +355,57 @@ export async function updateMyProfile(input: UpdateMyProfileInput): Promise<User
 	return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
 
+// 점프기관 타입
+export type JumpOrganization = {
+    id: number;
+    name: string;
+};
+
+// 점프기관 목록 조회 (점프학생 전용)
+export async function getMyJumpOrganizations(): Promise<JumpOrganization[]> {
+    return api<JumpOrganization[]>("/users/me/jump-organizations", { method: "GET" });
+}
+
+// 온보딩
+export type SubmitOnboardingInput = {
+    name: string;
+    interestJob?: string | null;
+    interestCompany?: string | null;
+    jumpOrganizationId?: number | null;
+};
+
+export type SubmitOnboardingResponse = UserBase & {
+    kakaoName?: string | null;
+    interestJob?: string | null;
+    interestCompany?: string | null;
+    jumpOrganization?: JumpOrganization | null;
+};
+
+export async function submitMyOnboarding(
+    input: SubmitOnboardingInput
+): Promise<SubmitOnboardingResponse> {
+    const name = (input.name ?? "").trim();
+    if (!name) {
+        throw new ApiError(400, "name은 필수값입니다.");
+    }
+
+    const payload: SubmitOnboardingInput = {
+        name,
+        interestJob: (input.interestJob ?? "").trim() || null,
+        interestCompany: (input.interestCompany ?? "").trim() || null,
+        jumpOrganizationId:
+            input.jumpOrganizationId != null && !Number.isNaN(Number(input.jumpOrganizationId))
+                ? Number(input.jumpOrganizationId)
+                : null,
+    };
+
+    return api<SubmitOnboardingResponse>("/users/me/onboarding", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+
 // 수료증 관련 타입
 export type AdminUserFile = {
 	fileId: number;
