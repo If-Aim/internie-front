@@ -102,7 +102,6 @@ export default function MyPage({ onLogout }: Props) {
 			? `${rawAvatarSrc}${rawAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion || 0}`
 			: rawAvatarSrc;
 	const [/*recent*/, setRecent] = React.useState<EventDay[]>([]);
-	const [targetCompany, /*setTargetCompany*/] = React.useState<string | null>(null);
 
 	// mypage-menu-item 서비스 준비중 팝업알림 
 	const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
@@ -245,7 +244,7 @@ export default function MyPage({ onLogout }: Props) {
 					<button type="button" className="mypage-menu-item" onClick={handleServicePreparing}>
 						<span className="mypage-menu-title">{t("mypage.targetCompany")}</span>
 						<span className="mypage-menu-right">
-							<span className="mypage-menu-value">{targetCompany ?? t("mypage.notSet")}</span>
+							<span className="mypage-menu-value">{me?.interestCompany?.trim() ? me.interestCompany : t("mypage.notSet")}</span>
 							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
 						</span>
 					</button>

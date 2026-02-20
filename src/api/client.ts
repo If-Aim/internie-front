@@ -228,6 +228,16 @@ export type UserSchool = {
 	campus: string;
 	region: string;
 };
+export type JumpOrganization = {
+    id: number;
+    name: string;
+};
+export type SubmitOnboardingInput = {
+    name: string;
+    interestJob?: string | null;
+    interestCompany?: string | null;
+    jumpOrganizationId?: number | null;
+};
 export type UserBase = {
 	userId: number;
 	name: string;
@@ -237,7 +247,17 @@ export type UserBase = {
 	role: string;
 	status: string;
 	school: UserSchool | null;
+
+	interestJob?: string | null;
+    interestCompany?: string | null;
 };
+export type SubmitOnboardingResponse = UserBase & {
+    kakaoName?: string | null;
+    interestJob?: string | null;
+    interestCompany?: string | null;
+    jumpOrganization?: JumpOrganization | null;
+};
+
 export type UserMe = UserBase;
 
 export function getUserIdFromAccessToken(): string | null {
@@ -355,11 +375,6 @@ export async function updateMyProfile(input: UpdateMyProfileInput): Promise<User
 	return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
 
-// 점프기관 타입
-export type JumpOrganization = {
-    id: number;
-    name: string;
-};
 
 // 점프기관 목록 조회 (점프학생 전용)
 export async function getMyJumpOrganizations(): Promise<JumpOrganization[]> {
@@ -367,20 +382,6 @@ export async function getMyJumpOrganizations(): Promise<JumpOrganization[]> {
 }
 
 // 온보딩
-export type SubmitOnboardingInput = {
-    name: string;
-    interestJob?: string | null;
-    interestCompany?: string | null;
-    jumpOrganizationId?: number | null;
-};
-
-export type SubmitOnboardingResponse = UserBase & {
-    kakaoName?: string | null;
-    interestJob?: string | null;
-    interestCompany?: string | null;
-    jumpOrganization?: JumpOrganization | null;
-};
-
 export async function submitMyOnboarding(
     input: SubmitOnboardingInput
 ): Promise<SubmitOnboardingResponse> {
