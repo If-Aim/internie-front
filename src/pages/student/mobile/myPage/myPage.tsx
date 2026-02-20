@@ -138,6 +138,10 @@ export default function MyPage({ onLogout }: Props) {
 				const res = await getUserMe();
 				if (!mounted) return;
 
+				if (import.meta.env.DEV) {
+					console.log("[MyPage] /users/me response:", res);
+				}
+
 				const lastStatusKey = `mypage_last_status_${res.userId}`;
 				const lastStatus = localStorage.getItem(lastStatusKey);
 
@@ -150,8 +154,9 @@ export default function MyPage({ onLogout }: Props) {
 				setAvatarVersion(Date.now());
 			} catch {}
 		})();
+
 		return () => { mounted = false; };
-	}, [location.pathname]);
+	}, [location.key]);
 
 	React.useEffect(() => {
 		let mounted = true;
