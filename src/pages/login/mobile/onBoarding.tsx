@@ -158,7 +158,7 @@ export default function OnBoarding(): React.ReactElement {
                 jumpOrganizationId: form.jumpOrganizationId,
             });
         } catch (e) {
-            
+
         }
 
         navigate("/student", { replace: true });
@@ -199,7 +199,6 @@ export default function OnBoarding(): React.ReactElement {
                                 onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
                                 placeholder="관심있는 직무를 입력하세요"
                             />
-                            <span className="ob-icon" aria-hidden="true"><img src="/search-01.svg" alt="" /></span>
                         </div>
 
                         <div className="ob-field ob-field--icon">
@@ -209,7 +208,6 @@ export default function OnBoarding(): React.ReactElement {
                                 onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
                                 placeholder="희망하는 기업을 입력하세요"
                             />
-                            <span className="ob-icon" aria-hidden="true"><img src="/search-01.svg" alt="" /></span>
                         </div>
                     </>
                 )}
