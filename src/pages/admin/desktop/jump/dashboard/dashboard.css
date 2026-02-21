@@ -118,10 +118,10 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 
 .jump-dashboard-org{ position: relative; width: 330px; }
 .jump-dashboard-org-trigger{ width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #F0F6FF; font-size: 16px; font-weight: 700; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.org-arrow{ width: 24px; transform: rotate(90deg); transition: transform .2s ease; }
-.jump-dashboard-org-menu{ position: absolute; top: 72px; left: 0; right: 0; background: #fff; border-radius: 10px; border: 1px solid #E6E6E6; box-shadow: 0 10px 20px rgba(0,0,0,0.08); padding: 8px; z-index: 20; } 
+.org-arrow{ width: 24px; transition: transform .2s ease; }
+.jump-dashboard-org-menu{ position: absolute; top: 72px; left: 0; right: 0; background: #F0F6FF; border-radius: 10px; border: 1px solid #E6E6E6; box-shadow: 0 10px 20px rgba(0,0,0,0.08); padding: 8px; z-index: 20; } 
 .jump-dashboard-org-item{ width: 100%; height: 44px; border-radius: 8px; border: none; background: transparent; text-align: left; padding: 0 12px; font-weight: 600; cursor: pointer; } 
-.jump-dashboard-org-item:hover{ background: #F2F6FF; }
+.jump-dashboard-org-item:hover{ background: #F0F6FF; }
 
 .jump-dashboard-week-grid { display: flex; flex-direction: column; gap: 12px; } 
 .jump-dashboard-week-grid-head { display: grid; grid-template-columns: 420px 1fr; align-items: end; } 
