@@ -223,7 +223,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						</div>
 
 						<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-							<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-01.svg"} alt="" />
+							<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
 							<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 						</div>
 					</div>
