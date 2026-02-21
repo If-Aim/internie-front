@@ -66,8 +66,9 @@ function getWeekLabel(weekStartMonday: Date) {
     return `${y}년 ${m}월 ${weekNo}주차`;
 }
 
-function displaySchoolOrNickname(u: JumpAdminStudent) {
-    return (u.nickname ?? "").trim() || "-";
+function displaySchoolName(u: JumpAdminStudent) {
+    const schoolName = (u.school?.name ?? "").trim();
+    return schoolName || "-";
 }
 
 function getOrgName(u: JumpAdminStudent) {
@@ -328,7 +329,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                                 <div key={s.userId} className="jump-dashboard-week-row">
                                     <div className="jump-dashboard-student">
                                         <div className="jump-dashboard-student-name">{s.name}</div>
-                                        <div className="jump-dashboard-student-school">{displaySchoolOrNickname(s)}</div>
+                                        <div className="jump-dashboard-student-school">{displaySchoolName(s)}</div>
                                     </div>
 
                                     <div className="jump-dashboard-cells">
