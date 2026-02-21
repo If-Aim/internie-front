@@ -54,6 +54,18 @@ function getWeekDays(base: Date): WeekDay[] {
     });
 }
 
+function isToday(ymd: string) {
+    const now = new Date();
+    const today =
+        now.getFullYear() +
+        "-" +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(now.getDate()).padStart(2, "0");
+
+    return ymd === today;
+}
+
 function getWeekLabel(weekStartMonday: Date) {
     const y = weekStartMonday.getFullYear();
     const m = weekStartMonday.getMonth() + 1;
@@ -343,7 +355,14 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                         <div className="jump-dashboard-week-grid-spacer" />
                         <div className="jump-dashboard-week-days">
                             {weekDays.map((d) => (
-                                <div key={d.ymd} className="jump-dashboard-week-day">
+                                <div
+                                    key={d.ymd}
+                                    className={
+                                        isToday(d.ymd)
+                                            ? "jump-dashboard-week-day jump-dashboard-week-day--today"
+                                            : "jump-dashboard-week-day"
+                                    }
+                                >
                                     {d.labelKo}
                                 </div>
                             ))}
