@@ -83,11 +83,12 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
 
     const [weekAnchor, setWeekAnchor] = React.useState<Date>(() => new Date());
     const [open, setOpen] = React.useState(false);
-    
+
     const weekStart = React.useMemo(() => startOfWeekMonday(weekAnchor), [weekAnchor]);
     const weekDays = React.useMemo(() => getWeekDays(weekAnchor), [weekAnchor]);
 
     const [calCache, setCalCache] = React.useState<Record<string, JumpAdminStudentCalendarResponse>>({});
+    const orgRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
         let mounted = true;
@@ -188,6 +189,25 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
             mounted = false;
         };
     }, [visibleStudents, monthsToLoad]); 
+
+    React.useEffect(() => {
+        if (!open) return;
+
+        function onDocMouseDown(e: MouseEvent) {
+            const el = orgRef.current;
+            if (!el) return;
+
+            if (e.target instanceof Node && !el.contains(e.target)) {
+                setOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", onDocMouseDown);
+
+        return () => {
+            document.removeEventListener("mousedown", onDocMouseDown);
+        };
+    }, [open]);
 
     function findDailyEventCount(studentId: number, ymd: string) {
         const [yStr, mStr] = ymd.split("-"); 
@@ -295,7 +315,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                     </div>
 
                     <div className="jump-dashboard-week-right">
-                        <div className="jump-dashboard-org">
+                        <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
                             <button type="button" className="jump-dashboard-org-trigger" onClick={() => setOpen((prev) => !prev)} >
                                 {selectedOrg || "전체"}
                                 <img className="org-arrow" src="/chevron-right.svg" />
