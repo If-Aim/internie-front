@@ -195,10 +195,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
                 <div className="jump-users-filters">
 					<div className="jump-users-filter">
 						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-							<button type="button" className="jump-users-org-trigger" onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" > 
-								<img className="jump-users-org-filter" src="/mynaui_filter.svg" alt="" />
+							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" > 
+								<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
 								{selectedOrg || "전체"}
-								<img className="jump-users-org-arrow" src="/chevron-right.svg" alt="" />
+								<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
 							</button>
 
 							{open && (
