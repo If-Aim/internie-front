@@ -1,5 +1,5 @@
 /* src/pages/admin/desktop/default/admin.css */
-.jump-admin-page{height: 100vh;background: var(--bg);color: #000;display: flex;flex-direction: column;}
+.jump-admin-page{min-height: 100vh; height: auto; background: var(--bg);color: #000;display: flex;flex-direction: column;}
 .jump-report-scroll {overflow-x: auto;overflow-y:auto; scrollbar-width: none;-ms-overflow-style: none;}
 .jump-report-scroll::-webkit-scrollbar {display: none;}
 .jump-report-scroll-inner {min-width: 1280px;}
@@ -19,7 +19,7 @@
 .jump-admin-topbar-right img{width:50px;border-radius: 50%;}
 
 /* ===== Body ===== */
-.jump-admin-body{padding: 55px 38px 43px 48px;  flex: 1 1 auto;overflow-y: auto; overflow-x: hidden;min-height:0;}
+.jump-admin-body{padding: 55px 38px 43px 48px;  flex: 1 1 auto; overflow: visible; overflow-y: auto; overflow-x: hidden;min-height:0;}
 .jump-admin-surface{max-width: 1280px;margin: 0 auto;}
 .jump-admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 59px;align-items: start;}
 
