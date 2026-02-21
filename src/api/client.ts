@@ -295,20 +295,27 @@ export async function getUserMe(): Promise<UserMe> {
 }
 
 // 온보딩 완료 판단
+function normalizeNullableText(v: unknown): string {
+    const s = String(v ?? "").trim();
+    if (!s) return "";
+    const lower = s.toLowerCase();
+    if (lower === "null") return "";
+    if (lower === "undefined") return "";
+    return s;
+}
+
 export function getUserDisplayName(me: Partial<UserBase> | null | undefined): string {
     if (!me) return "";
-    const v = (me.displayName ?? me.display_name ?? me.kakaoName ?? "").trim();
-    return v;
+    return normalizeNullableText((me as any).name) || normalizeNullableText((me as any).kakaoName);
 }
 
 export function isOnboardingDone(me: Partial<UserBase> | null | undefined): boolean {
     if (!me) return false;
 
-    const dn = String((me as any).displayName ?? (me as any).display_name ?? "").trim();
+    const name = normalizeNullableText((me as any).name);
+    if (name.toUpperCase() === "NULL") return false;
 
-    if (dn.toUpperCase() === "NULL") return false;
-
-    return dn.length > 0;
+    return name.length > 0;
 }
 
 export async function routeAfterLogin(): Promise<"/student" | "/onboarding"> {
