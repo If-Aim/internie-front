@@ -97,9 +97,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                 const list = await getJumpAdminStudents();
                 if (!mounted) return;
                 setStudents(list);
-
-                const firstOrg = (list[0] ? getOrgName(list[0]) : "").trim();
-                setSelectedOrg(firstOrg);
+                setSelectedOrg("");
             } catch (e) {
                 if (!mounted) return;
                 console.error(e);

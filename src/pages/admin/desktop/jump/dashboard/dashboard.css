@@ -116,8 +116,11 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-navbtn img { width: 24px; }
 .jump-dashboard-week-navbtn:hover { background: rgba(17, 24, 39, 0.06); }
 
-.jump-dashboard-org-select { height: 66px; min-width: 330px; border-radius: 10px; border: 1px solid #E6E6E6; background: #F0F6FF; font-size: 16px; font-weight: 700; color: #000; padding: 0 27px; }
-
+.jump-dashboard-org-select { height: 66px; min-width: 330px; border-radius: 10px; border: 1px solid #E6E6E6; background: #F0F6FF; font-size: 16px; font-weight: 700; color: #000; padding: 0 27px; background-image: url("/chevron-right.svg"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px auto; } 
+.jump-dashboard-org-select:hover { border-color: #cfd8ff; } 
+.jump-dashboard-org-select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(189, 216, 255, 0.6); }
+.jump-dashboard-org-select:disabled { opacity: 0.6; cursor: not-allowed; 
+}
 .jump-dashboard-week-grid { display: flex; flex-direction: column; gap: 12px; } 
 .jump-dashboard-week-grid-head { display: grid; grid-template-columns: 420px 1fr; align-items: end; } 
 .jump-dashboard-week-grid-spacer { height: 1px; }
