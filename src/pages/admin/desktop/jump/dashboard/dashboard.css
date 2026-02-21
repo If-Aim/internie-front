@@ -106,7 +106,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-kpi-arrow img { width: 24px;} 
 
 .jump-dashboard-week-card { background: #fff; border-radius: 10px; border: 1px solid #E6E6E6; padding: 20px 75px 52px 53px; }
-.jump-dashboard-week-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 122px; }
+.jump-dashboard-week-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .jump-dashboard-week-left { display: flex; align-items: center; gap: 20px; }
 .jump-dashboard-week-label { font-size: 24px; font-weight: 700; color: #000; }
 .jump-dashboard-week-nav { display: flex; gap: 13px; } 
