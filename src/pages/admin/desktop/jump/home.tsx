@@ -52,7 +52,7 @@ export default function JumpAdminHome(): React.ReactElement {
 
 						<nav className="jump-admin-topbar-tabs" aria-label="admin tabs">
 							<NavLink
-								to="/jump-admin/reports"
+								to="/jump-admin/dashboard"
 								className={({ isActive }) => (isActive ? "jump-admin-tab jump-admin-tab--active" : "jump-admin-tab")}
 							>
 								<span>대시보드</span>

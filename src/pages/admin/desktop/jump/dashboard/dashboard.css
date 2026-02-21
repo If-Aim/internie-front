@@ -111,7 +111,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-label { font-size: 24px; font-weight: 700; color: #000; }
 .jump-dashboard-week-nav { display: flex; gap: 13px; } 
 
-.jump-dashboard-week-navbtn { width: 40px; height: 40px; border: none; border-radius: 10px; background: transparent; cursor: pointer; }
+.jump-dashboard-week-navbtn { width: 40px; height: 40px; border: none; border-radius: 10px; background: #EEE; cursor: pointer; }
 .jump-dashboard-week-navbtn img { width: 24px; }
 .jump-dashboard-week-navbtn:hover { background: rgba(17, 24, 39, 0.06); }
 
@@ -120,7 +120,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-grid { display: flex; flex-direction: column; gap: 12px; } 
 .jump-dashboard-week-grid-head { display: grid; grid-template-columns: 420px 1fr; align-items: end; } 
 .jump-dashboard-week-grid-spacer { height: 1px; }
-.jump-dashboard-week-days { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; color: #979797; font-weight: 700; }
+.jump-dashboard-week-days { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; color: #979797; font-weight: 700; line-height: 20px;}
 .jump-dashboard-week-day { font-size: 12px; }
 
 .jump-dashboard-week-rows { display: flex; flex-direction: column; gap: 39px; padding-top: 43px; }
@@ -128,7 +128,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-student { display: flex; flex-direction: column; gap: 6px; padding-left: 10px; }
 .jump-dashboard-student-name { font-size: 16px; font-weight: 700; color: #000; }
 .jump-dashboard-student-school { font-size: 12px; font-weight: 400; color: #6B6B6B; }
-.jump-dashboard-cells { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; gap: 39px; }
+.jump-dashboard-cells { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; }
 .jump-dashboard-cell { width: 40px; height: 40px; border-radius: 6px; background: #F1F1F1; }
 .jump-dashboard-cell--on { background: var(--primary); } 
 .jump-dashboard-loading { padding: 18px 10px; font-weight: 700; color: #666; }
