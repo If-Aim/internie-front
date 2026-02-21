@@ -23,7 +23,7 @@
 .jump-admin-surface{max-width: 1280px;margin: 0 auto;}
 .jump-admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 59px;align-items: start;}
 
-.jump-admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 9px 13px 0 0;}
+.jump-admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 0 13px 0 0;}
 .jump-admin-section-title{font-size: 32px;font-weight: 700;line-height:50px;margin-bottom:12px;}
 .jump-admin-section-title-badge{ display: block; width: 89px; }
 .jump-admin-section-title-badge img{ width: 89px; }

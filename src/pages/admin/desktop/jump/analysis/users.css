@@ -14,12 +14,13 @@
 .jump-users-org-item { width: 100%; height: 50px; border-radius: 10px; border: none; background: #fff; text-align: left; padding: 0 48px; font-size: 16px;  font-weight: 700; cursor: pointer; } 
 .jump-users-org-item:hover { background: #d6d6d6; }
 
-.jump-users-empty { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;  gap: 25px; }
+.jump-users-right-card { display: flex; }
+.jump-users-empty { width: 100%; height: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;  gap: 25px; }
 .jump-users-empty img { width: 119px; height: auto; user-select: none; }
 .jump-users-empty-title { font-size: 16px; font-weight: 500; color: #979797; line-height: 40px; }
 
-.jump-users-detail-card { width: 100%; min-height: 720px; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; padding: 28px; } 
-.jump-users-detail { display: flex; flex-direction: column; min-height: 640px; }
+.jump-users-detail-card { width: 100%; min-height: 720px; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; padding: 83px 73px 41px; display: flex; flex: 1;} 
+.jump-users-detail { display: flex; flex-direction: column; min-height: 720px; flex: 1;}
 .jump-users-detail-head { display: flex; align-items: center; justify-content: center; position: relative; padding-top: 4px; margin-bottom: 22px; }
 .jump-users-detail-title { font-weight: 700; font-size: 28px; } 
 .jump-users-trash { position: absolute; right: 0; top: 6px; width: 32px; height: 32px; border: 1px solid #E6E6E6; border-radius: 6px; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -30,4 +31,4 @@
 .jump-users-info-label { font-weight: 400; color: #6B6B6B; }
 .jump-users-info-value { font-weight: 400; text-align: right; color: #000; line-height: 18px;}
 
-.jump-users-record-btn { width: 100%; max-width: 283px; height: 53px; border-radius: 10px; border: none; cursor: pointer; background: var(--primary); color: #fff; font-weight: 400; font-size: 16px; margin: auto; }
+.jump-users-record-btn { width: 100%; max-width: 283px; height: 53px; border-radius: 10px; border: none; cursor: pointer; background: var(--primary); color: #fff; font-weight: 400; font-size: 16px; margin-top: 169px; }
