@@ -756,8 +756,8 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 						<button
 						className="drawer-menu-item"
 						onClick={() => {
-							onRequireAuth("/jump-admin/reports", () => {
-							navigate("/jump-admin/reports");
+							onRequireAuth("/jump-admin/dashboard", () => {
+							navigate("/jump-admin/dashboard");
 							closeWithSnap();
 							});
 						}}
