@@ -1,4 +1,9 @@
 /* src/pages/admin/desktop/default/admin.css */
+#root:has(.jump-admin-page) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
 .jump-admin-page{min-height: 100vh; height: auto; background: var(--bg);color: #000;display: flex;flex-direction: column;}
 .jump-report-scroll {overflow-x: auto;overflow-y:auto; scrollbar-width: none;-ms-overflow-style: none;}
 .jump-report-scroll::-webkit-scrollbar {display: none;}
