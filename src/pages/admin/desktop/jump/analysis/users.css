@@ -21,13 +21,13 @@
 
 .jump-users-detail-card { width: 100%; min-height: 720px; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; padding: 83px 73px 41px; display: flex; flex: 1;} 
 .jump-users-detail { display: flex; flex-direction: column; flex: 1;}
-.jump-users-detail-head { display: flex; align-items: center; justify-content: center; position: relative; padding-top: 4px; margin-bottom: 22px; }
+.jump-users-detail-head { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 49px; }
 .jump-users-detail-title { font-weight: 700; font-size: 28px; } 
 .jump-users-trash { position: absolute; right: 0; top: 6px; width: 32px; height: 32px; border: 1px solid #E6E6E6; border-radius: 6px; background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .jump-users-trash img { width: 24px; height: 24x; }
 
-.jump-users-info { width: 100%; max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-.jump-users-info-row { width: 100%; height: 48px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; display: grid; grid-template-columns: 75px 1fr; align-items: center; padding: 0 16px; }
+.jump-users-info { margin: 0 48px; display: flex; flex-direction: column; gap: 16px; }
+.jump-users-info-row { width: 100%; height: 48px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; display: grid; grid-template-columns: 75px 1fr; align-items: center; padding: 0 31px; }
 .jump-users-info-label { font-weight: 400; color: #6B6B6B; }
 .jump-users-info-value { font-weight: 400; text-align: right; color: #000; line-height: 18px;}
 
