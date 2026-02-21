@@ -90,13 +90,13 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 
 
 /* ===== Page Wrapper ===== */
-.jump-dashboard { display: flex; flex-direction: column; gap: 26px; }
+.jump-dashboard { display: flex; flex-direction: column; gap: 21px; }
 
-.jump-dashboard-head { display: flex; flex-direction: column; gap: 20px; }
-.jump-dashboard-title { display: flex; flex-direction: column; gap: 6px; }
+.jump-dashboard-head { display: flex; flex-direction: column; gap: 33px; }
+.jump-dashboard-title { display: flex; flex-direction: column; }
 .jump-dashboard-title-badge { display: block; width: 89px; }
 .jump-dashboard-title-badge img{ width: 89px; }
-.jump-dashboard-title-main { font-size: 32px; font-weight: 700; color: #000; }
+.jump-dashboard-title-main { font-size: 32px; font-weight: 700; line-height: 50px;color: #000; }
 
 .jump-dashboard-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .jump-dashboard-kpi { height: 160px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; padding: 29px 11px 30px 29px; text-align: left; cursor: pointer; }
