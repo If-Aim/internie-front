@@ -112,7 +112,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-nav { display: flex; gap: 13px; } 
 
 .jump-dashboard-week-navbtn { width: 40px; height: 40px; border: none; border-radius: 999px; background: #EEE; cursor: pointer; }
-.jump-dashboard-week-navbtn.next-week { rotate:calc(-90deg); }
+.next-week { rotate:calc(-90deg); }
 .jump-dashboard-week-navbtn img { width: 24px; }
 .jump-dashboard-week-navbtn:hover { background: rgba(17, 24, 39, 0.06); }
 
