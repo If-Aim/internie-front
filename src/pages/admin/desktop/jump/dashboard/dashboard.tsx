@@ -82,7 +82,8 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
     const [selectedOrg, setSelectedOrg] = React.useState<string>("");
 
     const [weekAnchor, setWeekAnchor] = React.useState<Date>(() => new Date());
-
+    const [open, setOpen] = React.useState(false);
+    
     const weekStart = React.useMemo(() => startOfWeekMonday(weekAnchor), [weekAnchor]);
     const weekDays = React.useMemo(() => getWeekDays(weekAnchor), [weekAnchor]);
 
@@ -294,14 +295,26 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                     </div>
 
                     <div className="jump-dashboard-week-right">
-                        <select className="jump-dashboard-org-select" value={selectedOrg} onChange={(e) => setSelectedOrg(e.target.value)} disabled={loading} >
-                            <option value="">전체</option>
-                            {orgOptions.map((org) => (
-                                <option key={org} value={org}>
-                                    {org}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="jump-dashboard-org">
+                            <button type="button" className="jump-dashboard-org-trigger" onClick={() => setOpen((prev) => !prev)} >
+                                {selectedOrg || "전체"}
+                                <img className="org-arrow" src="/chevron-right.svg" />
+                            </button>
+
+                            {open && (
+                                <div className="jump-dashboard-org-menu">
+                                    <button className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+                                        전체
+                                    </button>
+
+                                    {orgOptions.map((org) => (
+                                        <button key={org} className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
+                                            {org}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
