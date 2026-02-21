@@ -200,48 +200,20 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 					<div className="jump-users-filters">
 						<div className="jump-users-filter">
 							<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-								<button
-									type="button"
-									className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
-									onClick={() => setOpen((prev) => !prev)}
-									aria-label="organization filter"
-								>
-									<img
-										className="jump-users-org-filter"
-										src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"}
-										alt=""
-									/>
+								<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
+									<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
 									<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-									<img
-										className="jump-users-org-arrow"
-										src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"}
-										alt=""
-									/>
+									<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
 								</button>
 
 								{open && (
 									<div className="jump-users-org-menu">
-										<button
-											type="button"
-											className="jump-users-org-item"
-											onClick={() => {
-												setSelectedOrg("");
-												setOpen(false);
-											}}
-										>
+										<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
 											전체
 										</button>
 
 										{orgOptions.map((org) => (
-											<button
-												key={org}
-												type="button"
-												className="jump-users-org-item"
-												onClick={() => {
-													setSelectedOrg(org);
-													setOpen(false);
-												}}
-											>
+											<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
 												{org}
 											</button>
 										))}
@@ -250,14 +222,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							</div>
 						</div>
 
-						<div className="jump-users-search">
-							<input
-								className="jump-users-search-input"
-								value={query}
-								onChange={(e) => setQuery(e.target.value)}
-								placeholder="검색"
-								aria-label="search"
-							/>
+						<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+							<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-01.svg"} alt="" />
+							<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 						</div>
 					</div>
 
