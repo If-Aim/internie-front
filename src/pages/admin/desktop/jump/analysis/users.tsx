@@ -172,11 +172,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						<div className="jump-admin-section-title-badge"><img src="/jump-logo.png"></img></div>
                         <div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
                     </div>
-
-                    <div className="jump-admin-section-count" aria-label="participant count">
-                        <span className="jump-admin-count-strong">{filtered.length}</span>
-                        <span className="jump-admin-count-total">명</span>
-                    </div>
                 </div>
 
                 <div className="jump-users-filters">
@@ -227,11 +222,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
                                 >
                                     <div className="jump-admin-badge">{idx + 1}</div>
                                     <div className="jump-admin-user-name">{displayName}</div>
-                                    <div className="jump-admin-user-school">{orgName}</div>
-                                    <div className="jump-admin-user-status-pill status--etc" />
-                                    <div className="jump-admin-chevron">
-                                        <img src="/chevron.svg" alt="" />
-                                    </div>
+                                    <div className="jump-admin-user-org">{orgName}</div>
                                 </button>
                             );
                         })}
