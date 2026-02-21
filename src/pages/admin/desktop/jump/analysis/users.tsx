@@ -41,13 +41,16 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-    const [orgFilter, setOrgFilter] = React.useState<string>("ALL");
     const [query, setQuery] = React.useState<string>("");
     const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
     const [calendarLoading, setCalendarLoading] = React.useState<boolean>(false);
     const [calendarError, setCalendarError] = React.useState<string | null>(null);
     const [calendar, setCalendar] = React.useState<JumpAdminStudentCalendarResponse | null>(null);
+
+	const [selectedOrg, setSelectedOrg] = React.useState<string>(""); 
+	const [open, setOpen] = React.useState<boolean>(false);
+	const orgRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
         let mounted = true;
@@ -84,26 +87,42 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     }, []);
 
     const orgOptions = React.useMemo(() => {
-        const set = new Set<string>();
-        for (const u of students) {
-            const org = getOrgName(u);
-            if (org && org !== "-") set.add(org);
-        }
-        return ["ALL", ...Array.from(set)];
-    }, [students]);
+		const set = new Set<string>();
+		for (const u of students) {
+			const org = getOrgName(u);
+			if (org && org !== "-") set.add(org);
+		}
+		return Array.from(set);
+	}, [students]);
 
     const filtered = React.useMemo(() => {
-        const byOrg = students.filter((u) => {
-            if (orgFilter === "ALL") return true;
-            return getOrgName(u) === orgFilter;
-        });
-        return byOrg.filter((u) => matchQuery(u, query));
-    }, [students, orgFilter, query]);
+		const byOrg = students.filter((u) => {
+			if (!selectedOrg.trim()) return true;
+			return getOrgName(u) === selectedOrg;
+		});
+		return byOrg.filter((u) => matchQuery(u, query));
+	}, [students, selectedOrg, query]);
 
     const selected = React.useMemo(() => {
         if (selectedId == null) return null;
         return students.find((u) => u.userId === selectedId) ?? null;
     }, [students, selectedId]);
+
+	React.useEffect(() => { // 필터 바깥쪽 클릭 시 닫힘
+		if (!open) return;
+
+		function onDocMouseDown(e: MouseEvent) {
+			const el = orgRef.current;
+			if (!el) return;
+
+			if (e.target instanceof Node && !el.contains(e.target)) {
+				setOpen(false);
+			}
+		}
+
+		document.addEventListener("mousedown", onDocMouseDown);
+		return () => document.removeEventListener("mousedown", onDocMouseDown);
+	}, [open]);
 
     React.useEffect(() => {
         let mounted = true;
@@ -159,7 +178,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
         if (!selected) return;
 
         // TODO: 실제 라우트가 정해지면 변경
-        // 예: navigate(`/jump-admin/reports?studentId=${selected.userId}`);
         navigate("/jump-admin/reports");
     };
 
@@ -175,31 +193,38 @@ export default function JumpAdminUsersPage(): React.ReactElement {
                 </div>
 
                 <div className="jump-users-filters">
-                    <div className="jump-users-filter">
-                        <select
-                            className="jump-users-select"
-                            value={orgFilter}
-                            onChange={(e) => setOrgFilter(e.target.value)}
-                            aria-label="organization filter"
-                        >
-                            {orgOptions.map((opt) => (
-                                <option key={opt} value={opt}>
-                                    {opt === "ALL" ? "전체" : opt}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+					<div className="jump-users-filter">
+						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
+							<button type="button" className="jump-users-org-trigger" onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" > 
+								<img className="jump-users-org-filter" src="/mynaui_filter.svg" alt="" />
+								{selectedOrg || "전체"}
+								<img className="jump-users-org-arrow" src="/chevron-right.svg" alt="" />
+							</button>
 
-                    <div className="jump-users-search">
-                        <input
-                            className="jump-users-search-input"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="검색"
-                            aria-label="search"
-                        />
-                    </div>
-                </div>
+							{open && (
+								<div className="jump-users-org-menu">
+									<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >전체</button>
+
+									{orgOptions.map((org) => (
+										<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
+											{org}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+					</div>
+
+					<div className="jump-users-search">
+						<input
+							className="jump-users-search-input"
+							value={query}
+							onChange={(e) => setQuery(e.target.value)}
+							placeholder="검색"
+							aria-label="search"
+						/>
+					</div>
+				</div>
 
                 {loading ? (
                     <div className="jump-users-state">불러오는 중...</div>
@@ -273,11 +298,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
                                 </div>
                             </div>
 
-                            <button
-                                type="button"
-                                className="jump-users-record-btn"
-                                onClick={handleClickRecordView}
-                            >
+                            <button type="button" className="jump-users-record-btn" onClick={handleClickRecordView} >
                                 기록 보기
                             </button>
                         </div>
