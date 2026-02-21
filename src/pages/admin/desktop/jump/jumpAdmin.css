@@ -19,7 +19,7 @@
 .jump-admin-topbar-right img{width:50px;border-radius: 50%;}
 
 /* ===== Body ===== */
-.jump-admin-body{padding: 66px 51px 77px 50px;  flex: 1 1 auto;overflow-y: auto; overflow-x: hidden;min-height:0;}
+.jump-admin-body{padding: 55px 38px 43px 48px;  flex: 1 1 auto;overflow-y: auto; overflow-x: hidden;min-height:0;}
 .jump-admin-surface{max-width: 1280px;margin: 0 auto;}
 .jump-admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 59px;align-items: start;}
 

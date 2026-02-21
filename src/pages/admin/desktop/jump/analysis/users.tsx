@@ -182,129 +182,166 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     };
 
     return (
-        <div className="jump-admin-grid">
-            {/* LEFT */}
-            <section>
-                <div className="jump-admin-section-head">
-                    <div>
-						<div className="jump-admin-section-title-badge"><img src="/jump-logo.png"></img></div>
-                        <div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
-                    </div>
-                </div>
+		<div className="jump-users-page">
+			{/* HEAD */}
+			<div className="jump-admin-section-head">
+				<div className="jump-admin-section-title-wrap">
+					<div className="jump-admin-section-title-badge">
+						<img src="/jump-logo.png" alt="" />
+					</div>
+					<div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
+				</div>
+			</div>
 
-                <div className="jump-users-filters">
-					<div className="jump-users-filter">
-						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" > 
-								<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
-								<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-								<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
-							</button>
+			{/* GRID */}
+			<div className="jump-admin-grid">
+				{/* LEFT CARD */}
+				<section className="jump-users-left-card">
+					<div className="jump-users-filters">
+						<div className="jump-users-filter">
+							<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
+								<button
+									type="button"
+									className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
+									onClick={() => setOpen((prev) => !prev)}
+									aria-label="organization filter"
+								>
+									<img
+										className="jump-users-org-filter"
+										src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"}
+										alt=""
+									/>
+									<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
+									<img
+										className="jump-users-org-arrow"
+										src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"}
+										alt=""
+									/>
+								</button>
 
-							{open && (
-								<div className="jump-users-org-menu">
-									<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >전체</button>
-
-									{orgOptions.map((org) => (
-										<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
-											{org}
+								{open && (
+									<div className="jump-users-org-menu">
+										<button
+											type="button"
+											className="jump-users-org-item"
+											onClick={() => {
+												setSelectedOrg("");
+												setOpen(false);
+											}}
+										>
+											전체
 										</button>
-									))}
-								</div>
-							)}
+
+										{orgOptions.map((org) => (
+											<button
+												key={org}
+												type="button"
+												className="jump-users-org-item"
+												onClick={() => {
+													setSelectedOrg(org);
+													setOpen(false);
+												}}
+											>
+												{org}
+											</button>
+										))}
+									</div>
+								)}
+							</div>
+						</div>
+
+						<div className="jump-users-search">
+							<input
+								className="jump-users-search-input"
+								value={query}
+								onChange={(e) => setQuery(e.target.value)}
+								placeholder="검색"
+								aria-label="search"
+							/>
 						</div>
 					</div>
 
-					<div className="jump-users-search">
-						<input
-							className="jump-users-search-input"
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							placeholder="검색"
-							aria-label="search"
-						/>
+					{loading ? (
+						<div className="jump-users-state">불러오는 중...</div>
+					) : errorMsg ? (
+						<div className="jump-users-state">{errorMsg}</div>
+					) : (
+						<div className="jump-admin-list" role="list">
+							{filtered.map((u, idx) => {
+								const isSelected = selectedId === u.userId;
+								const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
+								const orgName = getOrgName(u);
+
+								return (
+									<button
+										key={u.userId}
+										type="button"
+										className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+										onClick={() => setSelectedId(u.userId)}
+										role="listitem"
+									>
+										<div className="jump-admin-badge">{idx + 1}</div>
+										<div className="jump-admin-user-name">{displayName}</div>
+										<div className="jump-admin-user-org">{orgName}</div>
+									</button>
+								);
+							})}
+						</div>
+					)}
+				</section>
+
+				{/* RIGHT CARD */}
+				<section className="jump-users-right-card">
+					<div className="jump-users-detail-card">
+						{!selected ? (
+							<div className="jump-users-empty">
+								<img src="/internie_mascot_normal.png" alt="" />
+								<span className="jump-users-empty-title">학생을 선택해주세요!</span>
+							</div>
+						) : (
+							<div className="jump-users-detail">
+								<div className="jump-users-detail-head">
+									<div className="jump-users-detail-title">{normalizeText(selected.name) || "-"} 님</div>
+									<button type="button" className="jump-users-trash" aria-label="delete">
+										<img src="/trash-red-01.svg" alt="" />
+									</button>
+								</div>
+
+								<div className="jump-users-info">
+									<div className="jump-users-info-row">
+										<div className="jump-users-info-label">소속</div>
+										<div className="jump-users-info-value">{getSchoolName(selected)}</div>
+									</div>
+
+									<div className="jump-users-info-row">
+										<div className="jump-users-info-label">기관</div>
+										<div className="jump-users-info-value">{getOrgName(selected)}</div>
+									</div>
+
+									<div className="jump-users-info-row">
+										<div className="jump-users-info-label">봉사 일시</div>
+										<div className="jump-users-info-value">{volunteerTimeText}</div>
+									</div>
+
+									<div className="jump-users-info-row">
+										<div className="jump-users-info-label">기록 수</div>
+										<div className="jump-users-info-value">{recordCountText}</div>
+									</div>
+
+									<div className="jump-users-info-row">
+										<div className="jump-users-info-label">미기록 수</div>
+										<div className="jump-users-info-value">{unrecordedCountText}</div>
+									</div>
+								</div>
+
+								<button type="button" className="jump-users-record-btn" onClick={handleClickRecordView}>
+									기록 보기
+								</button>
+							</div>
+						)}
 					</div>
-				</div>
-
-                {loading ? (
-                    <div className="jump-users-state">불러오는 중...</div>
-                ) : errorMsg ? (
-                    <div className="jump-users-state">{errorMsg}</div>
-                ) : (
-                    <div className="jump-admin-list" role="list">
-                        {filtered.map((u, idx) => {
-                            const isSelected = selectedId === u.userId;
-                            const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
-                            const orgName = getOrgName(u);
-
-                            return (
-                                <button
-                                    key={u.userId}
-                                    type="button"
-                                    className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
-                                    onClick={() => setSelectedId(u.userId)}
-                                    role="listitem"
-                                >
-                                    <div className="jump-admin-badge">{idx + 1}</div>
-                                    <div className="jump-admin-user-name">{displayName}</div>
-                                    <div className="jump-admin-user-org">{orgName}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-            </section>
-
-            {/* RIGHT */}
-            <section>
-                <div className="jump-users-detail-card">
-                    {!selected ? (
-                        <div className="jump-users-empty"></div>
-                    ) : (
-                        <div className="jump-users-detail">
-                            <div className="jump-users-detail-head">
-                                <div className="jump-users-detail-title">
-                                    {normalizeText(selected.name) || "-"} 님
-                                </div>
-                                <button type="button" className="jump-users-trash" aria-label="delete">
-                                    <img src="/trash-red-01.svg" alt="" />
-                                </button>
-                            </div>
-
-                            <div className="jump-users-info">
-                                <div className="jump-users-info-row">
-                                    <div className="jump-users-info-label">소속</div>
-                                    <div className="jump-users-info-value">{getSchoolName(selected)}</div>
-                                </div>
-
-                                <div className="jump-users-info-row">
-                                    <div className="jump-users-info-label">기관</div>
-                                    <div className="jump-users-info-value">{getOrgName(selected)}</div>
-                                </div>
-
-                                <div className="jump-users-info-row">
-                                    <div className="jump-users-info-label">봉사 일시</div>
-                                    <div className="jump-users-info-value">{volunteerTimeText}</div>
-                                </div>
-
-                                <div className="jump-users-info-row">
-                                    <div className="jump-users-info-label">기록 수</div>
-                                    <div className="jump-users-info-value">{recordCountText}</div>
-                                </div>
-
-                                <div className="jump-users-info-row">
-                                    <div className="jump-users-info-label">미기록 수</div>
-                                    <div className="jump-users-info-value">{unrecordedCountText}</div>
-                                </div>
-                            </div>
-
-                            <button type="button" className="jump-users-record-btn" onClick={handleClickRecordView} >
-                                기록 보기
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </section>
-        </div>
-    );
+				</section>
+			</div>
+		</div>
+	);
 }
