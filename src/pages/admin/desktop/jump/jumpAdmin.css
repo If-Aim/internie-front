@@ -25,7 +25,7 @@
 
 /* ===== Body ===== */
 .jump-admin-body{padding: 55px 38px 43px 48px;  flex: 1 1 auto; overflow: visible; overflow-y: auto; overflow-x: hidden;min-height:0;}
-.jump-admin-surface{max-width: 1280px;margin: 0 auto;}
+.jump-admin-surface{max-width: 1440px;margin: 0 auto;}
 .jump-admin-grid{display: grid;grid-template-columns: 1fr 0.95fr;gap: 59px;align-items: start;}
 
 .jump-admin-section-head{display:flex;align-items: baseline;justify-content: space-between;padding: 0 13px 0 0;}
