@@ -289,7 +289,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                                 <img src="/chevron-left.svg" alt="" />
                             </button>
                             <button type="button" className="jump-dashboard-week-navbtn" onClick={goNextWeek} aria-label="next week">
-                                <img src="/chevron-right.svg" alt="" />
+                                <img className="next-week" src="/chevron-right.svg" alt="" />
                             </button>
                         </div>
                     </div>
