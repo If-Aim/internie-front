@@ -128,7 +128,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-grid-spacer { height: 1px; }
 .jump-dashboard-week-days { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; color: #979797; font-weight: 700; line-height: 20px;}
 .jump-dashboard-week-day{ text-align: center; justify-self: center; height: 35px; width: 55px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-.jump-dashboard-week-day--today{ background: #BDD8FF; border-radius: 6px;  display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+.jump-dashboard-week-day--today{ background: #BDD8FF; border-radius: 6px;  display: flex; align-items: center; justify-content: center; }
 
 .jump-dashboard-week-rows { display: flex; flex-direction: column; gap: 22px; padding-top: 43px; }
 .jump-dashboard-week-row { display: grid; grid-template-columns: 420px 1fr; align-items: center; }

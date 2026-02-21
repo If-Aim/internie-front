@@ -1,169 +1,298 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+    ApiError,
+    getJumpAdminStudents,
+    getJumpAdminStudentCalendar,
+    type JumpAdminStudent,
+    type JumpAdminStudentCalendarResponse,
+} from "../../../../../api/client";
 import "./users.css";
 
-type ActivityCard = {
-  id: string;
-  title: string;
-  keywords: string[];
-};
+function normalizeText(v: unknown): string {
+    return String(v ?? "").trim();
+}
 
-type ScheduleItem = {
-  time: string;
-  title: string;
-  subtitle?: string;
-};
+function getOrgName(u: JumpAdminStudent): string {
+    const org = u.jumpOrganization?.name;
+    return normalizeText(org) || "-";
+}
 
-export default function JumpAdminAnalysisUsersPage(): React.ReactElement {
-  // ===== 더미 데이터 =====
-  const profile = {
-    name: "인턴이",
-    school: "이화여자대학교 경영학부",
-    email: "internie@ewha.ac.kr",
-    avgScore: 65,
-    topCount: 2,
-    lowCount: 3,
-    reliability: 87,
-  };
+function matchQuery(u: JumpAdminStudent, q: string): boolean {
+    const query = q.trim().toLowerCase();
+    if (!query) return true;
 
-  const schedule = {
-    dateLabel: "8월 28일, 목요일",
-    items: [
-      { time: "08:00", title: "새로운 이벤트", subtitle: "새로운 이벤트" },
-      { time: "09:00", title: "새로운 이벤트", subtitle: "새로운 이벤트" },
-      { time: "10:00", title: "새로운 이벤트", subtitle: "새로운 이벤트" },
-      { time: "03:00", title: "새로운 이벤트", subtitle: "새로운 이벤트" },
-    ] satisfies ScheduleItem[],
-  };
+    const name = normalizeText(u.name).toLowerCase();
+    const nick = normalizeText(u.nickname).toLowerCase();
+    const org = getOrgName(u).toLowerCase();
 
-  const activities: ActivityCard[] = [
-    { id: "a1", title: "나의 활동", keywords: ["역량 키워드"] },
-    { id: "a2", title: "나의 활동", keywords: ["역량 키워드"] },
-    { id: "a3", title: "나의 활동", keywords: ["역량 키워드"] },
-    { id: "a4", title: "나의 활동", keywords: ["키워드"] },
-    { id: "a5", title: "디자인 스프린트", keywords: ["키워드", "키워드"] },
-    { id: "a6", title: "디자인 스프린트", keywords: ["키워드", "키워드"] },
-    { id: "a7", title: "디자인 스프린트", keywords: ["키워드"] },
-    { id: "a8", title: "디자인 스프린트", keywords: ["키워드", "키워드"] },
-    { id: "a9", title: "디자인 스프린트", keywords: ["키워드"] },
-    { id: "a10", title: "디자인 스프린트", keywords: ["키워드"] },
-    { id: "a11", title: "디자인 스프린트", keywords: ["키워드"] },
-    { id: "a12", title: "디자인 스프린트", keywords: ["키워드"] },
-  ];
+    return name.includes(query) || nick.includes(query) || org.includes(query);
+}
 
-  function onPrevDay() {}
-  function onNextDay() {}
-  function onUpgrade() {}
-  function onEditProfile() {}
+function getSchoolName(u: JumpAdminStudent): string {
+    return normalizeText(u.school?.name) || "-";
+}
 
-  return (
-    <div className="jump-analysis-layout">
-      <div className="jump-analysis-left">
-        <section className="analysis-card analysis-report">
-          <div className="analysis-report-head">
-            <div className="analysis-report-title">역량분석 보고서</div>
+export default function JumpAdminUsersPage(): React.ReactElement {
+    const navigate = useNavigate();
 
-            <button type="button" className="analysis-report-edit" onClick={onEditProfile}>
-              편집
-            </button>
-          </div>
+    const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-          <div className="analysis-profile-row">
-            <div className="analysis-avatar" aria-label="avatar" />
-            <div className="analysis-profile-meta">
-              <div className="analysis-profile-name">{profile.name}</div>
-              <div className="analysis-profile-sub">{profile.school}</div>
-              <div className="analysis-profile-sub">{profile.email}</div>
-            </div>
-          </div>
+    const [orgFilter, setOrgFilter] = React.useState<string>("ALL");
+    const [query, setQuery] = React.useState<string>("");
+    const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
-          <div className="analysis-report-stats">
-            <div className="analysis-stat">
-              <div className="analysis-stat-value">{profile.avgScore}점</div>
-              <div className="analysis-stat-label">역량점수 평균</div>
-            </div>
-            <div className="analysis-stat">
-              <div className="analysis-stat-value">{profile.topCount}개</div>
-              <div className="analysis-stat-label">상위 역량</div>
-            </div>
-            <div className="analysis-stat">
-              <div className="analysis-stat-value">{profile.lowCount}개</div>
-              <div className="analysis-stat-label">하위 역량</div>
-            </div>
-          </div>
+    const [calendarLoading, setCalendarLoading] = React.useState<boolean>(false);
+    const [calendarError, setCalendarError] = React.useState<string | null>(null);
+    const [calendar, setCalendar] = React.useState<JumpAdminStudentCalendarResponse | null>(null);
 
-          <div className="analysis-report-footer">
-            <div className="analysis-reliability">
-              <span className="analysis-reliability-label">신뢰도</span>
-              <span className="analysis-reliability-value">{profile.reliability}%</span>
-            </div>
+    React.useEffect(() => {
+        let mounted = true;
 
-            <button type="button" className="analysis-upgrade-btn" onClick={onUpgrade}>
-              역량 업그레이드하기
-            </button>
-          </div>
-        </section>
+        (async () => {
+            try {
+                setLoading(true);
+                setErrorMsg(null);
 
-        {/* 나의 일정 카드 */}
-        <section className="analysis-card analysis-schedule">
-          <div className="analysis-schedule-head">
-            <div className="analysis-schedule-title">나의 일정</div>
-          </div>
+                const list = await getJumpAdminStudents();
+                if (!mounted) return;
 
-          <div className="analysis-schedule-date">
-            <button type="button" className="analysis-day-nav" onClick={onPrevDay} aria-label="prev day">
-              ‹
-            </button>
-            <div className="analysis-day-label">{schedule.dateLabel}</div>
-            <button type="button" className="analysis-day-nav" onClick={onNextDay} aria-label="next day">
-              ›
-            </button>
-          </div>
+                setStudents(Array.isArray(list) ? list : []);
+                setSelectedId((prev) => {
+                    if (prev == null) return null;
+                    return list.some((u) => u.userId === prev) ? prev : null;
+                });
+            } catch (e) {
+                if (!mounted) return;
 
-          <div className="analysis-schedule-list">
-            {schedule.items.map((it, idx) => (
-              <div key={`${it.time}-${idx}`} className="analysis-schedule-item">
-                <div className="analysis-time">
-                  <div className="analysis-time-main">{it.time}</div>
+                if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+                    setErrorMsg("권한이 없거나 로그인 정보가 만료되었습니다.");
+                } else {
+                    setErrorMsg("참가자 목록을 불러오지 못했습니다.");
+                }
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const orgOptions = React.useMemo(() => {
+        const set = new Set<string>();
+        for (const u of students) {
+            const org = getOrgName(u);
+            if (org && org !== "-") set.add(org);
+        }
+        return ["ALL", ...Array.from(set)];
+    }, [students]);
+
+    const filtered = React.useMemo(() => {
+        const byOrg = students.filter((u) => {
+            if (orgFilter === "ALL") return true;
+            return getOrgName(u) === orgFilter;
+        });
+        return byOrg.filter((u) => matchQuery(u, query));
+    }, [students, orgFilter, query]);
+
+    const selected = React.useMemo(() => {
+        if (selectedId == null) return null;
+        return students.find((u) => u.userId === selectedId) ?? null;
+    }, [students, selectedId]);
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        if (!selected) {
+            setCalendar(null);
+            setCalendarError(null);
+            setCalendarLoading(false);
+            return () => {
+                mounted = false;
+            };
+        }
+
+        (async () => {
+            try {
+                setCalendarLoading(true);
+                setCalendarError(null);
+
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+
+                const data = await getJumpAdminStudentCalendar(selected.userId, year, month);
+                if (!mounted) return;
+
+                setCalendar(data);
+            } catch (e) {
+                if (!mounted) return;
+                setCalendar(null);
+                setCalendarError("기록 수를 불러오지 못했습니다.");
+            } finally {
+                if (mounted) setCalendarLoading(false);
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, [selected?.userId]);
+
+    const recordCountText = React.useMemo(() => {
+        if (!selected) return "-";
+        if (calendarLoading) return "불러오는 중...";
+        if (calendarError) return "-";
+        if (!calendar) return "-";
+        return `${calendar.totalRecordedDays}건`;
+    }, [selected, calendarLoading, calendarError, calendar]);
+
+    const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
+    const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
+
+    const handleClickRecordView = () => {
+        if (!selected) return;
+
+        // TODO: 실제 라우트가 정해지면 변경
+        // 예: navigate(`/jump-admin/reports?studentId=${selected.userId}`);
+        navigate("/jump-admin/reports");
+    };
+
+    return (
+        <div className="jump-admin-grid">
+            {/* LEFT */}
+            <section>
+                <div className="jump-admin-section-head">
+                    <div>
+						<div className="jump-admin-section-title-badge"><img src="/jump-logo.png"></img></div>
+                        <div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
+                    </div>
+
+                    <div className="jump-admin-section-count" aria-label="participant count">
+                        <span className="jump-admin-count-strong">{filtered.length}</span>
+                        <span className="jump-admin-count-total">명</span>
+                    </div>
                 </div>
 
-                <div className="analysis-schedule-dot" aria-hidden="true" />
+                <div className="jump-users-filters">
+                    <div className="jump-users-filter">
+                        <select
+                            className="jump-users-select"
+                            value={orgFilter}
+                            onChange={(e) => setOrgFilter(e.target.value)}
+                            aria-label="organization filter"
+                        >
+                            {orgOptions.map((opt) => (
+                                <option key={opt} value={opt}>
+                                    {opt === "ALL" ? "전체" : opt}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div className="analysis-schedule-text">
-                  <div className="analysis-schedule-item-title">{it.title}</div>
-                  <div className="analysis-schedule-item-sub">{it.subtitle ?? ""}</div>
+                    <div className="jump-users-search">
+                        <input
+                            className="jump-users-search-input"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="검색"
+                            aria-label="search"
+                        />
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
 
-      <div className="jump-analysis-right">
-        <section className="analysis-activity-panel">
-          <div className="analysis-activity-head">나의 활동</div>
+                {loading ? (
+                    <div className="jump-users-state">불러오는 중...</div>
+                ) : errorMsg ? (
+                    <div className="jump-users-state">{errorMsg}</div>
+                ) : (
+                    <div className="jump-admin-list" role="list">
+                        {filtered.map((u, idx) => {
+                            const isSelected = selectedId === u.userId;
+                            const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
+                            const orgName = getOrgName(u);
 
-          <div className="analysis-activity-grid">
-            {activities.map((a) => (
-              <button key={a.id} type="button" className="analysis-activity-card">
-                <div className="analysis-activity-tags">
-                  {a.keywords.slice(0, 2).map((k, i) => (
-                    <span key={`${a.id}-k-${i}`} className="analysis-pill">
-                      {k}
-                    </span>
-                  ))}
+                            return (
+                                <button
+                                    key={u.userId}
+                                    type="button"
+                                    className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+                                    onClick={() => setSelectedId(u.userId)}
+                                    role="listitem"
+                                >
+                                    <div className="jump-admin-badge">{idx + 1}</div>
+                                    <div className="jump-admin-user-name">{displayName}</div>
+                                    <div className="jump-admin-user-school">{orgName}</div>
+                                    <div className="jump-admin-user-status-pill status--etc" />
+                                    <div className="jump-admin-chevron">
+                                        <img src="/chevron.svg" alt="" />
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+            </section>
+
+            {/* RIGHT */}
+            <section>
+                <div className="jump-users-detail-card">
+                    {!selected ? (
+                        <div className="jump-users-empty"></div>
+                    ) : (
+                        <div className="jump-users-detail">
+                            <div className="jump-users-detail-head">
+                                <div className="jump-users-detail-title">
+                                    {normalizeText(selected.name) || "-"} 님
+                                </div>
+                                <button type="button" className="jump-users-trash" aria-label="delete">
+                                    <img src="/trash-red-01.svg" alt="" />
+                                </button>
+                            </div>
+
+                            <div className="jump-users-info">
+                                <div className="jump-users-info-row">
+                                    <div className="jump-users-info-label">소속</div>
+                                    <div className="jump-users-info-value">{getSchoolName(selected)}</div>
+                                </div>
+
+                                <div className="jump-users-info-row">
+                                    <div className="jump-users-info-label">기관</div>
+                                    <div className="jump-users-info-value">{getOrgName(selected)}</div>
+                                </div>
+
+                                <div className="jump-users-info-row">
+                                    <div className="jump-users-info-label">봉사 일시</div>
+                                    <div className="jump-users-info-value">{volunteerTimeText}</div>
+                                </div>
+
+                                <div className="jump-users-info-row">
+                                    <div className="jump-users-info-label">기록 수</div>
+                                    <div className="jump-users-info-value">{recordCountText}</div>
+                                </div>
+
+                                <div className="jump-users-info-row">
+                                    <div className="jump-users-info-label">미기록 수</div>
+                                    <div className="jump-users-info-value">{unrecordedCountText}</div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="jump-users-record-btn"
+                                onClick={handleClickRecordView}
+                            >
+                                기록 보기
+                            </button>
+                        </div>
+                    )}
                 </div>
-
-                <div className="analysis-activity-title">{a.title}</div>
-
-                <div className="analysis-activity-chevron" aria-hidden="true">
-                  ›
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+            </section>
+        </div>
+    );
 }

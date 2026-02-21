@@ -6,7 +6,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminJumpRoute from "../../../../adminJumpRoute";
 import JumpAdminHome from "./home";
 import JumpUsers from "./analysis/users";
-import JumpReports from "./dashboard/dashboard";
+import JumpDashboard from "./dashboard/dashboard";
 
 
 export default function DesktopAdminApp(): React.ReactElement {
@@ -16,7 +16,7 @@ export default function DesktopAdminApp(): React.ReactElement {
 				<Route element={<JumpAdminHome />}>
 					<Route index element={<Navigate to="users" replace />} />
 					<Route path="analysis" element={<JumpUsers />} />
-					<Route path="dashboard" element={<JumpReports />} />
+					<Route path="dashboard" element={<JumpDashboard />} />
 					<Route path="*" element={<Navigate to="users" replace />} />
 				</Route>
 			</Route>
