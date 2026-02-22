@@ -6,7 +6,14 @@ import "./users.css";
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
 type NavDir = "forward" | "back";
 
+const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+function buildYearOptions(centerYear: number, span: number) {
+	const ys: number[] = [];
+	for (let y = centerYear - span; y <= centerYear + span; y += 1) ys.push(y);
+	return ys;
+}
 
 function normalizeText(v: unknown): string {
     return String(v ?? "").trim();
@@ -181,6 +188,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 		return Array.from(set);
 	}, [students]);
+	
+	const nowY = new Date().getFullYear();
+	const yearOptions = buildYearOptions(nowY, 5);
 
     const filtered = React.useMemo(() => {
 		const byOrg = students.filter((u) => {
@@ -327,16 +337,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		setNavDir("forward");
 		setRightView("REPORT_DAY");
 	}
-
-	const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-	const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	
-	function buildYearOptions(centerYear: number, span: number) {
-		const ys: number[] = [];
-		for (let y = centerYear - span; y <= centerYear + span; y += 1) ys.push(y);
-		return ys;
-	}
-
 	function renderCalendar(): React.ReactNode {
 		if (!selected) {
 			return (
@@ -347,10 +348,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 
 		const cells = buildMonthGrid(calYear, calMonth);
-		const yearOptions = React.useMemo(() => {
-			const nowY = new Date().getFullYear();
-			return buildYearOptions(nowY, 5);
-		}, []);
 
 		return (
 			<div className="jump-users-calendar">
