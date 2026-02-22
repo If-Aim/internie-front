@@ -188,7 +188,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 		return Array.from(set);
 	}, [students]);
-	
+
 	const nowY = new Date().getFullYear();
 	const yearOptions = buildYearOptions(nowY, 5);
 
@@ -353,38 +353,44 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			<div className="jump-users-calendar">
 				<div className="jump-users-calendar-head">
 					<div className="jump-users-calendar-selects">
-						<select
-							className="jump-users-calendar-select"
-							value={calMonth}
-							onChange={(e) => {
-								const m = Number(e.target.value);
-								setSelectedYmd("");
-								setSelectedEventDayId(null);
-								setQIndex(0);
-								setCalMonth(m);
-							}}
-							aria-label="month select"
-						>
-							{MONTH_LABELS.map((label, idx) => {
-								const m = idx + 1;
-								return (<option key={label} value={m}>{label}</option>);
-							})}
-						</select>
+						<div className="jump-users-select-wrap">
+							<select
+								className="jump-users-calendar-select"
+								value={calMonth}
+								onChange={(e) => {
+									const m = Number(e.target.value);
+									setSelectedYmd("");
+									setSelectedEventDayId(null);
+									setQIndex(0);
+									setCalMonth(m);
+								}}
+								aria-label="month select"
+							>
+								{MONTH_LABELS.map((label, idx) => {
+									const m = idx + 1;
+									return (<option key={label} value={m}>{label}</option>);
+								})}
+							</select>
+							<img className="jump-users-select-arrow" src="/chevron-right-6b.svg" alt="" />
+						</div>
 
-						<select
-							className="jump-users-calendar-select"
-							value={calYear}
-							onChange={(e) => {
-								const y = Number(e.target.value);
-								setSelectedYmd("");
-								setSelectedEventDayId(null);
-								setQIndex(0);
-								setCalYear(y);
-							}}
-							aria-label="year select"
-						>
-							{yearOptions.map((y) => (<option key={y} value={y}>{y}</option>))}
-						</select>
+						<div className="jump-users-select-wrap">
+							<select
+								className="jump-users-calendar-select"
+								value={calYear}
+								onChange={(e) => {
+									const y = Number(e.target.value);
+									setSelectedYmd("");
+									setSelectedEventDayId(null);
+									setQIndex(0);
+									setCalYear(y);
+								}}
+								aria-label="year select"
+							>
+								{yearOptions.map((y) => (<option key={y} value={y}>{y}</option>))}
+							</select>
+							<img className="jump-users-select-arrow" src="/chevron-down-6b.svg" alt="" />
+						</div>
 					</div>
 				</div>
 
