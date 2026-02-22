@@ -4,7 +4,7 @@
 .jump-users-page .jump-admin-list { max-height: none; }
 
 .jump-users-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: 20px; gap: 23px; margin-bottom: 15px; }
-.jump-users-search-input { width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 0 14px; font-weight: 700; outline: none; }
+.jump-users-search-input { width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 0 14px; font-weight: 700; outline: none; font-size: 16px; }
 .jump-users-search-input { color: #000; } 
 .jump-users-search.is-empty .jump-users-search-input { color: #6b6b6b; }
 .jump-users-search.is-empty .jump-users-search-input::placeholder { color: #6b6b6b; }
@@ -49,6 +49,8 @@
 .jump-users-left-card .jump-admin-list { flex: 1; min-height: 0; overflow: auto; padding-bottom: 12px; }
 
 .jump-users-back-btn { width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; font-weight: 700; cursor: pointer; text-align: left; padding: 0 18px; }
+.jump-users-back-btn-img { width: 5px; }
+.jump-users-back-btn-text { color: #6B6B6B; font-size: 16px; font-weight: 700; margin-left: 31px;}
 
 .jump-users-selected-card { width: 100%; height: 79px; border-radius: 10px; border: 2px solid var(--primary); background: #fff; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 0 26px; cursor: pointer; transition: transform 280ms ease, opacity 280ms ease; }
 .jump-users-selected-left { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
@@ -67,13 +69,15 @@
 
 /* ===== Calendar ===== */
 .jump-users-calendar { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; }
-.jump-users-calendar-head { display: flex; align-items: center; justify-content: space-between; }
-.jump-users-calendar-title { font-weight: 700; font-size: 16px; }
+.jump-users-calendar-selects { display: inline-flex; gap: 10px; align-items: center; } 
+.jump-users-calendar-select { height: 36px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 0 12px; font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
+
+.jump-users-calendar-head { display: flex; align-items: center; justify-content: center; }
 .jump-users-calendar-state { padding: 10px 0; font-weight: 700; color: #6B6B6B; }
 .jump-users-calendar-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-.jump-users-calendar-weekday { font-weight: 700; font-size: 12px; color: #6B6B6B; text-align: center; }
+.jump-users-calendar-weekday { font-weight: 500; font-size: 14px; color: #000; text-align: center; line-height: 20px;}
 .jump-users-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; flex: 1; min-height: 0; }
-.jump-users-calendar-cell { height: 44px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; }
+.jump-users-calendar-cell { width: 69px; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; display: inline-flex; align-items: flex-start; justify-content: left; padding: 7px 9px; font-size: 14px; font-weight: 500; cursor: pointer; }
 .jump-users-calendar-cell.is-empty { border: none; background: transparent; cursor: default; }
 .jump-users-calendar-cell.is-selected { border: 2px solid var(--primary); }
 .jump-users-calendar-cell.has-record { background: #BDD8FF; border-color: #BDD8FF; }

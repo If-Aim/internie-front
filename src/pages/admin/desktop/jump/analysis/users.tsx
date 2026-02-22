@@ -139,30 +139,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return false;
 	}
 
-	function goPrevMonth() {
-		setSelectedYmd("");
-		setSelectedEventDayId(null);
-		setQIndex(0);
-
-		setCalMonth((prev) => {
-			if (prev > 1) return prev - 1;
-			setCalYear((y) => y - 1);
-			return 12;
-		});
-	}
-
-	function goNextMonth() {
-		setSelectedYmd("");
-		setSelectedEventDayId(null);
-		setQIndex(0);
-
-		setCalMonth((prev) => {
-			if (prev < 12) return prev + 1;
-			setCalYear((y) => y + 1);
-			return 1;
-		});
-	}
-
     React.useEffect(() => {
         let mounted = true;
 
@@ -351,6 +327,16 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		setNavDir("forward");
 		setRightView("REPORT_DAY");
 	}
+
+	const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	
+	function buildYearOptions(centerYear: number, span: number) {
+		const ys: number[] = [];
+		for (let y = centerYear - span; y <= centerYear + span; y += 1) ys.push(y);
+		return ys;
+	}
+
 	function renderCalendar(): React.ReactNode {
 		if (!selected) {
 			return (
@@ -361,23 +347,48 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 
 		const cells = buildMonthGrid(calYear, calMonth);
-
-		const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+		const yearOptions = React.useMemo(() => {
+			const nowY = new Date().getFullYear();
+			return buildYearOptions(nowY, 5);
+		}, []);
 
 		return (
 			<div className="jump-users-calendar">
 				<div className="jump-users-calendar-head">
-					<button type="button" onClick={goPrevMonth} aria-label="prev month">
-						이전
-					</button>
+					<div className="jump-users-calendar-selects">
+						<select
+							className="jump-users-calendar-select"
+							value={calMonth}
+							onChange={(e) => {
+								const m = Number(e.target.value);
+								setSelectedYmd("");
+								setSelectedEventDayId(null);
+								setQIndex(0);
+								setCalMonth(m);
+							}}
+							aria-label="month select"
+						>
+							{MONTH_LABELS.map((label, idx) => {
+								const m = idx + 1;
+								return (<option key={label} value={m}>{label}</option>);
+							})}
+						</select>
 
-					<div className="jump-users-calendar-title">
-						{`${calYear}-${pad2(calMonth)}`}
+						<select
+							className="jump-users-calendar-select"
+							value={calYear}
+							onChange={(e) => {
+								const y = Number(e.target.value);
+								setSelectedYmd("");
+								setSelectedEventDayId(null);
+								setQIndex(0);
+								setCalYear(y);
+							}}
+							aria-label="year select"
+						>
+							{yearOptions.map((y) => (<option key={y} value={y}>{y}</option>))}
+						</select>
 					</div>
-
-					<button type="button" onClick={goNextMonth} aria-label="next month">
-						다음
-					</button>
 				</div>
 
 				{calendarLoading ? (
@@ -532,8 +543,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return (
 			<div className="jump-users-left-frame">
 				<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail}>
-					<img src="/chevron-left-6b.svg" alt="" />
-					뒤로가기
+					<img className="jump-users-back-btn-img" src="/chevron-left-6b.svg" alt="" />
+					<span className="jump-users-back-btn-text">뒤로가기</span>
 				</button>
 
 				{selected ? (
@@ -620,9 +631,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		if (rightView === "REPORT_HOME") {
 			return (
 				<div>
-					<button type="button" onClick={handleBackToUserDetail}>
-						뒤로가기
-					</button>
 					<div>KPI 카드 2개</div>
 				</div>
 			);
