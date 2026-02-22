@@ -64,7 +64,7 @@ function DropdownSelect(props: {
                 <span className="jump-users-dd-text">
                     {selected ? selected.label : "-"}
                 </span>
-                <img className="jump-users-dd-arrow" src="/chevron-down-6b.svg" alt="" />
+                <img className="jump-users-dd-arrow" src="/chevron-right-6b.svg" alt="" />
             </button>
 
             {open && (
