@@ -1,14 +1,12 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-    ApiError,
-    getJumpAdminStudents,
-    getJumpAdminStudentCalendar,
-    type JumpAdminStudent,
-    type JumpAdminStudentCalendarResponse,
-} from "../../../../../api/client";
+import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, type JumpAdminStudent, type JumpAdminStudentCalendarResponse, } from "../../../../../api/client"; 
 import "./users.css";
+
+type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
+type NavDir = "forward" | "back";
+
+
 
 function normalizeText(v: unknown): string {
     return String(v ?? "").trim();
@@ -35,7 +33,6 @@ function getSchoolName(u: JumpAdminStudent): string {
 }
 
 export default function JumpAdminUsersPage(): React.ReactElement {
-    const navigate = useNavigate();
 
     const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
     const [loading, setLoading] = React.useState<boolean>(true);
@@ -51,6 +48,115 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const [selectedOrg, setSelectedOrg] = React.useState<string>(""); 
 	const [open, setOpen] = React.useState<boolean>(false);
 	const orgRef = React.useRef<HTMLDivElement | null>(null);
+
+	const [rightView, setRightView] = React.useState<UsersRightView>("USER_DETAIL");
+	const [navDir, setNavDir] = React.useState<NavDir>("forward");
+
+	const [selectedYmd, setSelectedYmd] = React.useState<string>(""); // YYYY-MM-DD
+	const [selectedEventDayId, setSelectedEventDayId] = React.useState<number | null>(null);
+	const [qIndex, setQIndex] = React.useState<number>(0);
+	const [qDir, /*setQDir*/] = React.useState<NavDir>("forward");
+	
+	const [eventDayCache, setEventDayCache] = React.useState<Record<number, any>>({});
+
+	const selected = React.useMemo(() => {
+        if (selectedId == null) return null;
+        return students.find((u) => u.userId === selectedId) ?? null;
+    }, [students, selectedId]);
+
+	// 달력 렌더
+	const isReportMode = rightView !== "USER_DETAIL";
+	const hasSelectedStudent = selected != null;
+	const [calYear, setCalYear] = React.useState<number>(() => new Date().getFullYear());
+	const [calMonth, setCalMonth] = React.useState<number>(() => new Date().getMonth() + 1);
+	function pad2(n: number) {
+		return String(n).padStart(2, "0");
+	}
+
+	function toYmd(y: number, m: number, d: number) {
+		return `${y}-${pad2(m)}-${pad2(d)}`;
+	}
+
+	function daysInMonth(y: number, m: number) {
+		return new Date(y, m, 0).getDate();
+	}
+
+	function firstDow(y: number, m: number) {
+		return new Date(y, m - 1, 1).getDay();
+	}
+
+	type CalCell = {
+		ymd: string;
+		day: number;
+		inMonth: boolean;
+	};
+
+	function buildMonthGrid(y: number, m: number): CalCell[] {
+		const dim = daysInMonth(y, m);
+		const startDow = firstDow(y, m);
+		const cells: CalCell[] = [];
+
+		for (let i = 0; i < startDow; i += 1) {
+			cells.push({
+				ymd: "",
+				day: 0,
+				inMonth: false,
+			});
+		}
+
+		for (let d = 1; d <= dim; d += 1) {
+			cells.push({
+				ymd: toYmd(y, m, d),
+				day: d,
+				inMonth: true,
+			});
+		}
+
+		while (cells.length % 7 !== 0) {
+			cells.push({
+				ymd: "",
+				day: 0,
+				inMonth: false,
+			});
+		}
+
+		return cells;
+	}
+
+	// 기록 존재?
+	function hasRecordOnDay(ymd: string): boolean {
+		return getEventDayIdsByYmd(ymd).length > 0;
+	}
+
+	// TODO: 기록 필요한데 안한 날짜
+	function isMissedRecordDay(_ymd: string): boolean {
+		
+		return false;
+	}
+
+	function goPrevMonth() {
+		setSelectedYmd("");
+		setSelectedEventDayId(null);
+		setQIndex(0);
+
+		setCalMonth((prev) => {
+			if (prev > 1) return prev - 1;
+			setCalYear((y) => y - 1);
+			return 12;
+		});
+	}
+
+	function goNextMonth() {
+		setSelectedYmd("");
+		setSelectedEventDayId(null);
+		setQIndex(0);
+
+		setCalMonth((prev) => {
+			if (prev < 12) return prev + 1;
+			setCalYear((y) => y + 1);
+			return 1;
+		});
+	}
 
     React.useEffect(() => {
         let mounted = true;
@@ -103,11 +209,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return byOrg.filter((u) => matchQuery(u, query));
 	}, [students, selectedOrg, query]);
 
-    const selected = React.useMemo(() => {
-        if (selectedId == null) return null;
-        return students.find((u) => u.userId === selectedId) ?? null;
-    }, [students, selectedId]);
-
 	React.useEffect(() => { // 필터 바깥쪽 클릭 시 닫힘
 		if (!open) return;
 
@@ -124,44 +225,40 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return () => document.removeEventListener("mousedown", onDocMouseDown);
 	}, [open]);
 
-    React.useEffect(() => {
-        let mounted = true;
+    React.useEffect(() => { // calendar 로딩
+		let mounted = true;
 
-        if (!selected) {
-            setCalendar(null);
-            setCalendarError(null);
-            setCalendarLoading(false);
-            return () => {
-                mounted = false;
-            };
-        }
+		if (!selected) {
+			setCalendar(null);
+			setCalendarError(null);
+			setCalendarLoading(false);
+			return () => {
+				mounted = false;
+			};
+		}
 
-        (async () => {
-            try {
-                setCalendarLoading(true);
-                setCalendarError(null);
+		(async () => {
+			try {
+				setCalendarLoading(true);
+				setCalendarError(null);
 
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = now.getMonth() + 1;
+				const data = await getJumpAdminStudentCalendar(selected.userId, calYear, calMonth);
+				if (!mounted) return;
 
-                const data = await getJumpAdminStudentCalendar(selected.userId, year, month);
-                if (!mounted) return;
+				setCalendar(data);
+			} catch {
+				if (!mounted) return;
+				setCalendar(null);
+				setCalendarError("기록 수를 불러오지 못했습니다.");
+			} finally {
+				if (mounted) setCalendarLoading(false);
+			}
+		})();
 
-                setCalendar(data);
-            } catch (e) {
-                if (!mounted) return;
-                setCalendar(null);
-                setCalendarError("기록 수를 불러오지 못했습니다.");
-            } finally {
-                if (mounted) setCalendarLoading(false);
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
-    }, [selected?.userId]);
+		return () => {
+			mounted = false;
+		};
+	}, [selected?.userId, calYear, calMonth]);
 
     const recordCountText = React.useMemo(() => {
         if (!selected) return "-";
@@ -174,12 +271,331 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
     const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
 
+	// 기록 보기
     const handleClickRecordView = () => {
-        if (!selected) return;
+		if (!selected) return;
 
-        // TODO: 실제 라우트가 정해지면 변경
-        navigate("/jump-admin/reports");
-    };
+		setNavDir("forward");
+		setRightView("REPORT_HOME");
+
+		setSelectedYmd("");
+		setSelectedEventDayId(null);
+		setQIndex(0);
+	};
+
+	React.useEffect(() => {
+		if (!selected) {
+			setRightView("USER_DETAIL");
+			setSelectedYmd("");
+			setSelectedEventDayId(null);
+			setQIndex(0);
+			return;
+		}
+
+		setRightView("USER_DETAIL");
+		setSelectedYmd("");
+		setSelectedEventDayId(null);
+		setQIndex(0);
+	}, [selected?.userId]);
+	
+	// 특정일에 기록 존재 여부
+	function getEventDayIdsByYmd(ymd: string): number[] {
+		if (!calendar || !ymd) return [];
+		const ds = (calendar.dailyStatuses ?? []).find((it) => it.date === ymd);
+		return ds?.eventDayIds ?? [];
+	}
+	// 보고서 화면에서 뒤로가기 버튼
+	const handleBackToUserDetail = () => {
+		setNavDir("back");
+		setRightView("USER_DETAIL");
+
+		setSelectedYmd("");
+		setSelectedEventDayId(null);
+		setQIndex(0);
+	};
+
+	/**
+	 * 달력 관련 선언
+	 */
+
+	// 날짜 선택
+	function handleSelectDay(ymd: string) {
+		setSelectedYmd(ymd);
+		setSelectedEventDayId(null);
+		setQIndex(0);
+
+		setNavDir("forward");
+		setRightView("REPORT_DAY");
+	}
+	function renderCalendar(): React.ReactNode {
+		if (!selected) {
+			return (
+				<div className="jump-users-calendar-empty">
+					학생을 선택하면 달력이 표시됩니다.
+				</div>
+			);
+		}
+
+		const cells = buildMonthGrid(calYear, calMonth);
+
+		const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+		return (
+			<div className="jump-users-calendar">
+				<div className="jump-users-calendar-head">
+					<button type="button" onClick={goPrevMonth} aria-label="prev month">
+						이전
+					</button>
+
+					<div className="jump-users-calendar-title">
+						{`${calYear}-${pad2(calMonth)}`}
+					</div>
+
+					<button type="button" onClick={goNextMonth} aria-label="next month">
+						다음
+					</button>
+				</div>
+
+				{calendarLoading ? (
+					<div className="jump-users-calendar-state">불러오는 중...</div>
+				) : calendarError ? (
+					<div className="jump-users-calendar-state">{calendarError}</div>
+				) : (
+					<>
+						<div className="jump-users-calendar-week">
+							{weekHeaders.map((w) => (
+								<div key={w} className="jump-users-calendar-weekday">
+									{w}
+								</div>
+							))}
+						</div>
+
+						<div className="jump-users-calendar-grid" role="grid">
+							{cells.map((c, idx) => {
+								if (!c.inMonth) {
+									return <div key={`e-${idx}`} className="jump-users-calendar-cell is-empty" />;
+								}
+
+								const isSelectedDay = c.ymd === selectedYmd;
+								const hasRecord = hasRecordOnDay(c.ymd);
+								const missed = isMissedRecordDay(c.ymd);
+
+								const className = [
+									"jump-users-calendar-cell",
+									isSelectedDay ? "is-selected" : "",
+									hasRecord ? "has-record" : "",
+									missed ? "is-missed" : "",
+								]
+									.filter(Boolean)
+									.join(" ");
+
+								return (
+									<button
+										key={c.ymd}
+										type="button"
+										className={className}
+										onClick={() => handleSelectDay(c.ymd)}
+										role="gridcell"
+									>
+										{c.day}
+									</button>
+								);
+							})}
+						</div>
+					</>
+				)}
+			</div>
+		);
+	}
+	// 기록명 클릭
+	async function handleOpenRecord(eventDayId: number) {
+		setSelectedEventDayId(eventDayId);
+		setQIndex(0);
+
+		setNavDir("forward");
+		setRightView("REPORT_DETAIL");
+
+		if (eventDayCache[eventDayId]) return;
+
+		try {
+			const detail = await getJumpAdminEventDayDetail(eventDayId);
+			setEventDayCache((prev) => ({
+				...prev,
+				[eventDayId]: detail,
+			}));
+		} catch {
+			setEventDayCache((prev) => ({
+				...prev,
+				[eventDayId]: null,
+			}));
+		}
+	}
+
+	// 오른쪽 카드 분기
+	const rightKey = `${rightView}-${selectedYmd}-${selectedEventDayId ?? "none"}`;
+
+	function renderRightContent(): React.ReactNode {
+		if (rightView === "USER_DETAIL") {
+			if (!selected) {
+				return (
+					<div className="jump-users-empty">
+						<img src="/internie_mascot_normal.png" alt="" />
+						<span className="jump-users-empty-title">학생을 선택해주세요!</span>
+					</div>
+				);
+			}
+
+			return (
+				<div className="jump-users-detail">
+					<div className="jump-users-detail-head">
+						<div className="jump-users-detail-title">
+							{normalizeText(selected.name) || "-"} 님
+						</div>
+						<button type="button" className="jump-users-trash" aria-label="delete">
+							<img src="/trash-red-01.svg" alt="" />
+						</button>
+					</div>
+
+					<div className="jump-users-info">
+						<div className="jump-users-info-row">
+							<div className="jump-users-info-label">소속</div>
+							<div className="jump-users-info-value">{getSchoolName(selected)}</div>
+						</div>
+
+						<div className="jump-users-info-row">
+							<div className="jump-users-info-label">기관</div>
+							<div className="jump-users-info-value">{getOrgName(selected)}</div>
+						</div>
+
+						<div className="jump-users-info-row">
+							<div className="jump-users-info-label">봉사 일시</div>
+							<div className="jump-users-info-value">{volunteerTimeText}</div>
+						</div>
+
+						<div className="jump-users-info-row">
+							<div className="jump-users-info-label">기록 수</div>
+							<div className="jump-users-info-value">{recordCountText}</div>
+						</div>
+
+						<div className="jump-users-info-row">
+							<div className="jump-users-info-label">미기록 수</div>
+							<div className="jump-users-info-value">{unrecordedCountText}</div>
+						</div>
+					</div>
+
+					<button type="button" className="jump-users-record-btn" onClick={handleClickRecordView}>
+						기록 보기
+					</button>
+				</div>
+			);
+		}
+
+		if (rightView === "REPORT_HOME") {
+			return (
+				<div>
+					<button type="button" onClick={handleBackToUserDetail}>
+						뒤로가기
+					</button>
+					<div>KPI 카드 2개</div>
+				</div>
+			);
+		}
+
+		if (rightView === "REPORT_DAY") {
+			return renderReportDay();
+		}
+
+		if (rightView === "REPORT_DETAIL") {
+			return renderReportDetail();
+		}
+
+		return null;
+	}
+
+	
+	function renderReportDay(): React.ReactNode { // 선택한 날짜에 기록 갯수 및 기록명 표시
+		if (!selectedYmd) {
+			return <div>날짜를 선택해주세요.</div>;
+		}
+
+		const ids = getEventDayIdsByYmd(selectedYmd);
+
+		return (
+			<div>
+				<div>{`${selectedYmd}에 ${ids.length}개의 기록이 있어요`}</div>
+
+				<div>
+					{ids.length === 0 ? (
+						<div>해당 날짜의 기록이 없습니다.</div>
+					) : (
+						ids.map((id, idx) => (
+							<button
+								key={id}
+								type="button"
+								onClick={() => handleOpenRecord(id)}
+							>
+								{`기록명${idx + 1}`}
+							</button>
+						))
+					)}
+				</div>
+			</div>
+		);
+	}
+
+	function renderReportDetail(): React.ReactNode { // 기록 상세 화면 렌더
+		if (!selectedEventDayId) return <div>기록을 선택해주세요.</div>;
+
+		const d = eventDayCache[selectedEventDayId];
+
+		if (d === undefined) return <div>불러오는 중...</div>;
+		if (d === null) return <div>기록 상세를 불러오지 못했습니다.</div>;
+
+		const qs: string[] = d?.question?.questionList ?? [];
+		const safeIndex = Math.min(Math.max(qIndex, 0), Math.max(qs.length - 1, 0));
+		const isFirst = safeIndex <= 0;
+		const isLast = safeIndex >= qs.length - 1;
+		const qText = qs[qIndex] ?? "";
+
+		const answerText = (d?.transcriptions ?? [])
+			.map((t: any) => normalizeText(t.text))
+			.filter(Boolean)
+			.join("\n");
+
+		const qKey = `q-${selectedEventDayId ?? "none"}-${qIndex}`; // 질문 전환 애니메이션용
+
+		return (
+			<div className="jump-report-detail">
+				<div className="jump-report-detail-head">
+					<button type="button" onClick={() => { setNavDir("back"); setRightView("REPORT_DAY"); }}>
+						뒤로
+					</button>
+					<div>{`기록명`}</div>
+				</div>
+
+				<div className="jump-report-qwrap">
+					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
+						<div className="jump-report-q">{`Q. ${qText || "-"}`}</div>
+						<div className="jump-report-a">{answerText || "-"}</div>
+					</div>
+				</div>
+
+				<div className="jump-report-nav">
+					{!isFirst && (
+						<button type="button" onClick={() => { setNavDir("back"); setQIndex((prev) => Math.max(0, prev - 1)); }} aria-label="prev question" >
+							<img src="/chevron-left.svg" alt="" />
+						</button>
+					)}
+
+					{!isLast && (
+						<button type="button" onClick={() => { setNavDir("forward"); setQIndex((prev) => Math.min(qs.length - 1, prev + 1)); }} aria-label="next question" >
+							<img src="/chevron-right.svg" alt="" />
+						</button>
+					)}
+				</div>
+			</div>
+		);
+	}
 
     return (
 		<div className="jump-users-page">
@@ -196,116 +612,90 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			{/* GRID */}
 			<div className="jump-admin-grid">
 				{/* LEFT CARD */}
-				<section className="jump-users-left-card">
-					<div className="jump-users-filters">
-						<div className="jump-users-filter">
-							<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-								<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
-									<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
-									<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-									<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
-								</button>
+				<section className={`jump-users-left-card ${hasSelectedStudent ? "has-selected" : ""} ${isReportMode ? "mode-report" : "mode-user"}`}>
+					<div className="jump-users-left-list-area">
+						<div className="jump-users-filters">
+							<div className="jump-users-filter">
+								<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
+									<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
+										<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
+										<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
+										<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
+									</button>
 
-								{open && (
-									<div className="jump-users-org-menu">
-										<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
-											전체
-										</button>
-
-										{orgOptions.map((org) => (
-											<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
-												{org}
+									{open && (
+										<div className="jump-users-org-menu">
+											<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+												전체
 											</button>
-										))}
-									</div>
-								)}
+
+											{orgOptions.map((org) => (
+												<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
+													{org}
+												</button>
+											))}
+										</div>
+									)}
+								</div>
+							</div>
+
+							<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+								<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
+								<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 							</div>
 						</div>
 
-						<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-							<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
-							<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
-						</div>
+						{loading ? (
+							<div className="jump-users-state">불러오는 중...</div>
+						) : errorMsg ? (
+							<div className="jump-users-state">{errorMsg}</div>
+						) : (
+							<div className="jump-admin-list" role="list">
+								{filtered.map((u, idx) => {
+									const isSelected = selectedId === u.userId;
+									const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
+									const orgName = getOrgName(u);
+
+									return (
+										<button
+											key={u.userId}
+											type="button"
+											className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+											onClick={() => setSelectedId(u.userId)}
+											role="listitem"
+										>
+											<div className="jump-admin-badge">{idx + 1}</div>
+											<div className="jump-admin-user-name">{displayName}</div>
+											<div className="jump-admin-user-org">{orgName}</div>
+										</button>
+									);
+								})}
+							</div>
+						)}
+					</div>
+					
+					{/* 달력 위로 슬라이딩 할 학생 카드 */}
+					<div className="jump-users-selected-strip">
+						{selected ? (
+							<button type="button" className="jump-users-selected-strip-btn" onClick={() => {/* 나중에 추가*/ }} >
+								<div className="jump-users-selected-name">{normalizeText(selected.name) || "-"}</div>
+								<div className="jump-users-selected-org">{getOrgName(selected)}</div>
+							</button>
+						) : null}
 					</div>
 
-					{loading ? (
-						<div className="jump-users-state">불러오는 중...</div>
-					) : errorMsg ? (
-						<div className="jump-users-state">{errorMsg}</div>
-					) : (
-						<div className="jump-admin-list" role="list">
-							{filtered.map((u, idx) => {
-								const isSelected = selectedId === u.userId;
-								const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
-								const orgName = getOrgName(u);
-
-								return (
-									<button
-										key={u.userId}
-										type="button"
-										className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
-										onClick={() => setSelectedId(u.userId)}
-										role="listitem"
-									>
-										<div className="jump-admin-badge">{idx + 1}</div>
-										<div className="jump-admin-user-name">{displayName}</div>
-										<div className="jump-admin-user-org">{orgName}</div>
-									</button>
-								);
-							})}
-						</div>
-					)}
+					{/* calendar card */}
+					<div className="jump-users-calendar-card">
+						{renderCalendar()}
+					</div>
 				</section>
 
 				{/* RIGHT CARD */}
 				<section className="jump-users-right-card">
 					<div className="jump-users-detail-card">
-						{!selected ? (
-							<div className="jump-users-empty">
-								<img src="/internie_mascot_normal.png" alt="" />
-								<span className="jump-users-empty-title">학생을 선택해주세요!</span>
-							</div>
-						) : (
-							<div className="jump-users-detail">
-								<div className="jump-users-detail-head">
-									<div className="jump-users-detail-title">{normalizeText(selected.name) || "-"} 님</div>
-									<button type="button" className="jump-users-trash" aria-label="delete">
-										<img src="/trash-red-01.svg" alt="" />
-									</button>
-								</div>
-
-								<div className="jump-users-info">
-									<div className="jump-users-info-row">
-										<div className="jump-users-info-label">소속</div>
-										<div className="jump-users-info-value">{getSchoolName(selected)}</div>
-									</div>
-
-									<div className="jump-users-info-row">
-										<div className="jump-users-info-label">기관</div>
-										<div className="jump-users-info-value">{getOrgName(selected)}</div>
-									</div>
-
-									<div className="jump-users-info-row">
-										<div className="jump-users-info-label">봉사 일시</div>
-										<div className="jump-users-info-value">{volunteerTimeText}</div>
-									</div>
-
-									<div className="jump-users-info-row">
-										<div className="jump-users-info-label">기록 수</div>
-										<div className="jump-users-info-value">{recordCountText}</div>
-									</div>
-
-									<div className="jump-users-info-row">
-										<div className="jump-users-info-label">미기록 수</div>
-										<div className="jump-users-info-value">{unrecordedCountText}</div>
-									</div>
-								</div>
-
-								<button type="button" className="jump-users-record-btn" onClick={handleClickRecordView}>
-									기록 보기
-								</button>
-							</div>
-						)}
+						<div key={rightKey} className={`jump-users-swap jump-users-swap--${navDir}`}>
+							{renderRightContent()}
+						</div>
 					</div>
 				</section>
 			</div>
