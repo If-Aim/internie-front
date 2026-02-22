@@ -276,7 +276,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 	const yearOptions: Option[] = React.useMemo(() => {
 		const nowY = new Date().getFullYear();
-		const ys = buildYearOptions(nowY, 5);
+		const ys = buildYearOptions(nowY, 2);
 		return ys.map((y) => ({
 			value: y,
 			label: String(y),
