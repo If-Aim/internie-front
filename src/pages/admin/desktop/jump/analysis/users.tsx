@@ -431,6 +431,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			</div>
 		);
 	}
+
 	// 기록명 클릭
 	async function handleOpenRecord(eventDayId: number) {
 		setSelectedEventDayId(eventDayId);
@@ -456,6 +457,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}
 
 	// 왼쪽 카드 분기
+	function getSelectedBadgeNumber(): number | null {
+		if (!selected) return null;
+
+		const idx = filtered.findIndex((u) => u.userId === selected.userId);
+		if (idx < 0) return null;
+
+		return idx + 1;
+	}
 	function renderLeftListMode(): React.ReactNode {
     	return (
 			<div className="jump-users-left-frame">
@@ -523,13 +532,21 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return (
 			<div className="jump-users-left-frame">
 				<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail}>
-					<img src="/chevron-left.svg" alt="" />
+					<img src="/chevron-left-6b.svg" alt="" />
 					뒤로가기
 				</button>
 
 				{selected ? (
 					<div className="jump-users-selected-card">
-						<div className="jump-users-selected-name">{normalizeText(selected.name) || "-"}</div>
+						<div className="jump-users-selected-left">
+							<div className="jump-admin-badge jump-users-selected-badge">
+								{getSelectedBadgeNumber() ?? "-"}
+							</div>
+							<div className="jump-users-selected-name">
+								{normalizeText(selected.name) || "-"}
+							</div>
+						</div>
+
 						<div className="jump-users-selected-org">{getOrgName(selected)}</div>
 					</div>
 				) : null}
