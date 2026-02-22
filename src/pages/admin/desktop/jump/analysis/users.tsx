@@ -5,6 +5,7 @@ import "./users.css";
 
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
 type NavDir = "forward" | "back";
+type Option = { value: number; label: string };
 
 const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const weekHeaders = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -13,6 +14,83 @@ function buildYearOptions(centerYear: number, span: number) {
 	const ys: number[] = [];
 	for (let y = centerYear - span; y <= centerYear + span; y += 1) ys.push(y);
 	return ys;
+}
+
+function useOutsideClose<T extends HTMLElement>(
+    ref: React.RefObject<T | null>,
+    open: boolean,
+    onClose: () => void
+) {
+    React.useEffect(() => {
+        if (!open) return;
+
+        function onMouseDown(e: MouseEvent) {
+            const el = ref.current;
+            if (!el) return;
+
+            if (e.target instanceof Node && !el.contains(e.target)) onClose();
+        }
+
+        document.addEventListener("mousedown", onMouseDown);
+        return () => document.removeEventListener("mousedown", onMouseDown);
+    }, [open, onClose, ref]);
+}
+
+function DropdownSelect(props: {
+    value: number;
+    options: Option[];
+    onChange: (next: number) => void;
+    ariaLabel: string;
+}) {
+    const { value, options, onChange, ariaLabel } = props;
+
+    const [open, setOpen] = React.useState(false);
+    const rootRef = React.useRef<HTMLDivElement | null>(null);
+
+    useOutsideClose(rootRef, open, () => setOpen(false));
+
+    const selected = options.find((o) => o.value === value) ?? null;
+
+    return (
+        <div ref={rootRef} className={`jump-users-dd ${open ? "is-open" : ""}`}>
+            <button
+                type="button"
+                className="jump-users-dd-trigger"
+                onClick={() => setOpen((p) => !p)}
+                aria-label={ariaLabel}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+            >
+                <span className="jump-users-dd-text">
+                    {selected ? selected.label : "-"}
+                </span>
+                <img className="jump-users-dd-arrow" src="/chevron-down-6b.svg" alt="" />
+            </button>
+
+            {open && (
+                <div className="jump-users-dd-menu" role="listbox" aria-label={ariaLabel}>
+                    {options.map((o) => {
+                        const isSelected = o.value === value;
+                        return (
+                            <button
+                                key={o.value}
+                                type="button"
+                                className={`jump-users-dd-item ${isSelected ? "is-selected" : ""}`}
+                                role="option"
+                                aria-selected={isSelected}
+                                onClick={() => {
+                                    onChange(o.value);
+                                    setOpen(false);
+                                }}
+                            >
+                                {o.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
 }
 
 function normalizeText(v: unknown): string {
@@ -189,8 +267,21 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return Array.from(set);
 	}, [students]);
 
-	const nowY = new Date().getFullYear();
-	const yearOptions = buildYearOptions(nowY, 5);
+	const monthOptions: Option[] = React.useMemo(() => {
+		return MONTH_LABELS.map((label, idx) => ({
+			value: idx + 1,
+			label,
+		}));
+	}, []);
+
+	const yearOptions: Option[] = React.useMemo(() => {
+		const nowY = new Date().getFullYear();
+		const ys = buildYearOptions(nowY, 5);
+		return ys.map((y) => ({
+			value: y,
+			label: String(y),
+		}));
+	}, []);
 
     const filtered = React.useMemo(() => {
 		const byOrg = students.filter((u) => {
@@ -353,44 +444,29 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			<div className="jump-users-calendar">
 				<div className="jump-users-calendar-head">
 					<div className="jump-users-calendar-selects">
-						<div className="jump-users-select-wrap">
-							<select
-								className="jump-users-calendar-select"
-								value={calMonth}
-								onChange={(e) => {
-									const m = Number(e.target.value);
-									setSelectedYmd("");
-									setSelectedEventDayId(null);
-									setQIndex(0);
-									setCalMonth(m);
-								}}
-								aria-label="month select"
-							>
-								{MONTH_LABELS.map((label, idx) => {
-									const m = idx + 1;
-									return (<option key={label} value={m}>{label}</option>);
-								})}
-							</select>
-							<img className="jump-users-select-arrow" src="/chevron-right-6b.svg" alt="" />
-						</div>
+						<DropdownSelect
+							value={calMonth}
+							options={monthOptions}
+							ariaLabel="month"
+							onChange={(m) => {
+								setSelectedYmd("");
+								setSelectedEventDayId(null);
+								setQIndex(0);
+								setCalMonth(m);
+							}}
+						/>
 
-						<div className="jump-users-select-wrap">
-							<select
-								className="jump-users-calendar-select"
-								value={calYear}
-								onChange={(e) => {
-									const y = Number(e.target.value);
-									setSelectedYmd("");
-									setSelectedEventDayId(null);
-									setQIndex(0);
-									setCalYear(y);
-								}}
-								aria-label="year select"
-							>
-								{yearOptions.map((y) => (<option key={y} value={y}>{y}</option>))}
-							</select>
-							<img className="jump-users-select-arrow" src="/chevron-down-6b.svg" alt="" />
-						</div>
+						<DropdownSelect
+							value={calYear}
+							options={yearOptions}
+							ariaLabel="year"
+							onChange={(y) => {
+								setSelectedYmd("");
+								setSelectedEventDayId(null);
+								setQIndex(0);
+								setCalYear(y);
+							}}
+						/>
 					</div>
 				</div>
 
