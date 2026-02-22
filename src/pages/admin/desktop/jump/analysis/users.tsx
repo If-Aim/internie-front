@@ -455,6 +455,92 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 	}
 
+	// 왼쪽 카드 분기
+	function renderLeftListMode(): React.ReactNode {
+    	return (
+			<div className="jump-users-left-frame">
+				<div className="jump-users-filters">
+					<div className="jump-users-filter">
+						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
+							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
+								<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
+								<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
+								<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
+							</button>
+							{open && (
+								<div className="jump-users-org-menu">
+									<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+										전체
+									</button>
+
+									{orgOptions.map((org) => (
+										<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
+											{org}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+					</div>
+
+					<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+						<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
+						<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
+					</div>
+				</div>
+
+				{loading ? (
+					<div className="jump-users-state">불러오는 중...</div>
+				) : errorMsg ? (
+					<div className="jump-users-state">{errorMsg}</div>
+				) : (
+					<div ref={listRef} className="jump-admin-list" role="list">
+						{filtered.map((u, idx) => {
+							const isSelected = selectedId === u.userId;
+							const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
+							const orgName = getOrgName(u);
+
+							return (
+								<button
+									key={u.userId}
+									type="button"
+									className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+									onClick={() => setSelectedId(u.userId)}
+									role="listitem"
+								>
+									<div className="jump-admin-badge">{idx + 1}</div>
+									<div className="jump-admin-user-name">{displayName}</div>
+									<div className="jump-admin-user-org">{orgName}</div>
+								</button>
+							);
+						})}
+					</div>
+				)}
+			</div>
+		);
+	}
+	function renderLeftReportMode(): React.ReactNode {
+		return (
+			<div className="jump-users-left-frame">
+				<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail}>
+					<img src="/chevron-left.svg" alt="" />
+					뒤로가기
+				</button>
+
+				{selected ? (
+					<div className="jump-users-selected-card">
+						<div className="jump-users-selected-name">{normalizeText(selected.name) || "-"}</div>
+						<div className="jump-users-selected-org">{getOrgName(selected)}</div>
+					</div>
+				) : null}
+
+				<div className="jump-users-calendar-card">
+					{renderCalendar()}
+				</div>
+			</div>
+		);
+	}
+
 	// 오른쪽 카드 분기
 	const rightKey = `${rightView}-${selectedYmd}-${selectedEventDayId ?? "none"}`;
 
@@ -636,85 +722,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			{/* GRID */}
 			<div className="jump-admin-grid">
 				{/* LEFT CARD */}
-				<section className={`jump-users-left-card ${isReportMode ? "mode-report" : "mode-user"}`}>
-					<div className="jump-users-left-list-area">
-						<div className="jump-users-filters">
-							<div className="jump-users-filter">
-								<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-									<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
-										<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
-										<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-										<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
-									</button>
-									{open && (
-										<div className="jump-users-org-menu">
-											<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
-												전체
-											</button>
-
-											{orgOptions.map((org) => (
-												<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
-													{org}
-												</button>
-											))}
-										</div>
-									)}
-								</div>
-							</div>
-
-							<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-								<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
-								<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
-							</div>
-						</div>
-
-						{loading ? (
-							<div className="jump-users-state">불러오는 중...</div>
-						) : errorMsg ? (
-							<div className="jump-users-state">{errorMsg}</div>
-						) : (
-							<div ref={listRef} className="jump-admin-list" role="list">
-								{filtered.map((u, idx) => {
-									const isSelected = selectedId === u.userId;
-									const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
-									const orgName = getOrgName(u);
-
-									return (
-										<button
-											key={u.userId}
-											type="button"
-											className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
-											onClick={() => setSelectedId(u.userId)}
-											role="listitem"
-										>
-											<div className="jump-admin-badge">{idx + 1}</div>
-											<div className="jump-admin-user-name">{displayName}</div>
-											<div className="jump-admin-user-org">{orgName}</div>
-										</button>
-									);
-								})}
-							</div>
-						)}
-					</div>
-					<div className="jump-users-left-report-area">
-						<div className={`jump-users-left-topbar ${isReportMode ? "is-visible" : "is-hidden"}`}>
-							<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail} aria-label="back" aria-hidden={!isReportMode} tabIndex={isReportMode ? 0 : -1} >
-								뒤로가기
-							</button>
-						</div>
-
-						{selected ? (
-							<button type="button" className="jump-users-selected-card" onClick={() => { /* 필요 시 */ }}>
-								<div className="jump-users-selected-card-name">{normalizeText(selected.name) || "-"}</div>
-								<div className="jump-users-selected-card-org">{getOrgName(selected)}</div>
-							</button>
-						) : (
-							<div className="jump-users-selected-card-empty">학생이 선택되지 않았습니다.</div>
-						)}
-
-						<div className="jump-users-calendar-card">
-							{renderCalendar()}
-						</div>
+				<section className="jump-users-left-card">
+					<div key={isReportMode ? "report" : "list"} className="jump-users-left-swap">
+						{isReportMode ? renderLeftReportMode() : renderLeftListMode()}
 					</div>
 				</section>
 
