@@ -68,11 +68,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const listRef = React.useRef<HTMLDivElement | null>(null);
 	const rowRefs = React.useRef<Record<number, HTMLButtonElement | null>>({});
 
-	const [stripAnim, setStripAnim] = React.useState<boolean>(true);
+	const [/*stripAnim*/, setStripAnim] = React.useState<boolean>(true);
 
 	const isReportMode = rightView !== "USER_DETAIL";
-	const hasSelectedStudent = selected != null;
-	const showSelectedStrip = isReportMode && selected != null;
+
 	const [calYear, setCalYear] = React.useState<number>(() => new Date().getFullYear());
 	const [calMonth, setCalMonth] = React.useState<number>(() => new Date().getMonth() + 1);
 	function pad2(n: number) {
@@ -637,7 +636,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			{/* GRID */}
 			<div className="jump-admin-grid">
 				{/* LEFT CARD */}
-				<section className={[ "jump-users-left-card", hasSelectedStudent ? "has-selected" : "", isReportMode ? "mode-report" : "mode-user", stripAnim ? "strip-anim" : "strip-no-anim", ].filter(Boolean).join(" ")} >
+				<section className={`jump-users-left-card ${isReportMode ? "mode-report" : "mode-user"}`}>
 					<div className="jump-users-left-list-area">
 						<div className="jump-users-filters">
 							<div className="jump-users-filter">
@@ -647,7 +646,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 										<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
 										<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
 									</button>
-
 									{open && (
 										<div className="jump-users-org-menu">
 											<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
@@ -698,20 +696,25 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							</div>
 						)}
 					</div>
-					
-					{/* 달력 위로 슬라이딩 할 학생 카드 */}
-					<div className="jump-users-selected-strip">
-						{showSelectedStrip ? (
-							<button type="button" className="jump-users-selected-strip-btn" onClick={() => { /* 나중에 */ }}>
-								<div className="jump-users-selected-name">{normalizeText(selected.name) || "-"}</div>
-								<div className="jump-users-selected-org">{getOrgName(selected)}</div>
+					<div className="jump-users-left-report-area">
+						<div className={`jump-users-left-topbar ${isReportMode ? "is-visible" : "is-hidden"}`}>
+							<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail} aria-label="back" aria-hidden={!isReportMode} tabIndex={isReportMode ? 0 : -1} >
+								뒤로가기
 							</button>
-						) : null}
-					</div>
+						</div>
 
-					{/* calendar card */}
-					<div className="jump-users-calendar-card">
-						{renderCalendar()}
+						{selected ? (
+							<button type="button" className="jump-users-selected-card" onClick={() => { /* 필요 시 */ }}>
+								<div className="jump-users-selected-card-name">{normalizeText(selected.name) || "-"}</div>
+								<div className="jump-users-selected-card-org">{getOrgName(selected)}</div>
+							</button>
+						) : (
+							<div className="jump-users-selected-card-empty">학생이 선택되지 않았습니다.</div>
+						)}
+
+						<div className="jump-users-calendar-card">
+							{renderCalendar()}
+						</div>
 					</div>
 				</section>
 
