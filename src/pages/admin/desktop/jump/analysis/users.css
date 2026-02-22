@@ -45,6 +45,9 @@
 
 /* ===== Left card ===== */
 .jump-users-left-card { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.jump-users-left-card.strip-no-anim .jump-users-selected-strip { transition: none; opacity: 1; transform: none; height: 72px; }
+.jump-users-left-card.strip-no-anim .jump-users-calendar-card { transition: none; opacity: 1; transform: none; height: 420px; }
+
 .jump-users-left-list-area { display: flex; flex-direction: column; min-height: 0; }
 .jump-users-left-card .jump-admin-list { flex: 1; min-height: 0; overflow: auto; padding-bottom: 12px; }
 

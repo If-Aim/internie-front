@@ -65,8 +65,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     }, [students, selectedId]);
 
 	// 달력 렌더
+	const listRef = React.useRef<HTMLDivElement | null>(null);
+	const rowRefs = React.useRef<Record<number, HTMLButtonElement | null>>({});
+
+	const [stripAnim, setStripAnim] = React.useState<boolean>(true);
+
 	const isReportMode = rightView !== "USER_DETAIL";
 	const hasSelectedStudent = selected != null;
+	const showSelectedStrip = isReportMode && selected != null;
 	const [calYear, setCalYear] = React.useState<number>(() => new Date().getFullYear());
 	const [calMonth, setCalMonth] = React.useState<number>(() => new Date().getMonth() + 1);
 	function pad2(n: number) {
@@ -271,10 +277,29 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
     const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
 
-	// 기록 보기
+	// 기록 보기버튼 클릭 시
     const handleClickRecordView = () => {
 		if (!selected) return;
 
+		const container = listRef.current;
+		const row = rowRefs.current[selected.userId];
+
+		let shouldAnimate = true;
+
+		// 하단인지 판단
+		if (container && row) {
+			const c = container.getBoundingClientRect();
+			const r = row.getBoundingClientRect();
+
+			const threshold = 60; // 하단 기준
+
+			const isNearBottom = r.bottom >= (c.bottom - threshold);
+			shouldAnimate = isNearBottom;
+		}
+
+		setStripAnim(shouldAnimate);
+
+		// 리프트모드로 전환
 		setNavDir("forward");
 		setRightView("REPORT_HOME");
 
@@ -612,7 +637,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			{/* GRID */}
 			<div className="jump-admin-grid">
 				{/* LEFT CARD */}
-				<section className={`jump-users-left-card ${hasSelectedStudent ? "has-selected" : ""} ${isReportMode ? "mode-report" : "mode-user"}`}>
+				<section className={[ "jump-users-left-card", hasSelectedStudent ? "has-selected" : "", isReportMode ? "mode-report" : "mode-user", stripAnim ? "strip-anim" : "strip-no-anim", ].filter(Boolean).join(" ")} >
 					<div className="jump-users-left-list-area">
 						<div className="jump-users-filters">
 							<div className="jump-users-filter">
@@ -650,7 +675,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						) : errorMsg ? (
 							<div className="jump-users-state">{errorMsg}</div>
 						) : (
-							<div className="jump-admin-list" role="list">
+							<div ref={listRef} className="jump-admin-list" role="list">
 								{filtered.map((u, idx) => {
 									const isSelected = selectedId === u.userId;
 									const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
@@ -676,8 +701,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 					
 					{/* 달력 위로 슬라이딩 할 학생 카드 */}
 					<div className="jump-users-selected-strip">
-						{selected ? (
-							<button type="button" className="jump-users-selected-strip-btn" onClick={() => {/* 나중에 추가*/ }} >
+						{showSelectedStrip ? (
+							<button type="button" className="jump-users-selected-strip-btn" onClick={() => { /* 나중에 */ }}>
 								<div className="jump-users-selected-name">{normalizeText(selected.name) || "-"}</div>
 								<div className="jump-users-selected-org">{getOrgName(selected)}</div>
 							</button>

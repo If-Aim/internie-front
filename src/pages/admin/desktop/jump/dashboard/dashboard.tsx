@@ -325,12 +325,9 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                     <div className="jump-dashboard-week-right">
                         <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
                             <button type="button" className={`jump-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
+                                <img className="jump-users-org-filter" src={!selectedOrg ? "/mynaui_filterr_6b.svg" : "/mynaui_filte.svg"} alt="" />
                                 <span className="jump-dashboard-org-text">{selectedOrg || "전체"}</span>
-                                <img
-                                    className="org-arrow"
-                                    src={!selectedOrg ? "/chevron-right-6b.svg" : "/chevron-right.svg"}
-                                    alt=""
-                                />
+                                <img className="org-arrow" src={!selectedOrg ? "/chevron-right-6b.svg" : "/chevron-right.svg"} alt="" />
                             </button>
 
                             {open && (
