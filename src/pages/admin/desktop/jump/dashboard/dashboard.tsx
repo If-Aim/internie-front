@@ -289,25 +289,21 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                     <button type="button" className="jump-dashboard-kpi">
                         <div className="jump-dashboard-kpi-label">전체 참여자 수</div>
                         <div className="jump-dashboard-kpi-value">{kpi.totalParticipants}명</div>
-                        <div className="jump-dashboard-kpi-arrow"><img src="/chevron-right.svg"></img></div>
                     </button>
 
                     <button type="button" className="jump-dashboard-kpi">
                         <div className="jump-dashboard-kpi-label">이번 달 기록 현황</div>
                         <div className="jump-dashboard-kpi-value">{kpi.monthRecordedCount}건</div>
-                        <div className="jump-dashboard-kpi-arrow"><img src="/chevron-right.svg"></img></div>
                     </button>
 
                     <button type="button" className="jump-dashboard-kpi">
                         <div className="jump-dashboard-kpi-label">이번 주 기록 현황</div>
                         <div className="jump-dashboard-kpi-value">{kpi.weekRecordedCount}건</div>
-                        <div className="jump-dashboard-kpi-arrow"><img src="/chevron-right.svg"></img></div>
                     </button>
 
                     <button type="button" className="jump-dashboard-kpi">
                         <div className="jump-dashboard-kpi-label">이번 주 미기록 현황</div>
                         <div className="jump-dashboard-kpi-value">{kpi.weekNotRecordedCells}건</div>
-                        <div className="jump-dashboard-kpi-arrow"><img src="/chevron-right.svg"></img></div>
                     </button>
                 </div>
             </div>
