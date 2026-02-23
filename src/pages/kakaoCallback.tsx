@@ -38,6 +38,9 @@ export default function KakaoCallback() {
 				}
 				localStorage.setItem("accessToken", auth);
 
+				// 로그인 직후 1회 온보딩 강제 표시용 플래그 - TODO: 추후 수정
+				localStorage.setItem("forceOnboardingOnceAfterLogin", "1");
+
 				const nextPath = await routeAfterLogin();
 				navigate(nextPath, { replace: true });
 				

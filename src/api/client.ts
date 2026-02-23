@@ -240,7 +240,9 @@ export type SubmitOnboardingInput = {
 };
 export type UserBase = {
 	userId: number;
-	name: string;
+	name?: string | null;
+	kakaoName?: string | null;
+
 	nickname: string | null;
 	profileImage: string | null;
 	verificationImage: string | null;
@@ -252,10 +254,8 @@ export type UserBase = {
     interestCompany?: string | null;
 	jumpOrganization?: JumpOrganization | null;
 
-	displayName?: string | null;
-	display_name?: string | null;
-	kakaoName?: string | null;
 };
+
 export type SubmitOnboardingResponse = UserBase;
 
 export type UserMe = UserBase;
@@ -318,13 +318,21 @@ export function isOnboardingDone(me: Partial<UserBase> | null | undefined): bool
     return name.length > 0;
 }
 
-export async function routeAfterLogin(): Promise<"/student" | "/onboarding"> {
-    try {
-        const me = await getUserMe();
-        return isOnboardingDone(me) ? "/student" : "/onboarding";
-    } catch {
-        return "/student";
+const FORCE_ONBOARDING_ONCE_KEY = "forceOnboardingOnceAfterLogin";
+
+export async function routeAfterLogin(): Promise<"/student" | "/onboarding"> { // TODO: 추후 수정
+    const forceOnce = localStorage.getItem(FORCE_ONBOARDING_ONCE_KEY) === "1";
+    if (forceOnce) {
+        localStorage.removeItem(FORCE_ONBOARDING_ONCE_KEY);
+        return "/onboarding";
     }
+    return "/student";
+	// try { // 추후 주석 해제
+    //     const me = await getUserMe();
+    //     return isOnboardingDone(me) ? "/student" : "/onboarding";
+    // } catch {
+    //     return "/student";
+    // }
 }
 
 // 학교 조회
