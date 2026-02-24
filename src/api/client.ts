@@ -95,12 +95,30 @@ async function requestWithAutoRefresh(
   return res;
 }
 
-export async function loginWithKakao(code: string, redirectUri: string) {
-	return apiPublic("/auth/kakao", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ code, redirectUri }),
-	});
+// 로그인 응답
+export type LoginResponse = {
+    onboardingCompleted: boolean;
+};
+
+export async function loginWithKakao(
+    code: string,
+    redirectUri: string
+): Promise<LoginResponse> {
+
+    const res = await apiPublic("/auth/kakao", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, redirectUri }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new ApiError(res.status, "Login failed", text);
+    }
+
+    const data = await res.json() as LoginResponse;
+
+    return data;
 }
 
 export async function apiPublic(
@@ -318,21 +336,11 @@ export function isOnboardingDone(me: Partial<UserBase> | null | undefined): bool
     return name.length > 0;
 }
 
-const FORCE_ONBOARDING_ONCE_KEY = "forceOnboardingOnceAfterLogin";
+export function routeAfterLoginFromLogin(
+    login: LoginResponse
+): "/student" | "/onboarding" {
 
-export async function routeAfterLogin(): Promise<"/student" | "/onboarding"> { // TODO: 추후 수정
-    const forceOnce = localStorage.getItem(FORCE_ONBOARDING_ONCE_KEY) === "1";
-    if (forceOnce) {
-        localStorage.removeItem(FORCE_ONBOARDING_ONCE_KEY);
-        return "/onboarding";
-    }
-    return "/student";
-	// try { // 추후 주석 해제
-    //     const me = await getUserMe();
-    //     return isOnboardingDone(me) ? "/student" : "/onboarding";
-    // } catch {
-    //     return "/student";
-    // }
+    return login.onboardingCompleted ? "/student" : "/onboarding";
 }
 
 // 학교 조회
