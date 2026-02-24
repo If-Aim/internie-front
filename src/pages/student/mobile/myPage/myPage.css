@@ -8,7 +8,7 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-email { font-size: 16px; font-weight: 500; color: #000; line-height:20px; }
 .mypage-email-sub { margin-top: -18px; font-size: 16px; font-weight: 500; color: #A2A2A2; line-height: 20px; }
 .mypage-profileimg-wrap { position: relative; width: 120px; height: 120px; border-radius: 999px; background: #ffffff; display: grid; place-items: center; z-index: 0; }
-.mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: contain; }
+.mypage-profileimg { width: 102px; height: 102px; border-radius:50%;object-fit: cover; }
 .mypage-school-badge { position: absolute; right: 4px; bottom: 4px; width: 50px; height: 50px; padding:5px;border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .mypage-greeting {font-size: 24px;font-weight: 700;color: #000;}
 .mypage-verify-badge{ position: absolute; right: 0px; bottom: 0px; width: 27px; height: 27px; z-index: 3; display: block; }

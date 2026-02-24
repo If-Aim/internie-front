@@ -44,7 +44,7 @@ export default function MyPage({ onLogout }: Props) {
 	}	
   
 	const [me, setMe] = React.useState<UserMe | null>(null);
-	const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
+	const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
 
 	const displayName = me?.name ?? "";
 	const isVerifiedStudent = me?.status === "APPROVED";
@@ -99,7 +99,7 @@ export default function MyPage({ onLogout }: Props) {
 
 	const avatarSrc =
 		rawAvatarSrc.startsWith("http")
-			? `${rawAvatarSrc}${rawAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion || 0}`
+			? rawAvatarSrc
 			: rawAvatarSrc;
 	const [/*recent*/, setRecent] = React.useState<EventDay[]>([]);
 

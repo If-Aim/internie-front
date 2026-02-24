@@ -29,7 +29,7 @@ export default function EditProfilePage(): React.ReactElement {
     const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
     const [saving, setSaving] = React.useState(false);
-    const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
+    const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
 
     React.useEffect(() => {
         let mounted = true;
@@ -78,7 +78,7 @@ export default function EditProfilePage(): React.ReactElement {
 
     const serverAvatarSrc =
         rawServerAvatarSrc.startsWith("http")
-            ? `${rawServerAvatarSrc}${rawServerAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion || 0}`
+            ? rawServerAvatarSrc
             : rawServerAvatarSrc;
 
     const avatarSrc = previewUrl ?? serverAvatarSrc;
