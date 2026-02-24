@@ -174,7 +174,7 @@ export default function EditProfilePage(): React.ReactElement {
                         <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
                     </div>
 
-                    <button type="button" className="profile-edit-avatar-btn" onClick={handleServicePreparing} >{/*추후 onClick={handleServicePreparing} -> onClick={()=> fileRef.current?.click()} disabled={saving}로 변경 */}
+                    <button type="button" className="profile-edit-avatar-btn" onClick={()=> fileRef.current?.click()} disabled={saving} >
                         편집
                     </button>
                     <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
