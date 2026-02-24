@@ -175,6 +175,19 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return new Date(y, m - 1, 1).getDay();
 	}
 
+	function getTodayYmd(): string {
+		const now = new Date();
+		const y = now.getFullYear();
+		const m = now.getMonth() + 1;
+		const d = now.getDate();
+		return toYmd(y, m, d);
+	}
+
+	function isFutureYmd(ymd: string): boolean {
+		if (!ymd) return false;
+		return ymd > getTodayYmd(); 
+	}
+
 	type CalCell = {
 		ymd: string;
 		day: number;
@@ -493,12 +506,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 								const isSelectedDay = c.ymd === selectedYmd;
 								const hasRecord = hasRecordOnDay(c.ymd);
 								const missed = isMissedRecordDay(c.ymd);
+								const isFuture = isFutureYmd(c.ymd);
 
 								const className = [
 									"jump-users-calendar-cell",
 									isSelectedDay ? "is-selected" : "",
 									hasRecord ? "has-record" : "",
 									missed ? "is-missed" : "",
+									isFuture ? "is-future" : "",
 								]
 									.filter(Boolean)
 									.join(" ");
@@ -508,8 +523,13 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 										key={c.ymd}
 										type="button"
 										className={className}
-										onClick={() => handleSelectDay(c.ymd)}
+										onClick={() => {
+											if (isFuture) return;
+											handleSelectDay(c.ymd);
+										}}
 										role="gridcell"
+										disabled={isFuture}
+										aria-disabled={isFuture}
 									>
 										{c.day}
 									</button>
