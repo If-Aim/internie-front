@@ -29,10 +29,10 @@ background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; word-bre
 .profile-edit-save:disabled{ background: #F1F1F1; color: #A2A2A2; }
 
 /* ===== 점프 센터 ===== */
-.jump-center-select { margin: 12px 0 0 12px; }
+.jump-center-select { margin: 20px 0 0 12px; }
 .vcjp-jump-logo { margin: 0 5px 8px; display: inline-flex; align-items: center; }
 .vcjp-jump-logo img { height: 30px; width: auto; display: block; }
-.vcjp-title { margin: 0 5px 8px; font-size: 24px; font-weight: 700; line-height: 20px; color: #000; }
+.vcjp-title { margin: 0 5px 32px; font-size: 24px; font-weight: 700; line-height: 20px; color: #000; }
 .vcjp-dd { width: 100%; border: 1px solid #E2E2E2; border-radius: 14px; background: #fff; overflow: hidden; }
 .vcjp-dd-trigger { width: 100%; height: 66px; padding: 0 10px 0 19px; border: 0; background: transparent; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 .vcjp-dd-value { font-size: 18px; font-weight: 500; color: #000; }
