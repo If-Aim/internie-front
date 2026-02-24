@@ -108,6 +108,7 @@ text-align: left; padding: 10px 4px; font-weight: 700; font-size: 14px; color: #
 @keyframes jumpUsersSlideInBack { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
 
 /* ===== rightView = "REPORT_HOME" ===== */
+.jump-users-detail-card--REPORT_HOME { background: transparent; border: none; box-shadow: none; padding: 0; overflow: visible; min-height: 0; }
 .jump-users-report-home { display: grid; grid-template-columns: 1fr 1fr; gap: 23px; }
 .jump-users-kpi-card { height: 160px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 29px 24px 30px; cursor: pointer; text-align: left;
 display: flex; flex-direction: column; justify-content: space-between; }
@@ -117,6 +118,7 @@ display: flex; flex-direction: column; justify-content: space-between; }
 .jump-users-kpi-arrow { width: 24px; height: 24px; transform: rotate(-90deg);}
 
 /* ===== rightView = "REPORT_DAY" ===== */
+.jump-users-detail-card--REPORT_DAY { padding: 29px 23px; min-height: 0; }
 .jump-users-report-day { display: flex; flex-direction: column; gap: 41px; }
 .jump-users-report-day-title { font-size: 24px; font-weight: 400; color: #000; }
 .jump-users-report-day-list { display: flex; flex-direction: column; gap: 20px; }
@@ -129,7 +131,14 @@ display: flex; align-items: center; justify-content: space-between; cursor: poin
 
 /* ===== Report detail / Question swap animation ===== */
 .jump-report-detail { display: flex; flex-direction: column; height: 100%; }
-.jump-report-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.jump-report-detail-head { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 18px; }
+
+.jump-report-back { width: 40px; height: 40px; border: none; background: transparent; border-radius: 999px; cursor: pointer; 
+display: inline-flex; align-items: center; justify-content: center; }
+.jump-report-back:hover { background: rgba(17, 24, 39, 0.06); }
+.jump-report-back img { width: 24px; height: 24px; }
+.jump-report-detail-title { text-align: left; font-size: 20px; font-weight: 800; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .jump-report-qwrap { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .jump-report-qswap { height: 100%; animation: jumpQIn 200ms ease both; }
 .jump-report-qswap--forward { animation-name: jumpQInFwd; }

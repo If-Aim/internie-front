@@ -1,6 +1,7 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
-import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, type JumpAdminStudent, type JumpAdminStudentCalendarResponse, deleteJumpAdminStudent } from "../../../../../api/client"; 
+import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, deleteJumpAdminStudent} from "../../../../../api/client"; 
+import type { JumpAdminStudent, JumpAdminStudentCalendarResponse, JumpAdminEventDayDetailResponse } from "../../../../../api/client"; 
 import "./users.css";
 
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
@@ -146,7 +147,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const [qIndex, setQIndex] = React.useState<number>(0);
 	const [qDir, /*setQDir*/] = React.useState<NavDir>("forward");
 	
-	const [eventDayCache, setEventDayCache] = React.useState<Record<number, any>>({});
+	const [eventDayCache, setEventDayCache] = React.useState<Record<number, JumpAdminEventDayDetailResponse | null | undefined>>({});
 
 	const selected = React.useMemo(() => {
         if (selectedId == null) return null;
@@ -373,8 +374,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	/* ======== 사용자별 기록 수 ========== */
 	function startOfWeekMonday(date: Date) {
 		const d = new Date(date);
-		const jsDow = d.getDay(); // 0 Sun - 6 Sat
-		const mondayOffset = (jsDow + 6) % 7; // Mon=0
+		const jsDow = d.getDay(); 
+		const mondayOffset = (jsDow + 6) % 7; 
 		d.setDate(d.getDate() - mondayOffset);
 		d.setHours(0, 0, 0, 0);
 		return d;
@@ -410,6 +411,30 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return sum;
 	}
 	/* ======== 사용자별 기록 수 end ========== */
+
+	/* ======== 사용자별 기록 상세 조회 ========== */
+	function getRecordTitleFromCache(eventDayId: number): string {
+		const d = eventDayCache[eventDayId];
+		if (!d) return "";
+		return normalizeText(d.eventDayTitle) || normalizeText(d.eventTitle) || "";
+	}
+
+	async function prefetchEventDayDetails(eventDayIds: number[]) {
+		const targets = eventDayIds.filter((id) => eventDayCache[id] === undefined);
+		if (targets.length === 0) return;
+
+		// 로딩 표시를 목록 전체에 걸고 싶지 않으면 별도 state는 생략
+		await Promise.all(
+			targets.map(async (id) => {
+				try {
+					const detail = await getJumpAdminEventDayDetail(id);
+					setEventDayCache((prev) => ({ ...prev, [id]: detail }));
+				} catch {
+					setEventDayCache((prev) => ({ ...prev, [id]: null }));
+				}
+			})
+		);
+	}
 
 	// 기록 보기버튼 클릭 시
     const handleClickRecordView = () => {
@@ -457,12 +482,16 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		setQIndex(0);
 	}, [selected?.userId]);
 	
+	/* ======== 사용자별 기록 상세 조회 end ========== */
+
 	// 특정일에 기록 존재 여부
 	function getEventDayIdsByYmd(ymd: string): number[] {
 		if (!calendar || !ymd) return [];
 		const ds = (calendar.dailyStatuses ?? []).find((it) => it.date === ymd);
 		return ds?.eventDayIds ?? [];
 	}
+
+
 	// 보고서 화면에서 뒤로가기 버튼
 	const handleBackToUserDetail = () => {
 		setNavDir("back");
@@ -521,6 +550,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 		setNavDir("forward");
 		setRightView("REPORT_DAY");
+
+		const ids = getEventDayIdsByYmd(ymd);
+		void prefetchEventDayDetails(ids);
 	}
 
 	// 날짜 표시
@@ -896,14 +928,17 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 				</div>
 
 				<div className="jump-users-report-day-list">
-					{ids.map((id, idx) => (
-						<button key={id} type="button" className="jump-users-report-day-item" onClick={() => handleOpenRecord(id)} >
-							<span className="jump-users-report-day-item-text">
-								{`기록명${idx + 1}`}
-							</span>
-							<img className="jump-users-report-day-item-arrow" src="/chevron-right.svg" alt="" />
-						</button>
-					))}
+					{ids.map((id, idx) => {
+						const title = getRecordTitleFromCache(id);
+						const label = title || `기록명${idx + 1}`; // 로딩 전/실패 시 fallback
+
+						return (
+							<button key={id} type="button" className="jump-users-report-day-item" onClick={() => handleOpenRecord(id)} >
+								<span className="jump-users-report-day-item-text">{label}</span>
+								<img className="jump-users-report-day-item-arrow" src="/chevron-right.svg" alt="" />
+							</button>
+						);
+					})}
 				</div>
 			</div>
 		);
@@ -929,14 +964,28 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			.join("\n");
 
 		const qKey = `q-${selectedEventDayId ?? "none"}-${qIndex}`; // 질문 전환 애니메이션용
-
+		const recordTitle =
+			getRecordTitleFromCache(selectedEventDayId) ||
+			"기록";
+			
 		return (
 			<div className="jump-report-detail">
 				<div className="jump-report-detail-head">
-					<button type="button" onClick={() => { setNavDir("back"); setRightView("REPORT_DAY"); }}>
-						뒤로
+					<button
+						type="button"
+						className="jump-report-back"
+						onClick={() => {
+							setNavDir("back");
+							setRightView("REPORT_DAY");
+						}}
+						aria-label="back"
+					>
+						<img src="/chevron-left-6b.svg" alt="" />
 					</button>
-					<div>{`기록명`}</div>
+
+					<div className="jump-report-detail-title">
+						{recordTitle}
+					</div>
 				</div>
 
 				<div className="jump-report-qwrap">
@@ -1025,7 +1074,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 				{/* RIGHT CARD */}
 				<section className="jump-users-right-card">
-					<div className="jump-users-detail-card">
+					<div className={`jump-users-detail-card jump-users-detail-card--${rightView}`}>
 						<div key={rightKey} className={`jump-users-swap jump-users-swap--${navDir}`}>
 							{renderRightContent()}
 						</div>
