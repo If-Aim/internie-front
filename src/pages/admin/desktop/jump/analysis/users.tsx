@@ -370,6 +370,47 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
     const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
 
+	/* ======== 사용자별 기록 수 ========== */
+	function startOfWeekMonday(date: Date) {
+		const d = new Date(date);
+		const jsDow = d.getDay(); // 0 Sun - 6 Sat
+		const mondayOffset = (jsDow + 6) % 7; // Mon=0
+		d.setDate(d.getDate() - mondayOffset);
+		d.setHours(0, 0, 0, 0);
+		return d;
+	}
+
+	function addDays(date: Date, days: number) {
+		const d = new Date(date);
+		d.setDate(d.getDate() + days);
+		return d;
+	}
+
+	function getWeekYmdsFromToday(): string[] {
+		const start = startOfWeekMonday(new Date());
+		const ymds: string[] = [];
+		for (let i = 0; i < 7; i += 1) {
+			const d = addDays(start, i);
+			ymds.push(toYmd(d.getFullYear(), d.getMonth() + 1, d.getDate()));
+		}
+		return ymds;
+	}
+
+	function getWeekRecordCount(): number {
+		if (!calendar) return 0;
+
+		const weekYmds = getWeekYmdsFromToday();
+		let sum = 0;
+
+		for (const ymd of weekYmds) {
+			const ds = (calendar.dailyStatuses ?? []).find((it) => it.date === ymd);
+			sum += (ds?.eventDayIds ?? []).length;
+		}
+
+		return sum;
+	}
+	/* ======== 사용자별 기록 수 end ========== */
+
 	// 기록 보기버튼 클릭 시
     const handleClickRecordView = () => {
 		if (!selected) return;
@@ -469,7 +510,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}
 
 	/**
-	 * 달력 관련 선언
+	 * 달력 관련 
 	 */
 
 	// 날짜 선택
@@ -481,7 +522,21 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		setNavDir("forward");
 		setRightView("REPORT_DAY");
 	}
-	
+
+	// 날짜 표시
+	function formatKoMonthDay(ymd: string): string {
+		const s = (ymd ?? "").trim();
+		if (!s) return "";
+		const parts = s.split("-");
+		if (parts.length < 3) return s;
+
+		const m = Number(parts[1]);
+		const d = Number(parts[2]);
+
+		if (Number.isNaN(m) || Number.isNaN(d)) return s;
+
+		return `${m}월 ${d}일`;
+	}
 	function renderCalendar(): React.ReactNode {
 		if (!selected) {
 			return (
@@ -726,7 +781,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 				<div className="jump-users-detail">
 					<div className="jump-users-detail-head">
 						<div className="jump-users-detail-title">
-							{normalizeText(selected.name) || "-"} 님
+							<span className="jump-users-name-strong">
+								{normalizeText(selected.name) || "-"}
+							</span>
+							<span className="jump-users-name">님</span>
 						</div>
 						<button
 							type="button"
@@ -776,9 +834,37 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 
 		if (rightView === "REPORT_HOME") {
+			const totalCount =
+				selected && calendar && !calendarLoading && !calendarError
+					? calendar.totalRecordedDays
+					: 0;
+
+			const weekCount =
+				selected && calendar && !calendarLoading && !calendarError
+					? getWeekRecordCount()
+					: 0;
+
 			return (
-				<div>
-					<div>KPI 카드 2개</div>
+				<div className="jump-users-report-home">
+					<button type="button" className="jump-users-kpi-card" disabled={!selected}>
+						<div className="jump-users-kpi-label">전체 기록 수</div>
+						<div className="jump-users-kpi-bottom">
+							<div className="jump-users-kpi-value">
+								{calendarLoading ? "-" : `${totalCount}건`}
+							</div>
+							<img className="jump-users-kpi-arrow" src="/chevron-right.svg" alt="" />
+						</div>
+					</button>
+
+					<button type="button" className="jump-users-kpi-card" disabled={!selected}>
+						<div className="jump-users-kpi-label">주간 기록 수</div>
+						<div className="jump-users-kpi-bottom">
+							<div className="jump-users-kpi-value">
+								{calendarLoading ? "-" : `${weekCount}건`}
+							</div>
+							<img className="jump-users-kpi-arrow" src="/chevron-right.svg" alt="" />
+						</div>
+					</button>
 				</div>
 			);
 		}
@@ -794,32 +880,30 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return null;
 	}
 
-	
-	function renderReportDay(): React.ReactNode { // 선택한 날짜에 기록 갯수 및 기록명 표시
+	// 선택한 날짜에 기록 갯수 및 기록명 표시
+	function renderReportDay(): React.ReactNode {
 		if (!selectedYmd) {
-			return <div>날짜를 선택해주세요.</div>;
+			return null;
 		}
 
 		const ids = getEventDayIdsByYmd(selectedYmd);
+		const md = formatKoMonthDay(selectedYmd);
 
 		return (
-			<div>
-				<div>{`${selectedYmd}에 ${ids.length}개의 기록이 있어요`}</div>
+			<div className="jump-users-report-day">
+				<div className="jump-users-report-day-title">
+					{md}에 <strong>{ids.length}개</strong>의 기록이 있어요
+				</div>
 
-				<div>
-					{ids.length === 0 ? (
-						<div>해당 날짜의 기록이 없습니다.</div>
-					) : (
-						ids.map((id, idx) => (
-							<button
-								key={id}
-								type="button"
-								onClick={() => handleOpenRecord(id)}
-							>
+				<div className="jump-users-report-day-list">
+					{ids.map((id, idx) => (
+						<button key={id} type="button" className="jump-users-report-day-item" onClick={() => handleOpenRecord(id)} >
+							<span className="jump-users-report-day-item-text">
 								{`기록명${idx + 1}`}
-							</button>
-						))
-					)}
+							</span>
+							<img className="jump-users-report-day-item-arrow" src="/chevron-right.svg" alt="" />
+						</button>
+					))}
 				</div>
 			</div>
 		);
