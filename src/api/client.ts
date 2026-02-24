@@ -600,6 +600,12 @@ export async function getJumpAdminEventDayDetail(
 	});
 }
 
+// 점프 학생 삭제
+export async function deleteJumpAdminStudent(userId: number | string): Promise<void> {
+    return api<void>(`/jump-admin/students/${userId}`, { method: "DELETE" });
+}
+
+
 /**
  * 관리자 여부 확인
  */

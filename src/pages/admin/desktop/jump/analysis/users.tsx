@@ -1,6 +1,6 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
-import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, type JumpAdminStudent, type JumpAdminStudentCalendarResponse, } from "../../../../../api/client"; 
+import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, type JumpAdminStudent, type JumpAdminStudentCalendarResponse, deleteJumpAdminStudent } from "../../../../../api/client"; 
 import "./users.css";
 
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
@@ -125,6 +125,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
     const [query, setQuery] = React.useState<string>("");
     const [selectedId, setSelectedId] = React.useState<number | null>(null);
+
+	const [deleteOpen, setDeleteOpen] = React.useState<boolean>(false);
+	const [deleteLoading, setDeleteLoading] = React.useState<boolean>(false);
+	const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
     const [calendarLoading, setCalendarLoading] = React.useState<boolean>(false);
     const [calendarError, setCalendarError] = React.useState<string | null>(null);
@@ -428,6 +432,42 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		setQIndex(0);
 	};
 
+	// 학생 삭제
+	async function handleConfirmDelete() {
+		if (!selected) return;
+
+		try {
+			setDeleteLoading(true);
+			setDeleteError(null);
+
+			await deleteJumpAdminStudent(selected.userId);
+
+			// UI 갱신: 목록에서 제거
+			setStudents((prev) => prev.filter((u) => u.userId !== selected.userId));
+
+			// 선택 해제 + 화면 초기화
+			setSelectedId(null);
+			setRightView("USER_DETAIL");
+			setSelectedYmd("");
+			setSelectedEventDayId(null);
+			setQIndex(0);
+
+			setDeleteOpen(false);
+		} catch (e) {
+			if (e instanceof ApiError) {
+				if (e.status === 401 || e.status === 403) {
+					setDeleteError("권한이 없거나 로그인 정보가 만료되었습니다.");
+				} else {
+					setDeleteError("삭제에 실패했습니다.");
+				}
+			} else {
+				setDeleteError("삭제에 실패했습니다.");
+			}
+		} finally {
+			setDeleteLoading(false);
+		}
+	}
+
 	/**
 	 * 달력 관련 선언
 	 */
@@ -688,7 +728,15 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						<div className="jump-users-detail-title">
 							{normalizeText(selected.name) || "-"} 님
 						</div>
-						<button type="button" className="jump-users-trash" aria-label="delete">
+						<button
+							type="button"
+							className="jump-users-trash"
+							aria-label="delete"
+							onClick={() => {
+								setDeleteError(null);
+								setDeleteOpen(true);
+							}}
+						>
 							<img src="/trash-red-01.svg" alt="" />
 						</button>
 					</div>
@@ -833,6 +881,45 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
     return (
 		<div className="jump-users-page">
+			{/* 학생 삭제 모달 */}
+			{deleteOpen && (
+				<div className="jump-users-modal-dim" role="dialog" aria-modal="true">
+					<div className="jump-users-modal">
+						<div className="jump-users-modal-title">학생을 삭제하시겠습니까?</div>
+						<div className="jump-users-modal-desc">
+							삭제 후에는 복구할 수 없습니다.
+						</div>
+
+						{deleteError && (
+							<div className="jump-users-modal-error">{deleteError}</div>
+						)}
+
+						<div className="jump-users-modal-actions">
+							<button
+								type="button"
+								className="jump-users-modal-btn is-cancel"
+								onClick={() => {
+									if (deleteLoading) return;
+									setDeleteOpen(false);
+								}}
+								disabled={deleteLoading}
+							>
+								아니오
+							</button>
+
+							<button
+								type="button"
+								className="jump-users-modal-btn is-danger"
+								onClick={handleConfirmDelete}
+								disabled={deleteLoading}
+							>
+								{deleteLoading ? "삭제 중..." : "예"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
 			{/* HEAD */}
 			<div className="jump-admin-section-head">
 				<div className="jump-admin-section-title-wrap">
