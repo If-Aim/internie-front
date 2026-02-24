@@ -44,7 +44,7 @@ export default function VerifyCodePage() {
 
             if (refreshed.role === "ROLE_JUMP_STUDENT") {
                 setCode("JUMP 인증 완료");
-                await loadJumpOrganizations();
+                await loadJumpOrganizations(refreshed.jumpOrganization);
             }
         } catch (e) {
             if (e instanceof ApiError) {
@@ -58,13 +58,25 @@ export default function VerifyCodePage() {
         }
     }
     
-    async function loadJumpOrganizations() {
+    async function loadJumpOrganizations(currentOrg?: JumpOrganization | null) {
         setOrgLoading(true);
         setOrgError(null);
 
         try {
             const orgs = await getMyJumpOrganizations();
-            setInstitutions(Array.isArray(orgs) ? orgs : []);
+            const list = Array.isArray(orgs) ? orgs : [];
+
+            const merged =
+                currentOrg?.id && !list.some((x) => x.id === currentOrg.id)
+                    ? [{ id: currentOrg.id, name: currentOrg.name ?? "" }, ...list]
+                    : list;
+
+            setInstitutions(merged);
+
+            if (currentOrg?.id) {
+                setJumpOrganizationId(currentOrg.id);
+                setJumpOrganizationName(currentOrg.name ?? "");
+            }
         } catch {
             setInstitutions([]);
             setOrgError("센터 목록을 불러오지 못했습니다.");
@@ -116,9 +128,16 @@ export default function VerifyCodePage() {
                 const user = await getUserMe();
                 if (!mounted) return;
                 setMe(user);
+
+                const existingOrg = user.jumpOrganization;
+                if (existingOrg?.id != null) {
+                    setJumpOrganizationId(existingOrg.id);
+                    setJumpOrganizationName(existingOrg.name ?? "");
+                }
+
                 if (user.role === "ROLE_JUMP_STUDENT") {
                     setCode("JUMP 인증 완료");
-                    await loadJumpOrganizations();
+                    await loadJumpOrganizations(user.jumpOrganization);
                 }
             } catch {
                 
@@ -204,16 +223,19 @@ export default function VerifyCodePage() {
                             )}
                         </div>
                     )}
-
-                    <button type="button" className="submit-code" onClick={finishInstitution} disabled={submitting || !jumpOrganizationId} >
-                        센터 저장
-                    </button>
                 </div>
             )}
 
             {error && <div className="ob-error">{error}</div>}
 
-            <button className="submit-code" onClick={submit} disabled={submitting || isJumpVerified} >
+            <button
+                className="submit-code"
+                onClick={isJumpVerified ? finishInstitution : submit}
+                disabled={
+                    submitting ||
+                    (isJumpVerified && !jumpOrganizationId)
+                }
+            >
                 완료
             </button>
         </div>
