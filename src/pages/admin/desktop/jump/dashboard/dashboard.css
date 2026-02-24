@@ -133,7 +133,7 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-week-day{ text-align: center; justify-self: center; height: 35px; width: 55px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
 .jump-dashboard-week-day--today{ background: #BDD8FF; border-radius: 6px;  display: flex; align-items: center; justify-content: center; color: #000; }
 
-.jump-dashboard-week-rows { display: flex; flex-direction: column; max-height:450px; gap: 22px; padding: 43px 0 40px; }
+.jump-dashboard-week-rows { display: flex; flex-direction: column; max-height:450px; gap: 22px; padding: 43px 0 40px; overflow: auto; }
 .jump-dashboard-week-row { display: grid; grid-template-columns: 420px 1fr; align-items: center; }
 .jump-dashboard-student { display: flex; flex-direction: row; gap: 50px; }
 .jump-dashboard-student-name { width: 60px; font-size: 16px; font-weight: 700; color: #6B6B6B; }
