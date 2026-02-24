@@ -234,13 +234,13 @@ export default function OnBoarding(): React.ReactElement {
                             <img src="/jump-logo.png" alt="JUMP" />
                         </div>
 
-                        <h1 className="ob-title">기관을 선택하세요</h1>
+                        <h1 className="ob-title">센터를 선택하세요</h1>
 
                         <div className="ob-field">
                             <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
                                 <button type="button" className="ob-dd-trigger" onClick={() => setInstOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={instOpen} >
                                     <span className={"ob-dd-value" + (form.jumpOrganizationName ? "" : " ob-dd-value--placeholder")}>
-                                        {form.jumpOrganizationName || "기관 선택"}
+                                        {form.jumpOrganizationName || "센터 선택"}
                                     </span>
                                     <span className="ob-dd-caret" aria-hidden="true">
                                         <img src="/chevron-left.svg" alt="" />
@@ -248,7 +248,7 @@ export default function OnBoarding(): React.ReactElement {
                                 </button>
 
                                 {instOpen && (
-                                    <div className="ob-dd-menu" role="listbox" aria-label="기관 목록">
+                                    <div className="ob-dd-menu" role="listbox" aria-label="센터 목록">
                                         {institutions.map((org) => (
                                             <button
                                                 key={org.id}

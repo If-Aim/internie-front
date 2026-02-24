@@ -680,7 +680,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						</div>
 
 						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">기관</div>
+							<div className="jump-users-info-label">센터</div>
 							<div className="jump-users-info-value">{getOrgName(selected)}</div>
 						</div>
 
