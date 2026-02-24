@@ -371,7 +371,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                                 <div key={s.userId} className="jump-dashboard-week-row">
                                     <div className="jump-dashboard-student">
                                         <div className="jump-dashboard-student-name">{s.name}</div>
-                                        <div className="jump-dashboard-student-school">{getOrgName(s) || "-"}</div>
+                                        <div className="jump-dashboard-student-org">{getOrgName(s) || "-"}</div>
                                     </div>
 
                                     <div className="jump-dashboard-cells">

@@ -1,9 +1,9 @@
 /* src/pages/admin/desktop/jump/analysis/users.css */
 .jump-admin-grid > section { min-height: 0; }
-.jump-users-page { display: flex; flex-direction: column; gap: 18px; }
+.jump-users-page { display: flex; flex-direction: column; gap: 13px; }
 .jump-users-page .jump-admin-list { max-height: none; }
 
-.jump-users-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: 20px; gap: 23px; margin-bottom: 15px; }
+.jump-users-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: 20px; gap: 23px; }
 .jump-users-search-input { width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 0 14px; font-weight: 700; outline: none; font-size: 16px; }
 .jump-users-search-input { color: #000; } 
 .jump-users-search.is-empty .jump-users-search-input { color: #6b6b6b; }
@@ -41,12 +41,12 @@
 .jump-users-info-value { font-weight: 400; text-align: right; color: #000; line-height: 18px;}
 
 .jump-users-record-btn { width: 100%; max-width: 283px; height: 53px; border-radius: 10px; border: none; cursor: pointer; background: var(--primary); color: #fff; font-weight: 400; font-size: 16px; margin: 169px auto 0; }
-.jump-admin-section-title-wrap { display: flex; align-items: center; gap: 18px; }
+.jump-admin-section-title-wrap { display: block; align-items: center; gap: 18px; }
 
 /* ===== Left card ===== */
 .jump-users-left-frame { display: flex; flex-direction: column; min-height: 0; flex: 1; gap: 15px; }
 .jump-users-left-card { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
-.jump-users-left-card .jump-admin-list { flex: 1; min-height: 0; overflow: auto; padding-bottom: 12px; }
+.jump-users-left-card .jump-admin-list {max-height: 620px; flex: 1; min-height: 0; overflow: auto; padding-bottom: 18px; }
 
 .jump-users-back-btn { width: 330px; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; font-weight: 700; cursor: pointer; text-align: left; padding: 0 18px; }
 .jump-users-back-btn-img { width: 5px; }
