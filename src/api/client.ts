@@ -100,25 +100,12 @@ export type LoginResponse = {
     onboardingCompleted: boolean;
 };
 
-export async function loginWithKakao(
-    code: string,
-    redirectUri: string
-): Promise<LoginResponse> {
-
-    const res = await apiPublic("/auth/kakao", {
+export async function loginWithKakao(code: string, redirectUri: string): Promise<Response> {
+    return apiPublic("/auth/kakao", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, redirectUri }),
     });
-
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new ApiError(res.status, "Login failed", text);
-    }
-
-    const data = await res.json() as LoginResponse;
-
-    return data;
 }
 
 export async function apiPublic(

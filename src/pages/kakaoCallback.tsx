@@ -1,40 +1,58 @@
-// src/pages/kakaoCallback.tsx
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { loginWithKakao, routeAfterLoginFromLogin } from "../api/client";
+import { loginWithKakao } from "../api/client";
+
+type LoginResponse = {
+    onboardingCompleted: boolean;
+};
 
 export default function KakaoCallback() {
-	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
-	const ranRef = React.useRef(false);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const ranRef = React.useRef(false);
 
-	React.useEffect(() => {
-		if (ranRef.current) return;
-		ranRef.current = true;
+    React.useEffect(() => {
+        if (ranRef.current) return;
+        ranRef.current = true;
 
-		const code = searchParams.get("code");
-		if (!code) {
-			navigate("/login", { replace: true });
-			return;
-		}
+        const code = searchParams.get("code");
+        if (!code) {
+            navigate("/login", { replace: true });
+            return;
+        }
 
-		(async () => {
-			try {
-				const origin = window.location.origin;
-				const redirectUri = `${origin}/oauth/kakao/callback`;
+        (async () => {
+            try {
+                const origin = window.location.origin;
+                const redirectUri = `${origin}/oauth/kakao/callback`;
 
-				const login = await loginWithKakao(code, redirectUri);
+                const res = await loginWithKakao(code, redirectUri);
 
-				const nextPath = routeAfterLoginFromLogin(login);
+                if (!res.ok) {
+                    console.error("로그인 실패:", res.status, await res.text().catch(() => ""));
+                    navigate("/login", { replace: true });
+                    return;
+                }
 
-				navigate(nextPath, { replace: true });
+                const auth = res.headers.get("Authorization") || res.headers.get("authorization");
+                if (!auth) {
+                    console.error("Authorization 헤더를 읽지 못했습니다.");
+                    navigate("/login", { replace: true });
+                    return;
+                }
 
-			} catch (e) {
-				console.error("로그인 실패:", e);
-				navigate("/login", { replace: true });
-			}
-		})();
-	}, [navigate, searchParams]);
+                localStorage.setItem("accessToken", auth);
 
-  return <div />;
+                const body = (await res.json().catch(() => null)) as LoginResponse | null;
+                const onboardingCompleted = Boolean(body?.onboardingCompleted);
+
+                navigate(onboardingCompleted ? "/student" : "/onboarding", { replace: true });
+            } catch (e) {
+                console.error("네트워크/파싱 에러:", e);
+                navigate("/login", { replace: true });
+            }
+        })();
+    }, [navigate, searchParams]);
+
+    return <div />;
 }
