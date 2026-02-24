@@ -66,14 +66,25 @@ function isToday(ymd: string) {
     return ymd === today;
 }
 
+function firstMondayOfMonth(y: number, m: number) {
+    const d = new Date(y, m - 1, 1); 
+    const jsDow = d.getDay();
+    const offset = (1 - jsDow + 7) % 7; 
+    d.setDate(d.getDate() + offset);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
 function getWeekLabel(weekStartMonday: Date) {
     const y = weekStartMonday.getFullYear();
     const m = weekStartMonday.getMonth() + 1;
 
-    const first = new Date(y, m - 1, 1);
-    const firstMon = startOfWeekMonday(first);
-    const diffDays = Math.floor((weekStartMonday.getTime() - firstMon.getTime()) / (1000 * 60 * 60 * 24));
-    const weekNo = Math.floor(diffDays / 7) + 1;
+    const firstMon = firstMondayOfMonth(y, m);
+    const msDay = 1000 * 60 * 60 * 24;
+
+    const diffDays = Math.floor((weekStartMonday.getTime() - firstMon.getTime()) / msDay);
+
+    const weekNo = diffDays < 0 ? 1 : Math.floor(diffDays / 7) + 1;
 
     return `${y}년 ${m}월 ${weekNo}주차`;
 }
