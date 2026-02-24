@@ -27,3 +27,21 @@ background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; word-bre
 .profile-edit-save{ width: 100%; height: 60px; border-radius: 10px; border: 0; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; }
 .profile-edit-save.is-disabled,
 .profile-edit-save:disabled{ background: #F1F1F1; color: #A2A2A2; }
+
+/* ===== 점프 센터 ===== */
+.vcjp-jump-logo { margin: 0 5px 8px; display: inline-flex; align-items: center; }
+.vcjp-jump-logo img { height: 30px; width: auto; display: block; }
+.vcjp-title { margin: 0 5px 8px; font-size: 24px; font-weight: 700; line-height: 20px; color: #000; }
+.vcjp-dd { width: 100%; border: 1px solid #E2E2E2; border-radius: 14px; background: #fff; overflow: hidden; }
+.vcjp-dd-trigger { width: 100%; height: 66px; padding: 0 56px 0 22px; border: 0; background: transparent; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.vcjp-dd-value { font-size: 18px; font-weight: 500; color: #000; }
+.vcjp-dd-value--placeholder { color: #9AA0A6; font-weight: 400; }
+.vcjp-dd-caret { width: 30px; height: 30px; display: grid; place-items: center; pointer-events: none; rotate: calc(-90deg); }
+.vcjp-dd--open .vcjp-dd-trigger { border-bottom: 1px solid #E2E2E2; } 
+.vcjp-dd-menu { max-height: 240px; overflow-y: auto; background: #fff; padding: 8px 0; }
+.vcjp-dd-item { width: 100%; text-align: left; border: 0; background: transparent; padding: 11px 23px; font-size: 16px; font-weight: 500; color: #5F5F5F; cursor: pointer; }
+.vcjp-dd-item:hover { background: #F5F7FB; }
+.vcjp-dd-item--active { color: #000; }
+.vcjp-dd-menu::-webkit-scrollbar { width: 8px; }
+.vcjp-dd-menu::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 999px;}
+.vcjp-dd-menu::-webkit-scrollbar-track { background: transparent; }
