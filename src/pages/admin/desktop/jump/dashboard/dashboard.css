@@ -29,7 +29,7 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .jump-report-left-stack{display: flex;flex-direction: column;gap: 34px;}
 .jump-report-selected-student{cursor: default;}
 
-.jump-report-detail{background:#fff; width: 620px; min-height:771px;display: flex;flex-direction: column;gap: 16px;flex: 0 0 620px; border-radius:15px;box-sizing: border-box;}
+.jump-report-detail{background:#fff; width: 100%; min-height:771px;display: flex;flex-direction: column;gap: 16px;flex: 0 0 620px; border-radius:15px;box-sizing: border-box;}
 .jump-report-choose{margin-bottom: 6px;}
 .jump-report-choose-title{font-weight: 700;margin-bottom: 8px;}
 .jump-report-choose-list{display: flex;gap: 8px;flex-wrap: wrap;}

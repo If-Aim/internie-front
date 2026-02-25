@@ -365,7 +365,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
         if (calendarLoading) return "불러오는 중...";
         if (calendarError) return "-";
         if (!calendar) return "-";
-        return `${calendar.totalRecordedDays}건`;
+        return `${getTotalEventDayCount()}건`;
     }, [selected, calendarLoading, calendarError, calendar]);
 
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
@@ -409,6 +409,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		}
 
 		return sum;
+	}
+
+	function getTotalEventDayCount(): number {
+		if (!calendar) return 0;
+
+		return (calendar.dailyStatuses ?? []).reduce((sum, ds) => {
+			return sum + (ds?.eventDayIds?.length ?? 0);
+		}, 0);
 	}
 	/* ======== 사용자별 기록 수 end ========== */
 
@@ -869,7 +877,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		if (rightView === "REPORT_HOME") {
 			const totalCount =
 				selected && calendar && !calendarLoading && !calendarError
-					? calendar.totalRecordedDays
+					? getTotalEventDayCount()
 					: 0;
 
 			const weekCount =
