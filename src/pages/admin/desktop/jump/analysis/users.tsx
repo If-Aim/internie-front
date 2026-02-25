@@ -953,6 +953,12 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		);
 	}
 
+	function replaceExperienceName(text: string, experienceName: string): string {
+		if (!text) return "";
+
+		return text.replace(/\(@experience_name\)/g, experienceName);
+	}
+
 	function renderReportDetail(): React.ReactNode { // 기록 상세 화면 렌더
 		if (!selectedEventDayId) return <div>기록을 선택해주세요.</div>;
 
@@ -965,7 +971,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		const safeIndex = Math.min(Math.max(qIndex, 0), Math.max(qs.length - 1, 0));
 		const isFirst = safeIndex <= 0;
 		const isLast = safeIndex >= qs.length - 1;
-		const qText = qs[safeIndex] ?? "";
+		
+		const experienceName =
+			normalizeText(d.eventDayTitle) ||
+			normalizeText(d.eventTitle) ||
+			"";
+
+		const rawQ = qs[safeIndex] ?? "";
+		const qText = replaceExperienceName(rawQ, experienceName);
 
 		const ts = (d?.transcriptions ?? []) as Array<{ text?: unknown }>;
 		const rawAnswer = normalizeText(ts[safeIndex]?.text);
