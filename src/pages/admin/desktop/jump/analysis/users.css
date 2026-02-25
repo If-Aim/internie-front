@@ -129,7 +129,7 @@ display: flex; align-items: center; justify-content: space-between; cursor: poin
 .jump-users-report-day-item-arrow { width: 24px; height: 24px; transform: rotate(-90deg); }
 
 /* ===== rightView = "REPORT_DETAIL" ===== */
-.jump-users-detail-card--REPORT_DETAIL { padding: 33x 24px 22px; overflow: hidden; min-height: 0; }
+.jump-users-detail-card--REPORT_DETAIL { padding: 33px 24px 22px; overflow: hidden; min-height: 0; }
 
 /* ===== Report detail / Question swap animation ===== */
 .jump-report-detail { display: flex; flex-direction: column; height: 100%; min-height: 0; }
@@ -149,7 +149,7 @@ display: inline-flex; align-items: center; justify-content: center; }
 .jump-report-qswap--forward { animation-name: jumpQInFwd; }
 .jump-report-qswap--back { animation-name: jumpQInBack; }
 .jump-report-q { border: 1px solid #E6E6E6; background: #F0F6FF; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px; color: #000; }
-.jump-report-a { flex: 1; min-height: 0; border: 1px solid #E6E6E6; background: #fff; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px;
+.jump-report-a { flex: 1; min-height: 0; max-height: 480px; border: 1px solid #E6E6E6; background: #fff; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px;
 color: #111; white-space: pre-line;  overflow: auto; }
 .jump-report-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
 
