@@ -145,7 +145,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const [selectedYmd, setSelectedYmd] = React.useState<string>(""); // YYYY-MM-DD
 	const [selectedEventDayId, setSelectedEventDayId] = React.useState<number | null>(null);
 	const [qIndex, setQIndex] = React.useState<number>(0);
-	const [qDir, /*setQDir*/] = React.useState<NavDir>("forward");
+	const [qDir, setQDir] = React.useState<NavDir>("forward");
 	
 	const [eventDayCache, setEventDayCache] = React.useState<Record<number, JumpAdminEventDayDetailResponse | null | undefined>>({});
 
@@ -423,17 +423,22 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		const targets = eventDayIds.filter((id) => eventDayCache[id] === undefined);
 		if (targets.length === 0) return;
 
-		// 로딩 표시를 목록 전체에 걸고 싶지 않으면 별도 state는 생략
-		await Promise.all(
+		const results = await Promise.all(
 			targets.map(async (id) => {
 				try {
 					const detail = await getJumpAdminEventDayDetail(id);
-					setEventDayCache((prev) => ({ ...prev, [id]: detail }));
+					return [id, detail] as const;
 				} catch {
-					setEventDayCache((prev) => ({ ...prev, [id]: null }));
+					return [id, null] as const;
 				}
 			})
 		);
+
+		setEventDayCache((prev) => {
+			const next = { ...prev };
+			for (const [id, value] of results) next[id] = value;
+			return next;
+		});
 	}
 
 	// 기록 보기버튼 클릭 시
@@ -673,23 +678,19 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	async function handleOpenRecord(eventDayId: number) {
 		setSelectedEventDayId(eventDayId);
 		setQIndex(0);
+		setQDir("forward");
 
 		setNavDir("forward");
 		setRightView("REPORT_DETAIL");
 
-		if (eventDayCache[eventDayId]) return;
+		// 캐시 체크는 truthy가 아니라 undefined 여부로 해야 합니다.
+		if (eventDayCache[eventDayId] !== undefined) return;
 
 		try {
 			const detail = await getJumpAdminEventDayDetail(eventDayId);
-			setEventDayCache((prev) => ({
-				...prev,
-				[eventDayId]: detail,
-			}));
+			setEventDayCache((prev) => ({ ...prev, [eventDayId]: detail }));
 		} catch {
-			setEventDayCache((prev) => ({
-				...prev,
-				[eventDayId]: null,
-			}));
+			setEventDayCache((prev) => ({ ...prev, [eventDayId]: null }));
 		}
 	}
 
@@ -956,18 +957,16 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		const safeIndex = Math.min(Math.max(qIndex, 0), Math.max(qs.length - 1, 0));
 		const isFirst = safeIndex <= 0;
 		const isLast = safeIndex >= qs.length - 1;
-		const qText = qs[qIndex] ?? "";
+		const qText = qs[safeIndex] ?? "";
 
 		const answerText = (d?.transcriptions ?? [])
 			.map((t: any) => normalizeText(t.text))
 			.filter(Boolean)
 			.join("\n");
 
-		const qKey = `q-${selectedEventDayId ?? "none"}-${qIndex}`; // 질문 전환 애니메이션용
-		const recordTitle =
-			getRecordTitleFromCache(selectedEventDayId) ||
-			"기록";
-			
+		const qKey = `q-${selectedEventDayId ?? "none"}-${safeIndex}`;
+		const recordTitle = getRecordTitleFromCache(selectedEventDayId) || "기록";
+
 		return (
 			<div className="jump-report-detail">
 				<div className="jump-report-detail-head">
@@ -983,9 +982,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						<img src="/chevron-left-6b.svg" alt="" />
 					</button>
 
-					<div className="jump-report-detail-title">
-						{recordTitle}
-					</div>
+					<div className="jump-report-detail-title">{recordTitle}</div>
 				</div>
 
 				<div className="jump-report-qwrap">
@@ -997,13 +994,27 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 				<div className="jump-report-nav">
 					{!isFirst && (
-						<button type="button" onClick={() => { setNavDir("back"); setQIndex((prev) => Math.max(0, prev - 1)); }} aria-label="prev question" >
+						<button
+							type="button"
+							onClick={() => {
+								setQDir("back");
+								setQIndex((prev) => Math.max(0, prev - 1));
+							}}
+							aria-label="prev question"
+						>
 							<img src="/chevron-left.svg" alt="" />
 						</button>
 					)}
 
 					{!isLast && (
-						<button type="button" onClick={() => { setNavDir("forward"); setQIndex((prev) => Math.min(qs.length - 1, prev + 1)); }} aria-label="next question" >
+						<button
+							type="button"
+							onClick={() => {
+								setQDir("forward");
+								setQIndex((prev) => Math.min(qs.length - 1, prev + 1));
+							}}
+							aria-label="next question"
+						>
 							<img src="/chevron-right.svg" alt="" />
 						</button>
 					)}

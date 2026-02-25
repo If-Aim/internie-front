@@ -81,7 +81,6 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 /* detail 카드 우 -> 좌 */
 .jump-report-detail {
   transform: translateX(60px);
-  opacity: 0;
   transition:
     transform 0.45s cubic-bezier(.4,0,.2,1),
     opacity 0.35s ease;
