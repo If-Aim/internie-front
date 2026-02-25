@@ -144,15 +144,18 @@ display: inline-flex; align-items: center; justify-content: center; }
 @keyframes jumpQInFwd { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes jumpQInBack { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 
-.jump-report-qwrap { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
-.jump-report-qswap { display: flex; flex-direction: column; gap: 12px; height: 100%; padding: 0 56px; }
+.jump-report-qwrap { display: flex; flex-direction: row; gap: 8px; flex: 1; min-height: 0; overflow: hidden; }
+.jump-report-qswap { display: flex; flex-direction: column; gap: 12px; height: 100%; padding: 0; }
 .jump-report-qswap--forward { animation-name: jumpQInFwd; }
 .jump-report-qswap--back { animation-name: jumpQInBack; }
 .jump-report-q { border: 1px solid #E6E6E6; background: #F0F6FF; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px; color: #000; }
 .jump-report-a { flex: 1; min-height: 0; max-height: 480px; border: 1px solid #E6E6E6; background: #fff; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px;
 color: #111; white-space: pre-line;  overflow: auto; }
 .jump-report-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
-
+.jump-report-qwrap-prev-btn { border: none; width: 40px; height: 40px; border-radius: 50%; background: #EEE;}
+.jump-report-qwrap-prev-btn img{ width: 24px; height: 24px; }
+.jump-report-qwrap-next-btn { border: none; width: 40px; height: 40px; border-radius: 50%; background: #EEE;}
+.jump-report-qwrap-next-btn img{ width: 24px; height: 24px; transform: rotate(-90deg); }
 
 /* ===== 학생 삭제 모달 ===== */
 .jump-users-modal-dim { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 9999; }

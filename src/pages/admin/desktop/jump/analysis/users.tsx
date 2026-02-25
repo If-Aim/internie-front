@@ -986,13 +986,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 				</div>
 
 				<div className="jump-report-qwrap">
-					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
-						<div className="jump-report-q">{`Q. ${qText || "-"}`}</div>
-						<div className="jump-report-a">{answerText || "-"}</div>
-					</div>
-				</div>
-
-				<div className="jump-report-nav">
 					{!isFirst && (
 						<button
 							type="button"
@@ -1000,11 +993,17 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 								setQDir("back");
 								setQIndex((prev) => Math.max(0, prev - 1));
 							}}
+							className="jump-report-qwrap-prev-btn"
 							aria-label="prev question"
 						>
 							<img src="/chevron-left.svg" alt="" />
 						</button>
 					)}
+
+					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
+						<div className="jump-report-q">{`Q. ${qText || "-"}`}</div>
+						<div className="jump-report-a">{answerText || "-"}</div>
+					</div>
 
 					{!isLast && (
 						<button
@@ -1013,6 +1012,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 								setQDir("forward");
 								setQIndex((prev) => Math.min(qs.length - 1, prev + 1));
 							}}
+							className="jump-report-qwrap-next-btn"
 							aria-label="next question"
 						>
 							<img src="/chevron-right.svg" alt="" />
