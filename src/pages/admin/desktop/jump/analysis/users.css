@@ -151,9 +151,9 @@ display: inline-flex; align-items: center; justify-content: center; }
 .jump-report-a { flex: 1; min-height: 0; max-height: 480px; border: 1px solid #E6E6E6; background: #fff; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px;
 color: #111; white-space: pre-line;  overflow: auto; }
 .jump-report-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
-.jump-report-qwrap-prev-btn { border: none; width: 40px; height: 40px; border-radius: 50%; background: #EEE;}
+.jump-report-qwrap-prev-btn, .jump-report-qwrap-next-btn { flex: 0 0 40px; border: none; width: 40px; height: 40px; border-radius: 50%; background: #EEE; display: inline-flex; align-items: center; justify-content: center; }
+.jump-report-qwrap-prev-btn:disabled, .jump-report-qwrap-next-btn:disabled { visibility: hidden;  pointer-events: none; }
 .jump-report-qwrap-prev-btn img{ width: 24px; height: 24px; }
-.jump-report-qwrap-next-btn { border: none; width: 40px; height: 40px; border-radius: 50%; background: #EEE;}
 .jump-report-qwrap-next-btn img{ width: 24px; height: 24px; transform: rotate(-90deg); }
 
 /* ===== 학생 삭제 모달 ===== */

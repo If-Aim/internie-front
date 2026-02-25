@@ -985,38 +985,40 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 				</div>
 
 				<div className="jump-report-qwrap">
-					{!isFirst && (
-						<button
-							type="button"
-							onClick={() => {
-								setQDir("back");
-								setQIndex((prev) => Math.max(0, prev - 1));
-							}}
-							className="jump-report-qwrap-prev-btn"
-							aria-label="prev question"
-						>
-							<img src="/chevron-left.svg" alt="" />
-						</button>
-					)}
+					<button
+						type="button"
+						onClick={() => {
+							if (isFirst) return;
+							setQDir("back");
+							setQIndex((prev) => Math.max(0, prev - 1));
+						}}
+						className="jump-report-qwrap-prev-btn"
+						aria-label="prev question"
+						disabled={isFirst}
+						aria-disabled={isFirst}
+					>
+						<img src="/chevron-left.svg" alt="" />
+					</button>
 
 					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
 						<div className="jump-report-q">{`Q. ${qText || "-"}`}</div>
 						<div className="jump-report-a">{answerText || "-"}</div>
 					</div>
 
-					{!isLast && (
-						<button
-							type="button"
-							onClick={() => {
-								setQDir("forward");
-								setQIndex((prev) => Math.min(qs.length - 1, prev + 1));
-							}}
-							className="jump-report-qwrap-next-btn"
-							aria-label="next question"
-						>
-							<img src="/chevron-right.svg" alt="" />
-						</button>
-					)}
+					<button
+						type="button"
+						onClick={() => {
+							if (isLast) return;
+							setQDir("forward");
+							setQIndex((prev) => Math.min(qs.length - 1, prev + 1));
+						}}
+						className="jump-report-qwrap-next-btn"
+						aria-label="next question"
+						disabled={isLast}
+						aria-disabled={isLast}
+					>
+						<img src="/chevron-right.svg" alt="" />
+					</button>
 				</div>
 			</div>
 		);
