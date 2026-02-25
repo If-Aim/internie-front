@@ -129,24 +129,23 @@ display: flex; align-items: center; justify-content: space-between; cursor: poin
 .jump-users-report-day-item-arrow { width: 24px; height: 24px; transform: rotate(-90deg); }
 
 /* ===== rightView = "REPORT_DETAIL" ===== */
-.jump-users-detail-card--REPORT_DETAIL { padding: 24px 24px 22px; overflow: hidden; }
+.jump-users-detail-card--REPORT_DETAIL { padding: 33x 24px 22px; overflow: hidden; min-height: 0; }
 
 /* ===== Report detail / Question swap animation ===== */
-.jump-users-detail-card--REPORT_DETAIL { min-height: 0; }
 .jump-report-detail { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .jump-report-detail-head { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 18px; }
 
-.jump-report-back { width: 40px; height: 40px; border: none; background: transparent; border-radius: 999px; cursor: pointer; 
+.jump-report-back { width: 40px; height: 29px; border: none; background: transparent; border-radius: 999px; cursor: pointer; 
 display: inline-flex; align-items: center; justify-content: center; }
 .jump-report-back:hover { background: rgba(17, 24, 39, 0.06); }
-.jump-report-back img { width: 24px; height: 24px; }
+.jump-report-back img { width: 5px; height: 10px; }
 .jump-report-detail-title { text-align: left; font-size: 20px; font-weight: 800; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @keyframes jumpQInFwd { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes jumpQInBack { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 
 .jump-report-qwrap { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
-.jump-report-qswap { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.jump-report-qswap { display: flex; flex-direction: column; gap: 12px; height: 100%; padding: 0 56px; }
 .jump-report-qswap--forward { animation-name: jumpQInFwd; }
 .jump-report-qswap--back { animation-name: jumpQInBack; }
 .jump-report-q { border: 1px solid #E6E6E6; background: #F0F6FF; border-radius: 10px; padding: 18px 18px; font-weight: 400; font-size: 16px; line-height: 22px; color: #000; }

@@ -979,7 +979,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						}}
 						aria-label="back"
 					>
-						<img src="/chevron-left-6b.svg" alt="" />
+						<img src="/jump-admin-back.svg" alt="" />
 					</button>
 
 					<div className="jump-report-detail-title">{recordTitle}</div>
