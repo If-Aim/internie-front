@@ -959,11 +959,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		const isLast = safeIndex >= qs.length - 1;
 		const qText = qs[safeIndex] ?? "";
 
-		const answerText = (d?.transcriptions ?? [])
-			.map((t: any) => normalizeText(t.text))
-			.filter(Boolean)
-			.join("\n");
-
+		const ts = (d?.transcriptions ?? []) as Array<{ text?: unknown }>;
+		const rawAnswer = normalizeText(ts[safeIndex]?.text);
+		const answerText = rawAnswer ? rawAnswer : "-";
+		
 		const qKey = `q-${selectedEventDayId ?? "none"}-${safeIndex}`;
 		const recordTitle = getRecordTitleFromCache(selectedEventDayId) || "기록";
 
