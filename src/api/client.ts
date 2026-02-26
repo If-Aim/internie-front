@@ -487,7 +487,7 @@ export type VerificationImageResponse = {
 export async function getStudentIdImg(
     userId: number | string
 ): Promise<VerificationImageResponse> {
-    return api<VerificationImageResponse>(`/users/${userId}/verification-image`, { method: "GET" } );
+    return api<VerificationImageResponse>(`admin/users/${userId}/verification-image`, { method: "GET" } );
 }
 
 // 사용자 승인
