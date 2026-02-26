@@ -480,6 +480,16 @@ export async function getAdminPendingUsers(): Promise<AdminUser[]> {
   	return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
 }
 
+// 학생증 사진 조회
+export type VerificationImageResponse = {
+    url: string;
+};
+export async function getStudentIdImg(
+    userId: number | string
+): Promise<VerificationImageResponse> {
+    return api<VerificationImageResponse>(`/users/${userId}/verification-image`, { method: "GET" } );
+}
+
 // 사용자 승인
 export async function approveAdminUser(userId: number | string): Promise<AdminUser> {
   	return api<AdminUser>(`/admin/users/${userId}/approve`, { method: "PATCH" });

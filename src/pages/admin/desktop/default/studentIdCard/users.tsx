@@ -2,7 +2,7 @@
 // 사용자 목록 페이지 (PC)
 import React from "react";
 // import { useNavigate } from "react-router-dom";
-import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser } from "../../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser, getStudentIdImg } from "../../../../../api/client";
 import "./users.css";
 import "../admin.css";
 
@@ -51,6 +51,10 @@ export default function AdminUsersPage(): React.ReactElement {
 		[users, selectedId]
 	);
 
+	const [verificationUrl, setVerificationUrl] = React.useState<string>("");
+	const [verificationLoading, setVerificationLoading] = React.useState(false);
+	const [verificationError, setVerificationError] = React.useState<string | null>(null);
+
 	const totalCount = users.length;
 	const approvedCount = users.filter((u) => u.status === "APPROVED").length;
 
@@ -82,6 +86,45 @@ export default function AdminUsersPage(): React.ReactElement {
 			mounted = false;
 		};
 	}, []);
+
+	React.useEffect(() => {
+		let mounted = true;
+
+		(async () => {
+			if (!selectedId) {
+				setVerificationUrl("");
+				setVerificationError(null);
+				return;
+			}
+
+			setVerificationLoading(true);
+			setVerificationError(null);
+
+			try {
+				const res = await getStudentIdImg(selectedId);
+				if (!mounted) return;
+
+				setVerificationUrl(res.url ?? "");
+			} catch (e) {
+				if (!mounted) return;
+
+				if (e instanceof ApiError) {
+					if (e.status === 404) setVerificationError("학생증 이미지가 없습니다.");
+					else if (e.status === 401 || e.status === 403) setVerificationError("권한이 없습니다.");
+					else setVerificationError("학생증 이미지를 불러오지 못했습니다.");
+				} else {
+					setVerificationError("학생증 이미지를 불러오지 못했습니다.");
+				}
+				setVerificationUrl("");
+			} finally {
+				if (mounted) setVerificationLoading(false);
+			}
+		})();
+
+		return () => {
+			mounted = false;
+		};
+	}, [selectedId]);
 
 	const patchUserInList = (updated: AdminUser) => {
 		setUsers((prev) =>
@@ -192,14 +235,12 @@ export default function AdminUsersPage(): React.ReactElement {
 
 						{/* 학생증 이미지 */}
 						<div className="admin-detail-photo">
-							{selectedUser.verificationImage ? (
-							<img
-								src={selectedUser.verificationImage}
-								alt="verification"
-								style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 12 }}
-							/>
+							{verificationLoading ? (
+								<span>불러오는 중…</span>
+							) : verificationUrl ? (
+								<img className="student-id-img-area" src={verificationUrl} alt="verification" />
 							) : (
-							<span>(학생증 사진 없음)</span>
+								<span>{verificationError ?? "(학생증 사진 없음)"}</span>
 							)}
 						</div>
 
