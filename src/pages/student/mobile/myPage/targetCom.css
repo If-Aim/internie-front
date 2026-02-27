@@ -1,6 +1,6 @@
 /* src/pages/student/mobile/mypage/targetCom.css */
 .tc-page { min-height: 100vh; background: #EEF4FF; display: flex; flex-direction: column; } 
-.tc-header { height: 56px; display: grid; grid-template-columns: 56px 1fr 56px; align-items: center; padding: 0 8px; }
+.tc-header { height: 56px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 24px 12px 0; }
 .tc-header__title { margin: 0; text-align: center; font-size: 16px; font-weight: 700; color: #000; }
 .tc-header__spacer { height: 1px; }
 .tc-header__close { width: 40px; height: 40px; justify-self: end; border: none; background: transparent; font-size: 28px; line-height: 1; color: #111; cursor: pointer; } 
