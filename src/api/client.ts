@@ -402,16 +402,15 @@ export type UpdateMyProfileJsonInput = {
 };
 
 export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<UserMe> {
-    const payload: UpdateMyProfileJsonInput = {
-        name: input.name ?? null,
-        nickname: input.nickname ?? null,
-    };
-
     return api<UserMe>("/users/me", {
         method: "PATCH",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+            name: (input.name ?? null),
+            nickname: (input.nickname ?? null),
+        }),
     });
 }
+
 // 프로필 사진 수정
 export async function updateMyProfileImage(file: File): Promise<UserMe> {
     const formData = new FormData();

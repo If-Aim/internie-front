@@ -29,7 +29,7 @@ export default function EditProfilePage(): React.ReactElement {
     const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
     const [saving, setSaving] = React.useState(false);
-    const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
+    const [avatarVersion, setAvatarVersion] = React.useState<number>(0);
 
     React.useEffect(() => {
         console.log("[EditProfilePage] mounted");
@@ -93,13 +93,12 @@ export default function EditProfilePage(): React.ReactElement {
     }, [selectedImageFile]);
 
     const isDefaultProfile = !me?.profileImage || (me.profileImage ?? "").includes("default");
-    const rawServerAvatarSrc = isDefaultProfile ? "/internie_mascot_normal.png" : (me?.profileImage ?? "/internie_mascot_normal.png");
+    const rawServerAvatarSrc = isDefaultProfile
+        ? "/internie_mascot_normal.png"
+        : (me?.profileImage ?? "/internie_mascot_normal.png");
 
-    const serverAvatarSrc =
-        rawServerAvatarSrc.startsWith("http")
-            ? rawServerAvatarSrc
-            : rawServerAvatarSrc;
-    
+    const serverAvatarSrc = `${rawServerAvatarSrc}${rawServerAvatarSrc.includes("?") ? "&" : "?"}v=${avatarVersion}`;
+
     const avatarSrc = previewUrl ?? serverAvatarSrc;
 
     // 임시
@@ -138,17 +137,19 @@ export default function EditProfilePage(): React.ReactElement {
         setSelectedImageFile(file);
     }
 
-    async function onSave() {
+        async function onSave() {
         const trimmedName = normalizeText(form.name);
 
         if (!trimmedName) {
             alert("이름을 입력해주세요.");
             return;
         }
+
         try {
             setSaving(true);
 
             let updatedMe: UserMe | null = null;
+
             updatedMe = await updateMyProfile({
                 name: trimmedName,
             });
@@ -171,12 +172,15 @@ export default function EditProfilePage(): React.ReactElement {
             setForm(nextInitial);
 
             setSelectedImageFile(null);
-        } catch {
-            alert("수정에 실패했습니다.");
+        } catch (e) {
+            const msg =
+                e && typeof e === "object" && "status" in e
+                    ? `수정 실패 (status=${(e as any).status})\n${String((e as any).bodyText ?? "")}`
+                    : `수정 실패\n${String(e ?? "")}`;
+            alert(msg);
         } finally {
             setSaving(false);
         }
-        console.log("[save] selectedImageFile at save =", selectedImageFile);
     }
 
     function handleServicePreparing() {
