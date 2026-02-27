@@ -1,18 +1,18 @@
 /* src/pages/student/mobile/mypage/targetCom.css */
-.tc-page { min-height: 100vh; background: #EEF4FF; display: flex; flex-direction: column; } 
-.tc-header { height: 56px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 24px 12px 0; }
+.tc-page { min-height: 100vh; background: #F0F6FF; display: flex; flex-direction: column; } 
+.tc-header { height: 50px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 24px 12px 0; }
 .tc-header__title { margin: 0; text-align: center; font-size: 16px; font-weight: 700; color: #000; }
 .tc-header__spacer { height: 1px; }
-.tc-header__close { width: 40px; height: 40px; justify-self: end; border: none; background: transparent; font-size: 28px; line-height: 1; color: #111; cursor: pointer; } 
+.tc-header__close { width: 40px; height: 40px; justify-self: end; border: none; background: transparent; cursor: pointer; } 
 .tc-header__close img { width: 24px; height: auto;}
-.tc-content { flex: 1; padding: 22px 18px 0 18px; }
-.tc-error { margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; background: #FFFFFF; color: #C62828; font-size: 13px; } 
+.tc-content { flex: 1; padding: 40px 22px 0 32px; }
+.tc-error { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: #FFFFFF; color: #C62828; font-size: 14px; } 
 
-.tc-section { margin-top: 16px; } 
-.tc-label { font-size: 14px; font-weight: 700; color: #111; margin: 0 0 10px 0; }
+.tc-section { margin-top: 25px; } 
+.tc-label { font-size: 16px; font-weight: 500; color: #000; margin: 0 0 10px; }
 .tc-inputRow { position: relative; }
-.tc-input { width: 100%; height: 56px; border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08); background: #FFFFFF; padding: 0 44px 0 16px; font-size: 16px; outline: none; }
-.tc-pencil { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; opacity: 0.6;  pointer-events: none; user-select: none; }
+.tc-input { width: 100%; height: 56px; border-radius: 10px; border: 1px solid #E2E2E2; background: #FFFFFF; padding: 0 23px 0 20px; font-size: 16px; font-weight: 500; outline: none; }
+.tc-pencil { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; pointer-events: none; user-select: none; }
 
 .tc-footer { padding: 14px 20px 53px;}
 .tc-saveBtn { width: 100%; height: 60px; border-radius: 10px; border: none; background: var(--primary); color: #FFFFFF; font-size: 16px; font-weight: 700; cursor: pointer; } 
