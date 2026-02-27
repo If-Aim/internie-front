@@ -12,7 +12,7 @@
 .tc-label { font-size: 14px; font-weight: 700; color: #111; margin: 0 0 10px 0; }
 .tc-inputRow { position: relative; }
 .tc-input { width: 100%; height: 56px; border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08); background: #FFFFFF; padding: 0 44px 0 16px; font-size: 16px; outline: none; }
-.tc-pencil-img { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; opacity: 0.6;  pointer-events: none; user-select: none; }
+.tc-pencil { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; opacity: 0.6;  pointer-events: none; user-select: none; }
 
 .tc-footer { padding: 14px 20px 53px;}
 .tc-saveBtn { width: 100%; height: 60px; border-radius: 10px; border: none; background: var(--primary); color: #FFFFFF; font-size: 16px; font-weight: 700; cursor: pointer; } 

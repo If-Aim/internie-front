@@ -100,7 +100,6 @@ export default function MyPage({ onLogout }: Props) {
 
 	const mypageSubText = (() => {
 		if (status === "APPROVED") {
-			// 학교가 있으면 학교명, 없으면 기존 문구(안전 fallback)
 			return schoolName || t("mypage_verifyUi.approved");
 		}
 		return t("mypage_verifyUi.required");
