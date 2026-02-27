@@ -209,7 +209,17 @@ export default function EditProfilePage(): React.ReactElement {
             <div className="profile-edit">
                 <section className="mypage-top">
                     <div className="mypage-profileimg-wrap">
-                        <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
+                        <img
+                            className="mypage-profileimg"
+                            src={avatarSrc}
+                            alt="profileImg"
+                            onLoad={(e) => {
+                                console.log("[avatar] load ok:", (e.currentTarget as HTMLImageElement).src);
+                            }}
+                            onError={(e) => {
+                                console.log("[avatar] load FAIL:", (e.currentTarget as HTMLImageElement).src);
+                            }}
+                        />
                     </div>
 
                     <button type="button" className="profile-edit-avatar-btn" onClick={()=> fileRef.current?.click()} disabled={saving} >

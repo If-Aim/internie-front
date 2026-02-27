@@ -42,9 +42,7 @@ export default function MyPage({ onLogout }: Props) {
 	if (location.pathname.endsWith("/mypage/verify")) {
 		return <Outlet />;
 	}	
-  
-	const [me, setMe] = React.useState<UserMe | null>(null);
-	const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
+  	const [me, setMe] = React.useState<UserMe | null>(null);
 
 	const displayName = me?.name ?? "";
 	const isVerifiedStudent = me?.status === "APPROVED";
@@ -81,6 +79,24 @@ export default function MyPage({ onLogout }: Props) {
 				};
 		}
 	})();
+	const loadMe = React.useCallback(async () => {
+		try {
+			const res = await getUserMe();
+			console.log("[MyPage] /users/me response:", res);
+
+			const lastStatusKey = `mypage_last_status_${res.userId}`;
+			const lastStatus = localStorage.getItem(lastStatusKey);
+
+			if (res.status === "REJECTED" && lastStatus !== "REJECTED") {
+				setShowRejectModal(true);
+			}
+
+			localStorage.setItem(lastStatusKey, res.status ?? "");
+			setMe(res);
+		} catch (e) {
+			console.error("getUserMe failed:", e);
+		}
+	}, []);
 
 	const mypageSubText = (() => {
 		if (status === "APPROVED") {
@@ -131,33 +147,28 @@ export default function MyPage({ onLogout }: Props) {
 		if (!me) return;
 		setShowRejectModal(false);
 	}
+
 	React.useEffect(() => {
 		let mounted = true;
 
 		(async () => {
-			try {
-				const res = await getUserMe();
-				if (!mounted) return;
-
-				console.log("[MyPage] /users/me response:", res);
-
-				const lastStatusKey = `mypage_last_status_${res.userId}`;
-				const lastStatus = localStorage.getItem(lastStatusKey);
-
-				if (res.status === "REJECTED" && lastStatus !== "REJECTED") {
-					setShowRejectModal(true);
-				}
-
-				localStorage.setItem(lastStatusKey, res.status ?? "");
-				setMe(res);
-				setAvatarVersion(Date.now());
-			} catch (e) {
-				console.error("getUserMe failed:", e);
-			}
+			if (!mounted) return;
+			await loadMe();
 		})();
 
 		return () => { mounted = false; };
-	}, [location.key]);  
+	}, [location.key, loadMe]);
+
+	React.useEffect(() => {
+		const onProfileUpdated = () => {
+			void loadMe();
+		};
+
+		window.addEventListener("profile-updated", onProfileUpdated);
+		return () => {
+			window.removeEventListener("profile-updated", onProfileUpdated);
+		};
+	}, [loadMe]);
 
 	React.useEffect(() => {
 		let mounted = true;
@@ -189,6 +200,8 @@ export default function MyPage({ onLogout }: Props) {
 		})();
 		return () => { mounted = false; };
 	}, []);
+
+	
 
 	return (
 		<div className="mypage">
