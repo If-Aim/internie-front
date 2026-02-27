@@ -155,6 +155,10 @@ export default function EditProfilePage(): React.ReactElement {
 
             if (selectedImageFile) {
                 updatedMe = await updateMyProfileImage(selectedImageFile);
+
+                console.log("[upload] typeof updatedMe =", typeof updatedMe);
+                console.log("[upload] updatedMe =", updatedMe);
+                console.log("[upload] profileImage =", (updatedMe as any)?.profileImage);
             }
 
             if (updatedMe) {
@@ -171,8 +175,16 @@ export default function EditProfilePage(): React.ReactElement {
             setForm(nextInitial);
 
             setSelectedImageFile(null);
-        } catch {
-            alert("수정에 실패했습니다.");
+        } catch (e) {
+            const status = (e as any)?.status;
+            const bodyText = (e as any)?.bodyText;
+
+            alert(
+                status != null
+                    ? `수정 실패 (status=${String(status)})\n${String(bodyText ?? "")}`
+                    : `수정 실패\n${String(e ?? "")}`
+            );
+            console.error("[onSave] error:", e);
         } finally {
             setSaving(false);
         }

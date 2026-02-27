@@ -180,11 +180,11 @@ export async function apiUpload<T = unknown>(
 		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
 	}
 
-	const ct = res.headers.get("content-type") ?? "";
-	if (!ct.includes("application/json")) {
-		const bodyText = await res.text().catch(() => "");
-		return bodyText as unknown as T;
-	}
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+    }
 
 	return (await res.json()) as T;
 }
