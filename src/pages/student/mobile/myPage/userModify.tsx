@@ -32,6 +32,21 @@ export default function EditProfilePage(): React.ReactElement {
     const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
 
     React.useEffect(() => {
+        console.log("[EditProfilePage] mounted");
+        return () => {
+            console.log("[EditProfilePage] unmounted");
+        };
+    }, []);
+
+    React.useEffect(() => {
+        console.log("[state] selectedImageFile changed =>", selectedImageFile);
+    }, [selectedImageFile]);
+
+    React.useEffect(() => {
+        console.log("[state] previewUrl changed =>", previewUrl);
+    }, [previewUrl]);
+    
+    React.useEffect(() => {
         let mounted = true;
 
         (async () => {
@@ -161,6 +176,7 @@ export default function EditProfilePage(): React.ReactElement {
         } finally {
             setSaving(false);
         }
+        console.log("[save] selectedImageFile at save =", selectedImageFile);
     }
 
     function handleServicePreparing() {
