@@ -416,6 +416,8 @@ export async function updateMyProfileImage(file: File): Promise<UserMe> {
     const formData = new FormData();
 
     formData.append("imagefile", file);
+    formData.append("imageFile", file);
+
     return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PATCH" });
 }
 
