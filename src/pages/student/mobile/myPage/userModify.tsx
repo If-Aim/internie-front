@@ -60,12 +60,16 @@ export default function EditProfilePage(): React.ReactElement {
     }, []);
 
     React.useEffect(() => {
+        console.log("[preview] selectedImageFile =", selectedImageFile);
+
         if (!selectedImageFile) {
             setPreviewUrl(null);
             return;
         }
 
         const url = URL.createObjectURL(selectedImageFile);
+        console.log("[preview] blob url =", url);
+
         setPreviewUrl(url);
 
         return () => {
@@ -80,7 +84,7 @@ export default function EditProfilePage(): React.ReactElement {
         rawServerAvatarSrc.startsWith("http")
             ? rawServerAvatarSrc
             : rawServerAvatarSrc;
-
+    
     const avatarSrc = previewUrl ?? serverAvatarSrc;
 
     // 임시
