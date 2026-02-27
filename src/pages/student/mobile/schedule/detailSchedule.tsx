@@ -18,10 +18,10 @@ function pad2(n: number) {
     return String(n).padStart(2, "0");
 }
 
-function formatRecordedAt(date: string, startTime?: string | null) {
+function formatRecordedAt(date: string/*, startTime?: string | null*/) {
     const [y, m, d] = date.split("-").map(Number);
-    const hhmm = startTime ? startTime.slice(0, 5) : "00:00";
-    return `${y}.${pad2(m)}.${pad2(d)} ${hhmm}`;
+    // const hhmm = startTime ? startTime.slice(0, 5) : "00:00";
+    return `${y}.${pad2(m)}.${pad2(d)} `; // 시간 같이 표기 === return `${y}.${pad2(m)}.${pad2(d)} ${hhmm}`;
 }
 function applyExperienceName(q: string, title: string) {
     if (!q.includes("(@experience_name)")) return q;
