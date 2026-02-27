@@ -396,19 +396,21 @@ export type UpdateMyProfileInput = {
 	nickname?: string | null;
 	imageFile?: File | null;
 };
+export type UpdateMyProfileJsonInput = {
+    name?: string | null;
+    nickname?: string | null;
+};
 
-export async function updateMyProfile(input: UpdateMyProfileInput): Promise<UserMe> {
-	const formData = new FormData();
+export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<UserMe> {
+    const payload: UpdateMyProfileJsonInput = {
+        name: input.name ?? null,
+        nickname: input.nickname ?? null,
+    };
 
-	if (input.name != null) formData.append("name", input.name);
-	if (input.nickname != null) formData.append("nickname", input.nickname);
-
-	if (input.imageFile != null) {
-		formData.append("imageFile", input.imageFile);
-		formData.append("imagefile", input.imageFile);
-	}
-	
-	return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
+    return api<UserMe>("/users/me", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+    });
 }
 // 프로필 사진 수정
 export async function updateMyProfileImage(file: File): Promise<UserMe> {
