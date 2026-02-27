@@ -410,7 +410,13 @@ export async function updateMyProfile(input: UpdateMyProfileInput): Promise<User
 	
 	return apiUpload<UserMe>("/users/me", formData, { method: "PATCH" });
 }
+// 프로필 사진 수정
+export async function updateMyProfileImage(file: File): Promise<UserMe> {
+    const formData = new FormData();
 
+    formData.append("imagefile", file);
+    return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PATCH" });
+}
 
 // 점프기관 목록 조회 (점프학생 전용)
 export async function getMyJumpOrganizations(): Promise<JumpOrganization[]> {

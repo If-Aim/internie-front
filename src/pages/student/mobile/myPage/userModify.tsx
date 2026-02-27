@@ -1,7 +1,7 @@
 // src/pages/student/mobile/myPage/userModify.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, updateMyProfile, type UserMe } from "../../../../api/client";
+import { getUserMe, updateMyProfile, type UserMe, updateMyProfileImage } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
 
@@ -121,23 +121,28 @@ export default function EditProfilePage(): React.ReactElement {
 
     async function onSave() {
         const trimmedName = normalizeText(form.name);
+
         if (!trimmedName) {
             alert("이름을 입력해주세요.");
             return;
         }
-
         try {
             setSaving(true);
 
-            const updated = await updateMyProfile({
+            let updatedMe: UserMe | null = null;
+            updatedMe = await updateMyProfile({
                 name: trimmedName,
-                imageFile: selectedImageFile ?? undefined,
-                // nickname: ... (추후)
             });
-            console.log("updated.profileImage =", updated.profileImage);
-            setMe(updated);
-            setAvatarVersion(Date.now());
-            window.dispatchEvent(new Event("profile-updated")); // 프로필 변경 알림
+
+            if (selectedImageFile) {
+                updatedMe = await updateMyProfileImage(selectedImageFile);
+            }
+
+            if (updatedMe) {
+                setMe(updatedMe);
+                setAvatarVersion(Date.now());
+                window.dispatchEvent(new Event("profile-updated"));
+            }
 
             const nextInitial: ProfileForm = {
                 ...form,
@@ -146,17 +151,18 @@ export default function EditProfilePage(): React.ReactElement {
             setInitialForm(nextInitial);
             setForm(nextInitial);
 
-            setSelectedImageFile(null); 
-
+            setSelectedImageFile(null);
         } catch {
             alert("수정에 실패했습니다.");
         } finally {
             setSaving(false);
         }
     }
+
     function handleServicePreparing() {
         alert("서비스 준비중입니다.");
     }
+    
     if (!me || !initialForm) return <div />;
 
     return (
