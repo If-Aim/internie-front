@@ -82,7 +82,7 @@ export default function DetailSchedule(): React.ReactElement {
 
                 setTitle(dRes.title || t("schedule_detail.titleFallback", "새로운 이벤트"));
 
-                setRecordedAtText(formatRecordedAt(dRes.date, dRes.startTime));
+                setRecordedAtText(formatRecordedAt(dRes.date/*, dRes.startTime*/));
 
                 const questions = (qRes.questionList ?? []).slice(0, 4);
                 const trans: Transcription[] = Array.isArray(dRes.transcriptions) ? dRes.transcriptions : [];
