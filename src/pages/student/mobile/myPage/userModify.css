@@ -10,7 +10,7 @@
 .profile-edit-top{ display: flex; justify-content: center; padding-top: 18px; padding-bottom: 20px; }
 .profile-edit-avatar-btn{ min-width:60px;height: 44px; padding: 0 22px; border-radius: 5px; border: 0;  white-space: nowrap;
 background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; word-break: keep-all; line-height: 20px;}
-.profile-edit-avatar-btn:active{ background: #dfdfdf; }
+.profile-edit-avatar-btn:active{ background: #d4d4d4; }
 .profile-edit-avatar-btn:disabled{ opacity: 0.6; }
 
 /* ===== 입력 폼 ===== */
