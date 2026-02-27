@@ -37,7 +37,7 @@ export default function DetailSchedule(): React.ReactElement {
     const [error, setError] = React.useState<string | null>(null);
 
     const [title, setTitle] = React.useState<string>(t("schedule_detail.titleFallback", "새로운 이벤트"));
-    const [recordedAtText, setRecordedAtText] = React.useState<string>("2000.00.00 00:00");
+    const [recordedAtText, setRecordedAtText] = React.useState<string>("2000.00.00");
     const [slides, setSlides] = React.useState<SlideItem[]>([]);
 
     const scrollerRef = React.useRef<HTMLDivElement | null>(null);
