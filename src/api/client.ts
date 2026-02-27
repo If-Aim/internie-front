@@ -416,7 +416,7 @@ export async function updateMyProfileImage(file: File): Promise<UserMe> {
     const formData = new FormData();
 
     formData.append("imagefile", file);
-    return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PATCH" });
+    return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "POST" });
 }
 
 // 점프기관 목록 조회 (점프학생 전용)
