@@ -5,7 +5,7 @@
 }
 html,body {margin: 0;padding: 0;height: 100%;overflow: hidden;}
 #root {height: 100%;overflow: hidden;}
-.topbar-question {height: 62px;display: flex;align-items: center;justify-content: space-between;}
+.topbar-question {height: 50px; padding: 40px 0; display: flex;align-items: center;justify-content: space-between;}
 
 .questions-intro {height: 100%;display: flex;flex-direction: column;justify-content: center;align-items: center;}
 .questions-intro-img {width: 119px;margin-bottom: 40px;}
@@ -30,15 +30,15 @@ border-radius: 50%;background: var(--primary);border: none;display: flex;justify
 .mic-button img {width: 40px;height: 40px;}
 .recording-mic-btn {position:fixed;bottom:34px;width: 105px;height: 105px;border-radius: 50%;border: none;background: #ffffff;display: flex;align-items: center;justify-content: center;z-index: 998;}
 .recording-mic-btn img {width: 40px;height: 40px;z-index: 999;}
-.recording-mic-btn::before {content: "";position: absolute;width: 100%;height: 100%;border-radius: 50%;border: 14px solid transparent;pointer-events: none;}
-.recording-mic-btn--disabled::before,.recording-mic-btn:disabled::before{border-color: #CCCCCC;}
+/* .recording-mic-btn::before {content: "";position: absolute;width: 100%;height: 100%;border-radius: 50%;border: 14px solid transparent;pointer-events: none;} */
+/* .recording-mic-btn--disabled::before,.recording-mic-btn:disabled::before{border-color: #CCCCCC;} */
 
 /* 마이크 바깥 하늘색 링 */
 .recording-mic-ring {position: fixed;bottom:20px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
 border-radius: 999px;background: rgba(255, 255, 255, 0.1);transition: opacity 0.1s linear;}
 .recording-mic-ring--active {background: rgba(70, 144, 255, 0.32);}
 .recording-mic-ring--disabled {background: #CCCCCC;border: none;box-shadow: none;}
-.recording-mic-btn--disabled img,.recording-mic-btn:disabled img {opacity: 1;}
+/* .recording-mic-btn--disabled img,.recording-mic-btn:disabled img {opacity: 1;} */
 .recording-mic-btn--active img {filter: none;opacity: 1;}
 
 .recording-sheet {position: fixed;left: 0;right: 0;bottom: 0;height:360px; background: #0166FF;border-radius: 10px 10px 0 0;
