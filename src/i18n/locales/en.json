@@ -84,6 +84,7 @@
 		"editTime": "Edit time",
 		"delete": "Delete",
 		"save": "Save",
+		"saving": "Saving..",
 		"complete": "Updated successfully.",
 		
 		"deleteFailedWithMessage": "Failed to delete the schedule.\n({{message}})",
@@ -103,6 +104,11 @@
 		"greeting": "Hello,",
 		"greeting2": "",
 		"targetCompany": "My Target Company",
+		"targetComLabel": "Target Company",
+		"targetComLabelEx": "e.g., AIM",
+		"desiredJob": "Desired Job",
+		"desiredJobEx": "e.g., CEO, PM, Backend Engineer",
+
 		"notSet": "Not Set",
 		"certs": "My Certificates",
 		"editProfile": "Edit Profile",
@@ -130,6 +136,10 @@
 		"failAddSchedule": "Couldn’t save your schedule.",
 		"failSetEndTime": "End time can’t be earlier than start time.",
 		"failSetEndDate": "End date can’t be earlier than start date.",
+
+		"failSetCareerGoalMissName": "Missing name information. Please log in again and try.",
+		"failSetCareerGoal": "Failed to save. Please try again later.",
+
 		"cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",
 		"invalidAccessMissingEventId": "Invalid access. The event ID is missing."
 	}

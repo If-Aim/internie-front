@@ -118,7 +118,7 @@ export async function apiPublic(
 ): Promise<Response> {
     return fetch(buildUrl(path), {
         ...init,
-        credentials: "include", // 쿠키 저장/전송을 위한 필수
+        credentials: "include",
     });
 }
 /* Auth */ 

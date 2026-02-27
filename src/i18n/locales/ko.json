@@ -84,6 +84,7 @@
         "editTime": "시간 수정하기",
         "delete": "삭제하기",
         "save": "저장하기",
+        "saving": "저장중..",
         "complete": "수정이 완료되었습니다.",
 
         "deleteFailedWithMessage": "일정을 삭제하지 못했습니다.\n({{message}})",
@@ -103,6 +104,11 @@
         "greeting": "안녕하세요,",
         "greeting2": "님",
         "targetCompany": "나의 목표 기업",
+        "targetComLabel": "목표 기업",
+        "targetComLabelEx": "예: aim",
+        "desiredJob": "희망 직무",
+        "desiredJobEx": "예: 대표, PM, 백엔드 개발자",
+
         "notSet": "미설정",
         "certs": "나의 수료증",
         "editProfile": "프로필 수정하기",
@@ -130,6 +136,10 @@
         "failAddSchedule": "일정을 저장하지 못했습니다.",
         "failSetEndTime": "종료 시간은 시작 시간보다 빠를 수 없습니다.",
         "failSetEndDate": "마감일은 시작일보다 빠를 수 없습니다.",
+
+        "failSetCareerGoalMissName": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        "failSetCareerGoal": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+
         "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",
         "invalidAccessMissingEventId": "잘못된 접근입니다. (Event ID 누락)"
     }

@@ -10,12 +10,14 @@ import MyPage from "./myPage/myPage";
 import SchoolVerify from "./myPage/schoolVerify";
 import Cert from "./myPage/certificates"
 import UserModify from "./myPage/userModify";
+import GoalCompany from "./myPage/targetCom"
 
 import NewSchedule from "./schedule/newSchedule";
 import EditSchedule from "./schedule/editSchedule";
 import DetailSchedule from "./schedule/detailSchedule";
 import QuestionsPage from "./questions/questionsPage";
 import VerifyCodePage from "./myPage/verifyCode";
+
 
 export default function StudentApp(): React.ReactElement {
 	return (
@@ -28,6 +30,7 @@ export default function StudentApp(): React.ReactElement {
 				<Route path="mypage/modify" element={<UserModify />} />
 				<Route path="verify" element={<SchoolVerify />} />
 				<Route path="mypage/verify-code" element={<VerifyCodePage />} />
+				<Route path="mypage/career-goals" element={<GoalCompany />} />
 
 				<Route path="schedule/new" element={<NewSchedule />} />
 				<Route path="schedule/:eventId" element={<EditSchedule />} />
