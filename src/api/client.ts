@@ -15,84 +15,71 @@ function getAuthHeader(): Record<string, string> {
 }
 
 export async function refreshAccessToken(): Promise<string> {
-	const res = await fetch(buildUrl("/auth/refresh"), {
-		method: "POST",
-		credentials: "include",
-	});
+    const res = await fetch(buildUrl("/auth/refresh"), {
+        method: "POST",
+        credentials: "include",
+    });
 
-	if (!res.ok) {
-		const bodyText = await res.text().catch(() => "");
-		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-	}
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+    }
 
-	const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
-	if (!newAuth) {
-		throw new ApiError(200, "No Authorization header in refresh response");
-	}
+    const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!newAuth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/refresh response", bodyText);
+    }
 
-	localStorage.setItem("accessToken", newAuth);
-	return newAuth;
+    localStorage.setItem("accessToken", newAuth);
+    return newAuth;
 }
+
 async function requestWithAutoRefresh(
-	path: string,
-	init: RequestInit = {},
-	opts?: { expectJson?: boolean } 
+    path: string,
+    init: RequestInit = {},
+    opts?: { expectJson?: boolean }
 ): Promise<Response> {
-	const expectJson = opts?.expectJson ?? false;
+    const expectJson = opts?.expectJson ?? false;
 
-	const baseHeaders: Record<string, string> = {
-		...(init.headers as Record<string, string> | undefined),
-		...getAuthHeader(),
-	};
+    const makeHeaders = () => {
+        const h: Record<string, string> = {
+            ...(init.headers as Record<string, string> | undefined),
+            ...getAuthHeader(),
+        };
+        if (expectJson && !("Content-Type" in h)) {
+            h["Content-Type"] = "application/json";
+        }
+        return h;
+    };
 
-	if (expectJson) {
-		if (!("Content-Type" in baseHeaders)) {
-			baseHeaders["Content-Type"] = "application/json";
-		}
-	}
+    const doFetch = async (): Promise<Response> => {
+        return fetch(buildUrl(path), {
+            ...init,
+            headers: makeHeaders(),
+            credentials: "include",
+        });
+    };
 
-	const doFetch = async (): Promise<Response> => {
-		return fetch(buildUrl(path), {
-			...init,
-			headers: baseHeaders,
-			credentials: "include",
-		});
-	};
+    let res = await doFetch();
 
-	let res = await doFetch();
+    if (res.status === 401 || res.status === 403) {
+        try {
+            await refreshAccessToken();
+            res = await doFetch();
+        } catch (e) {
+            localStorage.removeItem("accessToken");
+            throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
+        }
 
-	if (res.status === 401 || res.status === 403) {
-		try {
-			await refreshAccessToken();
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem("accessToken");
+            const bodyText = await res.text().catch(() => "");
+            throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+        }
+    }
 
-			const retryHeaders: Record<string, string> = {
-				...(init.headers as Record<string, string> | undefined),
-				...getAuthHeader(),
-			};
-			if (expectJson) {
-				if (!("Content-Type" in retryHeaders)) {
-					retryHeaders["Content-Type"] = "application/json";
-				}
-			}
-
-			res = await fetch(buildUrl(path), {
-				...init,
-				headers: retryHeaders,
-				credentials: "include",
-			});
-		} catch (e) {
-			localStorage.removeItem("accessToken");
-			throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
-		}
-
-		if (res.status === 401 || res.status === 403) {
-			localStorage.removeItem("accessToken");
-			const bodyText = await res.text().catch(() => "");
-			throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-		}
-	}
-
-  return res;
+    return res;
 }
 
 // 로그인 응답
@@ -100,24 +87,40 @@ export type LoginResponse = {
     onboardingCompleted: boolean;
 };
 
-export async function loginWithKakao(code: string, redirectUri: string): Promise<Response> {
-    return apiPublic("/auth/kakao", {
+export async function loginWithKakao(code: string, redirectUri?: string): Promise<LoginResponse> {
+    const body: any = redirectUri ? { code, redirectUri } : { code };
+
+    const res = await fetch(buildUrl("/auth/kakao"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, redirectUri }),
+        credentials: "include",
+        body: JSON.stringify(body),
     });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+    }
+
+    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/kakao response", bodyText);
+    }
+    localStorage.setItem("accessToken", auth);
+
+    return (await res.json()) as LoginResponse;
 }
 
 export async function apiPublic(
-	path: string,
-	init: RequestInit = {}
+    path: string,
+    init: RequestInit = {}
 ): Promise<Response> {
-	return fetch(buildUrl(path), {
-		...init,
-		credentials: "include", 
-	});
+    return fetch(buildUrl(path), {
+        ...init,
+        credentials: "include", // 쿠키 저장/전송을 위한 필수
+    });
 }
-
 /* Auth */ 
 export async function api<T = unknown>(
 	path: string,
