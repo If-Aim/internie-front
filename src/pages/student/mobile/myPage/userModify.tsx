@@ -32,18 +32,9 @@ export default function EditProfilePage(): React.ReactElement {
     const [/*avatarVersion*/, setAvatarVersion] = React.useState<number>(0);
 
     React.useEffect(() => {
-        console.log("[EditProfilePage] mounted");
-        return () => {
-            console.log("[EditProfilePage] unmounted");
-        };
-    }, []);
-
-    React.useEffect(() => {
-        console.log("[state] selectedImageFile changed =>", selectedImageFile);
     }, [selectedImageFile]);
 
     React.useEffect(() => {
-        console.log("[state] previewUrl changed =>", previewUrl);
     }, [previewUrl]);
     
     React.useEffect(() => {
@@ -75,16 +66,11 @@ export default function EditProfilePage(): React.ReactElement {
     }, []);
 
     React.useEffect(() => {
-        console.log("[preview] selectedImageFile =", selectedImageFile);
-
         if (!selectedImageFile) {
             setPreviewUrl(null);
             return;
         }
-
         const url = URL.createObjectURL(selectedImageFile);
-        console.log("[preview] blob url =", url);
-
         setPreviewUrl(url);
 
         return () => {
@@ -155,10 +141,6 @@ export default function EditProfilePage(): React.ReactElement {
 
             if (selectedImageFile) {
                 updatedMe = await updateMyProfileImage(selectedImageFile);
-
-                console.log("[upload] typeof updatedMe =", typeof updatedMe);
-                console.log("[upload] updatedMe =", updatedMe);
-                console.log("[upload] profileImage =", (updatedMe as any)?.profileImage);
             }
 
             if (updatedMe) {
@@ -188,7 +170,6 @@ export default function EditProfilePage(): React.ReactElement {
         } finally {
             setSaving(false);
         }
-        console.log("[save] selectedImageFile at save =", selectedImageFile);
     }
 
     function handleServicePreparing() {
@@ -209,17 +190,7 @@ export default function EditProfilePage(): React.ReactElement {
             <div className="profile-edit">
                 <section className="mypage-top">
                     <div className="mypage-profileimg-wrap">
-                        <img
-                            className="mypage-profileimg"
-                            src={avatarSrc}
-                            alt="profileImg"
-                            onLoad={(e) => {
-                                console.log("[avatar] load ok:", (e.currentTarget as HTMLImageElement).src);
-                            }}
-                            onError={(e) => {
-                                console.log("[avatar] load FAIL:", (e.currentTarget as HTMLImageElement).src);
-                            }}
-                        />
+                        <img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
                     </div>
 
                     <button type="button" className="profile-edit-avatar-btn" onClick={()=> fileRef.current?.click()} disabled={saving} >
