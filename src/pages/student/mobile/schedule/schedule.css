@@ -78,6 +78,47 @@ appearance: none;
 .add-btn-wrapper {margin-left: auto;position: relative;width: 24px;align-items:flex-start;margin-top:-20px;}
 .add-date {position: absolute;left: 0;width: 24px;border: 0;background: none;border-radius: 8px;cursor: pointer;display: flex;align-items: center;justify-content: center;}
 .add {position: absolute;left: 0;width: 24px;border: 0;background: none;border-radius: 8px;cursor: pointer;display: flex;align-items: center;justify-content: center;}
+.row--card { height: auto; background: #ffffff; border-radius: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 4px 4px rgba(0, 0, 0, 0.10); border: 1px solid rgba(0, 0, 0, 0.04); }
+.row--card.is-disabled { pointer-events: none; }
+
+.row-range { width: 100%; display: flex; align-items: center; gap: 10px; }
+.row-range .icon { width: 18px; height: 18px; display: block; }
+
+.range-pill, .time-pill { border: 0; background: #fff; border-radius: 999px; padding: 10px 14px; font-size: 14px; font-weight: 600; color: #000; cursor: pointer; line-height: 18px; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; }
+.range-pill:active, .time-pill:active { transform: translateY(1px); }
+.range-sep { font-size: 14px; font-weight: 700; color: #b1b1b1; }
+
+/* 토글 헤더(시간 추가하기/반복하기) */
+.row-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row-toggle-left { display: flex; align-items: center; gap: 12px; }
+.row-toggle-left .icon { width: 18px; height: 18px; display: block; }
+.row-toggle-left strong { font-size: 16px; font-weight: 700; color: #000; }
+
+/* 토글 body(열렸을 때 아래 영역) */
+.row-toggle-body { width: 100%; margin-top: 12px; padding-left: 30px; }
+.switch { width: 52px; height: 30px; border-radius: 999px; border: 0; background: #d7dbe3; position: relative; cursor: pointer; flex-shrink: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 999px; background: #ffffff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18); transition: transform 160ms ease; }
+.switch.is-on { background: var(--primary); }
+.switch.is-on::after { transform: translateX(22px); }
+.switch:active::after { transform: translateX(0); }
+.switch.is-on:active::after { transform: translateX(22px); }
+
+/* 반복 설정 */
+.repeat-row { display: flex; align-items: center; gap: 10px; }
+.repeat-select { width: 120px; height: 38px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.08); background: #ffffff; padding: 0 10px; font-size: 14px; font-weight: 600; outline: none; }
+.repeat-select:focus { border-color: rgba(11, 92, 255, 0.35); }
+
+/* 요일 선택 pill */
+.repeat-weekdays { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.weekday-pill { min-width: 40px; height: 34px; padding: 0 10px; border-radius: 999px; border: 1px solid rgba(0, 0, 0, 0.10); background: #ffffff; color: #000; font-size: 13px; font-weight: 700; cursor: pointer; }
+.weekday-pill.is-on { border-color: transparent; background: var(--primary); color: #ffffff; }
+.weekday-pill:active { transform: translateY(1px); }
+
+/* 반복 종료일 row */
+.repeat-until { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+.repeat-until .icon { width: 18px; height: 18px; display: block; }
+.repeat-until strong { font-size: 14px; font-weight: 700; color: #000; margin-right: auto; }
+
 
 /*메모공간*/
 .memo-box {margin-top: 23px;margin-left:3px;height:177px;background: #fff;border-radius: 12px;padding: 20px 36px;}
@@ -153,7 +194,10 @@ font-size: 16px;font-weight: 500;cursor: pointer;text-align:center;color:#666666
 .cal-cell{position:relative;display:flex;align-items:center;justify-content:center;padding: 0;}
 .cal-cell--empty{pointer-events:none;}
 .cal-day.is-out{opacity: .25;}
-.cal-day.is-selected{background: #0B5CFF;color: #fff;opacity: 1;}
+.cal-day.is-selected{background: var(--primary);color: #fff;opacity: 1;}
+.cal-day:disabled,
+.cal-day.is-disabled { opacity: 0.25; cursor: default; }
+.cal-day:disabled:active { transform: none; }
 
 /* 기간 선택용 */
 .cal-range{position: absolute;left: 50%;transform: translateX(-50%);top: 50%;transform: translate(-50%, -50%);

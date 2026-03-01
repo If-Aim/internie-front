@@ -493,6 +493,8 @@ function CalendarRange({
 						const between = !sameDay && inRange(day);
 
 						const showRange = !sameDay && (between || isStart || isEnd);
+						const isBeforeStartInEndOnly =
+							mode === "endOnly" && day.getTime() < s.getTime();
 
 						return (
 							<div
@@ -508,10 +510,12 @@ function CalendarRange({
 
 								<button
 									type="button"
+									disabled={isBeforeStartInEndOnly}
 									className={
 										"cal-day" +
 										((sameDay && isSameDay(day, s)) ? " is-selected" : "") +
-										(isStart || isEnd ? " is-selected" : "")
+										(isStart || isEnd ? " is-selected" : "") +
+										(isBeforeStartInEndOnly ? " is-disabled" : "")
 									}
 									onClick={() => handlePick(day)}
 								>
