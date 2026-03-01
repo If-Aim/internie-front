@@ -887,38 +887,26 @@ export default function NewSchedule() {
                         onChange={(e) => setTitle(e.target.value)}
                     />
 
-                    {/* 1) 기간 설정 카드 */}
                     <section className="row row--card">
                         <div className="row-range">
-                            <img className="icon" src="/clock-01.svg" alt="" />
+                            <img className="icon" src="/schedule_clock.svg" alt="" />
 
-                            <button
-                                type="button"
-                                className="range-pill"
-                                onClick={openStartRangeSheet}
-                                aria-label="set start date"
-                            >
+                            <button type="button" className="range-pill" onClick={openStartRangeSheet} aria-label="set start date" >
                                 {formatRangeDate(startDate, locale)}
                             </button>
 
                             <span className="range-sep">-</span>
 
-                            <button
-                                type="button"
-                                className="range-pill"
-                                onClick={openEndOnlyRangeSheet}
-                                aria-label="set end date"
-                            >
+                            <button type="button" className="range-pill" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
                                 {formatRangeDate(endDate, locale)}
                             </button>
                         </div>
                     </section>
 
-                    {/* 2) 시간 추가하기 카드 */}
                     <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
                         <div className="row-toggle">
                             <div className="row-toggle-left">
-                                <img className="icon" src="/stopwatch.svg" alt="" />
+                                <img className="icon" src="/schedule_stopwatch.svg" alt="" />
                                 <strong>시간 추가하기</strong>
                             </div>
 
@@ -966,11 +954,10 @@ export default function NewSchedule() {
                         )}
                     </section>
 
-                    {/* 3) 반복하기 카드 */}
                     <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
                         <div className="row-toggle">
                             <div className="row-toggle-left">
-                                <img className="icon" src="/repeat.svg" alt="" />
+                                <img className="icon" src="/reapeat-01.svg" alt="" />
                                 <strong>반복하기</strong>
                             </div>
 
