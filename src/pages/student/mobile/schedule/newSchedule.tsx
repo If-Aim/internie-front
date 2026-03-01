@@ -7,14 +7,10 @@ import { api } from "../../../../api/client";
 
 import "./schedule.css";
 
-type TimeWheelVariant = "sheet" | "calendar";
 type RepeatMode = "DAILY" | "WEEKLY";
 
 const MAX_OCCURRENCES = 60;
 
-const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
-	`${String(h).padStart(2, "0")}:00`
-); 
 function displayTimeLabel(hhmm: string, locale: string) {
 	const [hh, mm] = hhmm.split(":").map(Number);
 	const d = new Date(2000, 0, 1, hh, mm, 0);
@@ -25,34 +21,6 @@ function displayTimeLabel(hhmm: string, locale: string) {
 		hour12: true,
 	}).format(d);
 }
-function displayTimeWheelLabel(hhmm: string, locale: string) {
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(2000, 0, 1, hh, mm, 0);
-
-	if (locale.startsWith("ko")) {
-		return new Intl.DateTimeFormat("ko-KR", {
-			hour: "numeric",
-			hour12: true, 
-		})
-			.formatToParts(d)
-			.filter((p) => p.type === "hour")
-			.map((p) => p.value)
-			.join("")
-			.trim() + "시";
-	}
-
-	return new Intl.DateTimeFormat("en-US", {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true,
-	})
-		.formatToParts(d)
-		.filter((p) => p.type !== "dayPeriod")
-		.map((p) => p.value)
-		.join("")
-		.trim();
-}
-const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 const toApiHHmmss = (hhmm: string) => `${hhmm}:00`;
 function toYmd(date: Date): string {
@@ -63,7 +31,6 @@ function toYmd(date: Date): string {
 }
 
 const stripTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const getTimeIndex = (t: string | null) => (t ? TIME_OPTIONS.indexOf(t) : -1);
 
 //날짜 관련
 function isSameDay(a: Date, b: Date) {
@@ -164,141 +131,21 @@ async function createEventDay(eventId: number, input: {
     });
 }
 
-// 시간 관련 - 종일일때 서버에 시간을 어떤 값으로 보낼지 - TODO
-type TimeSheetProps = {
-	step: "start" | "end";
-	setStep: React.Dispatch<React.SetStateAction<"start" | "end">>;
-
-	startTime: string | null;
-	endTime: string | null;
-	onChangeStart: (v: string) => void;
-	onChangeEnd: (v: string) => void;
-
-	isAllDay: boolean;
-	setIsAllDay: React.Dispatch<React.SetStateAction<boolean>>;
-	setStartTime: React.Dispatch<React.SetStateAction<string | null>>;
-	setEndTime: React.Dispatch<React.SetStateAction<string | null>>;
-
-	onClose: () => void;
-};
-
-function TimeSheet({
-	step,
-	setStep,
-	startTime,
-	endTime,
-	onChangeStart,
-	onChangeEnd,
-	onClose,
-	isAllDay,
-	setIsAllDay,
-	setStartTime,
-	setEndTime,
-}: TimeSheetProps) {
-	const { t, i18n } = useTranslation();
-	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-	return (
-		<div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="set time" onClick={onClose} >
-			<div className="sheet-card" onClick={(e) => e.stopPropagation()} >
-				<div className="sheet-header">
-					<span className="sheet-title">{t("common.time")}</span>
-					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose} >
-						<img className="icon" alt="" src="/x-01.svg" />
-					</button>
-				</div>
-
-				<div className="sheet-cols">
-					{step === "start" ? (
-						<div className="sheet-col">
-							<div className="time-list">
-								<button
-									type="button"
-									className={"time-item" + (isAllDay ? " is-selected" : "")}
-									onClick={() => {
-										setIsAllDay(true);
-										setStartTime(null);
-										setEndTime(null);
-										setStep("start");
-										onClose(); 
-									}}
-								>
-									{t("common.allDay")}
-								</button>
-								{TIME_OPTIONS.map((opt) => (
-									<button
-										key={(opt)}
-										type="button"
-										className={"time-item" + ((opt) === startTime ? " is-selected" : "")}
-										onClick={() => {
-										setIsAllDay(false);
-										onChangeStart(opt);
-										setStep("end");
-										}}
-									>
-										{displayTimeLabel(opt, locale)} ~
-									</button>
-								))}
-							</div>
-						</div>
-					) : (
-						<div className="sheet-col">
-							<div className="time-list">
-								{TIME_OPTIONS.map((opt) => {
-									const startIdx = getTimeIndex(startTime);
-									const endIdx = getTimeIndex(opt);
-									const isDisabled = startTime ? endIdx <= startIdx : false;
-
-									return (
-										<button
-										key={opt}
-										type="button"
-										disabled={isDisabled}
-										className={
-											"time-item" +
-											(opt === endTime ? " is-selected" : "") +
-											(isDisabled ? " is-disabled" : "")
-										}
-										onClick={() => {
-											onChangeEnd(opt);
-											onClose();
-										}}
-										>
-										~ {displayTimeLabel(opt, locale)}
-										</button>
-									);
-								})}
-							</div>
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
-	);
-}
-
 type DateRangeSheetProps = {
-	mode: "range" | "startOnly" | "endOnly";
-
-	startDate: Date;
-	endDate: Date;
-	onChangeStart: (d: Date) => void;
-	onChangeEnd: (d: Date) => void;
-	hideTimeWheel?: boolean;
-
-	startTime: string | null;
-	onChangeStartTime: (t: string | null) => void;
-	onClose: () => void;
+    mode: "range" | "startOnly" | "endOnly";
+    startDate: Date;
+    endDate: Date;
+    onChangeStart: (d: Date) => void;
+    onChangeEnd: (d: Date) => void;
+    onClose: () => void;
 };
+
 function DateRangeSheet({
 	mode,
 	startDate,
 	endDate,
 	onChangeStart,
 	onChangeEnd,
-	hideTimeWheel,
-
-	startTime,
-	onChangeStartTime,
 	onClose,
 }: DateRangeSheetProps) {
 	const { t } = useTranslation();
@@ -334,14 +181,6 @@ function DateRangeSheet({
 						onWeeksChange={setWeeks}
 						resetKey={resetKey}
 					/>
-
-					{!hideTimeWheel && (
-						<div className="date-range-time date-range-time--single">
-							<div className="date-range-time-col">
-								<TimeWheel value={startTime} onChange={onChangeStartTime} variant="calendar" />
-							</div>
-						</div>
-					)}
 				</div>
 
 				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
@@ -372,13 +211,19 @@ function CalendarRange({
 	onWeeksChange?: (weeks: 5 | 6) => void;
 	resetKey: number;
 }) {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+
 	const s = clampToStartOfDay(startDate);
 	const e = clampToStartOfDay(endDate);
 	const sameDay = isSameDay(s, e);
 
 	const [cursor, setCursor] = React.useState(() => new Date(s.getFullYear(), s.getMonth(), 1));
 	const [focus, setFocus] = React.useState<"start" | "end">("start");
+
+	const weekLabels = locale === "ko-KR"
+    ? ["월", "화", "수", "목", "금", "토", "일"]
+    : ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 	React.useEffect(() => {
 		setFocus("start");
@@ -470,7 +315,7 @@ function CalendarRange({
 
 			<div className="cal-body">
 				<div className="cal-week">
-					{WEEK_LABELS.map((w) => (
+					{weekLabels.map((w) => (
 						<div key={w} className="cal-weekday">{w}</div>
 					))}
 				</div>
@@ -530,130 +375,12 @@ function CalendarRange({
 	);
 }
 
-//달력 내 시간 부분
-function getDayPeriodLabel(hhmm: string | null, locale: string) {
-	if (!hhmm) return "";
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(2000, 0, 1, hh, mm, 0);
-
-	const parts = new Intl.DateTimeFormat(locale, {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true, 
-	}).formatToParts(d);
-
-	return parts.find((p) => p.type === "dayPeriod")?.value ?? "";
-}
-
-function TimeWheel({
-	value,
-	onChange,
-	variant = "sheet",
-}: {
-	value: string | null;
-	onChange: (t: string | null) => void;
-	variant?: TimeWheelVariant;
-}) {
-	const { i18n } = useTranslation();
-	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-	const selectedPeriod = value ? getDayPeriodLabel(value, locale) : (locale.startsWith("ko") ? "오후" : "PM");
-
-	const rowRef = React.useRef<HTMLDivElement | null>(null);
-	const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-	const rafRef = React.useRef<number | null>(null);
-
-	const [opacities, setOpacities] = React.useState<number[]>(
-		() => Array.from({ length: TIME_OPTIONS.length }, () => 1)
-	);
-	const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
-	//시간 휠 그라데이션
-	const computeOpacities = React.useCallback(() => {
-		const row = rowRef.current;
-		if (!row) return;
-		const left = row.scrollLeft;
-		const startOffset = 40;
-		const fadeWidth = 140; 
-		const next = TIME_OPTIONS.map((_, idx) => {
-			const el = itemRefs.current[idx];
-			if (!el) return 1;
-
-			const itemLeft = el.offsetLeft;
-			const itemRight = itemLeft + el.offsetWidth;
-
-			const distanceFromLeftEdge = itemRight - left;
-
-			const raw = (distanceFromLeftEdge - startOffset) / fadeWidth;
-			const t = clamp(raw, 0, 1);
-			const eased = t * t * (3 - 2 * t);
-
-			const minO = 0.12;
-			const maxO = 1.0;
-
-			return minO + (maxO - minO) * eased;
-		});
-
-		setOpacities(next);
-	}, []);
-
-	const onScroll = React.useCallback(() => {
-		if (rafRef.current) cancelAnimationFrame(rafRef.current);
-		rafRef.current = requestAnimationFrame(() => {
-			computeOpacities();
-			rafRef.current = null;
-		});
-	}, [computeOpacities]);
-
-	React.useEffect(() => {
-		computeOpacities();
-		return () => {
-			if (rafRef.current) cancelAnimationFrame(rafRef.current);
-		};
-	}, [computeOpacities]);
-
-	return (
-		<div className="timewheel">
-			{variant === "calendar" && (<div className="timewheel-period">{selectedPeriod}</div>)}
-
-			<div
-				ref={rowRef}
-				className="timewheel-row"
-				role="listbox"
-				aria-label="set time"
-				onScroll={onScroll}
-			>
-				{TIME_OPTIONS.map((opt, idx) => {
-					const isSelected = opt === value;
-
-					return (
-						<button
-							key={opt}
-							ref={(el) => { itemRefs.current[idx] = el; }}
-							type="button"
-							className={"timewheel-item" + (isSelected ? " is-selected" : "")}
-							style={{ opacity: isSelected ? 1 : opacities[idx] }}
-							onClick={() => {
-								onChange(opt);
-								requestAnimationFrame(computeOpacities);
-							}}
-						>
-							{displayTimeWheelLabel(opt, locale)}
-						</button>
-					);
-				})}
-			</div>
-		</div>
-	);
-}
-
 //page
 export default function NewSchedule() {
 	type RangeSheetMode = "range" | "startOnly" | "endOnly";
 	const nav = useNavigate();
 	const {t, i18n} = useTranslation();
 	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-
-	const [showSheet, setShowSheet] = React.useState(false);
-	const [timeStep, setTimeStep] = React.useState<"start" | "end">("start");
 
 	const [isAllDay, setIsAllDay] = React.useState(false);
 	const [enableTime, setEnableTime] = React.useState(false);
@@ -676,12 +403,43 @@ export default function NewSchedule() {
 
 	const [startTime, setStartTime] = React.useState<string | null>(null);
 	const [endTime, setEndTime] = React.useState<string | null>(null);
-	const hasTime = startTime !== null && endTime !== null;
+
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
 
 	const isRangeSelected = startDate.getTime() !== endDate.getTime();
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
-	
+	const startInputRef = React.useRef<HTMLInputElement | null>(null);
+    const endInputRef = React.useRef<HTMLInputElement | null>(null);
+
+    const openNativeTimePicker = (which: "start" | "end") => {
+        const el = which === "start" ? startInputRef.current : endInputRef.current;
+        if (!el) return;
+        const anyEl = el as any;
+        if (typeof anyEl.showPicker === "function") {
+            anyEl.showPicker();
+            return;
+        }
+        el.click();
+    };
+
+    const handleNativeStartChange = (v: string) => {
+        setIsAllDay(false);
+        setStartTime(v);
+
+        setEndTime((prev) => {
+            if (!prev) return v;
+            return prev <= v ? v : prev;
+        });
+    };
+
+    const handleNativeEndChange = (v: string) => {
+        if (startTime && v <= startTime) {
+            alert(t("error.failSetEndTime"));
+            return;
+        }
+        setIsAllDay(false);
+        setEndTime(v);
+    };
     const openStartRangeSheet = () => {
         setRangeSheetMode("range");
         setShowDateRangeSheet(true);
@@ -723,38 +481,6 @@ export default function NewSchedule() {
 		if (endTime !== null) setEndTime(null);
 		if (isAllDay) setIsAllDay(false);
 	}, [isRangeSelected]);
-
-	//시간 변경
-	// 시작 시간 변경 시
-	const handleStartTimeChange = (newTime: string) => {
-		setStartTime(newTime);
-		const isSameDay = startDate.getTime() === endDate.getTime();
-		if (!isSameDay) return;
-		const startIdx = getTimeIndex(newTime);
-
-		if (!endTime) {
-			const nextIdx = Math.min(startIdx + 1, TIME_OPTIONS.length - 1);
-			setEndTime(TIME_OPTIONS[nextIdx]);
-			return;
-		}
-
-		if (getTimeIndex(endTime) < startIdx) {
-			const nextIdx = Math.min(startIdx + 1, TIME_OPTIONS.length - 1);
-			setEndTime(TIME_OPTIONS[nextIdx]);
-		}
-	};
-
-	// 종료 시간 변경 시
-	const handleEndTimeChange = (newTime: string) => {
-		const isSameDay = startDate.getTime() === endDate.getTime();
-		if (isSameDay && startTime) {
-			if (getTimeIndex(newTime) < getTimeIndex(startTime)) {
-				alert(t("error.failSetEndTime"));
-				return;
-			}
-		}
-		setEndTime(newTime);
-	};
 
 	type CreateEventResponse = {
 		id: number;
@@ -903,56 +629,73 @@ export default function NewSchedule() {
                         </div>
                     </section>
 
-                    <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
-                        <div className="row-toggle">
-                            <div className="row-toggle-left">
-                                <img className="icon" src="/schedule_stopwatch.svg" alt="" />
-                                <strong>시간 추가하기</strong>
-                            </div>
+					<section className={"row row--card row--expand" + (isRangeSelected ? " is-disabled" : "") + (enableTime ? " is-open" : "")}>
+						<div className="row-toggle">
+							<div className="row-toggle-left">
+								<img className="icon" src="/stopwatch.svg" alt="" />
+								<strong>시간 추가하기</strong>
+							</div>
 
-                            <button
-                                type="button"
-                                className={"switch" + (enableTime ? " is-on" : "")}
-                                onClick={() => {
+							<button
+								type="button"
+								className={"switch" + (enableTime ? " is-on" : "")}
+								onClick={() => {
 									if (isRangeSelected) return;
 
 									setEnableTime((prev) => {
 										const next = !prev;
-
 										if (!next) {
 											setIsAllDay(false);
 											setStartTime(null);
 											setEndTime(null);
 										}
-
 										return next;
 									});
 								}}
 								aria-pressed={enableTime}
-                                disabled={isRangeSelected}
-                            />
-                        </div>
+								disabled={isRangeSelected}
+							/>
+						</div>
 
-                        {enableTime && !isRangeSelected && (
-                            <div className="row-toggle-body">
-                                <button
-                                    type="button"
-                                    className="time-pill"
-                                    onClick={() => {
-                                        setTimeStep("start");
-                                        setShowSheet(true);
-                                    }}
-                                    aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}
-                                >
-                                    {isAllDay
-                                        ? t("common.allDay")
-                                        : hasTime
-                                            ? `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`
-                                            : t("schedule_new.addTime")}
-                                </button>
-                            </div>
-                        )}
-                    </section>
+						{enableTime && !isRangeSelected && (
+							<div className="row-toggle-body">
+								<button
+									type="button"
+									className="time-pill"
+									onClick={() => openNativeTimePicker("start")}
+								>
+									{startTime && endTime
+										? `${displayTimeLabel(startTime, locale)} - ${displayTimeLabel(endTime, locale)}`
+										: "시간 선택"}
+								</button>
+
+								<input
+									ref={startInputRef}
+									className="native-time-input"
+									type="time"
+									value={startTime ?? ""}
+									onChange={(e) => handleNativeStartChange(e.target.value)}
+								/>
+
+								<input
+									ref={endInputRef}
+									className="native-time-input"
+									type="time"
+									value={endTime ?? ""}
+									onChange={(e) => handleNativeEndChange(e.target.value)}
+								/>
+
+								<div className="native-time-actions">
+									<button type="button" className="native-time-btn" onClick={() => openNativeTimePicker("start")}>
+										시작
+									</button>
+									<button type="button" className="native-time-btn" onClick={() => openNativeTimePicker("end")} disabled={!startTime}>
+										종료
+									</button>
+								</div>
+							</div>
+						)}
+					</section>
 
                     <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
                         <div className="row-toggle">
@@ -1070,22 +813,6 @@ export default function NewSchedule() {
 				<footer className="footer-fixed">
 					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
 				</footer>
-				{/* 시간 선택 바텀시트 */}
-				{showSheet && (
-					<TimeSheet
-						step={timeStep}
-						setStep={setTimeStep}
-						startTime={startTime}
-						endTime={endTime}
-						onChangeStart={handleStartTimeChange}
-						onChangeEnd={handleEndTimeChange}
-						isAllDay={isAllDay}
-						setIsAllDay={setIsAllDay}
-						setStartTime={setStartTime}
-						setEndTime={setEndTime}
-						onClose={() => setShowSheet(false)}
-					/>
-				)}
 				{showRepeatUntilSheet && (
 					<DateRangeSheet
 						mode="endOnly"
@@ -1093,9 +820,6 @@ export default function NewSchedule() {
 						endDate={repeatUntil}
 						onChangeStart={() => {}}
 						onChangeEnd={(d) => setRepeatUntil(d)}
-						startTime={null}
-						onChangeStartTime={() => {}}
-						hideTimeWheel={true}
 						onClose={() => setShowRepeatUntilSheet(false)}
 					/>
 				)}
@@ -1132,11 +856,6 @@ export default function NewSchedule() {
 
 								setEnableRepeat(false);
 							}
-						}}
-						startTime={startTime}
-						onChangeStartTime={(v) => {
-							if (!v) return;
-							handleStartTimeChange(v);
 						}}
 						onClose={() => setShowDateRangeSheet(false)}
 					/>
