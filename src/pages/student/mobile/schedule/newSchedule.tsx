@@ -632,7 +632,7 @@ export default function NewSchedule() {
 					<section className={"row row--card row--expand" + (isRangeSelected ? " is-disabled" : "") + (enableTime ? " is-open" : "")}>
 						<div className="row-toggle">
 							<div className="row-toggle-left">
-								<img className="icon" src="/stopwatch.svg" alt="" />
+								<img className="icon" src="/schedule_stopwatch.svg" alt="" />
 								<strong>시간 추가하기</strong>
 							</div>
 
