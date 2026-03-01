@@ -127,10 +127,13 @@ appearance: none;
 .repeat-until .icon { width: 18px; height: 18px; display: block; }
 .repeat-until strong { font-size: 14px; font-weight: 700; color: #000; margin-right: auto; }
 
-.native-time-input { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.native-time-actions { display: flex; gap: 8px; margin-top: 10px; }
-.native-time-btn { flex: 1; height: 44px; border: 0; border-radius: 10px; background: #EFF3FF; color: #000; font-size: 14px; font-weight: 600; }
-
+.native-time-actions { display: flex; gap: 10px; align-items: center; }
+.native-time-btn { position: relative; display: inline-flex; align-items: center; justify-content: center;
+height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+.native-time-btn.is-disabled { opacity: 0.5; cursor: default; }
+.native-time-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.native-time-input:disabled { pointer-events: none; }
+.native-time-preview { margin-top: 12px; font-size: 14px; color: #111; }
 
 /*메모공간*/
 .memo-box {margin-top: 23px;margin-left:3px;height:177px;background: #fff;border-radius: 12px;padding: 20px 36px;}

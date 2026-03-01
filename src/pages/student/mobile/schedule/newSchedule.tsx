@@ -408,19 +408,6 @@ export default function NewSchedule() {
 
 	const isRangeSelected = startDate.getTime() !== endDate.getTime();
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
-	const startInputRef = React.useRef<HTMLInputElement | null>(null);
-    const endInputRef = React.useRef<HTMLInputElement | null>(null);
-
-    const openNativeTimePicker = (which: "start" | "end") => {
-        const el = which === "start" ? startInputRef.current : endInputRef.current;
-        if (!el) return;
-        const anyEl = el as any;
-        if (typeof anyEl.showPicker === "function") {
-            anyEl.showPicker();
-            return;
-        }
-        el.click();
-    };
 
     const handleNativeStartChange = (v: string) => {
         setIsAllDay(false);
@@ -659,39 +646,33 @@ export default function NewSchedule() {
 
 						{enableTime && !isRangeSelected && (
 							<div className="row-toggle-body">
-								<button
-									type="button"
-									className="time-pill"
-									onClick={() => openNativeTimePicker("start")}
-								>
+								<div className="native-time-actions">
+									<label className="native-time-btn">
+										시작
+										<input
+											className="native-time-input"
+											type="time"
+											value={startTime ?? ""}
+											onChange={(e) => handleNativeStartChange(e.target.value)}
+										/>
+									</label>
+
+									<label className={"native-time-btn" + (!startTime ? " is-disabled" : "")}>
+										종료
+										<input
+											className="native-time-input"
+											type="time"
+											value={endTime ?? ""}
+											onChange={(e) => handleNativeEndChange(e.target.value)}
+											disabled={!startTime}
+										/>
+									</label>
+								</div>
+
+								<div className="native-time-preview" role="button" aria-label="time preview">
 									{startTime && endTime
 										? `${displayTimeLabel(startTime, locale)} - ${displayTimeLabel(endTime, locale)}`
-										: "시간 선택"}
-								</button>
-
-								<input
-									ref={startInputRef}
-									className="native-time-input"
-									type="time"
-									value={startTime ?? ""}
-									onChange={(e) => handleNativeStartChange(e.target.value)}
-								/>
-
-								<input
-									ref={endInputRef}
-									className="native-time-input"
-									type="time"
-									value={endTime ?? ""}
-									onChange={(e) => handleNativeEndChange(e.target.value)}
-								/>
-
-								<div className="native-time-actions">
-									<button type="button" className="native-time-btn" onClick={() => openNativeTimePicker("start")}>
-										시작
-									</button>
-									<button type="button" className="native-time-btn" onClick={() => openNativeTimePicker("end")} disabled={!startTime}>
-										종료
-									</button>
+										: "시간을 선택해주세요"}
 								</div>
 							</div>
 						)}
