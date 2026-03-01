@@ -399,9 +399,12 @@ export type UpdateMyProfileInput = {
 	nickname?: string | null;
 	imageFile?: File | null;
 };
+
 export type UpdateMyProfileJsonInput = {
     name?: string | null;
     nickname?: string | null;
+    interestJob?: string | null;
+    interestCompany?: string | null;
 };
 
 export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<UserMe> {
@@ -410,6 +413,8 @@ export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<
         body: JSON.stringify({
             name: (input.name ?? null),
             nickname: (input.nickname ?? null),
+            interestJob: (input.interestJob ?? null),
+            interestCompany: (input.interestCompany ?? null),
         }),
     });
 }

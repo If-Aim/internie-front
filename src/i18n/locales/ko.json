@@ -137,7 +137,7 @@
         "failSetEndTime": "종료 시간은 시작 시간보다 빠를 수 없습니다.",
         "failSetEndDate": "마감일은 시작일보다 빠를 수 없습니다.",
 
-        "failSetCareerGoalMissName": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        "failGetUserMe": "내 정보 조회에 실패했습니다.",
         "failSetCareerGoal": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
 
         "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",

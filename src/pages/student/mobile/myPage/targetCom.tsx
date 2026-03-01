@@ -2,7 +2,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, submitMyOnboarding, type UserMe } from "../../../../api/client";
+import { getUserMe, updateMyProfile, type UserMe } from "../../../../api/client";
 import "./targetCom.css";
 
 type FormState = {
@@ -14,17 +14,8 @@ function normalize(v: unknown): string {
     return String(v ?? "").trim();
 }
 
-function safeName(me: UserMe | null): string {
-    if (!me) return "";
-    const name = normalize(me.name);
-    if (name) return name;
-    const kakaoName = normalize(me.kakaoName);
-    if (kakaoName) return kakaoName;
-    return "";
-}
-
 export default function TargetCompanyPage(): React.ReactElement {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const { t } = useTranslation();
 
     const [me, setMe] = React.useState<UserMe | null>(null);
@@ -62,7 +53,7 @@ export default function TargetCompanyPage(): React.ReactElement {
                 setError("");
             } catch (e) {
                 if (!mounted) return;
-                setError("내 정보 조회에 실패했습니다.");
+                setError(t("error.failGetUserMe"));
             } finally {
                 if (!mounted) return;
                 setLoading(false);
@@ -92,21 +83,13 @@ export default function TargetCompanyPage(): React.ReactElement {
         if (!me) return;
         if (!canSave) return;
 
-        const name = safeName(me);
-        if (!name) {
-            setError(t("error.failSetCareerGoalMissName"));
-            return;
-        }
-
         try {
             setSaving(true);
             setError("");
 
-            const updated = await submitMyOnboarding({
-                name,
+            const updated = await updateMyProfile({
                 interestJob: normalize(form.interestJob) || null,
                 interestCompany: normalize(form.interestCompany) || null,
-                jumpOrganizationId: me.jumpOrganization?.id ?? null,
             });
 
             setMe(updated);
@@ -131,8 +114,8 @@ export default function TargetCompanyPage(): React.ReactElement {
             <header className="tc-header">
                 <div className="tc-header__spacer" />
                 <h1 className="tc-header__title">{t("mypage.targetCompany")}</h1>
-                <button type="button" className="tc-header__close" onClick={onClose} aria-label="닫기">
-                    <img src="/x-01.svg"/>
+                <button type="button" className="tc-header__close" onClick={onClose} aria-label="close" >
+                    <img src="/x-01.svg" alt="" />
                 </button>
             </header>
 
@@ -146,11 +129,13 @@ export default function TargetCompanyPage(): React.ReactElement {
                             ref={jobRef}
                             className="tc-input"
                             value={form.interestJob}
-                            onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
+                            onChange={(e) =>
+                                setForm((p) => ({ ...p, interestJob: e.target.value }))
+                            }
                             placeholder={t("mypage.desiredJobEx")}
                             disabled={loading || saving}
                         />
-                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg"/>
+                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
                     </div>
                 </section>
 
@@ -161,11 +146,13 @@ export default function TargetCompanyPage(): React.ReactElement {
                             ref={companyRef}
                             className="tc-input"
                             value={form.interestCompany}
-                            onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
+                            onChange={(e) =>
+                                setForm((p) => ({ ...p, interestCompany: e.target.value }))
+                            }
                             placeholder={t("mypage.targetComLabelEx")}
                             disabled={loading || saving}
                         />
-                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg"/>
+                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
                     </div>
                 </section>
             </main>

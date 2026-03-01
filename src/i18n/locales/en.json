@@ -137,7 +137,7 @@
 		"failSetEndTime": "End time can’t be earlier than start time.",
 		"failSetEndDate": "End date can’t be earlier than start date.",
 
-		"failSetCareerGoalMissName": "Missing name information. Please log in again and try.",
+		"failGetUserMe": "Failed to load your information.",
 		"failSetCareerGoal": "Failed to save. Please try again later.",
 
 		"cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",

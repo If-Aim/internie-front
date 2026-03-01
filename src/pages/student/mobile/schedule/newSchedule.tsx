@@ -8,6 +8,9 @@ import { api } from "../../../../api/client";
 import "./schedule.css";
 
 type TimeWheelVariant = "sheet" | "calendar";
+type RepeatMode = "DAILY" | "WEEKLY";
+
+const MAX_OCCURRENCES = 60;
 
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
 	`${String(h).padStart(2, "0")}:00`
@@ -78,8 +81,14 @@ function clampToStartOfDay(d: Date) {
 function addMonths(d: Date, diff: number) {
 	return new Date(d.getFullYear(), d.getMonth() + diff, 1);
 }
+
 function daysInMonth(year: number, month: number) {
 	return new Date(year, month + 1, 0).getDate();
+}
+
+function getWeekdayMon0(d: Date): number {
+    const js = d.getDay();
+    return (js + 6) % 7;
 }
 
 function getMonthGrid(base: Date) {
@@ -105,6 +114,54 @@ function getMonthGrid(base: Date) {
 	});
 
 	return { year, month, days };
+}
+
+function enumerateRepeatDates(params: {
+    start: Date;
+    until: Date;
+    mode: RepeatMode;
+    weekdaysMon0?: boolean[]; // WEEKLY일 때 사용
+}): Date[] {
+    const start = stripTime(params.start);
+    const until = stripTime(params.until);
+
+    if (until.getTime() < start.getTime()) return [];
+
+    const dates: Date[] = [];
+
+    if (params.mode === "DAILY") {
+        for (let cur = new Date(start); cur.getTime() <= until.getTime(); cur.setDate(cur.getDate() + 1)) {
+            dates.push(new Date(cur));
+            if (dates.length > MAX_OCCURRENCES) break;
+        }
+        return dates;
+    }
+
+    const weekdays = params.weekdaysMon0 ?? [false, false, false, false, false, false, false];
+    const anySelected = weekdays.some(Boolean);
+    if (!anySelected) return [];
+
+    for (let cur = new Date(start); cur.getTime() <= until.getTime(); cur.setDate(cur.getDate() + 1)) {
+        const wd = getWeekdayMon0(cur);
+        if (weekdays[wd]) {
+            dates.push(new Date(cur));
+            if (dates.length > MAX_OCCURRENCES) break;
+        }
+    }
+    return dates;
+}
+
+async function createEventDay(eventId: number, input: {
+    date: string;
+    title: string;
+    startTime?: string;
+    endTime?: string;
+    memo?: string | null;
+}): Promise<void> {
+    await api(`/event-days/events/${eventId}`, {
+        method: "POST",
+        body: JSON.stringify(input),
+    });
 }
 
 // 시간 관련 - 종일일때 서버에 시간을 어떤 값으로 보낼지 - TODO
@@ -226,6 +283,7 @@ type DateRangeSheetProps = {
 	endDate: Date;
 	onChangeStart: (d: Date) => void;
 	onChangeEnd: (d: Date) => void;
+	hideTimeWheel?: boolean;
 
 	startTime: string | null;
 	onChangeStartTime: (t: string | null) => void;
@@ -237,6 +295,8 @@ function DateRangeSheet({
 	endDate,
 	onChangeStart,
 	onChangeEnd,
+	hideTimeWheel,
+
 	startTime,
 	onChangeStartTime,
 	onClose,
@@ -275,11 +335,13 @@ function DateRangeSheet({
 						resetKey={resetKey}
 					/>
 
-					<div className="date-range-time date-range-time--single">
-						<div className="date-range-time-col">
-							<TimeWheel value={startTime} onChange={onChangeStartTime} variant="calendar" />
+					{!hideTimeWheel && (
+						<div className="date-range-time date-range-time--single">
+							<div className="date-range-time-col">
+								<TimeWheel value={startTime} onChange={onChangeStartTime} variant="calendar" />
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 
 				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
@@ -339,7 +401,7 @@ function CalendarRange({
 	React.useEffect(() => {
 		onWeeksChange?.(weeks);
 	}, [weeks, onWeeksChange]);
-
+	
 	const monthLabel = cursor.toLocaleString("en-US", { month: "long" });
 	const title = `${monthLabel} ${cursor.getFullYear()}`;
 	const inRange = (d: Date) => {
@@ -351,14 +413,13 @@ function CalendarRange({
 			onChangeStart(picked);
 			return;
 		}
+
 		if (mode === "endOnly") { // 마감일 선택
 			const pTime = picked.getTime();
 			const sTime = s.getTime();
 
 			if (pTime < sTime) {
 				alert(t("error.failSetEndDate"));
-				onChangeStart(picked); 
-				onChangeEnd(picked); 
 				return;
 			}
 
@@ -591,7 +652,17 @@ export default function NewSchedule() {
 	const [timeStep, setTimeStep] = React.useState<"start" | "end">("start");
 
 	const [isAllDay, setIsAllDay] = React.useState(false);
-	
+	const [enableTime, setEnableTime] = React.useState(false);
+
+    const [showRepeatUntilSheet, setShowRepeatUntilSheet] = React.useState(false);
+	const [enableRepeat, setEnableRepeat] = React.useState(false);
+	const [repeatMode, setRepeatMode] = React.useState<RepeatMode>("DAILY");
+
+	const [repeatWeekdays, setRepeatWeekdays] = React.useState<boolean[]>(
+		() => [false, false, false, false, false, false, false]
+	);
+
+	const [repeatUntil, setRepeatUntil] = React.useState<Date>(() => new Date());
 
 	const [title, setTitle] = React.useState("");
 	const [memo, setMemo] = React.useState("");
@@ -607,20 +678,15 @@ export default function NewSchedule() {
 	const isRangeSelected = startDate.getTime() !== endDate.getTime();
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
 	
-	const openStartOnlyRangeSheet = () => {
-		setRangeSheetMode("startOnly");
-		setShowDateRangeSheet(true);
-	};
+    const openStartRangeSheet = () => {
+        setRangeSheetMode("range");
+        setShowDateRangeSheet(true);
+    };
 
-	const openEndOnlyRangeSheet = () => {
-		setRangeSheetMode("endOnly");
-		setShowDateRangeSheet(true);
-	};
-
-	const openFullRangeSheet = () => {
-		setRangeSheetMode("range");
-		setShowDateRangeSheet(true);
-	};
+    const openEndOnlyRangeSheet = () => {
+        setRangeSheetMode("endOnly");
+        setShowDateRangeSheet(true);
+    };
 
 	const formatFullDate = React.useCallback((d: Date) => {
 		return new Intl.DateTimeFormat(locale, {
@@ -642,40 +708,17 @@ export default function NewSchedule() {
 			day: "numeric",
 		}).format(d);
 	}
-	function getRangeSeparator(locale: string) {
-		return locale.startsWith("ko") ? " ~ " : " - ";
-	}
 
-	const startDateLabel = formatFullDate(startDate);
-	const endDateLabel = formatFullDate(endDate);
-	const dateRangeLabel = `${formatRangeDate(startDate, locale)}${getRangeSeparator(locale)}${formatRangeDate(endDate, locale)}`;
-	
-	//기간 변경 시
-	const handleStartDateChange = (newDate: Date) => {
-		setStartDate(newDate);
-		if (stripTime(newDate) > stripTime(endDate)) {
-			setEndDate(newDate);
-		}
-	};
-	// 마감일 변경 시 처리
-	const handleEndDateChange = (newDate: Date) => {
-		if (stripTime(newDate) < stripTime(startDate)) {
-			alert(t("error.failSetEndDate"));
-			return;
-		}
-		setEndDate(newDate);
-	};
-	//기간변경전용
-	const handleEndDateChangeForRange = (newDate: Date) => {
-		const nd = stripTime(newDate);
-		const sd = stripTime(startDate);
+	React.useEffect(() => {
+		if (!isRangeSelected) return;
 
-		if (nd < sd) {
-			setEndDate(startDate); 
-			return;
-		}
-		setEndDate(newDate);
-	};
+		if (enableTime) setEnableTime(false);
+		if (enableRepeat) setEnableRepeat(false);
+
+		if (startTime !== null) setStartTime(null);
+		if (endTime !== null) setEndTime(null);
+		if (isAllDay) setIsAllDay(false);
+	}, [isRangeSelected]);
 
 	//시간 변경
 	// 시작 시간 변경 시
@@ -709,10 +752,54 @@ export default function NewSchedule() {
 		setEndTime(newTime);
 	};
 
+	type CreateEventResponse = {
+		id: number;
+		title: string;
+		content: string;
+		startDate: string;
+		endDate: string;
+		startTime: string | null;
+		endTime: string | null;
+		userId: number;
+	};
+
 	const handleSave = async () => {
 		if (!title.trim()) {
 			alert(t("schedule_new.alertAddTitle"));
 			return;
+		}
+		const effectiveEndDate = enableRepeat ? repeatUntil : endDate;
+
+		if (enableRepeat && stripTime(repeatUntil).getTime() < stripTime(startDate).getTime()) {
+			alert(t("error.failSetEndDate"));
+			return;
+		}
+
+		let repeatDates: Date[] = [];
+		if (enableRepeat) {
+			repeatDates = enumerateRepeatDates({
+				start: startDate,
+				until: repeatUntil,
+				mode: repeatMode,
+				weekdaysMon0: repeatMode === "WEEKLY" ? repeatWeekdays : undefined,
+			});
+
+			if (repeatDates.length === 0) {
+				alert("반복 요일을 선택해주세요."); // TODO: 언어 변경 토글
+				return;
+			}
+
+			if (repeatDates.length > MAX_OCCURRENCES) {
+				alert(`반복 일정은 최대 ${MAX_OCCURRENCES}개까지만 생성할 수 있습니다.`); // TODO: 언어 변경 토글
+				return;
+			}
+
+			const ok = window.confirm( // TODO: 언어 변경 토글
+				"반복 일정을 생성하면 세부 일정이 여러 개 만들어집니다.\n" +
+				"이 중 하루라도 기록(녹음)을 하면 상위 일정(events)을 삭제할 수 없을 수 있습니다.\n" +
+				"계속 진행하시겠습니까?"
+			); 
+			if (!ok) return;
 		}
 
 		const payload: {
@@ -723,10 +810,10 @@ export default function NewSchedule() {
 			startTime?: string;
 			endTime?: string;
 		} = {
-			title,
+			title: title.trim(),
 			content: memo,
 			startDate: toYmd(startDate),
-			endDate: toYmd(endDate),
+			endDate: toYmd(effectiveEndDate),
 		};
 
 		if (isAllDay) {
@@ -736,13 +823,36 @@ export default function NewSchedule() {
 			payload.startTime = toApiHHmmss(startTime);
 			payload.endTime = toApiHHmmss(endTime);
 		}
-		
+
 		try {
-			await api(`/events`, {
+			const created = await api<CreateEventResponse>(`/events`, {
 				method: "POST",
 				body: JSON.stringify(payload),
 			});
-			// 성공 시
+
+			const eventId = Number(created.id);
+
+
+			const targets = enableRepeat ? repeatDates : [startDate];
+
+			for (const d of targets) {
+				const body: any = {
+					date: toYmd(d),
+					title: title.trim(),
+					memo: memo ? memo : null,
+				};
+
+				if (isAllDay) {
+					body.startTime = "00:00:00";
+					body.endTime = "23:59:59";
+				} else if (startTime && endTime) {
+					body.startTime = toApiHHmmss(startTime);
+					body.endTime = toApiHHmmss(endTime);
+				}
+
+				await createEventDay(eventId, body);
+			}
+
 			nav("/", { replace: true });
 		} catch (err) {
 			console.error("Error:", err);
@@ -763,55 +873,208 @@ export default function NewSchedule() {
 						<img className="icon" src="/x-01.svg" alt="" />
 					</button>
 				</header>
+				
+                <main className="new-event">
+                    <input
+                        className="title-input"
+                        placeholder={t("schedule_new.titlePlaceholder")}
+                        aria-label="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
 
-				<main className="new-event">
-					<input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    {/* 1) 기간 설정 카드 */}
+                    <section className="row row--card">
+                        <div className="row-range">
+                            <img className="icon" src="/clock-01.svg" alt="" />
 
-					{/* 일정 */}
-					<section className="row">
-						<div className="col">
-							<button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
-								<img className="icon" src="/clock-01.svg" alt="" />
-								<div className="row-today">
-									<strong>{startDateLabel}</strong>
-								</div>
-							</button>
-							<button type="button" className="row-sub row-sub-btn"
-							onClick={() => { setTimeStep("start"); setShowSheet(true); }}
-							aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}>
-							{isAllDay ? t("common.allDay") : hasTime ? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}` : t("schedule_new.addTime")}
-							</button>
-						</div>
-						<div className="add-btn-wrapper">
-							<button className="add-date" aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
-							<img className="add" src="/plus-02.svg" alt="" />
-							</button>
-						</div>
-					</section>
+                            <button
+                                type="button"
+                                className="range-pill"
+                                onClick={openStartRangeSheet}
+                                aria-label="set start date"
+                            >
+                                {formatRangeDate(startDate, locale)}
+                            </button>
 
-					{/* 날짜 */}
-					<section className="row row--today">
-						<div className="col">
-							<button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
-								<img className="icon" src="/check-broken.svg" alt="date" />
-								<div className="row-today"><strong>{endDateLabel}</strong></div>
-							</button>
-							<button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set start-end date">
-								{isRangeSelected ? dateRangeLabel : t("schedule_new.dateRange")}
-							</button>
-						</div>
-						<div className="add-btn-wrapper">
-							<button className="add-date" aria-label="set start-end date" onClick={openFullRangeSheet}>
-								<img className="add" src="/plus-02.svg" alt="" />
-							</button>
-						</div>
-					</section>
+                            <span className="range-sep">-</span>
 
-					{/* 메모추가 */}
-					<div className="memo-box">
-						<textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)}/>
-					</div>
-				</main>
+                            <button
+                                type="button"
+                                className="range-pill"
+                                onClick={openEndOnlyRangeSheet}
+                                aria-label="set end date"
+                            >
+                                {formatRangeDate(endDate, locale)}
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* 2) 시간 추가하기 카드 */}
+                    <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
+                        <div className="row-toggle">
+                            <div className="row-toggle-left">
+                                <img className="icon" src="/stopwatch.svg" alt="" />
+                                <strong>시간 추가하기</strong>
+                            </div>
+
+                            <button
+                                type="button"
+                                className={"switch" + (enableTime ? " is-on" : "")}
+                                onClick={() => {
+									if (isRangeSelected) return;
+
+									setEnableTime((prev) => {
+										const next = !prev;
+
+										if (!next) {
+											setIsAllDay(false);
+											setStartTime(null);
+											setEndTime(null);
+										}
+
+										return next;
+									});
+								}}
+								aria-pressed={enableTime}
+                                disabled={isRangeSelected}
+                            />
+                        </div>
+
+                        {enableTime && !isRangeSelected && (
+                            <div className="row-toggle-body">
+                                <button
+                                    type="button"
+                                    className="time-pill"
+                                    onClick={() => {
+                                        setTimeStep("start");
+                                        setShowSheet(true);
+                                    }}
+                                    aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}
+                                >
+                                    {isAllDay
+                                        ? t("common.allDay")
+                                        : hasTime
+                                            ? `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`
+                                            : t("schedule_new.addTime")}
+                                </button>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 3) 반복하기 카드 */}
+                    <section className={"row row--card" + (isRangeSelected ? " is-disabled" : "")}>
+                        <div className="row-toggle">
+                            <div className="row-toggle-left">
+                                <img className="icon" src="/repeat.svg" alt="" />
+                                <strong>반복하기</strong>
+                            </div>
+
+                            <button
+                                type="button"
+                                className={"switch" + (enableRepeat ? " is-on" : "")}
+                                onClick={() => {
+									if (isRangeSelected) return;
+
+									setEnableRepeat((prev) => {
+										const next = !prev;
+
+										if (next) {
+											setRepeatUntil((cur) => {
+												const c = stripTime(cur);
+												const s = stripTime(startDate);
+												return c.getTime() < s.getTime() ? s : c;
+											});
+
+											if (repeatMode === "WEEKLY" && !repeatWeekdays.some(Boolean)) {
+												const wd = getWeekdayMon0(startDate);
+												const base = [false, false, false, false, false, false, false];
+												base[wd] = true;
+												setRepeatWeekdays(base);
+											}
+										}
+
+										return next;
+									});
+								}}
+                                aria-pressed={enableRepeat}
+                                disabled={isRangeSelected}
+                            />
+                        </div>
+
+                        {enableRepeat && !isRangeSelected && (
+                            <div className="row-toggle-body">
+                                <div className="repeat-row">
+                                    <select
+                                        className="repeat-select"
+                                        value={repeatMode}
+                                        onChange={(e) => {
+											const v = e.target.value as RepeatMode;
+											setRepeatMode(v);
+
+											if (v === "WEEKLY" && !repeatWeekdays.some(Boolean)) {
+												const wd = getWeekdayMon0(startDate);
+												const base = [false, false, false, false, false, false, false];
+												base[wd] = true;
+												setRepeatWeekdays(base);
+											}
+										}}
+                                    >
+                                        <option value="DAILY">매일</option>
+                                        <option value="WEEKLY">매주</option>
+                                    </select>
+                                </div>
+
+                                {repeatMode === "WEEKLY" && (
+                                    <div className="repeat-weekdays">
+                                        {["월", "화", "수", "목", "금", "토", "일"].map((label, idx) => {
+                                            const active = repeatWeekdays[idx];
+                                            return (
+                                                <button
+                                                    key={label}
+                                                    type="button"
+                                                    className={"weekday-pill" + (active ? " is-on" : "")}
+                                                    onClick={() => {
+                                                        setRepeatWeekdays((prev) => {
+                                                            const next = [...prev];
+                                                            next[idx] = !next[idx];
+                                                            return next;
+                                                        });
+                                                    }}
+                                                >
+                                                    {label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
+                                <div className="repeat-until">
+                                    <img className="icon" src="/clock-01.svg" alt="" />
+                                    <strong>반복 종료일</strong>
+                                    <button
+                                        type="button"
+                                        className="range-pill"
+                                        onClick={() => setShowRepeatUntilSheet(true)}
+                                    >
+                                        {formatFullDate(repeatUntil)}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 메모추가 */}
+                    <div className="memo-box">
+                        <textarea
+                            className="memo-input"
+                            placeholder={t("schedule_new.memoPlaceholder")}
+                            aria-label="add memo"
+                            value={memo}
+                            onChange={(e) => setMemo(e.target.value)}
+                        />
+                    </div>
+                </main>
 
 				<footer className="footer-fixed">
 					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
@@ -832,15 +1095,58 @@ export default function NewSchedule() {
 						onClose={() => setShowSheet(false)}
 					/>
 				)}
+				{showRepeatUntilSheet && (
+					<DateRangeSheet
+						mode="endOnly"
+						startDate={startDate}
+						endDate={repeatUntil}
+						onChangeStart={() => {}}
+						onChangeEnd={(d) => setRepeatUntil(d)}
+						startTime={null}
+						onChangeStartTime={() => {}}
+						hideTimeWheel={true}
+						onClose={() => setShowRepeatUntilSheet(false)}
+					/>
+				)}
 				{showDateRangeSheet && (
 					<DateRangeSheet
 						mode={rangeSheetMode}
 						startDate={startDate}
 						endDate={endDate}
-						onChangeStart={handleStartDateChange}
-						onChangeEnd={rangeSheetMode === "range" ? handleEndDateChangeForRange : handleEndDateChange}
+						onChangeStart={(d) => {
+							setStartDate(d);
+							if (stripTime(d).getTime() > stripTime(endDate).getTime()) {
+								setEndDate(d);
+							}
+
+							setEnableTime(false);
+							setStartTime(null);
+							setEndTime(null);
+							setIsAllDay(false);
+
+							setEnableRepeat(false);
+						}}
+						onChangeEnd={(d) => {
+							if (stripTime(d).getTime() < stripTime(startDate).getTime()) {
+								alert(t("error.failSetEndDate"));
+								return;
+							}
+							setEndDate(d);
+
+							if (stripTime(d).getTime() !== stripTime(startDate).getTime()) {
+								setEnableTime(false);
+								setStartTime(null);
+								setEndTime(null);
+								setIsAllDay(false);
+
+								setEnableRepeat(false);
+							}
+						}}
 						startTime={startTime}
-						onChangeStartTime={(t) => { if (t) handleStartTimeChange(t); else setStartTime(null); }}
+						onChangeStartTime={(v) => {
+							if (!v) return;
+							handleStartTimeChange(v);
+						}}
 						onClose={() => setShowDateRangeSheet(false)}
 					/>
 				)}
