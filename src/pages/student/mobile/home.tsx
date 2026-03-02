@@ -971,11 +971,22 @@ function Home(): React.ReactElement {
 	};
 
 	const now = new Date();
-	const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-	const [month, setMonth] = React.useState<string>(currentMonth);
+    const STORAGE_KEY_YM = "student.home.ym";
+    const STORAGE_KEY_SORT = "student.home.sort";
+
+    const [month, setMonth] = React.useState<string>(() => {
+        const saved = sessionStorage.getItem(STORAGE_KEY_YM);
+        return saved && /^\d{4}-\d{2}$/.test(saved) ? saved : currentMonth;
+    });
+
+    const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => {
+        const saved = sessionStorage.getItem(STORAGE_KEY_SORT);
+        return saved === "past" || saved === "latest" ? saved : "latest";
+    });
+
 	const [isFilterOpen, setIsFilterOpen] = React.useState(false);
-	const [sortOrder, setSortOrder] = React.useState<SortOrder>("latest");
 	const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
 	const [isMenuOpen, setMenuOpen] = React.useState(false);
 	const [items, setItems] = React.useState<ScheduleItem[]>([]);
@@ -1172,6 +1183,24 @@ function Home(): React.ReactElement {
 			window.scrollTo(0, y);
 		};
 	}, [isMenuOpen]);
+
+	React.useEffect(() => {
+        sessionStorage.setItem(STORAGE_KEY_YM, month);
+    }, [month]);
+
+    React.useEffect(() => {
+        sessionStorage.setItem(STORAGE_KEY_SORT, sortOrder);
+    }, [sortOrder]);
+    
+	React.useEffect(() => {
+        if (isAuthed) return;
+
+        sessionStorage.removeItem(STORAGE_KEY_YM);
+        sessionStorage.removeItem(STORAGE_KEY_SORT);
+
+        setMonth(currentMonth);
+        setSortOrder("latest");
+    }, [isAuthed, currentMonth]);
 
 	const handleRecord = async () => {
 		if (!selectedItem) return;
