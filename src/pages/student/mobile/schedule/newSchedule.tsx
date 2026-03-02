@@ -568,6 +568,8 @@ export default function NewSchedule() {
 		}
 		setEndTime(newTime);
 	};
+	
+	const isTitleValid = title.trim().length > 0;
 
 	const handleSave = async () => {
 		if (!title.trim()) {
@@ -772,7 +774,9 @@ export default function NewSchedule() {
 					tabIndex={-1}
 				/>
 				<footer className="footer-fixed">
-					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
+					<button className={`btn-primary ${!isTitleValid ? "btn-disabled" : ""}`} onClick={handleSave} disabled={!isTitleValid} >
+						{t("common.save")}
+					</button>
 				</footer>
 
 				{/* 시간 선택 바텀시트 */}

@@ -150,6 +150,8 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 .btn-primary{width:100%;height:60px;border:0;border-radius:var(--radius);background:var(--primary);color:#fff;font-size:16px;font-weight:700;line-height:50px;justify-content: center;display: flex;align-items: center;}
 .btn-primary:hover{filter:brightness(1.03)}
 .btn-primary:active{transform:translateY(1px)}
+.btn-primary.btn-disabled { background-color: #F1F1F1; color: #A2A2A2; cursor: not-allowed; }
+.btn-primary:disabled { background-color: #F1F1F1; color: #A2A2A2; cursor: not-allowed; }
 .btn-danger{background:var(--danger);color:#fff}
 
 /* 시간·날짜 선택 모달*/
