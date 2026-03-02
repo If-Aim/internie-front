@@ -62,6 +62,17 @@ function toYmd(date: Date): string {
 const stripTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const getTimeIndex = (t: string | null) => (t ? TIME_OPTIONS.indexOf(t) : -1);
 
+function displayTimePillLabel(hhmm: string) {
+    const [hh, mm] = hhmm.split(":").map(Number);
+    const d = new Date(2000, 0, 1, hh, mm, 0);
+
+    return new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    }).format(d);
+}
+
 //날짜 관련
 function isSameDay(a: Date, b: Date) {
 	return (
@@ -603,8 +614,8 @@ export default function NewSchedule() {
 	const [endTime, setEndTime] = React.useState<string | null>(null);
 	const hasTime = startTime !== null && endTime !== null;
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
-	const startTimeLabel = startTime ? displayTimeLabel(startTime, locale) : "09:00 AM";
-	const endTimeLabel = endTime ? displayTimeLabel(endTime, locale) : "10:00 AM";
+	const startTimeLabel = startTime ? displayTimePillLabel(startTime) : "09:00 AM";
+	const endTimeLabel = endTime ? displayTimePillLabel(endTime) : "10:00 AM";
 
 	const startTimeInputRef = React.useRef<HTMLInputElement | null>(null);
 	const endTimeInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -680,6 +691,14 @@ export default function NewSchedule() {
 	};
 
 	//시간 변경
+	const hiddenTimeInputStyle: React.CSSProperties = {
+		position: "fixed",
+		left: "-10000px",
+		top: "0px",
+		width: "1px",
+		height: "1px",
+		opacity: 0,
+	};
 	// 시작 시간 변경 시
 	const handleStartTimeChange = (newTime: string) => {
 		setStartTime(newTime);
@@ -822,25 +841,13 @@ export default function NewSchedule() {
 								<div className="row-icon--empty" />
 
 								<div className="time-inline">
-									<button
-										type="button"
-										className="time-pill"
-										onClick={() => {
-											openStartTimePicker();
-										}}
-									>
+									<button type="button" className="time-pill" onClick={() => { openStartTimePicker(); }} >
 										{startTime ? startTimeLabel : "Start"}
 									</button>
 
 									<span className="date-sep" aria-hidden="true">-</span>
 
-									<button
-										type="button"
-										className="time-pill"
-										onClick={() => {
-											openEndTimePicker();
-										}}
-									>
+									<button type="button" className="time-pill" onClick={() => { openEndTimePicker(); }} >
 										{endTime ? endTimeLabel : "End"}
 									</button>
 								</div>
@@ -886,7 +893,7 @@ export default function NewSchedule() {
 					ref={startTimeInputRef}
 					type="time"
 					value={startTime ?? ""}
-					step={60} 
+					step={60}
 					onChange={(e) => {
 						const v = e.target.value;
 						if (!v) return;
@@ -894,18 +901,14 @@ export default function NewSchedule() {
 						setIsAllDay(false);
 						setStartTime(v);
 
-						if (!endTime) {
+						if (!endTime || endTime < v) {
 							setEndTime(v);
-						} else {
-							if (endTime < v) setEndTime(v);
 						}
-
 						requestAnimationFrame(() => {
 							openEndTimePicker();
 						});
 					}}
-					style={{ position: "fixed", left: "-10000px", top: "0px", opacity: 0, pointerEvents: "none", width: "1px", height: "1px" }}
-					aria-hidden="true"
+					style={hiddenTimeInputStyle}
 					tabIndex={-1}
 				/>
 
@@ -926,12 +929,9 @@ export default function NewSchedule() {
 
 						setEndTime(v);
 					}}
-					style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
-					aria-hidden="true"
+					style={hiddenTimeInputStyle}
 					tabIndex={-1}
 				/>
-
-
 				<footer className="footer-fixed">
 					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
 				</footer>
