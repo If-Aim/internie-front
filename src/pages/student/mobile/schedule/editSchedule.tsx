@@ -498,13 +498,40 @@ export default function EditSchedule() {
 	const [endDate, setEndDate] = React.useState<Date>(() => (passed?.endDate ? ymdToDate(passed.endDate) : new Date()));
 	const isSingleDay = stripTime(startDate).getTime() === stripTime(endDate).getTime();
 	
+	const prevTimeRef = React.useRef<{
+		isAllDay: boolean;
+		startTime: string | null;
+		endTime: string | null;
+	} | null>(null);
+	
 	React.useEffect(() => {
-		if (isSingleDay) return;
+		if (!isSingleDay) {
+			if (prevTimeRef.current === null) {
+				prevTimeRef.current = { isAllDay, startTime, endTime };
+			}
 
-		setIsAllDay(true);
-		setStartTime(null);
-		setEndTime(null);
+			setIsAllDay(true);
+			setStartTime(null);
+			setEndTime(null);
+			setShowSheet(false);
+			return;
+		}
+
 		setShowSheet(false);
+
+		if (prevTimeRef.current) {
+			const prev = prevTimeRef.current;
+			prevTimeRef.current = null;
+
+			setIsAllDay(prev.isAllDay);
+			setStartTime(prev.startTime);
+			setEndTime(prev.endTime);
+		} else {
+			const nextHasTime = startTime !== null && endTime !== null;
+			if (!nextHasTime) {
+				setIsAllDay(false);
+			}
+		}
 	}, [isSingleDay]);
 
 	React.useEffect(() => {
@@ -525,6 +552,8 @@ export default function EditSchedule() {
 
 	const hasTime = startTime !== null && endTime !== null;
 
+
+	
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
 
@@ -878,7 +907,7 @@ export default function EditSchedule() {
 													setStartTime(null);
 													setEndTime(null);
 												}
-												
+
 												if (!isSingleDay) return;
 											}}
 											aria-pressed={hasTime || isAllDay}
