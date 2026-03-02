@@ -604,7 +604,6 @@ export default function NewSchedule() {
 	const hasTime = startTime !== null && endTime !== null;
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
 
-	const isRangeSelected = startDate.getTime() !== endDate.getTime();
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
 	
 	const openStartOnlyRangeSheet = () => {
@@ -617,18 +616,6 @@ export default function NewSchedule() {
 		setShowDateRangeSheet(true);
 	};
 
-	const openFullRangeSheet = () => {
-		setRangeSheetMode("range");
-		setShowDateRangeSheet(true);
-	};
-
-	const formatFullDate = React.useCallback((d: Date) => {
-		return new Intl.DateTimeFormat(locale, {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		}).format(d);
-	}, [locale]);
 
 	function formatRangeDate(d: Date, locale: string) {
 		if (locale.startsWith("ko")) {
@@ -642,13 +629,8 @@ export default function NewSchedule() {
 			day: "numeric",
 		}).format(d);
 	}
-	function getRangeSeparator(locale: string) {
-		return locale.startsWith("ko") ? " ~ " : " - ";
-	}
 
-	const startDateLabel = formatFullDate(startDate);
-	const endDateLabel = formatFullDate(endDate);
-	const dateRangeLabel = `${formatRangeDate(startDate, locale)}${getRangeSeparator(locale)}${formatRangeDate(endDate, locale)}`;
+
 	
 	//기간 변경 시
 	const handleStartDateChange = (newDate: Date) => {
@@ -767,49 +749,122 @@ export default function NewSchedule() {
 				<main className="new-event">
 					<input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-					{/* 일정 */}
-					<section className="row">
-						<div className="col">
-							<button  type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
-								<img className="icon" src="/clock-01.svg" alt="" />
-								<div className="row-today">
-									<strong>{startDateLabel}</strong>
-								</div>
-							</button>
-							<button type="button" className="row-sub row-sub-btn"
-							onClick={() => { setTimeStep("start"); setShowSheet(true); }}
-							aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")}>
-							{isAllDay ? t("common.allDay") : hasTime ? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}` : t("schedule_new.addTime")}
-							</button>
+					{/* 날짜: 시작일 - 마감일 한 줄 */}
+					<section className="row row--date-inline">
+						<div className="row-icon">
+							<img className="icon" src="/clock-01.svg" alt="" />
 						</div>
-						<div className="add-btn-wrapper">
-							<button className="add-date" aria-label={hasTime ? t("schedule_new.editTime") : t("schedule_new.addTime")} onClick={() => {setTimeStep("start");setShowSheet(true);}}                   >
-							<img className="add" src="/plus-02.svg" alt="" />
+
+						<div className="date-inline">
+							<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
+								{formatRangeDate(startDate, locale)}
+							</button>
+
+							<span className="date-sep" aria-hidden="true">
+								-
+							</span>
+
+							<button type="button" className="date-pill" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
+								{formatRangeDate(endDate, locale)}
 							</button>
 						</div>
 					</section>
 
-					{/* 날짜 */}
-					<section className="row row--today">
-						<div className="col">
-							<button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
-								<img className="icon" src="/check-broken.svg" alt="date" />
-								<div className="row-today"><strong>{endDateLabel}</strong></div>
-							</button>
-							<button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set start-end date">
-								{isRangeSelected ? dateRangeLabel : t("schedule_new.dateRange")}
-							</button>
+					{/* 시간: 날짜와 분리 */}
+					<section className="row row--time-toggle">
+						<div className="row-icon">
+							<img className="icon" src="/stopwatch.svg" alt="" />
 						</div>
-						<div className="add-btn-wrapper">
-							<button className="add-date" aria-label="set start-end date" onClick={openFullRangeSheet}>
-								<img className="add" src="/plus-02.svg" alt="" />
-							</button>
-						</div>
+
+						<button
+							type="button"
+							className="time-label-btn"
+							onClick={() => {
+								// UI만 먼저: 토글 ON일 때만 시트 오픈되게(원치 않으면 제거)
+								if (!hasTime && !isAllDay) return;
+								setTimeStep("start");
+								setShowSheet(true);
+							}}
+							aria-label={t("schedule_new.addTime")}
+						>
+							<strong>시간 추가하기</strong>
+						</button>
+
+						<label className="switch" aria-label="toggle time">
+							<input
+								type="checkbox"
+								checked={hasTime || isAllDay}
+								onChange={(e) => {
+									const on = e.target.checked;
+
+									// UI만 먼저: ON이면 일단 기본값 세팅(원치 않으면 이 블록을 비워두셔도 됩니다)
+									if (on) {
+										setIsAllDay(false);
+										if (!startTime) setStartTime("09:00");
+										if (!endTime) setEndTime("10:00");
+									} else {
+										setIsAllDay(false);
+										setStartTime(null);
+										setEndTime(null);
+									}
+								}}
+							/>
+							<span className="switch-slider" />
+						</label>
 					</section>
 
-					{/* 메모추가 */}
+					{/* (선택) 토글 ON일 때만 시간 범위 표시 줄 */}
+					{(hasTime || isAllDay) && (
+						<section className="row row--time-range">
+							<div className="row-icon row-icon--empty" />
+
+							<button
+								type="button"
+								className="time-range-btn"
+								onClick={() => {
+									setTimeStep("start");
+									setShowSheet(true);
+								}}
+								aria-label={t("schedule_new.editTime")}
+							>
+								{isAllDay
+									? t("common.allDay")
+									: `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`}
+							</button>
+						</section>
+					)}
+
+					{/* 반복(1번째 화면처럼 토글 행) */}
+					{/* <section className="row row--repeat">
+						<div className="row-icon">
+							<img className="icon" src="/repeat.svg" alt="" />
+						</div>
+
+						<div className="repeat-label">
+							<strong>반복하기</strong>
+						</div>
+
+						<label className="switch" aria-label="toggle repeat">
+							<input
+								type="checkbox"
+								checked={false}
+								onChange={() => {
+									// 추후 기능 연결
+								}}
+							/>
+							<span className="switch-slider" />
+						</label>
+					</section> */}
+
+					{/* 메모 */}
 					<div className="memo-box">
-						<textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)}/>
+						<textarea
+							className="memo-input"
+							placeholder={t("schedule_new.memoPlaceholder")}
+							aria-label="add memo"
+							value={memo}
+							onChange={(e) => setMemo(e.target.value)}
+						/>
 					</div>
 				</main>
 
