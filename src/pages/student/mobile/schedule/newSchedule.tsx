@@ -603,6 +603,11 @@ export default function NewSchedule() {
 	const [endTime, setEndTime] = React.useState<string | null>(null);
 	const hasTime = startTime !== null && endTime !== null;
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
+	const startTimeLabel = startTime ? displayTimeLabel(startTime, locale) : "09:00 AM";
+	const endTimeLabel = endTime ? displayTimeLabel(endTime, locale) : "10:00 AM";
+
+	const startTimeInputRef = React.useRef<HTMLInputElement | null>(null);
+	const endTimeInputRef = React.useRef<HTMLInputElement | null>(null);
 
 	const [rangeSheetMode, setRangeSheetMode] = React.useState<RangeSheetMode>("range");
 	
@@ -616,6 +621,15 @@ export default function NewSchedule() {
 		setShowDateRangeSheet(true);
 	};
 
+	const openStartTimePicker = () => {
+		startTimeInputRef.current?.showPicker?.();
+		startTimeInputRef.current?.click();
+	};
+
+	const openEndTimePicker = () => {
+		endTimeInputRef.current?.showPicker?.();
+		endTimeInputRef.current?.click();
+	};
 
 	function formatRangeDate(d: Date, locale: string) {
 		if (locale.startsWith("ko")) {
@@ -769,57 +783,60 @@ export default function NewSchedule() {
 							</div>
 						</div>
 
-						{/* 시간 한 줄 */}
+						{/* 시간 */}
 						<div className="schedule-line schedule-line--time">
-							<img className="icon schedule-line--time-icon" src="/schedule_stopwatch.svg" alt="" />
+							<img className="icon schedule-line-icon" src="/stopwatch.svg" alt="" />
 
-							<button
-								type="button"
-								className="time-label-btn"
-								onClick={() => {
-									if (!hasTime && !isAllDay) return;
-									setTimeStep("start");
-									setShowSheet(true);
-								}}
-								aria-label={t("schedule_new.addTime")}
-							>
+							<div className="row-toggle-left">
 								<strong>시간 추가하기</strong>
-							</button>
+							</div>
 
 							<button
 								type="button"
-								className={`switch ${hasTime ? "is-on" : ""}`}
+								className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
 								onClick={() => {
-									if (hasTime) {
+									const on = !(hasTime || isAllDay);
+									if (on) {
+										setIsAllDay(false);
+										if (!startTime) setStartTime("09:00");
+										if (!endTime) setEndTime("10:00");
+									} else {
+										setIsAllDay(false);
 										setStartTime(null);
 										setEndTime(null);
-									} else {
-										setStartTime("09:00");
-										setEndTime("10:00");
 									}
 								}}
-								aria-pressed={hasTime}
-							>
-							</button>
+								aria-pressed={hasTime || isAllDay}
+							/>
 						</div>
 
-						{/* (선택) 토글 ON일 때만 시간 범위 표시 */}
-						{(hasTime || isAllDay) && (
-							<div className="schedule-line schedule-line--time-range">
-								<div className="row-icon row-icon--empty" />
-								<button
-									type="button"
-									className="time-range-btn"
-									onClick={() => {
-										setTimeStep("start");
-										setShowSheet(true);
-									}}
-									aria-label={t("schedule_new.editTime")}
-								>
-									{isAllDay
-										? t("common.allDay")
-										: `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`}
-								</button>
+						{(hasTime || isAllDay) && !isAllDay && (
+							<div className="schedule-line schedule-line--time-pills">
+								<div className="row-icon--empty" />
+
+								<div className="time-inline">
+									<button
+										type="button"
+										className="date-pill"
+										onClick={() => {
+											openStartTimePicker();
+										}}
+									>
+										{startTime ? startTimeLabel : "Start"}
+									</button>
+
+									<span className="date-sep" aria-hidden="true">-</span>
+
+									<button
+										type="button"
+										className="date-pill"
+										onClick={() => {
+											openEndTimePicker();
+										}}
+									>
+										{endTime ? endTimeLabel : "End"}
+									</button>
+								</div>
 							</div>
 						)}
 					</section>
@@ -857,10 +874,61 @@ export default function NewSchedule() {
 						/>
 					</div>
 				</main>
+				
+				<input
+					ref={startTimeInputRef}
+					type="time"
+					value={startTime ?? ""}
+					step={60} 
+					onChange={(e) => {
+						const v = e.target.value;
+						if (!v) return;
+
+						setIsAllDay(false);
+						setStartTime(v);
+
+						if (!endTime) {
+							setEndTime(v);
+						} else {
+							if (endTime < v) setEndTime(v);
+						}
+
+						requestAnimationFrame(() => {
+							openEndTimePicker();
+						});
+					}}
+					style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
+					aria-hidden="true"
+					tabIndex={-1}
+				/>
+
+				<input
+					ref={endTimeInputRef}
+					type="time"
+					value={endTime ?? ""}
+					step={60}
+					min={startTime ?? undefined}
+					onChange={(e) => {
+						const v = e.target.value;
+						if (!v) return;
+
+						if (startTime && v < startTime) {
+							alert(t("error.failSetEndTime"));
+							return;
+						}
+
+						setEndTime(v);
+					}}
+					style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
+					aria-hidden="true"
+					tabIndex={-1}
+				/>
+
 
 				<footer className="footer-fixed">
 					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
 				</footer>
+				
 				{/* 시간 선택 바텀시트 */}
 				{showSheet && (
 					<TimeSheet
