@@ -89,6 +89,8 @@
 
         "deleteFailedWithMessage": "일정을 삭제하지 못했습니다.\n({{message}})",
         "cannotDeleteWithRecording": "녹음 기록이 있는 일정은 삭제할 수 없습니다.",
+        "startDateLockedAfterFirstRecording": "첫 기록이 있는 날짜 이후로는 시작일을 변경할 수 없습니다.",
+        "endDateLockedBeforeRecording": "기록이 있는 날짜 이전으로는 종료일을 변경할 수 없습니다.",
         "cannotDeleteHasRecord": "기록한 일정은 삭제할 수 없습니다.",
         "noPermissionDelete": "일정을 삭제할 권한이 없습니다.",
         "deleteFailWithStatus": "삭제 실패 ({{status}})\n{{body}}"

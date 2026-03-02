@@ -496,6 +496,17 @@ export default function EditSchedule() {
 
 	const [startDate, setStartDate] = React.useState<Date>(() => (passed?.startDate ? ymdToDate(passed.startDate) : new Date()));
 	const [endDate, setEndDate] = React.useState<Date>(() => (passed?.endDate ? ymdToDate(passed.endDate) : new Date()));
+	const isSingleDay = stripTime(startDate).getTime() === stripTime(endDate).getTime();
+	
+	React.useEffect(() => {
+		if (isSingleDay) return;
+
+		setIsAllDay(true);
+		setStartTime(null);
+		setEndTime(null);
+		setShowSheet(false);
+	}, [isSingleDay]);
+
 	React.useEffect(() => {
 		if (!passed?.startDate || !passed?.endDate) return;
 		setStartDate(ymdToDate(passed.startDate));
@@ -604,7 +615,7 @@ export default function EditSchedule() {
 	const handleStartDateChange = (newDate: Date) => {
 		const nd = stripTime(newDate);
 		if (firstRecordedDate && nd > stripTime(firstRecordedDate)) {
-			alert("첫 녹음이 있는 날짜 이후로는 시작일을 변경할 수 없습니다."); // TODO: 언어 치환
+			alert(t("schedule_edit.startDateLockedAfterFirstRecording"));
 			return;
 		}
 		setStartDate(newDate);
@@ -616,7 +627,7 @@ export default function EditSchedule() {
 
 		// 마지막 기록(녹음)일보다 앞당길 수 없음
 		if (lastRecordedDate && nd < stripTime(lastRecordedDate)) {
-			alert("기록이 있는 날짜 이전으로는 마감일을 변경할 수 없습니다."); //TODO: 언어 치환
+			alert(t("schedule_edit.endDateLockedBeforeRecording")); 
 			return;
 		}
 
@@ -632,7 +643,7 @@ export default function EditSchedule() {
 		const sd = stripTime(startDate);
 
 		if (lastRecordedDate && nd < stripTime(lastRecordedDate)) {
-			alert("녹음이 있는 날짜 이전으로는 종료일을 변경할 수 없습니다."); //TODO: 언어 치환
+			alert(t("schedule_edit.endDateLockedBeforeRecording"));
 			setEndDate(lastRecordedDate); 
 			return;
 		}
@@ -685,13 +696,14 @@ export default function EditSchedule() {
 			return;
 		}
 		if (firstRecordedDate && stripTime(startDate) > stripTime(firstRecordedDate)) {
-			alert("첫 녹음이 있는 날짜 이후로는 시작일을 변경할 수 없습니다."); //TODO: 언어 치환
+			alert(t("schedule_edit.startDateLockedAfterFirstRecording")); 
 			return;
 		}
 		if (lastRecordedDate && stripTime(endDate) < stripTime(lastRecordedDate)) {
-			alert("녹음이 있는 날짜 이전으로는 종료일을 변경할 수 없습니다."); //TODO: 언어 치환
+			alert(t("schedule_edit.endDateLockedBeforeRecording")); 
 			return;
 		}
+
 		try {
 			const payload: {
 				title: string;
@@ -714,6 +726,18 @@ export default function EditSchedule() {
 				payload.startTime = toApiHHmmss(startTime);
 				payload.endTime = toApiHHmmss(endTime);
 			}
+
+			if (!isSingleDay) {
+				payload.startTime = "00:00:00";
+				payload.endTime = "23:59:59";
+			} else if (isAllDay) {
+				payload.startTime = "00:00:00";
+				payload.endTime = "23:59:59";
+			} else if (startTime && endTime) {
+				payload.startTime = toApiHHmmss(startTime);
+				payload.endTime = toApiHHmmss(endTime);
+			}
+
 
 			const updatedEventFromServer = await api<any>(`/events/${eventId}`, {
 				method: "PATCH",
@@ -823,59 +847,65 @@ export default function EditSchedule() {
 									</button>
 								</div>
 							</div>
+							
+							{isSingleDay && (
+								<>
+									{/* 시간 토글 */}
+									<div className="schedule-line schedule-line--time">
+										<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
 
-							{/* 시간 토글 */}
-							<div className="schedule-line schedule-line--time">
-								<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
+										<div className="row-toggle-left">
+											<strong>시간 추가하기</strong>
+										</div>
 
-								<div className="row-toggle-left">
-									<strong>시간 추가하기</strong>
-								</div>
+										<button
+											type="button"
+											className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
+											onClick={() => {
+												const on = !(hasTime || isAllDay);
 
-								<button
-									type="button"
-									className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
-									onClick={() => {
-										const on = !(hasTime || isAllDay);
+												if (on) {
+													setIsAllDay(false);
+													if (!startTime) setStartTime("09:00");
+													if (!endTime) setEndTime("10:00");
 
-										if (on) {
-											setIsAllDay(false);
-											if (!startTime) setStartTime("09:00");
-											if (!endTime) setEndTime("10:00");
-
-											requestAnimationFrame(() => {
-												setTimeStep("start");
-												setShowSheet(true);
-											});
-										} else {
-											setIsAllDay(false);
-											setStartTime(null);
-											setEndTime(null);
-										}
-									}}
-									aria-pressed={hasTime || isAllDay}
-								/>
-							</div>
-
-							{/* 시간 pill */}
-							{(hasTime || isAllDay) && !isAllDay && (
-								<div className="schedule-line schedule-line--time-pills">
-									<div className="row-icon--empty" />
-
-									<div className="time-inline">
-										<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
-											{hasTime ? displayTimePillLabelEn(startTime!) : "09:00 AM"}
-										</button>
-
-										<span className="date-sep" aria-hidden="true">
-											-
-										</span>
-
-										<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
-											{hasTime ? displayTimePillLabelEn(endTime!) : "10:00 AM"}
-										</button>
+													requestAnimationFrame(() => {
+														setTimeStep("start");
+														setShowSheet(true);
+													});
+												} else {
+													setIsAllDay(false);
+													setStartTime(null);
+													setEndTime(null);
+												}
+												
+												if (!isSingleDay) return;
+											}}
+											aria-pressed={hasTime || isAllDay}
+										/>
 									</div>
-								</div>
+
+									{/* 시간 pill */}
+									{(hasTime || isAllDay) && !isAllDay && (
+										<div className="schedule-line schedule-line--time-pills">
+											<div className="row-icon--empty" />
+
+											<div className="time-inline">
+												<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
+													{hasTime ? displayTimePillLabelEn(startTime!) : "09:00 AM"}
+												</button>
+
+												<span className="date-sep" aria-hidden="true">
+													-
+												</span>
+
+												<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
+													{hasTime ? displayTimePillLabelEn(endTime!) : "10:00 AM"}
+												</button>
+											</div>
+										</div>
+									)}
+								</>
 							)}
 						</section>
 

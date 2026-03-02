@@ -90,6 +90,8 @@
 		"deleteFailedWithMessage": "Failed to delete the schedule.\n({{message}})",
 		"cannotDeleteWithRecording": "Schedules with recordings cannot be deleted.",
 		"cannotDeleteHasRecord": "Schedules with saved records cannot be deleted.",
+		"startDateLockedAfterFirstRecording": "The start date cannot be changed after the first recording date.",
+        "endDateLockedBeforeRecording": "The end date cannot be changed to a date earlier than any existing recording.",
 		"noPermissionDelete": "You don't have permission to delete this event.",
 		"deleteFailWithStatus": "Delete failed ({{status}})\n{{body}}"
 	},

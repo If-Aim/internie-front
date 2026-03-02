@@ -455,6 +455,16 @@ export default function NewSchedule() {
 
 	const [startDate, setStartDate] = React.useState<Date>(() => new Date());
 	const [endDate, setEndDate] = React.useState<Date>(() => new Date());
+	const isSingleDay = stripTime(startDate).getTime() === stripTime(endDate).getTime();
+
+	React.useEffect(() => {
+		if (isSingleDay) return;
+
+		setIsAllDay(true);
+		setStartTime(null);
+		setEndTime(null);
+		setShowSheet(false);
+	}, [isSingleDay]);
 
 	const [startTime, setStartTime] = React.useState<string | null>(null);
 	const [endTime, setEndTime] = React.useState<string | null>(null);
@@ -597,7 +607,18 @@ export default function NewSchedule() {
 			payload.startTime = toApiHHmmss(startTime);
 			payload.endTime = toApiHHmmss(endTime);
 		}
-		
+
+		if (!isSingleDay) {
+			payload.startTime = "00:00:00";
+			payload.endTime = "23:59:59";
+		} else if (isAllDay) {
+			payload.startTime = "00:00:00";
+			payload.endTime = "23:59:59";
+		} else if (startTime && endTime) {
+			payload.startTime = toApiHHmmss(startTime);
+			payload.endTime = toApiHHmmss(endTime);
+		}
+
 		try {
 			await api(`/events`, {
 				method: "POST",
@@ -647,51 +668,58 @@ export default function NewSchedule() {
 								</button>
 							</div>
 						</div>
+						
 
-						{/* 시간 */}
-						<div className="schedule-line schedule-line--time">
-							<img className="icon schedule-line-icon--time" src="/schedule_stopwatch.svg" alt="" />
+						{isSingleDay && (
+							<>
+								{/* 시간 */}
+								<div className="schedule-line schedule-line--time">
+									<img className="icon schedule-line-icon--time" src="/schedule_stopwatch.svg" alt="" />
 
-							<div className="row-toggle-left">
-								<strong>시간 추가하기</strong>
-							</div>
+									<div className="row-toggle-left">
+										<strong>시간 추가하기</strong>
+									</div>
 
-							<button
-								type="button"
-								className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
-								onClick={() => {
-									const on = !(hasTime || isAllDay);
-									if (on) {
-										setIsAllDay(false);
-										if (!startTime) setStartTime("09:00");
-										if (!endTime) setEndTime("10:00");
-										
-									} else {
-										setIsAllDay(false);
-										setStartTime(null);
-										setEndTime(null);
-									}
-								}}
-								aria-pressed={hasTime || isAllDay}
-							/>
-						</div>
-
-						{(hasTime || isAllDay) && !isAllDay && (
-							<div className="schedule-line schedule-line--time-pills">
-								<div className="row-icon--empty" />
-
-								<div className="time-inline">
-									<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
-										{startTime ? startTimeLabel : "Start"}
-									</button>
-
-									<span className="date-sep" aria-hidden="true">-</span>
-
-									<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
-										{endTime ? endTimeLabel : "End"}
-									</button>
+									<button
+										type="button"
+										className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
+										onClick={() => {
+											const on = !(hasTime || isAllDay);
+											if (on) {
+												setIsAllDay(false);
+												if (!startTime) setStartTime("09:00");
+												if (!endTime) setEndTime("10:00");
+												
+											} else {
+												setIsAllDay(false);
+												setStartTime(null);
+												setEndTime(null);
+											}
+											
+											if (!isSingleDay) return;
+										}}
+										aria-pressed={hasTime || isAllDay}
+									/>
 								</div>
-							</div>
+
+								{(hasTime || isAllDay) && !isAllDay && (
+									<div className="schedule-line schedule-line--time-pills">
+										<div className="row-icon--empty" />
+
+										<div className="time-inline">
+											<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
+												{startTime ? startTimeLabel : "Start"}
+											</button>
+
+											<span className="date-sep" aria-hidden="true">-</span>
+
+											<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
+												{endTime ? endTimeLabel : "End"}
+											</button>
+										</div>
+									</div>
+								)}
+							</>
 						)}
 					</section>
 
@@ -719,13 +747,7 @@ export default function NewSchedule() {
 
 					{/* 메모 */}
 					<div className="memo-box">
-						<textarea
-							className="memo-input"
-							placeholder={t("schedule_new.memoPlaceholder")}
-							aria-label="add memo"
-							value={memo}
-							onChange={(e) => setMemo(e.target.value)}
-						/>
+						<textarea className="memo-input" placeholder={t("schedule_new.memoPlaceholder")} aria-label="add memo" value={memo} onChange={(e) => setMemo(e.target.value)} />
 					</div>
 				</main>
 				
