@@ -824,7 +824,7 @@ export default function NewSchedule() {
 								<div className="time-inline">
 									<button
 										type="button"
-										className="date-pill"
+										className="time-pill"
 										onClick={() => {
 											openStartTimePicker();
 										}}
@@ -836,7 +836,7 @@ export default function NewSchedule() {
 
 									<button
 										type="button"
-										className="date-pill"
+										className="time-pill"
 										onClick={() => {
 											openEndTimePicker();
 										}}
