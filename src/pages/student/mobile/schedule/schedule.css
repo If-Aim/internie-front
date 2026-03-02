@@ -176,11 +176,13 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 .schedule-line-icon {padding: 0 2px;}
 .date-sheet-body {padding: 16px 4px 8px;display: flex;justify-content: center;}
 .date-input {width: 100%;max-width: 260px;font-size: 16px;padding: 8px 10px;border-radius: 10px;border: 1px solid #d3d7e3;}
-.date-inline { display: flex; align-items: center; gap: 21px; }
+.date-inline { width: 100%; display: flex; align-items: center; gap: 21px; }
 .row-head-btn{border:0;background:transparent;padding:0;display:flex;align-items:center;gap:15px;width:100%;text-align:left;cursor:pointer;}
-.date-pill { border: 0; height:36px; width: 96px; background: #F1F1F1; font-size: 16px; font-weight: 500; color: #808080; line-height: 20px; border-radius: 18px; padding: 8px 16px; }
+.date-pill { border: 0; height:36px; width: 100%; min-width: 96px; background: #F1F1F1; font-size: 16px; font-weight: 500; color: #808080; line-height: 20px; border-radius: 18px; padding: 8px 16px; }
 .date-sep { line-height:22px; font-size: 16px; color: #808080; font-weight: 500;}
 
+/* 시간 설정 */
+.time-label-btn { border: none; background: transparent; line-height: 22px; font-size: 16px; font-weight: 500; color: #000; }
 
 /*달력*/
 .sheet-card--date{position: fixed;left: 0;right: 0;bottom: 0;width: 100%;max-width: 100%;
