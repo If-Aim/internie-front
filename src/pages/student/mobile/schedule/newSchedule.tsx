@@ -802,7 +802,7 @@ export default function NewSchedule() {
 
 						{/* 시간 */}
 						<div className="schedule-line schedule-line--time">
-							<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
+							<img className="icon schedule-line-icon--time" src="/schedule_stopwatch.svg" alt="" />
 
 							<div className="row-toggle-left">
 								<strong>시간 추가하기</strong>

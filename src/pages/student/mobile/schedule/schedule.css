@@ -182,6 +182,8 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 .date-sep { line-height:22px; font-size: 16px; color: #808080; font-weight: 500;}
 
 /* 시간 설정 */
+.schedule-line-icon--time {width: 18px; height: auto;}
+.row-icon--empty { width: 18px;}
 .time-label-btn { border: none; background: transparent; line-height: 22px; font-size: 16px; font-weight: 500; color: #000; }
 .time-inline { width: 100%; display: flex; align-items: center; gap: 21px; }
 .time-pill { border: 0; height:36px; width: 100%; min-width: 96px; background: #F1F1F1; font-size: 16px; font-weight: 500; color: #808080; line-height: 20px; border-radius: 18px; padding: 8px 10px; }
