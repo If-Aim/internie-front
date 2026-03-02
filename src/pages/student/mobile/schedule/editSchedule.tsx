@@ -8,7 +8,6 @@ import { api, ApiError, deleteEvent, deleteEventDay } from "../../../../api/clie
 import "./schedule.css";
 
 type Stage = "form" | "outro";
-type TimeWheelVariant = "sheet" | "calendar";
 
 type EditState =
 | 	{
@@ -55,46 +54,6 @@ function displayTimeLabel(hhmm: string, locale: string) {
 	}).format(d);
 }
 
-function displayTimeWheelLabel(hhmm: string, locale: string) {
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(2000, 0, 1, hh, mm, 0);
-
-	if (locale.startsWith("ko")) {
-		return (
-			new Intl.DateTimeFormat("ko-KR", { hour: "numeric", hour12: true })
-				.formatToParts(d)
-				.filter((p) => p.type === "hour")
-				.map((p) => p.value)
-				.join("")
-				.trim() + "시"
-		);
-	}
-
-	return new Intl.DateTimeFormat("en-US", {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true,
-	})
-		.formatToParts(d)
-		.filter((p) => p.type !== "dayPeriod")
-		.map((p) => p.value)
-		.join("")
-		.trim();
-}
-
-function getDayPeriodLabel(hhmm: string | null, locale: string) {
-	if (!hhmm) return "";
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(2000, 0, 1, hh, mm, 0);
-
-	const parts = new Intl.DateTimeFormat(locale, {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true,
-	}).formatToParts(d);
-
-	return parts.find((p) => p.type === "dayPeriod")?.value ?? "";
-}
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 function toYmd(date: Date): string {
@@ -172,101 +131,6 @@ function monthRange(start: Date, end: Date) {
 		cur.setMonth(cur.getMonth() + 1);
 	}
 	return out;
-}
-// 달력 내 시간 부분
-function TimeWheel({
-	value,
-	onChange,
-	variant = "sheet",
-}: {
-	value: string | null;
-	onChange: (t: string | null) => void;
-	variant?: TimeWheelVariant;
-}) {
-	const { i18n } = useTranslation();
-	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-	const selectedPeriod =
-		value ? getDayPeriodLabel(value, locale) : (locale.startsWith("ko") ? "오후" : "PM");
-
-	const rowRef = React.useRef<HTMLDivElement | null>(null);
-	const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-	const rafRef = React.useRef<number | null>(null);
-
-	const [opacities, setOpacities] = React.useState<number[]>(
-		() => Array.from({ length: TIME_OPTIONS.length }, () => 1)
-	);
-	const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
-
-	const computeOpacities = React.useCallback(() => {
-		const row = rowRef.current;
-		if (!row) return;
-		const left = row.scrollLeft;
-		const startOffset = 40;
-		const fadeWidth = 140;
-
-		const next = TIME_OPTIONS.map((_, idx) => {
-			const el = itemRefs.current[idx];
-			if (!el) return 1;
-
-			const itemLeft = el.offsetLeft;
-			const itemRight = itemLeft + el.offsetWidth;
-			const distanceFromLeftEdge = itemRight - left;
-
-			const raw = (distanceFromLeftEdge - startOffset) / fadeWidth;
-			const t = clamp(raw, 0, 1);
-			const eased = t * t * (3 - 2 * t);
-
-			const minO = 0.12;
-			const maxO = 1.0;
-			return minO + (maxO - minO) * eased;
-		});
-
-		setOpacities(next);
-	}, []);
-
-	const onScroll = React.useCallback(() => {
-		if (rafRef.current) cancelAnimationFrame(rafRef.current);
-		rafRef.current = requestAnimationFrame(() => {
-			computeOpacities();
-			rafRef.current = null;
-		});
-	}, [computeOpacities]);
-
-	React.useEffect(() => {
-		computeOpacities();
-		return () => {
-			if (rafRef.current) cancelAnimationFrame(rafRef.current);
-		};
-	}, [computeOpacities]);
-
-	return (
-		<div className="timewheel">
-			{variant === "calendar" && <div className="timewheel-period">{selectedPeriod}</div>}
-
-			<div ref={rowRef} className="timewheel-row" role="listbox" aria-label="set time" onScroll={onScroll} >
-				{TIME_OPTIONS.map((opt, idx) => {
-					const isSelected = opt === value;
-					return (
-						<button
-							key={opt}
-							ref={(el) => {
-								itemRefs.current[idx] = el;
-							}}
-							type="button"
-							className={"timewheel-item" + (isSelected ? " is-selected" : "")}
-							style={{ opacity: isSelected ? 1 : opacities[idx] }}
-							onClick={() => {
-								onChange(opt);
-								requestAnimationFrame(computeOpacities);
-							}}
-						>
-							{displayTimeWheelLabel(opt, locale)}
-						</button>
-					);
-				})}
-			</div>
-		</div>
-	);
 }
 
 type TimeSheetProps = {
@@ -388,9 +252,6 @@ type DateRangeSheetProps = {
 	onChangeStart: (d: Date) => void;
 	onChangeEnd: (d: Date) => void;
 
-	startTime: string | null;
-	onChangeStartTime: (t: string | null) => void;
-
 	onClose: () => void;
 };
 
@@ -400,8 +261,6 @@ function DateRangeSheet({
 	endDate,
 	onChangeStart,
 	onChangeEnd,
-	startTime,
-	onChangeStartTime,
 	onClose,
 }: DateRangeSheetProps) {
 	const { t } = useTranslation();
@@ -437,12 +296,6 @@ function DateRangeSheet({
 						onWeeksChange={setWeeks}
 						resetKey={resetKey}
 					/>
-
-					<div className="date-range-time date-range-time--single">
-						<div className="date-range-time-col">
-							<TimeWheel value={startTime} onChange={onChangeStartTime} />
-						</div>
-					</div>
 				</div>
 
 				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
@@ -659,7 +512,7 @@ export default function EditSchedule() {
 		initialAllDay ? null :
 		passed?.endTime ? passed.endTime.slice(0, 5) : null
 	);
-	
+
 	const hasTime = startTime !== null && endTime !== null;
 
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
@@ -1072,15 +925,6 @@ export default function EditSchedule() {
 							endDate={endDate}
 							onChangeStart={handleStartDateChange}
 							onChangeEnd={rangeSheetMode === "range" ? handleEndDateChangeForRange : handleEndDateChange}
-							startTime={startTime}
-							onChangeStartTime={(t) => {
-								if (t) {
-									setIsAllDay(false);
-									handleStartTimeChange(t);
-								} else {
-									setStartTime(null);
-								}
-							}}
 							onClose={() => setShowDateRangeSheet(false)}
 						/>
 					)}
