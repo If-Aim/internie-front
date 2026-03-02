@@ -104,8 +104,8 @@ appearance: none;
 
 /* 토글 body(열렸을 때 아래 영역) */
 .row-toggle-body { width: 100%; margin-top: 12px; }
-.switch { width: 52px; height: 30px; border-radius: 999px; border: 0; background: #d7dbe3; position: relative; cursor: pointer; flex-shrink: 0; margin-left: auto;}
-.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 999px; background: #ffffff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18); transition: transform 160ms ease; }
+.switch { width: 48px; height: 28px; border-radius: 25px; border: 0; background: #F1F1F1; position: relative; cursor: pointer; flex-shrink: 0; margin-left: auto;}
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 999px; background: #ffffff; transition: transform 160ms ease; }
 .switch.is-on { background: var(--primary); }
 .switch.is-on::after { transform: translateX(22px); }
 .switch:active::after { transform: translateX(0); }
@@ -140,10 +140,6 @@ height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #ddd; back
 .memo-input {width: 100%;min-height: 120px;resize: none;border: none;outline: none;background: transparent;
 font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pretendard, sans-serif;}
 .memo-input::placeholder {color: #b7bcc6;}
-
-/* 선택/포커스 상태용 유틸 */
-.is-active{outline:2px solid rgba(20,99,255,.2)}
-[role="button"], button, .iconbtn, .chev{transition:transform .05s ease, box-shadow .15s ease, background-color .15s ease;}
 
 /* 하단 저장하기 버튼 */
 .footer-fixed{position:fixed;left:0;right:0;bottom:0;padding:20px 20px 53px;background:linear-gradient(180deg, transparent, rgba(246,248,251,.9));}
