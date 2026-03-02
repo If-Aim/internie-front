@@ -111,6 +111,18 @@ function ymdToDate(ymd: string): Date {
 const stripTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const getTimeIndex = (t: string | null) => (t ? TIME_OPTIONS.indexOf(t) : -1);
 
+function displayTimePillLabelEn(hhmm: string) {
+    const [hh, mm] = hhmm.split(":").map(Number);
+    const d = new Date(2000, 0, 1, hh, mm, 0);
+
+    return new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    }).format(d);
+}
+
+
 // 날짜 관련
 function isSameDay(a: Date, b: Date) {
 	return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -639,11 +651,15 @@ export default function EditSchedule() {
 	}, [passed?.startDate, passed?.endDate]);
 	
 	const [startTime, setStartTime] = React.useState<string | null>(() =>
+		initialAllDay ? null :
 		passed?.startTime ? passed.startTime.slice(0, 5) : null
 	);
+
 	const [endTime, setEndTime] = React.useState<string | null>(() =>
+		initialAllDay ? null :
 		passed?.endTime ? passed.endTime.slice(0, 5) : null
 	);
+	
 	const hasTime = startTime !== null && endTime !== null;
 
 	const [showDateRangeSheet, setShowDateRangeSheet] = React.useState(false);
@@ -724,18 +740,7 @@ export default function EditSchedule() {
 		setRangeSheetMode("endOnly");
 		setShowDateRangeSheet(true);
 	};
-	const openFullRangeSheet = () => {
-		setRangeSheetMode("range");
-		setShowDateRangeSheet(true);
-	};
 
-	const formatFullDate = React.useCallback((d: Date) => {
-		return new Intl.DateTimeFormat(locale, {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-		}).format(d);
-	}, [locale]);
 
 	function formatRangeDate(d: Date, locale: string) {
 		if (locale.startsWith("ko")) {
@@ -743,14 +748,6 @@ export default function EditSchedule() {
 		}
 		return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(d);
 	}
-	function getRangeSeparator(locale: string) {
-		return locale.startsWith("ko") ? " ~ " : " - ";
-	}
-
-	const startDateLabel = formatFullDate(startDate);
-	const endDateLabel = formatFullDate(endDate);
-	const dateRangeLabel = `${formatRangeDate(startDate, locale)}${getRangeSeparator(locale)}${formatRangeDate(endDate, locale)}`;
-	const isRangeSelected = stripTime(startDate).getTime() !== stripTime(endDate).getTime();
 
 	const handleStartDateChange = (newDate: Date) => {
 		const nd = stripTime(newDate);
@@ -955,66 +952,79 @@ export default function EditSchedule() {
 
 					<main className="new-event">
 						<input className="title-input" placeholder={t("schedule_edit.titlePlaceholder")} aria-label="Schedule Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-						<section className="row">
-							<div className="col">
-								<button type="button" className="row-head row-head-btn" onClick={openStartOnlyRangeSheet} aria-label="" >
-								<img className="icon" src="/clock-01.svg" alt="" />
-									<div className="row-today">
-										<strong>{startDateLabel}</strong>
-									</div>
-								</button>
+						<section className="schedule-card schedule-card--datetime">
+							{/* 기간 */}
+							<div className="schedule-line schedule-line--date">
+								<img className="icon schedule-line-icon" src="/clock-01.svg" alt="" />
+
+								<div className="date-inline">
+									<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
+										{formatRangeDate(startDate, locale)}
+									</button>
+
+									<span className="date-sep" aria-hidden="true">
+										-
+									</span>
+
+									<button type="button" className="date-pill" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
+										{formatRangeDate(endDate, locale)}
+									</button>
+								</div>
+							</div>
+
+							{/* 시간 토글 */}
+							<div className="schedule-line schedule-line--time">
+								<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
+
+								<div className="row-toggle-left">
+									<strong>시간 추가하기</strong>
+								</div>
 
 								<button
 									type="button"
-									className="row-sub row-sub-btn"
+									className={`switch ${(hasTime || isAllDay) ? "is-on" : ""}`}
 									onClick={() => {
-										setTimeStep("start");
-										setShowSheet(true);
+										const on = !(hasTime || isAllDay);
+
+										if (on) {
+											setIsAllDay(false);
+											if (!startTime) setStartTime("09:00");
+											if (!endTime) setEndTime("10:00");
+
+											requestAnimationFrame(() => {
+												setTimeStep("start");
+												setShowSheet(true);
+											});
+										} else {
+											setIsAllDay(false);
+											setStartTime(null);
+											setEndTime(null);
+										}
 									}}
-									aria-label={hasTime ? t("schedule_edit.editTime") : t("schedule_edit.addTime")}
-								>
-								{isAllDay
-									? t("common.allDay")
-									: hasTime
-									? `${displayTimeLabel(startTime!, locale)} ~ ${displayTimeLabel(endTime!, locale)}`
-									: t("schedule_new.addTime")}
-								</button>
+									aria-pressed={hasTime || isAllDay}
+								/>
 							</div>
 
-							<div className="add-btn-wrapper">
-								<button
-									className="add-date"
-									aria-label={hasTime ? t("schedule_edit.editTime") : t("schedule_edit.addTime")}
-									onClick={() => {
-										setTimeStep("start");
-										setShowSheet(true);
-									}}
-								>
-									<img className="add" src="/plus-02.svg" alt="" />
-								</button>
-							</div>
-						</section>
+							{/* 시간 pill */}
+							{(hasTime || isAllDay) && !isAllDay && (
+								<div className="schedule-line schedule-line--time-pills">
+									<div className="row-icon--empty" />
 
-						{/* 마감일 + 범위 */}
-						<section className="row row--today">
-							<div className="col">
-								<button type="button" className="row-head row-head-btn" onClick={openEndOnlyRangeSheet} aria-label="set date range" >
-								<img className="icon" src="/check-broken.svg" alt="" />
-									<div className="row-today">
-										<strong>{endDateLabel}</strong>
+									<div className="time-inline">
+										<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
+											{hasTime ? displayTimePillLabelEn(startTime!) : "09:00 AM"}
+										</button>
+
+										<span className="date-sep" aria-hidden="true">
+											-
+										</span>
+
+										<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
+											{hasTime ? displayTimePillLabelEn(endTime!) : "10:00 AM"}
+										</button>
 									</div>
-								</button>
-
-								<button type="button" className="row-sub row-sub-btn" onClick={openFullRangeSheet} aria-label="set date range">
-									{isRangeSelected ? dateRangeLabel : t("schedule_edit.dateRange")}
-								</button>
-							</div>
-
-							<div className="add-btn-wrapper">
-								<button className="add-date" aria-label="set date range" onClick={openFullRangeSheet}>
-									<img className="add" src="/plus-02.svg" alt="" />
-								</button>
-							</div>
+								</div>
+							)}
 						</section>
 
 						{/* 메모 */}
