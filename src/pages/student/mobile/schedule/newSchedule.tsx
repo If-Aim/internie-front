@@ -500,6 +500,15 @@ export default function NewSchedule() {
 				mode: repeatMode,
 				weekdaysMon0: repeatMode === "WEEKLY" ? repeatWeekdays : undefined,
 			});
+			
+			console.log("[repeat debug]", {
+				enableRepeat,
+				repeatMode,
+				repeatWeekdays,
+				startDate: toYmd(startDate),
+				repeatUntil: toYmd(repeatUntil),
+				repeatDates: repeatDates.map(toYmd),
+			});
 
 			if (repeatDates.length === 0) {
 				alert("반복 요일을 선택해주세요."); // TODO: 언어 변경 토글
