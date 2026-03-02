@@ -159,37 +159,38 @@ export async function logout(): Promise<void> {
 
 // 업로드용 API
 export async function apiUpload<T = unknown>(
-	path: string,
-	formData: FormData,
-	init: RequestInit = {}
+    path: string,
+    formData: FormData,
+    init: RequestInit = {}
 ): Promise<T> {
-	const res = await requestWithAutoRefresh(
-		path,
-		{
-			...init,
-			method: init.method ?? "POST",
-			body: formData,
-			headers: {
-				...(init.headers as Record<string, string> | undefined),
-				...getAuthHeader(),
-			},
-		}, { expectJson: false }
-	);
+    const res = await requestWithAutoRefresh(
+        path,
+        {
+            ...init,
+            method: init.method ?? "POST",
+            body: formData,
+            headers: {
+                ...(init.headers as Record<string, string> | undefined),
+                ...getAuthHeader(),
+            },
+        },
+        { expectJson: false }
+    );
 
-	if (res.status === 204) return undefined as T;
+    if (res.status === 204) return undefined as T;
 
-	if (!res.ok) {
-		const bodyText = await res.text().catch(() => "");
-		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-	}
-
-    const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("application/json")) {
+    if (!res.ok) {
         const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
     }
 
-	return (await res.json()) as T;
+    const ct = res.headers.get("content-type") ?? "";
+
+    if (ct.includes("application/json")) {
+        return (await res.json()) as T;
+    }
+
+    return (await res.text()) as unknown as T;
 }
 
 // 맞춤 질문 조회
