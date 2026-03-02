@@ -235,21 +235,17 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 .cal-day.is-start,.cal-day.is-end{background: #0B5CFF;color: #fff;opacity: 1;}
 .cal-range-hint{margin-top: 10px;font-size: 14px;opacity: .55;text-align:center;}
 
-
 /* 달력 안 시간 선택부분 - 추후 삭제*/
 .date-range-time-label{font-size: 12px;}
 
 /* 확인 버튼 */
-.sheet-card--date .sheet-confirm{width: calc(100% - 40px);margin: 60px 20px 45px;}
+.sheet-card--date .sheet-confirm{width: calc(100% - 40px);margin: 60px 20px 53px;}
 
-/*일정 수정화면 스크롤 공간*/
+/* 일정 수정화면 스크롤 공간 */
 .bottom-spacer-schedule{height:150px;}
-
-.outro {display: flex;flex-direction: column;align-items: center;
-justify-content: center;text-align: center;height: 100vh; width: 100%;}
+.outro {display: flex;flex-direction: column;align-items: center; justify-content: center;text-align: center;height: 100vh; width: 100%;}
 .outro-img{width: 119px;}
-.outro-text {color: #000;font-size: 16px;font-weight: 500;line-height: 30px;
-word-wrap: break-word;text-align: center;width: 100%;margin-top: 40px;}
+.outro-text {color: #000;font-size: 16px;font-weight: 500;line-height: 30px; word-wrap: break-word;text-align: center;width: 100%;margin-top: 40px;}
 
 /* detailSchedule */
 .detail-screen{height: 100dvh;background: var(--bg);display: flex;flex-direction: column;overflow-y:auto;}
