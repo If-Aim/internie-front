@@ -173,9 +173,14 @@ font-size: 14px;line-height: 20px;color: #AEAEAE;font-weight:500;font-family: Pr
 
 
 /*날짜 선택*/
+.schedule-line-icon {padding: 0 2px;}
 .date-sheet-body {padding: 16px 4px 8px;display: flex;justify-content: center;}
 .date-input {width: 100%;max-width: 260px;font-size: 16px;padding: 8px 10px;border-radius: 10px;border: 1px solid #d3d7e3;}
 .row-head-btn{border:0;background:transparent;padding:0;display:flex;align-items:center;gap:15px;width:100%;text-align:left;cursor:pointer;}
+.date-pill { border: 0; height:36px; width: 96px; background: #F1F1F1; font-size: 16px; font-weight: 500; color: #808080; line-height: 20px; border-radius: 18px; padding: 8px 16px; }
+.date-sep { line-height:22px; font-size: 16px; color: #808080; margin: 0 21px; font-weight: 500;}
+
+
 /*달력*/
 .sheet-card--date{position: fixed;left: 0;right: 0;bottom: 0;width: 100%;max-width: 100%;
 background: #fff; border-radius: 24px 24px 0 0;overflow: hidden;
@@ -224,7 +229,7 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 .cal-range-hint{margin-top: 10px;font-size: 14px;opacity: .55;text-align:center;}
 
 
-/*달력 안 시간 선택부분*/
+/* 달력 안 시간 선택부분 - 추후 삭제*/
 .date-range-time-label{font-size: 12px;}
 .timewheel{padding: 15px 18px 12px;}
 .timewheel-period{text-align: center;font-size: 14px;font-weight: 500;margin: 0 0 10px;color:#AEAEAE;}
@@ -234,6 +239,7 @@ height: 100%;width: min(72px, 100%);background: rgba(1, 102, 255, 0.20);border-r
 .timewheel-item{flex: 0 0 auto;min-width: 73px;height: 73px;border: 0;background: transparent;font-size: 16px;font-weight: 700;cursor: pointer;color:#000;}
 .timewheel-item.is-selected{background: #0166FF;color: #fff;opacity: 1;width: 73px;height: 73px;border-radius: 9px;}
 .timewheel-item.is-left-edge{color: #000000;opacity: 0.5;}
+
 /* 확인 버튼 */
 .sheet-card--date .sheet-confirm{width: calc(100% - 40px);margin: 10px 20px 45px;}
 
@@ -286,7 +292,7 @@ padding-top: var(--shadow-pad);padding-bottom: var(--shadow-pad);}
 /**
 * 일정 추가 스타일 변경점
 */
-.schedule-card--datetime { background: #ffffff; border-radius: 16px; padding: 14px 16px; }
-.schedule-line { display: flex; align-items: center; gap: 12px; }
-.schedule-line + .schedule-line { margin-top: 12px; }
+.schedule-card--datetime { background: #ffffff; border-radius: 10px; padding: 16px 21px; }
+.schedule-line { display: flex; align-items: center; gap: 16px; }
+.schedule-line + .schedule-line { margin-top: 19px; }
 .schedule-line--time-range { padding-left: 0; }

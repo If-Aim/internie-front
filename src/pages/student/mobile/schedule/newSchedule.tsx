@@ -771,7 +771,7 @@ export default function NewSchedule() {
 
 						{/* 시간 한 줄 */}
 						<div className="schedule-line schedule-line--time">
-							<img className="icon" src="/schedule_stopwatch.svg" alt="" />
+							<img className="icon schedule-line--time-icon" src="/schedule_stopwatch.svg" alt="" />
 
 							<button
 								type="button"
