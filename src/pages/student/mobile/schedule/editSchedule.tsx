@@ -374,7 +374,6 @@ function CalendarRange({
 			const sTime = s.getTime();
 
 			if (pTime < sTime) {
-				alert(t("error.failSetEndDate"));
 				onChangeStart(picked); 
 				onChangeEnd(picked); 
 				return;
