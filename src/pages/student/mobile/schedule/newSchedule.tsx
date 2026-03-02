@@ -622,13 +622,19 @@ export default function NewSchedule() {
 	};
 
 	const openStartTimePicker = () => {
-		startTimeInputRef.current?.showPicker?.();
-		startTimeInputRef.current?.click();
+		const el = startTimeInputRef.current;
+		if (!el) return;
+
+		el.focus();
+		el.click();
 	};
 
 	const openEndTimePicker = () => {
-		endTimeInputRef.current?.showPicker?.();
-		endTimeInputRef.current?.click();
+		const el = endTimeInputRef.current;
+		if (!el) return;
+
+		el.focus();
+		el.click();
 	};
 
 	function formatRangeDate(d: Date, locale: string) {
@@ -800,6 +806,10 @@ export default function NewSchedule() {
 										setIsAllDay(false);
 										if (!startTime) setStartTime("09:00");
 										if (!endTime) setEndTime("10:00");
+
+										requestAnimationFrame(() => {
+											openStartTimePicker();
+										});
 									} else {
 										setIsAllDay(false);
 										setStartTime(null);
@@ -897,7 +907,7 @@ export default function NewSchedule() {
 							openEndTimePicker();
 						});
 					}}
-					style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
+					style={{ position: "fixed", left: "-10000px", top: "0px", opacity: 0, pointerEvents: "none", width: "1px", height: "1px" }}
 					aria-hidden="true"
 					tabIndex={-1}
 				/>
