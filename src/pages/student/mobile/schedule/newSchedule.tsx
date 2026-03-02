@@ -806,10 +806,7 @@ export default function NewSchedule() {
 										setIsAllDay(false);
 										if (!startTime) setStartTime("09:00");
 										if (!endTime) setEndTime("10:00");
-
-										requestAnimationFrame(() => {
-											openStartTimePicker();
-										});
+										
 									} else {
 										setIsAllDay(false);
 										setStartTime(null);
