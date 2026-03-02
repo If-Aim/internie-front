@@ -752,7 +752,7 @@ export default function NewSchedule() {
 					<section className="schedule-card schedule-card--datetime">
 						{/* 기간 */}
 						<div className="schedule-line schedule-line--date">
-							<img className="icon schedule-line-icon" src="/clock-01.svg" alt="" />
+							<img className="icon schedule-line-icon" src="/schedule_clock.svg" alt="" />
 
 							<div className="date-inline">
 								<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
@@ -786,26 +786,21 @@ export default function NewSchedule() {
 								<strong>시간 추가하기</strong>
 							</button>
 
-							<label className="switch" aria-label="toggle time">
-								<input
-									type="checkbox"
-									checked={hasTime || isAllDay}
-									onChange={(e) => {
-										const on = e.target.checked;
-
-										if (on) {
-											setIsAllDay(false);
-											if (!startTime) setStartTime("09:00");
-											if (!endTime) setEndTime("10:00");
-										} else {
-											setIsAllDay(false);
-											setStartTime(null);
-											setEndTime(null);
-										}
-									}}
-								/>
-								<span className="switch-slider" />
-							</label>
+							<button
+								type="button"
+								className={`switch ${hasTime ? "is-on" : ""}`}
+								onClick={() => {
+									if (hasTime) {
+										setStartTime(null);
+										setEndTime(null);
+									} else {
+										setStartTime("09:00");
+										setEndTime("10:00");
+									}
+								}}
+								aria-pressed={hasTime}
+							>
+							</button>
 						</div>
 
 						{/* (선택) 토글 ON일 때만 시간 범위 표시 */}
