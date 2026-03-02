@@ -58,6 +58,13 @@ function getWeekdayMon0(d: Date): number {
     return (js + 6) % 7;
 }
 
+function buildDefaultWeekdays(start: Date): boolean[] {
+    const wd = getWeekdayMon0(start); 
+    const base = [false, false, false, false, false, false, false];
+    base[wd] = true;
+    return base;
+}
+
 function getMonthGrid(base: Date) {
 	const year = base.getFullYear();
 	const month = base.getMonth();
@@ -710,12 +717,11 @@ export default function NewSchedule() {
 												return c.getTime() < s.getTime() ? s : c;
 											});
 
-											if (repeatMode === "WEEKLY" && !repeatWeekdays.some(Boolean)) {
-												const wd = getWeekdayMon0(startDate);
-												const base = [false, false, false, false, false, false, false];
-												base[wd] = true;
-												setRepeatWeekdays(base);
+											if (repeatMode === "WEEKLY") {
+												setRepeatWeekdays(buildDefaultWeekdays(startDate));
 											}
+										} else {
+											setRepeatWeekdays([false, false, false, false, false, false, false]);
 										}
 
 										return next;
@@ -736,11 +742,8 @@ export default function NewSchedule() {
 											const v = e.target.value as RepeatMode;
 											setRepeatMode(v);
 
-											if (v === "WEEKLY" && !repeatWeekdays.some(Boolean)) {
-												const wd = getWeekdayMon0(startDate);
-												const base = [false, false, false, false, false, false, false];
-												base[wd] = true;
-												setRepeatWeekdays(base);
+											if (v === "WEEKLY") {
+												setRepeatWeekdays(buildDefaultWeekdays(startDate));
 											}
 										}}
                                     >
