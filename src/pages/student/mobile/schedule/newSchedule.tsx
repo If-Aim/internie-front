@@ -752,9 +752,7 @@ export default function NewSchedule() {
 					<section className="schedule-card schedule-card--datetime">
 						{/* 기간 */}
 						<div className="schedule-line schedule-line--date">
-							<div className="row-icon">
-								<img className="icon" src="/clock-01.svg" alt="" />
-							</div>
+							<img className="icon schedule-line-icon" src="/clock-01.svg" alt="" />
 
 							<div className="date-inline">
 								<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
@@ -773,9 +771,7 @@ export default function NewSchedule() {
 
 						{/* 시간 한 줄 */}
 						<div className="schedule-line schedule-line--time">
-							<div className="row-icon">
-								<img className="icon" src="/schedule_stopwatch.svg" alt="" />
-							</div>
+							<img className="icon" src="/schedule_stopwatch.svg" alt="" />
 
 							<button
 								type="button"

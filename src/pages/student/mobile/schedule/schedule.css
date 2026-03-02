@@ -279,3 +279,14 @@ padding-top: var(--shadow-pad);padding-bottom: var(--shadow-pad);}
 
 .detail-footer{height: auto;display: flex;align-items: flex-end;margin-top: auto;background: transparent;}
 .detail-recordedAt{font-size: 12px;font-weight: 500;color: #979797;}
+
+
+
+
+/**
+* 일정 추가 스타일 변경점
+*/
+.schedule-card--datetime { background: #ffffff; border-radius: 16px; padding: 14px 16px; }
+.schedule-line { display: flex; align-items: center; gap: 12px; }
+.schedule-line + .schedule-line { margin-top: 12px; }
+.schedule-line--time-range { padding-left: 0; }
