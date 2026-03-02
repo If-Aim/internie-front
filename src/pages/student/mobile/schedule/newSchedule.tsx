@@ -785,7 +785,7 @@ export default function NewSchedule() {
 
 						{/* 시간 */}
 						<div className="schedule-line schedule-line--time">
-							<img className="icon schedule-line-icon" src="/stopwatch.svg" alt="" />
+							<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
 
 							<div className="row-toggle-left">
 								<strong>시간 추가하기</strong>
@@ -928,7 +928,7 @@ export default function NewSchedule() {
 				<footer className="footer-fixed">
 					<button className="btn-primary" onClick={handleSave}>{t("common.save")}</button>
 				</footer>
-				
+
 				{/* 시간 선택 바텀시트 */}
 				{showSheet && (
 					<TimeSheet
