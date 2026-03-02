@@ -632,14 +632,6 @@ export default function NewSchedule() {
 		setShowDateRangeSheet(true);
 	};
 
-	const openStartTimePicker = () => {
-		const el = startTimeInputRef.current;
-		if (!el) return;
-
-		el.focus();
-		el.click();
-	};
-
 	const openEndTimePicker = () => {
 		const el = endTimeInputRef.current;
 		if (!el) return;
@@ -841,13 +833,13 @@ export default function NewSchedule() {
 								<div className="row-icon--empty" />
 
 								<div className="time-inline">
-									<button type="button" className="time-pill" onClick={() => { openStartTimePicker(); }} >
+									<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
 										{startTime ? startTimeLabel : "Start"}
 									</button>
 
 									<span className="date-sep" aria-hidden="true">-</span>
 
-									<button type="button" className="time-pill" onClick={() => { openEndTimePicker(); }} >
+									<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
 										{endTime ? endTimeLabel : "End"}
 									</button>
 								</div>
