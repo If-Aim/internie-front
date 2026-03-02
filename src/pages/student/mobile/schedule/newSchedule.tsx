@@ -749,90 +749,89 @@ export default function NewSchedule() {
 				<main className="new-event">
 					<input className="title-input" placeholder={t("schedule_new.titlePlaceholder")} aria-label="title" value={title} onChange={(e) => setTitle(e.target.value)} />
 
-					{/* 날짜: 시작일 - 마감일 한 줄 */}
-					<section className="row row--date-inline">
-						<div className="row-icon">
-							<img className="icon" src="/clock-01.svg" alt="" />
+					<section className="schedule-card schedule-card--datetime">
+						{/* 기간 */}
+						<div className="schedule-line schedule-line--date">
+							<div className="row-icon">
+								<img className="icon" src="/clock-01.svg" alt="" />
+							</div>
+
+							<div className="date-inline">
+								<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
+									{formatRangeDate(startDate, locale)}
+								</button>
+
+								<span className="date-sep" aria-hidden="true">
+									-
+								</span>
+
+								<button type="button" className="date-pill" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
+									{formatRangeDate(endDate, locale)}
+								</button>
+							</div>
 						</div>
 
-						<div className="date-inline">
-							<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
-								{formatRangeDate(startDate, locale)}
-							</button>
-
-							<span className="date-sep" aria-hidden="true">
-								-
-							</span>
-
-							<button type="button" className="date-pill" onClick={openEndOnlyRangeSheet} aria-label="set end date" >
-								{formatRangeDate(endDate, locale)}
-							</button>
-						</div>
-					</section>
-
-					{/* 시간: 날짜와 분리 */}
-					<section className="row row--time-toggle">
-						<div className="row-icon">
-							<img className="icon" src="/stopwatch.svg" alt="" />
-						</div>
-
-						<button
-							type="button"
-							className="time-label-btn"
-							onClick={() => {
-								// UI만 먼저: 토글 ON일 때만 시트 오픈되게(원치 않으면 제거)
-								if (!hasTime && !isAllDay) return;
-								setTimeStep("start");
-								setShowSheet(true);
-							}}
-							aria-label={t("schedule_new.addTime")}
-						>
-							<strong>시간 추가하기</strong>
-						</button>
-
-						<label className="switch" aria-label="toggle time">
-							<input
-								type="checkbox"
-								checked={hasTime || isAllDay}
-								onChange={(e) => {
-									const on = e.target.checked;
-
-									// UI만 먼저: ON이면 일단 기본값 세팅(원치 않으면 이 블록을 비워두셔도 됩니다)
-									if (on) {
-										setIsAllDay(false);
-										if (!startTime) setStartTime("09:00");
-										if (!endTime) setEndTime("10:00");
-									} else {
-										setIsAllDay(false);
-										setStartTime(null);
-										setEndTime(null);
-									}
-								}}
-							/>
-							<span className="switch-slider" />
-						</label>
-					</section>
-
-					{/* (선택) 토글 ON일 때만 시간 범위 표시 줄 */}
-					{(hasTime || isAllDay) && (
-						<section className="row row--time-range">
-							<div className="row-icon row-icon--empty" />
+						{/* 시간 한 줄 */}
+						<div className="schedule-line schedule-line--time">
+							<div className="row-icon">
+								<img className="icon" src="/schedule_stopwatch.svg" alt="" />
+							</div>
 
 							<button
 								type="button"
-								className="time-range-btn"
+								className="time-label-btn"
 								onClick={() => {
+									if (!hasTime && !isAllDay) return;
 									setTimeStep("start");
 									setShowSheet(true);
 								}}
-								aria-label={t("schedule_new.editTime")}
+								aria-label={t("schedule_new.addTime")}
 							>
-								{isAllDay
-									? t("common.allDay")
-									: `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`}
+								<strong>시간 추가하기</strong>
 							</button>
-						</section>
-					)}
+
+							<label className="switch" aria-label="toggle time">
+								<input
+									type="checkbox"
+									checked={hasTime || isAllDay}
+									onChange={(e) => {
+										const on = e.target.checked;
+
+										if (on) {
+											setIsAllDay(false);
+											if (!startTime) setStartTime("09:00");
+											if (!endTime) setEndTime("10:00");
+										} else {
+											setIsAllDay(false);
+											setStartTime(null);
+											setEndTime(null);
+										}
+									}}
+								/>
+								<span className="switch-slider" />
+							</label>
+						</div>
+
+						{/* (선택) 토글 ON일 때만 시간 범위 표시 */}
+						{(hasTime || isAllDay) && (
+							<div className="schedule-line schedule-line--time-range">
+								<div className="row-icon row-icon--empty" />
+								<button
+									type="button"
+									className="time-range-btn"
+									onClick={() => {
+										setTimeStep("start");
+										setShowSheet(true);
+									}}
+									aria-label={t("schedule_new.editTime")}
+								>
+									{isAllDay
+										? t("common.allDay")
+										: `${displayTimeLabel(startTime!, locale)} - ${displayTimeLabel(endTime!, locale)}`}
+								</button>
+							</div>
+						)}
+					</section>
 
 					{/* 반복(1번째 화면처럼 토글 행) */}
 					{/* <section className="row row--repeat">
