@@ -195,13 +195,13 @@ function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
 	return (
 		<div className="topbar topbar-main">
 			<button className="iconbtn" aria-label={t("common.menu")} onClick={onMenuClick}>
-				<img className="icon" src="/menu-01.svg" alt={t("common.menu")} />
+				<img className="icon" src="/icons/menu-01.svg" alt={t("common.menu")} />
 			</button>
 
 			<div className="app-title">internie</div>
 
 			<button className="iconbtn" aria-label={t("common.add")} onClick={onAddClick}>
-				<img className="icon" src="/plus-01.svg" alt={t("common.add")} />
+				<img className="icon" src="/icons/plus-01.svg" alt={t("common.add")} />
 			</button>
 		</div>
 	);
@@ -269,7 +269,7 @@ function MonthFilterSheet({
 				<div className="period-sheet-header">
 					<div className="period-sheet-title">{t("filter.title")}</div>
 					<button className="period-sheet-close" onClick={onClose} aria-label={t("common.close")}>
-						<img className="icon" alt="" src="/x-01.svg" />
+						<img className="icon" alt="" src="/icons/x-01.svg" />
 					</button>
 				</div>
 
@@ -279,7 +279,7 @@ function MonthFilterSheet({
 
 							<label className="month-input">
 							<div className="month-input-text">{ymToDisplayWithLang(tmpYm, i18n.language)}</div>
-							<button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setIsMonthPickerOpen(true);}}><img className="month-input-icon" src="/calendar-07.svg" alt="" /></button>
+							<button type="button" className="month-icon-btn" aria-label={t("filter.period")} onClick={() => {setPickerYm(tmpYm); setIsMonthPickerOpen(true);}}><img className="month-input-icon" src="/icons/calendar-07.svg" alt="" /></button>
 							<input className="month-input-native" type="text" value={ymToDisplayWithLang(tmpYm, i18n.language)} readOnly onClick={() => {setPickerYm(tmpYm); setIsMonthPickerOpen(true);}} aria-label="month" />
 						</label>
 					</div>
@@ -516,7 +516,7 @@ function MonthPickerModal({
 				<div className="monthpicker-header">
 					<div className="monthpicker-title">{t("filter.period")}</div>
 					<button className="monthpicker-close" onClick={onClose} aria-label={t("common.close")}>
-						<img className="icon" alt="" src="/x-01.svg" />
+						<img className="icon" alt="" src="/icons/x-01.svg" />
 					</button>
 				</div>
 
@@ -723,19 +723,19 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 
 				<div className="drawer-body">
 					<button className="drawer-menu-item" onClick={() => {onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
-						<img className="icon" src="/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
+						<img className="icon" src="/icons/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
 						<span>{t("menu.mypage")}</span>
 					</button>
 					<button className="drawer-menu-item" onClick={handleServicePreparing}>
-						<img className="icon" src="/arrow-refresh-01.svg" alt={t("menu.recent")} />{" "}
+						<img className="icon" src="/icons/arrow-refresh-01.svg" alt={t("menu.recent")} />{" "}
 						<span>{t("menu.recent")}</span>
 					</button>
 					<button className="drawer-menu-item" onClick={handleServicePreparing}>
-						<img className="icon" src="/settings.svg" alt={t("menu.settings")} />{" "}
+						<img className="icon" src="/icons/settings.svg" alt={t("menu.settings")} />{" "}
 						<span>{t("menu.settings")}</span>
 					</button>
 					<button className="drawer-menu-item" onClick={toggleLang}>
-						<img className="icon" src="/settings.svg" alt={t("menu.language")} />{" "}
+						<img className="icon" src="/icons/settings.svg" alt={t("menu.language")} />{" "}
 						<span>{t("menu.language")}</span>
 					</button>
 					{userRole === "ROLE_ADMIN" && (
@@ -748,7 +748,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 							});
 						}}
 						>
-							<img className="icon" src="/chevron-right.svg" alt="" />
+							<img className="icon" src="/icons/chevron-right.svg" alt="" />
 							<span>사용자조회</span>
 						</button>
 					)}
@@ -762,7 +762,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 							});
 						}}
 						>
-							<img className="icon" src="/chevron-right.svg" alt="" />
+							<img className="icon" src="/icons/chevron-right.svg" alt="" />
 							<span>JUMP 관리자 페이지</span>
 						</button>
 					)}
@@ -788,7 +788,7 @@ function MonthHeader({ value, onOpen }: MonthHeaderProps) {
 			<div className="month-left">
 				<div className="h1">{label}</div>
 				<button className="month-btn" aria-label={t("calendar.selectMonth")} onClick={onOpen} 				>
-					<img className="icon" src="/chevron-right.svg" alt={t("calendar.selectMonth")} />
+					<img className="icon" src="/icons/chevron-right.svg" alt="" />
 				</button>
 			</div>
 		</div>
@@ -852,7 +852,7 @@ function EventCard({
 				onEditClick();
 			}}
 		>
-			<img className="icon" src="/chevron-right.svg" alt={t("schedule.edit")} style={{ transform: "rotate(-90deg)" }} />
+			<img className="icon" src="/icons/chevron-right.svg" alt="" style={{ transform: "rotate(-90deg)" }} />
 		</button>
     </article>
   );
@@ -904,7 +904,7 @@ function EventModal({ item, onClose, onRecord, eventDaysForThisEvent }: EventMod
 						<div className="event-modal-date">{dateText}</div>
 					</div>
 					<button type="button" className="event-modal-close" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" alt="" src="/x-01.svg" />
+						<img className="icon" alt="" src="/icons/x-01.svg" />
 					</button>
 				</header>
 				<div className="event-modal-weekdays" aria-label="weekday">
@@ -1387,7 +1387,7 @@ function Home(): React.ReactElement {
 								<div className="event-modal-date">{t("login.getLoginSub")}</div>
 							</div>
 							<button type="button" className="event-modal-close" aria-label={t("common.close")} onClick={() => setLoginGateOpen(false)} >
-								<img className="icon" alt="" src="/x-01.svg" />
+								<img className="icon" alt="" src="/icons/x-01.svg" />
 							</button>
 						</header>
 

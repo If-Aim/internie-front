@@ -87,7 +87,7 @@ export default function QuestionsPage() {
 		formData.append("audioFile", audioFile);
 		setIsUploading(true);
 		try {
-			const result = await apiUpload<any>(`/api/stt/upload/${eventDayIdNum}`, formData);
+			const result = await apiUpload<string>(`/api/stt/upload/${eventDayIdNum}`, formData);
 			console.log("STT 결과:", result);
 			return true;
 		} catch (err) {
@@ -357,7 +357,7 @@ export default function QuestionsPage() {
 				<div className="wrap">
 					<header className="topbar-question">
 						<button className="iconbtn" aria-label="메뉴">
-							<img className="icon" src="/menu-01.svg" alt="" />
+							<img className="icon" src="/icons/menu-01.svg" alt="" />
 						</button>
 						<h1 className="topbar-title">{eventDayTitle || "기록"}</h1>
 						<div style={{ width: 24 }} />
@@ -396,7 +396,7 @@ export default function QuestionsPage() {
 									setRecordStage("preparing");
 								}}
 							>
-								<img src="/microphone-01.svg" alt="" />
+								<img src="/icons/microphone-01.svg" alt="" />
 							</button>
 						)}
 
@@ -444,8 +444,8 @@ export default function QuestionsPage() {
 										>
 											<img
 											src={micLocked || !isMicOn || recordStage !== "recording"
-												? "/microphone-01-gray.svg"
-												: "/microphone-01-blue.svg"
+												? "/icons/microphone-01-gray.svg"
+												: "/icons/microphone-01-blue.svg"
 											}
 											alt="마이크"
 											/>
@@ -462,7 +462,7 @@ export default function QuestionsPage() {
 				<div className="record-outro-overlay">
 					<div className="record-outro-card">
 						<div className="record-outro-icon">
-						<img src="/check-02.svg" alt="완료" />
+						<img src="/icons/check-02.svg" alt="완료" />
 						</div>
 						<p className="record-outro-text">기록완료!</p>
 					</div>
@@ -473,7 +473,7 @@ export default function QuestionsPage() {
 					<div className="spacer-50" aria-hidden="true" />
 					<header className="topbar-completion">
 						{/* <button className="iconbtn" aria-label="메뉴">
-						<img className="icon" src="/menu-01.svg" alt="" />
+						<img className="icon" src="/icons/menu-01.svg" alt="" />
 						</button>
 						<h1 className="topbar-title">활동 보고서</h1>
 						<div style={{ width: 24 }} /> */}

@@ -171,7 +171,7 @@ function TimeSheet({
 				<div className="sheet-header">
 					<span className="sheet-title">{t("common.time")}</span>
 					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" alt="" src="/x-01.svg" />
+						<img className="icon" alt="" src="/icons/x-01.svg" />
 					</button>
 				</div>
 
@@ -281,7 +281,7 @@ function DateRangeSheet({
 				<div className="sheet-header">
 					<span className="sheet-title">{t("common.dateRange")}</span>
 					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" alt="" src="/x-01.svg" />
+						<img className="icon" alt="" src="/icons/x-01.svg" />
 					</button>
 				</div>
 
@@ -408,7 +408,7 @@ function CalendarRange({
 			<div className="cal-header">
 				<div className="cal-header-top">
 					<button type="button" className="cal-close-btn" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" src="/x-01.svg" alt="" />
+						<img className="icon" src="/icons/x-01.svg" alt="" />
 					</button>
 				</div>
 
@@ -416,11 +416,11 @@ function CalendarRange({
 					<div className="cal-title">{title}</div>
 					<div className="cal-nav">
 						<button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="prev month" >
-							<img className="icon" src="/Previous (Stroke).svg" alt="" />
+							<img className="icon" src="/icons/Previous (Stroke).svg" alt="" />
 						</button>
 
 						<button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="next month">
-							<img className="icon" src="/Next (Stroke).svg" alt="" />
+							<img className="icon" src="/icons/Next (Stroke).svg" alt="" />
 						</button>
 					</div>
 				</div>
@@ -845,13 +845,13 @@ export default function EditSchedule() {
 				<>
 					<header className="topbar topbar-main">
 						<button className="iconbtn" aria-label={t("common.menu")}>
-							<img className="icon" src="/menu-01.svg" alt="" />
+							<img className="icon" src="/icons/menu-01.svg" alt="" />
 						</button>
 
 						<h1 className="topbar-title">{t("schedule_edit.title")}</h1>
 
 						<button className="iconbtn" aria-label={t("common.close")} onClick={() => nav(-1)}>
-							<img className="icon" src="/x-01.svg" alt="" />
+							<img className="icon" src="/icons/x-01.svg" alt="" />
 						</button>
 					</header>
 
@@ -860,7 +860,7 @@ export default function EditSchedule() {
 						<section className="schedule-card schedule-card--datetime">
 							{/* 기간 */}
 							<div className="schedule-line schedule-line--date">
-								<img className="icon schedule-line-icon" src="/clock-01.svg" alt="" />
+								<img className="icon schedule-line-icon" src="/icons/clock-01.svg" alt="" />
 
 								<div className="date-inline">
 									<button type="button" className="date-pill" onClick={openStartOnlyRangeSheet} aria-label="set start date" >
@@ -881,7 +881,7 @@ export default function EditSchedule() {
 								<>
 									{/* 시간 토글 */}
 									<div className="schedule-line schedule-line--time">
-										<img className="icon schedule-line-icon" src="/schedule_stopwatch.svg" alt="" />
+										<img className="icon schedule-line-icon" src="/icons/schedule_stopwatch.svg" alt="" />
 
 										<div className="row-toggle-left">
 											<strong>시간 추가하기</strong>

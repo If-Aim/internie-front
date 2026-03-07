@@ -65,7 +65,7 @@ function DropdownSelect(props: {
                 <span className="jump-users-dd-text">
                     {selected ? selected.label : "-"}
                 </span>
-                <img className="jump-users-dd-arrow" src="/chevron-right-6b.svg" alt="" />
+                <img className="jump-users-dd-arrow" src="/icons/chevron-right-6b.svg" alt="" />
             </button>
 
             {open && (
@@ -718,9 +718,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 					<div className="jump-users-filter">
 						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
 							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
-								<img className="jump-users-org-filter" src={selectedOrg ? "/mynaui_filter.svg" : "/mynaui_filter_6b.svg"} alt="" />
+								<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
 								<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-								<img className="jump-users-org-arrow" src={selectedOrg ? "/chevron-right.svg" : "/chevron-right-6b.svg"} alt="" />
+								<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
 							</button>
 							{open && (
 								<div className="jump-users-org-menu">
@@ -739,7 +739,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 					</div>
 
 					<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-						<img className="jump-users-search-icon" src={!query.trim() ? "/search-6b-01.svg" : "/search-00-01.svg"} alt="" />
+						<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
 						<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 					</div>
 				</div>
@@ -778,7 +778,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return (
 			<div className="jump-users-left-frame">
 				<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail}>
-					<img className="jump-users-back-btn-img" src="/chevron-left-6b.svg" alt="" />
+					<img className="jump-users-back-btn-img" src="/icons/chevron-left-6b.svg" alt="" />
 					<span className="jump-users-back-btn-text">뒤로가기</span>
 				</button>
 
@@ -836,7 +836,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 								setDeleteOpen(true);
 							}}
 						>
-							<img src="/trash-red-01.svg" alt="" />
+							<img src="/icons/trash-red-01.svg" alt="" />
 						</button>
 					</div>
 
@@ -893,7 +893,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							<div className="jump-users-kpi-value">
 								{calendarLoading ? "-" : `${totalCount}건`}
 							</div>
-							<img className="jump-users-kpi-arrow" src="/chevron-right.svg" alt="" />
+							<img className="jump-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
 						</div>
 					</button>
 
@@ -903,7 +903,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							<div className="jump-users-kpi-value">
 								{calendarLoading ? "-" : `${weekCount}건`}
 							</div>
-							<img className="jump-users-kpi-arrow" src="/chevron-right.svg" alt="" />
+							<img className="jump-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
 						</div>
 					</button>
 				</div>
@@ -944,7 +944,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						return (
 							<button key={id} type="button" className="jump-users-report-day-item" onClick={() => handleOpenRecord(id)} >
 								<span className="jump-users-report-day-item-text">{label}</span>
-								<img className="jump-users-report-day-item-arrow" src="/chevron-right.svg" alt="" />
+								<img className="jump-users-report-day-item-arrow" src="/icons/chevron-right.svg" alt="" />
 							</button>
 						);
 					})}
@@ -999,7 +999,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						}}
 						aria-label="back"
 					>
-						<img src="/jump-admin-back.svg" alt="" />
+						<img src="/icons/jump-admin-back.svg" alt="" />
 					</button>
 
 					<div className="jump-report-detail-title">{recordTitle}</div>
@@ -1018,7 +1018,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						disabled={isFirst}
 						aria-disabled={isFirst}
 					>
-						<img src="/chevron-left.svg" alt="" />
+						<img src="/icons/chevron-left.svg" alt="" />
 					</button>
 
 					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
@@ -1038,7 +1038,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						disabled={isLast}
 						aria-disabled={isLast}
 					>
-						<img src="/chevron-right.svg" alt="" />
+						<img src="/icons/chevron-right.svg" alt="" />
 					</button>
 				</div>
 			</div>
@@ -1090,7 +1090,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			<div className="jump-admin-section-head">
 				<div className="jump-admin-section-title-wrap">
 					<div className="jump-admin-section-title-badge">
-						<img src="/jump-logo.png" alt="" />
+						<img src="/logos/jump-logo.png" alt="" />
 					</div>
 					<div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
 				</div>

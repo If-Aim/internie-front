@@ -171,7 +171,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 									<span className="admin-user-name">{u.name}</span>
 									<span className="admin-user-school">{displaySchoolname(u)}</span>
 									<span className="admin-cert-status"><span className={count > 0 ? "cert-count" : "cert-count cert-count--zero"}>수료증: {count}</span></span>
-									<span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
+									<span className="admin-chevron"><img src="/icons/chevron-right.svg" alt="" /></span>
 								</button>
 							);
 						})
@@ -200,7 +200,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 											</div>
 
 											<button type="button" className="cert-trash-btn" onClick={() => void handleDeleteFile(f.fileId)} aria-label="cert-delete" title="삭제" >
-												<img src="/trash-02.svg" alt="" />
+												<img src="/icons/trash-02.svg" alt="" />
 											</button>
 											</li>
 										))}
@@ -212,7 +212,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 					{selectedUser && hasFiles && (
 						<div className="cert-upload-footer">
 						<button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
-							<span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+							<span className="cert-upload-icon"><img src="/icons/upload-03.svg" alt="" /></span>
 							<span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
 						</button>
 						</div>
@@ -224,7 +224,7 @@ export default function AdminCertificatesPage(): React.ReactElement {
 								<p className="cert-upload-hint">파일 목록 불러오는 중…</p>
 							) : (
 								<button type="button" className="cert-upload-btn" onClick={openFilePicker} disabled={uploading} >
-									<span className="cert-upload-icon"><img src="/upload-03.svg" alt="" /></span>
+									<span className="cert-upload-icon"><img src="/icons/upload-03.svg" alt="" /></span>
 									<span>{uploading ? "업로드 중..." : "업로드 하기"}</span>
 								</button>
 							)}

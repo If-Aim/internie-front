@@ -115,7 +115,7 @@ export default function TargetCompanyPage(): React.ReactElement {
                 <div className="tc-header__spacer" />
                 <h1 className="tc-header__title">{t("mypage.targetCompany")}</h1>
                 <button type="button" className="tc-header__close" onClick={onClose} aria-label="close" >
-                    <img src="/x-01.svg" alt="" />
+                    <img src="/icons/x-01.svg" alt="" />
                 </button>
             </header>
 
@@ -135,7 +135,7 @@ export default function TargetCompanyPage(): React.ReactElement {
                             placeholder={t("mypage.desiredJobEx")}
                             disabled={loading || saving}
                         />
-                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
+                        <img className="tc-pencil" src="/icons/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
                     </div>
                 </section>
 
@@ -152,7 +152,7 @@ export default function TargetCompanyPage(): React.ReactElement {
                             placeholder={t("mypage.targetComLabelEx")}
                             disabled={loading || saving}
                         />
-                        <img className="tc-pencil" src="/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
+                        <img className="tc-pencil" src="/icons/ph_pencil-simple-thin.svg" alt="" aria-hidden="true" />
                     </div>
                 </section>
             </main>

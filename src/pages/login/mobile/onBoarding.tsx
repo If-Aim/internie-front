@@ -231,7 +231,7 @@ export default function OnBoarding(): React.ReactElement {
                 {step === 4 && isVerified && (
                     <>
                         <div className="ob-jump-logo">
-                            <img src="/jump-logo.png" alt="JUMP" />
+                            <img src="/logos/jump-logo.png" alt="JUMP" />
                         </div>
 
                         <h1 className="ob-title">센터를 선택하세요</h1>
@@ -243,7 +243,7 @@ export default function OnBoarding(): React.ReactElement {
                                         {form.jumpOrganizationName || "센터 선택"}
                                     </span>
                                     <span className="ob-dd-caret" aria-hidden="true">
-                                        <img src="/chevron-left.svg" alt="" />
+                                        <img src="/icons/chevron-left.svg" alt="" />
                                     </span>
                                 </button>
 

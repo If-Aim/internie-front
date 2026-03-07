@@ -206,7 +206,7 @@ export default function MyPage({ onLogout }: Props) {
 		<div className="mypage">
 			<header className="mypage-header">
 				<button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate("/")} >
-					<img src="/chevron-left.svg" alt="previous" />
+					<img src="/icons/chevron-left.svg" alt="previous" />
 				</button>
 				<div className="mypage-email"></div>
 			</header>
@@ -215,7 +215,7 @@ export default function MyPage({ onLogout }: Props) {
 				<div className="mypage-profileimg-wrap">
 					<img className="mypage-profileimg" src={avatarSrc} alt="profileImg" />
 					{isVerifiedStudent && (
-						<img className="mypage-verify-badge" src="/school-verified-01.svg" alt="재학생 인증 완료" />
+						<img className="mypage-verify-badge" src="/icons/school-verified-01.svg" alt="재학생 인증 완료" />
 					)}
 				</div>
 				<div className="mypage-greeting">
@@ -263,25 +263,25 @@ export default function MyPage({ onLogout }: Props) {
 						<span className="mypage-menu-title">{t("mypage.targetCompany")}</span>
 						<span className="mypage-menu-right">
 							<span className="mypage-menu-value">{me?.interestCompany?.trim() ? me.interestCompany : t("mypage.notSet")}</span>
-							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
 					</button>
 					<button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> 
 						<span className="mypage-menu-title">{t("mypage.certs")}</span>
 						<span className="mypage-menu-right">
-							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
 					</button>
 					<button type="button" className="mypage-menu-item" onClick={() => navigate("modify")}> 
 						<span className="mypage-menu-title">{t("mypage.editProfile")}</span>
 						<span className="mypage-menu-right">
-							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
 					</button>
 					<button type="button" className="mypage-menu-item"onClick={() => navigate("verify-code")}>
 						<span className="mypage-menu-title">{t("mypage.verifyCode")}</span>
 						<span className="mypage-menu-right">
-							<img className="mypage-menu-chevron" src="/chevron-right.svg" alt="" />
+							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
 					</button>
 				</div>
@@ -296,7 +296,7 @@ export default function MyPage({ onLogout }: Props) {
 				<div className="mypage-modal-backdrop" role="presentation">
 					<div className="mypage-modal" role="dialog" aria-modal="true">
 						<button type="button" className="mypage-modal-close" aria-label="close" onClick={closeRejectModal} >
-							<img src="/x-01.svg"></img>
+							<img src="/icons/x-01.svg"></img>
 						</button>
 
 						<div className="mypage-modal-body">

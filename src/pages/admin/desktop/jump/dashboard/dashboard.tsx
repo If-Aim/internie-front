@@ -287,7 +287,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
         <div className="jump-dashboard">
             <div className="jump-dashboard-head">
                 <div className="jump-dashboard-title">
-                    <div className="jump-dashboard-title-badge"><img src="/jump-logo.png"></img></div>
+                    <div className="jump-dashboard-title-badge"><img src="/logos/jump-logo.png"></img></div>
                     <div className="jump-dashboard-title-main">2026 상생지락 ALTogether</div>
                 </div>
 
@@ -320,10 +320,10 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                         <div className="jump-dashboard-week-label">{getWeekLabel(weekStart)}</div>
                         <div className="jump-dashboard-week-nav">
                             <button type="button" className="jump-dashboard-week-navbtn" onClick={goPrevWeek} aria-label="prev week">
-                                <img src="/chevron-left.svg" alt="" />
+                                <img src="/icons/chevron-left.svg" alt="" />
                             </button>
                             <button type="button" className="jump-dashboard-week-navbtn" onClick={goNextWeek} aria-label="next week">
-                                <img className="next-week" src="/chevron-right.svg" alt="" />
+                                <img className="next-week" src="/icons/chevron-right.svg" alt="" />
                             </button>
                         </div>
                     </div>
@@ -331,9 +331,9 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                     <div className="jump-dashboard-week-right">
                         <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
                             <button type="button" className={`jump-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
-                                <img className="jump-users-org-filter" src={!selectedOrg ? "/mynaui_filter_6b.svg" : "/mynaui_filter.svg"} alt="" />
+                                <img className="jump-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
                                 <span className={ selectedOrg ? "jump-dashboard-org-text is-selected" : "jump-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
-                                <img className="org-arrow" src={!selectedOrg ? "/chevron-right-6b.svg" : "/chevron-right.svg"} alt="" />
+                                <img className="org-arrow" src={!selectedOrg ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
                             </button>
 
                             {open && (

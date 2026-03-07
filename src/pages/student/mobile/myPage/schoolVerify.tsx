@@ -158,7 +158,7 @@ export default function SchoolVerify() {
         <div className="sv-screen">
             <header className="sv-header">
                 <button type="button" className="sv-close" aria-label="닫기" onClick={onClose}>
-                    <span aria-hidden><img src="/x-01.svg" alt="" /></span>
+                    <span aria-hidden><img src="/icons/x-01.svg" alt="" /></span>
                 </button>
             </header>
 
@@ -185,7 +185,7 @@ export default function SchoolVerify() {
                             }}
                         />
                         <span className={`sv-rightIcon ${selectedSchool ? "is-check" : "is-search"}`} aria-hidden>
-                            <img src={selectedSchool ? "/check-02.svg" : "/search-01.svg"} alt="" />
+                            <img src={selectedSchool ? "/icons/check-02.svg" : "/icons/search-01.svg"} alt="" />
                         </span>
                         {isDropdownOpen && (
                             <div className="sv-dropdown" role="listbox" aria-label="검색 결과">
@@ -272,7 +272,7 @@ export default function SchoolVerify() {
             {step === "SUBMITTED" && (
                 <main className="sv-submitted" role="status" aria-live="polite">
                     <div className="sv-submittedCenter">
-                        <div className="sv-checkCircle" aria-hidden><img src="/check-02.svg" alt="" /></div>
+                        <div className="sv-checkCircle" aria-hidden><img src="/icons/check-02.svg" alt="" /></div>
                         <h1 className="sv-submittedTitle">제출완료!</h1>
                     </div>
                 </main>

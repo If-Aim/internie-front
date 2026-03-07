@@ -183,7 +183,7 @@ export default function EditProfilePage(): React.ReactElement {
             <header className="mypage-header">
                 <div className="mypage-email">프로필 수정하기</div>
                 <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate(-1)}>
-                    <img src="/x-01.svg" alt="닫기" />
+                    <img src="/icons/x-01.svg" alt="닫기" />
                 </button>
             </header>
 

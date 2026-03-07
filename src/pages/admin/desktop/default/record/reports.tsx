@@ -88,10 +88,10 @@ function ReportCalendar(): React.ReactElement {
 				<div className="admin-cal-title">{monthLabel(year, month)}</div>
 				<div className="admin-cal-nav">
 					<button type="button" className="admin-cal-nav-btn" onClick={goPrev} aria-label="prev month">
-						<img src="/Previous (Stroke).svg" alt="" />
+						<img src="/icons/Previous (Stroke).svg" alt="" />
 					</button>
 					<button type="button" className="admin-cal-nav-btn" onClick={goNext} aria-label="next month">
-						<img src="/Next (Stroke).svg" alt="" />
+						<img src="/icons/Next (Stroke).svg" alt="" />
 					</button>
 				</div>
 			</div>
@@ -200,7 +200,7 @@ export default function AdminReportsPage(): React.ReactElement {
 								<span className="admin-user-name">{u.name}</span>
 								<span className="admin-user-school">{displaySchoolname(u)}</span>
 								<span className="admin-user-status-pill"></span>
-								<span className="admin-chevron"><img src="/chevron-right.svg" alt="" /></span>
+								<span className="admin-chevron"><img src="/icons/chevron-right.svg" alt="" /></span>
 							</button>
 						);
 						})

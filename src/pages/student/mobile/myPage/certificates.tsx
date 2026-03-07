@@ -185,7 +185,7 @@ export default function Certificates() {
 				<div className="cert-s-header-left" />
 				<div className="cert-s-header-title">수료증</div>
 				<button type="button" className="cert-s-header-close" aria-label="닫기" onClick={handleClose}>
-					<img src="/x-01.svg" alt="" />
+					<img src="/icons/x-01.svg" alt="" />
 				</button>
 			</header>
 
@@ -223,8 +223,8 @@ export default function Certificates() {
 									<img
 										src={
 											downloadingId === item.fileId
-											? "/download-02-blue.svg"
-											: "/download-02.svg"
+											? "/icons/download-02-blue.svg"
+											: "/icons/download-02.svg"
 										}
 										alt=""
 									/>

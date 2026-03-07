@@ -166,7 +166,7 @@ export default function VerifyCodePage() {
         <div className="mypage user-verify-code">
             <header className="mypage-header">
                 <button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)} >
-                    <img src="/chevron-left.svg" alt="previous" />
+                    <img src="/icons/chevron-left.svg" alt="" />
                 </button>
                 <div className="mypage-email"></div>
             </header>
@@ -186,7 +186,7 @@ export default function VerifyCodePage() {
             {isJumpVerified && ( // 점프 센터 선택
                 <div className="jump-center-select">
                     <div className="vcjp-jump-logo">
-                        <img src="/jump-logo.png" alt="JUMP" />
+                        <img src="/logos/jump-logo.png" alt="JUMP" />
                     </div>
                     <div className="vcjp-title">센터를 선택하세요</div>
 
@@ -201,7 +201,7 @@ export default function VerifyCodePage() {
                                     {jumpOrganizationName || "센터 선택"}
                                 </span>
                                 <span className="vcjp-dd-caret" aria-hidden="true">
-                                    <img src="/chevron-left.svg" alt="" />
+                                    <img src="/icons/chevron-left.svg" alt="" />
                                 </span>
                             </button>
 

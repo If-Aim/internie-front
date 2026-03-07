@@ -32,7 +32,7 @@ export default function Login(): React.ReactElement {
 		<div className="login-desktop-page">
 			<header className="login-desktop-header">
 				<div className="login-desktop-header-inner">
-					<img src="/internie_Logo_thin.png" alt="internie" className="login-desktop-logo" />
+					<img src="/logos/internie_Logo_thin.png" alt="internie" className="login-desktop-logo" />
 				</div>
 			</header>
 
@@ -51,7 +51,7 @@ export default function Login(): React.ReactElement {
 
 						<button type="button" className="login-desktop-btn primary" disabled>로그인하기</button>
 						<button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")} >
-							<img src="/kakao_Logo.svg" alt="" width={20} height={20} />
+							<img src="/logos/kakao_Logo.svg" alt="" width={20} height={20} />
 							<span>{t("login.startWithKakao")}</span>
 						</button>
 
@@ -82,12 +82,12 @@ export default function Login(): React.ReactElement {
 	//     <div className="header-spacer" aria-hidden="true" />
 	//     <main className="login-wrap">
 	//       <h1 className="brand">
-	//         <img src="/internie_Logo.svg" alt="internie" width={183} height={35} />
+	//         <img src="/logos/internie_Logo.svg" alt="internie" width={183} height={35} />
 	//       </h1>
 
 	//       <button type="button" className="btn btn-kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
 	//         <span className="ico ico-kakao" aria-hidden="true">
-	//           <img src="/kakao_Logo.svg" alt="" width={20} height={20} />
+	//           <img src="/logos/kakao_Logo.svg" alt="" width={20} height={20} />
 	//         </span>
 	//         <span className="btn-text">{t("login.startWithKakao")}</span>
 	//       </button>
@@ -98,7 +98,7 @@ export default function Login(): React.ReactElement {
 	//         onClick={() => go(GOOGLE_AUTH_URL)}
 	//         aria-label="Google로 시작하기">
 	//         <span className="ico ico-google" aria-hidden="true">
-	//           <img src="/google_Logo.svg" alt="" width={20} height={20} />
+	//           <img src="/logos/google_Logo.svg" alt="" width={20} height={20} />
 	//         </span>
 	//         <span className="btn-text">Google로 시작하기</span>
 	//       </button>*/}

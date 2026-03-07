@@ -119,7 +119,7 @@ export default function DetailSchedule(): React.ReactElement {
             <div className="detail-topbar">
                 <div className="detail-topbar-title">{title}</div>
                 <button className="detail-topbar-close" type="button" aria-label={t("common.close")} onClick={close}>
-                    <img className="icon" alt="" src="/x-01.svg" />
+                    <img className="icon" alt="" src="/icons/x-01.svg" />
                 </button>
             </div>
 

@@ -47,7 +47,7 @@ export default function JumpAdminHome(): React.ReactElement {
 				<div className={isReportsPage ? "jump-report-scroll-inner" : undefined}>
 					<header className="jump-admin-topbar">
 						<div className="jump-admin-topbar-left">
-							<a href="https://www.internie.com/student" rel="noopener noreferrer"><img className="jump-admin-logo" src="/internie_Logo_thin.png" alt="internie" /></a>
+							<a href="https://www.internie.com/student" rel="noopener noreferrer"><img className="jump-admin-logo" src="/logos/internie_Logo_thin.png" alt="internie" /></a>
 						</div>
 
 						<nav className="jump-admin-topbar-tabs" aria-label="admin tabs">
