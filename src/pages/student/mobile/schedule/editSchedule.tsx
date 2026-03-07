@@ -651,10 +651,16 @@ export default function EditSchedule() {
 				endDate: toYmd(endDate),
 			};
 
-			if (!isSingleDay || isAllDay) {
+			const sendAllDay =
+				!isSingleDay ||
+				isAllDay ||
+				startTime === null ||
+				endTime === null;
+
+			if (sendAllDay) {
 				payload.startTime = "00:00:00";
 				payload.endTime = "23:59:59";
-			} else if (startTime && endTime) {
+			} else {
 				payload.startTime = toApiHHmmss(startTime);
 				payload.endTime = toApiHHmmss(endTime);
 			}
