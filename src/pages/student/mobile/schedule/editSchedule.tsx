@@ -5,7 +5,12 @@ import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { api, ApiError, deleteEvent, deleteEventDay } from "../../../../api/client";
 
+import { TIME_OPTIONS, WEEK_LABELS, toApiHHmmss, displayTimeLabel, toYmd, stripTime, getTimeIndex, displayTimePillLabel, isSameDay, addMonths, getMonthGrid } from "./scheduleUtils";
+import type {RangeSheetMode, TimeSheetProps, DateRangeSheetProps } from "./scheduleTypes"
 import "./schedule.css";
+
+const { t, i18n } = useTranslation();
+const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
 
 type Stage = "form" | "outro";
 
@@ -36,88 +41,17 @@ type EventDayMonthResponse = {
 	totalCount: number;
 	eventDayList: EventDay[];
 };
-type RangeSheetMode = "range" | "startOnly" | "endOnly";
 
-const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
-	`${String(h).padStart(2, "0")}:00`
-);
-const toApiHHmmss = (hhmm: string) => `${hhmm}:00`;
-
-function displayTimeLabel(hhmm: string, locale: string) {
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(2000, 0, 1, hh, mm, 0);
-
-	return new Intl.DateTimeFormat(locale, {
-		hour: "numeric",
-		minute: "2-digit",
-		hour12: true,
-	}).format(d);
-}
-
-const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-
-function toYmd(date: Date): string {
-	const y = date.getFullYear();
-	const m = String(date.getMonth() + 1).padStart(2, "0");
-	const d = String(date.getDate()).padStart(2, "0");
-	return `${y}-${m}-${d}`;
-}
+/**
+ * 
+ * 수정페이지에만 필요한 함수
+ * 
+ */
 function ymdToDate(ymd: string): Date {
 	const [y, m, d] = ymd.split("-").map(Number);
 	return new Date(y, m - 1, d);
 }
 
-const stripTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const getTimeIndex = (t: string | null) => (t ? TIME_OPTIONS.indexOf(t) : -1);
-
-function displayTimePillLabelEn(hhmm: string) {
-    const [hh, mm] = hhmm.split(":").map(Number);
-    const d = new Date(2000, 0, 1, hh, mm, 0);
-
-    return new Intl.DateTimeFormat("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    }).format(d);
-}
-
-
-// 날짜 관련
-function isSameDay(a: Date, b: Date) {
-	return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-const clampToStartOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-
-function addMonths(d: Date, diff: number) {
-	return new Date(d.getFullYear(), d.getMonth() + diff, 1);
-}
-function daysInMonth(year: number, month: number) {
-	return new Date(year, month + 1, 0).getDate();
-}
-
-function getMonthGrid(base: Date) {
-	const year = base.getFullYear();
-	const month = base.getMonth();
-
-	const first = new Date(year, month, 1);
-	const jsDay = first.getDay();
-	const offset = (jsDay + 6) % 7;
-
-	const dim = daysInMonth(year, month);
-	const totalCells = offset + dim;
-	const rows = Math.ceil(totalCells / 7);
-	const cellCount = rows * 7;
-
-	const start = new Date(year, month, 1 - offset);
-
-	const days = Array.from({ length: cellCount }, (_, i) => {
-		const d = new Date(start);
-		d.setDate(start.getDate() + i);
-		return d;
-	});
-
-	return { year, month, days };
-}
 // 녹음 존재 시 기간 수정 block
 function ymFromDate(d: Date) {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -133,23 +67,6 @@ function monthRange(start: Date, end: Date) {
 	return out;
 }
 
-type TimeSheetProps = {
-	step: "start" | "end";
-	setStep: React.Dispatch<React.SetStateAction<"start" | "end">>;
-
-	startTime: string | null;
-	endTime: string | null;
-	onChangeStart: (v: string) => void;
-	onChangeEnd: (v: string) => void;
-
-	isAllDay: boolean;
-	setIsAllDay: React.Dispatch<React.SetStateAction<boolean>>;
-	setStartTime: React.Dispatch<React.SetStateAction<string | null>>;
-	setEndTime: React.Dispatch<React.SetStateAction<string | null>>;
-
-	onClose: () => void;
-};
-
 function TimeSheet({
 	step,
 	setStep,
@@ -163,8 +80,6 @@ function TimeSheet({
 	setStartTime,
 	setEndTime,
 }: TimeSheetProps) {
-	const { t, i18n } = useTranslation();
-	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
 	return (
 		<div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="set time" onClick={onClose}>
 			<div className="sheet-card" onClick={(e) => e.stopPropagation()}>
@@ -244,68 +159,6 @@ function TimeSheet({
 	);
 }
 
-type DateRangeSheetProps = {
-	mode: RangeSheetMode;
-
-	startDate: Date;
-	endDate: Date;
-	onChangeStart: (d: Date) => void;
-	onChangeEnd: (d: Date) => void;
-
-	onClose: () => void;
-};
-
-function DateRangeSheet({
-	mode,
-	startDate,
-	endDate,
-	onChangeStart,
-	onChangeEnd,
-	onClose,
-}: DateRangeSheetProps) {
-	const { t } = useTranslation();
-	const [weeks, setWeeks] = React.useState<5 | 6>(5);
-	const [resetKey, setResetKey] = React.useState(0);
-	React.useEffect(() => {
-		setResetKey((k) => k + 1);
-	}, [mode]);
-
-	return (
-		<div className="sheet-backdrop sheet-backdrop--cal" role="dialog" aria-modal="true" aria-label="set date range" onClick={onClose}>
-			<div
-				className={
-				"sheet-card sheet-card--date" + (weeks === 6 ? " sheet-card--date--6w" : " sheet-card--date--5w")
-				}
-				onClick={(e) => e.stopPropagation()}
-			>
-				<div className="sheet-header">
-					<span className="sheet-title">{t("common.dateRange")}</span>
-					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" alt="" src="/icons/x-01.svg" />
-					</button>
-				</div>
-
-				<div className="date-range-body">
-					<CalendarRange
-						mode={mode}
-						startDate={startDate}
-						endDate={endDate}
-						onChangeStart={onChangeStart}
-						onChangeEnd={onChangeEnd}
-						onClose={onClose}
-						onWeeksChange={setWeeks}
-						resetKey={resetKey}
-					/>
-				</div>
-
-				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
-					{t("common.confirm")}
-				</button>
-			</div>
-		</div>
-	);
-}
-
 function CalendarRange({
 	mode,
 	startDate,
@@ -325,9 +178,8 @@ function CalendarRange({
 	onWeeksChange?: (weeks: 5 | 6) => void;
 	resetKey: number;
 }) {
-	const { t } = useTranslation();
-	const s = clampToStartOfDay(startDate);
-	const e = clampToStartOfDay(endDate);
+	const s = stripTime(startDate);
+	const e = stripTime(endDate);
 	const sameDay = isSameDay(s, e);
 
 	const [cursor, setCursor] = React.useState(() => new Date(s.getFullYear(), s.getMonth(), 1));
@@ -359,7 +211,7 @@ function CalendarRange({
 	const title = `${monthLabel} ${cursor.getFullYear()}`;
 
 	const inRange = (d: Date) => {
-		const x = clampToStartOfDay(d).getTime();
+		const x = stripTime(d).getTime();
 		return x >= s.getTime() && x <= e.getTime();
 	};
 
@@ -442,7 +294,7 @@ function CalendarRange({
 
 						if (!inMonth) return <div key={key} className="cal-cell cal-cell--empty" aria-hidden="true" />;
 
-						const day = clampToStartOfDay(d);
+						const day = stripTime(d);
 						const isStart = isSameDay(day, s);
 						const isEnd = isSameDay(day, e);
 						const between = !sameDay && inRange(day);
@@ -475,10 +327,59 @@ function CalendarRange({
 	);
 }
 
-export default function EditSchedule() {
-	const { t, i18n } = useTranslation();
-	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+function DateRangeSheet({
+	mode,
+	startDate,
+	endDate,
+	onChangeStart,
+	onChangeEnd,
+	onClose,
+}: DateRangeSheetProps) {
+	const [weeks, setWeeks] = React.useState<5 | 6>(5);
+	const [resetKey, setResetKey] = React.useState(0);
+	React.useEffect(() => {
+		setResetKey((k) => k + 1);
+	}, [mode]);
 
+	return (
+		<div className="sheet-backdrop sheet-backdrop--cal" role="dialog" aria-modal="true" aria-label="set date range" onClick={onClose}>
+			<div
+				className={
+				"sheet-card sheet-card--date" + (weeks === 6 ? " sheet-card--date--6w" : " sheet-card--date--5w")
+				}
+				onClick={(e) => e.stopPropagation()}
+			>
+				<div className="sheet-header">
+					<span className="sheet-title">{t("common.dateRange")}</span>
+					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
+						<img className="icon" alt="" src="/icons/x-01.svg" />
+					</button>
+				</div>
+
+				<div className="date-range-body">
+					<CalendarRange
+						mode={mode}
+						startDate={startDate}
+						endDate={endDate}
+						onChangeStart={onChangeStart}
+						onChangeEnd={onChangeEnd}
+						onClose={onClose}
+						onWeeksChange={setWeeks}
+						resetKey={resetKey}
+					/>
+				</div>
+
+				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
+					{t("common.confirm")}
+				</button>
+			</div>
+		</div>
+	);
+}
+
+
+
+export default function EditSchedule() {
 	const nav = useNavigate();
 	const { eventId } = useParams();
 	const location = useLocation();
@@ -633,7 +534,6 @@ export default function EditSchedule() {
 		setShowDateRangeSheet(true);
 	};
 
-
 	function formatRangeDate(d: Date, locale: string) {
 		if (locale.startsWith("ko")) {
 			return new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric" }).format(d);
@@ -748,18 +648,7 @@ export default function EditSchedule() {
 				endDate: toYmd(endDate),
 			};
 
-			if (isAllDay) {
-				payload.startTime = "00:00:00";
-				payload.endTime = "23:59:59";
-			} else if (startTime && endTime) {
-				payload.startTime = toApiHHmmss(startTime);
-				payload.endTime = toApiHHmmss(endTime);
-			}
-
-			if (!isSingleDay) {
-				payload.startTime = "00:00:00";
-				payload.endTime = "23:59:59";
-			} else if (isAllDay) {
+			if (!isSingleDay || isAllDay) {
 				payload.startTime = "00:00:00";
 				payload.endTime = "23:59:59";
 			} else if (startTime && endTime) {
@@ -921,7 +810,7 @@ export default function EditSchedule() {
 
 											<div className="time-inline">
 												<button type="button" className="time-pill" onClick={() => { setTimeStep("start"); setShowSheet(true); }} >
-													{hasTime ? displayTimePillLabelEn(startTime!) : "09:00 AM"}
+													{hasTime ? displayTimePillLabel(startTime!) : "09:00 AM"}
 												</button>
 
 												<span className="date-sep" aria-hidden="true">
@@ -929,7 +818,7 @@ export default function EditSchedule() {
 												</span>
 
 												<button type="button" className="time-pill" onClick={() => { setTimeStep("end"); setShowSheet(true); }} >
-													{hasTime ? displayTimePillLabelEn(endTime!) : "10:00 AM"}
+													{hasTime ? displayTimePillLabel(endTime!) : "10:00 AM"}
 												</button>
 											</div>
 										</div>
