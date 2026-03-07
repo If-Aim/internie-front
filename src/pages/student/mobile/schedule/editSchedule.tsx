@@ -9,9 +9,6 @@ import { TIME_OPTIONS, WEEK_LABELS, toApiHHmmss, displayTimeLabel, toYmd, stripT
 import type {RangeSheetMode, TimeSheetProps, DateRangeSheetProps } from "./scheduleTypes"
 import "./schedule.css";
 
-const { t, i18n } = useTranslation();
-const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
-
 type Stage = "form" | "outro";
 
 type EditState =
@@ -80,6 +77,8 @@ function TimeSheet({
 	setStartTime,
 	setEndTime,
 }: TimeSheetProps) {
+	const { t, i18n } = useTranslation();
+	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
 	return (
 		<div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="set time" onClick={onClose}>
 			<div className="sheet-card" onClick={(e) => e.stopPropagation()}>
@@ -159,6 +158,57 @@ function TimeSheet({
 	);
 }
 
+function DateRangeSheet({
+	mode,
+	startDate,
+	endDate,
+	onChangeStart,
+	onChangeEnd,
+	onClose,
+}: DateRangeSheetProps) {
+	const { t } = useTranslation();
+	const [weeks, setWeeks] = React.useState<5 | 6>(5);
+	const [resetKey, setResetKey] = React.useState(0);
+	React.useEffect(() => {
+		setResetKey((k) => k + 1);
+	}, [mode]);
+
+	return (
+		<div className="sheet-backdrop sheet-backdrop--cal" role="dialog" aria-modal="true" aria-label="set date range" onClick={onClose}>
+			<div
+				className={
+				"sheet-card sheet-card--date" + (weeks === 6 ? " sheet-card--date--6w" : " sheet-card--date--5w")
+				}
+				onClick={(e) => e.stopPropagation()}
+			>
+				<div className="sheet-header">
+					<span className="sheet-title">{t("common.dateRange")}</span>
+					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
+						<img className="icon" alt="" src="/icons/x-01.svg" />
+					</button>
+				</div>
+
+				<div className="date-range-body">
+					<CalendarRange
+						mode={mode}
+						startDate={startDate}
+						endDate={endDate}
+						onChangeStart={onChangeStart}
+						onChangeEnd={onChangeEnd}
+						onClose={onClose}
+						onWeeksChange={setWeeks}
+						resetKey={resetKey}
+					/>
+				</div>
+
+				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
+					{t("common.confirm")}
+				</button>
+			</div>
+		</div>
+	);
+}
+
 function CalendarRange({
 	mode,
 	startDate,
@@ -178,6 +228,7 @@ function CalendarRange({
 	onWeeksChange?: (weeks: 5 | 6) => void;
 	resetKey: number;
 }) {
+	const { t } = useTranslation();
 	const s = stripTime(startDate);
 	const e = stripTime(endDate);
 	const sameDay = isSameDay(s, e);
@@ -327,59 +378,10 @@ function CalendarRange({
 	);
 }
 
-function DateRangeSheet({
-	mode,
-	startDate,
-	endDate,
-	onChangeStart,
-	onChangeEnd,
-	onClose,
-}: DateRangeSheetProps) {
-	const [weeks, setWeeks] = React.useState<5 | 6>(5);
-	const [resetKey, setResetKey] = React.useState(0);
-	React.useEffect(() => {
-		setResetKey((k) => k + 1);
-	}, [mode]);
-
-	return (
-		<div className="sheet-backdrop sheet-backdrop--cal" role="dialog" aria-modal="true" aria-label="set date range" onClick={onClose}>
-			<div
-				className={
-				"sheet-card sheet-card--date" + (weeks === 6 ? " sheet-card--date--6w" : " sheet-card--date--5w")
-				}
-				onClick={(e) => e.stopPropagation()}
-			>
-				<div className="sheet-header">
-					<span className="sheet-title">{t("common.dateRange")}</span>
-					<button className="sheet-close-btn" aria-label={t("common.close")} onClick={onClose}>
-						<img className="icon" alt="" src="/icons/x-01.svg" />
-					</button>
-				</div>
-
-				<div className="date-range-body">
-					<CalendarRange
-						mode={mode}
-						startDate={startDate}
-						endDate={endDate}
-						onChangeStart={onChangeStart}
-						onChangeEnd={onChangeEnd}
-						onClose={onClose}
-						onWeeksChange={setWeeks}
-						resetKey={resetKey}
-					/>
-				</div>
-
-				<button className="sheet-confirm btn-primary" type="button" onClick={onClose}>
-					{t("common.confirm")}
-				</button>
-			</div>
-		</div>
-	);
-}
-
-
-
 export default function EditSchedule() {
+	const { t, i18n } = useTranslation();
+	const locale = i18n.language.startsWith("ko") ? "ko-KR" : "en-US";
+
 	const nav = useNavigate();
 	const { eventId } = useParams();
 	const location = useLocation();
@@ -533,6 +535,7 @@ export default function EditSchedule() {
 		setRangeSheetMode("endOnly");
 		setShowDateRangeSheet(true);
 	};
+
 
 	function formatRangeDate(d: Date, locale: string) {
 		if (locale.startsWith("ko")) {
