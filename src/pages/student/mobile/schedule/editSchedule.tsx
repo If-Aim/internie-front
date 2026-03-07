@@ -782,7 +782,7 @@ export default function EditSchedule() {
 										<img className="icon schedule-line-icon" src="/icons/schedule_stopwatch.svg" alt="" />
 
 										<div className="row-toggle-left">
-											<strong>시간 추가하기</strong>
+											<strong>{t("schedule_new.addTime")}</strong>
 										</div>
 
 										<button

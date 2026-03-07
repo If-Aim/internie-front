@@ -1,6 +1,7 @@
 // src/pages/student/mobile/myPage/userModify.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getUserMe, updateMyProfile, type UserMe, updateMyProfileImage } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
@@ -17,6 +18,7 @@ function normalizeText(v: string) {
 }
 
 export default function EditProfilePage(): React.ReactElement {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const fileRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -89,9 +91,9 @@ export default function EditProfilePage(): React.ReactElement {
     const avatarSrc = previewUrl ?? serverAvatarSrc;
 
     // 임시
-    const displayEmail = (me as any)?.email ?? "이메일";
-    const birth = (me as any)?.birth ?? "생년월일";
-    const schoolMajor = me?.status === "APPROVED" ? (me.school?.name ?? "학교 정보 없음") : "재학생 인증 필요";
+    const displayEmail = (me as any)?.email ?? "example@your.email";
+    const birth = (me as any)?.birth ?? t("mypage.birth");
+    const schoolMajor = me?.status === "APPROVED" ? (me.school?.name ?? t("mypage.noSchool")) : t("mypage.needStudentVerification");
 
     // 변경 여부
     const isDirty = React.useMemo(() => {
@@ -117,7 +119,7 @@ export default function EditProfilePage(): React.ReactElement {
         e.target.value = "";
 
         if (!file.type.startsWith("image/")) {
-            alert("이미지 파일만 업로드할 수 있습니다.");
+            alert(t("error.imageRequired"));
             return;
         }
 
@@ -128,7 +130,7 @@ export default function EditProfilePage(): React.ReactElement {
         const trimmedName = normalizeText(form.name);
 
         if (!trimmedName) {
-            alert("이름을 입력해주세요.");
+            alert(t("mypage.needName"));
             return;
         }
         try {
@@ -181,9 +183,9 @@ export default function EditProfilePage(): React.ReactElement {
     return (
         <div className="mypage user-modify">
             <header className="mypage-header">
-                <div className="mypage-email">프로필 수정하기</div>
+                <div className="mypage-email">{t("mypage.editProfile")}</div>
                 <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate(-1)}>
-                    <img src="/icons/x-01.svg" alt="닫기" />
+                    <img src="/icons/x-01.svg" alt="" />
                 </button>
             </header>
 
@@ -194,14 +196,14 @@ export default function EditProfilePage(): React.ReactElement {
                     </div>
 
                     <button type="button" className="profile-edit-avatar-btn" onClick={()=> fileRef.current?.click()} disabled={saving} >
-                        편집
+                        {t("mypage.edit ")}
                     </button>
                     <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
                 </section>
 
                 <section className="profile-edit-form">
                     <div className="profile-edit-field">
-                        <div className="profile-edit-label">이름</div>
+                        <div className="profile-edit-label">{t("mypage.name")}</div>
                         <input className="profile-edit-input" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} disabled={saving} />
                     </div>
 
@@ -211,12 +213,12 @@ export default function EditProfilePage(): React.ReactElement {
                     </div>
 
                     <div className="profile-edit-field">
-                        <div className="profile-edit-label">생년월일</div>
+                        <div className="profile-edit-label">{t("mypage.birth")}</div>
                         <input className="profile-edit-input is-readonly" value={birth} readOnly onClick={handleServicePreparing} />
                     </div>
 
                     <div className="profile-edit-field">
-                        <div className="profile-edit-label">학교/전공</div>
+                        <div className="profile-edit-label">{t("mypage.schoolMajor")}</div>
                         <input className="profile-edit-input is-readonly" value={schoolMajor} disabled />
                     </div>
                 </section>
@@ -224,7 +226,7 @@ export default function EditProfilePage(): React.ReactElement {
 
             <div className="profile-edit-bottom">
                 <button className={`profile-edit-save ${!isDirty ? "is-disabled" : ""}`} onClick={onSave} disabled={!isDirty || saving} >
-                    저장하기
+                    {t("common.save")}
                 </button>
             </div>
         </div>

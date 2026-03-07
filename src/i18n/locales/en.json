@@ -16,7 +16,8 @@
 		"allDay": "All Day",
 		"confirm": "Confirm",
 		"save": "Save",
-		"dateRange": "Period"
+		"dateRange": "Period",
+        "loading": "Loading…"
 	},
 	"menu": {
 		"mypage": "Profile",
@@ -105,6 +106,15 @@
 	"mypage": {
 		"greeting": "Hello,",
 		"greeting2": "",
+        "birth": "Date of Birth",
+        "schoolMajor": "School / Major",
+        "noSchool": "No school info",
+        "needStudentVerification": "Student verification required",
+		"name": "Name",
+        "needName": "Please enter your name.",
+        "edit": "Edit",
+
+
 		"targetCompany": "My Target Company",
 		"targetComLabel": "Target Company",
 		"targetComLabelEx": "e.g., AIM",
@@ -113,6 +123,7 @@
 
 		"notSet": "Not Set",
 		"certs": "My Certificates",
+		"noCerts": "No certificate issued.",
 		"editProfile": "Edit Profile",
 		"verifyCode": "Verification Code",
 		"logout": "Logout"
@@ -140,6 +151,9 @@
 		"failSetEndDate": "End date can’t be earlier than start date.",
 
 		"failGetUserMe": "Failed to load your information.",
+		"failGetMyCerts": "Failed to load your certificates.",
+		"failToDownload": "Failed to download",
+		"imageRequired": "Only image files can be uploaded.",
 		"failSetCareerGoal": "Failed to save. Please try again later.",
 
 		"cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",

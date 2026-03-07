@@ -5,6 +5,7 @@ import { ApiError, type AdminUserFile, getMyAdminFiles, getMyAdminFileDownloadUr
 
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min?url";
+import { useTranslation } from "react-i18next";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -37,6 +38,7 @@ async function renderPdfFirstPageThumbnail(
 
 
 export default function Certificates() {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 
 	const [items, setItems] = React.useState<AdminUserFile[]>([]);
@@ -73,7 +75,7 @@ export default function Certificates() {
 					setErrorMsg(null);
 					return;
 				}
-				setErrorMsg("수료증 목록을 불러오지 못했습니다.");
+				setErrorMsg(t("error.failGetMyCerts"));
 				console.error(e);
 			} finally {
 				if (mounted) setLoading(false);
@@ -155,7 +157,7 @@ export default function Certificates() {
 			const res = await fetch(signedUrl, { method: "GET" });
 			if (!res.ok) {
 				const text = await res.text().catch(() => "");
-				throw new ApiError(res.status, "파일 다운로드 실패", text);
+				throw new ApiError(res.status, t("error.failToDownload"), text);
 			}
 			const blob = await res.blob();
 			const objectUrl = URL.createObjectURL(blob);
@@ -166,12 +168,12 @@ export default function Certificates() {
 		} catch (e) {
 			if (e instanceof ApiError) {
 				if (e.status === 404) {
-					alert("발급된 수료증이 없습니다.");
+					alert(t("mypage.noCerts"));
 					return;
 				}
-				alert(e.bodyText ? `다운로드 실패: ${e.bodyText}` : "다운로드에 실패했습니다.");
+				alert(e.bodyText ? `다운로드 실패: ${e.bodyText}` : t("error.failToDownload"));
 			} else {
-				alert("다운로드에 실패했습니다.");
+				alert(t("error.failToDownload"));
 			}
 			console.error(e);
 		} finally {
@@ -183,7 +185,7 @@ export default function Certificates() {
 		<div className="cert-s-page">
 			<header className="cert-s-header">
 				<div className="cert-s-header-left" />
-				<div className="cert-s-header-title">수료증</div>
+				<div className="cert-s-header-title">{t("mypage.certs")}</div>
 				<button type="button" className="cert-s-header-close" aria-label="닫기" onClick={handleClose}>
 					<img src="/icons/x-01.svg" alt="" />
 				</button>
@@ -191,11 +193,11 @@ export default function Certificates() {
 
 			<main className="cert-s-body">
 				{loading ? (
-					<div className="cert-s-empty">불러오는 중…</div>
+					<div className="cert-s-empty">{t("common.loading")}</div>
 				) : errorMsg ? (
 					<div className="cert-s-empty">{errorMsg}</div>
 				) : items.length === 0 ? (
-					<div className="cert-s-empty">발급된 수료증이 없습니다.</div>
+					<div className="cert-s-empty">{t("mypage.noCerts")}</div>
 				) : (
 					<div className="cert-s-list">
 						{items.map((item) => (

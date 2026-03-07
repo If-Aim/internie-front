@@ -17,7 +17,8 @@
         "allDay": "종일",
         "confirm": "확인",
         "save": "저장하기",
-        "dateRange": "기간"
+        "dateRange": "기간",
+        "loading": "불러오는 중…"
     },
     "menu": {
         "mypage": "기본 정보",
@@ -105,6 +106,15 @@
     "mypage": {
         "greeting": "안녕하세요,",
         "greeting2": "님",
+        
+        "birth": "생년월일",
+        "schoolMajor": "학교/전공",
+        "noSchool": "학교 정보 없음",
+        "needStudentVerification": "재학생 인증 필요",
+        "name": "이름",
+        "needName": "이름을 입력해주세요.",
+        "edit": "편집",
+
         "targetCompany": "나의 목표 기업",
         "targetComLabel": "목표 기업",
         "targetComLabelEx": "예: aim",
@@ -113,6 +123,7 @@
 
         "notSet": "미설정",
         "certs": "나의 수료증",
+        "noCerts": "발급된 수료증이 없습니다.",
         "editProfile": "프로필 수정하기",
         "verifyCode": "인증코드 입력하기",
         "logout": "로그아웃"
@@ -140,6 +151,9 @@
         "failSetEndDate": "마감일은 시작일보다 빠를 수 없습니다.",
 
         "failGetUserMe": "내 정보 조회에 실패했습니다.",
+        "failGetMyCerts" : "수료증 목록을 불러오지 못했습니다.",
+        "failToDownload": "파일 다운로드 실패",
+        "imageRequired": "이미지 파일만 업로드할 수 있습니다.",
         "failSetCareerGoal": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
 
         "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",
