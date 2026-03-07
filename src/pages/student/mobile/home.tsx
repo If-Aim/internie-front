@@ -735,7 +735,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRole, onRequi
 						<span>{t("menu.settings")}</span>
 					</button>
 					<button className="drawer-menu-item" onClick={toggleLang}>
-						<img className="icon" src="/icons/settings.svg" alt={t("menu.language")} />{" "}
+						<img className="icon" src="/icons/globe-01.svg" alt={t("menu.language")} />{" "}
 						<span>{t("menu.language")}</span>
 					</button>
 					{userRole === "ROLE_ADMIN" && (
