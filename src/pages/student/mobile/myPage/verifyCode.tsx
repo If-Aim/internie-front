@@ -1,11 +1,15 @@
 // src/pages/student/mobile/myPage/verifyCode.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import { type UserMe, ApiError, verifyJumpUser, getUserMe, type JumpOrganization, getMyJumpOrganizations, submitMyOnboarding } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
 
 export default function VerifyCodePage() {
+    const { t } = useTranslation();
+    
     const navigate = useNavigate();
     const [me, setMe] = React.useState<UserMe | null>(null);
 
@@ -172,12 +176,12 @@ export default function VerifyCodePage() {
             </header>
 
             <div className="profile-edit-field">
-                <div className="profile-edit-label">인증코드를 입력하세요</div>
+                <div className="profile-edit-label">{t("mypage.enterVerificationCode")}</div>
                 <input
                     className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
                     value={isJumpVerified ? "JUMP 인증 완료" : code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder={isJumpVerified ? undefined : "인증코드"}
+                    placeholder={isJumpVerified ? undefined : t("mypage.verificationCode")}
                     readOnly={isJumpVerified}
                     disabled={submitting}
                 />
@@ -236,7 +240,7 @@ export default function VerifyCodePage() {
                     (isJumpVerified && !jumpOrganizationId)
                 }
             >
-                완료
+                {t("common.done")}
             </button>
         </div>
     );

@@ -196,7 +196,7 @@ export default function EditProfilePage(): React.ReactElement {
                     </div>
 
                     <button type="button" className="profile-edit-avatar-btn" onClick={()=> fileRef.current?.click()} disabled={saving} >
-                        {t("mypage.edit ")}
+                        {t("mypage.edit")}
                     </button>
                     <input ref={fileRef} type="file" accept="image/*" onChange={onPickProfileImage} style={{ display: "none" }} /> 
                 </section>

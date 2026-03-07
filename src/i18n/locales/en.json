@@ -17,7 +17,8 @@
 		"confirm": "Confirm",
 		"save": "Save",
 		"dateRange": "Period",
-        "loading": "Loading…"
+        "loading": "Loading…",
+		"done": "Done"
 	},
 	"menu": {
 		"mypage": "Profile",
@@ -120,6 +121,9 @@
 		"targetComLabelEx": "e.g., AIM",
 		"desiredJob": "Desired Job",
 		"desiredJobEx": "e.g., CEO, PM, Backend Engineer",
+
+		"verificationCode": "Code",
+        "enterVerificationCode": "Enter the verification code",
 
 		"notSet": "Not Set",
 		"certs": "My Certificates",

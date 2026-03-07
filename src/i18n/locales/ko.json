@@ -18,7 +18,8 @@
         "confirm": "확인",
         "save": "저장하기",
         "dateRange": "기간",
-        "loading": "불러오는 중…"
+        "loading": "불러오는 중…",
+        "done": "완료"
     },
     "menu": {
         "mypage": "기본 정보",
@@ -120,6 +121,9 @@
         "targetComLabelEx": "예: aim",
         "desiredJob": "희망 직무",
         "desiredJobEx": "예: 대표, PM, 백엔드 개발자",
+
+        "verificationCode": "인증코드",
+        "enterVerificationCode": "인증코드를 입력하세요",
 
         "notSet": "미설정",
         "certs": "나의 수료증",
