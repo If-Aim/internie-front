@@ -259,6 +259,12 @@ export default function MyPage({ onLogout }: Props) {
 				</div>
 				*/}
 				<div className="mypage-menu">
+					<button type="button" className="mypage-menu-item" onClick={() => navigate("modify")}> 
+						<span className="mypage-menu-title">{t("mypage.editProfile")}</span>
+						<span className="mypage-menu-right">
+							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
+						</span>
+					</button>
 					<button type="button" className="mypage-menu-item" onClick={handleServicePreparing /*() => navigate("career-goals")*/}>
 						<span className="mypage-menu-title">{t("mypage.targetCompany")}</span>
 						<span className="mypage-menu-right">
@@ -268,12 +274,6 @@ export default function MyPage({ onLogout }: Props) {
 					</button>
 					<button type="button" className="mypage-menu-item" onClick={() => navigate("cert")}> 
 						<span className="mypage-menu-title">{t("mypage.certs")}</span>
-						<span className="mypage-menu-right">
-							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
-						</span>
-					</button>
-					<button type="button" className="mypage-menu-item" onClick={() => navigate("modify")}> 
-						<span className="mypage-menu-title">{t("mypage.editProfile")}</span>
 						<span className="mypage-menu-right">
 							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
