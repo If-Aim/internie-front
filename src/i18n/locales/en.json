@@ -144,6 +144,26 @@
 		"reVerify": "Try Again"
 	},
 
+	"comment_onboarding": "Onboarding",
+	"onboarding": {
+		"step1Title": "Enter your name",
+		"namePlaceholder": "Name",
+		"nameAlert": "*Please enter your real name.",
+		"step2Title": "Set your goals",
+		"interestJobPlaceholder": "Enter your job of interest",
+		"interestCompanyPlaceholder": "Enter your target company",
+		"step3Title": "Enter your verification code",
+		"verifyCodePlaceholder": "Verification code",
+		"invalidCode": "The verification code is invalid.",
+		"verifyFailedRetry": "Verification failed. Please try again later.",
+		"verifyFailed": "Verification failed.",
+		"step4Title": "Select your center",
+		"institutionPlaceholder": "Select a center",
+		"next": "Next",
+		"skip": "Skip",
+		"finish": "Done"
+	},
+
 	"comment_error": "에러 관련",
 	"error": {
 		"unknown": "An unknown error occurred.",

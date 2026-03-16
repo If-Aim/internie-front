@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, getUserMe, verifyJumpUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization } from "../../../api/client";
+import { useTranslation } from "react-i18next";
 import "./onBoarding.css"
 
 type Step = 1 | 2 | 3 | 4;
@@ -19,6 +20,7 @@ type FormState = {
 
 
 export default function OnBoarding(): React.ReactElement {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [step, setStep] = React.useState<Step>(1);
 
@@ -128,10 +130,10 @@ export default function OnBoarding(): React.ReactElement {
             setStep(4);
         } catch (e) {
             if (e instanceof ApiError) {
-                if (e.status === 401) setCodeError("인증 코드가 올바르지 않습니다.");
-                else setCodeError("인증에 실패했습니다. 잠시 후 다시 시도해주세요.");
+                if (e.status === 401) setCodeError(t("onboarding.invalidCode"));
+                else setCodeError(t("onboarding.verifyFailedRetry"));
             } else {
-                setCodeError("인증에 실패했습니다.");
+                setCodeError(t("onboarding.verifyFailed"));
             }
         } finally {
             setSubmitting(false);
@@ -175,29 +177,30 @@ export default function OnBoarding(): React.ReactElement {
             <div className="ob-content">
                 {step === 1 && (
                     <>
-                    <h1 className="ob-title">이름을 입력하세요</h1>
-                    <div className="ob-field">
-                        <input
-                        className="ob-input"
-                        value={form.name}
-                        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                        placeholder="이름"
-                        autoComplete="name"
-                        />
-                    </div>
+                        <h1 className="ob-title">{t("onboarding.step1Title")}</h1>
+                        <div className="ob-field">
+                            <input
+                            className="ob-input"
+                            value={form.name}
+                            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                            placeholder={t("onboarding.namePlaceholder")}
+                            autoComplete="name"
+                            />
+                        </div>
+                        <span className="ob-alert">{t("onboarding.nameAlert")}</span>
                     </>
                 )}
 
                 {step === 2 && (
                     <>
-                        <h1 className="ob-title">나의 목표를 설정하세요</h1>
+                        <h1 className="ob-title">{t("onboarding.step2Title")}</h1>
 
                         <div className="ob-field ob-field--icon">
                             <input
                                 className="ob-input"
                                 value={form.interestJob}
                                 onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
-                                placeholder="관심있는 직무를 입력하세요"
+                                placeholder={t("onboarding.interestJobPlaceholder")}
                             />
                         </div>
 
@@ -206,7 +209,7 @@ export default function OnBoarding(): React.ReactElement {
                                 className="ob-input"
                                 value={form.interestCompany}
                                 onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
-                                placeholder="희망하는 기업을 입력하세요"
+                                placeholder={t("onboarding.interestCompanyPlaceholder")}
                             />
                         </div>
                     </>
@@ -214,13 +217,13 @@ export default function OnBoarding(): React.ReactElement {
 
                 {step === 3 && (
                     <>
-                        <h1 className="ob-title">인증코드를 입력하세요</h1>
+                        <h1 className="ob-title">{t("onboarding.step3Title")}</h1>
                         <div className="ob-field">
                             <input
                                 className="ob-input"
                                 value={form.verifyCode}
                                 onChange={(e) => setForm((p) => ({ ...p, verifyCode: e.target.value }))}
-                                placeholder="인증코드"
+                                placeholder={t("onboarding.verifyCodePlaceholder")}
                             />
                         </div>
 
@@ -234,13 +237,13 @@ export default function OnBoarding(): React.ReactElement {
                             <img src="/logos/jump-logo.png" alt="JUMP" />
                         </div>
 
-                        <h1 className="ob-title">센터를 선택하세요</h1>
+                        <h1 className="ob-title">{t("onboarding.step4Title")}</h1>
 
                         <div className="ob-field">
                             <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
                                 <button type="button" className="ob-dd-trigger" onClick={() => setInstOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={instOpen} >
                                     <span className={"ob-dd-value" + (form.jumpOrganizationName ? "" : " ob-dd-value--placeholder")}>
-                                        {form.jumpOrganizationName || "센터 선택"}
+                                        {form.jumpOrganizationName || t("onboarding.institutionPlaceholder")}
                                     </span>
                                     <span className="ob-dd-caret" aria-hidden="true">
                                         <img src="/icons/chevron-left.svg" alt="" />
@@ -272,17 +275,17 @@ export default function OnBoarding(): React.ReactElement {
             <div className="ob-footer">
                 {step === 1 && (
                     <button className="ob-btn ob-btn--primary" onClick={next} disabled={!canGoStep1}>
-                    다음
+                        {t("onboarding.next")}
                     </button>
                 )}
 
                 {step === 2 && (
                     <>  
                         <button className="ob-btn ob-btn--ghost" onClick={skipGoals} type="button">
-                            건너뛰기
+                            {t("onboarding.skip")}
                         </button>
                         <button className="ob-btn ob-btn--primary" onClick={next} type="button" disabled={!canGoStep2} >
-                            다음
+                            {t("onboarding.next")}
                         </button>
                     </>
                 )}
@@ -290,16 +293,16 @@ export default function OnBoarding(): React.ReactElement {
                 {step === 3 && (
                     <>
                         <button className="ob-btn ob-btn--ghost" onClick={skipVerifyAndFinish} type="button">
-                            건너뛰기
+                            {t("onboarding.skip")}
                         </button>
                         <button className="ob-btn ob-btn--primary" onClick={submitAll} disabled={submitting || !canGoStep3} type="button" >
-                            다음
+                            {t("onboarding.next")}
                         </button>
                     </>
                 )}
                 {step === 4 && isVerified && (
                     <button className="ob-btn ob-btn--primary" onClick={finishInstitution} disabled={!canFinishStep4} type="button" >
-                        완료
+                        {t("common.done")}
                     </button>
                 )}
             </div>

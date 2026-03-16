@@ -8,6 +8,7 @@ font-size: 16px;font-weight:400;color: #000;outline: none;}
 .ob-input::placeholder{color: #9AA0A6;}
 .ob-input:focus{border-color: #CFCFCF;}
 .ob-footer{display:flex; flex-direction: column; gap: 12px; padding: 14px 20px calc(53px + env(safe-area-inset-bottom));background: #fff;}
+.ob-alert { margin: 13px 0 0 23px; color: #5F5F5F; font-size: 16px; font-weight: 400; }
 
 .ob-btn{width: 100%;height: 60px;border: none;border-radius: 10px;font-size: 16px;font-weight: 700;background: #E3E3E3;color: #707070;}
 .ob-btn--ghost{ background: #BDD8FF; color: #000; }
