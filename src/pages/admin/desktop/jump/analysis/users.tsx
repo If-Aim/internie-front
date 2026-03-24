@@ -798,7 +798,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 									type="button"
 									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
 									onClick={() => {
-										handleServicePreparing
+										handleServicePreparing()
 										// setRecordOpen((prev) => !prev);
 										// setOrgOpen(false);
 									}}
