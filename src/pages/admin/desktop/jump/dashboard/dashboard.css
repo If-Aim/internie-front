@@ -120,9 +120,9 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .jump-dashboard-org-text.is-selected {color: #000000;}
 
 .jump-dashboard-week-grid { display: flex; flex-direction: column; gap: 12px; } 
-.jump-dashboard-week-grid-head { display: grid; grid-template-columns: 1fr 1fr; align-items: end; } 
+.jump-dashboard-week-grid-head { padding: 0 3px 0; display: grid; grid-template-columns: 1fr 1fr; align-items: end; } 
 .jump-dashboard-week-grid-spacer { height: 1px; }
-.jump-dashboard-week-days { padding-right: 8px; display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; color: #979797; font-weight: 700; line-height: 20px;}
+.jump-dashboard-week-days { padding-right: 7px; display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; color: #979797; font-weight: 700; line-height: 20px;}
 .jump-dashboard-week-day{ text-align: center; justify-self: center; height: 35px; width: 55px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
 .jump-dashboard-week-day--today{ background: #BDD8FF; border-radius: 6px;  display: flex; align-items: center; justify-content: center; color: #000; }
 
