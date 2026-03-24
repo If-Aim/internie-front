@@ -728,7 +728,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			setEventDayCache((prev) => ({ ...prev, [eventDayId]: null }));
 		}
 	}
-
+	function handleServicePreparing() {
+		alert("서비스 준비중입니다.");
+	}
 	// 왼쪽 카드 분기
 	function getSelectedBadgeNumber(): number | null {
 		if (!selected) return null;
@@ -812,8 +814,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 											type="button"
 											className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
 											onClick={() => {
-												setSelectedRecordFilter("ALL");
-												setRecordOpen(false);
+												handleServicePreparing
+												// setSelectedRecordFilter("ALL");
+												// setRecordOpen(false);
 											}}
 										>
 											전체
