@@ -127,8 +127,8 @@ function getSchoolName(u: JumpAdminStudent): string {
 export default function JumpAdminUsersPage(): React.ReactElement {
 
     const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
-    const [/*loading*/, setLoading] = React.useState<boolean>(true);
-    const [/*errorMsg*/, setErrorMsg] = React.useState<string | null>(null);
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
     const [query, setQuery] = React.useState<string>("");
     const [selectedId, setSelectedId] = React.useState<number | null>(null);
@@ -160,7 +160,6 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	
 	const [eventDayCache, setEventDayCache] = React.useState<Record<number, JumpAdminEventDayDetailResponse | null | undefined>>({});
 	
-	const [recordFilter, /*setRecordFilter*/] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
 
 	const selected = React.useMemo(() => {
         if (selectedId == null) return null;
@@ -321,20 +320,15 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		});
 
 		const byRecord = byOrg.filter((_u) => {
-			if (recordFilter === "ALL") return true;
+			if (selectedRecordFilter === "ALL") return true;
 
-			const hasAnyRecord = (calendar?.dailyStatuses ?? []).some((ds) => {
-				return (ds?.eventDayIds?.length ?? 0) > 0;
-			});
-
-			if (recordFilter === "RECORDED") return hasAnyRecord;
-			if (recordFilter === "NOT_RECORDED") return !hasAnyRecord;
+			// TODO:
 
 			return true;
 		});
 
 		return byRecord.filter((u) => matchQuery(u, query));
-	}, [students, selectedOrg, query, recordFilter, calendar]);
+	}, [students, selectedOrg, selectedRecordFilter, query]);
 
 	React.useEffect(() => {// 필터 바깥쪽 클릭 시 닫힘
 		function onDocMouseDown(e: MouseEvent) {
@@ -745,64 +739,146 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return idx + 1;
 	}
 	function renderLeftListMode(): React.ReactNode {
-    	return (
-			<div className="jump-users-filters">
-				<div className="jump-users-filter-row">
-					<div className="jump-users-filter">
-						<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
-							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => { setOrgOpen((prev) => !prev); setRecordOpen(false); }} aria-label="organization filter" >
-								<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
-								<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-								<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
-							</button>
+		return (
+			<div className="jump-users-left-frame">
+				<div className="jump-users-filters">
+					<div className="jump-users-filter-row">
+						<div className="jump-users-filter">
+							<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
+								<button
+									type="button"
+									className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
+									onClick={() => {
+										setOrgOpen((prev) => !prev);
+										setRecordOpen(false);
+									}}
+									aria-label="organization filter"
+								>
+									<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
+									<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
+									<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
+								</button>
 
-							{orgOpen && (
-								<div className="jump-users-org-menu">
-									<button type="button" className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`} onClick={() => { setSelectedOrg(""); setOrgOpen(false); }} >
-										전체
-									</button>
-
-									{orgOptions.map((org) => (
-										<button key={org} type="button" className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`} onClick={() => { setSelectedOrg(org); setOrgOpen(false); }} >
-											{org}
+								{orgOpen && (
+									<div className="jump-users-org-menu">
+										<button
+											type="button"
+											className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`}
+											onClick={() => {
+												setSelectedOrg("");
+												setOrgOpen(false);
+											}}
+										>
+											전체
 										</button>
-									))}
-								</div>
-							)}
+
+										{orgOptions.map((org) => (
+											<button
+												key={org}
+												type="button"
+												className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`}
+												onClick={() => {
+													setSelectedOrg(org);
+													setOrgOpen(false);
+												}}
+											>
+												{org}
+											</button>
+										))}
+									</div>
+								)}
+							</div>
+						</div>
+
+						<div className="jump-users-filter">
+							<div ref={recordRef} className={`jump-users-org ${recordOpen ? "is-open" : ""}`}>
+								<button
+									type="button"
+									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
+									onClick={() => {
+										setRecordOpen((prev) => !prev);
+										setOrgOpen(false);
+									}}
+									aria-label="record status filter"
+								>
+									<img className="jump-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/fe_document-6b.svg" : "/icons/fe_document.svg"} alt="" />
+									<span className="jump-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
+									<img className="jump-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
+								</button>
+
+								{recordOpen && (
+									<div className="jump-users-org-menu">
+										<button
+											type="button"
+											className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
+											onClick={() => {
+												setSelectedRecordFilter("ALL");
+												setRecordOpen(false);
+											}}
+										>
+											전체
+										</button>
+
+										<button
+											type="button"
+											className={`jump-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`}
+											onClick={() => {
+												setSelectedRecordFilter("RECORDED");
+												setRecordOpen(false);
+											}}
+										>
+											기록
+										</button>
+
+										<button
+											type="button"
+											className={`jump-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`}
+											onClick={() => {
+												setSelectedRecordFilter("NOT_RECORDED");
+												setRecordOpen(false);
+											}}
+										>
+											미기록
+										</button>
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 
-					<div className="jump-users-filter">
-						<div ref={recordRef} className={`jump-users-org ${recordOpen ? "is-open" : ""}`}>
-							<button type="button" className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`} onClick={() => { setRecordOpen((prev) => !prev); setOrgOpen(false); }} aria-label="record status filter" >
-								<img className="jump-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/file-text-6b.svg" : "/icons/file-text.svg"} alt="" /> 
-								<span className="jump-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
-								<img className="jump-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
-							</button>
-
-							{recordOpen && (
-								<div className="jump-users-org-menu">
-									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("ALL"); setRecordOpen(false); }} >
-										전체
-									</button>
-
-									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("RECORDED"); setRecordOpen(false); }} >
-										기록
-									</button>
-
-									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("NOT_RECORDED"); setRecordOpen(false); }} >
-										미기록
-									</button>
-								</div>
-							)}
-						</div>
+					<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+						<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
+						<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 					</div>
 				</div>
 
-				<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-					<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
-					<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
-				</div>
+				{loading ? (
+					<div className="jump-users-state">불러오는 중...</div>
+				) : errorMsg ? (
+					<div className="jump-users-state">{errorMsg}</div>
+				) : (
+					<div ref={listRef} className="jump-admin-list" role="list">
+						{filtered.map((u, idx) => {
+							const isSelected = selectedId === u.userId;
+							const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
+							const orgName = getOrgName(u);
+
+							return (
+								<button
+									key={u.userId}
+									type="button"
+									className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+									onClick={() => setSelectedId(u.userId)}
+									role="listitem"
+								>
+									<div className="jump-admin-badge">{idx + 1}</div>
+									<div className="jump-admin-user-name">{displayName}</div>
+									<div className="jump-admin-user-org">{orgName}</div>
+								</button>
+							);
+						})}
+					</div>
+				)}
 			</div>
 		);
 	}
