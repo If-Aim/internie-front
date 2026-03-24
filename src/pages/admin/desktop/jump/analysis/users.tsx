@@ -798,8 +798,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 									type="button"
 									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
 									onClick={() => {
-										setRecordOpen((prev) => !prev);
-										setOrgOpen(false);
+										handleServicePreparing
+										// setRecordOpen((prev) => !prev);
+										// setOrgOpen(false);
 									}}
 									aria-label="record status filter"
 								>
@@ -814,9 +815,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 											type="button"
 											className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
 											onClick={() => {
-												handleServicePreparing
-												// setSelectedRecordFilter("ALL");
-												// setRecordOpen(false);
+												setSelectedRecordFilter("ALL");
+												setRecordOpen(false);
 											}}
 										>
 											전체
