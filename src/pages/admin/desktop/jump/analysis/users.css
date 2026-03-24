@@ -3,7 +3,9 @@
 .jump-users-page { display: flex; flex-direction: column; gap: 13px; }
 .jump-users-page .jump-admin-list { max-height: none; }
 
-.jump-users-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: 15px; gap: 23px; }
+.jump-users-filters { display: flex; flex-direction: column; gap: 15px; padding-right: 22px; }
+.jump-users-filter-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 23px; }
+.jump-users-filter { min-width: 0; }
 .jump-users-search-input { width: 100%; height: 66px; border-radius: 10px; border: 1px solid #E6E6E6; background: #fff; padding: 0 14px; font-weight: 700; outline: none; font-size: 16px; }
 .jump-users-search-input { color: #000; } 
 .jump-users-search.is-empty .jump-users-search-input { color: #6b6b6b; }

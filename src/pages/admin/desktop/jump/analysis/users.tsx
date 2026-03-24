@@ -103,6 +103,12 @@ function getOrgName(u: JumpAdminStudent): string {
     return normalizeText(org) || "-";
 }
 
+function getRecordFilterLabel(value: "ALL" | "RECORDED" | "NOT_RECORDED"): string {
+    if (value === "RECORDED") return "기록";
+    if (value === "NOT_RECORDED") return "미기록";
+    return "전체";
+}
+
 function matchQuery(u: JumpAdminStudent, q: string): boolean {
     const query = q.trim().toLowerCase();
     if (!query) return true;
@@ -121,8 +127,8 @@ function getSchoolName(u: JumpAdminStudent): string {
 export default function JumpAdminUsersPage(): React.ReactElement {
 
     const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
-    const [loading, setLoading] = React.useState<boolean>(true);
-    const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+    const [/*loading*/, setLoading] = React.useState<boolean>(true);
+    const [/*errorMsg*/, setErrorMsg] = React.useState<string | null>(null);
 
     const [query, setQuery] = React.useState<string>("");
     const [selectedId, setSelectedId] = React.useState<number | null>(null);
@@ -135,9 +141,14 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const [calendarError, setCalendarError] = React.useState<string | null>(null);
     const [calendar, setCalendar] = React.useState<JumpAdminStudentCalendarResponse | null>(null);
 
-	const [selectedOrg, setSelectedOrg] = React.useState<string>(""); 
-	const [open, setOpen] = React.useState<boolean>(false);
+	const [selectedOrg, setSelectedOrg] = React.useState<string>("");
+	const [selectedRecordFilter, setSelectedRecordFilter] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
+
+	const [orgOpen, setOrgOpen] = React.useState<boolean>(false);
+	const [recordOpen, setRecordOpen] = React.useState<boolean>(false);
+
 	const orgRef = React.useRef<HTMLDivElement | null>(null);
+	const recordRef = React.useRef<HTMLDivElement | null>(null);
 
 	const [rightView, setRightView] = React.useState<UsersRightView>("USER_DETAIL");
 	const [navDir, setNavDir] = React.useState<NavDir>("forward");
@@ -148,6 +159,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const [qDir, setQDir] = React.useState<NavDir>("forward");
 	
 	const [eventDayCache, setEventDayCache] = React.useState<Record<number, JumpAdminEventDayDetailResponse | null | undefined>>({});
+	
+	const [recordFilter, /*setRecordFilter*/] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
 
 	const selected = React.useMemo(() => {
         if (selectedId == null) return null;
@@ -306,24 +319,44 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			if (!selectedOrg.trim()) return true;
 			return getOrgName(u) === selectedOrg;
 		});
-		return byOrg.filter((u) => matchQuery(u, query));
-	}, [students, selectedOrg, query]);
 
-	React.useEffect(() => { // 필터 바깥쪽 클릭 시 닫힘
-		if (!open) return;
+		const byRecord = byOrg.filter((_u) => {
+			if (recordFilter === "ALL") return true;
 
+			const hasAnyRecord = (calendar?.dailyStatuses ?? []).some((ds) => {
+				return (ds?.eventDayIds?.length ?? 0) > 0;
+			});
+
+			if (recordFilter === "RECORDED") return hasAnyRecord;
+			if (recordFilter === "NOT_RECORDED") return !hasAnyRecord;
+
+			return true;
+		});
+
+		return byRecord.filter((u) => matchQuery(u, query));
+	}, [students, selectedOrg, query, recordFilter, calendar]);
+
+	React.useEffect(() => {// 필터 바깥쪽 클릭 시 닫힘
 		function onDocMouseDown(e: MouseEvent) {
-			const el = orgRef.current;
-			if (!el) return;
+			if (!(e.target instanceof Node)) return;
 
-			if (e.target instanceof Node && !el.contains(e.target)) {
-				setOpen(false);
+			const orgEl = orgRef.current;
+			const recordEl = recordRef.current;
+
+			if (orgOpen && orgEl && !orgEl.contains(e.target)) {
+				setOrgOpen(false);
+			}
+
+			if (recordOpen && recordEl && !recordEl.contains(e.target)) {
+				setRecordOpen(false);
 			}
 		}
 
+		if (!orgOpen && !recordOpen) return;
+
 		document.addEventListener("mousedown", onDocMouseDown);
 		return () => document.removeEventListener("mousedown", onDocMouseDown);
-	}, [open]);
+	}, [orgOpen, recordOpen]);
 
     React.useEffect(() => { // calendar 로딩
 		let mounted = true;
@@ -713,23 +746,24 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}
 	function renderLeftListMode(): React.ReactNode {
     	return (
-			<div className="jump-users-left-frame">
-				<div className="jump-users-filters">
+			<div className="jump-users-filters">
+				<div className="jump-users-filter-row">
 					<div className="jump-users-filter">
-						<div ref={orgRef} className={`jump-users-org ${open ? "is-open" : ""}`}>
-							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} aria-label="organization filter" >
+						<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
+							<button type="button" className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => { setOrgOpen((prev) => !prev); setRecordOpen(false); }} aria-label="organization filter" >
 								<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
 								<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
 								<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
 							</button>
-							{open && (
+
+							{orgOpen && (
 								<div className="jump-users-org-menu">
-									<button type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+									<button type="button" className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`} onClick={() => { setSelectedOrg(""); setOrgOpen(false); }} >
 										전체
 									</button>
 
 									{orgOptions.map((org) => (
-										<button key={org} type="button" className="jump-users-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }}>
+										<button key={org} type="button" className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`} onClick={() => { setSelectedOrg(org); setOrgOpen(false); }} >
 											{org}
 										</button>
 									))}
@@ -738,39 +772,37 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 						</div>
 					</div>
 
-					<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-						<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
-						<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
+					<div className="jump-users-filter">
+						<div ref={recordRef} className={`jump-users-org ${recordOpen ? "is-open" : ""}`}>
+							<button type="button" className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`} onClick={() => { setRecordOpen((prev) => !prev); setOrgOpen(false); }} aria-label="record status filter" >
+								<img className="jump-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/file-text-6b.svg" : "/icons/file-text.svg"} alt="" /> 
+								<span className="jump-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
+								<img className="jump-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
+							</button>
+
+							{recordOpen && (
+								<div className="jump-users-org-menu">
+									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("ALL"); setRecordOpen(false); }} >
+										전체
+									</button>
+
+									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("RECORDED"); setRecordOpen(false); }} >
+										기록
+									</button>
+
+									<button type="button" className={`jump-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`} onClick={() => { setSelectedRecordFilter("NOT_RECORDED"); setRecordOpen(false); }} >
+										미기록
+									</button>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 
-				{loading ? (
-					<div className="jump-users-state">불러오는 중...</div>
-				) : errorMsg ? (
-					<div className="jump-users-state">{errorMsg}</div>
-				) : (
-					<div ref={listRef} className="jump-admin-list" role="list">
-						{filtered.map((u, idx) => {
-							const isSelected = selectedId === u.userId;
-							const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
-							const orgName = getOrgName(u);
-
-							return (
-								<button
-									key={u.userId}
-									type="button"
-									className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
-									onClick={() => setSelectedId(u.userId)}
-									role="listitem"
-								>
-									<div className="jump-admin-badge">{idx + 1}</div>
-									<div className="jump-admin-user-name">{displayName}</div>
-									<div className="jump-admin-user-org">{orgName}</div>
-								</button>
-							);
-						})}
-					</div>
-				)}
+				<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+					<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
+					<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
+				</div>
 			</div>
 		);
 	}
