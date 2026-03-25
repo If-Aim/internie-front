@@ -140,6 +140,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
     const [calendarLoading, setCalendarLoading] = React.useState<boolean>(false);
     const [calendarError, setCalendarError] = React.useState<string | null>(null);
     const [calendar, setCalendar] = React.useState<JumpAdminStudentCalendarResponse | null>(null);
+	const [studentCalCache, setStudentCalCache] = React.useState<Record<string, JumpAdminStudentCalendarResponse>>({});
+	const [/*studentCalLoading*/, setStudentCalLoading] = React.useState<boolean>(false);
 
 	const [selectedOrg, setSelectedOrg] = React.useState<string>("");
 	const [selectedRecordFilter, setSelectedRecordFilter] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
@@ -288,6 +290,65 @@ export default function JumpAdminUsersPage(): React.ReactElement {
         };
     }, []);
 
+	React.useEffect(() => {
+		if (students.length === 0) {
+			setStudentCalCache({});
+			return;
+		}
+
+		let mounted = true;
+
+		(async () => {
+			setStudentCalLoading(true);
+
+			const nextCache: Record<string, JumpAdminStudentCalendarResponse> = {};
+
+			for (const key of Object.keys(studentCalCache)) {
+				nextCache[key] = studentCalCache[key];
+			}
+
+			try {
+				const tasks = students.map(async (u) => {
+					const key = `${u.userId}-${calYear}-${calMonth}`;
+					if (nextCache[key]) return;
+
+					try {
+						const res = await getJumpAdminStudentCalendar(u.userId, calYear, calMonth);
+						nextCache[key] = res;
+					} catch {
+						nextCache[key] = {
+							year: calYear,
+							month: calMonth,
+							totalRecordedDays: 0,
+							dailyStatuses: [],
+						};
+					}
+				});
+
+				await Promise.all(tasks);
+
+				if (!mounted) return;
+				setStudentCalCache(nextCache);
+			} finally {
+				if (mounted) setStudentCalLoading(false);
+			}
+		})();
+
+		return () => {
+			mounted = false;
+		};
+	}, [students, calYear, calMonth]);
+
+	function hasAnyRecordForStudent(userId: number): boolean {
+		const key = `${userId}-${calYear}-${calMonth}`;
+		const cal = studentCalCache[key];
+		if (!cal) return false;
+
+		return (cal.dailyStatuses ?? []).some((ds) => {
+			return (ds?.eventDayIds?.length ?? 0) > 0;
+		});
+	}
+
     const orgOptions = React.useMemo(() => {
 		const set = new Set<string>();
 		for (const u of students) {
@@ -319,16 +380,19 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			return getOrgName(u) === selectedOrg;
 		});
 
-		const byRecord = byOrg.filter((_u) => {
+		const byRecord = byOrg.filter((u) => {
 			if (selectedRecordFilter === "ALL") return true;
 
-			// TODO:
+			const hasRecord = hasAnyRecordForStudent(u.userId);
+
+			if (selectedRecordFilter === "RECORDED") return hasRecord;
+			if (selectedRecordFilter === "NOT_RECORDED") return !hasRecord;
 
 			return true;
 		});
 
 		return byRecord.filter((u) => matchQuery(u, query));
-	}, [students, selectedOrg, selectedRecordFilter, query]);
+	}, [students, selectedOrg, selectedRecordFilter, query, studentCalCache, calYear, calMonth]);
 
 	React.useEffect(() => {// 필터 바깥쪽 클릭 시 닫힘
 		function onDocMouseDown(e: MouseEvent) {
@@ -728,9 +792,11 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			setEventDayCache((prev) => ({ ...prev, [eventDayId]: null }));
 		}
 	}
-	function handleServicePreparing() {
-		alert("서비스 준비중입니다.");
-	}
+
+	// function handleServicePreparing() {
+	// 	alert("서비스 준비중입니다.");
+	// }
+
 	// 왼쪽 카드 분기
 	function getSelectedBadgeNumber(): number | null {
 		if (!selected) return null;
@@ -798,9 +864,9 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 									type="button"
 									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
 									onClick={() => {
-										handleServicePreparing()
-										// setRecordOpen((prev) => !prev);
-										// setOrgOpen(false);
+										//handleServicePreparing()
+										setRecordOpen((prev) => !prev);
+										setOrgOpen(false);
 									}}
 									aria-label="record status filter"
 								>
