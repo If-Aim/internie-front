@@ -75,44 +75,31 @@ export default function OnBoarding(): React.ReactElement {
     }, [instOpen]);
 
     function next() {
-        setStep((s) => (s < 3 ? ((s + 1) as Step) : s));
+        setStep((s) => (s < 4 ? ((s + 1) as Step) : s));
     }
 
     // function back() { 
     //     setStep((s) => (s > 1 ? ((s - 1) as Step) : s));
     // }  추후 필요 시 사용  ("이전") 버튼용
 
-    function skipGoals() {
-        setForm((prev) => ({ ...prev, interestJob: "", interestCompany: "", selectedTags: [] }));
+    function skipVerify() {
+        setCodeError(null);
+        setIsVerified(false);
+        setInstitutions([]);
+        setForm((prev) => ({
+            ...prev,
+            verifyCode: "",
+            jumpOrganizationId: null,
+            jumpOrganizationName: "",
+        }));
         setStep(3);
     }
-    async function skipVerifyAndFinish() {
-        setCodeError(null);
 
-        try {
-            await submitMyOnboarding({
-                name: form.name,
-                interestJob: form.interestJob,
-                interestCompany: form.interestCompany,
-            });
-        } catch {
-
-        }
-
-        navigate("/student", { replace: true });
-    }
-    async function submitAll() {
+    async function submitVerifyCode() {
         const code = form.verifyCode.trim();
 
         if (!code) {
-            try {
-                await submitMyOnboarding({
-                    name: form.name,
-                    interestJob: form.interestJob,
-                    interestCompany: form.interestCompany,
-                });
-            } catch {}
-            navigate("/student", { replace: true });
+            setCodeError(t("onboarding.invalidCode"));
             return;
         }
 
@@ -123,11 +110,10 @@ export default function OnBoarding(): React.ReactElement {
             await verifyJumpUser(code);
             setIsVerified(true);
 
-            // 점프기관 목록 조회
             const orgs = await getMyJumpOrganizations();
             setInstitutions(orgs);
 
-            setStep(4);
+            setStep(2);
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 401) setCodeError(t("onboarding.invalidCode"));
@@ -149,73 +135,33 @@ export default function OnBoarding(): React.ReactElement {
         setInstOpen(false);
     }
 
-    async function finishInstitution() {
+    function finishInstitution() {
         if (!form.jumpOrganizationId) return;
+        setStep(3);
+    }
 
+    async function finishOnboarding() {
         try {
             await submitMyOnboarding({
                 name: form.name,
                 interestJob: form.interestJob,
                 interestCompany: form.interestCompany,
-                jumpOrganizationId: form.jumpOrganizationId,
+                jumpOrganizationId: form.jumpOrganizationId ?? undefined,
             });
-        } catch (e) {
-
-        }
+        } catch {}
 
         navigate("/student", { replace: true });
     }
 
-    const canGoStep1 = form.name.trim().length > 0;
-    const canGoStep2 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
-    const canGoStep3 = form.verifyCode.trim().length > 0;
-
-    const canFinishStep4 = isVerified && form.jumpOrganizationId != null;
+    const canGoStep1 = form.verifyCode.trim().length > 0;
+    const canGoStep2 = isVerified && form.jumpOrganizationId != null;
+    const canGoStep3 = form.name.trim().length > 0;
+    const canGoStep4 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
 
     return (
         <div className="ob-step">
             <div className="ob-content">
                 {step === 1 && (
-                    <>
-                        <h1 className="ob-title">{t("onboarding.step1Title")}</h1>
-                        <div className="ob-field">
-                            <input
-                            className="ob-input"
-                            value={form.name}
-                            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                            placeholder={t("onboarding.namePlaceholder")}
-                            autoComplete="name"
-                            />
-                        </div>
-                        <span className="ob-alert">{t("onboarding.nameAlert")}</span>
-                    </>
-                )}
-
-                {step === 2 && (
-                    <>
-                        <h1 className="ob-title">{t("onboarding.step2Title")}</h1>
-
-                        <div className="ob-field ob-field--icon">
-                            <input
-                                className="ob-input"
-                                value={form.interestJob}
-                                onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
-                                placeholder={t("onboarding.interestJobPlaceholder")}
-                            />
-                        </div>
-
-                        <div className="ob-field ob-field--icon">
-                            <input
-                                className="ob-input"
-                                value={form.interestCompany}
-                                onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
-                                placeholder={t("onboarding.interestCompanyPlaceholder")}
-                            />
-                        </div>
-                    </>
-                )}
-
-                {step === 3 && (
                     <>
                         <h1 className="ob-title">{t("onboarding.step3Title")}</h1>
                         <div className="ob-field">
@@ -231,7 +177,8 @@ export default function OnBoarding(): React.ReactElement {
                     </>
                 )}
 
-                {step === 4 && isVerified && (
+                {/* JUMP */}
+                {step === 2 && isVerified && ( 
                     <>
                         <div className="ob-jump-logo">
                             <img src="/logos/jump-logo.png" alt="JUMP" />
@@ -270,40 +217,84 @@ export default function OnBoarding(): React.ReactElement {
                         </div>
                     </>
                 )}
+
+                {step === 3 && (
+                    <>
+                        <h1 className="ob-title">{t("onboarding.step1Title")}</h1>
+                        <div className="ob-field">
+                            <input
+                            className="ob-input"
+                            value={form.name}
+                            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                            placeholder={t("onboarding.namePlaceholder")}
+                            autoComplete="name"
+                            />
+                        </div>
+                        <span className="ob-alert">{t("onboarding.nameAlert")}</span>
+                    </>
+                )}
+
+                {step === 4 && (
+                    <>
+                        <h1 className="ob-title">{t("onboarding.step2Title")}</h1>
+
+                        <div className="ob-field ob-field--icon">
+                            <input
+                                className="ob-input"
+                                value={form.interestJob}
+                                onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
+                                placeholder={t("onboarding.interestJobPlaceholder")}
+                            />
+                        </div>
+
+                        <div className="ob-field ob-field--icon">
+                            <input
+                                className="ob-input"
+                                value={form.interestCompany}
+                                onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
+                                placeholder={t("onboarding.interestCompanyPlaceholder")}
+                            />
+                        </div>
+                    </>
+                )}
             </div>
 
-            <div className="ob-footer">
+            <div className="ob-footer"> {/* 각 step별 하단 버튼 */}
                 {step === 1 && (
-                    <button className="ob-btn ob-btn--primary" onClick={next} disabled={!canGoStep1}>
+                    <>
+                        <button className="ob-btn ob-btn--ghost" onClick={skipVerify} type="button">
+                            {t("onboarding.skip")}
+                        </button>
+                        <button className="ob-btn ob-btn--primary" onClick={submitVerifyCode} disabled={submitting || !canGoStep1} type="button">
+                            {t("onboarding.next")}
+                        </button>
+                    </>
+                )}
+
+                {step === 2 && isVerified && (
+                    <button className="ob-btn ob-btn--primary" onClick={finishInstitution} disabled={!canGoStep2} type="button">
                         {t("onboarding.next")}
                     </button>
                 )}
 
-                {step === 2 && (
-                    <>  
-                        <button className="ob-btn ob-btn--ghost" onClick={skipGoals} type="button">
-                            {t("onboarding.skip")}
-                        </button>
-                        <button className="ob-btn ob-btn--primary" onClick={next} type="button" disabled={!canGoStep2} >
-                            {t("onboarding.next")}
-                        </button>
-                    </>
-                )}
-
                 {step === 3 && (
-                    <>
-                        <button className="ob-btn ob-btn--ghost" onClick={skipVerifyAndFinish} type="button">
-                            {t("onboarding.skip")}
-                        </button>
-                        <button className="ob-btn ob-btn--primary" onClick={submitAll} disabled={submitting || !canGoStep3} type="button" >
-                            {t("onboarding.next")}
-                        </button>
-                    </>
-                )}
-                {step === 4 && isVerified && (
-                    <button className="ob-btn ob-btn--primary" onClick={finishInstitution} disabled={!canFinishStep4} type="button" >
-                        {t("common.done")}
+                    <button className="ob-btn ob-btn--primary" onClick={next} disabled={!canGoStep3} type="button">
+                        {t("onboarding.next")}
                     </button>
+                )}
+                
+                {step === 4 && (
+                    <>
+                        {!canGoStep4 ?(
+                            <button className="ob-btn ob-btn--ghost" onClick={finishOnboarding} type="button">
+                                {t("onboarding.skip")}
+                            </button>   
+                        ):(
+                            <button className="ob-btn ob-btn--primary" onClick={finishOnboarding} disabled={!canGoStep4} type="button">
+                                {t("common.done")}
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
         </div>
