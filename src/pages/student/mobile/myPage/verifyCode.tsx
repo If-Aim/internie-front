@@ -14,8 +14,10 @@ export default function VerifyCodePage() {
     const [me, setMe] = React.useState<UserMe | null>(null);
 
     const [code, setCode] = React.useState("");
+    const [showVerifiedMessage, setShowVerifiedMessage] = React.useState(false);
     const [submitting, setSubmitting] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const verifiedMessageTimeoutRef = React.useRef<number | null>(null);
 
     /*
     ** 점프 센터 선택 관련
@@ -44,7 +46,7 @@ export default function VerifyCodePage() {
     const isJumpVerified = verifiedFlow === "JUMP";
     // const isEsgVerified = verifiedFlow === "ESG";
     // const isKakaoVerified = verifiedFlow === "KAKAO";
-    const isPartnerVerified = verifiedFlow !== null;
+    // const isPartnerVerified = verifiedFlow !== null;
 
     async function submit() {
         const trimmed = code.trim();
@@ -63,13 +65,13 @@ export default function VerifyCodePage() {
             setMe(refreshed);
 
             if (flow === "JUMP") {
-                setCode("인증이 완료되었습니다.");
+                triggerVerifiedMessage();
                 await loadJumpOrganizations(refreshed.jumpOrganization);
                 return;
             }
 
             if (flow !== null) {
-                setCode("인증이 완료되었습니다.");
+                triggerVerifiedMessage();
                 return;
             }
 
@@ -86,14 +88,22 @@ export default function VerifyCodePage() {
         }
     }
 
-    function handleDone() {
-        if (isJumpVerified) {
-            void finishInstitution();
-            return;
+    function triggerVerifiedMessage() {
+        if (verifiedMessageTimeoutRef.current !== null) {
+            window.clearTimeout(verifiedMessageTimeoutRef.current);
         }
 
-        if (isPartnerVerified) {
-            navigate("/student", { replace: true });
+        setShowVerifiedMessage(true);
+
+        verifiedMessageTimeoutRef.current = window.setTimeout(() => {
+            setShowVerifiedMessage(false);
+            verifiedMessageTimeoutRef.current = null;
+        }, 5000);
+    }
+
+    function handleDone() {
+        if (isJumpVerified && jumpOrganizationId) {
+            void finishInstitution();
             return;
         }
 
@@ -162,6 +172,15 @@ export default function VerifyCodePage() {
             setSubmitting(false);
         }
     }
+
+    React.useEffect(() => {
+        return () => {
+            if (verifiedMessageTimeoutRef.current !== null) {
+                window.clearTimeout(verifiedMessageTimeoutRef.current);
+            }
+        };
+    }, []);
+
     React.useEffect(() => {
         let mounted = true;
 
@@ -178,7 +197,6 @@ export default function VerifyCodePage() {
                 }
 
                 if (Array.isArray(user.roleSet) && user.roleSet.includes("ROLE_JUMP_STUDENT")) {
-                    setCode("JUMP 인증 완료");
                     await loadJumpOrganizations(user.jumpOrganization);
                 }
             } catch {
@@ -216,13 +234,15 @@ export default function VerifyCodePage() {
             <div className="profile-edit-field">
                 <div className="profile-edit-label">{t("mypage.enterVerificationCode")}</div>
                 <input
-                    className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
-                    value={isPartnerVerified ? "인증이 완료되었습니다." : code}
+                    className="profile-edit-input"
+                    value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder={isPartnerVerified ? undefined : t("mypage.verificationCode")}
-                    readOnly={isPartnerVerified}
+                    placeholder={t("mypage.verificationCode")}
                     disabled={submitting}
                 />
+                {showVerifiedMessage && (
+                    <div className="verify-success-message">인증이 완료되었습니다.</div>
+                )}
             </div>
 
             {isJumpVerified && ( // 점프 센터 선택

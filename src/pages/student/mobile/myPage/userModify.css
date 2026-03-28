@@ -29,7 +29,7 @@ background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; word-bre
 .profile-edit-save.is-disabled,
 .profile-edit-save:disabled{ background: #F1F1F1; color: #A2A2A2; }
 
-/* ===== 점프 센터 ===== */
+/* ===== 인증코드 ===== */
 .jump-center-select { margin: 20px 0 0 12px; }
 .vcjp-jump-logo { margin: 0 5px 8px; display: inline-flex; align-items: center; }
 .vcjp-jump-logo img { height: 30px; width: auto; display: block; }
