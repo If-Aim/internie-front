@@ -36,11 +36,25 @@ export default function OnBoarding(): React.ReactElement {
 
     const [submitting, setSubmitting] = React.useState(false);
     const [codeError, setCodeError] = React.useState<string | null>(null);
-
+    function getVerifiedFlow(role: string | null) {
+        switch (role) {
+            case "ROLE_JUMP_STUDENT":
+                return "JUMP";
+            case "ROLE_ESG_STUDENT":
+                return "ESG";
+            case "ROLE_KAKAO_STUDENT":
+                return "KAKAO"; 
+            default:
+                return null;
+        }
+    }
     const [verifiedRole, setVerifiedRole] = React.useState<string | null>(null);
-    const isJumpVerified = verifiedRole === "ROLE_JUMP_STUDENT";
-    const isEsgVerified = verifiedRole === "ROLE_ESG";
-    //const isPartnerVerified = isJumpVerified || isEsgVerified;
+
+    const verifiedFlow = getVerifiedFlow(verifiedRole);
+    const isJumpVerified = verifiedFlow === "JUMP";
+    // const isEsgVerified = verifiedFlow === "ESG";
+    // const isKakaoVerified = verifiedFlow === "KAKAO";
+    const isPartnerVerified = verifiedFlow !== null;
 
     const [instOpen, setInstOpen] = React.useState(false);
     const instWrapRef = React.useRef<HTMLDivElement | null>(null);
@@ -188,13 +202,11 @@ export default function OnBoarding(): React.ReactElement {
                                 placeholder={t("onboarding.verifyCodePlaceholder")}
                             />
                         </div>
-
-                        {isEsgVerified && (
+                        {isPartnerVerified && (
                             <div className="ob-info">
-                                ESG 사용자로 인증되었습니다.
+                                인증되었습니다.
                             </div>
                         )}
-
                         {codeError && <div className="ob-error">{codeError}</div>}
                     </>
                 )}

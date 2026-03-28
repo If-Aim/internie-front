@@ -30,10 +30,26 @@ export default function VerifyCodePage() {
     const [orgLoading, setOrgLoading] = React.useState(false);
     const [orgError, setOrgError] = React.useState<string | null>(null);
 
-    const role = me?.role ?? "";
-    const isJumpVerified = role === "ROLE_JUMP_STUDENT";
-    const isESGVerified = role === "ROLE_ESG_STUDENT";
-    const isPartnerVerified = isJumpVerified || isESGVerified;
+    // 인증 상태
+    function getVerifiedFlow(role: string | null) {
+        switch (role) {
+            case "ROLE_JUMP_STUDENT":
+                return "JUMP";
+            case "ROLE_ESG_STUDENT":
+                return "ESG";
+            case "ROLE_KAKAO_STUDENT":
+                return "KAKAO";
+            default:
+                return null;
+        }
+    }
+
+    const verifiedFlow = getVerifiedFlow(me?.role ?? null);
+
+    const isJumpVerified = verifiedFlow === "JUMP";
+    // const isEsgVerified = verifiedFlow === "ESG";
+    // const isKakaoVerified = verifiedFlow === "KAKAO";
+    const isPartnerVerified = verifiedFlow !== null;
 
     async function submit() {
         const trimmed = code.trim();
@@ -47,12 +63,22 @@ export default function VerifyCodePage() {
 
         try {
             const refreshed = await verifyClientUser(trimmed);
+            const flow = getVerifiedFlow(refreshed.role ?? null);
+
             setMe(refreshed);
 
-            if (refreshed.role === "ROLE_JUMP_STUDENT") {
-                setCode("JUMP 인증 완료");
+            if (flow === "JUMP") {
+                setCode("인증이 완료되었습니다.");
                 await loadJumpOrganizations(refreshed.jumpOrganization);
+                return;
             }
+
+            if (flow !== null) {
+                setCode("인증이 완료되었습니다.");
+                return;
+            }
+
+            setError("인증된 사용자 역할을 확인할 수 없습니다.");
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 401) setError("인증 코드가 올바르지 않습니다.");
@@ -64,7 +90,21 @@ export default function VerifyCodePage() {
             setSubmitting(false);
         }
     }
-    
+
+    function handleDone() {
+        if (isJumpVerified) {
+            void finishInstitution();
+            return;
+        }
+
+        if (isPartnerVerified) {
+            navigate("/student", { replace: true });
+            return;
+        }
+
+        void submit();
+    }
+
     async function loadJumpOrganizations(currentOrg?: JumpOrganization | null) {
         setOrgLoading(true);
         setOrgError(null);
@@ -232,17 +272,12 @@ export default function VerifyCodePage() {
                     )}
                 </div>
             )}
-            {isESGVerified && (
-                <div className="partner-verified-box">
-                    <div className="vcjp-title">인증이 완료되었습니다.</div>
-                    <div className="vcjp-desc">ESG 사용자로 확인되었습니다.</div>
-                </div>
-            )}
+
             {error && <div className="ob-error">{error}</div>}
 
             <button
                 className="submit-code"
-                onClick={isJumpVerified ? finishInstitution : submit}
+                onClick={handleDone}
                 disabled={
                     submitting ||
                     (isJumpVerified && !jumpOrganizationId)
