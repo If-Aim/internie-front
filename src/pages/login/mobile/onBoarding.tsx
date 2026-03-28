@@ -36,21 +36,15 @@ export default function OnBoarding(): React.ReactElement {
 
     const [submitting, setSubmitting] = React.useState(false);
     const [codeError, setCodeError] = React.useState<string | null>(null);
-    function getVerifiedFlow(role: string | null) {
-        switch (role) {
-            case "ROLE_JUMP_STUDENT":
-                return "JUMP";
-            case "ROLE_ESG_STUDENT":
-                return "ESG";
-            case "ROLE_KAKAO_STUDENT":
-                return "KAKAO"; 
-            default:
-                return null;
-        }
+    function getVerifiedFlow(roleSet: string[] | null | undefined) {
+        if (!roleSet || roleSet.length === 0) return null;
+        if (roleSet.includes("ROLE_JUMP_STUDENT")) return "JUMP";
+        if (roleSet.includes("ROLE_ESG_STUDENT")) return "ESG";
+        if (roleSet.includes("ROLE_KAKAO_STUDENT")) return "KAKAO";
+        return null;
     }
-    const [verifiedRole, setVerifiedRole] = React.useState<string | null>(null);
-
-    const verifiedFlow = getVerifiedFlow(verifiedRole);
+    const [verifiedRoleSet, setVerifiedRoleSet] = React.useState<string[] | null>(null);
+    const verifiedFlow = getVerifiedFlow(verifiedRoleSet);
     const isJumpVerified = verifiedFlow === "JUMP";
     // const isEsgVerified = verifiedFlow === "ESG";
     // const isKakaoVerified = verifiedFlow === "KAKAO";
@@ -102,7 +96,7 @@ export default function OnBoarding(): React.ReactElement {
 
     function skipVerify() {
         setCodeError(null);
-        setVerifiedRole(null);
+        setVerifiedRoleSet(null);
         setInstitutions([]);
         setForm((prev) => ({
             ...prev,
@@ -126,23 +120,24 @@ export default function OnBoarding(): React.ReactElement {
 
         try {
             const refreshed = await verifyClientUser(code);
-            const role = refreshed.role ?? null;
+            const roleSet = refreshed.roleSet ?? null;
+            const flow = getVerifiedFlow(roleSet);
 
-            setVerifiedRole(role);
+            setVerifiedRoleSet(roleSet);
 
-            if (role === "ROLE_JUMP_STUDENT") {
+            if (flow === "JUMP") {
                 const orgs = await getMyJumpOrganizations();
                 setInstitutions(orgs);
                 setStep(2);
                 return;
             }
 
-            if (role === "ROLE_ESG") {
+            if (flow !== null) {
                 setStep(3);
                 return;
             }
 
-            setStep(3);
+            setCodeError(t("onboarding.verifyFailed"));
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 401) setCodeError(t("onboarding.invalidCode"));

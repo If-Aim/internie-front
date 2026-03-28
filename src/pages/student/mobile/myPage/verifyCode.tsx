@@ -31,20 +31,15 @@ export default function VerifyCodePage() {
     const [orgError, setOrgError] = React.useState<string | null>(null);
 
     // 인증 상태
-    function getVerifiedFlow(role: string | null) {
-        switch (role) {
-            case "ROLE_JUMP_STUDENT":
-                return "JUMP";
-            case "ROLE_ESG_STUDENT":
-                return "ESG";
-            case "ROLE_KAKAO_STUDENT":
-                return "KAKAO";
-            default:
-                return null;
-        }
+    function getVerifiedFlow(roleSet: string[] | null | undefined) {
+        if (!roleSet || roleSet.length === 0) return null;
+        if (roleSet.includes("ROLE_JUMP_STUDENT")) return "JUMP";
+        if (roleSet.includes("ROLE_ESG_STUDENT")) return "ESG";
+        if (roleSet.includes("ROLE_KAKAO_STUDENT")) return "KAKAO";
+        return null;
     }
 
-    const verifiedFlow = getVerifiedFlow(me?.role ?? null);
+    const verifiedFlow = getVerifiedFlow(me?.roleSet ?? null);
 
     const isJumpVerified = verifiedFlow === "JUMP";
     // const isEsgVerified = verifiedFlow === "ESG";
@@ -63,7 +58,7 @@ export default function VerifyCodePage() {
 
         try {
             const refreshed = await verifyClientUser(trimmed);
-            const flow = getVerifiedFlow(refreshed.role ?? null);
+            const flow = getVerifiedFlow(refreshed.roleSet ?? null);
 
             setMe(refreshed);
 
@@ -182,7 +177,7 @@ export default function VerifyCodePage() {
                     setJumpOrganizationName(existingOrg.name ?? "");
                 }
 
-                if (user.role === "ROLE_JUMP_STUDENT") {
+                if (Array.isArray(user.roleSet) && user.roleSet.includes("ROLE_JUMP_STUDENT")) {
                     setCode("JUMP 인증 완료");
                     await loadJumpOrganizations(user.jumpOrganization);
                 }

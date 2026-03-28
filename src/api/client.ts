@@ -255,7 +255,8 @@ export type UserBase = {
 	nickname: string | null;
 	profileImage: string | null;
 	verificationImage: string | null;
-	role: string;
+	role?: string | null;
+	roleSet: string[];
 	status: string;
 	school: UserSchool | null;
 
@@ -362,6 +363,7 @@ export async function selectMySchool(input: SelectMySchoolInput): Promise<Select
 	});
 }
 
+
 // 재학생 인증
 export type ApplyVerificationResponse = UserBase;
 
@@ -392,6 +394,13 @@ export async function verifyClientUser (
 		method: "POST",
 		body: JSON.stringify({ code } satisfies { code: string }),
 	});
+}
+
+// role reset - (개발용)
+export async function resetUserRole(): Promise<UserMe> {
+    return api<UserMe>("/users/me/reset-role", {
+        method: "DELETE",
+    });
 }
 
 // 프로필 수정
