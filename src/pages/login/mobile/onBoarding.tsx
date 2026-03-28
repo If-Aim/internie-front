@@ -1,7 +1,7 @@
 // src/pages/login/mobile/onBoarding.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApiError, getUserMe, verifyJumpUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization } from "../../../api/client";
+import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization } from "../../../api/client";
 import { useTranslation } from "react-i18next";
 import "./onBoarding.css"
 
@@ -107,7 +107,7 @@ export default function OnBoarding(): React.ReactElement {
         setCodeError(null);
 
         try {
-            await verifyJumpUser(code);
+            await verifyClientUser(code);
             setIsVerified(true);
 
             const orgs = await getMyJumpOrganizations();

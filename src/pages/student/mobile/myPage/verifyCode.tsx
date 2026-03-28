@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { type UserMe, ApiError, verifyJumpUser, getUserMe, type JumpOrganization, getMyJumpOrganizations, submitMyOnboarding } from "../../../../api/client";
+import { type UserMe, ApiError, verifyClientUser, getUserMe, type JumpOrganization, getMyJumpOrganizations, submitMyOnboarding } from "../../../../api/client";
 import "./myPage.css";
 import "./userModify.css";
 
@@ -43,7 +43,7 @@ export default function VerifyCodePage() {
         setError(null);
 
         try {
-            const refreshed = await verifyJumpUser(trimmed);
+            const refreshed = await verifyClientUser(trimmed);
             setMe(refreshed);
 
             if (refreshed.role === "ROLE_JUMP_STUDENT") {

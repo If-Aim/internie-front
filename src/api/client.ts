@@ -384,11 +384,11 @@ export async function applyMyVerification(
 	);
 }
 
-// JUMP 사용자 인증
-export async function verifyJumpUser (
+// 각 업체별 사용자 인증
+export async function verifyClientUser (
 	code: string
 ): Promise<UserMe> {
-	return api<UserMe>("/users/me/jump-verify", {
+	return api<UserMe>("/users/me/code-verify", {
 		method: "POST",
 		body: JSON.stringify({ code } satisfies { code: string }),
 	});
