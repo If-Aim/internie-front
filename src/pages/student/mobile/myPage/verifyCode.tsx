@@ -30,7 +30,10 @@ export default function VerifyCodePage() {
     const [orgLoading, setOrgLoading] = React.useState(false);
     const [orgError, setOrgError] = React.useState<string | null>(null);
 
-    const isJumpVerified = me?.role === "ROLE_JUMP_STUDENT";
+    const role = me?.role ?? "";
+    const isJumpVerified = role === "ROLE_JUMP_STUDENT";
+    const isESGVerified = role === "ROLE_ESG_STUDENT";
+    const isPartnerVerified = isJumpVerified || isESGVerified;
 
     async function submit() {
         const trimmed = code.trim();
@@ -179,10 +182,10 @@ export default function VerifyCodePage() {
                 <div className="profile-edit-label">{t("mypage.enterVerificationCode")}</div>
                 <input
                     className={`profile-edit-input ${isJumpVerified ? "is-readonly" : ""}`}
-                    value={isJumpVerified ? "JUMP 인증 완료" : code}
+                    value={isPartnerVerified ? "인증이 완료되었습니다." : code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder={isJumpVerified ? undefined : t("mypage.verificationCode")}
-                    readOnly={isJumpVerified}
+                    placeholder={isPartnerVerified ? undefined : t("mypage.verificationCode")}
+                    readOnly={isPartnerVerified}
                     disabled={submitting}
                 />
             </div>
@@ -229,7 +232,12 @@ export default function VerifyCodePage() {
                     )}
                 </div>
             )}
-
+            {isESGVerified && (
+                <div className="partner-verified-box">
+                    <div className="vcjp-title">인증이 완료되었습니다.</div>
+                    <div className="vcjp-desc">ESG 사용자로 확인되었습니다.</div>
+                </div>
+            )}
             {error && <div className="ob-error">{error}</div>}
 
             <button
