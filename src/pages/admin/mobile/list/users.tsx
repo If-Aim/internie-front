@@ -15,7 +15,7 @@ export default function AdminUsersMobile(): React.ReactElement {
 			try {
 				const me = await getUserMe();
 				if (!mounted) return;
-				if (me.role === "ROLE_ADMIN") {
+				if (Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ADMIN")) {
 					setIsAdmin(true);
 				} else {
 					alert("관리자만 접근할 수 있는 페이지입니다.");

@@ -647,24 +647,23 @@ export async function deleteJumpAdminStudent(userId: number | string): Promise<v
  * 관리자 여부 확인
  */
 export async function checkIsAdmin(): Promise<boolean> {
-	try {
-		const me = await getUserMe();
-		return me.role === "ROLE_ADMIN";
-	} catch (e) {
-		if (e instanceof ApiError && e.status === 401) return false;
-		throw e;
-	}
+    try {
+        const me = await getUserMe();
+        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ADMIN");
+    } catch (e) {
+        if (e instanceof ApiError && e.status === 401) return false;
+        throw e;
+    }
 }
 
-// 점프 관리자 확인
 export async function checkIsJumpAdmin(): Promise<boolean> {
-	try {
-		const me = await getUserMe();
-		return me.role === "ROLE_JUMP_ADMIN";
-	} catch (e) {
-		if (e instanceof ApiError && e.status === 401) return false;
-		throw e;
-	}
+    try {
+        const me = await getUserMe();
+        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_JUMP_ADMIN");
+    } catch (e) {
+        if (e instanceof ApiError && e.status === 401) return false;
+        throw e;
+    }
 }
 
 // 최근 기록한 일정 관련
