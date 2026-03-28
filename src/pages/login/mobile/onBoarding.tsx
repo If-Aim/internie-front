@@ -37,7 +37,11 @@ export default function OnBoarding(): React.ReactElement {
     const [submitting, setSubmitting] = React.useState(false);
     const [codeError, setCodeError] = React.useState<string | null>(null);
 
-    const [isVerified, setIsVerified] = React.useState(false);
+    const [verifiedRole, setVerifiedRole] = React.useState<string | null>(null);
+    const isJumpVerified = verifiedRole === "ROLE_JUMP_STUDENT";
+    const isEsgVerified = verifiedRole === "ROLE_ESG";
+    //const isPartnerVerified = isJumpVerified || isEsgVerified;
+
     const [instOpen, setInstOpen] = React.useState(false);
     const instWrapRef = React.useRef<HTMLDivElement | null>(null);
     const [institutions, setInstitutions] = React.useState<JumpOrganization[]>([]);
@@ -84,7 +88,7 @@ export default function OnBoarding(): React.ReactElement {
 
     function skipVerify() {
         setCodeError(null);
-        setIsVerified(false);
+        setVerifiedRole(null);
         setInstitutions([]);
         setForm((prev) => ({
             ...prev,
@@ -107,13 +111,24 @@ export default function OnBoarding(): React.ReactElement {
         setCodeError(null);
 
         try {
-            await verifyClientUser(code);
-            setIsVerified(true);
+            const refreshed = await verifyClientUser(code);
+            const role = refreshed.role ?? null;
 
-            const orgs = await getMyJumpOrganizations();
-            setInstitutions(orgs);
+            setVerifiedRole(role);
 
-            setStep(2);
+            if (role === "ROLE_JUMP_STUDENT") {
+                const orgs = await getMyJumpOrganizations();
+                setInstitutions(orgs);
+                setStep(2);
+                return;
+            }
+
+            if (role === "ROLE_ESG") {
+                setStep(3);
+                return;
+            }
+
+            setStep(3);
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 401) setCodeError(t("onboarding.invalidCode"));
@@ -154,7 +169,7 @@ export default function OnBoarding(): React.ReactElement {
     }
 
     const canGoStep1 = form.verifyCode.trim().length > 0;
-    const canGoStep2 = isVerified && form.jumpOrganizationId != null;
+    const canGoStep2 = isJumpVerified && form.jumpOrganizationId != null;
     const canGoStep3 = form.name.trim().length > 0;
     const canGoStep4 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
 
@@ -164,6 +179,7 @@ export default function OnBoarding(): React.ReactElement {
                 {step === 1 && (
                     <>
                         <h1 className="ob-title">{t("onboarding.step3Title")}</h1>
+
                         <div className="ob-field">
                             <input
                                 className="ob-input"
@@ -173,12 +189,18 @@ export default function OnBoarding(): React.ReactElement {
                             />
                         </div>
 
+                        {isEsgVerified && (
+                            <div className="ob-info">
+                                ESG 사용자로 인증되었습니다.
+                            </div>
+                        )}
+
                         {codeError && <div className="ob-error">{codeError}</div>}
                     </>
                 )}
 
                 {/* JUMP */}
-                {step === 2 && isVerified && ( 
+                {step === 2 && isJumpVerified && ( 
                     <>
                         <div className="ob-jump-logo">
                             <img src="/logos/jump-logo.png" alt="JUMP" />
@@ -271,7 +293,7 @@ export default function OnBoarding(): React.ReactElement {
                     </>
                 )}
 
-                {step === 2 && isVerified && (
+                {step === 2 && isJumpVerified && (
                     <button className="ob-btn ob-btn--primary" onClick={finishInstitution} disabled={!canGoStep2} type="button">
                         {t("onboarding.next")}
                     </button>
