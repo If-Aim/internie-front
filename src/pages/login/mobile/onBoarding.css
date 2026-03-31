@@ -18,6 +18,19 @@ font-size: 16px;font-weight:400;color: #000;outline: none;}
 .ob-btn:disabled{cursor: not-allowed;}
 .ob-btn:not(:disabled):active{transform: translateY(1px);}
 
+/* 이메일 인증 */
+.ob-inline{display:flex;gap:8px;align-items:center;margin-top:12px;}
+.ob-field--grow{flex:1 1 auto;margin-top:0;}
+.ob-btn--line{width:auto;min-width:96px;height:54px;padding:0 14px;border:1px solid #E2E2E2;border-radius:10px;background:#fff;color:#000;font-size:15px;font-weight:600;white-space:nowrap;}
+.ob-btn--line:disabled{background:#F3F3F3;color:#9AA0A6;border-color:#E2E2E2;cursor:not-allowed;}
+.ob-btn--line:not(:disabled):active{transform:translateY(1px);}
+.ob-success{margin:10px 0 0 4px;color:#2E7D32;font-size:14px;font-weight:500;line-height:20px;}
+.ob-error{margin:10px 0 0 4px;color:#D93025;font-size:14px;font-weight:500;line-height:20px;}
+@media (max-width:480px){
+    .ob-inline{flex-wrap:wrap;align-items:stretch;}
+    .ob-field--grow{flex:1 1 100%;}
+    .ob-btn--line{flex:1 1 0;width:100%;}
+}
 
 /* 점프 전용 */
 .ob-jump-logo { margin: 0 5px 8px; display: inline-flex; align-items: center; }

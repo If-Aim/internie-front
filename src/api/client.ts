@@ -85,6 +85,8 @@ async function requestWithAutoRefresh(
 // 로그인 응답
 export type LoginResponse = {
     onboardingCompleted: boolean;
+    linkedToExistingAccount: boolean;
+    message: string | null;
 };
 
 export async function loginWithKakao(code: string, redirectUri?: string): Promise<LoginResponse> {
@@ -112,6 +114,36 @@ export async function loginWithKakao(code: string, redirectUri?: string): Promis
     return (await res.json()) as LoginResponse;
 }
 
+export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
+    const res = await fetch(buildUrl("/auth/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ idToken }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/google response", bodyText);
+    }
+
+    localStorage.setItem("accessToken", auth);
+
+    return (await res.json()) as LoginResponse;
+}
+
 export async function apiPublic(
     path: string,
     init: RequestInit = {}
@@ -131,9 +163,15 @@ export async function api<T = unknown>(
 	if (res.status === 204) return undefined as T;
 
 	if (!res.ok) {
-		const bodyText = await res.text().catch(() => "");
-		throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-	}
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
 
 	const ct = res.headers.get("content-type") ?? "";
 	if (!ct.includes("application/json")) {
@@ -243,22 +281,27 @@ export type JumpOrganization = {
 };
 export type SubmitOnboardingInput = {
     name: string;
+	studentNumber?: string;
     interestJob?: string | null;
     interestCompany?: string | null;
     jumpOrganizationId?: number | null;
+	requireStudentNumber?: boolean;
 };
 export type UserBase = {
 	userId: number;
+	email: string | null,
+	emailVerified: boolean | null,
 	name?: string | null;
 	kakaoName?: string | null;
 
 	nickname: string | null;
 	profileImage: string | null;
 	verificationImage: string | null;
-	role?: string | null;
 	roleSet: string[];
 	status: string;
 	school: UserSchool | null;
+
+	studentNumber?: string | null;
 
 	interestJob?: string | null;
     interestCompany?: string | null;
@@ -269,6 +312,19 @@ export type UserBase = {
 export type SubmitOnboardingResponse = UserBase;
 
 export type UserMe = UserBase;
+export type EmailSendStatus = "CODE_SENT" | "EXISTING_ACCOUNT_FOUND";
+
+export type SendEmailCodeResponse = {
+    status: EmailSendStatus;
+    maskedEmail: string;
+};
+
+export type VerifyEmailCodeResponse = {
+    verified: boolean;
+    existingAccountFound: boolean;
+    maskedEmail: string;
+};
+
 
 export function getUserIdFromAccessToken(): string | null {
 	const token = localStorage.getItem("accessToken");
@@ -363,6 +419,22 @@ export async function selectMySchool(input: SelectMySchoolInput): Promise<Select
 	});
 }
 
+// 이메일 인증
+export async function sendEmailCode(email: string): Promise<SendEmailCodeResponse> {
+    return api<SendEmailCodeResponse>("/auth/email/send", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+    });
+}
+
+export async function verifyEmailCode(email: string, code: string): Promise<VerifyEmailCodeResponse> {
+    return api<VerifyEmailCodeResponse>("/auth/email/verify", {
+        method: "POST",
+        body: JSON.stringify({ email, code }),
+    });
+}
+
+
 
 // 재학생 인증
 export type ApplyVerificationResponse = UserBase;
@@ -453,14 +525,22 @@ export async function submitMyOnboarding(
         throw new ApiError(400, "name은 필수값입니다.");
     }
 
+    const studentNumber = (input.studentNumber ?? "").trim();
+    if (input.requireStudentNumber && !studentNumber) {
+        throw new ApiError(400, "studentNumber는 필수값입니다.");
+    }
+
+    const interestJob = (input.interestJob ?? "").trim();
+    const interestCompany = (input.interestCompany ?? "").trim();
+
     const payload: SubmitOnboardingInput = {
         name,
-        interestJob: (input.interestJob ?? "").trim() || null,
-        interestCompany: (input.interestCompany ?? "").trim() || null,
-        jumpOrganizationId:
-            input.jumpOrganizationId != null && !Number.isNaN(Number(input.jumpOrganizationId))
-                ? Number(input.jumpOrganizationId)
-                : null,
+        ...(studentNumber ? { studentNumber } : {}),
+        ...(interestJob ? { interestJob } : {}),
+        ...(interestCompany ? { interestCompany } : {}),
+        ...(input.jumpOrganizationId != null && !Number.isNaN(Number(input.jumpOrganizationId))
+            ? { jumpOrganizationId: Number(input.jumpOrganizationId) }
+            : {}),
     };
 
     return api<SubmitOnboardingResponse>("/users/me/onboarding", {
@@ -688,14 +768,29 @@ export async function getEventDaysByMonth(y: string, m: string): Promise<EventDa
 }
 
 // 에러 처리
-export class ApiError extends Error {
-	status: number;
-	bodyText?: string;
+function parseErrorBody(bodyText: string): { message?: string; code?: string } {
+    if (!bodyText) return {};
+    try {
+        const parsed = JSON.parse(bodyText);
+        return {
+            message: parsed?.message,
+            code: parsed?.clientExceptionCode ?? parsed?.code,
+        };
+    } catch {
+        return {};
+    }
+}
 
-	constructor(status: number, message: string, bodyText?: string) {
-		super(message);
-		this.name = "ApiError";
-		this.status = status;
-		this.bodyText = bodyText;
-	}
+export class ApiError extends Error {
+    status: number;
+    bodyText?: string;
+    code?: string;
+
+    constructor(status: number, message: string, bodyText?: string, code?: string) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+        this.bodyText = bodyText;
+        this.code = code;
+    }
 }

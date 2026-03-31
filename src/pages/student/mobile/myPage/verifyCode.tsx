@@ -14,7 +14,7 @@ export default function VerifyCodePage() {
     const [me, setMe] = React.useState<UserMe | null>(null);
 
     const [code, setCode] = React.useState("");
-    const [showVerifiedMessage, setShowVerifiedMessage] = React.useState(false);
+    const [verifyMessage, setVerifyMessage] = React.useState<string | null>(null);
     const [submitting, setSubmitting] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const verifiedMessageTimeoutRef = React.useRef<number | null>(null);
@@ -30,23 +30,33 @@ export default function VerifyCodePage() {
     const [jumpOrganizationName, setJumpOrganizationName] = React.useState<string>("");
 
     const [orgLoading, setOrgLoading] = React.useState(false);
-    const [orgError, setOrgError] = React.useState<string | null>(null);
+    const [orgLoadError, setOrgLoadError] = React.useState<string | null>(null);
+    const [orgSaveError, setOrgSaveError] = React.useState<string | null>(null);
+    const [orgSaveMessage, setOrgSaveMessage] = React.useState<string | null>(null);
+
+    const [studentNumber, setStudentNumber] = React.useState("");
+    const [studentNumberError, setStudentNumberError] = React.useState<string | null>(null);
+    const [studentNumberMessage, setStudentNumberMessage] = React.useState<string | null>(null);
 
     // 인증 상태
-    function getVerifiedFlow(roleSet: string[] | null | undefined) {
-        if (!roleSet || roleSet.length === 0) return null;
-        if (roleSet.includes("ROLE_JUMP_STUDENT")) return "JUMP";
-        if (roleSet.includes("ROLE_ESG_STUDENT")) return "ESG";
-        if (roleSet.includes("ROLE_KAKAO_STUDENT")) return "KAKAO";
-        return null;
-    }
-
-    const verifiedFlow = getVerifiedFlow(me?.roleSet ?? null);
-
-    const isJumpVerified = verifiedFlow === "JUMP";
-    // const isEsgVerified = verifiedFlow === "ESG";
-    // const isKakaoVerified = verifiedFlow === "KAKAO";
+    const roleSet = me?.roleSet ?? [];
+    const isJumpVerified = roleSet.includes("ROLE_JUMP_STUDENT");
+    // const isEsgVerified = roleSet.includes("ROLE_ESG_STUDENT");
+    const isKakaoVerified = roleSet.includes("ROLE_KAKAO_STUDENT");
     // const isPartnerVerified = verifiedFlow !== null;
+
+    function triggerVerifiedMessage(message: string) {
+        if (verifiedMessageTimeoutRef.current !== null) {
+            window.clearTimeout(verifiedMessageTimeoutRef.current);
+        }
+
+        setVerifyMessage(message);
+
+        verifiedMessageTimeoutRef.current = window.setTimeout(() => {
+            setVerifyMessage(null);
+            verifiedMessageTimeoutRef.current = null;
+        }, 5000);
+    }
 
     async function submit() {
         const trimmed = code.trim();
@@ -59,23 +69,31 @@ export default function VerifyCodePage() {
         setError(null);
 
         try {
+            const prevRoleSet = me?.roleSet ?? [];
+
             const refreshed = await verifyClientUser(trimmed);
-            const flow = getVerifiedFlow(refreshed.roleSet ?? null);
+            const nextRoleSet = refreshed.roleSet ?? [];
+
+            // 추가된 역할 찾기
+            const addedRoles = nextRoleSet.filter(
+                (role) => !prevRoleSet.includes(role)
+            );
 
             setMe(refreshed);
+            setCode("");
+            setError(null);
 
-            if (flow === "JUMP") {
-                triggerVerifiedMessage();
+            if (addedRoles.length === 0) {
+                triggerVerifiedMessage("이미 인증된 코드입니다.");
+            } else {
+                triggerVerifiedMessage("인증이 완료되었습니다.");
+            }
+
+            // 점프 role이 있으면 센터 목록 로드
+            if (nextRoleSet.includes("ROLE_JUMP_STUDENT")) {
                 await loadJumpOrganizations(refreshed.jumpOrganization);
-                return;
             }
 
-            if (flow !== null) {
-                triggerVerifiedMessage();
-                return;
-            }
-
-            setError("인증된 사용자 역할을 확인할 수 없습니다.");
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 401) setError("인증 코드가 올바르지 않습니다.");
@@ -88,31 +106,17 @@ export default function VerifyCodePage() {
         }
     }
 
-    function triggerVerifiedMessage() {
-        if (verifiedMessageTimeoutRef.current !== null) {
-            window.clearTimeout(verifiedMessageTimeoutRef.current);
-        }
-
-        setShowVerifiedMessage(true);
-
-        verifiedMessageTimeoutRef.current = window.setTimeout(() => {
-            setShowVerifiedMessage(false);
-            verifiedMessageTimeoutRef.current = null;
-        }, 5000);
+    function handleSubmitCode() {
+        void submit();
     }
 
-    function handleDone() {
-        if (isJumpVerified && jumpOrganizationId) {
-            void finishInstitution();
-            return;
-        }
-
-        void submit();
+    function handleSaveJumpCenter() {
+        void finishInstitution();
     }
 
     async function loadJumpOrganizations(currentOrg?: JumpOrganization | null) {
         setOrgLoading(true);
-        setOrgError(null);
+        setOrgLoadError(null);
 
         try {
             const orgs = await getMyJumpOrganizations();
@@ -131,7 +135,7 @@ export default function VerifyCodePage() {
             }
         } catch {
             setInstitutions([]);
-            setOrgError("센터 목록을 불러오지 못했습니다.");
+            setOrgLoadError("센터 목록을 불러오지 못했습니다.");
         } finally {
             setOrgLoading(false);
         }
@@ -140,6 +144,8 @@ export default function VerifyCodePage() {
     function pickInstitution(org: JumpOrganization) {
         setJumpOrganizationId(org.id);
         setJumpOrganizationName(org.name);
+        setOrgSaveError(null);
+        setOrgSaveMessage(null);
         setInstOpen(false);
     }
 
@@ -148,12 +154,13 @@ export default function VerifyCodePage() {
 
         const name = (me?.name ?? me?.kakaoName ?? "").trim();
         if (!name) {
-            setOrgError("이름 정보가 없어 센터 저장을 진행할 수 없습니다.");
+            setOrgSaveError("이름 정보가 없어 센터 저장을 진행할 수 없습니다.");
             return;
         }
 
         setSubmitting(true);
-        setOrgError(null);
+        setOrgSaveError(null);
+        setOrgSaveMessage(null);
 
         try {
             await submitMyOnboarding({
@@ -161,12 +168,50 @@ export default function VerifyCodePage() {
                 jumpOrganizationId,
             });
 
-            navigate("/student", { replace: true });
+            setOrgSaveError(null);
+            setOrgSaveMessage("센터 저장이 완료되었습니다.");
         } catch (e) {
             if (e instanceof ApiError) {
-                setOrgError("센터 저장에 실패했습니다.");
+                setOrgSaveError("센터 저장에 실패했습니다.");
             } else {
-                setOrgError("센터 저장에 실패했습니다.");
+                setOrgSaveError("센터 저장에 실패했습니다.");
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    async function finishStudentNumber() {
+        const trimmedStudentNumber = studentNumber.trim();
+        const name = (me?.name ?? me?.kakaoName ?? "").trim();
+
+        if (!name) {
+            setStudentNumberError("이름 정보가 없어 학번 저장을 진행할 수 없습니다.");
+            return;
+        }
+
+        if (!trimmedStudentNumber) {
+            setStudentNumberError("학번을 입력해주세요.");
+            return;
+        }
+
+        setSubmitting(true);
+        setStudentNumberError(null);
+        setStudentNumberMessage(null);
+
+        try {
+            await submitMyOnboarding({
+                name,
+                studentNumber: trimmedStudentNumber,
+            });
+
+            setStudentNumberError(null);
+            setStudentNumberMessage("학번 저장이 완료되었습니다.");
+        } catch (e) {
+            if (e instanceof ApiError) {
+                setStudentNumberError("학번 저장에 실패했습니다.");
+            } else {
+                setStudentNumberError("학번 저장에 실패했습니다.");
             }
         } finally {
             setSubmitting(false);
@@ -189,6 +234,7 @@ export default function VerifyCodePage() {
                 const user = await getUserMe();
                 if (!mounted) return;
                 setMe(user);
+                setStudentNumber((user.studentNumber ?? "").trim());
 
                 const existingOrg = user.jumpOrganization;
                 if (existingOrg?.id != null) {
@@ -230,7 +276,6 @@ export default function VerifyCodePage() {
                 </button>
                 <div className="mypage-email"></div>
             </header>
-
             <div className="profile-edit-field">
                 <div className="profile-edit-label">{t("mypage.enterVerificationCode")}</div>
                 <input
@@ -240,11 +285,8 @@ export default function VerifyCodePage() {
                     placeholder={t("mypage.verificationCode")}
                     disabled={submitting}
                 />
-                {showVerifiedMessage && (
-                    <div className="verify-success-message">인증이 완료되었습니다.</div>
-                )}
             </div>
-
+            
             {isJumpVerified && ( // 점프 센터 선택
                 <div className="jump-center-select">
                     <div className="vcjp-jump-logo">
@@ -254,52 +296,102 @@ export default function VerifyCodePage() {
 
                     {orgLoading ? (
                         <div className="ob-error">불러오는 중...</div>
-                    ) : orgError ? (
-                        <div className="ob-error">{orgError}</div>
+                    ) : orgLoadError ? (
+                        <div className="ob-error">{orgLoadError}</div>
                     ) : (
-                        <div className={"vcjp-dd" + (instOpen ? " vcjp-dd--open" : "")} ref={instWrapRef}>
-                            <button type="button" className="vcjp-dd-trigger" onClick={() => setInstOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={instOpen} disabled={submitting} > 
-                                <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
-                                    {jumpOrganizationName || "센터 선택"}
-                                </span>
-                                <span className="vcjp-dd-caret" aria-hidden="true">
-                                    <img src="/icons/chevron-left.svg" alt="" />
-                                </span>
-                            </button>
+                        <>
+                            <div className={"vcjp-dd" + (instOpen ? " vcjp-dd--open" : "")} ref={instWrapRef}>
+                                <button
+                                    type="button"
+                                    className="vcjp-dd-trigger"
+                                    onClick={() => setInstOpen((v) => !v)}
+                                    aria-haspopup="listbox"
+                                    aria-expanded={instOpen}
+                                    disabled={submitting}
+                                >
+                                    <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
+                                        {jumpOrganizationName || "센터 선택"}
+                                    </span>
+                                    <span className="vcjp-dd-caret" aria-hidden="true">
+                                        <img src="/icons/chevron-left.svg" alt="" />
+                                    </span>
+                                </button>
 
-                            {instOpen && (
-                                <div className="vcjp-dd-menu" role="listbox" aria-label="센터 목록">
-                                    {institutions.map((org) => (
-                                        <button
-                                            key={org.id}
-                                            type="button"
-                                            className={"vcjp-dd-item" + (jumpOrganizationId === org.id ? " vcjp-dd-item--active" : "")}
-                                            onClick={() => pickInstitution(org)}
-                                            role="option"
-                                            aria-selected={jumpOrganizationId === org.id}
-                                        >
-                                            {org.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                {instOpen && (
+                                    <div className="vcjp-dd-menu" role="listbox" aria-label="센터 목록">
+                                        {institutions.map((org) => (
+                                            <button
+                                                key={org.id}
+                                                type="button"
+                                                className={"vcjp-dd-item" + (jumpOrganizationId === org.id ? " vcjp-dd-item--active" : "")}
+                                                onClick={() => pickInstitution(org)}
+                                                role="option"
+                                                aria-selected={jumpOrganizationId === org.id}
+                                            >
+                                                {org.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {orgSaveError && <div className="ob-error">{orgSaveError}</div>}
+                            {orgSaveMessage && <div className="verify-success-message">{orgSaveMessage}</div>}
+                        </>
                     )}
                 </div>
             )}
 
+            {isKakaoVerified && (
+                <div className="jump-center-select">
+                    <div className="vcjp-title">학번을 입력하세요</div>
+                    <input
+                        className="profile-edit-input"
+                        value={studentNumber}
+                        onChange={(e) => {
+                            setStudentNumber(e.target.value);
+                            setStudentNumberError(null);
+                            setStudentNumberMessage(null);
+                        }}
+                        placeholder="학번 입력"
+                        disabled={submitting}
+                    />
+                    {studentNumberError && <div className="ob-error">{studentNumberError}</div>}
+                    {studentNumberMessage && <div className="verify-success-message">{studentNumberMessage}</div>}
+                </div>
+            )}
+
+            {verifyMessage && (
+                <div className="verify-success-message">{verifyMessage}</div>
+            )}
+
             {error && <div className="ob-error">{error}</div>}
 
-            <button
-                className="submit-code"
-                onClick={handleDone}
-                disabled={
-                    submitting ||
-                    (isJumpVerified && !jumpOrganizationId)
-                }
-            >
-                {t("common.done")}
-            </button>
+            <div className="verify-code-actions">
+                {isJumpVerified && (
+                    <button
+                        className="submit-code submit-code-secondary"
+                        onClick={handleSaveJumpCenter}
+                        disabled={submitting || !jumpOrganizationId}
+                    >
+                        센터 저장
+                    </button>
+                )}
+
+                {isKakaoVerified && (
+                    <button
+                        className="submit-code submit-code-secondary"
+                        onClick={() => { void finishStudentNumber(); }}
+                        disabled={submitting || !studentNumber.trim()}
+                    >
+                        학번 저장
+                    </button>
+                )}
+
+                <button className="submit-code" onClick={handleSubmitCode} disabled={submitting} >
+                    {t("common.done")}
+                </button>
+            </div>
         </div>
     );
 }

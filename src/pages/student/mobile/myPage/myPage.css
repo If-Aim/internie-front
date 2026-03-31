@@ -49,10 +49,11 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .user-verify-code{padding:20px 20px 50px; background-color: #fff;}
 .user-verify-code .profile-edit-label{color:#000; font-size:24px; font-weight:700;margin:0;}
 .user-verify-code .profile-edit-field{margin-left:12px; gap:32px;}
-.submit-code { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(53px + env(safe-area-inset-bottom)); width: 92%; height: 60px;
-border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}
-.ob-error{margin-top: 8px; margin-left: 12px; font-size: 14px; color: #000; font-weight: 700;}
-.verify-success-message{margin-top:8px;font-size:14px;line-height:20px;color:#000;opacity:0;animation:verifyFadeOut 5s ease forwards;}
+.verify-code-actions{position:fixed;left:20px;right:20px; bottom: calc(53px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;z-index:30;}
+.submit-code { width: 100%; height: 60px; border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}
+.submit-code-secondary{background:#fff;border:1px solid #d9d9d9;color:#111;}
+.ob-error{margin-top: 8px; margin-left: 12px; font-size: 16px; color: #000; font-weight: 700;}
+.verify-success-message{margin:8px 0 0 12px;font-size:16px;line-height:20px;color:#000;opacity:0;animation:verifyFadeOut 5s ease forwards;}
 @keyframes verifyFadeOut{0%{opacity:0;transform:translateY(2px);}10%{opacity:1;transform:translateY(0);}75%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-2px);}}
 
 /* mypage modal */
