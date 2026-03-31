@@ -124,6 +124,8 @@
 
         "verificationCode": "인증코드",
         "enterVerificationCode": "인증코드를 입력하세요",
+        "verifying":"확인 중...",
+
 
         "notSet": "미설정",
         "certs": "나의 수료증",
@@ -149,6 +151,14 @@
         "step1Title": "이름을 입력하세요",
         "namePlaceholder": "이름",
         "nameAlert": "*반드시 본명을 입력해주세요.",
+
+        "emailPlaceholder": "이메일",
+        "emailVerifingPlaceholder": "인증번호를 입력해주세요",
+        "emailSend": "인증번호 전송",
+        "emailSendAgain": "재전송",
+        "emailVerifyRequest": "인증확인",
+        "emailVerifingSuccess": "이메일 인증이 완료되었습니다.",
+        
         "step2Title": "나의 목표를 설정하세요",
         "interestJobPlaceholder": "관심있는 직무를 입력하세요",
         "interestCompanyPlaceholder": "희망하는 기업을 입력하세요",

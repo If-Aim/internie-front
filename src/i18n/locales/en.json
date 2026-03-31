@@ -124,6 +124,7 @@
 
 		"verificationCode": "Code",
         "enterVerificationCode": "Enter the verification code",
+		"verifying":"Verifying...",
 
 		"notSet": "Not Set",
 		"certs": "My Certificates",
@@ -149,6 +150,14 @@
 		"step1Title": "Enter your name",
 		"namePlaceholder": "Name",
 		"nameAlert": "*Please enter your real name.",
+		
+		"emailPlaceholder": "Email",
+		"emailVerifingPlaceholder": "Enter verification code",
+		"emailSend": "Send verification code",
+		"emailSendAgain": "Resend",
+		"emailVerifyRequest": "Verify",
+		"emailVerifingSuccess": "Email verification completed successfully.",
+        
 		"step2Title": "Set your goals",
 		"interestJobPlaceholder": "Enter your job of interest",
 		"interestCompanyPlaceholder": "Enter your target company",

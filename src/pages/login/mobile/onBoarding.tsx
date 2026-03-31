@@ -383,10 +383,9 @@ export default function OnBoarding(): React.ReactElement {
                                 className="ob-input"
                                 value={form.studentNumber}
                                 onChange={(e) => setForm((p) => ({ ...p, studentNumber: e.target.value }))}
-                                placeholder="학번을 입력해주세요"
+                                placeholder="학번"
                             />
                         </div>
-                        <span className="ob-alert">카카오 인증 사용자는 학번 입력이 필요합니다.</span>
                     </>
                 )}
 
@@ -482,13 +481,13 @@ export default function OnBoarding(): React.ReactElement {
                 
                 {step === 2 && isKakaoVerified && (
                     <button className="ob-btn ob-btn--primary" onClick={goToNameStep/* 이메일 인증 재개 시 "next"로 변경 */} disabled={!canGoStep2Kakao} type="button">
-                        {t("onboarding.next")}
+                        {t("onboarding.finish")}
                     </button>
                 )}
                 
                 {ENABLE_EMAIL_VERIFICATION && step === 3 && (
                     <button className="ob-btn ob-btn--primary" onClick={submitVerifyEmailCode} disabled={emailVerifying || !canGoStep3} type="button">
-                        {t("onboarding.next")}
+                        {t("onboarding.finish")}
                     </button>
                 )}
 

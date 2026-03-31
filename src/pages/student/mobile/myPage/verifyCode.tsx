@@ -15,7 +15,9 @@ export default function VerifyCodePage() {
 
     const [code, setCode] = React.useState("");
     const [verifyMessage, setVerifyMessage] = React.useState<string | null>(null);
-    const [submitting, setSubmitting] = React.useState(false);
+    const [verifyingCode, setVerifyingCode] = React.useState(false);
+    const [savingJumpCenter, setSavingJumpCenter] = React.useState(false);
+    const [savingStudentNumber, setSavingStudentNumber] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const verifiedMessageTimeoutRef = React.useRef<number | null>(null);
 
@@ -65,7 +67,7 @@ export default function VerifyCodePage() {
             return;
         }
 
-        setSubmitting(true);
+        setVerifyingCode(true);
         setError(null);
 
         try {
@@ -102,7 +104,7 @@ export default function VerifyCodePage() {
                 setError("인증에 실패했습니다.");
             }
         } finally {
-            setSubmitting(false);
+            setVerifyingCode(false);
         }
     }
 
@@ -158,7 +160,7 @@ export default function VerifyCodePage() {
             return;
         }
 
-        setSubmitting(true);
+        setSavingJumpCenter(true);
         setOrgSaveError(null);
         setOrgSaveMessage(null);
 
@@ -177,7 +179,7 @@ export default function VerifyCodePage() {
                 setOrgSaveError("센터 저장에 실패했습니다.");
             }
         } finally {
-            setSubmitting(false);
+            setSavingJumpCenter(false);
         }
     }
 
@@ -195,7 +197,7 @@ export default function VerifyCodePage() {
             return;
         }
 
-        setSubmitting(true);
+        setSavingStudentNumber(true);
         setStudentNumberError(null);
         setStudentNumberMessage(null);
 
@@ -214,7 +216,7 @@ export default function VerifyCodePage() {
                 setStudentNumberError("학번 저장에 실패했습니다.");
             }
         } finally {
-            setSubmitting(false);
+            setSavingStudentNumber(false);
         }
     }
 
@@ -283,7 +285,7 @@ export default function VerifyCodePage() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder={t("mypage.verificationCode")}
-                    disabled={submitting}
+                    disabled={verifyingCode}
                 />
             </div>
             
@@ -307,7 +309,7 @@ export default function VerifyCodePage() {
                                     onClick={() => setInstOpen((v) => !v)}
                                     aria-haspopup="listbox"
                                     aria-expanded={instOpen}
-                                    disabled={submitting}
+                                    disabled={savingJumpCenter}
                                 >
                                     <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
                                         {jumpOrganizationName || "센터 선택"}
@@ -345,17 +347,27 @@ export default function VerifyCodePage() {
             {isKakaoVerified && (
                 <div className="jump-center-select">
                     <div className="vcjp-title">학번을 입력하세요</div>
-                    <input
-                        className="profile-edit-input"
-                        value={studentNumber}
-                        onChange={(e) => {
-                            setStudentNumber(e.target.value);
-                            setStudentNumberError(null);
-                            setStudentNumberMessage(null);
-                        }}
-                        placeholder="학번 입력"
-                        disabled={submitting}
-                    />
+                    <div className="student-number-row">
+                        <input
+                            className="profile-edit-input"
+                            value={studentNumber}
+                            onChange={(e) => {
+                                setStudentNumber(e.target.value);
+                                setStudentNumberError(null);
+                                setStudentNumberMessage(null);
+                            }}
+                            placeholder="학번 입력"
+                            disabled={savingStudentNumber}
+                        />
+                        <button
+                            type="button"
+                            className="submit-code submit-code-secondary student-number-save-btn"
+                            onClick={() => { void finishStudentNumber(); }}
+                            disabled={savingStudentNumber || !studentNumber.trim()}
+                        >
+                            {savingStudentNumber ? "저장 중..." : "학번 저장"}
+                        </button>
+                    </div>
                     {studentNumberError && <div className="ob-error">{studentNumberError}</div>}
                     {studentNumberMessage && <div className="verify-success-message">{studentNumberMessage}</div>}
                 </div>
@@ -372,24 +384,13 @@ export default function VerifyCodePage() {
                     <button
                         className="submit-code submit-code-secondary"
                         onClick={handleSaveJumpCenter}
-                        disabled={submitting || !jumpOrganizationId}
+                        disabled={savingJumpCenter || !jumpOrganizationId}
                     >
-                        센터 저장
+                        {savingJumpCenter ? "저장 중..." : "센터 저장"}
                     </button>
                 )}
-
-                {isKakaoVerified && (
-                    <button
-                        className="submit-code submit-code-secondary"
-                        onClick={() => { void finishStudentNumber(); }}
-                        disabled={submitting || !studentNumber.trim()}
-                    >
-                        학번 저장
-                    </button>
-                )}
-
-                <button className="submit-code" onClick={handleSubmitCode} disabled={submitting} >
-                    {t("common.done")}
+                <button className="submit-code" onClick={handleSubmitCode} disabled={verifyingCode} >
+                    {verifyingCode ? "확인 중..." : t("common.done")}
                 </button>
             </div>
         </div>

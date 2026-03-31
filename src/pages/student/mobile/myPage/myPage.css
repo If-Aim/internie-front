@@ -55,6 +55,9 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .ob-error{margin-top: 8px; margin-left: 12px; font-size: 16px; color: #000; font-weight: 700;}
 .verify-success-message{margin:8px 0 0 12px;font-size:16px;line-height:20px;color:#000;opacity:0;animation:verifyFadeOut 5s ease forwards;}
 @keyframes verifyFadeOut{0%{opacity:0;transform:translateY(2px);}10%{opacity:1;transform:translateY(0);}75%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-2px);}}
+.student-number-row{display:flex;align-items:center;gap:8px;margin-top:12px;}
+.student-number-row .profile-edit-input{flex:1 1 auto;margin:0;}
+.student-number-save-btn{flex:0 0 auto;width:110px;height:60px;padding:0 12px;white-space:nowrap;}
 
 /* mypage modal */
 .mypage-modal-backdrop{ position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
