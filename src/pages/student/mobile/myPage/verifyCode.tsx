@@ -39,7 +39,10 @@ export default function VerifyCodePage() {
     const [studentNumber, setStudentNumber] = React.useState("");
     const [studentNumberError, setStudentNumberError] = React.useState<string | null>(null);
     const [studentNumberMessage, setStudentNumberMessage] = React.useState<string | null>(null);
-
+    
+    // 각 client별 인증 코드 후 단계
+    const [showJumpPopup, setShowJumpPopup] = React.useState(false);
+    const [showKakaoPopup, setShowKakaoPopup] = React.useState(false);
     // 인증 상태
     const roleSet = me?.roleSet ?? [];
     const isJumpVerified = roleSet.includes("ROLE_JUMP_STUDENT");
@@ -91,9 +94,24 @@ export default function VerifyCodePage() {
                 triggerVerifiedMessage("인증이 완료되었습니다.");
             }
 
-            // 점프 role이 있으면 센터 목록 로드
-            if (nextRoleSet.includes("ROLE_JUMP_STUDENT")) {
+            const hasJumpRole = nextRoleSet.includes("ROLE_JUMP_STUDENT");
+            const hasKakaoRole = nextRoleSet.includes("ROLE_KAKAO_STUDENT");
+            const hasJumpOrganization = refreshed.jumpOrganization?.id != null;
+            const hasStudentNumber = (refreshed.studentNumber ?? "").trim().length > 0;
+
+            if (hasJumpRole) {
                 await loadJumpOrganizations(refreshed.jumpOrganization);
+            }
+
+            if (hasJumpRole && !hasJumpOrganization) {
+                setShowJumpPopup(true);
+                setShowKakaoPopup(false);
+            } else if (hasKakaoRole && !hasStudentNumber) {
+                setShowKakaoPopup(true);
+                setShowJumpPopup(false);
+            } else {
+                setShowJumpPopup(false);
+                setShowKakaoPopup(false);
             }
 
         } catch (e) {
@@ -165,13 +183,27 @@ export default function VerifyCodePage() {
         setOrgSaveMessage(null);
 
         try {
-            await submitMyOnboarding({
+            const updated = await submitMyOnboarding({
                 name,
                 jumpOrganizationId,
             });
 
+            setMe(updated);
+            setJumpOrganizationId(updated.jumpOrganization?.id ?? null);
+            setJumpOrganizationName(updated.jumpOrganization?.name ?? "");
             setOrgSaveError(null);
             setOrgSaveMessage("센터 저장이 완료되었습니다.");
+
+            const hasKakaoRole = (updated.roleSet ?? []).includes("ROLE_KAKAO_STUDENT");
+            const hasStudentNumber = (updated.studentNumber ?? "").trim().length > 0;
+
+            if (hasKakaoRole && !hasStudentNumber) {
+                setShowJumpPopup(false);
+                setShowKakaoPopup(true);
+            } else {
+                setShowJumpPopup(false);
+                setShowKakaoPopup(false);
+            }
         } catch (e) {
             if (e instanceof ApiError) {
                 setOrgSaveError("센터 저장에 실패했습니다.");
@@ -202,13 +234,17 @@ export default function VerifyCodePage() {
         setStudentNumberMessage(null);
 
         try {
-            await submitMyOnboarding({
+            const updated = await submitMyOnboarding({
                 name,
                 studentNumber: trimmedStudentNumber,
             });
 
+            setMe(updated);
+            setStudentNumber((updated.studentNumber ?? "").trim());
             setStudentNumberError(null);
             setStudentNumberMessage("학번 저장이 완료되었습니다.");
+            setShowKakaoPopup(false);
+            setShowJumpPopup(false);
         } catch (e) {
             if (e instanceof ApiError) {
                 setStudentNumberError("학번 저장에 실패했습니다.");
@@ -247,6 +283,28 @@ export default function VerifyCodePage() {
                 if (Array.isArray(user.roleSet) && user.roleSet.includes("ROLE_JUMP_STUDENT")) {
                     await loadJumpOrganizations(user.jumpOrganization);
                 }
+
+                const needsJumpCenter =
+                    Array.isArray(user.roleSet) &&
+                    user.roleSet.includes("ROLE_JUMP_STUDENT") &&
+                    user.jumpOrganization?.id == null;
+
+                const needsStudentNumber =
+                    Array.isArray(user.roleSet) &&
+                    user.roleSet.includes("ROLE_KAKAO_STUDENT") &&
+                    !(user.studentNumber ?? "").trim();
+
+                if (needsJumpCenter) {
+                    setShowJumpPopup(true);
+                    setShowKakaoPopup(false);
+                } else if (needsStudentNumber) {
+                    setShowKakaoPopup(true);
+                    setShowJumpPopup(false);
+                } else {
+                    setShowJumpPopup(false);
+                    setShowKakaoPopup(false);
+                }
+
             } catch {
                 
             }
@@ -289,87 +347,146 @@ export default function VerifyCodePage() {
                 />
             </div>
             
-            {isJumpVerified && ( // 점프 센터 선택
-                <div className="jump-center-select">
-                    <div className="vcjp-jump-logo">
-                        <img src="/logos/jump-logo.png" alt="JUMP" />
+            {showJumpPopup && (
+                <div className="client-verify-popup-backdrop" onClick={() => setShowJumpPopup(false)}>
+                    <div className="client-verify-popup" onClick={(e) => e.stopPropagation()}>
+                        <div className="client-verify-popup-header">
+                            <div className="client-verify-popup-title">센터 선택</div>
+                            <button
+                                type="button"
+                                className="client-verify-popup-close"
+                                onClick={() => setShowJumpPopup(false)}
+                            >
+                                <img src="/icons/close.svg" alt="닫기" />
+                            </button>
+                        </div>
+
+                        <div className="client-verify-popup-desc">
+                            소속된 점프 센터를 선택해주세요.
+                        </div>
+
+                        <div className="client-verify-popup-body">
+                            {orgLoading ? (
+                                <div className="client-verify-popup-info">불러오는 중...</div>
+                            ) : orgLoadError ? (
+                                <div className="client-verify-popup-error">{orgLoadError}</div>
+                            ) : (
+                                <div className={"vcjp-dd" + (instOpen ? " vcjp-dd--open" : "")} ref={instWrapRef}>
+                                    <button
+                                        type="button"
+                                        className="vcjp-dd-trigger"
+                                        onClick={() => setInstOpen((v) => !v)}
+                                        aria-haspopup="listbox"
+                                        aria-expanded={instOpen}
+                                        disabled={savingJumpCenter}
+                                    >
+                                        <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
+                                            {jumpOrganizationName || "센터 선택"}
+                                        </span>
+                                        <span className="vcjp-dd-caret" aria-hidden="true">
+                                            <img src="/icons/chevron-left.svg" alt="" />
+                                        </span>
+                                    </button>
+
+                                    {instOpen && (
+                                        <div className="vcjp-dd-menu" role="listbox" aria-label="센터 목록">
+                                            {institutions.map((org) => (
+                                                <button
+                                                    key={org.id}
+                                                    type="button"
+                                                    className={"vcjp-dd-item" + (jumpOrganizationId === org.id ? " vcjp-dd-item--active" : "")}
+                                                    onClick={() => pickInstitution(org)}
+                                                    role="option"
+                                                    aria-selected={jumpOrganizationId === org.id}
+                                                >
+                                                    {org.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {orgSaveError && <div className="client-verify-popup-error">{orgSaveError}</div>}
+                            {orgSaveMessage && <div className="client-verify-popup-info">{orgSaveMessage}</div>}
+                        </div>
+
+                        <div className="client-verify-popup-footer">
+                            <button
+                                type="button"
+                                className="client-verify-popup-secondary"
+                                onClick={() => setShowJumpPopup(false)}
+                                disabled={savingJumpCenter}
+                            >
+                                닫기
+                            </button>
+                            <button
+                                type="button"
+                                className="client-verify-popup-primary"
+                                onClick={() => { void finishInstitution(); }}
+                                disabled={savingJumpCenter || !jumpOrganizationId}
+                            >
+                                {savingJumpCenter ? "저장 중..." : "저장"}
+                            </button>
+                        </div>
                     </div>
-                    <div className="vcjp-title">센터를 선택하세요</div>
-
-                    {orgLoading ? (
-                        <div className="ob-error">불러오는 중...</div>
-                    ) : orgLoadError ? (
-                        <div className="ob-error">{orgLoadError}</div>
-                    ) : (
-                        <>
-                            <div className={"vcjp-dd" + (instOpen ? " vcjp-dd--open" : "")} ref={instWrapRef}>
-                                <button
-                                    type="button"
-                                    className="vcjp-dd-trigger"
-                                    onClick={() => setInstOpen((v) => !v)}
-                                    aria-haspopup="listbox"
-                                    aria-expanded={instOpen}
-                                    disabled={savingJumpCenter}
-                                >
-                                    <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
-                                        {jumpOrganizationName || "센터 선택"}
-                                    </span>
-                                    <span className="vcjp-dd-caret" aria-hidden="true">
-                                        <img src="/icons/chevron-left.svg" alt="" />
-                                    </span>
-                                </button>
-
-                                {instOpen && (
-                                    <div className="vcjp-dd-menu" role="listbox" aria-label="센터 목록">
-                                        {institutions.map((org) => (
-                                            <button
-                                                key={org.id}
-                                                type="button"
-                                                className={"vcjp-dd-item" + (jumpOrganizationId === org.id ? " vcjp-dd-item--active" : "")}
-                                                onClick={() => pickInstitution(org)}
-                                                role="option"
-                                                aria-selected={jumpOrganizationId === org.id}
-                                            >
-                                                {org.name}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {orgSaveError && <div className="ob-error">{orgSaveError}</div>}
-                            {orgSaveMessage && <div className="verify-success-message">{orgSaveMessage}</div>}
-                        </>
-                    )}
                 </div>
             )}
 
-            {isKakaoVerified && (
-                <div className="jump-center-select">
-                    <div className="vcjp-title">학번을 입력하세요</div>
-                    <div className="student-number-row">
-                        <input
-                            className="profile-edit-input"
-                            value={studentNumber}
-                            onChange={(e) => {
-                                setStudentNumber(e.target.value);
-                                setStudentNumberError(null);
-                                setStudentNumberMessage(null);
-                            }}
-                            placeholder="학번 입력"
-                            disabled={savingStudentNumber}
-                        />
-                        <button
-                            type="button"
-                            className="submit-code submit-code-secondary student-number-save-btn"
-                            onClick={() => { void finishStudentNumber(); }}
-                            disabled={savingStudentNumber || !studentNumber.trim()}
-                        >
-                            {savingStudentNumber ? "저장 중..." : "학번 저장"}
-                        </button>
+            {showKakaoPopup && (
+                <div className="client-verify-popup-backdrop" onClick={() => setShowKakaoPopup(false)}>
+                    <div className="client-verify-popup" onClick={(e) => e.stopPropagation()}>
+                        <div className="client-verify-popup-header">
+                            <div className="client-verify-popup-title">학번 입력</div>
+                            <button
+                                type="button"
+                                className="client-verify-popup-close"
+                                onClick={() => setShowKakaoPopup(false)}
+                            >
+                                <img src="/icons/close.svg" alt="닫기" />
+                            </button>
+                        </div>
+
+                        <div className="client-verify-popup-desc">
+                            카카오 인증 사용자는 학번을 입력해주세요.
+                        </div>
+
+                        <div className="client-verify-popup-body">
+                            <input
+                                className="client-verify-popup-input"
+                                value={studentNumber}
+                                onChange={(e) => {
+                                    setStudentNumber(e.target.value);
+                                    setStudentNumberError(null);
+                                    setStudentNumberMessage(null);
+                                }}
+                                placeholder="학번 입력"
+                                disabled={savingStudentNumber}
+                            />
+
+                            {studentNumberError && <div className="client-verify-popup-error">{studentNumberError}</div>}
+                            {studentNumberMessage && <div className="client-verify-popup-info">{studentNumberMessage}</div>}
+                        </div>
+
+                        <div className="client-verify-popup-footer">
+                            <button
+                                type="button"
+                                className="client-verify-popup-secondary"
+                                onClick={() => setShowKakaoPopup(false)}
+                                disabled={savingStudentNumber}
+                            >
+                                닫기
+                            </button>
+                            <button
+                                type="button"
+                                className="client-verify-popup-primary"
+                                onClick={() => { void finishStudentNumber(); }}
+                                disabled={savingStudentNumber || !studentNumber.trim()}
+                            >
+                                {savingStudentNumber ? "저장 중..." : "저장"}
+                            </button>
+                        </div>
                     </div>
-                    {studentNumberError && <div className="ob-error">{studentNumberError}</div>}
-                    {studentNumberMessage && <div className="verify-success-message">{studentNumberMessage}</div>}
                 </div>
             )}
 
@@ -378,17 +495,38 @@ export default function VerifyCodePage() {
             )}
 
             {error && <div className="ob-error">{error}</div>}
-
-            <div className="verify-code-actions">
+            <div className="verify-client-actions">
                 {isJumpVerified && (
                     <button
-                        className="submit-code submit-code-secondary"
-                        onClick={handleSaveJumpCenter}
-                        disabled={savingJumpCenter || !jumpOrganizationId}
+                        type="button"
+                        className="verify-client-action-btn"
+                        onClick={() => {
+                            setOrgSaveError(null);
+                            setOrgSaveMessage(null);
+                            setShowJumpPopup(true);
+                            setShowKakaoPopup(false);
+                        }}
                     >
-                        {savingJumpCenter ? "저장 중..." : "센터 저장"}
+                        점프 센터 선택
                     </button>
                 )}
+
+                {isKakaoVerified && (
+                    <button
+                        type="button"
+                        className="verify-client-action-btn"
+                        onClick={() => {
+                            setStudentNumberError(null);
+                            setStudentNumberMessage(null);
+                            setShowKakaoPopup(true);
+                            setShowJumpPopup(false);
+                        }}
+                    >
+                        학번 수정
+                    </button>
+                )}
+            </div>
+            <div className="verify-code-actions">
                 <button className="submit-code" onClick={handleSubmitCode} disabled={verifyingCode} >
                     {verifyingCode ? "확인 중..." : t("common.done")}
                 </button>
