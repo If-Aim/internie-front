@@ -130,10 +130,6 @@ export default function VerifyCodePage() {
         void submit();
     }
 
-    function handleSaveJumpCenter() {
-        void finishInstitution();
-    }
-
     async function loadJumpOrganizations(currentOrg?: JumpOrganization | null) {
         setOrgLoading(true);
         setOrgLoadError(null);
