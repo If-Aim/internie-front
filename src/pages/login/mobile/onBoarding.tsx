@@ -258,17 +258,10 @@ export default function OnBoarding(): React.ReactElement {
             setCodeError(t("onboarding.verifyFailed"));
         } catch (e) {
             if (e instanceof ApiError) {
-                if (e.code === "AUTH_EXISTING_ACCOUNT") {
-                    alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
-                    localStorage.removeItem("accessToken");
-                    navigate("/login", { replace: true });
-                    return;
-                }
-
-                setEmailError("인증코드 발송에 실패했습니다.");
+                setCodeError("인증 코드가 올바르지 않습니다.");
                 return;
             }
-            setEmailError("이메일 전송 중 오류가 발생했습니다.");
+            setCodeError("인증 중 오류가 발생했습니다.");
         } finally {
             setSubmitting(false);
         }

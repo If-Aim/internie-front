@@ -38,9 +38,10 @@ export async function refreshAccessToken(): Promise<string> {
 async function requestWithAutoRefresh(
     path: string,
     init: RequestInit = {},
-    opts?: { expectJson?: boolean }
+    opts?: { expectJson?: boolean; skipAuthRefresh?: boolean }
 ): Promise<Response> {
     const expectJson = opts?.expectJson ?? false;
+    const skipAuthRefresh = opts?.skipAuthRefresh ?? false;
 
     const makeHeaders = () => {
         const h: Record<string, string> = {
@@ -63,7 +64,7 @@ async function requestWithAutoRefresh(
 
     let res = await doFetch();
 
-    if (res.status === 401 || res.status === 403) {
+    if (!skipAuthRefresh && (res.status === 401 || res.status === 403)) {
         try {
             await refreshAccessToken();
             res = await doFetch();
@@ -156,9 +157,13 @@ export async function apiPublic(
 /* Auth */ 
 export async function api<T = unknown>(
 	path: string,
-	init: RequestInit = {}
+	init: RequestInit = {},
+    opts?: { skipAuthRefresh?: boolean }
 ): Promise<T> {
-	const res = await requestWithAutoRefresh(path, init, { expectJson: true });
+	const res = await requestWithAutoRefresh(path, init, {
+        expectJson: true,
+        skipAuthRefresh: opts?.skipAuthRefresh ?? false,
+    });
 
 	if (res.status === 204) return undefined as T;
 
@@ -459,13 +464,19 @@ export async function applyMyVerification(
 }
 
 // 각 업체별 사용자 인증
-export async function verifyClientUser (
-	code: string
+export async function verifyClientUser(
+    code: string
 ): Promise<UserMe> {
-	return api<UserMe>("/users/me/code-verify", {
-		method: "POST",
-		body: JSON.stringify({ code } satisfies { code: string }),
-	});
+    return api<UserMe>(
+        "/users/me/code-verify",
+        {
+            method: "POST",
+            body: JSON.stringify({ code } satisfies { code: string }),
+        },
+        {
+            skipAuthRefresh: true,
+        }
+    );
 }
 
 // role reset - (개발용)
