@@ -98,7 +98,7 @@ export default function VerifyCodePage() {
 
         } catch (e) {
             if (e instanceof ApiError) {
-                if (e.status === 401) setError("인증 코드가 올바르지 않습니다.");
+                if (e.status === 400) setError("인증 코드가 올바르지 않습니다.");
                 else setError("인증에 실패했습니다.");
             } else {
                 setError("인증에 실패했습니다.");
