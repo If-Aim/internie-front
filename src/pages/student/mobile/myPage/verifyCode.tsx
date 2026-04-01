@@ -353,7 +353,7 @@ export default function VerifyCodePage() {
                                 className="client-verify-popup-close"
                                 onClick={() => setShowJumpPopup(false)}
                             >
-                                <img src="/icons/close.svg" alt="닫기" />
+                                <img src="/icons/x-01.svg" alt="닫기" />
                             </button>
                         </div>
 
@@ -439,7 +439,7 @@ export default function VerifyCodePage() {
                                 className="client-verify-popup-close"
                                 onClick={() => setShowKakaoPopup(false)}
                             >
-                                <img src="/icons/close.svg" alt="닫기" />
+                                <img src="/icons/x-01.svg" alt="닫기" />
                             </button>
                         </div>
 
