@@ -713,6 +713,11 @@ export type ClientAdminEventDayDetailResponse = {
 	question?: ClientAdminEventDayQuestions | null;
 };
 
+export type ClientAdminStudentRecordCountResponse = {
+    userId: number;
+    totalRecordCount: number;
+}
+
 export async function getClientAdminEventDayDetail(
 	clientType: ClientType,
     eventDayId: number | string
@@ -721,6 +726,18 @@ export async function getClientAdminEventDayDetail(
         `/admin-client/${clientType}/event-days/${eventDayId}`, 
         { method: "GET", });
 }
+
+// 해당 학생 기록 총 갯수
+export async function getClientAdminStudentRecordCount(
+    clientType: ClientType,
+    userId: number | string
+): Promise<ClientAdminStudentRecordCountResponse> {
+    return api<ClientAdminStudentRecordCountResponse>(
+        `/admin-client/${clientType}/students/${userId}/records/count`,
+        { method: "GET" }
+    );
+}
+
 
 // 점프 학생 삭제
 export async function deleteClientAdminStudent(

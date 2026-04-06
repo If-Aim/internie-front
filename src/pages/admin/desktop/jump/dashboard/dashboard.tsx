@@ -1,7 +1,7 @@
 // src/pages/admin/desktop/jump/dashboard/dashboard.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ApiError, type ClientAdminStudent, type ClientAdminStudentCalendarResponse, type ClientType, getClientAdminStudents, getClientAdminStudentCalendar, } from "../../../../../api/client"; 
+import { ApiError, type ClientAdminStudent, type ClientAdminStudentCalendarResponse, type ClientType, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminStudentRecordCount } from "../../../../../api/client"; 
 import "./dashboard.css";
 import "../jumpAdmin.css"
 
@@ -122,6 +122,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
 
     const [students, setStudents] = React.useState<ClientAdminStudent[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [recordCountMap, setRecordCountMap] = React.useState<Record<number, number>>({});
 
     const [selectedOrg, setSelectedOrg] = React.useState<string>("");
 
@@ -135,6 +136,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     const orgRef = React.useRef<HTMLDivElement | null>(null);
 
     const isJump = clientType === "jump";
+    const isKakao = clientType === "kakao";
 
     const config = getClientConfig(clientType);
 
@@ -171,6 +173,43 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
             mounted = false;
         };
     }, [clientType]);
+
+    React.useEffect(() => {
+        if (!clientType) return;
+        if (students.length === 0) {
+            setRecordCountMap({});
+            return;
+        }
+
+        let mounted = true;
+
+        (async () => {
+            try {
+                const entries = await Promise.all(
+                    students.map(async (student) => {
+                        try {
+                            const res = await getClientAdminStudentRecordCount(clientType, student.userId);
+                            return [student.userId, res.totalRecordCount] as const;
+                        } catch (e) {
+                            if (!(e instanceof ApiError)) console.error(e);
+                            return [student.userId, 0] as const;
+                        }
+                    })
+                );
+
+                if (!mounted) return;
+                setRecordCountMap(Object.fromEntries(entries));
+            } catch (e) {
+                if (!mounted) return;
+                console.error(e);
+                setRecordCountMap({});
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, [clientType, students]);
 
     const orgOptions = React.useMemo(() => {
         if (!isJump) return [];
@@ -351,13 +390,18 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
             }
         }
 
+        const overFiveRecorededStudents = visibleStudents.filter((s) => {
+            return (recordCountMap[s.userId] ?? 0) >= 5;
+        }).length;
+
         return {
             totalParticipants,
             monthRecordedCount,
             weekRecordedCount,
             weekNotRecordedCells,
+            overFiveRecorededStudents,
         };
-    }, [visibleStudents, weekDays, calCache, weekAnchor]);
+    }, [visibleStudents, weekDays, calCache, weekAnchor, recordCountMap]);
 
     function goPrevWeek() {
         setWeekAnchor((prev) => addDays(prev, -7));
@@ -392,8 +436,8 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                     </button>
 
                     <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">이번 주 미기록 현황</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.weekNotRecordedCells}건</div>
+                        <div className="jump-dashboard-kpi-label">과제 완료</div>
+                        <div className="jump-dashboard-kpi-value">{kpi.overFiveRecorededStudents}건</div>
                     </button>
                 </div>
             </div>
@@ -446,6 +490,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                                     <div className="jump-dashboard-student">
                                         <div className="jump-dashboard-student-name">{s.name}</div>
                                         {isJump&&(<div className="jump-dashboard-student-org">{getOrgName(s) || "-"}</div>)}
+                                        {isKakao&&(<div className="jump-dashboard-student-org">{s.studentNumber || "-"}</div>)}
                                     </div>
 
                                     <div className="jump-dashboard-cells">
