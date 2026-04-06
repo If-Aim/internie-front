@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, sendEmailCode, verifyEmailCode } from "../../../api/client";
 import { useTranslation } from "react-i18next";
-import "./onBoarding.css"
+import "./onboarding.css"
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -43,13 +43,7 @@ export default function OnBoarding(): React.ReactElement {
 
     const [submitting, setSubmitting] = React.useState(false);
     const [codeError, setCodeError] = React.useState<string | null>(null);
-    function getVerifiedFlow(roleSet: string[] | null | undefined) {
-        if (!roleSet || roleSet.length === 0) return null;
-        if (roleSet.includes("ROLE_JUMP_STUDENT")) return "JUMP";
-        if (roleSet.includes("ROLE_ESG_STUDENT")) return "ESG";
-        if (roleSet.includes("ROLE_KAKAO_STUDENT")) return "KAKAO";
-        return null;
-    }
+
 
     // 이메일 인증
     const [emailSending, setEmailSending] = React.useState(false);
@@ -57,12 +51,19 @@ export default function OnBoarding(): React.ReactElement {
     const [emailSentMessage, setEmailSentMessage] = React.useState<string | null>(null);
     const [emailError, setEmailError] = React.useState<string | null>(null);
 
+    // ROLE 검증
     const [verifiedRoleSet, setVerifiedRoleSet] = React.useState<string[] | null>(null);
-    const verifiedFlow = getVerifiedFlow(verifiedRoleSet);
-    const isJumpVerified = verifiedFlow === "JUMP";
-    // const isEsgVerified = verifiedFlow === "ESG";
-    const isKakaoVerified = verifiedFlow === "KAKAO";
-    const isPartnerVerified = verifiedFlow !== null;
+
+    const roleSet = verifiedRoleSet ?? [];
+    const isJumpVerified = roleSet.includes("ROLE_JUMP_STUDENT");
+    const isKakaoVerified = roleSet.includes("ROLE_KAKAO_STUDENT");
+    const isPartnerVerified = roleSet.length > 0;
+
+    const hasJumpOrganization = form.jumpOrganizationId != null;
+    const hasStudentNumber = form.studentNumber.trim().length > 0;
+
+    const needsJumpOrganization = isJumpVerified && !hasJumpOrganization;
+    const needsStudentNumber = isKakaoVerified && !hasStudentNumber;
 
     const [instOpen, setInstOpen] = React.useState(false);
     const instWrapRef = React.useRef<HTMLDivElement | null>(null);
@@ -80,6 +81,7 @@ export default function OnBoarding(): React.ReactElement {
                     ...p,
                     name: (me.name ?? "").trim(),
                     email: (me.email ?? "").trim(),
+                    studentNumber: (me.studentNumber ?? "").trim(),
                     jumpOrganizationId: me.jumpOrganization?.id ?? null,
                     jumpOrganizationName: me.jumpOrganization?.name ?? "",
                 }));
@@ -233,29 +235,33 @@ export default function OnBoarding(): React.ReactElement {
 
         try {
             const refreshed = await verifyClientUser(code);
-            const roleSet = refreshed.roleSet ?? null;
-            const flow = getVerifiedFlow(roleSet);
+            const roleSet = refreshed.roleSet ?? [];
 
             setVerifiedRoleSet(roleSet);
 
-            if (flow === "JUMP") {
+            setForm((prev) => ({
+                ...prev,
+                studentNumber: (refreshed.studentNumber ?? "").trim(),
+                jumpOrganizationId: refreshed.jumpOrganization?.id ?? null,
+                jumpOrganizationName: refreshed.jumpOrganization?.name ?? "",
+            }));
+
+            const hasJumpRole = roleSet.includes("ROLE_JUMP_STUDENT");
+            const hasKakaoRole = roleSet.includes("ROLE_KAKAO_STUDENT");
+            const hasJumpOrganization = refreshed.jumpOrganization?.id != null;
+            const hasStudentNumber = (refreshed.studentNumber ?? "").trim().length > 0;
+
+            if (hasJumpRole) {
                 const orgs = await getMyJumpOrganizations();
                 setInstitutions(orgs);
+            }
+
+            if ((hasJumpRole && !hasJumpOrganization) || (hasKakaoRole && !hasStudentNumber)) {
                 setStep(2);
                 return;
             }
 
-            if (flow === "KAKAO") {
-                setStep(2);
-                return;
-            }
-
-            if (flow !== null) {
-                goToNameStep(); //setStep(3); 이메일 인증 숨김
-                return;
-            }
-
-            setCodeError(t("onboarding.verifyFailed"));
+            goToNameStep();
         } catch (e) {
             if (e instanceof ApiError) {
                 setCodeError("인증 코드가 올바르지 않습니다.");
@@ -276,19 +282,26 @@ export default function OnBoarding(): React.ReactElement {
         setInstOpen(false);
     }
 
-    function finishInstitution() {
-        if (!form.jumpOrganizationId) return;
-        goToNameStep(); // setStep(3);
+    function finishStep2() {
+        if (needsJumpOrganization && !form.jumpOrganizationId) {
+            return;
+        }
+
+        if (needsStudentNumber && !form.studentNumber.trim()) {
+            return;
+        }
+
+        goToNameStep();
     }
 
     async function finishOnboarding() {
         try {
             await submitMyOnboarding({
                 name: form.name.trim(),
-                studentNumber: isKakaoVerified ? form.studentNumber.trim() : undefined,
-                interestJob: form.interestJob.trim() || undefined,
-                interestCompany: form.interestCompany.trim() || undefined,
-                jumpOrganizationId: isJumpVerified ? (form.jumpOrganizationId ?? undefined) : undefined,
+                ...(isKakaoVerified ? { studentNumber: form.studentNumber.trim() } : {}),
+                ...(isJumpVerified ? { jumpOrganizationId: form.jumpOrganizationId } : {}),
+                ...(form.interestJob.trim() ? { interestJob: form.interestJob.trim() } : {}),
+                ...(form.interestCompany.trim() ? { interestCompany: form.interestCompany.trim() } : {}),
             });
             navigate("/student", { replace: true });
         } catch {
@@ -297,8 +310,9 @@ export default function OnBoarding(): React.ReactElement {
     }
 
     const canGoStep1 = form.verifyCode.trim().length > 0;
-    const canGoStep2Jump = isJumpVerified && form.jumpOrganizationId != null;
-    const canGoStep2Kakao = isKakaoVerified && form.studentNumber.trim().length > 0;
+    const canGoStep2 =
+        (!needsJumpOrganization || form.jumpOrganizationId != null) &&
+        (!needsStudentNumber || form.studentNumber.trim().length > 0);
     const canGoStep3 = form.email.trim().length > 0 && form.emailCode.trim().length > 0;
     const canGoStep4 = form.name.trim().length > 0;
     const canGoStep5 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
@@ -328,57 +342,67 @@ export default function OnBoarding(): React.ReactElement {
                 )}
 
                 {/* JUMP */}
-                {step === 2 && isJumpVerified && ( 
+                {step === 2 && (
                     <>
-                        <div className="ob-jump-logo">
-                            <img src="/logos/jump-logo.png" alt="JUMP" />
-                        </div>
+                        {needsJumpOrganization && (
+                            <>
+                                <div className="ob-jump-logo">
+                                    <img src="/logos/jump-logo.png" alt="JUMP" />
+                                </div>
 
-                        <h1 className="ob-title">{t("onboarding.step4Title")}</h1>
+                                <h1 className="ob-title">{t("onboarding.step4Title")}</h1>
 
-                        <div className="ob-field">
-                            <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
-                                <button type="button" className="ob-dd-trigger" onClick={() => setInstOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={instOpen} >
-                                    <span className={"ob-dd-value" + (form.jumpOrganizationName ? "" : " ob-dd-value--placeholder")}>
-                                        {form.jumpOrganizationName || t("onboarding.institutionPlaceholder")}
-                                    </span>
-                                    <span className="ob-dd-caret" aria-hidden="true">
-                                        <img src="/icons/chevron-left.svg" alt="" />
-                                    </span>
-                                </button>
+                                <div className="ob-field">
+                                    <div className={"ob-dd" + (instOpen ? " ob-dd--open" : "")} ref={instWrapRef}>
+                                        <button
+                                            type="button"
+                                            className="ob-dd-trigger"
+                                            onClick={() => setInstOpen((v) => !v)}
+                                            aria-haspopup="listbox"
+                                            aria-expanded={instOpen}
+                                        >
+                                            <span className={"ob-dd-value" + (form.jumpOrganizationName ? "" : " ob-dd-value--placeholder")}>
+                                                {form.jumpOrganizationName || t("onboarding.institutionPlaceholder")}
+                                            </span>
+                                            <span className="ob-dd-caret" aria-hidden="true">
+                                                <img src="/icons/chevron-left.svg" alt="" />
+                                            </span>
+                                        </button>
 
-                                {instOpen && (
-                                    <div className="ob-dd-menu" role="listbox" aria-label="센터 목록">
-                                        {institutions.map((org) => (
-                                            <button
-                                                key={org.id}
-                                                type="button"
-                                                className={"ob-dd-item" + (form.jumpOrganizationId === org.id ? " ob-dd-item--active" : "")}
-                                                onClick={() => pickInstitution(org)}
-                                                role="option"
-                                                aria-selected={form.jumpOrganizationId === org.id}
-                                            >
-                                                {org.name}
-                                            </button>
-                                        ))}
+                                        {instOpen && (
+                                            <div className="ob-dd-menu" role="listbox" aria-label="센터 목록">
+                                                {institutions.map((org) => (
+                                                    <button
+                                                        key={org.id}
+                                                        type="button"
+                                                        className={"ob-dd-item" + (form.jumpOrganizationId === org.id ? " ob-dd-item--active" : "")}
+                                                        onClick={() => pickInstitution(org)}
+                                                        role="option"
+                                                        aria-selected={form.jumpOrganizationId === org.id}
+                                                    >
+                                                        {org.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                )}
+                                </div>
+                            </>
+                        )}
 
-                {step === 2 && isKakaoVerified && (
-                    <>
-                        <h1 className="ob-title">학번을 입력해주세요</h1>
-                        <div className="ob-field">
-                            <input
-                                className="ob-input"
-                                value={form.studentNumber}
-                                onChange={(e) => setForm((p) => ({ ...p, studentNumber: e.target.value }))}
-                                placeholder="학번"
-                            />
-                        </div>
+                        {needsStudentNumber && (
+                            <>
+                                <h1 className="ob-title">학번을 입력해주세요</h1>
+                                <div className="ob-field">
+                                    <input
+                                        className="ob-input"
+                                        value={form.studentNumber}
+                                        onChange={(e) => setForm((p) => ({ ...p, studentNumber: e.target.value }))}
+                                        placeholder="학번"
+                                    />
+                                </div>
+                            </>
+                        )}
                     </>
                 )}
 
@@ -466,15 +490,9 @@ export default function OnBoarding(): React.ReactElement {
                     </>
                 )}
 
-                {step === 2 && isJumpVerified && (
-                    <button className="ob-btn ob-btn--primary" onClick={finishInstitution} disabled={!canGoStep2Jump} type="button">
+                {step === 2 && (
+                    <button className="ob-btn ob-btn--primary" onClick={finishStep2} disabled={!canGoStep2} type="button">
                         {t("onboarding.next")}
-                    </button>
-                )}
-                
-                {step === 2 && isKakaoVerified && (
-                    <button className="ob-btn ob-btn--primary" onClick={goToNameStep/* 이메일 인증 재개 시 "next"로 변경 */} disabled={!canGoStep2Kakao} type="button">
-                        {t("onboarding.finish")}
                     </button>
                 )}
                 

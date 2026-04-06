@@ -63,7 +63,7 @@ cursor: pointer;z-index: 100;}
 .event-modal-header {display: flex;align-items: baseline;justify-content: space-between;padding: 0 18px 4px;}
 .event-modal-header-spacer {width: 24px;height: 24px;}
 .event-modal-header-center {flex: 1;display: flex;flex-direction: column;align-items: center;gap: 17px;}
-.event-modal-title { font-size: 24px; font-weight: 700; color: #000; line-height: 20px;}
+.event-modal-title { font-size: 24px; font-weight: 700; color: #000; line-height: 20px; }
 .event-modal-date { font-size: 16px; color: rgba(0, 0, 0, 0.5); font-weight:500;line-height: 20px;}
 .event-modal-close { padding:0; border: none; background: transparent;  cursor: pointer; margin-right:2px;}
 
@@ -80,6 +80,28 @@ width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid 
 
 .event-modal-footer { display: flex; justify-content: flex-end; }
 .event-modal-primary { background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; line-height: 50px;padding: 5px 24px; cursor: pointer; width: 100%; }
+
+/* 이메일 인증 팝업 */
+.email-popup-backdrop {position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1100;}
+.email-popup {width: calc(100% - 40px); max-width: 360px; background: var(--bg-login); border-radius: 20px; padding: 28px 20px 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.18);}
+.email-popup-header {position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 12px;}
+.email-popup-title {font-size: 24px; font-weight: 700; color: #000; line-height: 28px; text-align: center;}
+.email-popup-close {position: absolute; top: 0; right: 0; padding: 0; border: none; background: transparent; cursor: pointer;}
+.email-popup-desc {font-size: 16px; color: rgba(0,0,0,0.5); font-weight: 500; line-height: 24px; text-align: center; margin-bottom: 20px;}
+.email-popup-body {display: flex; flex-direction: column; gap: 12px;}
+.email-popup-input {width: 100%; height: 54px; padding: 0 18px; border-radius: 10px; border: 1px solid #E2E2E2; background: #fff; font-size: 16px; font-weight: 400; color: #000; outline: none; box-sizing: border-box;}
+.email-popup-input::placeholder {color: #9AA0A6;}
+.email-popup-input:focus {border-color: #CFCFCF;}
+.email-popup-row {display: flex; gap: 8px;}
+.email-popup-row .email-popup-input {flex: 1 1 auto;}
+.email-popup-send-btn {flex: 0 0 auto; min-width: 96px; height: 54px; border: none; border-radius: 10px; background: #BDD8FF; color: #0b0b0b; font-size: 15px; font-weight: 700; cursor: pointer; padding: 0 14px;}
+.email-popup-send-btn:disabled {opacity: 0.6; cursor: default;}
+.email-popup-info {font-size: 14px; font-weight: 500; line-height: 20px; color: rgba(0,0,0,0.6); text-align: left;}
+.email-popup-error {font-size: 14px; font-weight: 500; line-height: 20px; color: #d64545; text-align: left;}
+.email-popup-footer {display: flex; gap: 10px; margin-top: 20px;}
+.email-popup-secondary {flex: 1 1 0; height: 56px; border: 1px solid #D9D9D9; border-radius: 12px; background: #fff; color: #000; font-size: 16px; font-weight: 700; cursor: pointer;}
+.email-popup-primary {flex: 1 1 0; height: 56px; border: none; border-radius: 12px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;}
+.email-popup-primary:disabled,.email-popup-secondary:disabled {opacity: 0.6; cursor: default;}
 
 /* 빈 상태 (Empty State) */
 .empty { margin-top: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; }

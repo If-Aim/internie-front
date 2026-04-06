@@ -1,7 +1,8 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
-import { ApiError, getJumpAdminStudents, getJumpAdminStudentCalendar, getJumpAdminEventDayDetail, deleteJumpAdminStudent} from "../../../../../api/client"; 
-import type { JumpAdminStudent, JumpAdminStudentCalendarResponse, JumpAdminEventDayDetailResponse } from "../../../../../api/client"; 
+import { useNavigate, useParams } from "react-router-dom";
+import { ApiError, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminEventDayDetail, deleteClientAdminStudent} from "../../../../../api/client"; 
+import type { ClientType, ClientAdminStudent, ClientAdminStudentCalendarResponse, ClientAdminEventDayDetailResponse } from "../../../../../api/client"; 
 import "./users.css";
 
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
@@ -98,7 +99,7 @@ function normalizeText(v: unknown): string {
     return String(v ?? "").trim();
 }
 
-function getOrgName(u: JumpAdminStudent): string {
+function getOrgName(u: ClientAdminStudent): string {
     const org = u.jumpOrganization?.name;
     return normalizeText(org) || "-";
 }
@@ -109,24 +110,49 @@ function getRecordFilterLabel(value: "ALL" | "RECORDED" | "NOT_RECORDED"): strin
     return "전체";
 }
 
-function matchQuery(u: JumpAdminStudent, q: string): boolean {
+function matchQuery(u: ClientAdminStudent, q: string, isJumpClient: boolean): boolean {
     const query = q.trim().toLowerCase();
     if (!query) return true;
 
     const name = normalizeText(u.name).toLowerCase();
     const nick = normalizeText(u.nickname).toLowerCase();
-    const org = getOrgName(u).toLowerCase();
+    const org = isJumpClient ? getOrgName(u).toLowerCase() : "";
 
     return name.includes(query) || nick.includes(query) || org.includes(query);
 }
 
-function getSchoolName(u: JumpAdminStudent): string {
+function getSchoolName(u: ClientAdminStudent): string {
     return normalizeText(u.school?.name) || "-";
 }
 
-export default function JumpAdminUsersPage(): React.ReactElement {
+function getClientConfig(clientType: ClientType | null) { // client별 title, logo분기
+    switch (clientType) {
+        case "kakao":
+            return {
+                title: "소셜벤처창업",
+                logo: "/logos/kakaoventure-logo.png",
+            };
+        case "jump":
+        default:
+            return {
+                title: "2026 상생지락 ALTogether",
+                logo: "/logos/jump-logo.png",
+            };
+    }
+}
 
-    const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
+
+export default function ClientAdminUsersPage(): React.ReactElement {
+	const navigate = useNavigate();
+	const params = useParams<{ clientType: string }>();
+
+	function isClientType(value: string | undefined): value is ClientType {
+		return value === "jump" || value === "kakao";
+	}
+
+	const clientType = isClientType(params.clientType) ? params.clientType : null;
+
+    const [students, setStudents] = React.useState<ClientAdminStudent[]>([]);
     const [loading, setLoading] = React.useState<boolean>(true);
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
@@ -139,8 +165,8 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
     const [calendarLoading, setCalendarLoading] = React.useState<boolean>(false);
     const [calendarError, setCalendarError] = React.useState<string | null>(null);
-    const [calendar, setCalendar] = React.useState<JumpAdminStudentCalendarResponse | null>(null);
-	const [studentCalCache, setStudentCalCache] = React.useState<Record<string, JumpAdminStudentCalendarResponse>>({});
+    const [calendar, setCalendar] = React.useState<ClientAdminStudentCalendarResponse | null>(null);
+	const [studentCalCache, setStudentCalCache] = React.useState<Record<string, ClientAdminStudentCalendarResponse>>({});
 	const [/*studentCalLoading*/, setStudentCalLoading] = React.useState<boolean>(false);
 
 	const [selectedOrg, setSelectedOrg] = React.useState<string>("");
@@ -160,8 +186,10 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	const [qIndex, setQIndex] = React.useState<number>(0);
 	const [qDir, setQDir] = React.useState<NavDir>("forward");
 	
-	const [eventDayCache, setEventDayCache] = React.useState<Record<number, JumpAdminEventDayDetailResponse | null | undefined>>({});
+	const [eventDayCache, setEventDayCache] = React.useState<Record<number, ClientAdminEventDayDetailResponse | null | undefined>>({});
 	
+	const isJump = clientType === "jump";
+	const config = getClientConfig(clientType);
 
 	const selected = React.useMemo(() => {
         if (selectedId == null) return null;
@@ -256,7 +284,17 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return false;
 	}
 
+	React.useEffect(() => {
+		if (clientType) return;
+		navigate("/student", { replace: true });
+	}, [clientType, navigate]);
+
+	if (!clientType) {
+		return <div className="jump-users-state">잘못된 관리자 경로입니다.</div>;
+	}
+
     React.useEffect(() => {
+		if (!clientType) return;
         let mounted = true;
 
         (async () => {
@@ -264,7 +302,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
                 setLoading(true);
                 setErrorMsg(null);
 
-                const list = await getJumpAdminStudents();
+                const list = await getClientAdminStudents(clientType);
                 if (!mounted) return;
 
                 setStudents(Array.isArray(list) ? list : []);
@@ -288,7 +326,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [clientType]);
 
 	React.useEffect(() => {
 		if (students.length === 0) {
@@ -301,7 +339,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		(async () => {
 			setStudentCalLoading(true);
 
-			const nextCache: Record<string, JumpAdminStudentCalendarResponse> = {};
+			const nextCache: Record<string, ClientAdminStudentCalendarResponse> = {};
 
 			for (const key of Object.keys(studentCalCache)) {
 				nextCache[key] = studentCalCache[key];
@@ -313,7 +351,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 					if (nextCache[key]) return;
 
 					try {
-						const res = await getJumpAdminStudentCalendar(u.userId, calYear, calMonth);
+						const res = await getClientAdminStudentCalendar(clientType, u.userId, calYear, calMonth);
 						nextCache[key] = res;
 					} catch {
 						nextCache[key] = {
@@ -337,7 +375,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return () => {
 			mounted = false;
 		};
-	}, [students, calYear, calMonth]);
+	}, [students, calYear, calMonth, clientType]);
 
 	function hasAnyRecordForStudent(userId: number): boolean {
 		const key = `${userId}-${calYear}-${calMonth}`;
@@ -350,13 +388,15 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}
 
     const orgOptions = React.useMemo(() => {
+		if (!isJump) return[];
+
 		const set = new Set<string>();
 		for (const u of students) {
 			const org = getOrgName(u);
 			if (org && org !== "-") set.add(org);
 		}
 		return Array.from(set);
-	}, [students]);
+	}, [students, isJump]);
 
 	const monthOptions: Option[] = React.useMemo(() => {
 		return MONTH_LABELS.map((label, idx) => ({
@@ -375,10 +415,12 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}, []);
 
     const filtered = React.useMemo(() => {
-		const byOrg = students.filter((u) => {
-			if (!selectedOrg.trim()) return true;
-			return getOrgName(u) === selectedOrg;
-		});
+		const byOrg = !isJump
+			? students
+			: students.filter((u) => {
+				if (!selectedOrg.trim()) return true;
+				return getOrgName(u) === selectedOrg;
+			});
 
 		const byRecord = byOrg.filter((u) => {
 			if (selectedRecordFilter === "ALL") return true;
@@ -391,8 +433,67 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			return true;
 		});
 
-		return byRecord.filter((u) => matchQuery(u, query));
-	}, [students, selectedOrg, selectedRecordFilter, query, studentCalCache, calYear, calMonth]);
+		return byRecord.filter((u) => matchQuery(u, query, isJump));
+	}, [students, selectedOrg, selectedRecordFilter, query, studentCalCache, calYear, calMonth, isJump]);
+	
+
+	function renderOrgFilter() {
+        if (!isJump) return null;
+        return (
+            <div className="jump-users-filter">
+				<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
+					<button
+						type="button"
+						className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
+						onClick={() => {
+							setOrgOpen((prev) => !prev);
+							setRecordOpen(false);
+						}}
+						aria-label="organization filter"
+					>
+						<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
+						<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
+						<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
+					</button>
+
+					{orgOpen && (
+						<div className="jump-users-org-menu">
+							<button
+								type="button"
+								className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedOrg("");
+									setOrgOpen(false);
+								}}
+							>
+								전체
+							</button>
+
+							{orgOptions.map((org) => (
+								<button
+									key={org}
+									type="button"
+									className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`}
+									onClick={() => {
+										setSelectedOrg(org);
+										setOrgOpen(false);
+									}}
+								>
+									{org}
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+			</div>
+        );
+    }
+
+	React.useEffect(() => {
+		if (isJump) return;
+		setSelectedOrg("");
+		setOrgOpen(false);
+	}, [isJump]);
 
 	React.useEffect(() => {// 필터 바깥쪽 클릭 시 닫힘
 		function onDocMouseDown(e: MouseEvent) {
@@ -433,7 +534,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 				setCalendarLoading(true);
 				setCalendarError(null);
 
-				const data = await getJumpAdminStudentCalendar(selected.userId, calYear, calMonth);
+				const data = await getClientAdminStudentCalendar(clientType, selected.userId, calYear, calMonth);
 				if (!mounted) return;
 
 				setCalendar(data);
@@ -449,7 +550,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		return () => {
 			mounted = false;
 		};
-	}, [selected?.userId, calYear, calMonth]);
+	}, [selected?.userId, calYear, calMonth, clientType]);
 
     const recordCountText = React.useMemo(() => {
         if (!selected) return "-";
@@ -519,13 +620,15 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 	}
 
 	async function prefetchEventDayDetails(eventDayIds: number[]) {
+		if(!clientType) return;
+
 		const targets = eventDayIds.filter((id) => eventDayCache[id] === undefined);
 		if (targets.length === 0) return;
 
 		const results = await Promise.all(
 			targets.map(async (id) => {
 				try {
-					const detail = await getJumpAdminEventDayDetail(id);
+					const detail = await getClientAdminEventDayDetail(clientType, id);
 					return [id, detail] as const;
 				} catch {
 					return [id, null] as const;
@@ -608,13 +711,13 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 	// 학생 삭제
 	async function handleConfirmDelete() {
-		if (!selected) return;
+		if (!clientType || !selected) return;
 
 		try {
 			setDeleteLoading(true);
 			setDeleteError(null);
 
-			await deleteJumpAdminStudent(selected.userId);
+			await deleteClientAdminStudent(clientType, selected.userId);
 
 			// UI 갱신: 목록에서 제거
 			setStudents((prev) => prev.filter((u) => u.userId !== selected.userId));
@@ -775,6 +878,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 	// 기록명 클릭
 	async function handleOpenRecord(eventDayId: number) {
+		if(!clientType) return;
 		setSelectedEventDayId(eventDayId);
 		setQIndex(0);
 		setQDir("forward");
@@ -786,7 +890,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 		if (eventDayCache[eventDayId] !== undefined) return;
 
 		try {
-			const detail = await getJumpAdminEventDayDetail(eventDayId);
+			const detail = await getClientAdminEventDayDetail(clientType, eventDayId);
 			setEventDayCache((prev) => ({ ...prev, [eventDayId]: detail }));
 		} catch {
 			setEventDayCache((prev) => ({ ...prev, [eventDayId]: null }));
@@ -811,53 +915,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 			<div className="jump-users-left-frame">
 				<div className="jump-users-filters">
 					<div className="jump-users-filter-row">
-						<div className="jump-users-filter">
-							<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
-								<button
-									type="button"
-									className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
-									onClick={() => {
-										setOrgOpen((prev) => !prev);
-										setRecordOpen(false);
-									}}
-									aria-label="organization filter"
-								>
-									<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
-									<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-									<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
-								</button>
-
-								{orgOpen && (
-									<div className="jump-users-org-menu">
-										<button
-											type="button"
-											className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`}
-											onClick={() => {
-												setSelectedOrg("");
-												setOrgOpen(false);
-											}}
-										>
-											전체
-										</button>
-
-										{orgOptions.map((org) => (
-											<button
-												key={org}
-												type="button"
-												className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`}
-												onClick={() => {
-													setSelectedOrg(org);
-													setOrgOpen(false);
-												}}
-											>
-												{org}
-											</button>
-										))}
-									</div>
-								)}
-							</div>
-						</div>
-
+						{renderOrgFilter()}
 						<div className="jump-users-filter">
 							<div ref={recordRef} className={`jump-users-org ${recordOpen ? "is-open" : ""}`}>
 								<button
@@ -942,7 +1000,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 								>
 									<div className="jump-admin-badge">{idx + 1}</div>
 									<div className="jump-admin-user-name">{displayName}</div>
-									<div className="jump-admin-user-org">{orgName}</div>
+									{isJump && (<div className="jump-admin-user-org">{orgName}</div>)}
 								</button>
 							);
 						})}
@@ -970,7 +1028,7 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							</div>
 						</div>
 
-						<div className="jump-users-selected-org">{getOrgName(selected)}</div>
+						{isJump && (<div className="jump-users-selected-org">{getOrgName(selected)}</div>)}
 					</div>
 				) : null}
 
@@ -1022,17 +1080,20 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 							<div className="jump-users-info-label">소속</div>
 							<div className="jump-users-info-value">{getSchoolName(selected)}</div>
 						</div>
-
-						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">센터</div>
-							<div className="jump-users-info-value">{getOrgName(selected)}</div>
-						</div>
-
-						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">봉사 일시</div>
-							<div className="jump-users-info-value">{volunteerTimeText}</div>
-						</div>
-
+						
+						{isJump && (
+							<div className="jump-users-info-row">
+								<div className="jump-users-info-label">센터</div>
+								<div className="jump-users-info-value">{getOrgName(selected)}</div>
+							</div>
+						)}
+						{isJump && (
+							<div className="jump-users-info-row">
+								<div className="jump-users-info-label">봉사 일시</div>
+								<div className="jump-users-info-value">{volunteerTimeText}</div>
+							</div>
+						)}
+							
 						<div className="jump-users-info-row">
 							<div className="jump-users-info-label">기록 수</div>
 							<div className="jump-users-info-value">{recordCountText}</div>
@@ -1265,11 +1326,11 @@ export default function JumpAdminUsersPage(): React.ReactElement {
 
 			{/* HEAD */}
 			<div className="jump-admin-section-head">
-				<div className="jump-admin-section-title-wrap">
+				<div className={`jump-admin-section-title-wrap ${clientType === "kakao" ? "is-kakao" : ""}`}>
 					<div className="jump-admin-section-title-badge">
-						<img src="/logos/jump-logo.png" alt="" />
+						<img src={config.logo} alt="" /> {clientType === "kakao" && ( <img src="/logos/ewhaWU-ko-logo.png" alt="" /> )}
 					</div>
-					<div className="jump-admin-section-title">2026 상생지락 ALTogether</div>
+					<div className="jump-admin-section-title">{config.title}</div>
 				</div>
 			</div>
 

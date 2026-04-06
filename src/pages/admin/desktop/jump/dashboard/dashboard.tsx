@@ -1,6 +1,7 @@
 // src/pages/admin/desktop/jump/dashboard/dashboard.tsx
 import React from "react";
-import { ApiError, type JumpAdminStudent, type JumpAdminStudentCalendarResponse, getJumpAdminStudents, getJumpAdminStudentCalendar, } from "../../../../../api/client"; 
+import { useNavigate, useParams } from "react-router-dom";
+import { ApiError, type ClientAdminStudent, type ClientAdminStudentCalendarResponse, type ClientType, getClientAdminStudents, getClientAdminStudentCalendar, } from "../../../../../api/client"; 
 import "./dashboard.css";
 import "../jumpAdmin.css"
 
@@ -89,12 +90,37 @@ function getWeekLabel(weekStartMonday: Date) {
     return `${y}년 ${m}월 ${weekNo}주차`;
 }
 
-function getOrgName(u: JumpAdminStudent) {
+function getOrgName(u: ClientAdminStudent) {
     return (u.jumpOrganization?.name ?? "").trim();
 }
 
-export default function JumpAdminDashboardPage(): React.ReactElement {
-    const [students, setStudents] = React.useState<JumpAdminStudent[]>([]);
+function getClientConfig(clientType: ClientType | null) { // client별 title, logo분기
+    switch (clientType) {
+        case "kakao":
+            return {
+                title: "소셜벤처창업",
+                logo: "/logos/kakaoventure-logo.png",
+            };
+        case "jump":
+        default:
+            return {
+                title: "2026 상생지락 ALTogether",
+                logo: "/logos/jump-logo.png",
+            };
+    }
+}
+
+export default function ClientAdminDashboardPage(): React.ReactElement {
+    const navigate = useNavigate();
+	const params = useParams<{ clientType: string }>();
+
+	function isClientType(value: string | undefined): value is ClientType {
+		return value === "jump" || value === "kakao";
+	}
+
+	const clientType = isClientType(params.clientType) ? params.clientType : null;
+
+    const [students, setStudents] = React.useState<ClientAdminStudent[]>([]);
     const [loading, setLoading] = React.useState(true);
 
     const [selectedOrg, setSelectedOrg] = React.useState<string>("");
@@ -105,16 +131,30 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
     const weekStart = React.useMemo(() => startOfWeekMonday(weekAnchor), [weekAnchor]);
     const weekDays = React.useMemo(() => getWeekDays(weekAnchor), [weekAnchor]);
 
-    const [calCache, setCalCache] = React.useState<Record<string, JumpAdminStudentCalendarResponse>>({});
+    const [calCache, setCalCache] = React.useState<Record<string, ClientAdminStudentCalendarResponse>>({});
     const orgRef = React.useRef<HTMLDivElement | null>(null);
 
+    const isJump = clientType === "jump";
+
+    const config = getClientConfig(clientType);
+
     React.useEffect(() => {
+        if (clientType) return;
+        navigate("/student", { replace: true });
+    }, [clientType, navigate]);
+
+    if (!clientType) {
+        return <div className="jump-users-state">잘못된 관리자 경로입니다.</div>;
+    }
+
+    React.useEffect(() => {
+        if(!clientType) return;
         let mounted = true;
 
         (async () => {
             try {
                 setLoading(true);
-                const list = await getJumpAdminStudents();
+                const list = await getClientAdminStudents(clientType);
                 if (!mounted) return;
                 setStudents(list);
                 setSelectedOrg("");
@@ -130,22 +170,26 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [clientType]);
 
     const orgOptions = React.useMemo(() => {
+        if (!isJump) return [];
+
         const set = new Set<string>();
         for (const s of students) {
             const org = getOrgName(s);
             if (org) set.add(org);
         }
         return Array.from(set);
-    }, [students]);
+    }, [students, isJump]);
 
     const visibleStudents = React.useMemo(() => {
+        if (!isJump) return students;
+
         const org = selectedOrg.trim();
         if (!org) return students;
         return students.filter((s) => getOrgName(s) === org);
-    }, [students, selectedOrg]);
+    }, [students, selectedOrg, isJump]);
 
     const monthsToLoad = React.useMemo(() => {
         const pairs = new Set<string>();
@@ -158,13 +202,46 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
         });
     }, [weekDays]);
 
+
+    function renderOrgFilter() {
+        if (!isJump) return null;
+        return (
+            <div className="jump-dashboard-week-right">
+                <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
+                    <button type="button" className={`jump-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
+                        <img className="jump-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
+                        <span className={ selectedOrg ? "jump-dashboard-org-text is-selected" : "jump-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
+                        <img className="org-arrow" src={!selectedOrg ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
+                    </button>
+
+                    {open && (
+                        <div className="jump-dashboard-org-menu">
+                            <button className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+                                전체
+                            </button>
+
+                            {orgOptions.map((org) => (
+                                <button key={org} className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
+                                    {org}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div> 
+        );
+    }
+
+
+
     React.useEffect(() => {
+        if(!clientType) return;
         if (visibleStudents.length === 0) return;
 
         let mounted = true;
 
         (async () => {
-            const nextCache: Record<string, JumpAdminStudentCalendarResponse> = {};
+            const nextCache: Record<string, ClientAdminStudentCalendarResponse> = {};
 
             for (const k of Object.keys(calCache)) nextCache[k] = calCache[k];
 
@@ -179,7 +256,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                         tasks.push(
                             (async () => {
                                 try {
-                                    const res = await getJumpAdminStudentCalendar(s.userId, ym.y, ym.m);
+                                    const res = await getClientAdminStudentCalendar(clientType, s.userId, ym.y, ym.m);
                                     nextCache[key] = res;
                                 } catch (e) {
                                     if (!(e instanceof ApiError)) console.error(e);
@@ -206,7 +283,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
         return () => {
             mounted = false;
         };
-    }, [visibleStudents, monthsToLoad]); 
+    }, [visibleStudents, monthsToLoad, clientType]); 
 
     React.useEffect(() => {
         if (!open) return;
@@ -226,6 +303,13 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
             document.removeEventListener("mousedown", onDocMouseDown);
         };
     }, [open]);
+
+    React.useEffect(() => {
+        if (!isJump) {
+            setSelectedOrg("");
+            setOpen(false);
+        }
+    }, [isJump]);
 
     function findDailyEventCount(studentId: number, ymd: string) {
         const [yStr, mStr] = ymd.split("-"); 
@@ -286,9 +370,9 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
     return (
         <div className="jump-dashboard">
             <div className="jump-dashboard-head">
-                <div className="jump-dashboard-title">
-                    <div className="jump-dashboard-title-badge"><img src="/logos/jump-logo.png"></img></div>
-                    <div className="jump-dashboard-title-main">2026 상생지락 ALTogether</div>
+                <div className={`jump-dashboard-title ${clientType === "kakao" ? "is-kakao" : ""}`}>
+                    <div className="jump-dashboard-title-badge"><img src={config.logo}/>{clientType === "kakao" && (<img src="/logos/ewhaWU-ko-logo.png"/>)}</div>
+                    <div className="jump-dashboard-title-main">{config.title}</div>
                 </div>
 
                 <div className="jump-dashboard-kpis">
@@ -328,29 +412,8 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                         </div>
                     </div>
 
-                    <div className="jump-dashboard-week-right">
-                        <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
-                            <button type="button" className={`jump-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
-                                <img className="jump-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
-                                <span className={ selectedOrg ? "jump-dashboard-org-text is-selected" : "jump-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
-                                <img className="org-arrow" src={!selectedOrg ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
-                            </button>
-
-                            {open && (
-                                <div className="jump-dashboard-org-menu">
-                                    <button className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
-                                        전체
-                                    </button>
-
-                                    {orgOptions.map((org) => (
-                                        <button key={org} className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
-                                            {org}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    {renderOrgFilter()}
+                    
                 </div>
 
                 <div className="jump-dashboard-week-grid">
@@ -382,7 +445,7 @@ export default function JumpAdminDashboardPage(): React.ReactElement {
                                 <div key={s.userId} className="jump-dashboard-week-row">
                                     <div className="jump-dashboard-student">
                                         <div className="jump-dashboard-student-name">{s.name}</div>
-                                        <div className="jump-dashboard-student-org">{getOrgName(s) || "-"}</div>
+                                        {isJump&&(<div className="jump-dashboard-student-org">{getOrgName(s) || "-"}</div>)}
                                     </div>
 
                                     <div className="jump-dashboard-cells">

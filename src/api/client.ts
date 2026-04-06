@@ -285,12 +285,11 @@ export type JumpOrganization = {
     name: string;
 };
 export type SubmitOnboardingInput = {
-    name: string;
-	studentNumber?: string;
+    name?: string | null;
+	studentNumber?: string | null;
     interestJob?: string | null;
     interestCompany?: string | null;
     jumpOrganizationId?: number | null;
-	requireStudentNumber?: boolean;
 };
 export type UserBase = {
 	userId: number;
@@ -532,23 +531,15 @@ export async function submitMyOnboarding(
     input: SubmitOnboardingInput
 ): Promise<SubmitOnboardingResponse> {
     const name = (input.name ?? "").trim();
-    if (!name) {
-        throw new ApiError(400, "name은 필수값입니다.");
-    }
-
     const studentNumber = (input.studentNumber ?? "").trim();
-    if (input.requireStudentNumber && !studentNumber) {
-        throw new ApiError(400, "studentNumber는 필수값입니다.");
-    }
-
     const interestJob = (input.interestJob ?? "").trim();
     const interestCompany = (input.interestCompany ?? "").trim();
 
     const payload: SubmitOnboardingInput = {
-        name,
-        ...(studentNumber ? { studentNumber } : {}),
-        ...(interestJob ? { interestJob } : {}),
-        ...(interestCompany ? { interestCompany } : {}),
+        ...(input.name != null ? { name } : {}),
+        ...(input.studentNumber != null ? { studentNumber } : {}),
+        ...(input.interestJob != null ? { interestJob } : {}),
+        ...(input.interestCompany != null ? { interestCompany } : {}),
         ...(input.jumpOrganizationId != null && !Number.isNaN(Number(input.jumpOrganizationId))
             ? { jumpOrganizationId: Number(input.jumpOrganizationId) }
             : {}),
@@ -666,71 +657,77 @@ export async function deleteAdminUserFile(
   	});
 }
 
-/* - JUMP admin 관련 - */
-// 점프 학생 목록
-export type JumpAdminStudent = UserBase;
+/* - client admin 관련 - */
+// client 학생 목록
+export type ClientType = "jump" | "kakao";
+export type ClientAdminStudent = UserBase;
 
-export async function getJumpAdminStudents(): Promise<JumpAdminStudent[]> {
-  	return api<JumpAdminStudent[]>("/jump-admin/students", { method: "GET" });
+export async function getClientAdminStudents(clientType: ClientType): Promise<ClientAdminStudent[]> {
+  	return api<ClientAdminStudent[]>(`/admin-client/${clientType}/students`, { method: "GET" });
 }
 
-export type JumpAdminDailyStatus = {
+export type ClientAdminDailyStatus = {
 	date: string; // YYYY-MM-DD
 	eventDayIds: number[];
 };
 
-export type JumpAdminStudentCalendarResponse = {
+export type ClientAdminStudentCalendarResponse = {
 	year: number;
 	month: number;
 	totalRecordedDays: number;
-	dailyStatuses: JumpAdminDailyStatus[];
+	dailyStatuses: ClientAdminDailyStatus[];
 };
 
-export async function getJumpAdminStudentCalendar(
-	studentId: number | string,
+export async function getClientAdminStudentCalendar(
+	clientType: ClientType,
+    studentId: number | string,
 	year: number | string,
 	month: number | string
-): Promise<JumpAdminStudentCalendarResponse> {
-	return api<JumpAdminStudentCalendarResponse>(
-		`/jump-admin/students/${studentId}/calendar/${year}/${month}`,
+): Promise<ClientAdminStudentCalendarResponse> {
+	return api<ClientAdminStudentCalendarResponse>(
+		`/admin-client/${clientType}/students/${studentId}/calendar/${year}/${month}`,
 		{ method: "GET" }
 	);
 }
 
-// 점프 학생 eventDay 상세(질문/전사 포함)
-export type JumpAdminTranscription = {
+// client 학생 eventDay 상세(질문/전사 포함)
+export type ClientAdminTranscription = {
 	transcriptionId: number;
 	text: string;
 	audioUrl?: string;
 };
 
-export type JumpAdminEventDayQuestions = {
+export type ClientAdminEventDayQuestions = {
 	eventDayId: number;
 	questionId: number;
 	questionList: string[];
 };
 
-export type JumpAdminEventDayDetailResponse = {
+export type ClientAdminEventDayDetailResponse = {
 	eventDayId: number;
 	eventDayTitle: string;
 	eventTitle: string;
 	startTime?: string | null;
 	endTime?: string | null;
-	transcriptions: JumpAdminTranscription[];
-	question?: JumpAdminEventDayQuestions | null;
+	transcriptions: ClientAdminTranscription[];
+	question?: ClientAdminEventDayQuestions | null;
 };
 
-export async function getJumpAdminEventDayDetail(
-	eventDayId: number | string
-): Promise<JumpAdminEventDayDetailResponse> {
-	return api<JumpAdminEventDayDetailResponse>(`/jump-admin/event-days/${eventDayId}`, {
-		method: "GET",
-	});
+export async function getClientAdminEventDayDetail(
+	clientType: ClientType,
+    eventDayId: number | string
+): Promise<ClientAdminEventDayDetailResponse> {
+	return api<ClientAdminEventDayDetailResponse>(
+        `/admin-client/${clientType}/event-days/${eventDayId}`, 
+        { method: "GET", });
 }
 
 // 점프 학생 삭제
-export async function deleteJumpAdminStudent(userId: number | string): Promise<void> {
-    return api<void>(`/jump-admin/students/${userId}`, { method: "DELETE" });
+export async function deleteClientAdminStudent(
+    clientType: ClientType,
+    userId: number | string
+): Promise<void> {
+    return api<void>(`/admin-client/${clientType}/students/${userId}`, { method: "DELETE" });
 }
 
 
@@ -747,14 +744,25 @@ export async function checkIsAdmin(): Promise<boolean> {
     }
 }
 
-export async function checkIsJumpAdmin(): Promise<boolean> {
+export async function checkIsClientAdmin(clientType: ClientType): Promise<boolean> {
     try {
         const me = await getUserMe();
-        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_JUMP_ADMIN");
+        if (!Array.isArray(me.roleSet)) return false;
+        if (clientType === "jump") return me.roleSet.includes("ROLE_JUMP_ADMIN");
+        if (clientType === "kakao") return me.roleSet.includes("ROLE_KAKAO_ADMIN");
+        return false;
     } catch (e) {
         if (e instanceof ApiError && e.status === 401) return false;
         throw e;
     }
+}
+
+export function getClientAdminTypes(roleSet: string[] | undefined | null): ClientType[] { // roleSet 로 clientType뽑기
+    if (!Array.isArray(roleSet)) return [];
+    const result: ClientType[] = [];
+    if (roleSet.includes("ROLE_JUMP_ADMIN")) result.push("jump");
+    if (roleSet.includes("ROLE_KAKAO_ADMIN")) result.push("kakao");
+    return result;
 }
 
 // 최근 기록한 일정 관련

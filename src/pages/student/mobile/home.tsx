@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { api, getUserMe } from "../../../api/client";
+import { api, ApiError, getUserMe, sendEmailCode, verifyEmailCode } from "../../../api/client";
 
 import "../../../App.css"; 
 
@@ -756,14 +756,28 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 						<button
 						className="drawer-menu-item"
 						onClick={() => {
-							onRequireAuth("/jump-admin/dashboard", () => {
-							navigate("/jump-admin/dashboard");
+							onRequireAuth("/admin/jump/dashboard", () => {
+							navigate("/admin/jump/dashboard");
 							closeWithSnap();
 							});
 						}}
 						>
 							<img className="icon" src="/icons/chevron-right.svg" alt="" />
 							<span>JUMP 관리자 페이지</span>
+						</button>
+					)}
+					{userRoleSet.includes("ROLE_KAKAO_ADMIN") && (
+						<button
+						className="drawer-menu-item"
+						onClick={() => {
+							onRequireAuth("/admin/kakao/dashboard", () => {
+							navigate("/admin/kakao/dashboard");
+							closeWithSnap();
+							});
+						}}
+						>
+							<img className="icon" src="/icons/chevron-right.svg" alt="" />
+							<span>KAKAO 관리자 페이지</span>
 						</button>
 					)}
 				</div>
@@ -949,6 +963,126 @@ function Home(): React.ReactElement {
 
 	const [loginGateOpen, setLoginGateOpen] = React.useState(false);
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
+	
+	// 이메일 인증
+	const [emailVerifyPopupOpen, setEmailVerifyPopupOpen] = React.useState(false);
+	const [needsEmailVerification, setNeedsEmailVerification] = React.useState(false);
+	const [emailForm, setEmailForm] = React.useState({ email: "", code: "" });
+	const [emailSending, setEmailSending] = React.useState(false);
+	const [emailVerifying, setEmailVerifying] = React.useState(false);
+	const [emailSentMessage, setEmailSentMessage] = React.useState<string | null>(null);
+	const [emailError, setEmailError] = React.useState<string | null>(null);
+
+	async function handleSendEmailCode() {
+		const email = emailForm.email.trim();
+
+		if (!email) {
+			setEmailError("이메일을 입력해주세요.");
+			return;
+		}
+
+		setEmailSending(true);
+		setEmailError(null);
+		setEmailSentMessage(null);
+
+		try {
+			const res = await sendEmailCode(email);
+
+			if (res.status === "EXISTING_ACCOUNT_FOUND") {
+				alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+				localStorage.removeItem("accessToken");
+				navigate("/login", { replace: true });
+				return;
+			}
+
+			setEmailSentMessage(`${res.maskedEmail}로 인증코드를 발송했습니다.`);
+		} catch (e) {
+			if (e instanceof ApiError) {
+				if (e.code === "AUTH_EXISTING_ACCOUNT") {
+					alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+					localStorage.removeItem("accessToken");
+					navigate("/login", { replace: true });
+					return;
+				}
+				setEmailError("인증코드 발송에 실패했습니다.");
+				return;
+			}
+
+			setEmailError("이메일 전송 중 오류가 발생했습니다.");
+		} finally {
+			setEmailSending(false);
+		}
+	}
+
+	async function handleVerifyEmailCode() {
+		const email = emailForm.email.trim();
+		const code = emailForm.code.trim();
+
+		if (!email) {
+			setEmailError("이메일을 입력해주세요.");
+			return;
+		}
+
+		if (!code) {
+			setEmailError("인증코드를 입력해주세요.");
+			return;
+		}
+
+		setEmailVerifying(true);
+		setEmailError(null);
+
+		try {
+			const res = await verifyEmailCode(email, code);
+
+			if (res.existingAccountFound) {
+				alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+				localStorage.removeItem("accessToken");
+				navigate("/login", { replace: true });
+				return;
+			}
+
+			if (!res.verified) {
+				setEmailError("이메일 인증에 실패했습니다.");
+				return;
+			}
+
+			const me = await getUserMe();
+			setNeedsEmailVerification(false);
+			setEmailVerifyPopupOpen(false);
+			setEmailForm({
+				email: (me.email ?? "").trim(),
+				code: "",
+			});
+			setEmailSentMessage(null);
+			setEmailError(null);
+
+			alert("이메일 인증이 완료되었습니다.");
+		} catch (e) {
+			if (e instanceof ApiError) {
+				if (e.code === "AUTH_EXISTING_ACCOUNT") {
+					alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+					localStorage.removeItem("accessToken");
+					navigate("/login", { replace: true });
+					return;
+				}
+
+				setEmailError("인증코드가 올바르지 않거나 만료되었습니다.");
+				return;
+			}
+
+			setEmailError("이메일 인증 중 오류가 발생했습니다.");
+		} finally {
+			setEmailVerifying(false);
+		}
+	}
+
+	function handleCloseEmailVerifyPopup() {
+		setEmailVerifyPopupOpen(false);
+	}
+
+	function handleEmailPopupBackdropClick() {
+		setEmailVerifyPopupOpen(false);
+	}
 
 	const isAuthed = !!localStorage.getItem("accessToken");
 
@@ -1054,12 +1188,28 @@ function Home(): React.ReactElement {
 					? "/internie_mascot_normal.png"
 					: (profile ?? "/internie_mascot_normal.png")
 				);
+
+				const needsVerify = !me.email || me.emailVerified !== true;
+				setNeedsEmailVerification(needsVerify);
+				setEmailVerifyPopupOpen(needsVerify);
+				setEmailForm({
+					email: (me.email ?? "").trim(),
+					code: "",
+				});
+				setEmailSentMessage(null);
+				setEmailError(null);
+
 			} catch (e) {
 				console.error("getUserMe failed:", e);
 				setCurrentUserId(null);
 				setUserName("User");
 				setUserProfileImg("/internie_mascot_normal.png");
 				setUserRoleSet([]);
+				setNeedsEmailVerification(false);
+				setEmailVerifyPopupOpen(false);
+				setEmailForm({ email: "", code: "" });
+				setEmailSentMessage(null);
+				setEmailError(null);
 			}
 		})();
 	}, [isAuthed, profileTick]);
@@ -1399,6 +1549,68 @@ function Home(): React.ReactElement {
 								나중에
 							</button>
 						</footer>
+					</div>
+				</div>
+			)}
+
+			{/* 이메일 인증 유도 */}
+			{emailVerifyPopupOpen && needsEmailVerification && (
+				<div className="email-popup-backdrop" onClick={handleEmailPopupBackdropClick} role="presentation">
+					<div className="email-popup" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+						<div className="email-popup-header">
+							<div className="email-popup-title">이메일 인증</div>
+							<button type="button" className="email-popup-close" aria-label={t("common.close")} onClick={handleCloseEmailVerifyPopup}>
+								<img className="icon" src="/icons/x-01.svg" alt="" />
+							</button>
+						</div>
+
+						<div className="email-popup-desc">
+							계정 보호와 안정적인 로그인 이용을 위해 이메일 인증을 진행해주세요.
+						</div>
+
+						<div className="email-popup-body">
+							<input
+								className="email-popup-input"
+								value={emailForm.email}
+								onChange={(e) => setEmailForm((prev) => ({ ...prev, email: e.target.value }))}
+								placeholder="이메일을 입력해주세요"
+								autoComplete="email"
+							/>
+
+							<div className="email-popup-row">
+								<input
+									className="email-popup-input"
+									value={emailForm.code}
+									onChange={(e) => setEmailForm((prev) => ({ ...prev, code: e.target.value }))}
+									placeholder="인증코드를 입력해주세요"
+								/>
+								<button
+									type="button"
+									className="email-popup-send-btn"
+									onClick={handleSendEmailCode}
+									disabled={emailSending}
+								>
+									{emailSending ? "전송중" : "코드 받기"}
+								</button>
+							</div>
+
+							{emailSentMessage && <div className="email-popup-info">{emailSentMessage}</div>}
+							{emailError && <div className="email-popup-error">{emailError}</div>}
+						</div>
+
+						<div className="email-popup-footer">
+							<button type="button" className="email-popup-secondary" onClick={handleCloseEmailVerifyPopup}>
+								나중에
+							</button>
+							<button
+								type="button"
+								className="email-popup-primary"
+								onClick={handleVerifyEmailCode}
+								disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}
+							>
+								{emailVerifying ? "인증중" : "인증하기"}
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

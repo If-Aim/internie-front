@@ -1,7 +1,7 @@
 // src/pages/admin/desktop/jump/home.tsx
 // 점프 관리자 페이지 메인 (PC)
 import React from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import { ApiError, getUserMe, type UserMe } from "../../../../api/client";
 import "./jumpAdmin.css";
 
@@ -15,7 +15,9 @@ function getDisplayAdminName(me: UserMe | null): string {
 export default function JumpAdminHome(): React.ReactElement {
 	const [me, setMe] = React.useState<UserMe | null>(null);
 	const { pathname } = useLocation();
-	const isReportsPage = pathname.startsWith("/jump-admin/reports");
+	const { clientType } = useParams<{ clientType: string }>();
+	const basePath = clientType ? `/admin/${clientType}` : "/admin/jump";
+	const isReportsPage = pathname.startsWith(`${basePath}/reports`);
 
 	React.useEffect(() => {
 		let mounted = true;
@@ -52,19 +54,19 @@ export default function JumpAdminHome(): React.ReactElement {
 
 						<nav className="jump-admin-topbar-tabs" aria-label="admin tabs">
 							<NavLink
-								to="/jump-admin/dashboard"
+								to={`${basePath}/dashboard`}
 								className={({ isActive }) => (isActive ? "jump-admin-tab jump-admin-tab--active" : "jump-admin-tab")}
 							>
 								<span>대시보드</span>
 							</NavLink>
 							<NavLink
-								to="/jump-admin/analysis"
+								to={`${basePath}/analysis`}
 								className={({ isActive }) => (isActive ? "jump-admin-tab jump-admin-tab--active" : "jump-admin-tab")}
 							>
 								<span>참가자 관리</span>
 							</NavLink>
 							<NavLink
-								to="/jump-admin/analysis" // 추후 변경
+								to={`${basePath}/analysis`}// 추후 변경
 								className="jump-admin-tab jump-admin-tab--disabled"
 								onClick={(e) => {
 								e.preventDefault(); 

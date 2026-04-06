@@ -63,6 +63,31 @@ export default function VerifyCodePage() {
         }, 5000);
     }
 
+    function syncClientPopups(user: UserMe) {
+        const roleSet = user.roleSet ?? [];
+        const needsJumpCenter =
+            roleSet.includes("ROLE_JUMP_STUDENT") &&
+            user.jumpOrganization?.id == null;
+
+        const needsStudentNumber =
+            roleSet.includes("ROLE_KAKAO_STUDENT") &&
+            !(user.studentNumber ?? "").trim();
+
+        if (needsJumpCenter) {
+            setShowJumpPopup(true);
+            setShowKakaoPopup(false);
+            return;
+        }
+
+        if (needsStudentNumber) {
+            setShowJumpPopup(false);
+            setShowKakaoPopup(true);
+            return;
+        }
+
+        setShowJumpPopup(false);
+        setShowKakaoPopup(false);
+    }
     async function submit() {
         const trimmed = code.trim();
         if (!trimmed) {
@@ -95,24 +120,12 @@ export default function VerifyCodePage() {
             }
 
             const hasJumpRole = nextRoleSet.includes("ROLE_JUMP_STUDENT");
-            const hasKakaoRole = nextRoleSet.includes("ROLE_KAKAO_STUDENT");
-            const hasJumpOrganization = refreshed.jumpOrganization?.id != null;
-            const hasStudentNumber = (refreshed.studentNumber ?? "").trim().length > 0;
 
             if (hasJumpRole) {
                 await loadJumpOrganizations(refreshed.jumpOrganization);
             }
 
-            if (hasJumpRole && !hasJumpOrganization) {
-                setShowJumpPopup(true);
-                setShowKakaoPopup(false);
-            } else if (hasKakaoRole && !hasStudentNumber) {
-                setShowKakaoPopup(true);
-                setShowJumpPopup(false);
-            } else {
-                setShowJumpPopup(false);
-                setShowKakaoPopup(false);
-            }
+            syncClientPopups(refreshed);
 
         } catch (e) {
             if (e instanceof ApiError) {
@@ -168,19 +181,12 @@ export default function VerifyCodePage() {
     async function finishInstitution() {
         if (!jumpOrganizationId) return;
 
-        const name = (me?.name ?? me?.kakaoName ?? "").trim();
-        if (!name) {
-            setOrgSaveError("이름 정보가 없어 센터 저장을 진행할 수 없습니다.");
-            return;
-        }
-
         setSavingJumpCenter(true);
         setOrgSaveError(null);
         setOrgSaveMessage(null);
 
         try {
             const updated = await submitMyOnboarding({
-                name,
                 jumpOrganizationId,
             });
 
@@ -189,17 +195,7 @@ export default function VerifyCodePage() {
             setJumpOrganizationName(updated.jumpOrganization?.name ?? "");
             setOrgSaveError(null);
             setOrgSaveMessage("센터 저장이 완료되었습니다.");
-
-            const hasKakaoRole = (updated.roleSet ?? []).includes("ROLE_KAKAO_STUDENT");
-            const hasStudentNumber = (updated.studentNumber ?? "").trim().length > 0;
-
-            if (hasKakaoRole && !hasStudentNumber) {
-                setShowJumpPopup(false);
-                setShowKakaoPopup(true);
-            } else {
-                setShowJumpPopup(false);
-                setShowKakaoPopup(false);
-            }
+            syncClientPopups(updated);
         } catch (e) {
             if (e instanceof ApiError) {
                 setOrgSaveError("센터 저장에 실패했습니다.");
@@ -211,14 +207,8 @@ export default function VerifyCodePage() {
         }
     }
 
-    async function finishStudentNumber() {
+    async function finishStudentNumber() { 
         const trimmedStudentNumber = studentNumber.trim();
-        const name = (me?.name ?? me?.kakaoName ?? "").trim();
-
-        if (!name) {
-            setStudentNumberError("이름 정보가 없어 학번 저장을 진행할 수 없습니다.");
-            return;
-        }
 
         if (!trimmedStudentNumber) {
             setStudentNumberError("학번을 입력해주세요.");
@@ -231,7 +221,6 @@ export default function VerifyCodePage() {
 
         try {
             const updated = await submitMyOnboarding({
-                name,
                 studentNumber: trimmedStudentNumber,
             });
 
@@ -239,8 +228,7 @@ export default function VerifyCodePage() {
             setStudentNumber((updated.studentNumber ?? "").trim());
             setStudentNumberError(null);
             setStudentNumberMessage("학번 저장이 완료되었습니다.");
-            setShowKakaoPopup(false);
-            setShowJumpPopup(false);
+            syncClientPopups(updated);
         } catch (e) {
             if (e instanceof ApiError) {
                 setStudentNumberError("학번 저장에 실패했습니다.");
@@ -280,27 +268,7 @@ export default function VerifyCodePage() {
                     await loadJumpOrganizations(user.jumpOrganization);
                 }
 
-                const needsJumpCenter =
-                    Array.isArray(user.roleSet) &&
-                    user.roleSet.includes("ROLE_JUMP_STUDENT") &&
-                    user.jumpOrganization?.id == null;
-
-                const needsStudentNumber =
-                    Array.isArray(user.roleSet) &&
-                    user.roleSet.includes("ROLE_KAKAO_STUDENT") &&
-                    !(user.studentNumber ?? "").trim();
-
-                if (needsJumpCenter) {
-                    setShowJumpPopup(true);
-                    setShowKakaoPopup(false);
-                } else if (needsStudentNumber) {
-                    setShowKakaoPopup(true);
-                    setShowJumpPopup(false);
-                } else {
-                    setShowJumpPopup(false);
-                    setShowKakaoPopup(false);
-                }
-
+                syncClientPopups(user);
             } catch {
                 
             }

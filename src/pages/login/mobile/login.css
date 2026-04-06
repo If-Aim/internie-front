@@ -15,7 +15,12 @@ border: 0;font-size: 16px;font-weight: 700;box-shadow: var(--shadow);cursor: poi
 font-family: Pretendard, system-ui, -apple-system, Arial;}
 .btn:active { transform: translateY(1px); }
 .btn-kakao {background: var(--kakao);color: #111;}
-.btn-google {background: var(--white);color: #111;}
+.btn-google {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 12px;
+}
 .ico {display: inline-flex;width: 24px; height: 24px;align-items: center; justify-content: center;}
 .btn-text { flex: 1; text-align: center; }
 
