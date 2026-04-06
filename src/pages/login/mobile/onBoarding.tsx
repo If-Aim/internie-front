@@ -70,6 +70,9 @@ export default function OnBoarding(): React.ReactElement {
     const hasJumpOrganization = form.jumpOrganizationId != null;
     const hasStudentNumber = form.studentNumber.trim().length > 0;
 
+    const shouldShowJumpOrganization = isJumpVerified;
+    const shouldShowStudentNumber = isKakaoVerified;
+
     const needsJumpOrganization = isJumpVerified && !hasJumpOrganization;
     const needsStudentNumber = isKakaoVerified && !hasStudentNumber;
 
@@ -247,7 +250,7 @@ export default function OnBoarding(): React.ReactElement {
 
             setVerifiedRoleSet(roleSet);
             setHasTriedVerify(true);
-            
+
             setForm((prev) => ({
                 ...prev,
                 studentNumber: (refreshed.studentNumber ?? "").trim(),
@@ -355,7 +358,7 @@ export default function OnBoarding(): React.ReactElement {
                 {/* JUMP */}
                 {step === 2 && (
                     <>
-                        {needsJumpOrganization && (
+                        {shouldShowJumpOrganization && (
                             <>
                                 <div className="ob-jump-logo">
                                     <img src="/logos/jump-logo.png" alt="JUMP" />
@@ -401,7 +404,7 @@ export default function OnBoarding(): React.ReactElement {
                             </>
                         )}
 
-                        {needsStudentNumber && (
+                        {shouldShowStudentNumber && (
                             <>
                                 <h1 className="ob-title">학번을 입력해주세요</h1>
                                 <div className="ob-field">
