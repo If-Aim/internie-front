@@ -53,11 +53,19 @@ export default function OnBoarding(): React.ReactElement {
 
     // ROLE 검증
     const [verifiedRoleSet, setVerifiedRoleSet] = React.useState<string[] | null>(null);
+    const [hasTriedVerify, setHasTriedVerify] = React.useState(false);
 
     const roleSet = verifiedRoleSet ?? [];
     const isJumpVerified = roleSet.includes("ROLE_JUMP_STUDENT");
     const isKakaoVerified = roleSet.includes("ROLE_KAKAO_STUDENT");
-    const isPartnerVerified = roleSet.length > 0;
+
+    const verifiedMessages = roleSet // 각 역할별 메시지 생성 로직
+        .map((role) => {
+            if (role === "ROLE_JUMP_STUDENT") return "JUMP 인증되었습니다.";
+            if (role === "ROLE_KAKAO_STUDENT") return "KAKAO 인증되었습니다.";
+            return null;
+        })
+        .filter(Boolean) as string[];
 
     const hasJumpOrganization = form.jumpOrganizationId != null;
     const hasStudentNumber = form.studentNumber.trim().length > 0;
@@ -238,7 +246,8 @@ export default function OnBoarding(): React.ReactElement {
             const roleSet = refreshed.roleSet ?? [];
 
             setVerifiedRoleSet(roleSet);
-
+            setHasTriedVerify(true);
+            
             setForm((prev) => ({
                 ...prev,
                 studentNumber: (refreshed.studentNumber ?? "").trim(),
@@ -332,9 +341,11 @@ export default function OnBoarding(): React.ReactElement {
                                 placeholder={t("onboarding.verifyCodePlaceholder")}
                             />
                         </div>
-                        {isPartnerVerified && (
+                        {hasTriedVerify && verifiedMessages.length > 0 && (
                             <div className="ob-info">
-                                인증되었습니다.
+                                {verifiedMessages.map((msg, idx) => (
+                                    <div key={idx}>{msg}</div>
+                                ))}
                             </div>
                         )}
                         {codeError && <div className="ob-error">{codeError}</div>}
