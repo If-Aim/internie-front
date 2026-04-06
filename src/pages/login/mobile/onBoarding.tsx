@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, sendEmailCode, verifyEmailCode } from "../../../api/client";
 import { useTranslation } from "react-i18next";
-import "./onboarding.css"
+import "./onBoarding.css"
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
