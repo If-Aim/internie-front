@@ -1,7 +1,7 @@
 // src/pages/admin/desktop/jump/analysis/users.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ApiError, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminEventDayDetail, deleteClientAdminStudent} from "../../../../../api/client"; 
+import { ApiError, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminEventDayDetail, deleteClientAdminStudent, getClientAdminStudentRecordCount} from "../../../../../api/client"; 
 import type { ClientType, ClientAdminStudent, ClientAdminStudentCalendarResponse, ClientAdminEventDayDetailResponse } from "../../../../../api/client"; 
 import "./users.css";
 
@@ -168,6 +168,11 @@ export default function ClientAdminUsersPage(): React.ReactElement {
     const [calendar, setCalendar] = React.useState<ClientAdminStudentCalendarResponse | null>(null);
 	const [studentCalCache, setStudentCalCache] = React.useState<Record<string, ClientAdminStudentCalendarResponse>>({});
 	const [/*studentCalLoading*/, setStudentCalLoading] = React.useState<boolean>(false);
+
+	// 학생의 총 기록 수
+	const [totalRecordCount, setTotalRecordCount] = React.useState<number | null>(null);
+	const [totalRecordCountLoading, setTotalRecordCountLoading] = React.useState<boolean>(false);
+	const [totalRecordCountError, setTotalRecordCountError] = React.useState<string | null>(null);
 
 	const [selectedOrg, setSelectedOrg] = React.useState<string>("");
 	const [selectedRecordFilter, setSelectedRecordFilter] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
@@ -517,6 +522,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return () => document.removeEventListener("mousedown", onDocMouseDown);
 	}, [orgOpen, recordOpen]);
 
+	/* ======== 사용자별 기록 수 ========== */
     React.useEffect(() => { // calendar 로딩
 		let mounted = true;
 
@@ -552,18 +558,54 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		};
 	}, [selected?.userId, calYear, calMonth, clientType]);
 
+	React.useEffect(() => {
+		if (!clientType || !selected) {
+			setTotalRecordCount(null);
+			setTotalRecordCountError(null);
+			setTotalRecordCountLoading(false);
+			return;
+		}
+
+		let mounted = true;
+
+		(async () => {
+			try {
+				setTotalRecordCountLoading(true);
+				setTotalRecordCountError(null);
+
+				const res = await getClientAdminStudentRecordCount(clientType, selected.userId);
+				if (!mounted) return;
+
+				setTotalRecordCount(res.totalRecordCount ?? 0);
+			} catch (e) {
+				if (!mounted) return;
+
+				setTotalRecordCount(null);
+				setTotalRecordCountError("전체 기록 수를 불러오지 못했습니다.");
+				if (!(e instanceof ApiError)) console.error(e);
+			} finally {
+				if (mounted) setTotalRecordCountLoading(false);
+			}
+		})();
+
+		return () => {
+			mounted = false;
+		};
+	}, [clientType, selected?.userId]);
+
+
     const recordCountText = React.useMemo(() => {
-        if (!selected) return "-";
-        if (calendarLoading) return "불러오는 중...";
-        if (calendarError) return "-";
-        if (!calendar) return "-";
-        return `${getTotalEventDayCount()}건`;
-    }, [selected, calendarLoading, calendarError, calendar]);
+		if (!selected) return "-";
+		if (totalRecordCountLoading) return "불러오는 중...";
+		if (totalRecordCountError) return "-";
+		if (totalRecordCount == null) return "-";
+		return `${totalRecordCount}건`;
+	}, [selected, totalRecordCountLoading, totalRecordCountError, totalRecordCount]);
 
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
     const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
 
-	/* ======== 사용자별 기록 수 ========== */
+	
 	function startOfWeekMonday(date: Date) {
 		const d = new Date(date);
 		const jsDow = d.getDay(); 
@@ -603,13 +645,6 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return sum;
 	}
 
-	function getTotalEventDayCount(): number {
-		if (!calendar) return 0;
-
-		return (calendar.dailyStatuses ?? []).reduce((sum, ds) => {
-			return sum + (ds?.eventDayIds?.length ?? 0);
-		}, 0);
-	}
 	/* ======== 사용자별 기록 수 end ========== */
 
 	/* ======== 사용자별 기록 상세 조회 ========== */
@@ -922,7 +957,6 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 									type="button"
 									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
 									onClick={() => {
-										//handleServicePreparing()
 										setRecordOpen((prev) => !prev);
 										setOrgOpen(false);
 									}}
@@ -1076,33 +1110,46 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 					</div>
 
 					<div className="jump-users-info">
-						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">소속</div>
-							<div className="jump-users-info-value">{getSchoolName(selected)}</div>
-						</div>
-						
-						{isJump && (
-							<div className="jump-users-info-row">
-								<div className="jump-users-info-label">센터</div>
-								<div className="jump-users-info-value">{getOrgName(selected)}</div>
-							</div>
-						)}
-						{isJump && (
-							<div className="jump-users-info-row">
-								<div className="jump-users-info-label">봉사 일시</div>
-								<div className="jump-users-info-value">{volunteerTimeText}</div>
-							</div>
-						)}
-							
-						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">기록 수</div>
-							<div className="jump-users-info-value">{recordCountText}</div>
-						</div>
+						{isJump ? (
+							<>
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">소속</div>
+									<div className="jump-users-info-value">{getSchoolName(selected)}</div>
+								</div>
 
-						<div className="jump-users-info-row">
-							<div className="jump-users-info-label">미기록 수</div>
-							<div className="jump-users-info-value">{unrecordedCountText}</div>
-						</div>
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">센터</div>
+									<div className="jump-users-info-value">{getOrgName(selected)}</div>
+								</div>
+
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">봉사 일시</div>
+									<div className="jump-users-info-value">{volunteerTimeText}</div>
+								</div>
+
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">기록 수</div>
+									<div className="jump-users-info-value">{recordCountText}</div>
+								</div>
+
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">미기록 수</div>
+									<div className="jump-users-info-value">{unrecordedCountText}</div>
+								</div>
+							</>
+						) : (
+							<>
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">학번</div>
+									<div className="jump-users-info-value">{selected.studentNumber || "-"}</div>
+								</div>
+
+								<div className="jump-users-info-row">
+									<div className="jump-users-info-label">기록 수</div>
+									<div className="jump-users-info-value">{recordCountText}</div>
+								</div>
+							</>
+						)}
 					</div>
 
 					<button type="button" className="jump-users-record-btn" onClick={handleClickRecordView}>
@@ -1114,8 +1161,8 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 		if (rightView === "REPORT_HOME") {
 			const totalCount =
-				selected && calendar && !calendarLoading && !calendarError
-					? getTotalEventDayCount()
+				selected && totalRecordCount != null && !totalRecordCountLoading && !totalRecordCountError
+					? totalRecordCount
 					: 0;
 
 			const weekCount =
@@ -1129,7 +1176,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 						<div className="jump-users-kpi-label">전체 기록 수</div>
 						<div className="jump-users-kpi-bottom">
 							<div className="jump-users-kpi-value">
-								{calendarLoading ? "-" : `${totalCount}건`}
+								{totalRecordCountLoading ? "-" : `${totalCount}건`}
 							</div>
 							<img className="jump-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
 						</div>

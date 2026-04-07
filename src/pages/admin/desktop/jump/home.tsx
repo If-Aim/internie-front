@@ -12,6 +12,15 @@ function getDisplayAdminName(me: UserMe | null): string {
 	return nick || name || "관리자";
 }
 
+function isDefaultProfileImage(url?: string | null): boolean {
+    if (!url) return true;
+
+    const lowered = url.toLowerCase();
+    if (lowered.includes("default")) return true;
+
+    return false;
+}
+
 export default function JumpAdminHome(): React.ReactElement {
 	const [me, setMe] = React.useState<UserMe | null>(null);
 	const { pathname } = useLocation();
@@ -42,6 +51,9 @@ export default function JumpAdminHome(): React.ReactElement {
 	}, []);
 
 	const adminName = getDisplayAdminName(me);
+	const adminProfileImg = isDefaultProfileImage(me?.profileImage)
+		? "/internie_mascot_normal.png"
+		: (me?.profileImage ?? "/internie_mascot_normal.png");
 
 	return (
 		<div className={isReportsPage ? "jump-admin-page jump-admin-page--reports" : "jump-admin-page"}>
@@ -80,11 +92,7 @@ export default function JumpAdminHome(): React.ReactElement {
 						<div className="jump-admin-topbar-right">
 							<span className="jump-admin-name">관리자 {adminName}님</span>
 
-							{me?.profileImage ? (
-								<img className="jump-admin-avatar-img" src={me.profileImage} alt="admin avatar" />
-							) : (
-								<div className="jump-admin-avatar" aria-label="admin avatar" />
-							)}
+							<img className="jump-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
 						</div>
 					</header>
 
