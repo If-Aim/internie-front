@@ -22,14 +22,23 @@ const kakaoAuthUrl =
 
 export default function Login() {
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const googleBtnRef = useRef<HTMLDivElement | null>(null);
 
     const go = (url: string) => {
         window.location.href = url;
     };
 
-    useEffect(() => { // 구글 로그인 로컬
+    const handleGoogleClick = () => {
+        const target = googleBtnRef.current?.querySelector("div[role='button']") as HTMLDivElement | null;
+        if (target) {
+            target.click();
+            return;
+        }
+        alert("구글 로그인 버튼을 아직 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    };
+
+    useEffect(() => {
         let intervalId: number | null = null;
 
         const initializeGoogleLogin = () => {
@@ -87,31 +96,44 @@ export default function Login() {
                 window.clearInterval(intervalId);
             }
         };
-    }, []);
-
+    }, [navigate]);
+    const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
+    function handleServicePreparing() {
+		alert(isKo ? "서비스 준비중입니다.": "Coming Soon");
+	}
     return (
         <div className="page">
             <div className="header-spacer" aria-hidden="true" />
             <main className="login-wrap">
-                <h1 className="brand">
-                    <img src="/logos/internie_Logo.svg" alt="internie" width={183} height={35} />
-                </h1>
+                <div className="login-content">
+                    <div className="login-center">
+                        <div className="login-mascot">
+                            <img src="/internie_mascot_normal.png" alt="internie" />
+                        </div>
+                        <h1 className="brand">internie</h1>
+                        <p className="brand-sub">하루 5분으로 진짜 스펙 만들기</p>
+                    </div>
 
-                <button
-                    type="button"
-                    className="btn btn-kakao"
-                    onClick={() => go(kakaoAuthUrl)}
-                    aria-label={t("login.startWithKakaoAria")}
-                >
-                    <span className="ico ico-kakao" aria-hidden="true">
-                        <img src="/logos/kakao_Logo.svg" alt="" width={20} height={20} />
-                    </span>
-                    <span className="btn-text">{t("login.startWithKakao")}</span>
-                </button>
+                    <div className="login-actions">
+                        <button type="button" className="btn btn-kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")} > 
+                            <span className="btn-icon" aria-hidden="true">
+                                <img src="/logos/kakao_Logo.svg" alt="" />
+                            </span>
+                            <span className="btn-text">{t("login.startWithKakao")}</span>
+                        </button>
 
-                {/* <div className="btn-google">
-                    <div ref={googleBtnRef} id="google-login-btn" />
-                </div> */}
+                        <button type="button" className="btn btn-google" onClick={handleServicePreparing} aria-label={t("login.startWithGoogleAria")} >
+                            <span className="btn-icon" aria-hidden="true">
+                                <img src="/logos/google_Logo.svg" alt="" />
+                            </span>
+                            <span className="btn-text">{t("login.startWithGoogle")}</span>
+                        </button>
+
+                        <div className="google-hidden-btn" aria-hidden="true">
+                            <div ref={googleBtnRef} id="google-login-btn" />
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     );
