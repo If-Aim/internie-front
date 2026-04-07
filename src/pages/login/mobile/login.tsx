@@ -29,14 +29,14 @@ export default function Login() {
         window.location.href = url;
     };
 
-    const handleGoogleClick = () => {
-        const target = googleBtnRef.current?.querySelector("div[role='button']") as HTMLDivElement | null;
-        if (target) {
-            target.click();
-            return;
-        }
-        alert("구글 로그인 버튼을 아직 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
-    };
+    // const handleGoogleClick = () => {
+    //     const target = googleBtnRef.current?.querySelector("div[role='button']") as HTMLDivElement | null;
+    //     if (target) {
+    //         target.click();
+    //         return;
+    //     }
+    //     alert("구글 로그인 버튼을 아직 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    // };
 
     useEffect(() => {
         let intervalId: number | null = null;
