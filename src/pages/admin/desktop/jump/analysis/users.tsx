@@ -170,7 +170,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	const [/*studentCalLoading*/, setStudentCalLoading] = React.useState<boolean>(false);
 
 	// 학생의 총 기록 수
-	const [totalRecordCount, setTotalRecordCount] = React.useState<number | null>(null);
+	const [totalRecordCountMap, setTotalRecordCountMap] = React.useState<Record<number, number>>({});
 	const [totalRecordCountLoading, setTotalRecordCountLoading] = React.useState<boolean>(false);
 	const [totalRecordCountError, setTotalRecordCountError] = React.useState<string | null>(null);
 
@@ -200,7 +200,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
         if (selectedId == null) return null;
         return students.find((u) => u.userId === selectedId) ?? null;
     }, [students, selectedId]);
-
+	
 	// 달력 렌더
 	const listRef = React.useRef<HTMLDivElement | null>(null);
 	const rowRefs = React.useRef<Record<number, HTMLButtonElement | null>>({});
@@ -215,10 +215,14 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return String(n).padStart(2, "0");
 	}
 
+	function getStudentCalKey(userId: number, year: number, month: number) {
+		return `${userId}-${year}-${month}`;
+	}
+
 	function toYmd(y: number, m: number, d: number) {
 		return `${y}-${pad2(m)}-${pad2(d)}`;
 	}
-
+	
 	function daysInMonth(y: number, m: number) {
 		return new Date(y, m, 0).getDate();
 	}
@@ -535,6 +539,18 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 			};
 		}
 
+		const cacheKey = getStudentCalKey(selected.userId, calYear, calMonth);
+		const cached = studentCalCache[cacheKey];
+
+		if (cached) {
+			setCalendar(cached);
+			setCalendarError(null);
+			setCalendarLoading(false);
+			return () => {
+				mounted = false;
+			};
+		}
+
 		(async () => {
 			try {
 				setCalendarLoading(true);
@@ -544,6 +560,10 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 				if (!mounted) return;
 
 				setCalendar(data);
+				setStudentCalCache((prev) => ({
+					...prev,
+					[cacheKey]: data,
+				}));
 			} catch {
 				if (!mounted) return;
 				setCalendar(null);
@@ -556,11 +576,17 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return () => {
 			mounted = false;
 		};
-	}, [selected?.userId, calYear, calMonth, clientType]);
+	}, [selected?.userId, calYear, calMonth, clientType, studentCalCache]);
 
 	React.useEffect(() => {
 		if (!clientType || !selected) {
-			setTotalRecordCount(null);
+			setTotalRecordCountError(null);
+			setTotalRecordCountLoading(false);
+			return;
+		}
+
+		const cached = totalRecordCountMap[selected.userId];
+		if (cached !== undefined) {
 			setTotalRecordCountError(null);
 			setTotalRecordCountLoading(false);
 			return;
@@ -576,11 +602,13 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 				const res = await getClientAdminStudentRecordCount(clientType, selected.userId);
 				if (!mounted) return;
 
-				setTotalRecordCount(res.totalRecordCount ?? 0);
+				setTotalRecordCountMap((prev) => ({
+					...prev,
+					[selected.userId]: res.totalRecordCount ?? 0,
+				}));
 			} catch (e) {
 				if (!mounted) return;
 
-				setTotalRecordCount(null);
 				setTotalRecordCountError("전체 기록 수를 불러오지 못했습니다.");
 				if (!(e instanceof ApiError)) console.error(e);
 			} finally {
@@ -591,16 +619,17 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return () => {
 			mounted = false;
 		};
-	}, [clientType, selected?.userId]);
+	}, [clientType, selected?.userId, totalRecordCountMap]);
 
 
+	const selectedTotalRecordCount = selected ? totalRecordCountMap[selected.userId] : undefined;
     const recordCountText = React.useMemo(() => {
 		if (!selected) return "-";
-		if (totalRecordCountLoading) return "불러오는 중...";
+		if (selectedTotalRecordCount !== undefined) return `${selectedTotalRecordCount}건`;
 		if (totalRecordCountError) return "-";
-		if (totalRecordCount == null) return "-";
-		return `${totalRecordCount}건`;
-	}, [selected, totalRecordCountLoading, totalRecordCountError, totalRecordCount]);
+		if (totalRecordCountLoading) return "불러오는 중...";
+		return "-";
+	}, [selected, selectedTotalRecordCount, totalRecordCountError, totalRecordCountLoading]);
 
     const unrecordedCountText = "-"; // TODO: 백엔드 준비되면 연결
     const volunteerTimeText = "-"; // TODO: 백엔드 준비되면 연결
@@ -1161,8 +1190,8 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 		if (rightView === "REPORT_HOME") {
 			const totalCount =
-				selected && totalRecordCount != null && !totalRecordCountLoading && !totalRecordCountError
-					? totalRecordCount
+				selected && selectedTotalRecordCount !== undefined
+					? selectedTotalRecordCount
 					: 0;
 
 			const weekCount =
