@@ -1,5 +1,5 @@
-// src/adminJumpRoute.tsx
-// 기본 관리자 + 점프 관리자용 protectedRoute
+// src/clientAdminRoute.tsx
+// 기본 관리자 + client 관리자용 protectedRoute
 import React from "react";
 import { Navigate, Outlet, useParams } from "react-router-dom";
 import { ApiError, checkIsClientAdmin, type ClientType } from "./api/client";

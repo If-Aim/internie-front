@@ -48,19 +48,19 @@ export default function AdminHome(): React.ReactElement {
 
 				<nav className="admin-topbar-tabs" aria-label="admin tabs">
 					<NavLink
-						to="/admin/users"
+						to="/system-admin/users"
 						className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
 					>
 						<span>학생증</span>
 					</NavLink>
 					<NavLink
-						to="/admin/certificates"
+						to="/system-admin/certificates"
 						className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
 					>
 						<span>수료증</span>
 					</NavLink>
 					<NavLink
-						to="/admin/reports"
+						to="/system-admin/reports"
 						className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
 					>
 						<span>기록 열람</span>

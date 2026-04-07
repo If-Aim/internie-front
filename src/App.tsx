@@ -30,7 +30,7 @@ export default function App(): React.ReactElement {
 
 				{/* 관리자용 라우트 */}
 				<Route element={<AdminRoute />}>
-					<Route path="/admin/*" element={<AdminApp />} />
+					<Route path="/system-admin/*" element={<AdminApp />} />
 				</Route>
 				{/* client 관리자용 라우트 */}
 				<Route path="/admin/:clientType/*" element={<AdminClientRoute />}>

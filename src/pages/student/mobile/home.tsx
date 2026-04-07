@@ -740,13 +740,13 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 					</button>
 					{userRoleSet.includes("ROLE_ADMIN") && (
 						<button
-						className="drawer-menu-item"
-						onClick={() => {
-							onRequireAuth("/admin/users", () => {
-							navigate("/admin/users");
-							closeWithSnap();
-							});
-						}}
+							type="button"
+							className="drawer-menu-item"
+							onClick={(e) => {
+								e.stopPropagation();
+								console.log("before navigate /admin/users");
+								navigate("/system-admin/users");
+							}}
 						>
 							<img className="icon" src="/icons/chevron-right.svg" alt="" />
 							<span>사용자조회</span>
