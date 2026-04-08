@@ -435,10 +435,20 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                         <div className="jump-dashboard-kpi-value">{kpi.weekRecordedCount}건</div>
                     </button>
 
+                    {isJump && (
+                    <button type="button" className="jump-dashboard-kpi">
+                        <div className="jump-dashboard-kpi-label">이번 주 미기록 현황</div>
+                        <div className="jump-dashboard-kpi-value">{kpi.weekNotRecordedCells}건</div>
+                    </button>
+                    )}
+                    
+                    {isKakao && (
                     <button type="button" className="jump-dashboard-kpi">
                         <div className="jump-dashboard-kpi-label">과제 완료</div>
                         <div className="jump-dashboard-kpi-value">{kpi.overFiveRecorededStudents}건</div>
                     </button>
+                    )}
+                    
                 </div>
             </div>
 
