@@ -387,16 +387,6 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		};
 	}, [students, calYear, calMonth, clientType]);
 
-	function hasAnyRecordForStudent(userId: number): boolean {
-		const key = `${userId}-${calYear}-${calMonth}`;
-		const cal = studentCalCache[key];
-		if (!cal) return false;
-
-		return (cal.dailyStatuses ?? []).some((ds) => {
-			return (ds?.eventDayIds?.length ?? 0) > 0;
-		});
-	}
-
     const orgOptions = React.useMemo(() => {
 		if (!isJump) return[];
 
@@ -435,7 +425,8 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		const byRecord = byOrg.filter((u) => {
 			if (selectedRecordFilter === "ALL") return true;
 
-			const hasRecord = hasAnyRecordForStudent(u.userId);
+			const count = totalRecordCountMap[u.userId] ?? 0;
+			const hasRecord = count > 0;
 
 			if (selectedRecordFilter === "RECORDED") return hasRecord;
 			if (selectedRecordFilter === "NOT_RECORDED") return !hasRecord;
@@ -446,7 +437,6 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		return byRecord.filter((u) => matchQuery(u, query, isJump));
 	}, [students, selectedOrg, selectedRecordFilter, query, studentCalCache, calYear, calMonth, isJump]);
 	
-
 	function renderOrgFilter() {
         if (!isJump) return null;
         return (
@@ -578,7 +568,45 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 			mounted = false;
 		};
 	}, [selected?.userId, calYear, calMonth, clientType, studentCalCache]);
+	
+	React.useEffect(() => {
+		if (!clientType || students.length === 0) return;
 
+		let mounted = true;
+
+		(async () => {
+			try {
+				setTotalRecordCountLoading(true);
+
+				const results = await Promise.all(
+					students.map(async (u) => {
+						try {
+							const res = await getClientAdminStudentRecordCount(clientType, u.userId);
+							return [u.userId, res.totalRecordCount ?? 0] as const;
+						} catch {
+							return [u.userId, 0] as const;
+						}
+					})
+				);
+
+				if (!mounted) return;
+
+				const map: Record<number, number> = {};
+				for (const [id, count] of results) {
+					map[id] = count;
+				}
+
+				setTotalRecordCountMap(map);
+			} finally {
+				if (mounted) setTotalRecordCountLoading(false);
+			}
+		})();
+
+		return () => {
+			mounted = false;
+		};
+	}, [clientType, students]);
+	
 	React.useEffect(() => {
 		if (!clientType || !selected) {
 			setTotalRecordCountError(null);
