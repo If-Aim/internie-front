@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminEventDayDetail, deleteClientAdminStudent, getClientAdminStudentRecordCount} from "../../../../../api/client"; 
 import type { ClientType, ClientAdminStudent, ClientAdminStudentCalendarResponse, ClientAdminEventDayDetailResponse } from "../../../../../api/client"; 
+import { replaceExperienceName } from "../../../../../utils/josa";
 import "./users.css";
 
 type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DETAIL";
@@ -1265,12 +1266,6 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 				</div>
 			</div>
 		);
-	}
-
-	function replaceExperienceName(text: string, experienceName: string): string {
-		if (!text) return "";
-
-		return text.replace(/\(@experience_name\)/g, experienceName);
 	}
 
 	function renderReportDetail(): React.ReactNode { // 기록 상세 화면 렌더

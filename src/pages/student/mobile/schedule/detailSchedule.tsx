@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ApiError, getEventDayDetail, getEventDayQuestions, type Transcription, } from "../../../../api/client";
-
+import { replaceExperienceName } from "../../../../utils/josa";
 import "./schedule.css"
 
 type Params = { eventDayId?: string };
@@ -22,10 +22,6 @@ function formatRecordedAt(date: string/*, startTime?: string | null*/) {
     const [y, m, d] = date.split("-").map(Number);
     // const hhmm = startTime ? startTime.slice(0, 5) : "00:00";
     return `${y}.${pad2(m)}.${pad2(d)} `; // 시간 같이 표기 === return `${y}.${pad2(m)}.${pad2(d)} ${hhmm}`;
-}
-function applyExperienceName(q: string, title: string) {
-    if (!q.includes("(@experience_name)")) return q;
-    return q.replaceAll("(@experience_name)", title);
 }
 
 export default function DetailSchedule(): React.ReactElement {
@@ -89,7 +85,7 @@ export default function DetailSchedule(): React.ReactElement {
 
                 const merged: SlideItem[] = questions.map((q, i) => ({
                 idx: i + 1,
-                question: applyExperienceName(q, dRes.title),
+                question: replaceExperienceName(q, dRes.title),
                 answerText: (trans[i]?.text ?? "").trim(),
                 }));
 

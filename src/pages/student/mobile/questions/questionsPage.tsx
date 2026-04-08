@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api, apiUpload, ApiError } from "../../../../api/client";
 import type {EventDayDetailResponse, EventDayQuestionsResponse  } from "../../../../api/client";
-
+import { replaceExperienceName } from "../../../../utils/josa";
 import "./questions.css";
 
 type Stage = "asking" | "completed";
@@ -19,10 +19,6 @@ type QuestionDto = {
 const BARS = 40; // 파형 바 개수
 const SENSITIVITY = 10; // 감도 조절 상수
 
-function applyExperienceName(q: string, title: string) {
-	if (!q.includes("(@experience_name)")) return q;
-	return q.split("(@experience_name)").join(title);
-}
 //역량 분석 로딩 dots
 function LoadingDots() {
 	return (
@@ -130,7 +126,7 @@ export default function QuestionsPage() {
 				const mapped: QuestionDto[] = list.map((text, i) => ({
 					id: `${data.questionId}_${i + 1}`,
 					order: i + 1,
-					text: applyExperienceName(text, title),
+					text: replaceExperienceName(text, title),
 					totalCount,
 				}));
 
