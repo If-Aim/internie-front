@@ -303,6 +303,7 @@ export type UserBase = {
 	verificationImage: string | null;
 	roleSet: string[];
 	status: string;
+    rejectionReason?: string | null;
 	school: UserSchool | null;
 
 	studentNumber?: string | null;
@@ -577,6 +578,39 @@ export async function getMyAdminFileDownloadUrl(
 
 /* - admin 관련 - */
 export type AdminUser = UserBase;
+export type AdminDailyStatus = {
+    date: String;
+    eventDayIds: number[];
+};
+export type AdminUserCalendarResponse = {
+    year: number;
+    month: number;
+    totalRecordedDays: number;
+    dailyStatuses: AdminDailyStatus[];
+};
+export type AdminEventDayDetailResponse = {
+    eventDayId: number;
+    eventDayTitle: string;
+    eventTitle: string;
+    startTime?: string | null;
+    endTime?: string | null;
+    transcriptions: ClientAdminTranscription[];
+    question?: ClientAdminEventDayQuestions | null;
+};
+export type AdminUserRecordCountResponse = {
+    studentId: number;
+    totalRecordCount: number;
+};
+
+export async function checkIsCaptain(): Promise<boolean> { // Captain인지 확인
+    try {
+        const me = await getUserMe();
+        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_CAPTAIN");
+    } catch (e) {
+        if (e instanceof ApiError && e.status == 401) return false;
+        throw e;
+    }
+}
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
 	const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
@@ -584,6 +618,9 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 	return JSON.parse(text) as AdminUser[];
 }
 
+/**
+ *  학생증 인증
+*/
 // 학생증 제출자 목록 조회
 export async function getAdminPendingUsers(): Promise<AdminUser[]> {
   	return api<AdminUser[]>("/admin/users/pending", { method: "GET" });
@@ -605,10 +642,23 @@ export async function approveAdminUser(userId: number | string): Promise<AdminUs
 }
 
 // 사용자 거절
-export async function rejectAdminUser(userId: number | string): Promise<AdminUser> {
-  	return api<AdminUser>(`/admin/users/${userId}/reject`, { method: "PATCH" });
+export type RejectAdminUserInput = {
+    reason: string;
+};
+
+export async function rejectAdminUser(
+    userId: number | string,
+    input: RejectAdminUserInput
+): Promise<AdminUser> {
+    return api<AdminUser>(`/admin/users/${userId}/reject`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+    });
 }
 
+/**
+ *  관리자 파일 (수료증)
+*/
 // 관리자 파일 업로드
 export async function uploadAdminUserFile(
 	userId: number,
@@ -656,6 +706,78 @@ export async function deleteAdminUserFile(
    		method: "DELETE",
   	});
 }
+
+/**
+ *  기록 확인
+*/
+export async function getAdminUserCalendar(
+    userId: number | string,
+    year: number | string,
+    month: number | string
+): Promise<AdminUserCalendarResponse> {
+    return api<AdminUserCalendarResponse>(
+        `/admin/users/${userId}/calendar/${year}/${month}`,
+        { method: "GET" }
+    );
+}
+
+export async function getAdminEventDayDetail(
+    eventDayId: number | string
+): Promise<AdminEventDayDetailResponse> {
+    return api<AdminEventDayDetailResponse>(
+        `/admin/event-days/${eventDayId}`,
+        { method: "GET" }
+    );
+}
+
+export async function getAdminUserRecordCount(
+    userId: number | string
+): Promise<AdminUserRecordCountResponse> {
+    return api<AdminUserRecordCountResponse>(
+        `/admin/users/${userId}/records/count`,
+        { method: "GET" }
+    );
+}
+
+export async function deleteAdminUserRecord(
+    userId: number | string,
+    eventDayId: number | string
+): Promise<void> {
+    return api<void>(
+        `/admin/users/${userId}/event-days/${eventDayId}/records`,
+        { method: "DELETE" }
+    );
+}
+
+/**
+ *  CAPTAIN용
+*/
+export type GrantableAdminRole = "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN";
+
+export type AdminRoleUpdateInput = {
+    role: GrantableAdminRole;
+};
+
+export async function grantAdminRole(
+    userId: number | string,
+    input: AdminRoleUpdateInput
+): Promise<AdminUser> {
+    return api<AdminUser>(`/admin/users/${userId}/roles`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+    });
+}
+
+export async function revokeAdminRole(
+    userId: number | string,
+    input: AdminRoleUpdateInput
+): Promise<AdminUser> {
+    return api<AdminUser>(`/admin/users/${userId}/roles`, {
+        method: "DELETE",
+        body: JSON.stringify(input),
+    });
+}
+
 
 /* - client admin 관련 - */
 // client 학생 목록
@@ -754,7 +876,7 @@ export async function deleteClientAdminStudent(
 export async function checkIsAdmin(): Promise<boolean> {
     try {
         const me = await getUserMe();
-        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ADMIN");
+        return Array.isArray(me.roleSet) && (me.roleSet.includes("ROLE_ADMIN") || me.roleSet.includes("ROLE_CAPTAIN"));
     } catch (e) {
         if (e instanceof ApiError && e.status === 401) return false;
         throw e;

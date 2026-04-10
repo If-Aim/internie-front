@@ -1,10 +1,16 @@
 // src/pages/admin/desktop/default/studentIdCard/users.tsx
 // 사용자 목록 페이지 (PC)
 import React from "react";
-// import { useNavigate } from "react-router-dom";
-import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser, getStudentIdImg } from "../../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, approveAdminUser, rejectAdminUser, getStudentIdImg, grantAdminRole, revokeAdminRole, checkIsCaptain, type GrantableAdminRole, } from "../../../../../api/client";
 import "./users.css";
 import "../admin.css";
+
+const REJECT_REASON_OPTIONS = [
+	"사진이 선명하지 않습니다.",
+	"이름이 일치하지 않습니다.",
+	"만료된 학생증입니다.",
+	"직접 입력",
+] as const;
 
 function statusLabel(status: string) {
 	switch (status) {
@@ -54,9 +60,34 @@ export default function AdminUsersPage(): React.ReactElement {
 	const [verificationUrl, setVerificationUrl] = React.useState<string>("");
 	const [verificationLoading, setVerificationLoading] = React.useState(false);
 	const [verificationError, setVerificationError] = React.useState<string | null>(null);
+	const [isCaptain, setIsCaptain] = React.useState(false);
+
+	const [rejectReasonType, setRejectReasonType] = React.useState<string>(REJECT_REASON_OPTIONS[0]);
+	const [customRejectReason, setCustomRejectReason] = React.useState("");
+
+	const [roleLoading, setRoleLoading] = React.useState(false);
+	const [selectedAdminRole, setSelectedAdminRole] = React.useState<GrantableAdminRole>("ROLE_ADMIN");
 
 	const totalCount = users.length;
 	const approvedCount = users.filter((u) => u.status === "APPROVED").length;
+
+	React.useEffect(() => { // CAPTAIN 여부 로드
+		let mounted = true;
+
+		(async () => {
+			try {
+				const captain = await checkIsCaptain();
+				if (!mounted) return;
+				setIsCaptain(captain);
+			} catch (e) {
+				console.error(e);
+			}
+		})();
+
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
 	React.useEffect(() => {
 		let mounted = true;
@@ -155,15 +186,27 @@ export default function AdminUsersPage(): React.ReactElement {
 		}
 	};
 
+	const rejectReason = React.useMemo(() => { // 거절 사유 문자열 계산
+		if (rejectReasonType === "직접 입력") {
+			return customRejectReason.trim();
+		}
+		return rejectReasonType;
+	}, [rejectReasonType, customRejectReason]);
+
 	const handleReject = async () => {
 		if (!selectedUser) return;
 		if (actionLoading) return;
-		if (selectedUser.status !== "PENDING") return; 
+		if (selectedUser.status !== "PENDING") return;
+
+		if (!rejectReason) {
+			alert("거절 사유를 입력해주세요.");
+			return;
+		}
 
 		setActionLoading(true);
 		try {
-			const updated = await rejectAdminUser(selectedUser.userId);
-			patchUserInList(updated); 
+			const updated = await rejectAdminUser(selectedUser.userId, { reason: rejectReason });
+			patchUserInList(updated);
 		} catch (e) {
 			if (e instanceof ApiError) {
 				if (e.status === 404) alert("사용자를 찾을 수 없습니다.");
@@ -177,12 +220,48 @@ export default function AdminUsersPage(): React.ReactElement {
 			setActionLoading(false);
 		}
 	};
+	
+	const handleGrantAdminRole = async () => { // 관리자 권한 부여
+		if (!selectedUser) return;
+		if (!isCaptain) return;
+		if (roleLoading) return;
 
-	// const handleReRequest = async () => {
-	//   // 현재 백엔드 문서에 "재요청" API가 없으므로,
-	//   // 일단 버튼만 두고 나중에 API가 생기면 연결
-	//   
-	// };
+		setRoleLoading(true);
+		try {
+			const updated = await grantAdminRole(selectedUser.userId, { role: selectedAdminRole });
+			patchUserInList(updated);
+		} catch (e) {
+			console.error(e);
+			if (e instanceof ApiError && e.status === 403) {
+				alert("CAPTAIN 권한이 필요합니다.");
+			} else {
+				alert("관리자 권한 부여에 실패했습니다.");
+			}
+		} finally {
+			setRoleLoading(false);
+		}
+	};
+
+	const handleRevokeAdminRole = async () => { // 관리자 권한 회수
+		if (!selectedUser) return;
+		if (!isCaptain) return;
+		if (roleLoading) return;
+
+		setRoleLoading(true);
+		try {
+			const updated = await revokeAdminRole(selectedUser.userId, { role: selectedAdminRole });
+			patchUserInList(updated);
+		} catch (e) {
+			console.error(e);
+			if (e instanceof ApiError && e.status === 403) {
+				alert("CAPTAIN 권한이 필요합니다.");
+			} else {
+				alert("관리자 권한 회수에 실패했습니다.");
+			}
+		} finally {
+			setRoleLoading(false);
+		}
+	};
 
 	// const canAct = !!selectedUser && selectedUser.status === "PENDING" && !actionLoading; 
 
@@ -245,28 +324,73 @@ export default function AdminUsersPage(): React.ReactElement {
 						</div>
 
 						<div className="admin-detail-actions">
+							<div className="admin-reject-reason-box">
+								<div className="admin-reject-reason-title">거절 사유</div>
+
+								<select
+									className="admin-select"
+									value={rejectReasonType}
+									onChange={(e) => setRejectReasonType(e.target.value)}
+									disabled={actionLoading}
+								>
+									{REJECT_REASON_OPTIONS.map((opt) => (
+										<option key={opt} value={opt}>{opt}</option>
+									))}
+								</select>
+
+								{rejectReasonType === "직접 입력" && (
+									<textarea
+										className="admin-textarea"
+										value={customRejectReason}
+										onChange={(e) => setCustomRejectReason(e.target.value)}
+										placeholder="거절 사유를 입력해주세요."
+										rows={4}
+									/>
+								)}
+							</div>
 							<button className="admin-btn admin-btn--ghost" type="button" onClick={handleReject} disabled={actionLoading} > 
-								{actionLoading ? "처리 중…" : "재요청"}
+								{actionLoading ? "처리 중…" : "거절"}
 							</button>
 							<button className="admin-btn admin-btn--primary" type="button" onClick={handleApprove} disabled={actionLoading} >
 								{actionLoading ? "처리 중…" : "승인"}
 							</button>
 						</div>
 
-						{/* 목업에 재요청, 승인 버튼만 있음. 추후 아래 주석 해제 */}
-						{/* 
-						<div className="admin-detail-actions" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
-							<button className="admin-btn admin-btn--ghost" type="button" onClick={handleReRequest}>
-							재요청
-							</button>
-							<button className="admin-btn admin-btn--ghost" type="button" onClick={handleReject}>
-							거절
-							</button>
-							<button className="admin-btn admin-btn--primary" type="button" onClick={handleApprove}>
-							승인
-							</button>
-						</div>
-						*/}
+						{isCaptain && selectedUser && (
+							<div className="admin-role-box">
+								<div className="admin-reject-reason-title">관리자 권한 설정</div>
+
+								<select
+									className="admin-select"
+									value={selectedAdminRole}
+									onChange={(e) => setSelectedAdminRole(e.target.value as GrantableAdminRole)}
+									disabled={roleLoading}
+								>
+									<option value="ROLE_ADMIN">ROLE_ADMIN</option>
+									<option value="ROLE_JUMP_ADMIN">ROLE_JUMP_ADMIN</option>
+									<option value="ROLE_KAKAO_ADMIN">ROLE_KAKAO_ADMIN</option>
+								</select>
+
+								<div className="admin-detail-actions">
+									<button
+										className="admin-btn admin-btn--ghost"
+										type="button"
+										onClick={handleRevokeAdminRole}
+										disabled={roleLoading}
+									>
+										{roleLoading ? "처리 중…" : "권한 회수"}
+									</button>
+									<button
+										className="admin-btn admin-btn--primary"
+										type="button"
+										onClick={handleGrantAdminRole}
+										disabled={roleLoading}
+									>
+										{roleLoading ? "처리 중…" : "권한 부여"}
+									</button>
+								</div>
+							</div>
+						)}
 						</>
 					)}
 				</div>
