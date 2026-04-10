@@ -21,6 +21,9 @@ font-size: 22px;font-weight: 500;color: #333333;}
 .admin-cal-cell--selected:hover{background: var(--primary);}
 
 .admin-cal-cell--recorded { background: rgba(0, 102, 255, 0.2); color: #111; }
+.admin-cal-cell--recorded:hover:not(:disabled) { background: #dcecff; }
+.admin-cal-cell--selected.admin-cal-cell--recorded { background: #4a90e2; color: #fff; }
+
 
 /* 기록 있는 날짜 - hover 시 */
 .admin-cal-cell--recorded:hover:not(:disabled):not(.admin-cal-cell--selected) {

@@ -579,7 +579,7 @@ export async function getMyAdminFileDownloadUrl(
 /* - admin 관련 - */
 export type AdminUser = UserBase;
 export type AdminDailyStatus = {
-    date: String;
+    date: string;
     eventDayIds: number[];
 };
 export type AdminUserCalendarResponse = {

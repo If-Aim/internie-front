@@ -1,7 +1,7 @@
 // src/pages/admin/desktop/default/record/reports.tsx
 // 보고서 화면(탭)
 import React from "react";
-import { ApiError, type AdminUser, getAdminUsers, getAdminUserCalendar, getAdminEventDayDetail, deleteAdminUserRecord, checkIsCaptain, type AdminUserCalendarResponse,type AdminEventDayDetailResponse, getClientAdminStudentRecordCount, } from "../../../../../api/client";
+import { ApiError, type AdminUser, getAdminUsers, getAdminUserCalendar, getAdminEventDayDetail, deleteAdminUserRecord, checkIsCaptain, type AdminUserCalendarResponse,type AdminEventDayDetailResponse, getAdminUserRecordCount, } from "../../../../../api/client";
 import "./reports.css";
 
 type CalCell = { key: string; day: number | null; dateStr: string | null };
@@ -186,7 +186,7 @@ export default function AdminReportsPage(): React.ReactElement {
 				await Promise.all(
 					list.map(async (u) => {
 						try {
-							const res = await getClientAdminStudentRecordCount("jump", u.userId);
+							const res = await getAdminUserRecordCount(u.userId);
 							counts[u.userId] = res.totalRecordCount;
 						} catch {
 							counts[u.userId] = 0;
