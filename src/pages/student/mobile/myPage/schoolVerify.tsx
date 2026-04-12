@@ -222,7 +222,7 @@ export default function SchoolVerify() {
                             ) : (
                             <img className="sv-previewGuide" src="/studentcard_guide.png" alt="학생증 촬영 가이드" />
                             )}
-                            <span>개인정보 보호를 위해{"\n"}카드 번호 등을 가려서 올려주세요!</span>
+                            <span className="sv-previewGuide-text">개인정보 보호를 위해<br/>카드 번호 등은 가려서 올려주세요!</span>
                         </div>
 
                         {errorMsg && <div className="sv-error">{errorMsg}</div>}
