@@ -376,18 +376,16 @@ export default function AdminUsersPage(): React.ReactElement {
 												</label>
 											);
 										})}
+										{modalRejectReasonType === "직접 입력" && (
+											<textarea
+												className="reject-modal-textarea"
+												value={modalCustomRejectReason}
+												onChange={(e) => setModalCustomRejectReason(e.target.value)}
+												placeholder="거절 사유를 상세히 입력해주세요."
+												rows={4}
+											/>
+										)}
 									</div>
-
-									{modalRejectReasonType === "직접 입력" && (
-										<textarea
-											className="reject-modal-textarea"
-											value={modalCustomRejectReason}
-											onChange={(e) => setModalCustomRejectReason(e.target.value)}
-											placeholder="거절 사유를 상세히 입력해주세요."
-											rows={4}
-										/>
-									)}
-
 									<div className="reject-modal-actions">
 										<button type="button" className="reject-modal-btn reject-modal-btn-cancel" onClick={closeRejectModal} disabled={actionLoading}>
 											취소
