@@ -1,4 +1,4 @@
-// src/pages/admin/desktop/jump/analysis/users.tsx
+// src/pages/admin/desktop/client/analysis/users.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminEventDayDetail, deleteClientAdminStudent, getClientAdminStudentRecordCount} from "../../../../../api/client"; 
@@ -55,30 +55,30 @@ function DropdownSelect(props: {
     const selected = options.find((o) => o.value === value) ?? null;
 
     return (
-        <div ref={rootRef} className={`jump-users-dd ${open ? "is-open" : ""}`}>
+        <div ref={rootRef} className={`client-users-dd ${open ? "is-open" : ""}`}>
             <button
                 type="button"
-                className="jump-users-dd-trigger"
+                className="client-users-dd-trigger"
                 onClick={() => setOpen((p) => !p)}
                 aria-label={ariaLabel}
                 aria-haspopup="listbox"
                 aria-expanded={open}
             >
-                <span className="jump-users-dd-text">
+                <span className="client-users-dd-text">
                     {selected ? selected.label : "-"}
                 </span>
-                <img className="jump-users-dd-arrow" src="/icons/chevron-right-6b.svg" alt="" />
+                <img className="client-users-dd-arrow" src="/icons/chevron-right-6b.svg" alt="" />
             </button>
 
             {open && (
-                <div className="jump-users-dd-menu" role="listbox" aria-label={ariaLabel}>
+                <div className="client-users-dd-menu" role="listbox" aria-label={ariaLabel}>
                     {options.map((o) => {
                         const isSelected = o.value === value;
                         return (
                             <button
                                 key={o.value}
                                 type="button"
-                                className={`jump-users-dd-item ${isSelected ? "is-selected" : ""}`}
+                                className={`client-users-dd-item ${isSelected ? "is-selected" : ""}`}
                                 role="option"
                                 aria-selected={isSelected}
                                 onClick={() => {
@@ -300,7 +300,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	}, [clientType, navigate]);
 
 	if (!clientType) {
-		return <div className="jump-users-state">잘못된 관리자 경로입니다.</div>;
+		return <div className="client-users-state">잘못된 관리자 경로입니다.</div>;
 	}
 
     React.useEffect(() => {
@@ -440,27 +440,27 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	function renderOrgFilter() {
         if (!isJump) return null;
         return (
-            <div className="jump-users-filter">
-				<div ref={orgRef} className={`jump-users-org ${orgOpen ? "is-open" : ""}`}>
+            <div className="client-users-filter">
+				<div ref={orgRef} className={`client-users-org ${orgOpen ? "is-open" : ""}`}>
 					<button
 						type="button"
-						className={`jump-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
+						className={`client-users-org-trigger ${!selectedOrg ? "is-all" : ""}`}
 						onClick={() => {
 							setOrgOpen((prev) => !prev);
 							setRecordOpen(false);
 						}}
 						aria-label="organization filter"
 					>
-						<img className="jump-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
-						<span className="jump-users-org-text">{selectedOrg || "전체"}</span>
-						<img className="jump-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
+						<img className="client-users-org-filter" src={selectedOrg ? "/icons/mynaui_filter.svg" : "/icons/mynaui_filter_6b.svg"} alt="" />
+						<span className="client-users-org-text">{selectedOrg || "전체"}</span>
+						<img className="client-users-org-arrow" src={selectedOrg ? "/icons/chevron-right.svg" : "/icons/chevron-right-6b.svg"} alt="" />
 					</button>
 
 					{orgOpen && (
-						<div className="jump-users-org-menu">
+						<div className="client-users-org-menu">
 							<button
 								type="button"
-								className={`jump-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`}
+								className={`client-users-org-item ${selectedOrg === "" ? "is-selected" : ""}`}
 								onClick={() => {
 									setSelectedOrg("");
 									setOrgOpen(false);
@@ -473,7 +473,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 								<button
 									key={org}
 									type="button"
-									className={`jump-users-org-item ${selectedOrg === org ? "is-selected" : ""}`}
+									className={`client-users-org-item ${selectedOrg === org ? "is-selected" : ""}`}
 									onClick={() => {
 										setSelectedOrg(org);
 										setOrgOpen(false);
@@ -872,7 +872,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	function renderCalendar(): React.ReactNode {
 		if (!selected) {
 			return (
-				<div className="jump-users-calendar-empty">
+				<div className="client-users-calendar-empty">
 					학생을 선택하면 달력이 표시됩니다.
 				</div>
 			);
@@ -881,9 +881,9 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		const cells = buildMonthGrid(calYear, calMonth);
 
 		return (
-			<div className="jump-users-calendar">
-				<div className="jump-users-calendar-head">
-					<div className="jump-users-calendar-selects">
+			<div className="client-users-calendar">
+				<div className="client-users-calendar-head">
+					<div className="client-users-calendar-selects">
 						<DropdownSelect
 							value={calMonth}
 							options={monthOptions}
@@ -911,23 +911,23 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 				</div>
 
 				{calendarLoading ? (
-					<div className="jump-users-calendar-state">불러오는 중...</div>
+					<div className="client-users-calendar-state">불러오는 중...</div>
 				) : calendarError ? (
-					<div className="jump-users-calendar-state">{calendarError}</div>
+					<div className="client-users-calendar-state">{calendarError}</div>
 				) : (
 					<>
-						<div className="jump-users-calendar-week">
+						<div className="client-users-calendar-week">
 							{weekHeaders.map((w) => (
-								<div key={w} className="jump-users-calendar-weekday">
+								<div key={w} className="client-users-calendar-weekday">
 									{w}
 								</div>
 							))}
 						</div>
 
-						<div className="jump-users-calendar-grid" role="grid">
+						<div className="client-users-calendar-grid" role="grid">
 							{cells.map((c, idx) => {
 								if (!c.inMonth) {
-									return <div key={`e-${idx}`} className="jump-users-calendar-cell is-empty" />;
+									return <div key={`e-${idx}`} className="client-users-calendar-cell is-empty" />;
 								}
 
 								const isSelectedDay = c.ymd === selectedYmd;
@@ -936,7 +936,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 								const isFuture = isFutureYmd(c.ymd);
 
 								const className = [
-									"jump-users-calendar-cell",
+									"client-users-calendar-cell",
 									isSelectedDay ? "is-selected" : "",
 									hasRecord ? "has-record" : "",
 									missed ? "is-missed" : "",
@@ -1005,31 +1005,31 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	}
 	function renderLeftListMode(): React.ReactNode {
 		return (
-			<div className="jump-users-left-frame">
-				<div className="jump-users-filters">
-					<div className="jump-users-filter-row">
+			<div className="client-users-left-frame">
+				<div className="client-users-filters">
+					<div className="client-users-filter-row">
 						{renderOrgFilter()}
-						<div className="jump-users-filter">
-							<div ref={recordRef} className={`jump-users-org ${recordOpen ? "is-open" : ""}`}>
+						<div className="client-users-filter">
+							<div ref={recordRef} className={`client-users-org ${recordOpen ? "is-open" : ""}`}>
 								<button
 									type="button"
-									className={`jump-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
+									className={`client-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
 									onClick={() => {
 										setRecordOpen((prev) => !prev);
 										setOrgOpen(false);
 									}}
 									aria-label="record status filter"
 								>
-									<img className="jump-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/fe_document-6b.svg" : "/icons/fe_document.svg"} alt="" />
-									<span className="jump-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
-									<img className="jump-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
+									<img className="client-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/fe_document-6b.svg" : "/icons/fe_document.svg"} alt="" />
+									<span className="client-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
+									<img className="client-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
 								</button>
 
 								{recordOpen && (
-									<div className="jump-users-org-menu">
+									<div className="client-users-org-menu">
 										<button
 											type="button"
-											className={`jump-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
+											className={`client-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
 											onClick={() => {
 												setSelectedRecordFilter("ALL");
 												setRecordOpen(false);
@@ -1040,7 +1040,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 										<button
 											type="button"
-											className={`jump-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`}
+											className={`client-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`}
 											onClick={() => {
 												setSelectedRecordFilter("RECORDED");
 												setRecordOpen(false);
@@ -1051,7 +1051,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 										<button
 											type="button"
-											className={`jump-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`}
+											className={`client-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`}
 											onClick={() => {
 												setSelectedRecordFilter("NOT_RECORDED");
 												setRecordOpen(false);
@@ -1065,18 +1065,18 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 						</div>
 					</div>
 
-					<div className={`jump-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
-						<img className="jump-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
-						<input className="jump-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
+					<div className={`client-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
+						<img className="client-users-search-icon" src={!query.trim() ? "/icons/search-6b-01.svg" : "/icons/search-00-01.svg"} alt="" />
+						<input className="client-users-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="검색" aria-label="search" />
 					</div>
 				</div>
 
 				{loading ? (
-					<div className="jump-users-state">불러오는 중...</div>
+					<div className="client-users-state">불러오는 중...</div>
 				) : errorMsg ? (
-					<div className="jump-users-state">{errorMsg}</div>
+					<div className="client-users-state">{errorMsg}</div>
 				) : (
-					<div ref={listRef} className="jump-admin-list" role="list">
+					<div ref={listRef} className="client-admin-list" role="list">
 						{filtered.map((u, idx) => {
 							const isSelected = selectedId === u.userId;
 							const displayName = normalizeText(u.name) || normalizeText(u.nickname) || "-";
@@ -1086,13 +1086,13 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 								<button
 									key={u.userId}
 									type="button"
-									className={isSelected ? "jump-admin-list-item jump-admin-list-item--selected" : "jump-admin-list-item"}
+									className={isSelected ? "client-admin-list-item client-admin-list-item--selected" : "client-admin-list-item"}
 									onClick={() => setSelectedId(u.userId)}
 									role="listitem"
 								>
-									<div className="jump-admin-badge">{idx + 1}</div>
-									<div className="jump-admin-user-name">{displayName}</div>
-									{isJump && (<div className="jump-admin-user-org">{orgName}</div>)}
+									<div className="client-admin-badge">{idx + 1}</div>
+									<div className="client-admin-user-name">{displayName}</div>
+									{isJump && (<div className="client-admin-user-org">{orgName}</div>)}
 								</button>
 							);
 						})}
@@ -1103,28 +1103,28 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	}
 	function renderLeftReportMode(): React.ReactNode {
 		return (
-			<div className="jump-users-left-frame">
-				<button type="button" className="jump-users-back-btn" onClick={handleBackToUserDetail}>
-					<img className="jump-users-back-btn-img" src="/icons/chevron-left-6b.svg" alt="" />
-					<span className="jump-users-back-btn-text">뒤로가기</span>
+			<div className="client-users-left-frame">
+				<button type="button" className="client-users-back-btn" onClick={handleBackToUserDetail}>
+					<img className="client-users-back-btn-img" src="/icons/chevron-left-6b.svg" alt="" />
+					<span className="client-users-back-btn-text">뒤로가기</span>
 				</button>
 
 				{selected ? (
-					<div className="jump-users-selected-card">
-						<div className="jump-users-selected-left">
-							<div className="jump-admin-badge jump-users-selected-badge">
+					<div className="client-users-selected-card">
+						<div className="client-users-selected-left">
+							<div className="client-admin-badge client-users-selected-badge">
 								{getSelectedBadgeNumber() ?? "-"}
 							</div>
-							<div className="jump-users-selected-name">
+							<div className="client-users-selected-name">
 								{normalizeText(selected.name) || "-"}
 							</div>
 						</div>
 
-						{isJump && (<div className="jump-users-selected-org">{getOrgName(selected)}</div>)}
+						{isJump && (<div className="client-users-selected-org">{getOrgName(selected)}</div>)}
 					</div>
 				) : null}
 
-				<div className="jump-users-calendar-card">
+				<div className="client-users-calendar-card">
 					{renderCalendar()}
 				</div>
 			</div>
@@ -1138,25 +1138,25 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		if (rightView === "USER_DETAIL") {
 			if (!selected) {
 				return (
-					<div className="jump-users-empty">
+					<div className="client-users-empty">
 						<img src="/internie_mascot_normal.png" alt="" />
-						<span className="jump-users-empty-title">학생을 선택해주세요!</span>
+						<span className="client-users-empty-title">학생을 선택해주세요!</span>
 					</div>
 				);
 			}
 
 			return (
-				<div className="jump-users-detail">
-					<div className="jump-users-detail-head">
-						<div className="jump-users-detail-title">
-							<span className="jump-users-name-strong">
+				<div className="client-users-detail">
+					<div className="client-users-detail-head">
+						<div className="client-users-detail-title">
+							<span className="client-users-name-strong">
 								{normalizeText(selected.name) || "-"}
 							</span>
-							<span className="jump-users-name">님</span>
+							<span className="client-users-name">님</span>
 						</div>
 						<button
 							type="button"
-							className="jump-users-trash"
+							className="client-users-trash"
 							aria-label="delete"
 							onClick={() => {
 								setDeleteError(null);
@@ -1167,50 +1167,50 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 						</button>
 					</div>
 
-					<div className="jump-users-info">
+					<div className="client-users-info">
 						{isJump ? (
 							<>
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">소속</div>
-									<div className="jump-users-info-value">{getSchoolName(selected)}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">소속</div>
+									<div className="client-users-info-value">{getSchoolName(selected)}</div>
 								</div>
 
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">센터</div>
-									<div className="jump-users-info-value">{getOrgName(selected)}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">센터</div>
+									<div className="client-users-info-value">{getOrgName(selected)}</div>
 								</div>
 
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">봉사 일시</div>
-									<div className="jump-users-info-value">{volunteerTimeText}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">봉사 일시</div>
+									<div className="client-users-info-value">{volunteerTimeText}</div>
 								</div>
 
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">기록 수</div>
-									<div className="jump-users-info-value">{recordCountText}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">기록 수</div>
+									<div className="client-users-info-value">{recordCountText}</div>
 								</div>
 
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">미기록 수</div>
-									<div className="jump-users-info-value">{unrecordedCountText}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">미기록 수</div>
+									<div className="client-users-info-value">{unrecordedCountText}</div>
 								</div>
 							</>
 						) : (
 							<>
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">학번</div>
-									<div className="jump-users-info-value">{selected.studentNumber || "-"}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">학번</div>
+									<div className="client-users-info-value">{selected.studentNumber || "-"}</div>
 								</div>
 
-								<div className="jump-users-info-row">
-									<div className="jump-users-info-label">기록 수</div>
-									<div className="jump-users-info-value">{recordCountText}</div>
+								<div className="client-users-info-row">
+									<div className="client-users-info-label">기록 수</div>
+									<div className="client-users-info-value">{recordCountText}</div>
 								</div>
 							</>
 						)}
 					</div>
 
-					<button type="button" className="jump-users-record-btn" onClick={handleClickRecordView}>
+					<button type="button" className="client-users-record-btn" onClick={handleClickRecordView}>
 						기록 보기
 					</button>
 				</div>
@@ -1229,24 +1229,24 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 					: 0;
 
 			return (
-				<div className="jump-users-report-home">
-					<button type="button" className="jump-users-kpi-card" disabled={!selected}>
-						<div className="jump-users-kpi-label">전체 기록 수</div>
-						<div className="jump-users-kpi-bottom">
-							<div className="jump-users-kpi-value">
+				<div className="client-users-report-home">
+					<button type="button" className="client-users-kpi-card" disabled={!selected}>
+						<div className="client-users-kpi-label">전체 기록 수</div>
+						<div className="client-users-kpi-bottom">
+							<div className="client-users-kpi-value">
 								{totalRecordCountLoading ? "-" : `${totalCount}건`}
 							</div>
-							<img className="jump-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
+							<img className="client-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
 						</div>
 					</button>
 
-					<button type="button" className="jump-users-kpi-card" disabled={!selected}>
-						<div className="jump-users-kpi-label">주간 기록 수</div>
-						<div className="jump-users-kpi-bottom">
-							<div className="jump-users-kpi-value">
+					<button type="button" className="client-users-kpi-card" disabled={!selected}>
+						<div className="client-users-kpi-label">주간 기록 수</div>
+						<div className="client-users-kpi-bottom">
+							<div className="client-users-kpi-value">
 								{calendarLoading ? "-" : `${weekCount}건`}
 							</div>
-							<img className="jump-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
+							<img className="client-users-kpi-arrow" src="/icons/chevron-right.svg" alt="" />
 						</div>
 					</button>
 				</div>
@@ -1274,20 +1274,20 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		const md = formatKoMonthDay(selectedYmd);
 
 		return (
-			<div className="jump-users-report-day">
-				<div className="jump-users-report-day-title">
+			<div className="client-users-report-day">
+				<div className="client-users-report-day-title">
 					{md}에 <strong>{ids.length}개</strong>의 기록이 있어요
 				</div>
 
-				<div className="jump-users-report-day-list">
+				<div className="client-users-report-day-list">
 					{ids.map((id, idx) => {
 						const title = getRecordTitleFromCache(id);
 						const label = title || `기록명${idx + 1}`; // 로딩 전/실패 시 fallback
 
 						return (
-							<button key={id} type="button" className="jump-users-report-day-item" onClick={() => handleOpenRecord(id)} >
-								<span className="jump-users-report-day-item-text">{label}</span>
-								<img className="jump-users-report-day-item-arrow" src="/icons/chevron-right.svg" alt="" />
+							<button key={id} type="button" className="client-users-report-day-item" onClick={() => handleOpenRecord(id)} >
+								<span className="client-users-report-day-item-text">{label}</span>
+								<img className="client-users-report-day-item-arrow" src="/icons/chevron-right.svg" alt="" />
 							</button>
 						);
 					})}
@@ -1325,11 +1325,11 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		const recordTitle = getRecordTitleFromCache(selectedEventDayId) || "기록";
 
 		return (
-			<div className="jump-report-detail">
-				<div className="jump-report-detail-head">
+			<div className="client-report-detail">
+				<div className="client-report-detail-head">
 					<button
 						type="button"
-						className="jump-report-back"
+						className="client-report-back"
 						onClick={() => {
 							setNavDir("back");
 							setRightView("REPORT_DAY");
@@ -1339,10 +1339,10 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 						<img src="/icons/jump-admin-back.svg" alt="" />
 					</button>
 
-					<div className="jump-report-detail-title">{recordTitle}</div>
+					<div className="client-report-detail-title">{recordTitle}</div>
 				</div>
 
-				<div className="jump-report-qwrap">
+				<div className="client-report-qwrap">
 					<button
 						type="button"
 						onClick={() => {
@@ -1350,7 +1350,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 							setQDir("back");
 							setQIndex((prev) => Math.max(0, prev - 1));
 						}}
-						className="jump-report-qwrap-prev-btn"
+						className="client-report-qwrap-prev-btn"
 						aria-label="prev question"
 						disabled={isFirst}
 						aria-disabled={isFirst}
@@ -1358,9 +1358,9 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 						<img src="/icons/chevron-left.svg" alt="" />
 					</button>
 
-					<div key={qKey} className={`jump-report-qswap jump-report-qswap--${qDir}`}>
-						<div className="jump-report-q">{`Q. ${qText || "-"}`}</div>
-						<div className="jump-report-a">{answerText || "-"}</div>
+					<div key={qKey} className={`client-report-qswap client-report-qswap--${qDir}`}>
+						<div className="client-report-q">{`Q. ${qText || "-"}`}</div>
+						<div className="client-report-a">{answerText || "-"}</div>
 					</div>
 
 					<button
@@ -1370,7 +1370,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 							setQDir("forward");
 							setQIndex((prev) => Math.min(qs.length - 1, prev + 1));
 						}}
-						className="jump-report-qwrap-next-btn"
+						className="client-report-qwrap-next-btn"
 						aria-label="next question"
 						disabled={isLast}
 						aria-disabled={isLast}
@@ -1383,24 +1383,24 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	}
 
     return (
-		<div className="jump-users-page">
+		<div className="client-users-page">
 			{/* 학생 삭제 모달 */}
 			{deleteOpen && (
-				<div className="jump-users-modal-dim" role="dialog" aria-modal="true">
-					<div className="jump-users-modal">
-						<div className="jump-users-modal-title">학생을 삭제하시겠습니까?</div>
-						<div className="jump-users-modal-desc">
+				<div className="client-users-modal-dim" role="dialog" aria-modal="true">
+					<div className="client-users-modal">
+						<div className="client-users-modal-title">학생을 삭제하시겠습니까?</div>
+						<div className="client-users-modal-desc">
 							삭제 후에는 복구할 수 없습니다.
 						</div>
 
 						{deleteError && (
-							<div className="jump-users-modal-error">{deleteError}</div>
+							<div className="client-users-modal-error">{deleteError}</div>
 						)}
 
-						<div className="jump-users-modal-actions">
+						<div className="client-users-modal-actions">
 							<button
 								type="button"
-								className="jump-users-modal-btn is-cancel"
+								className="client-users-modal-btn is-cancel"
 								onClick={() => {
 									if (deleteLoading) return;
 									setDeleteOpen(false);
@@ -1412,7 +1412,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 							<button
 								type="button"
-								className="jump-users-modal-btn is-danger"
+								className="client-users-modal-btn is-danger"
 								onClick={handleConfirmDelete}
 								disabled={deleteLoading}
 							>
@@ -1424,28 +1424,28 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 			)}
 
 			{/* HEAD */}
-			<div className="jump-admin-section-head">
-				<div className={`jump-admin-section-title-wrap ${clientType === "kakao" ? "is-kakao" : ""}`}>
-					<div className="jump-admin-section-title-badge">
+			<div className="client-admin-section-head">
+				<div className={`client-admin-section-title-wrap ${clientType === "kakao" ? "is-kakao" : ""}`}>
+					<div className="client-admin-section-title-badge">
 						<img src={config.logo} alt="" /> {clientType === "kakao" && ( <img src="/logos/ewhaWU-ko-logo.png" alt="" /> )}
 					</div>
-					<div className="jump-admin-section-title">{config.title}</div>
+					<div className="client-admin-section-title">{config.title}</div>
 				</div>
 			</div>
 
 			{/* GRID */}
-			<div className="jump-admin-grid">
+			<div className="client-admin-grid">
 				{/* LEFT CARD */}
-				<section className="jump-users-left-card">
-					<div key={isReportMode ? "report" : "list"} className="jump-users-left-swap">
+				<section className="client-users-left-card">
+					<div key={isReportMode ? "report" : "list"} className="client-users-left-swap">
 						{isReportMode ? renderLeftReportMode() : renderLeftListMode()}
 					</div>
 				</section>
 
 				{/* RIGHT CARD */}
-				<section className="jump-users-right-card">
-					<div className={`jump-users-detail-card jump-users-detail-card--${rightView}`}>
-						<div key={rightKey} className={`jump-users-swap jump-users-swap--${navDir}`}>
+				<section className="client-users-right-card">
+					<div className={`client-users-detail-card client-users-detail-card--${rightView}`}>
+						<div key={rightKey} className={`client-users-swap client-users-swap--${navDir}`}>
 							{renderRightContent()}
 						</div>
 					</div>

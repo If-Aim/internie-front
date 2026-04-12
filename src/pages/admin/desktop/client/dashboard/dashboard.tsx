@@ -1,9 +1,9 @@
-// src/pages/admin/desktop/jump/dashboard/dashboard.tsx
+// src/pages/admin/desktop/client/dashboard/dashboard.tsx
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, type ClientAdminStudent, type ClientAdminStudentCalendarResponse, type ClientType, getClientAdminStudents, getClientAdminStudentCalendar, getClientAdminStudentRecordCount } from "../../../../../api/client"; 
 import "./dashboard.css";
-import "../jumpAdmin.css"
+import "../clientAdmin.css"
 
 type WeekDay = {
     y: number;
@@ -146,7 +146,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     }, [clientType, navigate]);
 
     if (!clientType) {
-        return <div className="jump-users-state">잘못된 관리자 경로입니다.</div>;
+        return <div className="client-users-state">잘못된 관리자 경로입니다.</div>;
     }
 
     React.useEffect(() => {
@@ -245,22 +245,22 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     function renderOrgFilter() {
         if (!isJump) return null;
         return (
-            <div className="jump-dashboard-week-right">
-                <div ref={orgRef} className={`jump-dashboard-org ${open ? "is-open" : ""}`}>
-                    <button type="button" className={`jump-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
-                        <img className="jump-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
-                        <span className={ selectedOrg ? "jump-dashboard-org-text is-selected" : "jump-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
+            <div className="client-dashboard-week-right">
+                <div ref={orgRef} className={`client-dashboard-org ${open ? "is-open" : ""}`}>
+                    <button type="button" className={`client-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
+                        <img className="client-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
+                        <span className={ selectedOrg ? "client-dashboard-org-text is-selected" : "client-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
                         <img className="org-arrow" src={!selectedOrg ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
                     </button>
 
                     {open && (
-                        <div className="jump-dashboard-org-menu">
-                            <button className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
+                        <div className="client-dashboard-org-menu">
+                            <button className="client-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
                                 전체
                             </button>
 
                             {orgOptions.map((org) => (
-                                <button key={org} className="jump-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
+                                <button key={org} className="client-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
                                     {org}
                                 </button>
                             ))}
@@ -412,55 +412,55 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     }
 
     return (
-        <div className="jump-dashboard">
-            <div className="jump-dashboard-head">
-                <div className={`jump-dashboard-title ${clientType === "kakao" ? "is-kakao" : ""}`}>
-                    <div className="jump-dashboard-title-badge"><img src={config.logo}/>{clientType === "kakao" && (<img src="/logos/ewhaWU-ko-logo.png"/>)}</div>
-                    <div className="jump-dashboard-title-main">{config.title}</div>
+        <div className="client-dashboard">
+            <div className="client-dashboard-head">
+                <div className={`client-dashboard-title ${clientType === "kakao" ? "is-kakao" : ""}`}>
+                    <div className="client-dashboard-title-badge"><img src={config.logo}/>{clientType === "kakao" && (<img src="/logos/ewhaWU-ko-logo.png"/>)}</div>
+                    <div className="client-dashboard-title-main">{config.title}</div>
                 </div>
 
-                <div className="jump-dashboard-kpis">
-                    <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">전체 참여자 수</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.totalParticipants}명</div>
+                <div className="client-dashboard-kpis">
+                    <button type="button" className="client-dashboard-kpi">
+                        <div className="client-dashboard-kpi-label">전체 참여자 수</div>
+                        <div className="client-dashboard-kpi-value">{kpi.totalParticipants}명</div>
                     </button>
 
-                    <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">이번 달 기록 현황</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.monthRecordedCount}건</div>
+                    <button type="button" className="client-dashboard-kpi">
+                        <div className="client-dashboard-kpi-label">이번 달 기록 현황</div>
+                        <div className="client-dashboard-kpi-value">{kpi.monthRecordedCount}건</div>
                     </button>
 
-                    <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">이번 주 기록 현황</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.weekRecordedCount}건</div>
+                    <button type="button" className="client-dashboard-kpi">
+                        <div className="client-dashboard-kpi-label">이번 주 기록 현황</div>
+                        <div className="client-dashboard-kpi-value">{kpi.weekRecordedCount}건</div>
                     </button>
 
                     {isJump && (
-                    <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">이번 주 미기록 현황</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.weekNotRecordedCells}건</div>
+                    <button type="button" className="client-dashboard-kpi">
+                        <div className="client-dashboard-kpi-label">이번 주 미기록 현황</div>
+                        <div className="client-dashboard-kpi-value">{kpi.weekNotRecordedCells}건</div>
                     </button>
                     )}
                     
                     {isKakao && (
-                    <button type="button" className="jump-dashboard-kpi">
-                        <div className="jump-dashboard-kpi-label">과제 완료</div>
-                        <div className="jump-dashboard-kpi-value">{kpi.overFiveRecorededStudents}건</div>
+                    <button type="button" className="client-dashboard-kpi">
+                        <div className="client-dashboard-kpi-label">과제 완료</div>
+                        <div className="client-dashboard-kpi-value">{kpi.overFiveRecorededStudents}건</div>
                     </button>
                     )}
                     
                 </div>
             </div>
 
-            <div className="jump-dashboard-week-card">
-                <div className="jump-dashboard-week-head">
-                    <div className="jump-dashboard-week-left">
-                        <div className="jump-dashboard-week-label">{getWeekLabel(weekStart)}</div>
-                        <div className="jump-dashboard-week-nav">
-                            <button type="button" className="jump-dashboard-week-navbtn" onClick={goPrevWeek} aria-label="prev week">
+            <div className="client-dashboard-week-card">
+                <div className="client-dashboard-week-head">
+                    <div className="client-dashboard-week-left">
+                        <div className="client-dashboard-week-label">{getWeekLabel(weekStart)}</div>
+                        <div className="client-dashboard-week-nav">
+                            <button type="button" className="client-dashboard-week-navbtn" onClick={goPrevWeek} aria-label="prev week">
                                 <img src="/icons/chevron-left.svg" alt="" />
                             </button>
-                            <button type="button" className="jump-dashboard-week-navbtn" onClick={goNextWeek} aria-label="next week">
+                            <button type="button" className="client-dashboard-week-navbtn" onClick={goNextWeek} aria-label="next week">
                                 <img className="next-week" src="/icons/chevron-right.svg" alt="" />
                             </button>
                         </div>
@@ -470,17 +470,17 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                     
                 </div>
 
-                <div className="jump-dashboard-week-grid">
-                    <div className="jump-dashboard-week-grid-head">
-                        <div className="jump-dashboard-week-grid-spacer" />
-                        <div className="jump-dashboard-week-days">
+                <div className="client-dashboard-week-grid">
+                    <div className="client-dashboard-week-grid-head">
+                        <div className="client-dashboard-week-grid-spacer" />
+                        <div className="client-dashboard-week-days">
                             {weekDays.map((d) => (
                                 <div
                                     key={d.ymd}
                                     className={
                                         isToday(d.ymd)
-                                            ? "jump-dashboard-week-day jump-dashboard-week-day--today"
-                                            : "jump-dashboard-week-day"
+                                            ? "client-dashboard-week-day client-dashboard-week-day--today"
+                                            : "client-dashboard-week-day"
                                     }
                                 >
                                     {d.labelKo}
@@ -489,21 +489,21 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                         </div>
                     </div>
 
-                    <div className="jump-dashboard-week-rows">
+                    <div className="client-dashboard-week-rows">
                         {loading ? (
-                            <div className="jump-dashboard-loading">로딩 중...</div>
+                            <div className="client-dashboard-loading">로딩 중...</div>
                         ) : visibleStudents.length === 0 ? (
-                            <div className="jump-dashboard-loading">표시할 참가자가 없습니다.</div>
+                            <div className="client-dashboard-loading">표시할 참가자가 없습니다.</div>
                         ) : (
                             visibleStudents.map((s) => (
-                                <div key={s.userId} className="jump-dashboard-week-row">
-                                    <div className="jump-dashboard-student">
-                                        <div className="jump-dashboard-student-name">{s.name}</div>
-                                        {isJump&&(<div className="jump-dashboard-student-org">{getOrgName(s) || "-"}</div>)}
-                                        {isKakao&&(<div className="jump-dashboard-student-org">{s.studentNumber || "-"}</div>)}
+                                <div key={s.userId} className="client-dashboard-week-row">
+                                    <div className="client-dashboard-student">
+                                        <div className="client-dashboard-student-name">{s.name}</div>
+                                        {isJump&&(<div className="client-dashboard-student-org">{getOrgName(s) || "-"}</div>)}
+                                        {isKakao&&(<div className="client-dashboard-student-org">{s.studentNumber || "-"}</div>)}
                                     </div>
 
-                                    <div className="jump-dashboard-cells">
+                                    <div className="client-dashboard-cells">
                                         {weekDays.map((d) => {
                                             const cnt = findDailyEventCount(s.userId, d.ymd);
                                             const has = cnt > 0;
@@ -511,7 +511,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                                             return (
                                                 <div
                                                     key={`${s.userId}-${d.ymd}`}
-                                                    className={has ? "jump-dashboard-cell jump-dashboard-cell--on" : "jump-dashboard-cell"}
+                                                    className={has ? "client-dashboard-cell client-dashboard-cell--on" : "client-dashboard-cell"}
                                                     title={has ? `${d.ymd} (${cnt}건)` : d.ymd}
                                                 />
                                             );

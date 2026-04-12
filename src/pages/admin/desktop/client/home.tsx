@@ -1,9 +1,9 @@
-// src/pages/admin/desktop/jump/home.tsx
+// src/pages/admin/desktop/client/home.tsx
 // 점프 관리자 페이지 메인 (PC)
 import React from "react";
 import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import { ApiError, getUserMe, type UserMe } from "../../../../api/client";
-import "./jumpAdmin.css";
+import "./clientAdmin.css";
 
 function getDisplayAdminName(me: UserMe | null): string {
 	if (!me) return "관리자";
@@ -56,30 +56,30 @@ export default function JumpAdminHome(): React.ReactElement {
 		: (me?.profileImage ?? "/internie_mascot_normal.png");
 
 	return (
-		<div className={isReportsPage ? "jump-admin-page jump-admin-page--reports" : "jump-admin-page"}>
-			<div className={isReportsPage ? "jump-report-scroll" : undefined}>
-				<div className={isReportsPage ? "jump-report-scroll-inner" : undefined}>
-					<header className="jump-admin-topbar">
-						<div className="jump-admin-topbar-left">
-							<a href="https://www.internie.com/student" rel="noopener noreferrer"><img className="jump-admin-logo" src="/logos/internie_Logo_thin.png" alt="internie" /></a>
+		<div className={isReportsPage ? "client-admin-page client-admin-page--reports" : "client-admin-page"}>
+			<div className={isReportsPage ? "client-report-scroll" : undefined}>
+				<div className={isReportsPage ? "client-report-scroll-inner" : undefined}>
+					<header className="client-admin-topbar">
+						<div className="client-admin-topbar-left">
+							<a href="https://www.internie.com/student" rel="noopener noreferrer"><img className="client-admin-logo" src="/logos/internie_Logo_thin.png" alt="internie" /></a>
 						</div>
 
-						<nav className="jump-admin-topbar-tabs" aria-label="admin tabs">
+						<nav className="client-admin-topbar-tabs" aria-label="admin tabs">
 							<NavLink
 								to={`${basePath}/dashboard`}
-								className={({ isActive }) => (isActive ? "jump-admin-tab jump-admin-tab--active" : "jump-admin-tab")}
+								className={({ isActive }) => (isActive ? "client-admin-tab client-admin-tab--active" : "client-admin-tab")}
 							>
 								<span>대시보드</span>
 							</NavLink>
 							<NavLink
 								to={`${basePath}/analysis`}
-								className={({ isActive }) => (isActive ? "jump-admin-tab jump-admin-tab--active" : "jump-admin-tab")}
+								className={({ isActive }) => (isActive ? "client-admin-tab client-admin-tab--active" : "client-admin-tab")}
 							>
 								<span>참가자 관리</span>
 							</NavLink>
 							<NavLink
 								to={`${basePath}/analysis`}// 추후 변경
-								className="jump-admin-tab jump-admin-tab--disabled"
+								className="client-admin-tab client-admin-tab--disabled"
 								onClick={(e) => {
 								e.preventDefault(); 
 								alert("서비스 준비중입니다.");
@@ -89,15 +89,15 @@ export default function JumpAdminHome(): React.ReactElement {
 							</NavLink>
 						</nav>
 
-						<div className="jump-admin-topbar-right">
-							<span className="jump-admin-name">관리자 {adminName}님</span>
+						<div className="client-admin-topbar-right">
+							<span className="client-admin-name">관리자 {adminName}님</span>
 
-							<img className="jump-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
+							<img className="client-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
 						</div>
 					</header>
 
-					<div className="jump-admin-body">
-						<div className="jump-admin-surface">
+					<div className="client-admin-body">
+						<div className="client-admin-surface">
 							<Outlet />
 						</div>
 					</div>

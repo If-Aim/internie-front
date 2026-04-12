@@ -1,4 +1,4 @@
-// src/pages/admin/desktop/jump/jumpAdminApp.tsx
+// src/pages/admin/desktop/client/clientAdminApp.tsx
 // 관리자화면 라우트
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";

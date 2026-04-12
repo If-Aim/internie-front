@@ -12,7 +12,7 @@ const OnBoarding = lazy(() => import("./pages/login/mobile/onBoarding"));
 
 const StudentApp = lazy(() => import("./pages/student/studentApp"));
 const AdminApp = lazy(() => import("./pages/admin/adminApp"));
-const ClientAdminApp = lazy(() => import("./pages/admin/desktop/jump/clientAdminApp"));
+const ClientAdminApp = lazy(() => import("./pages/admin/desktop/client/clientAdminApp"));
 
 export default function App(): React.ReactElement {
 	return (
