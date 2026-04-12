@@ -49,6 +49,7 @@ export default function MyPage({ onLogout }: Props) {
 	const status = (me?.status ?? "UNVERIFIED") as VerifyStatus;
 	const [showRejectModal, setShowRejectModal] = React.useState(false);
 	const schoolName = (me?.school?.name ?? "").trim();
+	const rejectReasonText = (me?.rejectionReason ?? "").trim();
 
 	const verifyUi = (() => {
 		switch (status) {
@@ -233,7 +234,7 @@ export default function MyPage({ onLogout }: Props) {
 							${status === "PENDING" ? "is-pending" : ""} 
 							${status === "REJECTED" ? "is-rejected" : ""}
 						`}
-						onClick={handleServicePreparing}
+						onClick={verifyUi.onClick}
 						disabled={verifyUi.disabled}
 					>
 						<span className="mypage-badge" />
@@ -301,7 +302,7 @@ export default function MyPage({ onLogout }: Props) {
 
 						<div className="mypage-modal-body">
 							<span className="mypage-modal-title">{t("mypage_modal.title")}</span>
-							<span className="mypage-modal-reason">사유:<br/>정보 미제거, 학생증 판별 불가</span> {/* 추후 사유 노출 수정 */}
+							<span className="mypage-modal-reason">사유:<br/>{rejectReasonText}</span> {/* 추후 사유 노출 수정 */}
 						</div>
 						<button type="button" className="mypage-modal-primary" onClick={goReVerify} >
 							{t("mypage_modal.reVerify")}

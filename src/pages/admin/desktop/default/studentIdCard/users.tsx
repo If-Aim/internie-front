@@ -56,15 +56,16 @@ export default function AdminUsersPage(): React.ReactElement {
 		() => users.find((u) => u.userId === selectedId) ?? null,
 		[users, selectedId]
 	);
-
+	
+	// 학생증 인증관련
 	const [verificationUrl, setVerificationUrl] = React.useState<string>("");
 	const [verificationLoading, setVerificationLoading] = React.useState(false);
 	const [verificationError, setVerificationError] = React.useState<string | null>(null);
+	const [showRejectModal, setShowRejectModal] = React.useState(false);
+	const [modalRejectReasonType, setModalRejectReasonType] = React.useState<string>(REJECT_REASON_OPTIONS[0]);
+	const [modalCustomRejectReason, setModalCustomRejectReason] = React.useState("");
+
 	const [isCaptain, setIsCaptain] = React.useState(false);
-
-	const [rejectReasonType, setRejectReasonType] = React.useState<string>(REJECT_REASON_OPTIONS[0]);
-	const [customRejectReason, setCustomRejectReason] = React.useState("");
-
 	const [roleLoading, setRoleLoading] = React.useState(false);
 	const [selectedAdminRole, setSelectedAdminRole] = React.useState<GrantableAdminRole>("ROLE_ADMIN");
 
@@ -187,13 +188,28 @@ export default function AdminUsersPage(): React.ReactElement {
 	};
 
 	const rejectReason = React.useMemo(() => { // 거절 사유 문자열 계산
-		if (rejectReasonType === "직접 입력") {
-			return customRejectReason.trim();
+		if (modalRejectReasonType === "직접 입력") {
+			return modalCustomRejectReason.trim();
 		}
-		return rejectReasonType;
-	}, [rejectReasonType, customRejectReason]);
+		return modalRejectReasonType;
+	}, [modalRejectReasonType, modalCustomRejectReason]);
 
-	const handleReject = async () => {
+	const openRejectModal = () => {
+		if (!selectedUser) return;
+		if (actionLoading) return;
+		if (selectedUser.status !== "PENDING") return;
+
+		setModalRejectReasonType(REJECT_REASON_OPTIONS[0]);
+		setModalCustomRejectReason("");
+		setShowRejectModal(true);
+	};
+
+	const closeRejectModal = () => {
+		if (actionLoading) return;
+		setShowRejectModal(false);
+	};
+
+	const submitReject = async () => {
 		if (!selectedUser) return;
 		if (actionLoading) return;
 		if (selectedUser.status !== "PENDING") return;
@@ -207,6 +223,7 @@ export default function AdminUsersPage(): React.ReactElement {
 		try {
 			const updated = await rejectAdminUser(selectedUser.userId, { reason: rejectReason });
 			patchUserInList(updated);
+			setShowRejectModal(false);
 		} catch (e) {
 			if (e instanceof ApiError) {
 				if (e.status === 404) alert("사용자를 찾을 수 없습니다.");
@@ -324,39 +341,66 @@ export default function AdminUsersPage(): React.ReactElement {
 						</div>
 
 						<div className="admin-detail-actions">
-							<div className="admin-reject-reason-box">
-								<div className="admin-reject-reason-title">거절 사유</div>
-
-								<select
-									className="admin-select"
-									value={rejectReasonType}
-									onChange={(e) => setRejectReasonType(e.target.value)}
-									disabled={actionLoading}
-								>
-									{REJECT_REASON_OPTIONS.map((opt) => (
-										<option key={opt} value={opt}>{opt}</option>
-									))}
-								</select>
-
-								{rejectReasonType === "직접 입력" && (
-									<textarea
-										className="admin-textarea"
-										value={customRejectReason}
-										onChange={(e) => setCustomRejectReason(e.target.value)}
-										placeholder="거절 사유를 입력해주세요."
-										rows={4}
-									/>
-								)}
-							</div>
-							<button className="admin-btn admin-btn--ghost" type="button" onClick={handleReject} disabled={actionLoading} > 
+							<button className="admin-btn admin-btn--ghost" type="button" onClick={openRejectModal} disabled={actionLoading}>
 								{actionLoading ? "처리 중…" : "거절"}
 							</button>
-							<button className="admin-btn admin-btn--primary" type="button" onClick={handleApprove} disabled={actionLoading} >
+							<button className="admin-btn admin-btn--primary" type="button" onClick={handleApprove} disabled={actionLoading}>
 								{actionLoading ? "처리 중…" : "승인"}
 							</button>
 						</div>
+						
+						{showRejectModal && ( // 학생증 인증 거절 사유 입력 모달
+							<div className="reject-modal-backdrop" role="presentation">
+								<div className="reject-modal" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+									<button type="button" className="reject-modal-close" aria-label="닫기" onClick={closeRejectModal}>
+										<img src="/icons/x-01.svg" alt="" />
+									</button>
 
-						{isCaptain && selectedUser && (
+									<div className="reject-modal-title" id="reject-modal-title">거절 사유를 선택하세요</div>
+									<div className="reject-modal-subtitle">학생에게 전달될 거절 사유를 선택하거나 직접 입력해주세요</div>
+
+									<div className="reject-modal-options">
+										{REJECT_REASON_OPTIONS.map((opt) => {
+											const checked = modalRejectReasonType === opt;
+											return (
+												<label key={opt} className={`reject-option ${checked ? "is-selected" : ""}`}>
+													<input
+														type="radio"
+														name="rejectReason"
+														value={opt}
+														checked={checked}
+														onChange={(e) => setModalRejectReasonType(e.target.value)}
+													/>
+													<span className="reject-option-radio" />
+													<span className="reject-option-text">{opt}</span>
+												</label>
+											);
+										})}
+									</div>
+
+									{modalRejectReasonType === "직접 입력" && (
+										<textarea
+											className="reject-modal-textarea"
+											value={modalCustomRejectReason}
+											onChange={(e) => setModalCustomRejectReason(e.target.value)}
+											placeholder="거절 사유를 상세히 입력해주세요."
+											rows={4}
+										/>
+									)}
+
+									<div className="reject-modal-actions">
+										<button type="button" className="reject-modal-btn reject-modal-btn-cancel" onClick={closeRejectModal} disabled={actionLoading}>
+											취소
+										</button>
+										<button type="button" className="reject-modal-btn reject-modal-btn-submit" onClick={submitReject} disabled={actionLoading}>
+											{actionLoading ? "처리 중…" : "전송하기"}
+										</button>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{isCaptain && selectedUser && (  // CAP 전용
 							<div className="admin-role-box">
 								<div className="admin-reject-reason-title">관리자 권한 설정</div>
 
