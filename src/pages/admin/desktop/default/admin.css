@@ -1,6 +1,9 @@
 /* src/pages/admin/desktop/default/admin.css */
-.admin-page{min-height: 100vh;background: var(--bg);color: #000;display: flex;flex-direction: column;}
-
+.admin-page{min-height: 100vh;background: var(--bg);color: #000;display: flex;flex-direction: column; }
+#root:has(.admin-page) {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
 /* ===== Topbar ===== */
 .admin-topbar{height: 90px;background: #fff;display: grid;grid-template-columns: 1fr auto 1fr;align-items: center;padding: 0 40px;border-bottom: 1px solid var(--line);box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);}
 .admin-topbar-left{display:flex;align-items:center;gap: 12px;}
