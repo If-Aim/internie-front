@@ -122,9 +122,9 @@ position: absolute;top: 50%;transform: translateY(-50%);display: flex;align-item
 .client-dashboard-org-text.is-selected {color: #000000;}
 
 .client-dashboard-week-grid { --student-col: minmax(472px, 1fr); --grid-col: minmax(300px, 1fr); --day-size: 40px; --day-gap: clamp(12px, 1.8vw, 28px); display: flex; flex-direction: column; gap: 12px; }
-.client-dashboard-week-grid-head { display: grid; grid-template-columns: var(--student-col) var(--grid-col); align-items: end; column-gap: clamp(20px, 2.4vw, 48px); padding: 0; }
+.client-dashboard-week-grid-head { display: grid; grid-template-columns: var(--student-col) var(--grid-col); align-items: end; column-gap: clamp(20px, 2.3vw, 48px); padding: 0; }
 .client-dashboard-week-grid-spacer { height: 1px; }
-.client-dashboard-week-days { display: grid; grid-template-columns: repeat(7, var(--day-size)); justify-content: space-between; align-items: center; color: #979797; font-weight: 700; line-height: 20px; }
+.client-dashboard-week-days { display: grid; grid-template-columns: repeat(7, var(--day-size)); justify-content: space-between; align-items: center; color: #979797; font-weight: 700; line-height: 20px; padding-right: 8px;}
 .client-dashboard-week-day { width: var(--day-size); height: 35px; font-size: 12px; display: flex; align-items: center; justify-content: center; text-align: center; }
 .client-dashboard-week-day--today { background: #BDD8FF; border-radius: 6px; color: #000; }
 
