@@ -67,31 +67,37 @@ function isToday(ymd: string) {
     return ymd === today;
 }
 
-function firstMondayOfMonth(y: number, m: number) {
-    const d = new Date(y, m - 1, 1); 
-    const jsDow = d.getDay();
-    const offset = (1 - jsDow + 7) % 7; 
-    d.setDate(d.getDate() + offset);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
+function getWeekLabelByDate(baseDate: Date) {
+    const normalized = new Date(baseDate);
+    normalized.setHours(0, 0, 0, 0);
 
-function getWeekLabel(weekStartMonday: Date) {
-    const y = weekStartMonday.getFullYear();
-    const m = weekStartMonday.getMonth() + 1;
+    const y = normalized.getFullYear();
+    const m = normalized.getMonth() + 1;
 
-    const firstMon = firstMondayOfMonth(y, m);
+    const firstDay = new Date(y, m - 1, 1);
+    firstDay.setHours(0, 0, 0, 0);
+
+    const firstWeekStart = startOfWeekMonday(firstDay);
+    const currentWeekStart = startOfWeekMonday(normalized);
+
     const msDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.floor(
+        (currentWeekStart.getTime() - firstWeekStart.getTime()) / msDay
+    );
 
-    const diffDays = Math.floor((weekStartMonday.getTime() - firstMon.getTime()) / msDay);
-
-    const weekNo = diffDays < 0 ? 1 : Math.floor(diffDays / 7) + 1;
+    const weekNo = Math.floor(diffDays / 7) + 1;
 
     return `${y}년 ${m}월 ${weekNo}주차`;
 }
 
 function getOrgName(u: ClientAdminStudent) {
     return (u.jumpOrganization?.name ?? "").trim();
+}
+
+function getAssignmentFilterLabel(value: "ALL" | "COMPLETED" | "INCOMPLETE") {
+    if (value === "COMPLETED") return "과제 완료";
+    if (value === "INCOMPLETE") return "과제 미완료";
+    return "전체";
 }
 
 function getClientConfig(clientType: ClientType | null) { // client별 title, logo분기
@@ -125,11 +131,15 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     const [recordCountMap, setRecordCountMap] = React.useState<Record<number, number>>({});
 
     const [selectedOrg, setSelectedOrg] = React.useState<string>("");
+    const [selectedAssignment, setSelectedAssignment] = React.useState<"ALL" | "COMPLETED" | "INCOMPLETE">("ALL");
 
-    const [weekAnchor, setWeekAnchor] = React.useState<Date>(() => new Date());
+    const [weekAnchor, setWeekAnchor] = React.useState<Date>(() => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        return now;
+    });
     const [open, setOpen] = React.useState(false);
 
-    const weekStart = React.useMemo(() => startOfWeekMonday(weekAnchor), [weekAnchor]);
     const weekDays = React.useMemo(() => getWeekDays(weekAnchor), [weekAnchor]);
 
     const [calCache, setCalCache] = React.useState<Record<string, ClientAdminStudentCalendarResponse>>({});
@@ -223,12 +233,25 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     }, [students, isJump]);
 
     const visibleStudents = React.useMemo(() => {
-        if (!isJump) return students;
+        let next = students;
 
-        const org = selectedOrg.trim();
-        if (!org) return students;
-        return students.filter((s) => getOrgName(s) === org);
-    }, [students, selectedOrg, isJump]);
+        if (isJump) {
+            const org = selectedOrg.trim();
+            if (org) {
+                next = next.filter((s) => getOrgName(s) === org);
+            }
+        }
+
+        if (isKakao) {
+            if (selectedAssignment === "COMPLETED") {
+                next = next.filter((s) => (recordCountMap[s.userId] ?? 0) >= 5);
+            } else if (selectedAssignment === "INCOMPLETE") {
+                next = next.filter((s) => (recordCountMap[s.userId] ?? 0) < 5);
+            }
+        }
+
+        return next;
+    }, [students, selectedOrg, selectedAssignment, isJump, isKakao, recordCountMap]);
 
     const monthsToLoad = React.useMemo(() => {
         const pairs = new Set<string>();
@@ -242,36 +265,107 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
     }, [weekDays]);
 
 
-    function renderOrgFilter() {
-        if (!isJump) return null;
+    function renderTopFilter() {
+        if (!isJump && !isKakao) return null;
+
+        const isOrgMode = isJump;
+        const isAll = isOrgMode ? !selectedOrg : selectedAssignment === "ALL";
+        const label = isOrgMode ? (selectedOrg || "전체") : getAssignmentFilterLabel(selectedAssignment);
+
         return (
             <div className="client-dashboard-week-right">
                 <div ref={orgRef} className={`client-dashboard-org ${open ? "is-open" : ""}`}>
-                    <button type="button" className={`client-dashboard-org-trigger ${!selectedOrg ? "is-all" : ""}`} onClick={() => setOpen((prev) => !prev)} >
-                        <img className="client-users-org-filter" src={!selectedOrg ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"} alt="" />
-                        <span className={ selectedOrg ? "client-dashboard-org-text is-selected" : "client-dashboard-org-text is-all" } >{selectedOrg || "전체"}</span>
-                        <img className="org-arrow" src={!selectedOrg ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
+                    <button
+                        type="button"
+                        className={`client-dashboard-org-trigger ${isAll ? "is-all" : ""}`}
+                        onClick={() => setOpen((prev) => !prev)}
+                    >
+                        <img
+                            className="client-users-org-filter"
+                            src={isAll ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"}
+                            alt=""
+                        />
+                        <span className={isAll ? "client-dashboard-org-text is-all" : "client-dashboard-org-text is-selected"}>
+                            {label}
+                        </span>
+                        <img
+                            className="org-arrow"
+                            src={isAll ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"}
+                            alt=""
+                        />
                     </button>
 
                     {open && (
                         <div className="client-dashboard-org-menu">
-                            <button className="client-dashboard-org-item" onClick={() => { setSelectedOrg(""); setOpen(false); }} >
-                                전체
-                            </button>
+                            {isOrgMode ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="client-dashboard-org-item"
+                                        onClick={() => {
+                                            setSelectedOrg("");
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        전체
+                                    </button>
 
-                            {orgOptions.map((org) => (
-                                <button key={org} className="client-dashboard-org-item" onClick={() => { setSelectedOrg(org); setOpen(false); }} >
-                                    {org}
-                                </button>
-                            ))}
+                                    {orgOptions.map((org) => (
+                                        <button
+                                            key={org}
+                                            type="button"
+                                            className="client-dashboard-org-item"
+                                            onClick={() => {
+                                                setSelectedOrg(org);
+                                                setOpen(false);
+                                            }}
+                                        >
+                                            {org}
+                                        </button>
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="client-dashboard-org-item"
+                                        onClick={() => {
+                                            setSelectedAssignment("ALL");
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        전체
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="client-dashboard-org-item"
+                                        onClick={() => {
+                                            setSelectedAssignment("COMPLETED");
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        과제 완료
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="client-dashboard-org-item"
+                                        onClick={() => {
+                                            setSelectedAssignment("INCOMPLETE");
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        과제 미완료
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
-            </div> 
+            </div>
         );
     }
-
-
 
     React.useEffect(() => {
         if(!clientType) return;
@@ -455,7 +549,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
             <div className="client-dashboard-week-card">
                 <div className="client-dashboard-week-head">
                     <div className="client-dashboard-week-left">
-                        <div className="client-dashboard-week-label">{getWeekLabel(weekStart)}</div>
+                        <div className="client-dashboard-week-label">{getWeekLabelByDate(weekAnchor)}</div>
                         <div className="client-dashboard-week-nav">
                             <button type="button" className="client-dashboard-week-navbtn" onClick={goPrevWeek} aria-label="prev week">
                                 <img src="/icons/chevron-left.svg" alt="" />
@@ -465,9 +559,7 @@ export default function ClientAdminDashboardPage(): React.ReactElement {
                             </button>
                         </div>
                     </div>
-
-                    {renderOrgFilter()}
-                    
+                    {renderTopFilter()}
                 </div>
 
                 <div className="client-dashboard-week-grid">

@@ -105,6 +105,12 @@ function getOrgName(u: ClientAdminStudent): string {
     return normalizeText(org) || "-";
 }
 
+function getAssignmentFilterLabel(value: "ALL" | "COMPLETED" | "INCOMPLETE"): string {
+	if (value === "COMPLETED") return "과제 완료";
+	if (value === "INCOMPLETE") return "과제 미완료";
+	return "전체";
+}
+
 function getRecordFilterLabel(value: "ALL" | "RECORDED" | "NOT_RECORDED"): string {
     if (value === "RECORDED") return "기록";
     if (value === "NOT_RECORDED") return "미기록";
@@ -177,11 +183,14 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 
 	const [selectedOrg, setSelectedOrg] = React.useState<string>("");
 	const [selectedRecordFilter, setSelectedRecordFilter] = React.useState<"ALL" | "RECORDED" | "NOT_RECORDED">("ALL");
+	const [selectedAssignmentFilter, setSelectedAssignmentFilter] = React.useState<"ALL" | "COMPLETED" | "INCOMPLETE">("ALL");
 
 	const [orgOpen, setOrgOpen] = React.useState<boolean>(false);
+	const [assignmentOpen, setAssignmentOpen] = React.useState<boolean>(false);
 	const [recordOpen, setRecordOpen] = React.useState<boolean>(false);
 
 	const orgRef = React.useRef<HTMLDivElement | null>(null);
+	const assignmentRef = React.useRef<HTMLDivElement | null>(null);
 	const recordRef = React.useRef<HTMLDivElement | null>(null);
 
 	const [rightView, setRightView] = React.useState<UsersRightView>("USER_DETAIL");
@@ -195,6 +204,7 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	const [eventDayCache, setEventDayCache] = React.useState<Record<number, ClientAdminEventDayDetailResponse | null | undefined>>({});
 	
 	const isJump = clientType === "jump";
+	const isKakao = clientType === "kakao";
 	const config = getClientConfig(clientType);
 
 	const selected = React.useMemo(() => {
@@ -415,14 +425,26 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 	}, []);
 
     const filtered = React.useMemo(() => {
-		const byOrg = !isJump
-			? students
-			: students.filter((u) => {
+		const byFirstFilter = students.filter((u) => {
+			if (isJump) {
 				if (!selectedOrg.trim()) return true;
 				return getOrgName(u) === selectedOrg;
-			});
+			}
 
-		const byRecord = byOrg.filter((u) => {
+			if (isKakao) {
+				if (selectedAssignmentFilter === "ALL") return true;
+
+				const count = totalRecordCountMap[u.userId] ?? 0;
+				const isCompleted = count >= 5;
+
+				if (selectedAssignmentFilter === "COMPLETED") return isCompleted;
+				if (selectedAssignmentFilter === "INCOMPLETE") return !isCompleted;
+			}
+
+			return true;
+		});
+
+		const byRecord = byFirstFilter.filter((u) => {
 			if (selectedRecordFilter === "ALL") return true;
 
 			const count = totalRecordCountMap[u.userId] ?? 0;
@@ -435,8 +457,78 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 		});
 
 		return byRecord.filter((u) => matchQuery(u, query, isJump));
-	}, [students, selectedOrg, selectedRecordFilter, query, studentCalCache, calYear, calMonth, isJump]);
+	}, [ students, selectedOrg, selectedAssignmentFilter, selectedRecordFilter, query, totalRecordCountMap, isJump, isKakao, ]);
 	
+	function renderRecordFilter() {
+		return (
+			<div className="client-users-filter">
+				<div ref={recordRef} className={`client-users-org ${recordOpen ? "is-open" : ""}`}>
+					<button
+						type="button"
+						className={`client-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
+						onClick={() => {
+							setRecordOpen((prev) => !prev);
+							setOrgOpen(false);
+							setAssignmentOpen(false);
+						}}
+						aria-label="record status filter"
+					>
+						<img
+							className="client-users-org-filter"
+							src={selectedRecordFilter === "ALL" ? "/icons/fe_document-6b.svg" : "/icons/fe_document.svg"}
+							alt=""
+						/>
+						<span className="client-users-org-text">
+							{getRecordFilterLabel(selectedRecordFilter)}
+						</span>
+						<img
+							className="client-users-org-arrow"
+							src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"}
+							alt=""
+						/>
+					</button>
+
+					{recordOpen && (
+						<div className="client-users-org-menu">
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedRecordFilter("ALL");
+									setRecordOpen(false);
+								}}
+							>
+								전체
+							</button>
+
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedRecordFilter("RECORDED");
+									setRecordOpen(false);
+								}}
+							>
+								기록
+							</button>
+
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedRecordFilter("NOT_RECORDED");
+									setRecordOpen(false);
+								}}
+							>
+								미기록
+							</button>
+						</div>
+					)}
+				</div>
+			</div>
+		);
+	}
+
 	function renderOrgFilter() {
         if (!isJump) return null;
         return (
@@ -489,21 +581,98 @@ export default function ClientAdminUsersPage(): React.ReactElement {
         );
     }
 
+	function renderAssignmentFilter() {
+		if (!isKakao) return null;
+
+		return (
+			<div className="client-users-filter">
+				<div ref={assignmentRef} className={`client-users-org ${assignmentOpen ? "is-open" : ""}`}>
+					<button
+						type="button"
+						className={`client-users-org-trigger ${selectedAssignmentFilter === "ALL" ? "is-all" : ""}`}
+						onClick={() => {
+							setAssignmentOpen((prev) => !prev);
+							setOrgOpen(false);
+							setRecordOpen(false);
+						}}
+						aria-label="assignment status filter"
+					>
+						<img
+							className="client-users-org-filter"
+							src={selectedAssignmentFilter === "ALL" ? "/icons/mynaui_filter_6b.svg" : "/icons/mynaui_filter.svg"}
+							alt=""
+						/>
+						<span className="client-users-org-text">
+							{getAssignmentFilterLabel(selectedAssignmentFilter)}
+						</span>
+						<img
+							className="client-users-org-arrow"
+							src={selectedAssignmentFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"}
+							alt=""
+						/>
+					</button>
+
+					{assignmentOpen && (
+						<div className="client-users-org-menu">
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedAssignmentFilter === "ALL" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedAssignmentFilter("ALL");
+									setAssignmentOpen(false);
+								}}
+							>
+								전체
+							</button>
+
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedAssignmentFilter === "COMPLETED" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedAssignmentFilter("COMPLETED");
+									setAssignmentOpen(false);
+								}}
+							>
+								과제 완료
+							</button>
+
+							<button
+								type="button"
+								className={`client-users-org-item ${selectedAssignmentFilter === "INCOMPLETE" ? "is-selected" : ""}`}
+								onClick={() => {
+									setSelectedAssignmentFilter("INCOMPLETE");
+									setAssignmentOpen(false);
+								}}
+							>
+								과제 미완료
+							</button>
+						</div>
+					)}
+				</div>
+			</div>
+		);
+	}
+
 	React.useEffect(() => {
 		if (isJump) return;
 		setSelectedOrg("");
 		setOrgOpen(false);
 	}, [isJump]);
 
-	React.useEffect(() => {// 필터 바깥쪽 클릭 시 닫힘
+	React.useEffect(() => { // 필터 바깥쪽 클릭 시 닫힘
 		function onDocMouseDown(e: MouseEvent) {
 			if (!(e.target instanceof Node)) return;
 
 			const orgEl = orgRef.current;
+			const assignmentEl = assignmentRef.current;
 			const recordEl = recordRef.current;
 
 			if (orgOpen && orgEl && !orgEl.contains(e.target)) {
 				setOrgOpen(false);
+			}
+
+			if (assignmentOpen && assignmentEl && !assignmentEl.contains(e.target)) {
+				setAssignmentOpen(false);
 			}
 
 			if (recordOpen && recordEl && !recordEl.contains(e.target)) {
@@ -511,11 +680,11 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 			}
 		}
 
-		if (!orgOpen && !recordOpen) return;
+		if (!orgOpen && !assignmentOpen && !recordOpen) return;
 
 		document.addEventListener("mousedown", onDocMouseDown);
 		return () => document.removeEventListener("mousedown", onDocMouseDown);
-	}, [orgOpen, recordOpen]);
+	}, [orgOpen, assignmentOpen, recordOpen]);
 
 	/* ======== 사용자별 기록 수 ========== */
     React.useEffect(() => { // calendar 로딩
@@ -1008,61 +1177,9 @@ export default function ClientAdminUsersPage(): React.ReactElement {
 			<div className="client-users-left-frame">
 				<div className="client-users-filters">
 					<div className="client-users-filter-row">
-						{renderOrgFilter()}
-						<div className="client-users-filter">
-							<div ref={recordRef} className={`client-users-org ${recordOpen ? "is-open" : ""}`}>
-								<button
-									type="button"
-									className={`client-users-org-trigger ${selectedRecordFilter === "ALL" ? "is-all" : ""}`}
-									onClick={() => {
-										setRecordOpen((prev) => !prev);
-										setOrgOpen(false);
-									}}
-									aria-label="record status filter"
-								>
-									<img className="client-users-org-filter" src={selectedRecordFilter === "ALL" ? "/icons/fe_document-6b.svg" : "/icons/fe_document.svg"} alt="" />
-									<span className="client-users-org-text">{getRecordFilterLabel(selectedRecordFilter)}</span>
-									<img className="client-users-org-arrow" src={selectedRecordFilter === "ALL" ? "/icons/chevron-right-6b.svg" : "/icons/chevron-right.svg"} alt="" />
-								</button>
-
-								{recordOpen && (
-									<div className="client-users-org-menu">
-										<button
-											type="button"
-											className={`client-users-org-item ${selectedRecordFilter === "ALL" ? "is-selected" : ""}`}
-											onClick={() => {
-												setSelectedRecordFilter("ALL");
-												setRecordOpen(false);
-											}}
-										>
-											전체
-										</button>
-
-										<button
-											type="button"
-											className={`client-users-org-item ${selectedRecordFilter === "RECORDED" ? "is-selected" : ""}`}
-											onClick={() => {
-												setSelectedRecordFilter("RECORDED");
-												setRecordOpen(false);
-											}}
-										>
-											기록
-										</button>
-
-										<button
-											type="button"
-											className={`client-users-org-item ${selectedRecordFilter === "NOT_RECORDED" ? "is-selected" : ""}`}
-											onClick={() => {
-												setSelectedRecordFilter("NOT_RECORDED");
-												setRecordOpen(false);
-											}}
-										>
-											미기록
-										</button>
-									</div>
-								)}
-							</div>
-						</div>
+						{isJump && renderOrgFilter()}
+						{isKakao && renderAssignmentFilter()}
+						{renderRecordFilter()}
 					</div>
 
 					<div className={`client-users-search ${!query.trim() ? "is-empty" : "is-typing"}`}>
