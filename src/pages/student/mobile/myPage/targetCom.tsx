@@ -2,7 +2,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, updateMyProfile, type UserMe } from "../../../../api/client";
+import { getUserMe, submitMyOnboarding, type UserMe } from "../../../../api/client";
 import "./targetCom.css";
 
 type FormState = {
@@ -87,17 +87,20 @@ export default function TargetCompanyPage(): React.ReactElement {
             setSaving(true);
             setError("");
 
-            const updated = await updateMyProfile({
-                interestJob: normalize(form.interestJob) || null,
-                interestCompany: normalize(form.interestCompany) || null,
+            await submitMyOnboarding({
+                interestJob: normalize(form.interestJob),
+                interestCompany: normalize(form.interestCompany),
             });
 
-            setMe(updated);
+            const refreshed = await getUserMe();
+
+            setMe(refreshed);
 
             const next: FormState = {
-                interestJob: normalize(updated.interestJob),
-                interestCompany: normalize(updated.interestCompany),
+                interestJob: normalize(refreshed.interestJob),
+                interestCompany: normalize(refreshed.interestCompany),
             };
+
             setForm(next);
             setInitial(next);
 

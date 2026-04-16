@@ -268,7 +268,7 @@ export default function MyPage({ onLogout }: Props) {
 							<img className="mypage-menu-chevron" src="/icons/chevron-right.svg" alt="" />
 						</span>
 					</button>
-					<button type="button" className="mypage-menu-item" onClick={handleServicePreparing /*() => navigate("career-goals")*/}>
+					<button type="button" className="mypage-menu-item" onClick={() => navigate("career-goals")}>
 						<span className="mypage-menu-title">{t("mypage.targetCompany")}</span>
 						<span className="mypage-menu-right">
 							<span className="mypage-menu-value">{me?.interestCompany?.trim() ? me.interestCompany : t("mypage.notSet")}</span>
