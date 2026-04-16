@@ -160,11 +160,11 @@ export default function TargetCompanyPage(): React.ReactElement {
                 </section>
             </main>
 
-            <footer className="tc-footer">
+            <div className="tc-footer">
                 <button type="button" className="tc-saveBtn" onClick={onSave} disabled={!canSave} >
                     {saving ? t("schedule_edit.saving") : t("schedule_edit.save")}
                 </button>
-            </footer>
+            </div>
         </div>
     );
 }
