@@ -738,7 +738,7 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 						<img className="icon" src="/icons/globe-01.svg" alt={t("menu.language")} />{" "}
 						<span>{t("menu.language")}</span>
 					</button>
-					{userRoleSet.includes("ROLE_ADMIN") && (
+					{userRoleSet.includes("ROLE_ADMIN") || userRoleSet.includes("ROLE_CAPTAIN")&& (
 						<button
 							type="button"
 							className="drawer-menu-item"
