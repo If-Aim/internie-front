@@ -2,7 +2,7 @@
 // 사용자 목록 페이지 (모바일)
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserMe, ApiError } from "../../../../api/client";
+import { checkIsAdmin, ApiError } from "../../../../api/client";
 
 export default function AdminUsersMobile(): React.ReactElement {
     const navigate = useNavigate();
@@ -11,11 +11,13 @@ export default function AdminUsersMobile(): React.ReactElement {
 
 	React.useEffect(() => {
 		let mounted = true;
+
 		(async () => {
 			try {
-				const me = await getUserMe();
+				const ok = await checkIsAdmin();
 				if (!mounted) return;
-				if (Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ADMIN")) {
+
+				if (ok) {
 					setIsAdmin(true);
 				} else {
 					alert("관리자만 접근할 수 있는 페이지입니다.");
@@ -31,6 +33,7 @@ export default function AdminUsersMobile(): React.ReactElement {
 				if (mounted) setLoading(false);
 			}
 		})();
+
 		return () => {
 			mounted = false;
 		};
