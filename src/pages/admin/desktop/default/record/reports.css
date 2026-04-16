@@ -61,7 +61,7 @@
 .admin-report-role-trigger span { color: #000; }
 .admin-report-role-trigger span.is-empty { color: #6B6B6B; }
 .admin-report-role-trigger img { width: 24px; height: 24px; }
-.admin-report-role-menu { position: absolute; overflow: auto; max-height: 300px; top: calc(100% + 2px); left: 0; right: 0; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; z-index: 50; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+.admin-report-role-menu { position: absolute; overflow: auto; max-height: 300px; left: 0; right: 0; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; z-index: 50; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px; }
 .admin-report-role-item { min-height: 50px; border: none; border-radius: 10px; background: #fff; text-align: left; padding: 0 17px; color: #6B6B6B; font-size: 16px; font-weight: 400; cursor: pointer; }
 .admin-report-role-item:hover { background: #d6d6d6; }
 .admin-report-role-item.is-selected { background: #d6d6d6; color: #000; }

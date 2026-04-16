@@ -23,8 +23,11 @@ function getDisplayName(user: AdminUser): string {
     return normalizeText(user.name) || normalizeText((user as { nickname?: unknown }).nickname) || "-";
 }
 
-function getSchoolName(user: AdminUser): string {
-    return normalizeText(user.school?.name) || "-";
+function getStudentMetaPrimaryText(user: AdminUser): string {
+    if (hasRole(user, "ROLE_JUMP_STUDENT")) {
+        return normalizeText((user as { jumpOrganization?: { name?: unknown } }).jumpOrganization?.name);
+    }
+    return "";
 }
 
 function normalizeRoleSet(user: AdminUser): string[] {
@@ -159,10 +162,10 @@ function matchQuery(user: AdminUser, query: string): boolean {
     if (!q) return true;
 
     const name = getDisplayName(user).toLowerCase();
-    const school = getSchoolName(user).toLowerCase();
+    const primaryText = getStudentMetaPrimaryText(user).toLowerCase();
     const roles = normalizeRoleSet(user).map((role) => formatRoleLabel(role).toLowerCase());
 
-    return name.includes(q) || school.includes(q) || roles.some((role) => role.includes(q));
+    return name.includes(q) || primaryText.includes(q) || roles.some((role) => role.includes(q));
 }
 
 function startOfWeekMonday(date: Date): Date {
@@ -1321,6 +1324,9 @@ export default function AdminReportsPage(): React.ReactElement {
 
             const adminRoleChips = getAdminRoleChips(selected);
             const studentRoleChips = getStudentRoleChips(selected);
+            const primaryStudentText = getStudentMetaPrimaryText(selected);
+            const studentNumber = normalizeText((selected as { studentNumber?: unknown }).studentNumber);
+            const hasStudentMeta = !!primaryStudentText || !!studentNumber;
 
 			return (
 				<div className="admin-report-detail">
@@ -1360,19 +1366,21 @@ export default function AdminReportsPage(): React.ReactElement {
                                         >
                                             인터니 관리자
                                         </button>
+
                                         <button
                                             type="button"
                                             className={`admin-report-role-item ${hasRole(selected, "ROLE_JUMP_ADMIN") ? "is-selected" : ""}`}
                                             onClick={() => handleSelectAdminRole("ROLE_JUMP_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_JUMP_ADMIN")}
                                         >
                                             JUMP 관리자
                                         </button>
+
                                         <button
                                             type="button"
                                             className={`admin-report-role-item ${hasRole(selected, "ROLE_KAKAO_ADMIN") ? "is-selected" : ""}`}
                                             onClick={() => handleSelectAdminRole("ROLE_KAKAO_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_KAKAO_ADMIN")}
                                         >
                                             소셜벤처창업 관리자
                                         </button>
@@ -1407,19 +1415,25 @@ export default function AdminReportsPage(): React.ReactElement {
                         )}
                         
 						<div className="admin-report-meta">
-							<div className="admin-report-role-chips">
-								{studentRoleChips.map((role) => (
-									<span key={role} className={`admin-report-role-chip ${role === "ROLE_JUMP_STUDENT" ? "is-jump" : "is-kakao"}`}>
-										{formatRoleChip(role)}
-									</span>
-								))}
-							</div>
+                            <div className="admin-report-role-chips">
+                                {studentRoleChips.map((role) => (
+                                    <span key={role} className={`admin-report-role-chip ${role === "ROLE_JUMP_STUDENT" ? "is-jump" : "is-kakao"}`}>
+                                        {formatRoleChip(role)}
+                                    </span>
+                                ))}
+                            </div>
 
-							<div className="admin-report-meta-texts">
-								<div className="admin-report-meta-line">{getSchoolName(selected)}</div>
-								<div className="admin-report-meta-line">{normalizeText((selected as { studentNumber?: unknown }).studentNumber) || "-"}</div>
-							</div>
-						</div>
+                            {studentRoleChips.length > 0 && hasStudentMeta && (
+                                <div className="admin-report-meta-texts">
+                                    {primaryStudentText && (
+                                        <div className="admin-report-meta-line">{primaryStudentText}</div>
+                                    )}
+                                    {studentNumber && (
+                                        <div className="admin-report-meta-line">{studentNumber}</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 					</div>
 
 					<button type="button" className="admin-report-record-btn" onClick={handleClickRecordView}>
@@ -1488,7 +1502,7 @@ export default function AdminReportsPage(): React.ReactElement {
                                 setRevokingAdminRole("");
                             }}
 						>
-							<img src="/icons/x-01.svg" className="admin-report-confirm-close-icon"></img>
+							<img src="/icons/x-01.svg" className="admin-report-confirm-close-icon" alt=""/>
 						</button>
 
 						<div className="admin-report-confirm-title">
