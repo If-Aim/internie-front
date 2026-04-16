@@ -2,7 +2,7 @@
 // 보고서 화면(탭)
 import React from "react";
 import { ApiError, getAdminUsers, getAdminUserCalendar, getAdminEventDayDetail, deleteAdminUserRecord, checkIsCaptain, getAdminUserRecordCount, grantAdminRole, revokeAdminRole } from "../../../../../api/client";
-import type { AdminUser, AdminUserCalendarResponse, AdminEventDayDetailResponse, GrantableAdminRole, } from "../../../../../api/client";
+import type { AdminUser, AdminUserCalendarResponse, AdminEventDayDetailResponse, } from "../../../../../api/client";
 import { replaceExperienceName } from "../../../../../utils/josa";
 import "./reports.css";
 
@@ -50,14 +50,20 @@ function hasRole(user: AdminUser, role: string): boolean {
 }
 
 function formatRoleChip(role: string): string {
+    if (role === "ROLE_ADMIN") return "인터니 관리자";
     if (role === "ROLE_JUMP_ADMIN") return "JUMP 관리자";
     if (role === "ROLE_KAKAO_ADMIN") return "소셜벤처창업 관리자";
-    if (role === "ROLE_ADMIN") return "인터니 관리자";
     if (role === "ROLE_JUMP_STUDENT") return "JUMP 상생지락";
     if (role === "ROLE_KAKAO_STUDENT") return "소셜벤처창업";
     if (role === "ROLE_ESG_STUDENT") return "용산";
     if (role === "ROLE_STUDENT") return "학생";
     return role.replace(/^ROLE_/, "");
+}
+
+function getAdminRoleChips(user: AdminUser): AdminRoleOption[] {
+    return normalizeRoleSet(user).filter((role): role is AdminRoleOption => {
+        return role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN";
+    });
 }
 
 function getStudentRoleChips(user: AdminUser): string[] {
@@ -66,23 +72,9 @@ function getStudentRoleChips(user: AdminUser): string[] {
     });
 }
 
-function getAdminRoleValue(user: AdminUser): AdminRoleOption {
-    if (hasRole(user, "ROLE_ADMIN")) return "ROLE_ADMIN";
-    if (hasRole(user, "ROLE_JUMP_ADMIN")) return "ROLE_JUMP_ADMIN";
-    if (hasRole(user, "ROLE_KAKAO_ADMIN")) return "ROLE_KAKAO_ADMIN";
-    return "";
-}
-
 function getAdminRoleLabel(role: AdminRoleOption): string {
     if (role === "ROLE_ADMIN") return "인터니 관리자";
     if (role === "ROLE_JUMP_ADMIN") return "JUMP 관리자";
-    if (role === "ROLE_KAKAO_ADMIN") return "소셜벤처창업 관리자";
-    return "관리자가 아님";
-}
-
-function getAdminRolePromptLabel(role: AdminRoleOption): string {
-    if (role === "ROLE_ADMIN") return "인터니 관리자";
-    if (role === "ROLE_JUMP_ADMIN") return "JUMP 상생지락 관리자";
     if (role === "ROLE_KAKAO_ADMIN") return "소셜벤처창업 관리자";
     return "관리자가 아님";
 }
@@ -337,7 +329,9 @@ export default function AdminReportsPage(): React.ReactElement {
 
 	const [roleConfirmOpen, setRoleConfirmOpen] = React.useState<boolean>(false);
 	const [roleSubmitting, setRoleSubmitting] = React.useState<boolean>(false);
-	const [pendingAdminRole, setPendingAdminRole] = React.useState<AdminRoleOption>("");
+	const [roleConfirmMode, setRoleConfirmMode] = React.useState<"grant" | "revoke">("grant");
+    const [pendingAdminRole, setPendingAdminRole] = React.useState<AdminRoleOption>("");
+    const [revokingAdminRole, setRevokingAdminRole] = React.useState<AdminRoleOption>("");
 	const [adminRoleError, setAdminRoleError] = React.useState<string | null>(null);
 
 	const selected = React.useMemo(() => {
@@ -395,26 +389,33 @@ export default function AdminReportsPage(): React.ReactElement {
 	}, [users, roleFilter, selectedRecordFilter, totalRecordCountMap, query]);
 
 	function handleSelectAdminRole(nextRole: AdminRoleOption) {
-		if (!selected) return;
+        if (!selected) return;
+        if (!nextRole) return;
 
-		const currentRole = getAdminRoleValue(selected);
+        if (hasRole(selected, nextRole)) {
+            setAdminRoleOpen(false);
+            return;
+        }
 
-		if (currentRole === nextRole) {
-			setAdminRoleOpen(false);
-			return;
-		}
+        setPendingAdminRole(nextRole);
+        setRoleConfirmMode("grant");
+        setRoleConfirmOpen(true);
+        setAdminRoleOpen(false);
+        setAdminRoleError(null);
+    }
 
-		setPendingAdminRole(nextRole);
-		setRoleConfirmOpen(true);
-		setAdminRoleOpen(false);
-		setAdminRoleError(null);
-	}
+    function handleClickRevokeAdminRole(role: AdminRoleOption) {
+        if (!selected) return;
+
+        setRevokingAdminRole(role);
+        setRoleConfirmMode("revoke");
+        setRoleConfirmOpen(true);
+        setAdminRoleOpen(false);
+        setAdminRoleError(null);
+    }
 
 	async function handleConfirmAdminRole() {
         if (!selected) return;
-
-        const nextRole = pendingAdminRole;
-        const adminRoles: GrantableAdminRole[] = ["ROLE_ADMIN", "ROLE_JUMP_ADMIN", "ROLE_KAKAO_ADMIN"];
 
         try {
             setRoleSubmitting(true);
@@ -422,14 +423,16 @@ export default function AdminReportsPage(): React.ReactElement {
 
             let updatedUser = selected;
 
-            for (const role of adminRoles) {
-                if (hasRole(updatedUser, role) && role !== nextRole) {
-                    updatedUser = await revokeAdminRole(selected.userId, { role });
+            if (roleConfirmMode === "revoke") {
+                if (revokingAdminRole) {
+                    updatedUser = await revokeAdminRole(selected.userId, { role: revokingAdminRole });
                 }
-            }
+            } else {
+                const nextRole = pendingAdminRole;
 
-            if (nextRole && !hasRole(updatedUser, nextRole)) {
-                updatedUser = await grantAdminRole(selected.userId, { role: nextRole });
+                if (nextRole && !hasRole(updatedUser, nextRole)) {
+                    updatedUser = await grantAdminRole(selected.userId, { role: nextRole });
+                }
             }
 
             setUsers((prev) =>
@@ -441,6 +444,7 @@ export default function AdminReportsPage(): React.ReactElement {
 
             setRoleConfirmOpen(false);
             setPendingAdminRole("");
+            setRevokingAdminRole("");
         } catch (e) {
             setAdminRoleError("관리자 역할 변경에 실패했습니다.");
         } finally {
@@ -1097,8 +1101,8 @@ export default function AdminReportsPage(): React.ReactElement {
                         {filtered.map((user, idx) => {
 							const isSelected = user.userId === selectedId;
 							const chips = normalizeRoleSet(user).filter((role) => {
-								return role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN";
-							});
+                                return role === "ROLE_ADMIN" || role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN";
+                            });
 
 							return (
 								<button
@@ -1115,12 +1119,12 @@ export default function AdminReportsPage(): React.ReactElement {
 											<span
 												key={role}
 												className={[
-													"admin-report-chip",
-													role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" ? "is-admin" : "is-student",
-													role === "ROLE_JUMP_ADMIN" || role === "ROLE_JUMP_STUDENT" ? "is-jump" : "",
-													role === "ROLE_KAKAO_ADMIN" || role === "ROLE_KAKAO_STUDENT" ? "is-kakao" : "",
-													// role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_STUDENT" ? "is-esg" : "",
-												].filter(Boolean).join(" ")}
+                                                    "admin-report-chip",
+                                                    role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" ? "is-admin" : "is-student",
+                                                    role === "ROLE_JUMP_ADMIN" || role === "ROLE_JUMP_STUDENT" ? "is-jump" : "",
+                                                    role === "ROLE_KAKAO_ADMIN" || role === "ROLE_KAKAO_STUDENT" ? "is-kakao" : "",
+                                                    role === "ROLE_ADMIN" ? "is-default-admin" : "",
+                                                ].filter(Boolean).join(" ")}
 											>
 												{formatRoleChip(role)}
 											</span>
@@ -1315,8 +1319,8 @@ export default function AdminReportsPage(): React.ReactElement {
 				);
 			}
 
-			const adminRoleValue = getAdminRoleValue(selected);
-			const studentRoleChips = getStudentRoleChips(selected);
+            const adminRoleChips = getAdminRoleChips(selected);
+            const studentRoleChips = getStudentRoleChips(selected);
 
 			return (
 				<div className="admin-report-detail">
@@ -1333,14 +1337,16 @@ export default function AdminReportsPage(): React.ReactElement {
 							<div className="admin-report-info-value">{recordCountText}</div>
 						</div>
 
-                        {isCaptain &&
+                        {isCaptain && (
                             <div ref={adminRoleRef} className="admin-report-role-select-wrap">
                                 <button
                                     type="button"
                                     className={`admin-report-role-trigger ${adminRoleOpen ? "is-open" : ""}`}
                                     onClick={() => setAdminRoleOpen((prev) => !prev)}
                                 >
-                                    <span className={!adminRoleValue ? "is-empty" : ""}>{getAdminRoleLabel(adminRoleValue)}</span>
+                                    <span className={adminRoleChips.length === 0 ? "is-empty" : ""}>
+                                        {adminRoleChips.length === 0 ? "관리자 권한 추가" : `관리자 권한 ${adminRoleChips.length}개 보유`}
+                                    </span>
                                     <img src="/icons/chevron-right-6b.svg" alt="" className={adminRoleOpen ? "is-open" : ""} />
                                 </button>
 
@@ -1348,41 +1354,58 @@ export default function AdminReportsPage(): React.ReactElement {
                                     <div className="admin-report-role-menu">
                                         <button
                                             type="button"
-                                            className={`admin-report-role-item ${adminRoleValue === "" ? "is-selected" : ""}`}
-                                            onClick={() => handleSelectAdminRole("")}
-                                        >
-                                            관리자가 아님
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`admin-report-role-item ${adminRoleValue === "ROLE_ADMIN" ? "is-selected" : ""}`}
+                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_ADMIN") ? "is-selected" : ""}`}
                                             onClick={() => handleSelectAdminRole("ROLE_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_ADMIN")}
                                         >
-                                            기본 관리자
+                                            인터니 관리자
                                         </button>
                                         <button
                                             type="button"
-                                            className={`admin-report-role-item ${adminRoleValue === "ROLE_JUMP_ADMIN" ? "is-selected" : ""}`}
+                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_JUMP_ADMIN") ? "is-selected" : ""}`}
                                             onClick={() => handleSelectAdminRole("ROLE_JUMP_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_ADMIN")}
                                         >
                                             JUMP 관리자
                                         </button>
                                         <button
                                             type="button"
-                                            className={`admin-report-role-item ${adminRoleValue === "ROLE_KAKAO_ADMIN" ? "is-selected" : ""}`}
+                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_KAKAO_ADMIN") ? "is-selected" : ""}`}
                                             onClick={() => handleSelectAdminRole("ROLE_KAKAO_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_ADMIN")}
                                         >
                                             소셜벤처창업 관리자
                                         </button>
                                     </div>
                                 )}
                             </div>
-                        }
+                        )}
 						
 						{adminRoleError && (
 							<div className="admin-report-role-error">{adminRoleError}</div>
 						)}
 
+                        {adminRoleChips.length > 0 && (
+                            <div className="admin-report-admin-role-chips">
+                                {adminRoleChips.map((role) => (
+                                    <button
+                                        key={role}
+                                        type="button"
+                                        className={`admin-report-role-chip is-admin ${
+                                            role === "ROLE_ADMIN" ? "is-default-admin" : ""
+                                        } ${
+                                            role === "ROLE_JUMP_ADMIN" ? "is-jump" : ""
+                                        } ${
+                                            role === "ROLE_KAKAO_ADMIN" ? "is-kakao" : ""
+                                        }`}
+                                        onClick={() => handleClickRevokeAdminRole(role)}
+                                    >
+                                        {formatRoleChip(role)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        
 						<div className="admin-report-meta">
 							<div className="admin-report-role-chips">
 								{studentRoleChips.map((role) => (
@@ -1459,17 +1482,20 @@ export default function AdminReportsPage(): React.ReactElement {
 							type="button"
 							className="admin-report-confirm-close"
 							onClick={() => {
-								if (roleSubmitting) return;
-								setRoleConfirmOpen(false);
-								setPendingAdminRole("");
-							}}
+                                if (roleSubmitting) return;
+                                setRoleConfirmOpen(false);
+                                setPendingAdminRole("");
+                                setRevokingAdminRole("");
+                            }}
 						>
-							×
+							<img src="/icons/x-01.svg" className="admin-report-confirm-close-icon"></img>
 						</button>
 
 						<div className="admin-report-confirm-title">
-							{getDisplayName(selected)}님을 {getAdminRolePromptLabel(pendingAdminRole)}로 설정하시겠습니까?
-						</div>
+                            {roleConfirmMode === "revoke"
+                                ? `${getDisplayName(selected)}님의 ${getAdminRoleLabel(revokingAdminRole)} 권한을 회수하시겠습니까?`
+                                : `${getDisplayName(selected)}님을 ${getAdminRoleLabel(pendingAdminRole)}로 설정하시겠습니까?`}
+                        </div>
 
 						<div className="admin-report-confirm-actions">
 							<button
@@ -1485,10 +1511,11 @@ export default function AdminReportsPage(): React.ReactElement {
 								type="button"
 								className="admin-report-confirm-btn is-gray"
 								onClick={() => {
-									if (roleSubmitting) return;
-									setRoleConfirmOpen(false);
-									setPendingAdminRole("");
-								}}
+                                    if (roleSubmitting) return;
+                                    setRoleConfirmOpen(false);
+                                    setPendingAdminRole("");
+                                    setRevokingAdminRole("");
+                                }}
 								disabled={roleSubmitting}
 							>
 								취소

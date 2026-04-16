@@ -1,8 +1,9 @@
 /* src/pages/admin/desktop/default/record/reports.css */
-.admin-report-page { display: flex; flex-direction: column; gap: 13px; }
+.admin-report-page { display: flex; flex-direction: column; gap: 12px; }
 .admin-report-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr); gap: 23px; min-height: 0; }
 .admin-report-left-card, .admin-report-right-card { min-height: 0; }
 
+.admin-report-section-title { line-height: 50px; font-weight: 700; font-size: 32px; }
 .admin-report-left-frame { display: flex; flex-direction: column; min-height: 0; gap: 15px; }
 .admin-report-filters { display: flex; flex-direction: column; gap: 15px; }
 .admin-report-filter-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 23px; }
@@ -55,15 +56,15 @@
 .admin-report-info-value { font-weight: 400; text-align: right; color: #000; }
 
 .admin-report-role-select-wrap { position: relative; }
-.admin-report-role-trigger { width: 100%; height: 48px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; padding: 0 31px; display: flex; align-items: center; justify-content: space-between; font-size: 16px; cursor: pointer; }
-.admin-report-role-trigger img.is-open { transform: rotate(90deg); }
+.admin-report-role-trigger { width: 100%; height: 48px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; padding: 0 27px; display: flex; align-items: center; justify-content: space-between; font-size: 16px; cursor: pointer; }
+.admin-report-role-trigger img.is-open { transform: rotate(180deg); }
 .admin-report-role-trigger span { color: #000; }
 .admin-report-role-trigger span.is-empty { color: #6B6B6B; }
-.admin-report-role-trigger img { width: 20px; height: 20px; }
-.admin-report-role-menu { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.08); z-index: 50; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
-.admin-report-role-item { min-height: 48px; border: none; border-radius: 10px; background: #fff; text-align: left; padding: 0 16px; font-size: 16px; cursor: pointer; }
+.admin-report-role-trigger img { width: 24px; height: 24px; }
+.admin-report-role-menu { position: absolute; overflow: auto; max-height: 300px; top: calc(100% + 2px); left: 0; right: 0; background: #fff; border: 1px solid #E6E6E6; border-radius: 10px; z-index: 50; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+.admin-report-role-item { min-height: 50px; border: none; border-radius: 10px; background: #fff; text-align: left; padding: 0 17px; color: #6B6B6B; font-size: 16px; font-weight: 400; cursor: pointer; }
 .admin-report-role-item:hover { background: #d6d6d6; }
-.admin-report-role-item.is-selected { background: #d6d6d6; font-weight: 700; }
+.admin-report-role-item.is-selected { background: #d6d6d6; color: #000; }
 .admin-report-role-error { margin-top: -4px; font-size: 14px; color: #F00; }
 
 .admin-report-meta { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 16px; margin-top: 194px; }
@@ -145,6 +146,7 @@
 .admin-report-confirm-dim { position: fixed; inset: 0; background: rgba(0,0,0,0.28); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .admin-report-confirm-modal { position: relative; width: 640px; min-height: 360px; background: #fff; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 48px; }
 .admin-report-confirm-close { position: absolute; top: 28px; right: 34px; border: none; background: transparent; font-size: 42px; line-height: 1; cursor: pointer; color: #000; }
+.admin-report-confirm-close-icon { width: 24px; height: 24px; }
 .admin-report-confirm-title { max-width: 420px; text-align: center; font-size: 22px; line-height: 1.35; font-weight: 700; color: #000; }
 .admin-report-confirm-actions { display: flex; gap: 78px; margin-top: 56px; }
 .admin-report-confirm-btn { width: 121px; height: 49px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; }

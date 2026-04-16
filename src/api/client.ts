@@ -763,7 +763,7 @@ export async function grantAdminRole(
     input: AdminRoleUpdateInput
 ): Promise<AdminUser> {
     return api<AdminUser>(`/admin/users/${userId}/roles`, {
-        method: "PATCH",
+        method: "POST",
         body: JSON.stringify(input),
     });
 }
