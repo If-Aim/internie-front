@@ -83,7 +83,9 @@ export default function MyPage({ onLogout }: Props) {
 	const loadMe = React.useCallback(async () => {
 		try {
 			const res = await getUserMe();
-			console.log("[MyPage] /users/me response:", res);
+			if (res.roleSet?.includes("ROLE_ADMIN")) {
+				console.log("[MyPage] /users/me response:", res);
+			}
 
 			const lastStatusKey = `mypage_last_status_${res.userId}`;
 			const lastStatus = localStorage.getItem(lastStatusKey);
