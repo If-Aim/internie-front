@@ -738,18 +738,17 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 						<img className="icon" src="/icons/globe-01.svg" alt={t("menu.language")} />{" "}
 						<span>{t("menu.language")}</span>
 					</button>
-					{userRoleSet.includes("ROLE_ADMIN") || userRoleSet.includes("ROLE_CAPTAIN")&& (
+					{(userRoleSet.includes("ROLE_ADMIN") || userRoleSet.includes("ROLE_CAPTAIN")) && (
 						<button
 							type="button"
 							className="drawer-menu-item"
 							onClick={(e) => {
 								e.stopPropagation();
-								console.log("before navigate /admin/users");
 								navigate("/system-admin/users");
 							}}
 						>
 							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>사용자조회</span>
+							<span>인터니 관리자 페이지</span>
 						</button>
 					)}
 					{userRoleSet.includes("ROLE_JUMP_ADMIN") && (
