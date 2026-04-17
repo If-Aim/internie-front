@@ -3,8 +3,10 @@
 	"login": {
 		"startWithKakao": "Login with Kakao",
 		"startWithKakaoAria": "Login with Kakao",
+		"loginWithKakao": "Login with Kakao",
 		"startWithGoogle": "Login with Google",
 		"startWithGoogleAria": "Login with Google",
+		"loginWithGoogle": "Login with Google",
 		"getLoginTitle": "Login Required",
 		"getLoginSub": "Would you like to log in?"
 	},

@@ -3,8 +3,10 @@
     "login": {
         "startWithKakao": "카카오로 시작하기",
         "startWithKakaoAria": "카카오로 시작하기",
-        "startWithGoogle": "Google로 시작하기",
-		"startWithGoogleAria": "Google로 시작하기",
+        "loginWithKakao": "카카오 로그인",
+        "startWithGoogle": "구글로 시작하기",
+		"startWithGoogleAria": "구글로 시작하기",
+		"loginWithGoogle": "구글 로그인",
         "getLoginTitle": "로그인이 필요한 서비스입니다",
         "getLoginSub": "로그인 하시겠습니까?"
     },
