@@ -70,12 +70,12 @@ export default function Login(): React.ReactElement {
                         <div className="login-desktop-socials">
                             <button type="button" className="login-desktop-btn google" onClick={handleServicePreparing} aria-label={t("login.startWithGoogleAria")}>
                                 <img src="/logos/google_Logo.svg" alt="" width={20} height={20} />
-                                <span>{t("login.startWithGoogle")}</span>
+                                <span>{t("login.loginWithGoogle")}</span>
                             </button>
 
                             <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
                                 <img src="/logos/kakao_Logo.svg" alt="" width={20} height={20} />
-                                <span>{t("login.startWithKakao")}</span>
+                                <span>{t("login.loginWithKakao")}</span>
                             </button>
                         </div>
 
