@@ -18,14 +18,14 @@
 .login-desktop-ac { display: flex; flex-direction: column; gap: 11px; }
 .login-desktop-input-title { font-size: 16px; line-height: 20px; font-weight: 600; color: #666; text-align: left; }
 
-.login-desktop-pw-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.login-desktop-pw-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-right: 10px;}
 .login-desktop-input-findpw { font-size: 12px; line-height: 20px; font-weight: 600; color: #6B6B6B; text-decoration: underline; cursor: pointer; }
 
 .login-desktop-input-wrap { position: relative; }
 .login-desktop-input { width: 100%; height: 48px; border: 1px solid #DDD; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; color: #111; outline: none; }
 .login-desktop-input.is-password { padding-right: 52px; }
 .login-desktop-input::placeholder { color: #d0d0d0; }
-.login-desktop-input:disabled { background: #fff; color: #bdbdbd; }
+.login-desktop-input:disabled { background: #fff; color: #bdbdbd; cursor: not-allowed; }
 
 .login-desktop-pw-blind { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; opacity: 0.55; }
 
@@ -34,13 +34,13 @@
 .login-desktop-btn.google { background: #fff; color: #6B6B6B; border: 1px solid #ddd; }
 .login-desktop-btn.kakao { background: #fee500; color: #000; }
 
-.login-desktop-social-divider { position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; font-weight: 500; color: #E7E7E7; }
-.login-desktop-social-divider::before,.login-desktop-social-divider::after { content: ""; flex: 1; height: 1px; background: #e3e3e3; }
-.login-desktop-social-divider::before { margin-right: 16px; }
-.login-desktop-social-divider::after { margin-left: 16px; }
+.login-desktop-social-divider { position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; font-weight: 500; color: #A2A2A2; }
+.login-desktop-social-divider::before,.login-desktop-social-divider::after { content: ""; flex: 1; height: 1px; background: #E7E7E7; }
+.login-desktop-social-divider::before { margin-right: 37px; }
+.login-desktop-social-divider::after { margin-left: 37px; }
 
-.login-desktop-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: -4px; }
-.login-desktop-socials .login-desktop-btn { height: 44px; font-size: 15px; font-weight: 700; }
+.login-desktop-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -3px; }
+.login-desktop-socials .login-desktop-btn { height: 36px; font-size: 15px; font-weight: 700; }
 
 .login-desktop-join { margin-top: 28px; font-size: 14px; line-height: 1.5; color: rgba(0, 0, 0, 0.45); }
 .login-desktop-join button { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 14px; line-height: 1.5; font-weight: 700; color: #111; text-decoration: underline; cursor: not-allowed; }
