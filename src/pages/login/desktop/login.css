@@ -40,7 +40,7 @@
 .login-desktop-social-divider::after { margin-left: 37px; }
 
 .login-desktop-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -3px; }
-.login-desktop-socials .login-desktop-btn { height: 36px; font-size: 15px; font-weight: 700; }
+.login-desktop-socials .login-desktop-btn { height: 36px; font-size: 12px; font-weight: 700; }
 
 .login-desktop-join { margin-top: 28px; font-size: 14px; line-height: 1.5; color: rgba(0, 0, 0, 0.45); }
 .login-desktop-join button { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 14px; line-height: 1.5; font-weight: 700; color: #111; text-decoration: underline; cursor: not-allowed; }
