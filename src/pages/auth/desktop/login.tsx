@@ -21,8 +21,7 @@ const kakaoAuthUrl =
 
 export default function Login(): React.ReactElement {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
-    const googleBtnRef = useRef<HTMLDivElement | null>(null);
+    const { t } = useTranslation();
     const googleInitializedRef = useRef(false);
 
     const [loginId, setLoginId] = useState("");
@@ -34,9 +33,15 @@ export default function Login(): React.ReactElement {
         window.location.href = url;
     };
 
-    const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
     const canLogin = loginId.trim().length > 0 && password.length > 0;
+    const handleGoogleClick = () => {
+        if (!window.google?.accounts?.id) {
+            alert("구글 로그인 준비 중입니다.");
+            return;
+        }
 
+        window.google.accounts.id.prompt();
+    };
     const handleLocalLogin = async () => {
         const trimmedLoginId = loginId.trim();
 
@@ -63,54 +68,43 @@ export default function Login(): React.ReactElement {
     useEffect(() => {
         let intervalId: number | null = null;
 
-        const renderGoogleButton = () => {
-            if (!window.google || !googleBtnRef.current) return false;
+        const initializeGoogleLogin = () => {
+            if (!window.google?.accounts?.id) return false;
+            if (googleInitializedRef.current) return true;
 
-            if (!googleInitializedRef.current) {
-                googleInitializedRef.current = true;
+            googleInitializedRef.current = true;
 
-                window.google.accounts.id.initialize({
-                    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-                    callback: async (response: any) => {
-                        const idToken = response?.credential;
-                        if (!idToken) {
-                            console.error("Google idToken을 받지 못했습니다.");
+            window.google.accounts.id.initialize({
+                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+                callback: async (response: any) => {
+                    const idToken = response?.credential;
+                    if (!idToken) {
+                        console.error("Google idToken을 받지 못했습니다.");
+                        return;
+                    }
+
+                    try {
+                        const data = await loginWithGoogle(idToken);
+                        navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
+                    } catch (e) {
+                        console.error("구글 로그인 실패", e);
+
+                        if (e instanceof ApiError) {
+                            alert(e.message || t("login.loginWithGoogle"));
                             return;
                         }
 
-                        try {
-                            const data = await loginWithGoogle(idToken);
-                            navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
-                        } catch (e) {
-                            console.error("구글 로그인 실패", e);
-
-                            if (e instanceof ApiError) {
-                                alert(e.message || (isKo ? "구글 로그인에 실패했습니다." : "Google login failed."));
-                                return;
-                            }
-
-                            alert(isKo ? "구글 로그인에 실패했습니다." : "Google login failed.");
-                        }
-                    },
-                });
-            }
-
-            googleBtnRef.current.innerHTML = "";
-
-            window.google.accounts.id.renderButton(googleBtnRef.current, {
-                theme: "outline",
-                size: "large",
-                width: 240,
-                text: "signin_with",
-                shape: "rectangular",
+                        alert(t("login.loginWithGoogle"));
+                    }
+                },
             });
 
             return true;
         };
 
-        if (!renderGoogleButton()) {
+        if (!initializeGoogleLogin()) {
             intervalId = window.setInterval(() => {
-                if (renderGoogleButton() && intervalId) {
+                if (initializeGoogleLogin() && intervalId) {
                     window.clearInterval(intervalId);
                 }
             }, 300);
@@ -121,7 +115,7 @@ export default function Login(): React.ReactElement {
                 window.clearInterval(intervalId);
             }
         };
-    }, [navigate]);
+    }, [navigate, t]);
 
     return (
         <div className="login-desktop-page">
@@ -200,9 +194,10 @@ export default function Login(): React.ReactElement {
                         </div>
 
                         <div className="login-desktop-socials">
-                            <div className="login-google-wrap">
-                                <div ref={googleBtnRef} id="google-login-btn-desktop" />
-                            </div>
+                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} aria-label={t("login.startWithGoogleAria")} >
+                                <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
+                                <span>{t("login.loginWithGoogle")}</span>
+                            </button>
 
                             <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
                                 <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
