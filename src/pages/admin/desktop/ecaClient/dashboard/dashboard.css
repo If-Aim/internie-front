@@ -1,0 +1,8 @@
+/* src/pages/admin/desktop/ecaClient/dashboard/dashboard.css */
+.eca-dashboard-page { display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: calc(100vh - 68px); background: #F0F6FF; }
+.eca-dashboard-sidebar { border-right: 1px solid #E8E8E8; background: #fff; }
+.eca-dashboard-side-nav { display: flex; flex-direction: column; gap: 17px; padding: 39px 20px; }
+.eca-dashboard-side-link { display: flex; align-items: center; min-height: 48px; padding: 0 52px; border-radius: 10px; color: #808080; font-size: 16px; font-weight: 700; text-decoration: none; line-height: 20px; /*transition: background-color .2s ease, color .2s ease;*/ }
+.eca-dashboard-side-link:hover { background: #e2eefd; }
+.eca-dashboard-side-link--active { background: #BDD8FF; color: var(--primary); }
+.eca-dashboard-content { min-width: 0;}
