@@ -23,7 +23,9 @@
         "startWithGoogleAria": "Continue with Google",
         "loginWithGoogle": "Log in with Google",
         "getLoginTitle": "Login Required",
-        "getLoginSub": "Would you like to log in?"
+        "getLoginSub": "Would you like to log in?",
+		"googleNotReady": "Google login is being prepared. Please try again shortly.",
+		"googleLoginFailed": "Google login failed."
     },
     "signup": {
         "title": "Sign Up",

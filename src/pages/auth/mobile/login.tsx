@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginWithGoogle, loginWithLocal } from "../../../api/client";
+import { ApiError, loginWithGoogle, loginWithLocal } from "../../../api/client";
 import "./login.css";
 
 declare global {
@@ -22,7 +22,7 @@ const kakaoAuthUrl =
 export default function Login() {
     const navigate = useNavigate();
     const { t } = useTranslation();
-    const googleBtnRef = useRef<HTMLDivElement | null>(null);
+    const googleInitializedRef = useRef(false);
 
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
@@ -35,12 +35,12 @@ export default function Login() {
     };
 
     const handleGoogleClick = () => {
-        const target = googleBtnRef.current?.querySelector("div[role='button']") as HTMLDivElement | null;
-        if (target) {
-            target.click();
+        if (!window.google?.accounts?.id) {
+            alert(t("login.googleNotReady"));
             return;
         }
-        alert("구글 로그인 버튼을 아직 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+
+        window.google.accounts.id.prompt();
     };
 
     const handleLocalLogin = async () => {
@@ -71,7 +71,10 @@ export default function Login() {
         let intervalId: number | null = null;
 
         const initializeGoogleLogin = () => {
-            if (!window.google || !googleBtnRef.current) return false;
+            if (!window.google?.accounts?.id) return false;
+            if (googleInitializedRef.current) return true;
+
+            googleInitializedRef.current = true;
 
             window.google.accounts.id.initialize({
                 client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
@@ -88,19 +91,15 @@ export default function Login() {
                         navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
                     } catch (e) {
                         console.error("구글 로그인 실패", e);
-                        alert("구글 로그인에 실패했습니다.");
+
+                        if (e instanceof ApiError) {
+                            alert(e.message || t("login.googleLoginFailed"));
+                            return;
+                        }
+
+                        alert(t("login.googleLoginFailed"));
                     }
                 },
-            });
-
-            googleBtnRef.current.innerHTML = "";
-
-            window.google.accounts.id.renderButton(googleBtnRef.current, {
-                theme: "outline",
-                size: "large",
-                width: 260,
-                text: "signin_with",
-                shape: "rectangular",
             });
 
             return true;
@@ -119,7 +118,7 @@ export default function Login() {
                 window.clearInterval(intervalId);
             }
         };
-    }, [navigate]);
+    }, [navigate, t]);
 
     return (
         <div className="mobile-login-page">
@@ -187,10 +186,6 @@ export default function Login() {
                         </span>
                         <span className="mobile-login-social-text">{t("login.startWithGoogle")}</span>
                     </button>
-
-                    <div className="google-hidden-btn" aria-hidden="true">
-                        <div ref={googleBtnRef} id="google-login-btn" />
-                    </div>
                 </section>
 
                 <section className="mobile-login-signup-section">

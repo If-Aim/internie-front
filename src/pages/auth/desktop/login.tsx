@@ -36,7 +36,7 @@ export default function Login(): React.ReactElement {
     const canLogin = loginId.trim().length > 0 && password.length > 0;
     const handleGoogleClick = () => {
         if (!window.google?.accounts?.id) {
-            alert("구글 로그인 준비 중입니다.");
+            alert(t("login.googleNotReady"));
             return;
         }
 
