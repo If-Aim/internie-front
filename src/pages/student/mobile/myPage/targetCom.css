@@ -1,4 +1,3 @@
-/* src/pages/student/mobile/mypage/targetCom.css */
 .tc-page { min-height: 100dvh; background: #F0F6FF; display: flex; flex-direction: column; } 
 .tc-header { height: 50px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 24px 12px 0; }
 .tc-header__title { margin: 0; text-align: center; font-size: 16px; font-weight: 700; color: #000; }

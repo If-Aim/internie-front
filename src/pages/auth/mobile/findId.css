@@ -1,0 +1,32 @@
+.find-id-mobile-page { height: 100svh; overflow-y: auto;-webkit-overflow-scrolling: touch; background: #fff; display: flex; flex-direction: column;
+padding: 18px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: border-box;}
+.signup-mobile-header { position: relative; height: 56px; display: flex; align-items: center; justify-content: center; } 
+.signup-mobile-back-btn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: none; background: transparent; }
+.signup-mobile-back-btn img { width: 24px; height: 24px; display: block; object-fit: contain; }
+.signup-mobile-space { width:24px; height: 24px; display: flex; align-items: center; justify-content: center; flex: 0 0 24px;}
+.signup-mobile-header-title { font-size: 16px; font-weight: 700; color: #000; line-height: 20px; }
+
+.find-id-mobile-title { margin: 47px 12px 15px; font-size: 24px; font-weight: 700; line-height: 20px; color: #000; }
+.find-id-mobile-subtitle { margin: 0 12px 18px; font-size: 14px; line-height: 20px; color: #6B6B6B; }
+.find-id-mobile-field { margin: 20px 12px 0; }
+.find-id-mobile-input { width: 100%; height: 54px; padding: 0 18px; border-radius: 10px; border: 1px solid #E2E2E2; background: #fff; font-size: 16px; font-weight: 400; color: #000; outline: none; }
+.find-id-mobile-input::placeholder { color: #5F5F5F; }
+.find-id-mobile-input:focus { border-color: #CFCFCF; }
+.find-id-mobile-input:disabled { background: #E3E3E3; color: #707070; }
+.find-id-mobile-info { margin: 0 12px 0; color: var(--primary); font-size: 14px; font-weight: 500; line-height: 20px; }
+.find-id-mobile-error { margin: 12px 12px 0; color: #D93025; font-size: 14px; font-weight: 500; line-height: 20px; }
+.find-id-mobile-footer { display: flex; flex-direction: column; gap: 12px; padding: 32px 0 calc(53px + env(safe-area-inset-bottom)); background: #fff; }
+.find-id-mobile-btn { width: 100%; height: 60px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; }
+.find-id-mobile-btn--ghost { background: #BDD8FF; color: #000; }
+.find-id-mobile-btn--primary { background: #E3E3E3; color: #707070; }
+.find-id-mobile-btn--primary:not(:disabled) { background: var(--primary); color: #fff; }
+.find-id-mobile-btn:disabled { cursor: not-allowed; }
+
+.find-id-mobile-modal-overlay { position: fixed; inset: 0; background: rgba(209, 209, 209, 0.50);; backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 47px; z-index: 1000; }
+.find-id-mobile-modal { position: relative; width: 100%; max-width: 600px; border-radius: 20px; background: #fff; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25); padding: 55px 30px 45px; text-align: center; }
+.find-id-mobile-modal-close { position: absolute; top: 16px; right: 14px; width: 32px; height: 32px; border: 0; background: transparent; padding: 0; cursor: pointer; }
+.find-id-moblie-modal-icon{ display: flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+.find-id-mobile-modal-text { font-size: 20px; font-weight: 500; line-height: 30px; color: #000; margin: 16px 0 32px; }
+.find-id-mobile-modal-confirm { width: 100%; max-width:160px; height: 48px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+.find-id-mobile-input.is-error { border-color: #ff4d4f; }
+.find-id-mobile-field--second { margin-top: 12px; }

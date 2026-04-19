@@ -7,7 +7,7 @@ flex-direction: column;padding: 36px 40px;align-items: stretch;justify-content: 
 .cert-file-item{display: flex;align-items: center;justify-content: space-between;background: #fff;
 border-radius: 10px;box-shadow: 0 4px 4px rgba(0,0,0,0.25);padding: 25px 21px;}
 .cert-file-left{display: flex;flex-direction: column;gap: 8px;min-width: 0;}
-.cert-file-name{font-weight: 700;color: #111;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+.cert-file-name{font-weight: 700;color: #000;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
 .cert-file-date{height: 16px; line-height: 16px;font-size: 13px;color: #9ca3af;}
 .cert-upload-head{font-size: 40px;font-weight:700;line-height:50px;justify-self:center;margin-bottom:41px;}
 

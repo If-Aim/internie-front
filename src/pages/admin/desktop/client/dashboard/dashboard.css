@@ -7,7 +7,7 @@ min-height: 771px;display:flex;align-items:center;justify-content:center;positio
 .admin-cal-head{display: flex;align-items: center;justify-content: flex-start;position: relative;margin: 8px 0 0 15px;}
 .admin-cal-title{font-size: 16px;font-weight: 600;color: #000;}
 .admin-cal-nav{position: absolute;right: 0;display: flex;gap: 14px;}
-.admin-cal-nav-btn{width: 44px;height: 44px;border: none;background: transparent;border-radius: 10px;cursor: pointer;color: #111;}
+.admin-cal-nav-btn{width: 44px;height: 44px;border: none;background: transparent;border-radius: 10px;cursor: pointer;color: #000;}
 .admin-cal-nav-btn img{width: auto;height: 16px;}
 .admin-cal-nav-btn:hover{background: rgba(17, 24, 39, 0.06);}
 .admin-cal-dow{display: grid;grid-template-columns: repeat(7, 1fr);gap: 40px;margin: 56px 15px 0px;text-align: center;

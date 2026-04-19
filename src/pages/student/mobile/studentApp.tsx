@@ -1,4 +1,3 @@
-// src/pages/student/mobile/studentApp.tsx
 // 학생화면 라우트
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -17,7 +16,7 @@ import EditSchedule from "./schedule/editSchedule";
 import DetailSchedule from "./schedule/detailSchedule";
 import QuestionsPage from "./questions/questionsPage";
 import VerifyCodePage from "./myPage/verifyCode";
-
+import WithdrawPage from "./myPage/withdraw";
 
 export default function StudentApp(): React.ReactElement {
 	return (
@@ -31,6 +30,7 @@ export default function StudentApp(): React.ReactElement {
 				<Route path="verify" element={<SchoolVerify />} />
 				<Route path="mypage/verify-code" element={<VerifyCodePage />} />
 				<Route path="mypage/career-goals" element={<GoalCompany />} />
+				<Route path="mypage/withdraw" element={<WithdrawPage />} />
 
 				<Route path="schedule/new" element={<NewSchedule />} />
 				<Route path="schedule/:eventId" element={<EditSchedule />} />

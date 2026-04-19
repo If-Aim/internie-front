@@ -1,7 +1,6 @@
-// src/pages/login/mobile/onBoarding.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, sendEmailCode, verifyEmailCode } from "../../../api/client";
+import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, sendMyEmailCode, verifyMyEmailCode } from "../../../api/client";
 import { useTranslation } from "react-i18next";
 import "./onBoarding.css"
 
@@ -150,7 +149,7 @@ export default function OnBoarding(): React.ReactElement {
         setEmailError(null);
         setEmailSentMessage(null);
         try {
-            const res = await sendEmailCode(email);
+            const res = await sendMyEmailCode(email);
 
             if (res.status === "EXISTING_ACCOUNT_FOUND") {
                 alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
@@ -185,7 +184,7 @@ export default function OnBoarding(): React.ReactElement {
         setEmailVerifying(true);
         setEmailError(null);
         try {
-            const res = await verifyEmailCode(email, code);
+            const res = await verifyMyEmailCode(email, code);
 
             if (res.existingAccountFound) {
                 alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");

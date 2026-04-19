@@ -1,9 +1,8 @@
-// src/pages/student/home.tsx
 import { useTranslation } from "react-i18next";
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { api, ApiError, getUserMe, sendEmailCode, verifyEmailCode } from "../../../api/client";
+import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type UserMe, } from "../../../api/client";
 
 import "../../../App.css"; 
 
@@ -543,13 +542,13 @@ function MonthPickerModal({
 type SideMenuProps = {
 	isOpen: boolean;
 	onClose: () => void;
-	userId: number | null;
 	userName: string;
+	userEmail: string;
 	userProfileImg: string;
 	userRoleSet: string[];
 	onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
 };
-function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRequireAuth }: SideMenuProps) {
+function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRoleSet, onRequireAuth }: SideMenuProps) {
 	const navigate = useNavigate();
 	const { t, i18n } = useTranslation();
 	const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
@@ -714,10 +713,11 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 			>
 				<div className="drawer-header">
 					<div className="profile-wrap">
-						<img src={userProfileImg} alt={t("menu.profile")} className="profile-img" />
 						<div className="profile-info">
 							<div className="name">{userName}</div>
+							<div className="email">{userEmail}</div>
 						</div>
+						<img src={userProfileImg} alt={t("menu.profile")} className="profile-img" />
 					</div>
 				</div>
 
@@ -725,10 +725,6 @@ function SideMenu({ isOpen, onClose, userName, userProfileImg, userRoleSet, onRe
 					<button className="drawer-menu-item" onClick={() => {onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
 						<img className="icon" src="/icons/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
 						<span>{t("menu.mypage")}</span>
-					</button>
-					<button className="drawer-menu-item" onClick={handleServicePreparing}>
-						<img className="icon" src="/icons/arrow-refresh-01.svg" alt={t("menu.recent")} />{" "}
-						<span>{t("menu.recent")}</span>
 					</button>
 					<button className="drawer-menu-item" onClick={handleServicePreparing}>
 						<img className="icon" src="/icons/settings.svg" alt={t("menu.settings")} />{" "}
@@ -985,7 +981,8 @@ function Home(): React.ReactElement {
 		setEmailSentMessage(null);
 
 		try {
-			const res = await sendEmailCode(email);
+			const lang = i18n.resolvedLanguage ?? i18n.language ?? "ko";
+			const res = await sendMyEmailCode(email, lang);
 
 			if (res.status === "EXISTING_ACCOUNT_FOUND") {
 				alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
@@ -1031,7 +1028,7 @@ function Home(): React.ReactElement {
 		setEmailError(null);
 
 		try {
-			const res = await verifyEmailCode(email, code);
+			const res = await verifyMyEmailCode(email, code);
 
 			if (res.existingAccountFound) {
 				alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
@@ -1045,11 +1042,12 @@ function Home(): React.ReactElement {
 				return;
 			}
 
-			const me = await getUserMe();
+			const nextMe = await getUserMe();
+			setMe(nextMe);
 			setNeedsEmailVerification(false);
 			setEmailVerifyPopupOpen(false);
 			setEmailForm({
-				email: (me.email ?? "").trim(),
+				email: (nextMe.email ?? "").trim(),
 				code: "",
 			});
 			setEmailSentMessage(null);
@@ -1142,22 +1140,22 @@ function Home(): React.ReactElement {
 	const pendingUpdatedEventRef = React.useRef<any>(null);
 	const isSelectedLocked = !!selectedItem?.isLocked;
 
-	const [currentUserId, setCurrentUserId] = React.useState<number | null>(null);
-	const [userName, setUserName] = React.useState<string>("User");
-	const [userProfileImg, setUserProfileImg] = React.useState<string>(
-		"/internie_mascot_normal.png"
-	);
-	const [userRoleSet, setUserRoleSet] = React.useState<string[]>([]);
+	const [me, setMe] = React.useState<UserMe | null>(null);
 	const [profileTick, setProfileTick] = React.useState(0);
+	const userName = (me?.name ?? "").trim() || "User";
+	const userEmail = (me?.email ?? "").trim();
+	const userRoleSet = Array.isArray(me?.roleSet) ? me.roleSet : [];
 
-	function isDefaultProfileImage(url?: string | null) {
-		if (!url) return true;
+	const userProfileImg = React.useMemo(() => {
+		const profile = me?.profileImage;
 
-		const lowered = url.toLowerCase();
-		if (lowered.includes("default")) return true;
+		if (!profile) return "/internie_mascot_normal.png";
 
-		return false;
-	}
+		const lowered = profile.toLowerCase();
+		if (lowered.includes("default")) return "/internie_mascot_normal.png";
+
+		return profile;
+	}, [me]);
 
 	React.useEffect(() => {
 		const onUpdated = () => setProfileTick((v) => v + 1);
@@ -1167,43 +1165,32 @@ function Home(): React.ReactElement {
 
 	React.useEffect(() => {
 		(async () => {
-		
 			if (!isAuthed) {
-				setCurrentUserId(null);
-				setUserName("User");
-				setUserProfileImg("/internie_mascot_normal.png");
-				setUserRoleSet([]);
+				setMe(null);
+				setNeedsEmailVerification(false);
+				setEmailVerifyPopupOpen(false);
+				setEmailForm({ email: "", code: "" });
+				setEmailSentMessage(null);
+				setEmailError(null);
 				return;
 			}
+
 			try {
-				const me = await getUserMe();
-				setCurrentUserId(me.userId);
-				setUserName(me.name ?? "User");
-				setUserRoleSet(Array.isArray(me.roleSet) ? me.roleSet : []);
+				const nextMe = await getUserMe();
+				setMe(nextMe);
 
-				const profile = me.profileImage;
-				setUserProfileImg(
-				isDefaultProfileImage(profile)
-					? "/internie_mascot_normal.png"
-					: (profile ?? "/internie_mascot_normal.png")
-				);
-
-				const needsVerify = !me.email || me.emailVerified !== true;
+				const needsVerify = !nextMe.email || nextMe.emailVerified !== true;
 				setNeedsEmailVerification(needsVerify);
 				setEmailVerifyPopupOpen(needsVerify);
 				setEmailForm({
-					email: (me.email ?? "").trim(),
+					email: (nextMe.email ?? "").trim(),
 					code: "",
 				});
 				setEmailSentMessage(null);
 				setEmailError(null);
-
 			} catch (e) {
 				console.error("getUserMe failed:", e);
-				setCurrentUserId(null);
-				setUserName("User");
-				setUserProfileImg("/internie_mascot_normal.png");
-				setUserRoleSet([]);
+				setMe(null);
 				setNeedsEmailVerification(false);
 				setEmailVerifyPopupOpen(false);
 				setEmailForm({ email: "", code: "" });
@@ -1422,8 +1409,8 @@ function Home(): React.ReactElement {
 				<SideMenu
 					isOpen={isMenuOpen}
 					onClose={() => setMenuOpen(false)}
-					userId={currentUserId}
 					userName={userName}
+					userEmail={userEmail}
 					userProfileImg={userProfileImg}
 					userRoleSet={userRoleSet}
 					onRequireAuth={(path, action) => requireAuth(path, action)}
@@ -1607,7 +1594,7 @@ function Home(): React.ReactElement {
 								onClick={handleVerifyEmailCode}
 								disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}
 							>
-								{emailVerifying ? "인증중" : "인증하기"}
+								{emailVerifying ? "인증 중" : "인증하기"}
 							</button>
 						</div>
 					</div>

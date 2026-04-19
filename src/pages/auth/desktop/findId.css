@@ -1,0 +1,58 @@
+.find-id-desktop-page { min-height: 100dvh; background: #F0F6FF; display: flex; flex-direction: column; }
+.find-id-desktop-header { position: sticky; top: 0; z-index: 50; height: 66px; background: #fff; display: flex; align-items: center; border-bottom: 1px solid #ddd; }
+.find-id-desktop-header-inner { width: min(1200px, calc(100% - 64px)); margin: 0 85px; display: flex; align-items: center; }
+.find-id-desktop-header-logo { display: inline-block; font-size: 20px; line-height: 1; font-weight: 700; color: var(--primary); }
+
+.find-id-desktop-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px 56px; }
+.find-id-desktop-container { width: 492px; max-width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 54px 60px 56px; text-align: center; }
+
+.find-id-desktop-title { margin: 0; font-size: 24px; line-height: 32px; font-weight: 700; color: #000; }
+.find-id-desktop-subtitle { display: none; }
+
+.find-id-desktop-card { display: flex; flex-direction: column; gap: 18px; margin-top: 42px; }
+.find-id-desktop-field { display: flex; flex-direction: column; gap: 11px; }
+.find-id-desktop-label { font-size: 16px; line-height: 20px; font-weight: 600; color: #666; text-align: left; }
+
+.find-id-desktop-inline { display: flex; gap: 10px; }
+.find-id-desktop-inline .find-id-desktop-input { flex: 1 1 auto; }
+
+.find-id-desktop-input { width: 100%; height: 48px; border: 1px solid #DDD; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; color: #000; outline: none; }
+.find-id-desktop-input::placeholder { color: #d0d0d0; }
+.find-id-desktop-input:focus { border-color: #CFCFCF; }
+.find-id-desktop-input:disabled { background: #F6F6F6; color: #8a8a8a; }
+
+.find-id-desktop-inline-btn { flex: 0 0 114px; height: 48px; border: none; border-radius: 10px; background: #F1F1F1; color: #666; font-size: 14px; font-weight: 700; cursor: pointer; }
+.find-id-desktop-inline-btn:not(:disabled) { background: #BDD8FF; color: #0B57FF; }
+.find-id-desktop-inline-btn:disabled { cursor: not-allowed; }
+
+.find-id-desktop-info { margin-top: -6px; font-size: 12px; line-height: 18px; font-weight: 500; color: #2E7D32; text-align: left; }
+.find-id-desktop-help { margin-top: -6px; font-size: 12px; line-height: 18px; font-weight: 500; color: #7a7a7a; text-align: left; }
+.find-id-desktop-error { margin-top: -4px; font-size: 12px; line-height: 18px; font-weight: 600; color: #D93025; text-align: left; }
+
+.find-id-desktop-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.find-id-desktop-btn { width: 100%; height: 50px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.find-id-desktop-btn.primary { background: #F6F6F6; color: #6B6B6B; }
+.find-id-desktop-btn.primary:not(:disabled) { background: var(--primary); color: #fff; }
+.find-id-desktop-btn.ghost { background: #BDD8FF; color: #000; }
+.find-id-desktop-btn:disabled { cursor: not-allowed; }
+
+.find-id-desktop-complete { display: flex; flex-direction: column; gap: 10px; }
+.find-id-desktop-complete-title { font-size: 18px; line-height: 24px; font-weight: 700; color: #000; text-align: left; }
+
+.find-id-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center; z-index: 100; background: rgba(107, 107, 107, 0.50); backdrop-filter: blur(5px);}
+.find-id-modal { width: 656px; max-width: calc(100% - 32px); background: #fff; border-radius: 18px; padding: 60px 40px 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); text-align: center; }
+.find-id-modal-icon { width: 66px; height: 66px; margin: 0 auto 28px; border-radius: 50%; background: #1E6BFF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; }
+.find-id-modal-text { font-size: 20px; line-height: 30px; font-weight: 500; color: #000; }
+.find-id-modal-actions { display: flex; justify-content: center; gap: 32px; margin-top: 44px; }
+.find-id-modal-btn { width: 166px; height: 56px; border: none; border-radius: 10px; background: #D9D9D9; color: #666; font-size: 16px; font-weight: 700; cursor: pointer; }
+.find-id-modal-btn.primary { background: #1E6BFF; color: #fff; }
+
+@media (max-width: 640px) {
+    .find-id-desktop-main { padding: 24px 16px 40px; }
+    .find-id-desktop-container { padding: 40px 24px 32px; }
+    .find-id-desktop-inline { flex-direction: column; }
+    .find-id-desktop-inline-btn { flex: none; width: 100%; }
+    .find-id-modal { padding: 40px 24px 28px; }
+    .find-id-modal-actions { flex-direction: column; gap: 12px; }
+    .find-id-modal-btn { width: 100%; }
+}

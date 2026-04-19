@@ -30,7 +30,9 @@ padding: 20px 20px calc(60px + 32px + env(safe-area-inset-bottom)); box-sizing: 
 .mypage-menu-right{display: flex;align-items: center;gap: 5px;}
 .mypage-menu-value{font-size: 12px;font-weight: 600;justify-self: right; color: #A2A2A2;}
 .mypage-menu-chevron{width: 18px;height: 18px;transform:rotate(-90deg);}
+.mypage-withdraw-link{margin-top:30px;background: none; border:none; color: #A2A2A2; font-size: 16px; font-weight: 600; text-decoration-line: underline;}
 .mypage-cards.bottom-spacer {height: 30px;width: 100%;flex-shrink: 0;}
+
 
 .mypage-card-title {font-size: 16px; font-weight: 700; color: #000;}
 .mypage-cardgrid {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;margin:0 8px;}
@@ -51,7 +53,7 @@ border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-
 .user-verify-code .profile-edit-field{margin-left:12px; gap:32px;}
 .verify-code-actions{position:fixed;left:20px;right:20px; bottom: calc(53px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;z-index:30;}
 .submit-code { width: 100%; height: 60px; border: 0;border-radius: 10px; background: var(--primary); color: #ffffff; font-size: 16px; font-weight: 700;}
-.submit-code-secondary{background:#fff;border:1px solid #d9d9d9;color:#111;}
+.submit-code-secondary{background:#fff;border:1px solid #d9d9d9;color:#000;}
 .ob-error{margin-top: 8px; margin-left: 12px; font-size: 16px; color: #000; font-weight: 700;}
 .verify-success-message{margin:8px 0 0 12px;font-size:16px;line-height:20px;color:#000;opacity:0;animation:verifyFadeOut 5s ease forwards;}
 @keyframes verifyFadeOut{0%{opacity:0;transform:translateY(2px);}10%{opacity:1;transform:translateY(0);}75%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-2px);}}

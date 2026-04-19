@@ -1,4 +1,3 @@
-/* src/pages/student/myPage/certificates.css */
 .cert-s-page{min-height: 100dvh;background: #F0F6FF;display: flex;flex-direction: column;}
 .cert-s-header{height: 50px;display: grid;grid-template-columns: 44px 1fr 44px;align-items: center;padding: 24px 12px 0;}
 

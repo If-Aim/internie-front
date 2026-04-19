@@ -1,4 +1,3 @@
-// src/pages/student/studentApp.tsx
 import React from "react";
 import MobileStudentApp from "./mobile/studentApp";
 import DesktopStudentApp from "./desktop/studentApp";

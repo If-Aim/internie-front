@@ -1,4 +1,3 @@
-// src/pages/student/mobile/myPage/myPage.tsx
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
@@ -39,9 +38,18 @@ export default function MyPage({ onLogout }: Props) {
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	if (location.pathname.endsWith("/mypage/verify")) {
+	const isSubPage =
+    location.pathname.endsWith("/mypage/verify") ||
+    location.pathname.endsWith("/mypage/modify") ||
+    location.pathname.endsWith("/mypage/career-goals") ||
+    location.pathname.endsWith("/mypage/cert") ||
+    location.pathname.endsWith("/mypage/verify-code") ||
+    location.pathname.endsWith("/mypage/withdraw");
+
+	if (isSubPage) {
 		return <Outlet />;
-	}	
+	}
+
   	const [me, setMe] = React.useState<UserMe | null>(null);
 
 	const displayName = me?.name ?? "";
@@ -288,6 +296,9 @@ export default function MyPage({ onLogout }: Props) {
 						</span>
 					</button>
 				</div>
+				<button type="button" className="mypage-withdraw-link" onClick={() => navigate("withdraw")}>
+					{t("mypage.Withdraw")}
+				</button>
 				<div className="bottom-spacer"></div>
 			</section>
 
@@ -304,7 +315,7 @@ export default function MyPage({ onLogout }: Props) {
 
 						<div className="mypage-modal-body">
 							<span className="mypage-modal-title">{t("mypage_modal.title")}</span>
-							<span className="mypage-modal-reason">사유:<br/>{rejectReasonText}</span> {/* 추후 사유 노출 수정 */}
+							<span className="mypage-modal-reason">사유:<br/>{rejectReasonText}</span> 
 						</div>
 						<button type="button" className="mypage-modal-primary" onClick={goReVerify} >
 							{t("mypage_modal.reVerify")}

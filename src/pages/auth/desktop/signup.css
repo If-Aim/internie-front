@@ -1,0 +1,48 @@
+.signup-desktop-page { min-height: 100vh; background: #F0F6FF; display: flex; flex-direction: column; }
+.signup-desktop-header { position: sticky; top: 0; z-index: 50; height: 66px; background: #fff; display: flex; align-items: center; border-bottom: 1px solid #ddd; }
+.signup-desktop-header-inner { width: min(1200px, calc(100% - 64px)); margin: 0 85px; display: flex; align-items: center; }
+.signup-desktop-header-logo { display: inline-block; font-size: 20px; line-height: 1; font-weight: 700; color: var(--primary); }
+
+.signup-desktop-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px 56px; }
+.signup-desktop-container { width: 492px; max-width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 54px 60px 46px; text-align: center; }
+
+.signup-desktop-title { margin: 0; font-size: 24px; line-height: 32px; font-weight: 700; color: #000; }
+.signup-desktop-subtitle { margin: 8px 0 42px; font-size: 16px; line-height: 20px; font-weight: 500; color: #6B6B6B; }
+.signup-desktop-subtitle-link { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 16px; line-height: 20px; font-weight: 700; color: var(--primary); cursor: pointer; }
+.signup-desktop-card { display: flex; flex-direction: column; gap: 18px; }
+.signup-desktop-field { display: flex; flex-direction: column; gap: 11px; }
+.signup-desktop-label { font-size: 16px; line-height: 20px; font-weight: 500; color: #6B6B6B; text-align: left; }
+
+.signup-desktop-input { width: 100%; height: 48px; border: 1px solid #DDD; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; color: #000; outline: none; }
+.signup-desktop-input::placeholder { color: #d0d0d0; }
+.signup-desktop-input:focus { border-color: #CFCFCF; }
+.signup-desktop-input-wrap { position: relative; flex: 1 1 auto; }
+.signup-desktop-inline .signup-desktop-input-wrap { flex: 1 1 auto; }
+.signup-desktop-inline .signup-desktop-input { width: 100%; }
+.signup-desktop-input-wrap .signup-desktop-input { width: 100%; }
+.signup-desktop-input.has-inner-timer { padding-right: 72px; }
+.signup-desktop-input-timer { position: absolute; top: 50%; right: 18px; transform: translateY(-50%); font-size: 16px; line-height: 20px; font-weight: 500; color: var(--primary); pointer-events: none; }
+.signup-desktop-input:disabled { background: #F6F6F6; color: #888; cursor: not-allowed; }
+
+.signup-desktop-inline {display:flex;gap:10px;}
+.signup-desktop-inline-btn {flex:0 0 112px;height:48px;border:none;border-radius:10px;background:#BDD8FF;color:var(--primary);font-size:14px;font-weight:500;cursor:pointer;}
+.signup-desktop-inline-btn:disabled {cursor:not-allowed; background: #F6F6F6; color: #6B6B6B;}
+.signup-desktop-info {margin-top:-6px;font-size:12px;line-height:18px;font-weight:500;color:#2E7D32;text-align:left;}
+.signup-desktop-info.is-error{ color: #D93025; }
+.signup-desktop-help { margin-top: -6px; font-size: 12px; line-height: 18px; font-weight: 500; color: #FF3D3D; text-align: left; }
+.signup-desktop-error { margin-top: -4px; font-size: 12px; line-height: 18px; font-weight: 600; color: #D93025; text-align: left; }
+
+.signup-desktop-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.signup-desktop-btn { width: 100%; height: 50px; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.signup-desktop-btn.primary { background: #F6F6F6; color: #6B6B6B; }
+.signup-desktop-btn.primary:not(:disabled) { background: var(--primary); color: #fff; }
+.signup-desktop-btn.ghost { background: #BDD8FF; color: #000; }
+.signup-desktop-btn:disabled { cursor: not-allowed; }
+
+.signup-desktop-login-link { margin-top: 8px; font-size: 14px; line-height: 1.5; color: rgba(0, 0, 0, 0.45); }
+.signup-desktop-login-link button { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 14px; line-height: 1.5; font-weight: 700; color: #000; text-decoration: underline; cursor: pointer; }
+
+@media (max-width: 640px) {
+    .signup-desktop-main { padding: 24px 16px 40px; }
+    .signup-desktop-container { padding: 40px 24px 32px; }
+}

@@ -1,6 +1,5 @@
-// src/pages/student/desktop/studentApp.tsx
 import React from "react";
-import Login from "../../login/login";
+import Login from "../../auth/auth.tsx";
 import MobileStudentApp from "../mobile/studentApp";
 
 export default function StudentApp(): React.ReactElement {

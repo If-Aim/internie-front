@@ -17,7 +17,7 @@
 .client-admin-topbar-left{display:flex;align-items:center;gap: 12px;}
 .client-admin-logo{height: 48px;width: auto;display:block;}
 .client-admin-topbar-tabs{display:flex;gap: 4px;align-items:center;justify-content:center;}
-.client-admin-tab{width:120px;text-decoration: none;color: #111;font-weight: 700;font-size: 20px;line-height:30px;padding: 10px 6px;position: relative;display:flex;align-items:center;justify-content: center;}
+.client-admin-tab{width:120px;text-decoration: none;color: #000;font-weight: 700;font-size: 20px;line-height:30px;padding: 10px 6px;position: relative;display:flex;align-items:center;justify-content: center;}
 .client-admin-tab--active{color: var(--primary);}
 
 .client-admin-tab--active::after{content:"";position:absolute;left: 0;right: 0;bottom: 2px;height: 3px;border-radius: 3px;}

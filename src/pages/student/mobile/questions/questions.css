@@ -1,4 +1,3 @@
-/* src/styles/questions.css */
 .screen {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #F0F6FF;
   overflow-y: auto; 
     -webkit-overflow-scrolling: touch; 
@@ -30,8 +29,6 @@ border-radius: 50%;background: var(--primary);border: none;display: flex;justify
 .mic-button img {width: 40px;height: 40px;}
 .recording-mic-btn {position:fixed;bottom:34px;width: 105px;height: 105px;border-radius: 50%;border: none;background: #ffffff;display: flex;align-items: center;justify-content: center;z-index: 998;}
 .recording-mic-btn img {width: 40px;height: 40px;z-index: 999;}
-/* .recording-mic-btn::before {content: "";position: absolute;width: 100%;height: 100%;border-radius: 50%;border: 14px solid transparent;pointer-events: none;} */
-/* .recording-mic-btn--disabled::before,.recording-mic-btn:disabled::before{border-color: #CCCCCC;} */
 
 /* 마이크 바깥 하늘색 링 */
 .recording-mic-ring {position: fixed;bottom:20px;display: inline-flex;align-items: center;justify-content: center;width: 133px;height: 133px;
@@ -91,7 +88,7 @@ justify-content: center;box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);}
 .completion-page {width: 100%;display: flex;flex-direction: column;justify-content: space-between;
 padding: 0 20px 50px 20px;background: #F0F6FF;text-align: center;}
 .completion-content {display: flex;flex-direction: column;align-items: center;justify-content: center;margin-top: 180px;}
-.completion-title {font-size: 24px;font-weight: 700;color: #111;line-height: 20px;margin-bottom: 21px;}
+.completion-title {font-size: 24px;font-weight: 700;color: #000;line-height: 20px;margin-bottom: 21px;}
 .completion-desc {font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);line-height: 28px;margin: 0;}
 .loading-dots {display: flex;justify-content: center;align-items: center;gap: 11px;margin-bottom: 20px;}
 .loading-dot {width: 12px;height: 12px;border-radius: 9999px;background: var(--primary); animation: loading-dot-bounce 0.9s infinite ease-in-out;}

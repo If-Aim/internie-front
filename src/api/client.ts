@@ -83,45 +83,26 @@ async function requestWithAutoRefresh(
     return res;
 }
 
-// 로그인 응답
-export type LoginResponse = {
-    onboardingCompleted: boolean;
-    linkedToExistingAccount: boolean;
-    message: string | null;
-};
-
-export async function loginWithKakao(code: string, redirectUri?: string): Promise<LoginResponse> {
-    const body: any = redirectUri ? { code, redirectUri } : { code };
-
-    const res = await fetch(buildUrl("/auth/kakao"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+export async function apiPublic(
+    path: string,
+    init: RequestInit = {}
+): Promise<Response> {
+    return fetch(buildUrl(path), {
+        ...init,
         credentials: "include",
-        body: JSON.stringify(body),
     });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-    }
-
-    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!auth) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/kakao response", bodyText);
-    }
-    localStorage.setItem("accessToken", auth);
-
-    return (await res.json()) as LoginResponse;
 }
 
-export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
-    const res = await fetch(buildUrl("/auth/google"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+export async function apiPublicJson<T = unknown>(
+    path: string,
+    init: RequestInit = {}
+): Promise<T> {
+    const res = await fetch(buildUrl(path), {
+        ...init,
         credentials: "include",
-        body: JSON.stringify({ idToken }),
     });
+
+    if (res.status === 204) return undefined as T;
 
     if (!res.ok) {
         const bodyText = await res.text().catch(() => "");
@@ -134,27 +115,15 @@ export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
         );
     }
 
-    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!auth) {
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) {
         const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/google response", bodyText);
+        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
     }
 
-    localStorage.setItem("accessToken", auth);
-
-    return (await res.json()) as LoginResponse;
+    return (await res.json()) as T;
 }
 
-export async function apiPublic(
-    path: string,
-    init: RequestInit = {}
-): Promise<Response> {
-    return fetch(buildUrl(path), {
-        ...init,
-        credentials: "include",
-    });
-}
-/* Auth */ 
 export async function api<T = unknown>(
 	path: string,
 	init: RequestInit = {},
@@ -187,6 +156,317 @@ export async function api<T = unknown>(
 	return (await res.json()) as T;
 }
 
+/* Auth */ 
+// 회원가입 요청
+export type SignupRequest = {
+    loginId: string;
+    password: string;
+    email?: string;
+};
+
+// 로그인 요청
+export type LoginRequest = {
+    loginId: string;
+    password: string;
+};
+
+// 아이디 중복확인
+export type LoginIdAvailabilityResponse = {
+    available: boolean;
+    message: string;
+};
+
+// 로그인 응답
+export type LoginResponse = {
+    onboardingCompleted: boolean;
+    linkedToExistingAccount: boolean;
+    message: string | null;
+};
+
+// 로컬 회원가입
+export async function signup(input: SignupRequest): Promise<void> {
+    const res = await fetch(buildUrl("/auth/signup"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+            loginId: input.loginId,
+            password: input.password,
+            email: input.email ?? ""
+        }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+}
+
+// 로컬 아이디 중복 확인
+export async function checkLoginIdAvailability(
+    loginId: string
+): Promise<LoginIdAvailabilityResponse> {
+    const qs = new URLSearchParams({
+        loginId: loginId.trim(),
+    }).toString();
+
+    return apiPublicJson<LoginIdAvailabilityResponse>(`/auth/login-id/check?${qs}`, {
+        method: "GET",
+    });
+}
+
+// 로컬 로그인 
+export async function loginWithLocal(input: LoginRequest): Promise<LoginResponse> {
+    const res = await fetch(buildUrl("/auth/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+            loginId: input.loginId,
+            password: input.password,
+        }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/login response", bodyText);
+    }
+
+    localStorage.setItem("accessToken", auth);
+
+    return (await res.json()) as LoginResponse;
+}
+
+export type FindLoginIdCodeRequest = {
+    email: string;
+    language?: string;
+};
+
+export type FindLoginIdVerifyRequest = {
+    email: string;
+    code: string;
+    language?: string;
+};
+
+export type FindLoginIdResponse = {
+    maskedEmail: string;
+    message: string;
+};
+
+export type SendResetPasswordCodeRequest = {
+    loginId: string;
+    email: string;
+    language?: string;
+};
+
+export type VerifyResetPasswordCodeRequest = {
+    loginId: string;
+    email: string;
+    code: string;
+    language?: string;
+};
+
+export type ResetPasswordRequest = {
+    loginId: string;
+    email: string;
+    resetToken: string;
+    newPassword: string;
+};
+
+export type PasswordRecoveryResponse = {
+    maskedEmail: string;
+    message: string;
+};
+
+export type PasswordResetVerifyResponse = {
+    maskedEmail: string;
+    message: string;
+    resetToken: string;
+};
+
+// 아이디 찾기
+export async function sendFindLoginIdCode(
+    email: string,
+    language?: string
+): Promise<FindLoginIdResponse> {
+    const res = await apiPublic("/auth/login-id/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, language }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+    }
+
+    return (await res.json()) as FindLoginIdResponse;
+}
+
+export async function verifyFindLoginIdCode(
+    email: string,
+    code: string,
+    language?: string
+): Promise<FindLoginIdResponse> {
+    const res = await apiPublic("/auth/login-id/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, language }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+    }
+
+    return (await res.json()) as FindLoginIdResponse;
+}
+
+// 비밀번호 재설정
+export async function sendResetPasswordCode(
+    input: SendResetPasswordCodeRequest
+): Promise<PasswordRecoveryResponse> {
+    return apiPublicJson<PasswordRecoveryResponse>("/auth/password/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            loginId: input.loginId.trim(),
+            email: input.email.trim(),
+            language: input.language,
+        }),
+    });
+}
+
+export async function verifyResetPasswordCode(
+    input: VerifyResetPasswordCodeRequest
+): Promise<PasswordResetVerifyResponse> {
+    return apiPublicJson<PasswordResetVerifyResponse>("/auth/password/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            loginId: input.loginId.trim(),
+            email: input.email.trim(),
+            code: input.code.trim(),
+            language: input.language,
+        }),
+    });
+}
+
+export async function resetPasswordWithToken(
+    input: ResetPasswordRequest
+): Promise<void> {
+    await apiPublicJson<void>("/auth/password/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            loginId: input.loginId.trim(),
+            email: input.email.trim(),
+            resetToken: input.resetToken.trim(),
+            newPassword: input.newPassword,
+        }),
+    });
+}
+
+
+// 카카오 로그인
+export async function loginWithKakao(code: string, redirectUri?: string): Promise<LoginResponse> {
+    const body: any = redirectUri ? { code, redirectUri } : { code };
+
+    const res = await fetch(buildUrl("/auth/kakao"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+    }
+
+    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/kakao response", bodyText);
+    }
+    localStorage.setItem("accessToken", auth);
+
+    return (await res.json()) as LoginResponse;
+}
+
+// 구글 로그인
+export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
+    const res = await fetch(buildUrl("/auth/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ idToken }),
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, "No Authorization header in /auth/google response", bodyText);
+    }
+
+    localStorage.setItem("accessToken", auth);
+
+    return (await res.json()) as LoginResponse;
+}
+
 // 로그아웃
 export async function logout(): Promise<void> {
 	const token = localStorage.getItem("accessToken");
@@ -198,6 +478,78 @@ export async function logout(): Promise<void> {
 			Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
 		},
 	});
+}
+
+// 회원가입용 이메일 인증
+export async function sendEmailCode(
+    email: string,
+    language?: string
+): Promise<SendEmailCodeResponse> {
+    return apiPublicJson<SendEmailCodeResponse>("/auth/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: email.trim(),
+            language,
+        }),
+    });
+}
+
+export async function verifyEmailCode(
+    email: string,
+    code: string
+): Promise<VerifyEmailCodeResponse> {
+    return apiPublicJson<VerifyEmailCodeResponse>("/auth/email/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: email.trim(),
+            code: code.trim(),
+        }),
+    });
+}
+
+// 로그인 후 이메일 인증
+export async function sendMyEmailCode(
+    email: string,
+    language?: string
+): Promise<SendEmailCodeResponse> {
+    return api<SendEmailCodeResponse>("/users/me/email/send", {
+        method: "POST",
+        body: JSON.stringify({
+            email: email.trim(),
+            language,
+        }),
+    });
+}
+
+export async function verifyMyEmailCode(
+    email: string,
+    code: string
+): Promise<VerifyEmailCodeResponse> {
+    return api<VerifyEmailCodeResponse>("/users/me/email/verify", {
+        method: "POST",
+        body: JSON.stringify({
+            email: email.trim(),
+            code: code.trim(),
+        }),
+    });
+}
+
+// 회원 탈퇴
+export type WithdrawRequest = {
+    reason: string;
+    detail?: string;
+};
+
+export async function withdraw(input: WithdrawRequest): Promise<void> {
+    await api<void>("/auth/me", {
+        method: "DELETE",
+        body: JSON.stringify({
+            reason: input.reason,
+            detail: input.detail ?? ""
+        })
+    });
 }
 
 // 업로드용 API
@@ -315,13 +667,14 @@ export type UserBase = {
 };
 
 export type SubmitOnboardingResponse = UserBase;
-
 export type UserMe = UserBase;
 export type EmailSendStatus = "CODE_SENT" | "EXISTING_ACCOUNT_FOUND";
+export type ExistingAccountType = "LOCAL" | "GOOGLE" | "KAKAO" | "UNKNOWN";
 
 export type SendEmailCodeResponse = {
     status: EmailSendStatus;
     maskedEmail: string;
+    existingAccountType: ExistingAccountType | null;
 };
 
 export type VerifyEmailCodeResponse = {
@@ -329,7 +682,6 @@ export type VerifyEmailCodeResponse = {
     existingAccountFound: boolean;
     maskedEmail: string;
 };
-
 
 export function getUserIdFromAccessToken(): string | null {
 	const token = localStorage.getItem("accessToken");
@@ -424,23 +776,6 @@ export async function selectMySchool(input: SelectMySchoolInput): Promise<Select
 	});
 }
 
-// 이메일 인증
-export async function sendEmailCode(email: string): Promise<SendEmailCodeResponse> {
-    return api<SendEmailCodeResponse>("/auth/email/send", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-    });
-}
-
-export async function verifyEmailCode(email: string, code: string): Promise<VerifyEmailCodeResponse> {
-    return api<VerifyEmailCodeResponse>("/auth/email/verify", {
-        method: "POST",
-        body: JSON.stringify({ email, code }),
-    });
-}
-
-
-
 // 재학생 인증
 export type ApplyVerificationResponse = UserBase;
 
@@ -516,11 +851,18 @@ export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<
 export async function updateMyProfileImage(file: File): Promise<UserMe> {
     const formData = new FormData();
 
-    formData.append("imagefile", file);
     formData.append("imageFile", file);
 
     return apiUpload<UserMe>("/users/me/profile-image", formData, { method: "PATCH" });
 }
+
+// 프로필 사진 삭제
+export async function deleteMyProfileImage(): Promise<UserMe> {
+    return api<UserMe>("/users/me/profile-image", {
+        method: "DELETE",
+    });
+}
+
 
 // 점프기관 목록 조회 (점프학생 전용)
 export async function getMyJumpOrganizations(): Promise<JumpOrganization[]> {
@@ -926,13 +1268,15 @@ export async function getEventDaysByMonth(y: string, m: string): Promise<EventDa
 }
 
 // 에러 처리
-function parseErrorBody(bodyText: string): { message?: string; code?: string } {
+function parseErrorBody(bodyText: string): { message?: string; code?: string; path?: string; status?: number } {
     if (!bodyText) return {};
     try {
         const parsed = JSON.parse(bodyText);
         return {
             message: parsed?.message,
-            code: parsed?.clientExceptionCode ?? parsed?.code,
+            code: parsed?.clientExceptionCode ?? parsed?.code ?? parsed?.error,
+            path: parsed?.path,
+            status: typeof parsed?.status === "number" ? parsed.status : undefined,
         };
     } catch {
         return {};
@@ -943,12 +1287,14 @@ export class ApiError extends Error {
     status: number;
     bodyText?: string;
     code?: string;
+    path?: string;
 
-    constructor(status: number, message: string, bodyText?: string, code?: string) {
+    constructor(status: number, message: string, bodyText?: string, code?: string, path?: string) {
         super(message);
         this.name = "ApiError";
         this.status = status;
         this.bodyText = bodyText;
         this.code = code;
+        this.path = path;
     }
 }

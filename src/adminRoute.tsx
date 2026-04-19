@@ -1,4 +1,3 @@
-// src/adminRoute.tsx
 // 관리자용 protectedRoute
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";

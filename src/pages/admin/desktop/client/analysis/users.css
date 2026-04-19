@@ -160,11 +160,11 @@ display: inline-flex; align-items: center; justify-content: center; }
 /* ===== 학생 삭제 모달 ===== */
 .client-users-modal-dim { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .client-users-modal { width: 420px; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-.client-users-modal-title { font-size: 18px; font-weight: 800; color: #111; }
+.client-users-modal-title { font-size: 18px; font-weight: 800; color: #000; }
 .client-users-modal-desc { margin-top: 8px; font-size: 14px; color: #666; }
 .client-users-modal-error { margin-top: 12px; font-size: 13px; font-weight: 700; color: #d33; }
 .client-users-modal-actions { margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end; }
 .client-users-modal-btn { height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #e6e6e6; background: #fff; font-weight: 800; cursor: pointer; } 
-.client-users-modal-btn.is-cancel { color: #111; } 
+.client-users-modal-btn.is-cancel { color: #000; } 
 .client-users-modal-btn.is-danger { border: none; background: #ff3b30; color: #fff; }
 .client-users-modal-btn:disabled { opacity: 0.6; cursor: default; }

@@ -1,4 +1,3 @@
-// src/pages/student/mobile/myPage/schoolVerify.tsx
 // 재학생 인증 페이지 
 import React from "react";
 import { useNavigate } from "react-router-dom";

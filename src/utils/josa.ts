@@ -1,4 +1,4 @@
-// src/utils/josa.ts (질문 조사 치환)
+// 질문 조사 치환
 export function hasBatchim(word: string) {
     if (!word) return false;
     const target = word.trim();
