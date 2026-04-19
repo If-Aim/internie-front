@@ -37,15 +37,6 @@ export default function Login(): React.ReactElement {
     const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
     const canLogin = loginId.trim().length > 0 && password.length > 0;
 
-    const handleGoogleClick = () => {
-        const target = googleBtnRef.current?.querySelector("div[role='button']") as HTMLDivElement | null;
-        if (target) {
-            target.click();
-            return;
-        }
-        alert(isKo ? "구글 로그인 버튼을 아직 불러오지 못했습니다." : "Google login button is not ready yet.");
-    };
-
     const handleLocalLogin = async () => {
         const trimmedLoginId = loginId.trim();
 
@@ -209,10 +200,9 @@ export default function Login(): React.ReactElement {
                         </div>
 
                         <div className="login-desktop-socials">
-                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} aria-label={t("login.startWithGoogleAria")}>
-                                <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
-                                <span>{t("login.loginWithGoogle")}</span>
-                            </button>
+                            <div className="login-google-wrap">
+                                <div ref={googleBtnRef} id="google-login-btn-desktop" />
+                            </div>
 
                             <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
                                 <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
@@ -225,9 +215,6 @@ export default function Login(): React.ReactElement {
                             <button type="button" onClick={() => navigate("/signup")}>{t("login.signupLink")}</button>
                         </div>
 
-                        <div style={{ marginTop: 12 }}>
-                            <div ref={googleBtnRef} id="google-login-btn-desktop" />
-                        </div>
                     </section>
                 </div>
             </main>

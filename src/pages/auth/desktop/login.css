@@ -31,6 +31,8 @@
 
 .login-desktop-btn { width: 100%; height: 50px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .login-desktop-btn.primary { margin-top: 11px; background: #F6F6F6; color: #6B6B6B; }
+.login-google-wrap { width: 100%; }
+.login-google-wrap > div { width: 100%; }
 .login-desktop-btn.google { background: #fff; color: #6B6B6B; border: 1px solid #ddd; }
 .login-desktop-btn.kakao { background: #fee500; color: #000; }
 
