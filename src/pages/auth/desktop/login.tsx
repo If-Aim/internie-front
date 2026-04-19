@@ -225,7 +225,7 @@ export default function Login(): React.ReactElement {
                             <button type="button" onClick={() => navigate("/signup")}>{t("login.signupLink")}</button>
                         </div>
 
-                        <div style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }} aria-hidden="true">
+                        <div style={{ marginTop: 12 }}>
                             <div ref={googleBtnRef} id="google-login-btn-desktop" />
                         </div>
                     </section>
