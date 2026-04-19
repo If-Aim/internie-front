@@ -23,6 +23,7 @@ export default function Login(): React.ReactElement {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const googleBtnRef = useRef<HTMLDivElement | null>(null);
+    const googleInitializedRef = useRef(false);
 
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
@@ -71,41 +72,44 @@ export default function Login(): React.ReactElement {
     useEffect(() => {
         let intervalId: number | null = null;
 
-        const initializeGoogleLogin = () => {
+        const renderGoogleButton = () => {
             if (!window.google || !googleBtnRef.current) return false;
 
-            window.google.accounts.id.initialize({
-                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-                callback: async (response: any) => {
-                    const idToken = response?.credential;
+            if (!googleInitializedRef.current) {
+                googleInitializedRef.current = true;
 
-                    if (!idToken) {
-                        console.error("Google idToken을 받지 못했습니다.");
-                        return;
-                    }
-
-                    try {
-                        const data = await loginWithGoogle(idToken);
-                        navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
-                    } catch (e) {
-                        console.error("구글 로그인 실패", e);
-
-                        if (e instanceof ApiError) {
-                            alert(e.message || (isKo ? "구글 로그인에 실패했습니다." : "Google login failed."));
+                window.google.accounts.id.initialize({
+                    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+                    callback: async (response: any) => {
+                        const idToken = response?.credential;
+                        if (!idToken) {
+                            console.error("Google idToken을 받지 못했습니다.");
                             return;
                         }
 
-                        alert(isKo ? "구글 로그인에 실패했습니다." : "Google login failed.");
-                    }
-                },
-            });
+                        try {
+                            const data = await loginWithGoogle(idToken);
+                            navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
+                        } catch (e) {
+                            console.error("구글 로그인 실패", e);
+
+                            if (e instanceof ApiError) {
+                                alert(e.message || (isKo ? "구글 로그인에 실패했습니다." : "Google login failed."));
+                                return;
+                            }
+
+                            alert(isKo ? "구글 로그인에 실패했습니다." : "Google login failed.");
+                        }
+                    },
+                });
+            }
 
             googleBtnRef.current.innerHTML = "";
 
             window.google.accounts.id.renderButton(googleBtnRef.current, {
                 theme: "outline",
                 size: "large",
-                width: 1,
+                width: 240,
                 text: "signin_with",
                 shape: "rectangular",
             });
@@ -113,9 +117,9 @@ export default function Login(): React.ReactElement {
             return true;
         };
 
-        if (!initializeGoogleLogin()) {
+        if (!renderGoogleButton()) {
             intervalId = window.setInterval(() => {
-                if (initializeGoogleLogin() && intervalId) {
+                if (renderGoogleButton() && intervalId) {
                     window.clearInterval(intervalId);
                 }
             }, 300);
@@ -126,7 +130,7 @@ export default function Login(): React.ReactElement {
                 window.clearInterval(intervalId);
             }
         };
-    }, [navigate, isKo]);
+    }, [navigate]);
 
     return (
         <div className="login-desktop-page">
