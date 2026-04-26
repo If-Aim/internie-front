@@ -14,25 +14,39 @@ function getAuthHeader(): Record<string, string> {
 	};
 }
 
+let refreshPromise: Promise<string> | null = null;
+
 export async function refreshAccessToken(): Promise<string> {
-    const res = await fetch(buildUrl("/auth/refresh"), {
-        method: "POST",
-        credentials: "include",
-    });
+    if (refreshPromise) return refreshPromise;
 
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+    refreshPromise = (async () => {
+        const res = await fetch(buildUrl("/auth/refresh"), {
+            method: "POST",
+            credentials: "include",
+        });
+
+        if (!res.ok) {
+            const bodyText = await res.text().catch(() => "");
+            throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+        }
+
+        const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
+
+        if (!newAuth) {
+            const bodyText = await res.text().catch(() => "");
+            throw new ApiError(200, "No Authorization header in /auth/refresh response", bodyText);
+        }
+
+        localStorage.setItem("accessToken", newAuth);
+
+        return newAuth;
+    })();
+
+    try {
+        return await refreshPromise;
+    } finally {
+        refreshPromise = null;
     }
-
-    const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!newAuth) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/refresh response", bodyText);
-    }
-
-    localStorage.setItem("accessToken", newAuth);
-    return newAuth;
 }
 
 async function requestWithAutoRefresh(
