@@ -242,7 +242,7 @@ export default function PrivacyPolicy(): React.ReactElement {
                         <li>정보주체 또는 제3자의 급박한 생명, 신체, 재산의 이익을 위하여 필요한 경우</li>
                         <li>수사기관 등 관계 법령에 따른 적법한 요청이 있는 경우</li>
                     </ol>
-                    
+
                     <h3>3) 서비스 내 권한 기반 열람에 관한 안내</h3>
                     <p>
                         회사는 프로그램 운영을 위해 사용자가 참여하는 기관의 담당자 또는 운영진에게 해당 참가자의 개인정보 및 활동 정보를 열람할 수 있는 권한을 부여할 수 있습니다. 
@@ -456,11 +456,11 @@ export default function PrivacyPolicy(): React.ReactElement {
                             <tbody>
                                 <tr>
                                     <td>개인정보 보호책임자</td>
-                                    <td>[성명 / 직책 / 이메일 / 연락처]</td>
+                                    <td>김유진<br/>purieu@ewha.ac.kr</td>
                                 </tr>
                                 <tr>
                                     <td>개인정보보호 담당부서</td>
-                                    <td>[부서명 / 이메일 / 연락처]</td>
+                                    <td>aim<br/>aim2a.kor@gmail.co</td>
                                 </tr>
                             </tbody>
                         </table>
