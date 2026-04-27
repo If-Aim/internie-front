@@ -1,4 +1,5 @@
-.privacy-page { background: #f9fafb; min-height: 100dvh; overflow: auto,}
+#root{overflow: auto !important;}
+.privacy-page {background: #f9fafb; min-height: 100dvh; overflow-y: auto !important;}
 .privacy-content { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
 
 .privacy-title { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
