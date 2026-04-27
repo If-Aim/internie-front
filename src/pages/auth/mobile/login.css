@@ -47,6 +47,9 @@ body { margin: 0; font-family: "Pretendard Variable", Pretendard, sans-serif; ba
 .mobile-login-signup-text { font-size: 12px; line-height: 22px; font-weight: 500; color: #A2A2A2; }
 .mobile-login-signup-link { padding: 0; border: 0; background: transparent; font-size: 12px; line-height: 22px; font-weight: 500; color: var(--text); text-decoration: underline; cursor: pointer; }
 
+.mobile-login-policy-section { display: flex; justify-content: center; margin-top: 16px; }
+.mobile-login-policy-link { border: 0; background: transparent; color: #A2A2A2; font-size: 12px; font-weight: 500; text-decoration: underline; cursor: pointer; }
+
 .google-hidden-btn { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; pointer-events: none; opacity: 0; }
 
 .bottom-spacer{display: block; height: 132px; }

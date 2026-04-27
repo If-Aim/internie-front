@@ -13,3 +13,14 @@
 .privacy-content li { font-size: 14px; line-height: 1.7; color: #374151; }
 .privacy-content ul { padding-left: 18px; } 
 .privacy-footer { margin-top: 60px; font-size: 13px; color: #6b7280; }
+
+.privacy-table-wrap { width: 100%; overflow-x: auto; margin-top: 16px; }
+.privacy-table { width: 100%; min-width: 980px; border-collapse: collapse; border-top: 1px solid #d1d5db; background: #ffffff; }
+.privacy-table th { padding: 14px 12px; border-bottom: 1px solid #d1d5db; background: #f3f4f6; font-size: 13px; font-weight: 700; color: #111827; text-align: left; white-space: nowrap; }
+.privacy-table td { padding: 14px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; line-height: 1.6; color: #374151; vertical-align: top; }
+
+.privacy-ol { padding-left: 20px; margin: 12px 0; }
+.privacy-ol li { margin-bottom: 10px; font-size: 14px; line-height: 1.7; }
+
+.privacy-ul { padding-left: 18px; margin-top: 10px; }
+.privacy-ul li { margin-bottom: 6px; font-size: 14px; }

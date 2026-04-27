@@ -195,6 +195,12 @@ export default function Login() {
                     </button>
                 </section>
 
+                <section className="mobile-login-policy-section">
+                    <button type="button" className="mobile-login-policy-link" onClick={() => navigate("/privacy-policy")}>
+                        개인정보 처리방침
+                    </button>
+                </section>
+                
                 <div className="bottom-spacer"></div>
             </main>
         </div>
