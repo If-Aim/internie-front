@@ -460,7 +460,7 @@ export default function PrivacyPolicy(): React.ReactElement {
                                 </tr>
                                 <tr>
                                     <td>개인정보보호 담당부서</td>
-                                    <td>aim<br/>aim2a.kor@gmail.co</td>
+                                    <td>aim<br/>aim2a.kor@gmail.com</td>
                                 </tr>
                             </tbody>
                         </table>
