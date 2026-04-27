@@ -11,6 +11,7 @@ const Signup = lazy(() => import("./pages/auth/signup"));
 const FindId = lazy(() => import("./pages/auth/findId"))
 const ResetPassword = lazy(() => import("./pages/auth/resetPassword"))
 const KakaoCallback = lazy(() => import("./pages/kakaoCallback"));
+const PrivacyPolicy = lazy(() => import("./pages/privacy/privacyPolicy"))
 const OnBoarding = lazy(() => import("./pages/auth/mobile/onBoarding"));
 
 const StudentApp = lazy(() => import("./pages/student/studentApp"));
@@ -27,6 +28,7 @@ export default function App(): React.ReactElement {
 				<Route path="/find-id" element={<FindId />} />
 				<Route path="/reset-password" element={<ResetPassword />} />
 				<Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
+				<Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
 				<Route element={<ProtectedRoute />}>
 					<Route path="/onboarding" element={<OnBoarding />} />

@@ -45,6 +45,10 @@
 .login-desktop-join { margin-top: 28px; font-size: 12px; line-height: 20px; color: #A2A2A2; }
 .login-desktop-join button { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 12px; line-height: 20px; font-weight: 500; color: #000; text-decoration: underline; cursor: pointer; }
 
+.login-desktop-policy { margin-top: 18px; display: flex; justify-content: center; }
+.login-desktop-policy button { border: 0; background: transparent; color: #A2A2A2; font-size: 13px; font-weight: 500; text-decoration: underline; cursor: pointer; }
+.login-desktop-policy button:hover { color: #2563eb; }
+
 @media (max-width: 640px) {
     .login-desktop-main { padding: 24px 16px 40px; }
     .login-desktop-container { padding: 40px 24px 32px; }

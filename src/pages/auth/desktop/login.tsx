@@ -209,7 +209,11 @@ export default function Login(): React.ReactElement {
                             <span>{t("login.signupPrompt")}</span>
                             <button type="button" onClick={() => navigate("/signup")}>{t("login.signupLink")}</button>
                         </div>
-
+                        <div className="login-desktop-policy">
+                            <button type="button" onClick={() => navigate("/privacy-policy")}>
+                                개인정보 처리방침
+                            </button>
+                        </div>
                     </section>
                 </div>
             </main>
