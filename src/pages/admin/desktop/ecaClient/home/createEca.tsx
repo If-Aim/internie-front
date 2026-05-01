@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { createExternalActivity, getClientAdminStudents, type ClientType } from "../../../../../api/client";
+import { createExternalActivity, getClientAdminStudents, getExternalActivityManagers, type ClientType } from "../../../../../api/client";
 import "./createEca.css"; 
 
 type Manager = {
     id: number;
     name: string;
     position: string;
+    profileImage?: string | null;
 };
 
 type CenterInfo = {
@@ -215,24 +216,30 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchInitData(): Promise<void> {
-            setManagers([
-                { id: 1, name: "담당자B", position: "행복기획팀 팀장" },
-                { id: 2, name: "담당자C", position: "전략기획팀 팀장" },
-                { id: 3, name: "담당자D", position: "혁신전략팀 매니저" },
-                { id: 4, name: "담당자E", position: "미래기획팀 책임자" },
-                { id: 5, name: "담당자F", position: "미래전략본부장" },
-            ]);
-
             try {
-                const students = await getClientAdminStudents(CLIENT_TYPE);
-                const ids = students
+                const [students, managerUsers] = await Promise.all([
+                    getClientAdminStudents(CLIENT_TYPE),
+                    getExternalActivityManagers(CENTER_ID),
+                ]);
+
+                const participantIds = students
                     .map((student) => student.userId)
                     .filter((id): id is number => typeof id === "number");
 
-                setParticipantUserIds(ids);
+                const nextManagers = managerUsers
+                    .map((manager) => ({
+                        id: manager.userId,
+                        name: manager.name ?? manager.kakaoName ?? manager.nickname ?? "이름 없음",
+                        position: "ESG 관리자",
+                        profileImage: manager.profileImage ?? null,
+                    }))
+                    .filter((manager) => typeof manager.id === "number");
+
+                setParticipantUserIds(participantIds);
+                setManagers(nextManagers);
             } catch (e) {
                 console.error(e);
-                setSubmitError("학생 목록을 불러오지 못했습니다.");
+                setSubmitError("초기 데이터를 불러오지 못했습니다.");
             }
         }
 
@@ -576,7 +583,11 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                                                     <label key={manager.id} className={"eca-manager-option" + (checked ? " is-selected" : "")}>
                                                         <input type="checkbox" checked={checked} onChange={() => toggleManager(manager.id)} />
 
-                                                        <span className="eca-manager-avatar" />
+                                                        {manager.profileImage ? (
+                                                            <img className="eca-manager-avatar" src={manager.profileImage} alt="" />
+                                                        ) : (
+                                                            <span className="eca-manager-avatar" />
+                                                        )}
 
                                                         <strong>{manager.name}</strong>
 

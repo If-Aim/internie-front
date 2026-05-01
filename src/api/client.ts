@@ -1237,11 +1237,13 @@ export type CreateExternalActivityRequest = {
     participantUserIds: number[];
     managerUserIds: number[];
 };
-
+export type ExternalActivityManager = UserBase;
 export type ExternalActivityResponse = CreateExternalActivityRequest & {
     externalActivityId: number;
     centerId: number;
     progressStatus: ExternalActivityProgressStatus;
+    participantNames?: string[] | null;
+    managerNames?: string[] | null;
 };
 
 export type ExternalActivitiesByStatusQuery = {
@@ -1273,6 +1275,12 @@ export async function createExternalActivity( // 대외활동 생성
             body: JSON.stringify(request),
         }
     );
+}
+
+export async function getExternalActivityManagers( // 센터별 매니저 조회
+    centerId: number | string
+): Promise<ExternalActivityManager[]> {
+    return api<ExternalActivityManager[]>(`/centers/${centerId}/managers`, { method: "GET" });
 }
 
 export async function getExternalActivitiesByCenter( // 센터별 대외활동 전체 조회

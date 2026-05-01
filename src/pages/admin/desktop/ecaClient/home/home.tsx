@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserMe, getMyManagedExternalActivities, getMyManagedExternalActivitiesByStatus, getExternalActivitiesByCenter, getExternalActivitiesByStatus } from "../../../../../api/client";
-import type { UserMe, ExternalActivityProgressStatus, ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/client";
+import type { UserMe, ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/client";
 import "./home.css";
 
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
@@ -11,22 +11,47 @@ type Activity = {
     title: string;
     date: string;
     status: ActivityStatus;
-    managerUserIds: number[];
+    managerNames: string[];
 };
 
 const CENTER_ID = 1;
 
 const activityStatuses: ActivityStatus[] = ["upcoming", "ongoing", "completed", "delayed"];
 
-const progressStatusMap: Record<ExternalActivityProgressStatus, ActivityStatus> = {
-    UPCOMING: "upcoming",
-    ONGOING: "ongoing",
-    COMPLETED: "completed",
-    DELAYED: "delayed",
-};
-
 function formatActivityDate(startDate: string, endDate: string): string {
     return `${startDate.replaceAll("-", ".")} ~ ${endDate.replaceAll("-", ".")}`;
+}
+
+function parseApiDate(value: string): Date {
+    const [year, month, day] = value.split("-").map(Number);
+
+    return new Date(year, month - 1, day);
+}
+
+function getTodayDateOnly(): Date {
+    const now = new Date();
+
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function getCalculatedActivityStatus(activity: ExternalActivityResponse): ActivityStatus {
+    if (activity.progressStatus === "COMPLETED") {
+        return "completed";
+    }
+
+    const today = getTodayDateOnly();
+    const startDate = parseApiDate(activity.startDate);
+    const endDate = parseApiDate(activity.endDate);
+
+    if (today.getTime() < startDate.getTime()) {
+        return "upcoming";
+    }
+
+    if (today.getTime() <= endDate.getTime()) {
+        return "ongoing";
+    }
+
+    return "delayed";
 }
 
 function toHomeActivity(activity: ExternalActivityResponse): Activity {
@@ -34,8 +59,8 @@ function toHomeActivity(activity: ExternalActivityResponse): Activity {
         id: activity.externalActivityId,
         title: activity.name,
         date: formatActivityDate(activity.startDate, activity.endDate),
-        status: progressStatusMap[activity.progressStatus],
-        managerUserIds: activity.managerUserIds,
+        status: getCalculatedActivityStatus(activity),
+        managerNames: Array.isArray(activity.managerNames) ? activity.managerNames : [],
     };
 }
 
@@ -535,15 +560,15 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 <h3>{item.title}</h3>
                                 <p>{item.date}</p>
                                 <div className="eca-home-center-manager-row">
-                                    {item.managerUserIds.slice(0, 2).map((managerUserId) => (
-                                        <div key={managerUserId} className="eca-home-center-manager">
+                                    {item.managerNames.slice(0, 2).map((managerName, index) => (
+                                        <div key={`${item.id}-${managerName}-${index}`} className="eca-home-center-manager">
                                             <span className="eca-home-center-manager-avatar" />
-                                            <span>{`담당자 ${managerUserId}`}</span>
+                                            <span>{managerName}</span>
                                         </div>
                                     ))}
                                 </div>
 
-                                {item.managerUserIds.length > 2 ? (
+                                {item.managerNames.length > 2 ? (
                                     <div className="eca-home-center-more-wrap" ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}>
                                         <button
                                             type="button"
@@ -559,10 +584,10 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                                         {managerPopoverActivityId === item.id ? (
                                             <div className="eca-home-manager-popover">
-                                                {item.managerUserIds.slice(2).map((managerUserId) => (
-                                                    <div key={managerUserId} className="eca-home-center-manager">
+                                                {item.managerNames.slice(2).map((managerName, index) => (
+                                                    <div key={`${item.id}-${managerName}-${index}`} className="eca-home-center-manager">
                                                         <span className="eca-home-center-manager-avatar" />
-                                                        <span>{`담당자 ${managerUserId}`}</span>
+                                                        <span>{managerName}</span>
                                                     </div>
                                                 ))}
                                             </div>
