@@ -25,13 +25,6 @@ const progressStatusMap: Record<ExternalActivityProgressStatus, ActivityStatus> 
     DELAYED: "delayed",
 };
 
-const progressStatusApiMap: Record<ActivityStatus, ExternalActivityProgressStatus> = {
-    upcoming: "UPCOMING",
-    ongoing: "ONGOING",
-    completed: "COMPLETED",
-    delayed: "DELAYED",
-};
-
 function formatActivityDate(startDate: string, endDate: string): string {
     return `${startDate.replaceAll("-", ".")} ~ ${endDate.replaceAll("-", ".")}`;
 }
@@ -155,23 +148,12 @@ export default function EcaAdminHomePage(): React.ReactElement {
     }, []);
 
     React.useEffect(() => {
-        loadInitialHomeActivities();
-    }, []);
-
-    React.useEffect(() => {
         loadMyActivities();
     }, [selectedStatuses, selectedYear, searchKeyword]);
 
     React.useEffect(() => {
         loadCenterActivities();
     }, [centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
-
-    async function loadInitialHomeActivities(): Promise<void> {
-        await Promise.all([
-            loadMyActivities(),
-            loadCenterActivities(),
-        ]);
-    }
 
     async function loadMyActivities(): Promise<void> {
         try {
@@ -360,8 +342,6 @@ export default function EcaAdminHomePage(): React.ReactElement {
     }
 
     const adminName = getDisplayAdminName(me);
-    const filteredMyActivities = myActivities;
-    const filteredCenterActivities = centerActivities;
 
     return (
         <div className="eca-home-page">
@@ -437,7 +417,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                 </div>
 
                 <div className="eca-home-my-grid">
-                    {filteredMyActivities.length === 0 ? (
+                    {myActivities.length === 0 ? (
                         <div className="eca-home-empty">데이터가 없습니다</div>
                     ) : (
                         selectedStatuses.map((status) => (
@@ -447,7 +427,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => handleDropToStatus(status)}
                             >
-                                {filteredMyActivities.filter((item) => item.status === status).map((item) => (
+                                {myActivities.filter((item) => item.status === status).map((item) => (
                                     <div key={item.id} className="eca-home-my-card">
                                         <div
                                             className="eca-home-card-drag-handle"
@@ -546,10 +526,10 @@ export default function EcaAdminHomePage(): React.ReactElement {
                 </div>
 
                 <div className="eca-home-center-scroll" ref={centerScrollRef}>
-                    {filteredCenterActivities.length === 0 ? (
+                    {centerActivities.length === 0 ? (
                         <div className="eca-home-empty">데이터가 없습니다</div>
                     ) : (
-                        filteredCenterActivities.map((item) => (
+                        centerActivities.map((item) => (
                             <div key={item.id} className="eca-home-center-card">
                                 <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
                                 <h3>{item.title}</h3>

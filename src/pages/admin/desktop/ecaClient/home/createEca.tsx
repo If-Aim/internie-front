@@ -190,7 +190,7 @@ function CalendarRange({
 
 export default function EcaActivityCreatePage(): React.ReactElement {
     const navigate = useNavigate();
-    const [center, setCenter] = React.useState<CenterInfo | null>(null);
+    const [center, /*setCenter*/] = React.useState<CenterInfo | null>(null);
     const [managers, setManagers] = React.useState<Manager[]>([]);
     const [selectedManagerIds, setSelectedManagerIds] = React.useState<number[]>([]);
     const [managerModalOpen, setManagerModalOpen] = React.useState(false);
