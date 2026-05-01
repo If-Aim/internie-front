@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { createExternalActivity, } from "../../../../../api/client";
+import { createExternalActivity, getClientAdminStudents, type ClientType } from "../../../../../api/client";
 import "./createEca.css"; 
 
 type Manager = {
@@ -16,6 +16,7 @@ type CenterInfo = {
 
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const CENTER_ID = 1;
+const CLIENT_TYPE: ClientType = "esg";
 function toApiDate(value: string): string {
     return value.replaceAll(".", "-");
 }
@@ -193,6 +194,8 @@ export default function EcaActivityCreatePage(): React.ReactElement {
     const [center, /*setCenter*/] = React.useState<CenterInfo | null>(null);
     const [managers, setManagers] = React.useState<Manager[]>([]);
     const [selectedManagerIds, setSelectedManagerIds] = React.useState<number[]>([]);
+    const [participantUserIds, setParticipantUserIds] = React.useState<number[]>([]);
+
     const [managerModalOpen, setManagerModalOpen] = React.useState(false);
     const [managerSearch, setManagerSearch] = React.useState("");
     const [managerDropdownOpen, setManagerDropdownOpen] = React.useState(false);
@@ -201,7 +204,6 @@ export default function EcaActivityCreatePage(): React.ReactElement {
     const [activityName, setActivityName] = React.useState("");
     const [startDate, setStartDate] = React.useState<string | null>(null);
     const [endDate, setEndDate] = React.useState<string | null>(null);
-
     const [datePickerTarget, setDatePickerTarget] = React.useState<"start" | "end" | null>(null);
     const calendarWrapRef = React.useRef<HTMLDivElement | null>(null);
     const managerSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
@@ -221,17 +223,17 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 { id: 5, name: "담당자F", position: "미래전략본부장" },
             ]);
 
-            // try {
-            //     // TODO: 백엔드 연결 예정
-            //     // const centerRes = await api("/centers/me");
-            //     // const managersRes = await api("/centers/me/managers");
+            try {
+                const students = await getClientAdminStudents(CLIENT_TYPE);
+                const ids = students
+                    .map((student) => student.userId)
+                    .filter((id): id is number => typeof id === "number");
 
-            //     // setCenter(centerRes);
-            //     // setManagers(managersRes);
-
-            // } catch (e) {
-            //     console.error(e);
-            // }
+                setParticipantUserIds(ids);
+            } catch (e) {
+                console.error(e);
+                setSubmitError("학생 목록을 불러오지 못했습니다.");
+            }
         }
 
         fetchInitData();
@@ -316,6 +318,11 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             return;
         }
 
+        if (participantUserIds.length === 0) {
+            setSubmitError("참여 학생 목록을 불러오지 못했습니다.");
+            return;
+        }
+
         if (!planFile) {
             setSubmitError("활동 계획서를 업로드해주세요.");
             return;
@@ -331,7 +338,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 startDate: toApiDate(startDate),
                 endDate: toApiDate(endDate),
                 activityPlanUrl: null,
-                participantUserIds: [],
+                participantUserIds,
                 managerUserIds: selectedManagerIds,
             });
 

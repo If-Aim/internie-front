@@ -1,4 +1,6 @@
 import React from "react";
+import { useParams } from "react-router-dom";
+import { getClientAdminStudents, type ClientType } from "../../../../../../api/client";
 import "./dashboard.css";
 
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
@@ -21,6 +23,7 @@ interface Participant {
     id: number;
     name: string;
     school: string;
+    profileImage?: string | null;
     status?: "active" | "default";
 }
 
@@ -44,12 +47,6 @@ const attendances: AttendanceSummary[] = [
     { id: 3, date: "3월 28일 (토)", activityName: "활동 C", attendedCount: 14, totalCount: 16 },
 ];
 
-const participants: Participant[] = [
-    { id: 1, name: "학생 A", school: "이화여자대학교 교육공학과", status: "active" },
-    { id: 2, name: "학생 B", school: "이화여자대학교 교육공학과" },
-    { id: 3, name: "학생 C", school: "이화여자대학교 교육공학과", status: "active" },
-];
-
 const teams: TeamSummary[] = [
     { id: 1, name: "팀 A", members: "학생 A 외 4명", statusText: "현재 활동중", status: "active" },
     { id: 2, name: "팀 B", members: "학생 B 외 3명", statusText: "3시간 전", status: "inactive" },
@@ -57,7 +54,42 @@ const teams: TeamSummary[] = [
 ];
 
 export default function EcaDashboardExActivity(): React.ReactElement {
+    const { clientType } = useParams<{ clientType?: ClientType }>();
+    const resolvedClientType: ClientType = clientType ?? "esg";
     const status: ActivityStatus = "ongoing"; // 백엔드에서 status 받아오기
+    const [participants, setParticipants] = React.useState<Participant[]>([]);
+    const [participantLoading, setParticipantLoading] = React.useState(false);
+    const [participantError, setParticipantError] = React.useState("");
+
+    React.useEffect(() => {
+        async function fetchParticipants(): Promise<void> {
+            setParticipantLoading(true);
+            setParticipantError("");
+
+            try {
+                const students = await getClientAdminStudents(resolvedClientType);
+                const nextParticipants = students
+                    .map((student) => ({
+                        id: student.userId,
+                        name: student.name ?? "이름 없음",
+                        school: student.school?.name ?? "-",
+                        profileImage: student.profileImage ?? null,
+                        status: "default" as const,
+                    }))
+                    .filter((student) => typeof student.id === "number");
+
+                setParticipants(nextParticipants);
+            } catch (e) {
+                console.error(e);
+                setParticipantError("참여자 목록을 불러오지 못했습니다.");
+            } finally {
+                setParticipantLoading(false);
+            }
+        }
+
+        fetchParticipants();
+    }, [resolvedClientType]);
+
     return (
         <div className="eca-dashboard-detail-page">
             <div className="eca-dashboard-detail-head">
@@ -85,7 +117,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                 <article className="eca-dashboard-summary-card">
                     <span>전체 참여자 수</span>
-                    <strong>50명</strong>
+                    <strong>{participants.length}명</strong>
                 </article>
             </section>
 
@@ -141,19 +173,31 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                         </div>
 
                         <div className="eca-dashboard-list">
-                            {participants.map((item) => (
-                                <button type="button" className="eca-dashboard-person-row" key={item.id}>
-                                    <span className="eca-dashboard-avatar-wrap">
-                                        <span className="eca-dashboard-avatar" />
-                                        {item.status === "active" ? <span className="eca-dashboard-active-dot" /> : null}
-                                    </span>
-                                    <span className="eca-dashboard-person-info">
-                                        <strong>{item.name}</strong>
-                                        <span>{item.school}</span>
-                                    </span>
-                                    <span className="eca-dashboard-send-icon">▷</span>
-                                </button>
-                            ))}
+                            {participantLoading ? (
+                                <p className="eca-dashboard-empty">참여자 목록을 불러오는 중입니다.</p>
+                            ) : participantError ? (
+                                <p className="eca-dashboard-empty">{participantError}</p>
+                            ) : participants.length === 0 ? (
+                                <p className="eca-dashboard-empty">참여자가 없습니다.</p>
+                            ) : (
+                                participants.map((item) => (
+                                    <button type="button" className="eca-dashboard-person-row" key={item.id}>
+                                        <span className="eca-dashboard-avatar-wrap">
+                                            {item.profileImage ? (
+                                                <img className="eca-dashboard-avatar" src={item.profileImage} alt="" />
+                                            ) : (
+                                                <span className="eca-dashboard-avatar" />
+                                            )}
+                                            {item.status === "active" ? <span className="eca-dashboard-active-dot" /> : null}
+                                        </span>
+                                        <span className="eca-dashboard-person-info">
+                                            <strong>{item.name}</strong>
+                                            <span>{item.school}</span>
+                                        </span>
+                                        <span className="eca-dashboard-send-icon">▷</span>
+                                    </button>
+                                ))
+                            )}
                         </div>
                     </section>
 

@@ -1108,7 +1108,7 @@ export async function deleteAdminUserRecord(
 /**
  *  CAPTAIN용
 */
-export type GrantableAdminRole = "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN";
+export type GrantableAdminRole = "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN" | "ROLE_ESG_ADMIN";
 
 export type AdminRoleUpdateInput = {
     role: GrantableAdminRole;
@@ -1137,7 +1137,7 @@ export async function revokeAdminRole(
 
 /* - client admin 관련 - */
 // client 학생 목록
-export type ClientType = "jump" | "kakao";
+export type ClientType = "jump" | "kakao" | "esg";
 export type ClientAdminStudent = UserBase;
 
 export async function getClientAdminStudents(clientType: ClientType): Promise<ClientAdminStudent[]> {
@@ -1217,7 +1217,7 @@ export async function getClientAdminStudentRecordCount(
 }
 
 
-// 점프 학생 삭제
+// 학생 삭제
 export async function deleteClientAdminStudent(
     clientType: ClientType,
     userId: number | string
@@ -1389,6 +1389,7 @@ export async function checkIsClientAdmin(clientType: ClientType): Promise<boolea
         if (!Array.isArray(me.roleSet)) return false;
         if (clientType === "jump") return me.roleSet.includes("ROLE_JUMP_ADMIN");
         if (clientType === "kakao") return me.roleSet.includes("ROLE_KAKAO_ADMIN");
+        if (clientType === "esg") return me.roleSet.includes("ROLE_ESG_ADMIN");
         return false;
     } catch (e) {
         if (e instanceof ApiError && e.status === 401) return false;
@@ -1412,6 +1413,7 @@ export function getClientAdminTypes(roleSet: string[] | undefined | null): Clien
     const result: ClientType[] = [];
     if (roleSet.includes("ROLE_JUMP_ADMIN")) result.push("jump");
     if (roleSet.includes("ROLE_KAKAO_ADMIN")) result.push("kakao");
+    if (roleSet.includes("ROLE_ESG_ADMIN")) result.push("esg");
     return result;
 }
 
