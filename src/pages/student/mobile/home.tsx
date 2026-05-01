@@ -775,6 +775,20 @@ function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRo
 							<span>KAKAO 관리자 페이지</span>
 						</button>
 					)}
+					{userRoleSet.includes("ROLE_ESG_ADMIN") && (
+						<button
+						className="drawer-menu-item"
+						onClick={() => {
+							onRequireAuth("/eca-admin/home", () => {
+							navigate("/eca-admin/home");
+							closeWithSnap();
+							});
+						}}
+						>
+							<img className="icon" src="/icons/chevron-right.svg" alt="" />
+							<span>용산 청소년 센터 관리자 페이지</span>
+						</button>
+					)}
 				</div>
 			</div>
 		</>
