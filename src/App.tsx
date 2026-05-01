@@ -47,7 +47,7 @@ export default function App(): React.ReactElement {
 				</Route>
 				{/* 대외활동 관리자용 라우트 */}
 				<Route element={<EcaAdminRoute />}>
-					<Route path="*" element={<EcaClientAdminApp />} />
+					<Route path="/eca-admin/*" element={<EcaClientAdminApp />} />
 				</Route>
 
 				<Route path="*" element={<Navigate to="/student" replace />} />

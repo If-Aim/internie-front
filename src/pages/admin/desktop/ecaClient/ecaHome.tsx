@@ -107,7 +107,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                             const isOpen = openedActivityId === activity.id;
                             const isActivityActive = pathname.startsWith(`/eca-admin/activities/${activity.id}/dashboard`);
                                 // 추후 하위 메뉴 API 연결 시 아래 경로도 active 조건에 추가
-                                // pathname.startsWith(`/eca-admin/activities/${activity.id}/assignments`)
+                                // pathname.startsWith(`/eca-admin/activities/${activity.id}/assignment`)
                                 // pathname.startsWith(`/eca-admin/activities/${activity.id}/attendance`)
                                 // pathname.startsWith(`/eca-admin/activities/${activity.id}/team`)
 
@@ -135,7 +135,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                                 대시보드
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activity.id}/assignments`}
+                                                to={`/eca-admin/activities/${activity.id}/assignment`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
                                                 과제 제출 현황
