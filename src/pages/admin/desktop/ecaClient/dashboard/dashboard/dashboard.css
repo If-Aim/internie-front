@@ -1,0 +1,59 @@
+.eca-dashboard-detail-page { width: 100%; margin: 0 auto; padding: 80px 0 56px; box-sizing: border-box; }
+.eca-dashboard-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+.eca-dashboard-detail-head h1 { margin: 0; color: #111; font-size: 28px; font-weight: 900; line-height: 1.2; }
+.eca-dashboard-more-button { width: 40px; height: 32px; border: 0; background: transparent; color: #111; font-size: 28px; font-weight: 900; line-height: 1; cursor: pointer; }
+
+.eca-dashboard-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px; }
+.eca-dashboard-summary-card { height: 146px; padding: 28px 28px 22px; border: 1px solid #ddd; border-radius: 10px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.eca-dashboard-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 800; }
+.eca-dashboard-summary-card strong { color: #000; font-size: 30px; font-weight: 900; line-height: 1; }
+.eca-dashboard-summary-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.eca-dashboard-status-badge { height: 32px; max-width: 84px; padding: 0 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px !important; font-weight: 600 !important; }
+.eca-dashboard-status--upcoming { background: #F6F6F6; color: #808080 !important; }
+.eca-dashboard-status--ongoing { background: #CAFFBF; color: #34A853 !important; }
+.eca-dashboard-status--completed { background: #BDD8FF; color: #0166FF !important; }
+.eca-dashboard-status--delayed { background: #FFD6D2; color: #F00 !important; }
+
+.eca-dashboard-main-grid { display: grid; grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr); gap: 18px; align-items: start; }
+.eca-dashboard-left-column { display: flex; flex-direction: column; gap: 14px; }
+.eca-dashboard-right-column { display: flex; flex-direction: column; gap: 14px; }
+
+.eca-dashboard-panel { padding: 26px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; }
+.eca-dashboard-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.eca-dashboard-panel-head h2 { margin: 0; color: #555; font-size: 15px; font-weight: 900; line-height: 1.25; }
+.eca-dashboard-panel-actions { display: flex; align-items: center; gap: 10px; }
+.eca-dashboard-panel-actions button { width: 34px; height: 34px; border: 0; border-radius: 999px; background: #f2f2f2; color: #999; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.eca-dashboard-list { display: flex; flex-direction: column; gap: 10px; }
+.eca-dashboard-assignment-row, .eca-dashboard-attendance-row, .eca-dashboard-person-row, .eca-dashboard-team-row { width: 100%; min-height: 58px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fff; color: #111; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }
+.eca-dashboard-assignment-row:hover, .eca-dashboard-attendance-row:hover, .eca-dashboard-person-row:hover, .eca-dashboard-team-row:hover { background: #f8fbff; }
+
+.eca-dashboard-assignment-row { padding: 0 14px 0 18px; gap: 14px; }
+.eca-dashboard-assignment-row > span:first-child { flex: 1; color: #111; font-size: 15px; font-weight: 900; text-align: left; }
+.eca-dashboard-count-badge { min-width: 68px; height: 30px; padding: 0 14px; border-radius: 999px; background: #b6d7ff; color: var(--primary); font-size: 14px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-dashboard-row-arrow { color: #999; font-size: 32px; font-weight: 400; line-height: 1; }
+
+.eca-dashboard-attendance-row { padding: 0 14px 0 18px; gap: 16px; }
+.eca-dashboard-attendance-row strong { width: 132px; color: #111; font-size: 15px; font-weight: 900; text-align: left; }
+.eca-dashboard-attendance-row span:nth-child(2) { flex: 1; color: #777; font-size: 12px; font-weight: 700; text-align: left; }
+.eca-dashboard-attendance-row span:nth-child(3) { color: #111; font-size: 14px; font-weight: 900; white-space: nowrap; }
+.eca-dashboard-attendance-row b { color: var(--primary); font-weight: 900; }
+
+.eca-dashboard-side-panel { padding: 26px 20px; }
+.eca-dashboard-search-button { width: 30px; height: 30px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-search-button img { width: 24px; height: 24px; display: block; }
+
+.eca-dashboard-person-row { min-height: 64px; padding: 0 14px; gap: 14px; }
+.eca-dashboard-avatar-wrap { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
+.eca-dashboard-avatar { width: 38px; height: 38px; border-radius: 999px; background: #e1e1e1; display: block; flex-shrink: 0; }
+.eca-dashboard-active-dot { position: absolute; right: -2px; bottom: 2px; width: 12px; height: 12px; border-radius: 999px; background: var(--primary); border: 2px solid #fff; box-sizing: border-box; }
+.eca-dashboard-person-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.eca-dashboard-person-info strong { color: #111; font-size: 15px; font-weight: 900; line-height: 1.1; }
+.eca-dashboard-person-info span { max-width: 100%; color: #777; font-size: 12px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-dashboard-send-icon { width: 34px; height: 34px; border: 1px solid #ddd; border-radius: 999px; color: #aaa; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
+.eca-dashboard-team-row { min-height: 64px; padding: 0 14px; gap: 14px; }
+.eca-dashboard-team-status { min-width: 86px; color: #777; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
+.eca-dashboard-team-status span { width: 16px; height: 16px; border-radius: 999px; background: #e1e1e1; flex-shrink: 0; }
+.eca-dashboard-team-status--active { color: #333; }
+.eca-dashboard-team-status--active span { background: var(--primary); }

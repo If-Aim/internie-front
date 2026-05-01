@@ -1,20 +1,599 @@
-// src/pages/admin/desktop/ecaClient/home/home.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { getUserMe, getMyManagedExternalActivities, getMyManagedExternalActivitiesByStatus, getExternalActivitiesByCenter, getExternalActivitiesByStatus } from "../../../../../api/client";
+import type { UserMe, ExternalActivityProgressStatus, ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/client";
 import "./home.css";
 
+type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
+
+type Activity = {
+    id: number;
+    title: string;
+    date: string;
+    status: ActivityStatus;
+    managerUserIds: number[];
+};
+
+const CENTER_ID = 1;
+
+const activityStatuses: ActivityStatus[] = ["upcoming", "ongoing", "completed", "delayed"];
+
+const progressStatusMap: Record<ExternalActivityProgressStatus, ActivityStatus> = {
+    UPCOMING: "upcoming",
+    ONGOING: "ongoing",
+    COMPLETED: "completed",
+    DELAYED: "delayed",
+};
+
+const progressStatusApiMap: Record<ActivityStatus, ExternalActivityProgressStatus> = {
+    upcoming: "UPCOMING",
+    ongoing: "ONGOING",
+    completed: "COMPLETED",
+    delayed: "DELAYED",
+};
+
+function formatActivityDate(startDate: string, endDate: string): string {
+    return `${startDate.replaceAll("-", ".")} ~ ${endDate.replaceAll("-", ".")}`;
+}
+
+function toHomeActivity(activity: ExternalActivityResponse): Activity {
+    return {
+        id: activity.externalActivityId,
+        title: activity.name,
+        date: formatActivityDate(activity.startDate, activity.endDate),
+        status: progressStatusMap[activity.progressStatus],
+        managerUserIds: activity.managerUserIds,
+    };
+}
+
+function flattenByStatus(response: ExternalActivitiesByStatusResponse, selectedStatuses: ActivityStatus[]): Activity[] {
+    return selectedStatuses.flatMap((status) => response[status].map(toHomeActivity));
+}
+
+function getDisplayAdminName(me: UserMe | null): string {
+    if (!me) return "";
+    const nick = (me.nickname ?? "").trim();
+    const name = (me.name ?? "").trim();
+
+    return nick || name || "";
+}
+
 export default function EcaAdminHomePage(): React.ReactElement {
+    const navigate = useNavigate();
+    const [me, setMe] = React.useState<UserMe | null>(null);
+
+    const [myActivities, setMyActivities] = React.useState<Activity[]>([]);
+    const [centerActivities, setCenterActivities] = React.useState<Activity[]>([]);
+    const allStatuses: ActivityStatus[] = ["completed", "ongoing", "upcoming", "delayed"];
+    const [selectedStatuses, setSelectedStatuses] = React.useState<ActivityStatus[]>(activityStatuses);
+    const [filterOpen, setFilterOpen] = React.useState(false);
+    const [yearOpen, setYearOpen] = React.useState(false);
+    const [searchOpen, setSearchOpen] = React.useState(false);
+    const [searchKeyword, setSearchKeyword] = React.useState("");
+    const [selectedYear, setSelectedYear] = React.useState("2026");
+
+    const [centerSelectedStatuses, setCenterSelectedStatuses] = React.useState<ActivityStatus[]>(activityStatuses);
+    const [centerFilterOpen, setCenterFilterOpen] = React.useState(false);
+    const [centerYearOpen, setCenterYearOpen] = React.useState(false);
+    const [centerSelectedYear, setCenterSelectedYear] = React.useState("2026");
+    const [centerSearchOpen, setCenterSearchOpen] = React.useState(false);
+    const [centerSearchKeyword, setCenterSearchKeyword] = React.useState("");
+
+    const [statusMenuActivityId, setStatusMenuActivityId] = React.useState<number | null>(null);
+    const [managerPopoverActivityId, setManagerPopoverActivityId] = React.useState<number | null>(null);
+    const [draggingActivityId, setDraggingActivityId] = React.useState<number | null>(null);
+    
+    const centerScrollRef = React.useRef<HTMLDivElement | null>(null);
+    const managerPopoverRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        function handleWheel(e: WheelEvent): void {
+            const el = centerScrollRef.current;
+            if (!el) return;
+
+            if (e.deltaY === 0) return;
+
+            e.preventDefault();
+            el.scrollLeft += e.deltaY;
+        }
+
+        const el = centerScrollRef.current;
+        if (!el) return;
+
+        el.addEventListener("wheel", handleWheel, { passive: false });
+
+        return () => {
+            el.removeEventListener("wheel", handleWheel);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (managerPopoverActivityId === null) return;
+
+        function handleMouseDown(e: MouseEvent): void {
+            if (!managerPopoverRef.current) return;
+            if (managerPopoverRef.current.contains(e.target as Node)) return;
+            setManagerPopoverActivityId(null);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, [managerPopoverActivityId]);
+
+    function changeMyActivityStatus(activityId: number, status: ActivityStatus): void {
+        setMyActivities((prev) => prev.map((item) => item.id === activityId ? { ...item, status } : item));
+        setStatusMenuActivityId(null);
+    }
+
+    function handleDropToStatus(status: ActivityStatus): void {
+        if (draggingActivityId === null) return;
+        changeMyActivityStatus(draggingActivityId, status);
+        setDraggingActivityId(null);
+    }
+
+    React.useEffect(() => {
+        let mounted = true;
+
+        (async () => {
+            try {
+                const data = await getUserMe();
+                if (!mounted) return;
+                setMe(data);
+            } catch (error) {
+                if (mounted) {
+                    setMe(null);
+                }
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    React.useEffect(() => {
+        loadInitialHomeActivities();
+    }, []);
+
+    React.useEffect(() => {
+        loadMyActivities();
+    }, [selectedStatuses, selectedYear, searchKeyword]);
+
+    React.useEffect(() => {
+        loadCenterActivities();
+    }, [centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
+
+    async function loadInitialHomeActivities(): Promise<void> {
+        await Promise.all([
+            loadMyActivities(),
+            loadCenterActivities(),
+        ]);
+    }
+
+    async function loadMyActivities(): Promise<void> {
+        try {
+            const isAllStatusSelected = selectedStatuses.length === activityStatuses.length;
+            const name = searchKeyword.trim() || undefined;
+            const year = selectedYear || undefined;
+
+            if (isAllStatusSelected) {
+                const result = await getMyManagedExternalActivities({
+                    year,
+                    name,
+                });
+
+                setMyActivities(result.map(toHomeActivity));
+                return;
+            }
+
+            const result = await getMyManagedExternalActivitiesByStatus({
+                year,
+                name,
+            });
+
+            setMyActivities(flattenByStatus(result, selectedStatuses));
+        } catch (error) {
+            setMyActivities([]);
+        }
+    }
+
+    async function loadCenterActivities(): Promise<void> {
+        try {
+            const isAllStatusSelected = centerSelectedStatuses.length === activityStatuses.length;
+            const name = centerSearchKeyword.trim() || undefined;
+            const year = centerSelectedYear || undefined;
+
+            if (isAllStatusSelected) {
+                const result = await getExternalActivitiesByCenter(CENTER_ID, {
+                    year,
+                    name,
+                });
+
+                setCenterActivities(result.map(toHomeActivity));
+                return;
+            }
+
+            const result = await getExternalActivitiesByStatus(CENTER_ID, {
+                year,
+                name,
+            });
+
+            setCenterActivities(flattenByStatus(result, centerSelectedStatuses));
+        } catch (error) {
+            setCenterActivities([]);
+        }
+    }
+
+    interface HomeToolbarProps {
+        selectedStatuses: ActivityStatus[];
+        selectedYear: string;
+        filterOpen: boolean;
+        yearOpen: boolean;
+        searchOpen: boolean;
+        searchKeyword: string;
+        onToggleFilter: () => void;
+        onToggleYear: () => void;
+        onToggleSearch: () => void;
+        onToggleStatus: (status: ActivityStatus) => void;
+        onSelectYear: (year: string) => void;
+        onChangeSearchKeyword: (value: string) => void;
+        onResetSearchKeyword: () => void;
+        onClose: () => void;
+    }
+
+    function HomeToolbar({
+        selectedStatuses,
+        selectedYear,
+        filterOpen,
+        yearOpen,
+        searchOpen,
+        searchKeyword,
+        onToggleFilter,
+        onToggleYear,
+        onToggleSearch,
+        onToggleStatus,
+        onSelectYear,
+        onChangeSearchKeyword,
+        onResetSearchKeyword,
+        onClose,
+    }: HomeToolbarProps): React.ReactElement {
+        const toolbarRef = React.useRef<HTMLDivElement | null>(null);
+
+        React.useEffect(() => {
+            if (!filterOpen && !yearOpen && !searchOpen) return;
+
+            function handleMouseDown(e: MouseEvent): void {
+                if (!toolbarRef.current) return;
+                if (toolbarRef.current.contains(e.target as Node)) return;
+                onClose();
+            }
+
+            document.addEventListener("mousedown", handleMouseDown);
+
+            return () => {
+                document.removeEventListener("mousedown", handleMouseDown);
+            };
+        }, [filterOpen, yearOpen, searchOpen, onClose]);
+
+        return (
+            <div className="eca-home-toolbar" ref={toolbarRef}>
+                <div className="eca-home-toolbar-item">
+                    <button type="button" className="eca-home-icon-button" onClick={onToggleFilter} aria-label="필터 열기">
+                        <img src={selectedStatuses.length === allStatuses.length ? "/icons/mynaui_filter_a0.svg" : "/icons/mynaui_filter_dot_a0.svg"} alt="" />
+                    </button>
+
+                    {filterOpen ? (
+                        <div className="eca-home-filter-popover">
+                            {activityStatuses.map((status) => (
+                                <button type="button" key={status} className="eca-home-filter-option" onClick={() => onToggleStatus(status)}>
+                                    <img
+                                        className="eca-home-filter-radio"
+                                        src={
+                                            selectedStatuses.length === activityStatuses.length
+                                                ? "/icons/filter_selected_all.svg"
+                                                : selectedStatuses.includes(status)
+                                                    ? "/icons/filter_selected_one.svg"
+                                                    : "/icons/filter_selected_none.svg"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>{status}</span>
+                                </button>
+                            ))}
+                        </div>
+                    ) : null}
+                </div>
+
+                <div className="eca-home-search-wrap">
+                    <button type="button" className="eca-home-icon-button" onClick={onToggleSearch} aria-label="검색">
+                        <img src="/icons/search-01-a0.svg" alt="" />
+                    </button>
+
+                    {searchOpen ? (
+                        <div className="eca-home-search-popover">
+                            <input
+                                className="eca-home-search-input"
+                                value={searchKeyword}
+                                onChange={(e) => onChangeSearchKeyword(e.target.value)}
+                                autoFocus
+                            />
+                            <button type="button" className="eca-home-search-reset" onClick={onResetSearchKeyword}>
+                                초기화
+                            </button>
+                        </div>
+                    ) : null}
+                </div>
+
+                <div className="eca-home-year-wrap">
+                    <button type="button" className={yearOpen ? "eca-home-year-button eca-home-year-button--open" : "eca-home-year-button"} onClick={onToggleYear}>
+                        <span>{selectedYear}</span>
+                        <img className="eca-home-year-arrow" src="/icons/chevron-down-80.svg" alt="" />
+                    </button>
+
+                    {yearOpen ? (
+                        <div className="eca-home-year-popover">
+                            {["2026", "2025", "2024"].map((year) => (
+                                <button type="button" key={year} className={selectedYear === year ? "eca-home-year-option eca-home-year-option--active" : "eca-home-year-option"} onClick={() => onSelectYear(year)}>
+                                    {year}
+                                </button>
+                            ))}
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+        );
+    }
+
+    function getStatusCount(activities: Activity[], status: ActivityStatus): number {
+        return activities.filter((item) => item.status === status).length;
+    }
+
+    function toggleStatus(current: ActivityStatus[], status: ActivityStatus): ActivityStatus[] {
+        const next = current.includes(status)
+            ? current.filter((item) => item !== status)
+            : [...current, status];
+
+        return activityStatuses.filter((item) => next.includes(item));
+    }
+
+    const adminName = getDisplayAdminName(me);
+    const filteredMyActivities = myActivities;
+    const filteredCenterActivities = centerActivities;
+
     return (
         <div className="eca-home-page">
-            <section className="eca-home-hero">
-                <div className="eca-home-hero-text">
-                    <div className="eca-home-eyebrow">ECA ADMIN</div>
-                    <h1 className="eca-home-title">대외활동 관리자 홈</h1>
-                    <p className="eca-home-desc">
-                        참가자 현황, 활동 진행 상태, 주요 공지를 한눈에 확인할 수 있는 관리자 홈 화면입니다.
-                    </p>
+            <section className="eca-home-header">
+                <div className="eca-home-header-top">
+                    <h1>센터 이름</h1>
+                </div>
+
+                <div className="eca-home-header-bottom">
+                    <p>환영합니다, {adminName ? `${adminName} 관리자님` : "관리자님"}</p>
+
+                    <button type="button" className="eca-home-add-button" onClick={() => navigate("/eca-admin/activities/new")} >
+                        + 대외활동 등록
+                    </button>
                 </div>
             </section>
 
+            <section className="eca-home-mypanel">
+                <div className="eca-home-mypanel-head">
+                    <h2>나의 대외활동</h2>
+                    <HomeToolbar
+                        selectedStatuses={selectedStatuses}
+                        selectedYear={selectedYear}
+                        filterOpen={filterOpen}
+                        yearOpen={yearOpen}
+                        searchOpen={searchOpen}
+                        searchKeyword={searchKeyword}
+                        onToggleFilter={() => {
+                            setFilterOpen((prev) => !prev);
+                            setYearOpen(false);
+                            setSearchOpen(false);
+                        }}
+                        onToggleYear={() => {
+                            setYearOpen((prev) => !prev);
+                            setFilterOpen(false);
+                            setSearchOpen(false);
+                        }}
+                        onToggleSearch={() => {
+                            setSearchOpen((prev) => !prev);
+                            setFilterOpen(false);
+                            setYearOpen(false);
+                        }}
+                        onToggleStatus={(status) => {
+                            setSelectedStatuses((prev) => toggleStatus(prev, status));
+                        }}
+                        onSelectYear={(year) => {
+                            setSelectedYear(year);
+                            setYearOpen(false);
+                        }}
+                        onChangeSearchKeyword={setSearchKeyword}
+                        onResetSearchKeyword={() => setSearchKeyword("")}
+                        onClose={() => {
+                            setFilterOpen(false);
+                            setYearOpen(false);
+                            setSearchOpen(false);
+                        }}
+                    />
+                </div>
+
+                <div className={selectedStatuses.length === activityStatuses.length ? "eca-home-status-row" : "eca-home-status-row eca-home-status-row--filtered"}>
+                    {selectedStatuses.map((status) => (
+                        <div
+                            key={status}
+                            className="eca-home-status-column"
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={() => handleDropToStatus(status)}
+                        >
+                            <span className={`eca-home-status eca-home-status--${status}`}>
+                                {status} ({getStatusCount(myActivities, status)})
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="eca-home-my-grid">
+                    {filteredMyActivities.length === 0 ? (
+                        <div className="eca-home-empty">데이터가 없습니다</div>
+                    ) : (
+                        selectedStatuses.map((status) => (
+                            <div
+                                key={status}
+                                className="eca-home-card-column"
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={() => handleDropToStatus(status)}
+                            >
+                                {filteredMyActivities.filter((item) => item.status === status).map((item) => (
+                                    <div key={item.id} className="eca-home-my-card">
+                                        <div
+                                            className="eca-home-card-drag-handle"
+                                            draggable
+                                            onDragStart={() => setDraggingActivityId(item.id)}
+                                            onDragEnd={() => setDraggingActivityId(null)}
+                                        />
+
+                                        <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
+
+                                        <button
+                                            type="button"
+                                            className="eca-home-card-menu-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setStatusMenuActivityId((prev) => prev === item.id ? null : item.id);
+                                            }}
+                                        >
+                                            <img src="/icons/eca-home-card-menu-button.svg" alt="" />
+                                        </button>
+
+                                        {statusMenuActivityId === item.id ? (
+                                            <div className="eca-home-status-menu">
+                                                {activityStatuses.map((statusItem) => (
+                                                    <button
+                                                        type="button"
+                                                        key={statusItem}
+                                                        className={`eca-home-status-menu-option eca-home-status-menu-option--${statusItem}`}
+                                                        onClick={() => changeMyActivityStatus(item.id, statusItem)}
+                                                    >
+                                                        {statusItem}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : null}
+
+                                        <h3 className="eca-home-my-card-title">{item.title}</h3>
+                                        <p className="eca-home-my-card-date">{item.date}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
+
+            <section className="eca-home-centerpanel">
+                <div className="eca-home-centerpanel-head">
+                    <h2>센터 전체 대외활동</h2>
+                    <HomeToolbar
+                        selectedStatuses={centerSelectedStatuses}
+                        selectedYear={centerSelectedYear}
+                        filterOpen={centerFilterOpen}
+                        yearOpen={centerYearOpen}
+                        searchOpen={centerSearchOpen}
+                        searchKeyword={centerSearchKeyword}
+                        onToggleFilter={() => {
+                            setCenterFilterOpen((prev) => !prev);
+                            setCenterYearOpen(false);
+                            setCenterSearchOpen(false);
+                            setFilterOpen(false);
+                            setYearOpen(false);
+                            setSearchOpen(false);
+                        }}
+                        onToggleYear={() => {
+                            setCenterYearOpen((prev) => !prev);
+                            setCenterFilterOpen(false);
+                            setCenterSearchOpen(false);
+                            setFilterOpen(false);
+                            setYearOpen(false);
+                            setSearchOpen(false);
+                        }}
+                        onToggleSearch={() => {
+                            setCenterSearchOpen((prev) => !prev);
+                            setCenterFilterOpen(false);
+                            setCenterYearOpen(false);
+                            setFilterOpen(false);
+                            setYearOpen(false);
+                            setSearchOpen(false);
+                        }}
+                        onToggleStatus={(status) => {
+                            setCenterSelectedStatuses((prev) => toggleStatus(prev, status));
+                        }}
+                        onSelectYear={(year) => {
+                            setCenterSelectedYear(year);
+                            setCenterYearOpen(false);
+                        }}
+                        onChangeSearchKeyword={setCenterSearchKeyword}
+                        onResetSearchKeyword={() => setCenterSearchKeyword("")}
+                        onClose={() => {
+                            setCenterFilterOpen(false);
+                            setCenterYearOpen(false);
+                            setCenterSearchOpen(false);
+                        }}
+                    />
+                </div>
+
+                <div className="eca-home-center-scroll" ref={centerScrollRef}>
+                    {filteredCenterActivities.length === 0 ? (
+                        <div className="eca-home-empty">데이터가 없습니다</div>
+                    ) : (
+                        filteredCenterActivities.map((item) => (
+                            <div key={item.id} className="eca-home-center-card">
+                                <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
+                                <h3>{item.title}</h3>
+                                <p>{item.date}</p>
+                                <div className="eca-home-center-manager-row">
+                                    {item.managerUserIds.slice(0, 2).map((managerUserId) => (
+                                        <div key={managerUserId} className="eca-home-center-manager">
+                                            <span className="eca-home-center-manager-avatar" />
+                                            <span>{`담당자 ${managerUserId}`}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {item.managerUserIds.length > 2 ? (
+                                    <div className="eca-home-center-more-wrap" ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}>
+                                        <button
+                                            type="button"
+                                            className="eca-home-more-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setManagerPopoverActivityId((prev) => prev === item.id ? null : item.id);
+                                            }}
+                                        >
+                                            <img className="eca-home-more-button-icon" src="/icons/eca-home-card-menu-button-00.svg" alt="" />
+                                            <span className="eca-home-more-button-title">더보기</span>
+                                        </button>
+
+                                        {managerPopoverActivityId === item.id ? (
+                                            <div className="eca-home-manager-popover">
+                                                {item.managerUserIds.slice(2).map((managerUserId) => (
+                                                    <div key={managerUserId} className="eca-home-center-manager">
+                                                        <span className="eca-home-center-manager-avatar" />
+                                                        <span>{`담당자 ${managerUserId}`}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : null}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
         </div>
     );
 }

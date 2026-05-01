@@ -1225,6 +1225,150 @@ export async function deleteClientAdminStudent(
     return api<void>(`/admin-client/${clientType}/students/${userId}`, { method: "DELETE" });
 }
 
+/* - EA 관련 - */
+export type ExternalActivityProgressStatus = "UPCOMING" | "ONGOING" | "COMPLETED" | "DELAYED";
+
+export type CreateExternalActivityRequest = {
+    name: string;
+    description?: string | null;
+    startDate: string;
+    endDate: string;
+    activityPlanUrl?: string | null;
+    participantUserIds: number[];
+    managerUserIds: number[];
+};
+
+export type ExternalActivityResponse = CreateExternalActivityRequest & {
+    externalActivityId: number;
+    centerId: number;
+    progressStatus: ExternalActivityProgressStatus;
+};
+
+export type ExternalActivitiesByStatusQuery = {
+    year?: number | string;
+    name?: string;
+};
+
+export type ExternalActivityListQuery = ExternalActivitiesByStatusQuery & {
+    status?: ExternalActivityProgressStatus;
+};
+
+export type MyManagedExternalActivitiesQuery = ExternalActivityListQuery;
+
+export type ExternalActivitiesByStatusResponse = {
+    upcoming: ExternalActivityResponse[];
+    ongoing: ExternalActivityResponse[];
+    completed: ExternalActivityResponse[];
+    delayed: ExternalActivityResponse[];
+};
+
+export async function createExternalActivity( // 대외활동 생성
+    centerId: number | string,
+    request: CreateExternalActivityRequest
+): Promise<ExternalActivityResponse> {
+    return api<ExternalActivityResponse>(
+        `/centers/${centerId}/externalActivities`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getExternalActivitiesByCenter( // 센터별 대외활동 전체 조회
+    centerId: number | string,
+    query?: ExternalActivityListQuery
+): Promise<ExternalActivityResponse[]> {
+    const params = new URLSearchParams();
+
+    if (query?.status) {
+        params.set("status", query.status);
+    }
+
+    if (query?.year) {
+        params.set("year", String(query.year));
+    }
+
+    if (query?.name?.trim()) {
+        params.set("name", query.name.trim());
+    }
+
+    const queryString = params.toString();
+
+    return api<ExternalActivityResponse[]>(
+        `/centers/${centerId}/externalActivities${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+export async function getExternalActivitiesByStatus( // 센터 대외 활동 진행 상태별 대외 활동 조회
+    centerId: number | string,
+    query?: ExternalActivitiesByStatusQuery
+): Promise<ExternalActivitiesByStatusResponse> {
+    const params = new URLSearchParams();
+
+    if (query?.year) {
+        params.set("year", String(query.year));
+    }
+
+    if (query?.name?.trim()) {
+        params.set("name", query.name.trim());
+    }
+
+    const queryString = params.toString();
+
+    return api<ExternalActivitiesByStatusResponse>(
+        `/centers/${centerId}/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+export async function getMyManagedExternalActivities( // 나의 대외활동 조회(관리자)
+    query?: MyManagedExternalActivitiesQuery
+): Promise<ExternalActivityResponse[]> {
+    const params = new URLSearchParams();
+
+    if (query?.status) {
+        params.set("status", query.status);
+    }
+
+    if (query?.year) {
+        params.set("year", String(query.year));
+    }
+
+    if (query?.name?.trim()) {
+        params.set("name", query.name.trim());
+    }
+
+    const queryString = params.toString();
+
+    return api<ExternalActivityResponse[]>(
+        `/users/me/externalActivities${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+export async function getMyManagedExternalActivitiesByStatus( //나의 대외활동 진행상태별 조회
+    query?: ExternalActivitiesByStatusQuery
+): Promise<ExternalActivitiesByStatusResponse> {
+    const params = new URLSearchParams();
+
+    if (query?.year) {
+        params.set("year", String(query.year));
+    }
+
+    if (query?.name?.trim()) {
+        params.set("name", query.name.trim());
+    }
+
+    const queryString = params.toString();
+
+    return api<ExternalActivitiesByStatusResponse>(
+        `/users/me/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
 
 /**
  * 관리자 여부 확인
@@ -1246,6 +1390,17 @@ export async function checkIsClientAdmin(clientType: ClientType): Promise<boolea
         if (clientType === "jump") return me.roleSet.includes("ROLE_JUMP_ADMIN");
         if (clientType === "kakao") return me.roleSet.includes("ROLE_KAKAO_ADMIN");
         return false;
+    } catch (e) {
+        if (e instanceof ApiError && e.status === 401) return false;
+        throw e;
+    }
+}
+
+export async function checkIsEsgAdmin(): Promise<boolean> { // 우선 용산만, 추후 수정
+    try {
+        const me = await getUserMe();
+
+        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ESG_ADMIN");
     } catch (e) {
         if (e instanceof ApiError && e.status === 401) return false;
         throw e;

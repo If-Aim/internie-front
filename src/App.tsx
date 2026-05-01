@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./protectedRoute";
 import AdminRoute from "./adminRoute";
 import AdminClientRoute from "./clientAdminRoute";
-import AdminEcaClientRoute from "./pages/admin/desktop/ecaClient/ecaClientAdminApp";
+import EcaAdminRoute from "./ecaAdminRoute";
 
 const Auth = lazy(() => import("./pages/auth/auth"));
 const Signup = lazy(() => import("./pages/auth/signup"));
@@ -46,7 +46,7 @@ export default function App(): React.ReactElement {
 					<Route path="*" element={<ClientAdminApp />} />
 				</Route>
 				{/* 대외활동 관리자용 라우트 */}
-				<Route path="/eca-admin/*" element={<AdminEcaClientRoute />}>
+				<Route element={<EcaAdminRoute />}>
 					<Route path="*" element={<EcaClientAdminApp />} />
 				</Route>
 
