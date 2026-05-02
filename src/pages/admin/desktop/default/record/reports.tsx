@@ -10,7 +10,7 @@ type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DET
 type NavDir = "forward" | "back";
 type RecordFilter = "ALL" | "RECORDED" | "NOT_RECORDED";
 type Option = { value: number; label: string };
-type AdminRoleOption = "" | "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN";
+type AdminRoleOption = "" | "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN" | "ROLE_ESG_ADMIN" ;
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEK_HEADERS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -362,7 +362,7 @@ export default function AdminReportsPage(): React.ReactElement {
 
 		for (const user of users) {
 			for (const role of normalizeRoleSet(user)) {
-				if (role === "ROLE_STUDENT" || role === "ROLE_JUMP_STUDENT"  || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" ) {
+				if (role === "ROLE_STUDENT" || role === "ROLE_JUMP_STUDENT"  || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ) {
 					set.add(role);
 				}
 			}
@@ -1104,7 +1104,7 @@ export default function AdminReportsPage(): React.ReactElement {
                         {filtered.map((user, idx) => {
 							const isSelected = user.userId === selectedId;
 							const chips = normalizeRoleSet(user).filter((role) => {
-                                return role === "ROLE_ADMIN" || role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN";
+                                return role === "ROLE_ADMIN" || role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN";
                             });
 
 							return (
@@ -1123,9 +1123,10 @@ export default function AdminReportsPage(): React.ReactElement {
 												key={role}
 												className={[
                                                     "admin-report-chip",
-                                                    role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" ? "is-admin" : "is-student",
+                                                    role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ? "is-admin" : "is-student",
                                                     role === "ROLE_JUMP_ADMIN" || role === "ROLE_JUMP_STUDENT" ? "is-jump" : "",
                                                     role === "ROLE_KAKAO_ADMIN" || role === "ROLE_KAKAO_STUDENT" ? "is-kakao" : "",
+                                                    role === "ROLE_ESG_ADMIN" || role === "ROLE_ESG_STUDENT" ? "is-esg" : "",
                                                     role === "ROLE_ADMIN" ? "is-default-admin" : "",
                                                 ].filter(Boolean).join(" ")}
 											>
