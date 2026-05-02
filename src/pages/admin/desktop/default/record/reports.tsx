@@ -1385,6 +1385,14 @@ export default function AdminReportsPage(): React.ReactElement {
                                         >
                                             소셜벤처창업 관리자
                                         </button>
+                                        <button
+                                            type="button"
+                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_ESG_ADMIN") ? "is-selected" : ""}`}
+                                            onClick={() => handleSelectAdminRole("ROLE_ESG_ADMIN")}
+                                            disabled={hasRole(selected, "ROLE_ESG_ADMIN")}
+                                        >
+                                            소셜벤처창업 관리자
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -1404,6 +1412,8 @@ export default function AdminReportsPage(): React.ReactElement {
                                             role === "ROLE_ADMIN" ? "is-default-admin" : ""
                                         } ${
                                             role === "ROLE_JUMP_ADMIN" ? "is-jump" : ""
+                                        } ${
+                                            role === "ROLE_ESG_ADMIN" ? "is-esg" : ""
                                         } ${
                                             role === "ROLE_KAKAO_ADMIN" ? "is-kakao" : ""
                                         }`}
