@@ -10,10 +10,33 @@ type UsersRightView = "USER_DETAIL" | "REPORT_HOME" | "REPORT_DAY" | "REPORT_DET
 type NavDir = "forward" | "back";
 type RecordFilter = "ALL" | "RECORDED" | "NOT_RECORDED";
 type Option = { value: number; label: string };
-type AdminRoleOption = "" | "ROLE_ADMIN" | "ROLE_JUMP_ADMIN" | "ROLE_KAKAO_ADMIN" | "ROLE_ESG_ADMIN" ;
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEK_HEADERS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const ADMIN_ROLE_META = [
+    { value: "ROLE_ADMIN", label: "인터니 관리자", className: "is-default-admin" },
+    { value: "ROLE_JUMP_ADMIN", label: "JUMP 관리자", className: "is-jump" },
+    { value: "ROLE_KAKAO_ADMIN", label: "소셜벤처창업 관리자", className: "is-kakao" },
+    { value: "ROLE_ESG_ADMIN", label: "용산 관리자", className: "is-esg" },
+] as const;
+const ADMIN_ROLE_OPTIONS = ADMIN_ROLE_META.map((item) => item.value);
+
+type AdminRoleValue = typeof ADMIN_ROLE_META[number]["value"];
+type AdminRoleOption = "" | AdminRoleValue;
+function isAdminRole(role: string): role is AdminRoleValue {
+    return ADMIN_ROLE_OPTIONS.includes(role as AdminRoleValue);
+}
+
+const STUDENT_ROLE_OPTIONS = [
+    "ROLE_JUMP_STUDENT",
+    "ROLE_KAKAO_STUDENT",
+    "ROLE_ESG_STUDENT",
+] as const;
+type StudentRoleValue = typeof STUDENT_ROLE_OPTIONS[number];
+
+function isStudentRole(role: string): role is StudentRoleValue {
+    return STUDENT_ROLE_OPTIONS.includes(role as StudentRoleValue);
+}
 
 function normalizeText(v: unknown): string {
     return String(v ?? "").trim();
@@ -56,6 +79,7 @@ function formatRoleChip(role: string): string {
     if (role === "ROLE_ADMIN") return "인터니 관리자";
     if (role === "ROLE_JUMP_ADMIN") return "JUMP 관리자";
     if (role === "ROLE_KAKAO_ADMIN") return "소셜벤처창업 관리자";
+    if (role === "ROLE_ESG_ADMIN") return "용산 관리자";
     if (role === "ROLE_JUMP_STUDENT") return "JUMP 상생지락";
     if (role === "ROLE_KAKAO_STUDENT") return "소셜벤처창업";
     if (role === "ROLE_ESG_STUDENT") return "용산";
@@ -63,23 +87,26 @@ function formatRoleChip(role: string): string {
     return role.replace(/^ROLE_/, "");
 }
 
-function getAdminRoleChips(user: AdminUser): AdminRoleOption[] {
-    return normalizeRoleSet(user).filter((role): role is AdminRoleOption => {
-        return role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN";
+function getAdminRoleChips(user: AdminUser): AdminRoleValue[] {
+    return normalizeRoleSet(user).filter((role): role is AdminRoleValue => {
+        return isAdminRole(role);
     });
 }
 
-function getStudentRoleChips(user: AdminUser): string[] {
-    return normalizeRoleSet(user).filter((role) => {
-        return role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT";
+function getAdminRoleClassName(role: AdminRoleOption): string {
+    const found = ADMIN_ROLE_META.find((item) => item.value === role);
+    return found?.className ?? "";
+}
+
+function getStudentRoleChips(user: AdminUser): StudentRoleValue[] {
+    return normalizeRoleSet(user).filter((role): role is StudentRoleValue => {
+        return isStudentRole(role);
     });
 }
 
 function getAdminRoleLabel(role: AdminRoleOption): string {
-    if (role === "ROLE_ADMIN") return "인터니 관리자";
-    if (role === "ROLE_JUMP_ADMIN") return "JUMP 관리자";
-    if (role === "ROLE_KAKAO_ADMIN") return "소셜벤처창업 관리자";
-    return "관리자가 아님";
+    const found = ADMIN_ROLE_META.find((item) => item.value === role);
+    return found?.label ?? "관리자가 아님";
 }
 
 function getRecordFilterLabel(value: RecordFilter): string {
@@ -1104,7 +1131,7 @@ export default function AdminReportsPage(): React.ReactElement {
                         {filtered.map((user, idx) => {
 							const isSelected = user.userId === selectedId;
 							const chips = normalizeRoleSet(user).filter((role) => {
-                                return role === "ROLE_ADMIN" || role === "ROLE_JUMP_STUDENT" || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN";
+                                return isAdminRole(role) || isStudentRole(role);
                             });
 
 							return (
@@ -1359,40 +1386,17 @@ export default function AdminReportsPage(): React.ReactElement {
 
                                 {adminRoleOpen && (
                                     <div className="admin-report-role-menu">
-                                        <button
-                                            type="button"
-                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_ADMIN") ? "is-selected" : ""}`}
-                                            onClick={() => handleSelectAdminRole("ROLE_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_ADMIN")}
-                                        >
-                                            인터니 관리자
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_JUMP_ADMIN") ? "is-selected" : ""}`}
-                                            onClick={() => handleSelectAdminRole("ROLE_JUMP_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_JUMP_ADMIN")}
-                                        >
-                                            JUMP 관리자
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_KAKAO_ADMIN") ? "is-selected" : ""}`}
-                                            onClick={() => handleSelectAdminRole("ROLE_KAKAO_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_KAKAO_ADMIN")}
-                                        >
-                                            소셜벤처창업 관리자
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`admin-report-role-item ${hasRole(selected, "ROLE_ESG_ADMIN") ? "is-selected" : ""}`}
-                                            onClick={() => handleSelectAdminRole("ROLE_ESG_ADMIN")}
-                                            disabled={hasRole(selected, "ROLE_ESG_ADMIN")}
-                                        >
-                                            소셜벤처창업 관리자
-                                        </button>
+                                        {ADMIN_ROLE_META.map((item) => (
+                                            <button
+                                                key={item.value}
+                                                type="button"
+                                                className={`admin-report-role-item ${hasRole(selected, item.value) ? "is-selected" : ""}`}
+                                                onClick={() => handleSelectAdminRole(item.value)}
+                                                disabled={hasRole(selected, item.value)}
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -1408,15 +1412,7 @@ export default function AdminReportsPage(): React.ReactElement {
                                     <button
                                         key={role}
                                         type="button"
-                                        className={`admin-report-role-chip is-admin ${
-                                            role === "ROLE_ADMIN" ? "is-default-admin" : ""
-                                        } ${
-                                            role === "ROLE_JUMP_ADMIN" ? "is-jump" : ""
-                                        } ${
-                                            role === "ROLE_ESG_ADMIN" ? "is-esg" : ""
-                                        } ${
-                                            role === "ROLE_KAKAO_ADMIN" ? "is-kakao" : ""
-                                        }`}
+                                        className={`admin-report-role-chip is-admin ${getAdminRoleClassName(role)}`}
                                         onClick={() => handleClickRevokeAdminRole(role)}
                                     >
                                         {formatRoleChip(role)}
@@ -1428,7 +1424,15 @@ export default function AdminReportsPage(): React.ReactElement {
 						<div className="admin-report-meta">
                             <div className="admin-report-role-chips">
                                 {studentRoleChips.map((role) => (
-                                    <span key={role} className={`admin-report-role-chip ${role === "ROLE_JUMP_STUDENT" ? "is-jump" : "is-kakao"}`}>
+                                    <span
+                                        key={role}
+                                        className={[
+                                            "admin-report-role-chip",
+                                            role === "ROLE_JUMP_STUDENT" ? "is-jump" : "",
+                                            role === "ROLE_KAKAO_STUDENT" ? "is-kakao" : "",
+                                            role === "ROLE_ESG_STUDENT" ? "is-esg" : "",
+                                        ].filter(Boolean).join(" ")}
+                                    >
                                         {formatRoleChip(role)}
                                     </span>
                                 ))}
