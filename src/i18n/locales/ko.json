@@ -276,6 +276,12 @@
         "WithdrawDesc3": "데이터는 다시 복구될 수 없어요.",
         "WithdrawQuestion": "{{name}}님이 탈퇴하려는 이유가 궁금해요",
         "WithdrawReasonSelect": "선택하기",
+
+        "WithdrawNoticeTitle": "탈퇴 전 확인해주세요",
+        "WithdrawNoticeDesc": "회원탈퇴 후 계정은 즉시 비활성화되며, 30일 후 모든 회원 정보가 삭제됩니다.",
+        "WithdrawNoticeDesc2": "탈퇴 후 30일 동안은 같은 이메일로 재가입할 수 없습니다.",
+        "WithdrawSubmit": "탈퇴하기",
+        "WithdrawSubmitting": "처리 중...", 
         "WithdrawR": {
             "reason": {
                 "notUsing": "더 이상 서비스를 사용하지 않음",

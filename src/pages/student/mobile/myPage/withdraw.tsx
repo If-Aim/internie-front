@@ -77,7 +77,7 @@ export default function WithdrawPage() {
             setSubmitting(true);
 
             await withdraw({
-                reason,
+                reason: t(reason),
                 detail: isEtcReason ? trimmedDetail : "",
             });
 
@@ -153,9 +153,14 @@ export default function WithdrawPage() {
                     />
                 )}
             </section>
+            <div className="withdraw-notice">
+                <strong>{t("mypage.WithdrawNoticeTitle")}</strong>
+                <p>{t("mypage.WithdrawNoticeDesc")}</p>
+                <p>{t("mypage.WithdrawNoticeDesc2")}</p>
+            </div>
             <div className="wd-bottom-spacer"></div>
             <button type="button" className="withdraw-submit" disabled={!canSubmit} onClick={handleWithdraw}>
-                {submitting ? "처리 중..." : "탈퇴하기"}
+                {submitting ? t("mypage.WithdrawSubmitting") : t("mypage.WithdrawSubmit")}
             </button>
         </div>
     );

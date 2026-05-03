@@ -275,6 +275,12 @@
 		"WithdrawDesc3": "This data cannot be restored.",
 		"WithdrawQuestion": "We’d like to know why you’re leaving, {{name}}",
 		"WithdrawReasonSelect": "Select a reason",
+		
+		"WithdrawNoticeTitle": "Please check before deleting your account",
+		"WithdrawNoticeDesc": "After deleting your account, it will be immediately deactivated and all account information will be permanently deleted after 30 days.",
+		"WithdrawNoticeDesc2": "You cannot sign up again with the same email address for 30 days after deletion.",
+		"WithdrawSubmit": "Delete Account",
+		"WithdrawSubmitting": "Processing...",
         "WithdrawR": {
 			"reason": {
 				"notUsing": "No longer using the service",
