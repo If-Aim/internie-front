@@ -25,7 +25,9 @@
         "getLoginTitle": "Login Required",
         "getLoginSub": "Would you like to log in?",
 		"googleNotReady": "Google login is being prepared. Please try again shortly.",
-		"googleLoginFailed": "Google login failed."
+		"googleLoginFailed": "Google login failed.",
+		"invalidLogin": "The ID or password is incorrect.",
+		"withdrawnAccount": "This account has been deleted. You can sign up again with the same email address after 30 days."
     },
     "signup": {
         "title": "Sign Up",
@@ -275,7 +277,7 @@
 		"WithdrawDesc3": "This data cannot be restored.",
 		"WithdrawQuestion": "We’d like to know why you’re leaving, {{name}}",
 		"WithdrawReasonSelect": "Select a reason",
-		
+
 		"WithdrawNoticeTitle": "Please check before deleting your account",
 		"WithdrawNoticeDesc": "After deleting your account, it will be immediately deactivated and all account information will be permanently deleted after 30 days.",
 		"WithdrawNoticeDesc2": "You cannot sign up again with the same email address for 30 days after deletion.",

@@ -25,7 +25,9 @@
         "getLoginTitle": "로그인이 필요한 서비스입니다",
         "getLoginSub": "로그인 하시겠습니까?",
         "googleNotReady": "구글 로그인을 준비 중입니다. 잠시 후 다시 시도해주세요.",
-        "googleLoginFailed": "구글 로그인에 실패했습니다."
+        "googleLoginFailed": "구글 로그인에 실패했습니다.",
+        "invalidLogin": "아이디 또는 비밀번호가 올바르지 않습니다.",
+        "withdrawnAccount": "탈퇴한 계정입니다. 탈퇴 후 30일이 지나면 같은 이메일로 다시 가입할 수 있습니다."
     },
     "signup": {
         "title": "회원가입",

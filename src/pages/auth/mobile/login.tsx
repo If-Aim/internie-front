@@ -29,7 +29,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
-
+    
     const go = (url: string) => {
         window.location.href = url;
     };
@@ -61,7 +61,13 @@ export default function Login() {
             navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
         } catch (e) {
             console.error("일반 로그인 실패", e);
-            setLoginError("비밀번호가 일치하지 않습니다");
+
+            if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
+                setLoginError(t("login.withdrawnAccount"));
+                return;
+            }
+
+            setLoginError(t("login.invalidLogin"));
         } finally {
             setSubmitting(false);
         }
@@ -92,12 +98,17 @@ export default function Login() {
                     } catch (e) {
                         console.error("구글 로그인 실패", e);
 
-                        if (e instanceof ApiError) {
-                            alert(e.message || t("login.googleLoginFailed"));
+                        if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
+                            setLoginError(t("login.withdrawnAccount"));
                             return;
                         }
 
-                        alert(t("login.googleLoginFailed"));
+                        if (e instanceof ApiError) {
+                            setLoginError(e.message || t("login.googleLoginFailed"));
+                            return;
+                        }
+
+                        setLoginError(t("login.googleLoginFailed"));
                     }
                 },
             });
