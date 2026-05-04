@@ -49,6 +49,9 @@
 .login-desktop-policy button { border: 0; background: transparent; color: #A2A2A2; font-size: 13px; font-weight: 500; text-decoration: underline; cursor: pointer; }
 .login-desktop-policy button:hover { color: #2563eb; }
 
+.login-desktop-error-text { margin: -6px 0 14px; color: #FF3B30; font-size: 13px; font-weight: 500; line-height: 1.45; }
+.login-desktop-input.is-error { border-color: #FF3B30; }
+
 @media (max-width: 640px) {
     .login-desktop-main { padding: 24px 16px 40px; }
     .login-desktop-container { padding: 40px 24px 32px; }

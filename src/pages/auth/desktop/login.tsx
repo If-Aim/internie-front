@@ -28,6 +28,7 @@ export default function Login(): React.ReactElement {
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null);
 
     const go = (url: string) => {
         window.location.href = url;
@@ -46,20 +47,29 @@ export default function Login(): React.ReactElement {
         const trimmedLoginId = loginId.trim();
 
         if (!trimmedLoginId || !password) {
-            alert("아이디와 비밀번호를 입력해주세요.");
+            setLoginError(t("login.requiredLoginInfo"));
             return;
         }
 
         try {
             setSubmitting(true);
+            setLoginError(null);
+
             const data = await loginWithLocal({
                 loginId: trimmedLoginId,
                 password,
             });
+
             navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
-        } catch (e: any) {
+        } catch (e) {
             console.error("일반 로그인 실패", e);
-            alert(e?.message || "로그인에 실패했습니다.");
+
+            if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
+                setLoginError(t("login.withdrawnAccount"));
+                return;
+            }
+
+            setLoginError(t("login.invalidLogin"));
         } finally {
             setSubmitting(false);
         }
@@ -89,12 +99,17 @@ export default function Login(): React.ReactElement {
                     } catch (e) {
                         console.error("구글 로그인 실패", e);
 
-                        if (e instanceof ApiError) {
-                            alert(e.message || t("login.loginWithGoogle"));
+                        if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
+                            setLoginError(t("login.withdrawnAccount"));
                             return;
                         }
 
-                        alert(t("login.loginWithGoogle"));
+                        if (e instanceof ApiError) {
+                            setLoginError(e.message || t("login.googleLoginFailed"));
+                            return;
+                        }
+
+                        setLoginError(t("login.googleLoginFailed"));
                     }
                 },
             });
@@ -146,7 +161,7 @@ export default function Login(): React.ReactElement {
                             <input
                                 className="login-desktop-input"
                                 value={loginId}
-                                onChange={(e) => setLoginId(e.target.value)}
+                                onChange={(e) => { setLoginId(e.target.value); setLoginError(null); }}
                                 placeholder={t("login.idPlaceholder")}
                                 autoComplete="username"
                                 onKeyDown={(e) => {
@@ -167,9 +182,9 @@ export default function Login(): React.ReactElement {
 
                             <div className="login-desktop-input-wrap">
                                 <input
-                                    className="login-desktop-input is-password"
+                                    className={`login-desktop-input is-password ${loginError ? "is-error" : ""}`}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {setPassword(e.target.value); setLoginError(null); }}
                                     placeholder={t("login.passwordPlaceholder")}
                                     type={showPassword ? "text" : "password"}
                                     autoComplete="current-password"
@@ -185,6 +200,11 @@ export default function Login(): React.ReactElement {
                             </div>
                         </div>
 
+                        {loginError && (
+                            <div className="login-desktop-error-text">
+                                {loginError}
+                            </div>
+                        )}
                         <button type="button" className="login-desktop-btn primary" onClick={handleLocalLogin} disabled={!canLogin || submitting} >
                             {submitting ? t("login.loginLoading") : t("login.loginButton")}
                         </button>
