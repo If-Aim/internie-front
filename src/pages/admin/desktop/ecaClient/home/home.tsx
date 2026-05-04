@@ -6,12 +6,18 @@ import "./home.css";
 
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
 
+type ActivityManager = {
+    userId?: number;
+    name: string;
+    profileImage?: string | null;
+};
+
 type Activity = {
     id: number;
     title: string;
     date: string;
     status: ActivityStatus;
-    managerNames: string[];
+    managers: ActivityManager[];
 };
 
 const CENTER_ID = 1;
@@ -55,12 +61,25 @@ function getCalculatedActivityStatus(activity: ExternalActivityResponse): Activi
 }
 
 function toHomeActivity(activity: ExternalActivityResponse): Activity {
+    const managers: ActivityManager[] = Array.isArray(activity.managers)
+        ? activity.managers.map((manager) => ({
+            userId: manager.userId,
+            name: manager.name,
+            profileImage: manager.profileImage ?? null,
+        }))
+        : Array.isArray(activity.managerNames)
+            ? activity.managerNames.map((name) => ({
+                name,
+                profileImage: null,
+            }))
+            : [];
+
     return {
         id: activity.externalActivityId,
         title: activity.name,
         date: formatActivityDate(activity.startDate, activity.endDate),
         status: getCalculatedActivityStatus(activity),
-        managerNames: Array.isArray(activity.managerNames) ? activity.managerNames : [],
+        managers,
     };
 }
 
@@ -74,6 +93,19 @@ function getDisplayAdminName(me: UserMe | null): string {
     const name = (me.name ?? "").trim();
 
     return nick || name || "";
+}
+
+function ManagerProfile({ manager }: { manager: ActivityManager }): React.ReactElement {
+    return (
+        <div className="eca-home-center-manager">
+            <img
+                className="eca-home-center-manager-avatar"
+                src={manager.profileImage || "/internie_mascot_normal.png"}
+                alt=""
+            />
+            <span>{manager.name}</span>
+        </div>
+    );
 }
 
 export default function EcaAdminHomePage(): React.ReactElement {
@@ -560,15 +592,15 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 <h3>{item.title}</h3>
                                 <p>{item.date}</p>
                                 <div className="eca-home-center-manager-row">
-                                    {item.managerNames.slice(0, 2).map((managerName, index) => (
-                                        <div key={`${item.id}-${managerName}-${index}`} className="eca-home-center-manager">
-                                            <span className="eca-home-center-manager-avatar" />
-                                            <span>{managerName}</span>
-                                        </div>
+                                    {item.managers.slice(0, 2).map((manager, index) => (
+                                        <ManagerProfile
+                                            key={`${item.id}-${manager.userId ?? manager.name}-${index}`}
+                                            manager={manager}
+                                        />
                                     ))}
                                 </div>
 
-                                {item.managerNames.length > 2 ? (
+                                {item.managers.length > 2 ? (
                                     <div className="eca-home-center-more-wrap" ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}>
                                         <button
                                             type="button"
@@ -584,11 +616,11 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                                         {managerPopoverActivityId === item.id ? (
                                             <div className="eca-home-manager-popover">
-                                                {item.managerNames.slice(2).map((managerName, index) => (
-                                                    <div key={`${item.id}-${managerName}-${index}`} className="eca-home-center-manager">
-                                                        <span className="eca-home-center-manager-avatar" />
-                                                        <span>{managerName}</span>
-                                                    </div>
+                                                {item.managers.slice(2).map((manager, index) => (
+                                                    <ManagerProfile
+                                                        key={`${item.id}-${manager.userId ?? manager.name}-${index}`}
+                                                        manager={manager}
+                                                    />
                                                 ))}
                                             </div>
                                         ) : null}

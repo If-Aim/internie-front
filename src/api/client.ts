@@ -1237,13 +1237,25 @@ export type CreateExternalActivityRequest = {
     participantUserIds: number[];
     managerUserIds: number[];
 };
-export type ExternalActivityManager = UserBase;
-export type ExternalActivityResponse = CreateExternalActivityRequest & {
+export type ExternalActivityManager = {
+    userId: number;
+    name: string;
+    profileImage?: string | null;
+    roleSet?: string[];
+};
+
+export type ExternalActivityResponse = {
     externalActivityId: number;
     centerId: number;
-    progressStatus: ExternalActivityProgressStatus;
+    name: string;
+    description?: string | null;
     participantNames?: string[] | null;
     managerNames?: string[] | null;
+    managers?: ExternalActivityManager[] | null;
+    startDate: string;
+    endDate: string;
+    activityPlanUrl?: string | null;
+    progressStatus: ExternalActivityProgressStatus;
 };
 
 export type ExternalActivitiesByStatusQuery = {
