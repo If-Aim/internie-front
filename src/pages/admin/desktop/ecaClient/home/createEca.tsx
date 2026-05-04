@@ -7,7 +7,7 @@ type Manager = {
     id: number;
     name: string;
     position: string;
-    profileImage?: string | null;
+    profileImage: string | null;
 };
 
 type CenterInfo = {
@@ -227,13 +227,13 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                     .filter((id): id is number => typeof id === "number");
 
                 const nextManagers = managerUsers
+                    .filter((manager) => typeof manager.userId === "number")
                     .map((manager) => ({
                         id: manager.userId,
-                        name: manager.name ?? manager.kakaoName ?? manager.nickname ?? "이름 없음",
+                        name: manager.name ?? "이름 없음",
                         position: "ESG 관리자",
                         profileImage: manager.profileImage ?? null,
-                    }))
-                    .filter((manager) => typeof manager.id === "number");
+                    }));
 
                 setParticipantUserIds(participantIds);
                 setManagers(nextManagers);
