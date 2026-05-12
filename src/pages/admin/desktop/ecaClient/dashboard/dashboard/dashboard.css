@@ -1,12 +1,19 @@
-.eca-dashboard-detail-page { width: 100%; margin: 0 auto; padding: 80px 0 56px; box-sizing: border-box; }
-.eca-dashboard-detail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
-.eca-dashboard-detail-head h1 { margin: 0; color: #111; font-size: 28px; font-weight: 900; line-height: 1.2; }
-.eca-dashboard-more-button { width: 40px; height: 32px; border: 0; background: transparent; color: #111; font-size: 28px; font-weight: 900; line-height: 1; cursor: pointer; }
+:root { --eca-dashboard-width: clamp(732px, 68vw, 1120px); }
 
-.eca-dashboard-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px; }
-.eca-dashboard-summary-card { height: 146px; padding: 28px 28px 22px; border: 1px solid #ddd; border-radius: 10px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
-.eca-dashboard-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 800; }
-.eca-dashboard-summary-card strong { color: #000; font-size: 30px; font-weight: 900; line-height: 1; }
+.eca-dashboard-detail-page { width: var(--eca-dashboard-width); margin: 0 auto; padding: 0 0 56px; box-sizing: border-box; }
+.eca-dashboard-detail-head { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 34px; }
+.eca-dashboard-detail-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
+.eca-dashboard-more-button { width: 36px; height: 36px; border: 0; background: transparent; cursor: pointer; }
+.eca-dashboard-menu-wrap { position: relative; display: flex; align-items: center; }
+.eca-dashboard-menu { position: absolute; top: 36px; z-index: 60; width: 120px; padding: 6px 0 9px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-dashboard-menu button { display: flex; align-items: center; gap: 18px; width: 100%; height: 30px; margin: 5px 0; padding: 0 20px; border: 0; background: #fff; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; box-sizing: border-box; }
+.eca-dashboard-menu svg { flex: 0 0 auto; display: block; }
+.eca-dashboard-menu button:hover { background: #eeeeee; }
+
+.eca-dashboard-summary-grid { display: grid; width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+.eca-dashboard-summary-card { width: 100%; min-height: 140px; padding: 18px 19px 27px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.eca-dashboard-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 800; line-height: 32px;}
+.eca-dashboard-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
 .eca-dashboard-summary-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .eca-dashboard-status-badge { height: 32px; max-width: 84px; padding: 0 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px !important; font-weight: 600 !important; }
 .eca-dashboard-status--upcoming { background: #F6F6F6; color: #808080 !important; }
@@ -14,46 +21,86 @@
 .eca-dashboard-status--completed { background: #BDD8FF; color: #0166FF !important; }
 .eca-dashboard-status--delayed { background: #FFD6D2; color: #F00 !important; }
 
-.eca-dashboard-main-grid { display: grid; grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr); gap: 18px; align-items: start; }
-.eca-dashboard-left-column { display: flex; flex-direction: column; gap: 14px; }
-.eca-dashboard-right-column { display: flex; flex-direction: column; gap: 14px; }
+.eca-dashboard-main-grid { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.eca-dashboard-left-column { width: 100%; display: flex; flex-direction: column; gap: 11px; }
+.eca-dashboard-right-column { width: 100%; display: flex; flex-direction: column; background: #fff; border: 1px solid #ddd; border-radius: 10px; min-height: 560px; padding-top: 23px; box-sizing: border-box; }
 
-.eca-dashboard-panel { padding: 26px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; }
-.eca-dashboard-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-.eca-dashboard-panel-head h2 { margin: 0; color: #555; font-size: 15px; font-weight: 900; line-height: 1.25; }
-.eca-dashboard-panel-actions { display: flex; align-items: center; gap: 10px; }
-.eca-dashboard-panel-actions button { width: 34px; height: 34px; border: 0; border-radius: 999px; background: #f2f2f2; color: #999; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-panel-left { padding: 23px 20px 26px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; height: 260px;}
+.eca-dashboard-panel-right { width: 100%; padding: 23px 9px 26px 20px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; }
+.eca-dashboard-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 19px; padding: 0 8px 0 4px; }
+.eca-dashboard-panel-head h2 { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
+.eca-dashboard-panel-actions { display: flex; align-items: center; gap: 9px; }
+.eca-dashboard-panel-actions button { width: 32px; height: 32px; border: 0; border-radius: 999px; background: #F6F6F6; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-panel-actions button:disabled { opacity: .35; cursor: default; }
 
-.eca-dashboard-list { display: flex; flex-direction: column; gap: 10px; }
-.eca-dashboard-assignment-row, .eca-dashboard-attendance-row, .eca-dashboard-person-row, .eca-dashboard-team-row { width: 100%; min-height: 58px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fff; color: #111; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }
-.eca-dashboard-assignment-row:hover, .eca-dashboard-attendance-row:hover, .eca-dashboard-person-row:hover, .eca-dashboard-team-row:hover { background: #f8fbff; }
+.eca-dashboard-list-left { display: flex; flex-direction: column; gap: 8px; }
+.eca-dashboard-list-right { display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; padding-right: 7px;}
+.eca-dashboard-assignment-row, .eca-dashboard-attendance-row { width: 100%; height: 48px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fff; color: #000; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }
+.eca-dashboard-person-row, .eca-dashboard-team-row { width: 100%; min-height: 58px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fff; color: #000; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }
 
-.eca-dashboard-assignment-row { padding: 0 14px 0 18px; gap: 14px; }
-.eca-dashboard-assignment-row > span:first-child { flex: 1; color: #111; font-size: 15px; font-weight: 900; text-align: left; }
-.eca-dashboard-count-badge { min-width: 68px; height: 30px; padding: 0 14px; border-radius: 999px; background: #b6d7ff; color: var(--primary); font-size: 14px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-dashboard-row-arrow { color: #999; font-size: 32px; font-weight: 400; line-height: 1; }
+.eca-dashboard-assignment-row { padding: 0 6px 0 18px; gap: 3px; }
+.eca-dashboard-assignment-row > span:first-child { flex: 1; color: #000; font-size: 14px; font-weight: 700; text-align: left; }
+.eca-dashboard-assignment-prev {transform: rotate(-180deg);}
+.eca-dashboard-assignment-create { background:none !important; border-radius: 0 !important; }
+.eca-dashboard-count-badge { min-width: 64px; height: 24px; padding: 0 14px; border-radius: 12px; background: #BDD8FF; color: var(--primary); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-dashboard-row-arrow { width: 28px; height: 28px; border: none; background: none; display:flex; align-items: center; justify-content: center; padding: 0; }
 
-.eca-dashboard-attendance-row { padding: 0 14px 0 18px; gap: 16px; }
-.eca-dashboard-attendance-row strong { width: 132px; color: #111; font-size: 15px; font-weight: 900; text-align: left; }
-.eca-dashboard-attendance-row span:nth-child(2) { flex: 1; color: #777; font-size: 12px; font-weight: 700; text-align: left; }
-.eca-dashboard-attendance-row span:nth-child(3) { color: #111; font-size: 14px; font-weight: 900; white-space: nowrap; }
+.eca-dashboard-attendance-row { padding: 0 6px 0 18px; gap: 3px; }
+.eca-dashboard-attendance-row strong { width: 96px; color: #000; font-size: 14px; font-weight: 700; text-align: left; }
+.eca-dashboard-attendance-row span:nth-child(2) { flex: 1; color: #6B6B6B; font-size: 10px; font-weight: 500; text-align: center; }
+.eca-dashboard-attendance-row span:nth-child(3) { color: #000; font-size: 12px; font-weight: 700; white-space: nowrap; text-align: right; }
 .eca-dashboard-attendance-row b { color: var(--primary); font-weight: 900; }
 
-.eca-dashboard-side-panel { padding: 26px 20px; }
+.eca-dashboard-side-panel { width: 100%; padding: 0 20px 23px 20px; border: none; height: 280px; box-sizing: border-box; }
+.eca-dashboard-side-panel.is-scrollable { padding: 0 9px 23px 20px; }
+.eca-dashboard-list-right { display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; padding-right: 0; }
+.eca-dashboard-side-panel.is-scrollable .eca-dashboard-list-right { padding-right: 7px; }
+
 .eca-dashboard-search-button { width: 30px; height: 30px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-dashboard-search-button img { width: 24px; height: 24px; display: block; }
+.eca-dashboard-search-wrap { position: relative; display: flex; align-items: center; }
+.eca-dashboard-search-popover { position: absolute; top: 34px; right: -6px; z-index: 30; width: 240px; height: 48px; padding: 0 18px 0 16px; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); display: flex; align-items: center; gap: 10px; box-sizing: border-box; }
+.eca-dashboard-search-input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 0; outline: none; color: #000; font-size: 14px; font-weight: 700; box-sizing: border-box; }
+.eca-dashboard-search-reset { width: 24px; height: 24px; border: 0; border-radius: 10px; background: none; cursor: pointer; }
 
 .eca-dashboard-person-row { min-height: 64px; padding: 0 14px; gap: 14px; }
 .eca-dashboard-avatar-wrap { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
 .eca-dashboard-avatar { width: 38px; height: 38px; border-radius: 999px; background: #e1e1e1; display: block; flex-shrink: 0; }
 .eca-dashboard-active-dot { position: absolute; right: -2px; bottom: 2px; width: 12px; height: 12px; border-radius: 999px; background: var(--primary); border: 2px solid #fff; box-sizing: border-box; }
 .eca-dashboard-person-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.eca-dashboard-person-info strong { color: #111; font-size: 15px; font-weight: 900; line-height: 1.1; }
+.eca-dashboard-person-info strong { display: block; max-width: 100%; overflow: hidden; color: #000; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 700; line-height: 16px; }
 .eca-dashboard-person-info span { max-width: 100%; color: #777; font-size: 12px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-dashboard-send-icon { width: 34px; height: 34px; border: 1px solid #ddd; border-radius: 999px; color: #aaa; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-dashboard-send-message { width: 36px; height: 36px; border: 1px solid #E7E7E7; border-radius: 999px; display:flex; align-items: center; justify-content: center; box-sizing: border-box; background: #fff; cursor: not-allowed; }
+.eca-dashboard-send-icon { width: 20px; height: 20px; display: block; }
 
-.eca-dashboard-team-row { min-height: 64px; padding: 0 14px; gap: 14px; }
-.eca-dashboard-team-status { min-width: 86px; color: #777; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap; }
-.eca-dashboard-team-status span { width: 16px; height: 16px; border-radius: 999px; background: #e1e1e1; flex-shrink: 0; }
-.eca-dashboard-team-status--active { color: #333; }
-.eca-dashboard-team-status--active span { background: var(--primary); }
+.eca-dashboard-team-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 14px; border: 1px solid #E5E5E5; border-radius: 14px; background: #FFF; box-sizing: border-box; }
+.eca-dashboard-team-info { display: flex; flex: 1 1 auto; min-width: 0; max-width: 80px; flex-direction: column; gap: 2px; }
+.eca-dashboard-team-info strong { overflow: hidden; color: #000; font-size: 14px; font-weight: 700; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.eca-dashboard-team-info span { overflow: hidden; color: #808080; font-size: 12px; font-weight: 500; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.eca-dashboard-team-assignment-area { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; margin-left: auto; }
+.eca-dashboard-team-assignment-badge { display: inline-flex; align-items: center; justify-content: center; max-width: 112px; height: 24px; padding: 0 6px; overflow: hidden; border-radius: 12px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-weight: 700; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
+.eca-dashboard-team-assignment-more-wrap { position: relative; flex: 0 0 auto; }
+.eca-dashboard-team-assignment-more-button { display: inline-flex; align-items: center; gap: 1px; height: 12px; padding: 0 6px; border: 0; border-radius: 999px; background: #D9D9D9; color: #404040; cursor: pointer; }
+.eca-dashboard-team-assignment-more-button span { display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-team-assignment-more-button em { color: #000; font-size: 8px; font-style: normal; font-weight: 500; line-height: 1; }
+.eca-dashboard-team-assignment-popover { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 12px; border-radius: 16px; background: #FFF; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); white-space: nowrap; box-sizing: border-box; }
+.eca-dashboard-team-assignment-popover-badge { display: inline-flex; align-items: center; justify-content: center; max-width: 112px; height: 24px; padding: 0 6px; overflow: hidden; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-weight: 700; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
+
+::-webkit-scrollbar {width: 4px; height:4px; color:#D9D9D9;}
+::-webkit-scrollbar-track {background: transparent;}
+::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}
+
+@media (min-width: 1440px) {
+    :root { --eca-dashboard-width: clamp(960px, 64vw, 1180px); }
+
+    .eca-dashboard-detail-head h1 { font-size: 28px; line-height: 40px; }
+    .eca-dashboard-summary-card { min-height: 160px; padding: 22px 24px 30px; }
+    .eca-dashboard-summary-card span { font-size: 15px; }
+    .eca-dashboard-summary-card strong { font-size: 28px; }
+    .eca-dashboard-panel-left { height: 292px; padding: 26px 24px 28px; }
+    .eca-dashboard-right-column { min-height: 624px; padding-top: 26px; }
+    .eca-dashboard-side-panel { height: 312px; }
+    .eca-dashboard-list-right { max-height: 238px; }
+    .eca-dashboard-assignment-row, .eca-dashboard-attendance-row { height: 54px; }
+    .eca-dashboard-person-row, .eca-dashboard-team-row { min-height: 70px; }
+}

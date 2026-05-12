@@ -1,23 +1,14 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { createExternalActivity, getClientAdminStudents, getExternalActivityManagers, type ClientType } from "../../../../../api/client";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { getClientAdminStudents, type ClientType,} from "../../../../../api/client";
+import { createExternalActivity, getExternalActivityManagers, type ExternalActivityManager } from "../../../../../api/ea";
+import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./createEca.css"; 
 
-type Manager = {
-    id: number;
-    name: string;
-    position: string;
-    profileImage: string | null;
-};
-
-type CenterInfo = {
-    id: number;
-    name: string;
-};
-
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-const CENTER_ID = 1;
 const CLIENT_TYPE: ClientType = "esg";
+const DEFAULT_MANAGER_PROFILE_IMAGE = "/internie_mascot_normal.png";
+
 function toApiDate(value: string): string {
     return value.replaceAll(".", "-");
 }
@@ -192,8 +183,8 @@ function CalendarRange({
 
 export default function EcaActivityCreatePage(): React.ReactElement {
     const navigate = useNavigate();
-    const [center, /*setCenter*/] = React.useState<CenterInfo | null>(null);
-    const [managers, setManagers] = React.useState<Manager[]>([]);
+    const { center } = useOutletContext<EcaClientAdminOutletContext>();
+    const [managers, setManagers] = React.useState<ExternalActivityManager[]>([]);
     const [selectedManagerIds, setSelectedManagerIds] = React.useState<number[]>([]);
     const [participantUserIds, setParticipantUserIds] = React.useState<number[]>([]);
 
@@ -216,10 +207,14 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchInitData(): Promise<void> {
+            if (!center?.centerId) {
+                return;
+            }
+
             try {
                 const [students, managerUsers] = await Promise.all([
                     getClientAdminStudents(CLIENT_TYPE),
-                    getExternalActivityManagers(CENTER_ID),
+                    getExternalActivityManagers(center.centerId),
                 ]);
 
                 const participantIds = students
@@ -227,13 +222,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                     .filter((id): id is number => typeof id === "number");
 
                 const nextManagers = managerUsers
-                    .filter((manager) => typeof manager.userId === "number")
-                    .map((manager) => ({
-                        id: manager.userId,
-                        name: manager.name ?? "이름 없음",
-                        position: "ESG 관리자",
-                        profileImage: manager.profileImage ?? null,
-                    }));
+                    .filter((manager) => typeof manager.userId === "number");
 
                 setParticipantUserIds(participantIds);
                 setManagers(nextManagers);
@@ -244,7 +233,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         }
 
         fetchInitData();
-    }, []);
+    }, [center?.centerId]);
 
     React.useEffect(() => {
         if (!datePickerTarget) return;
@@ -278,14 +267,14 @@ export default function EcaActivityCreatePage(): React.ReactElement {
     }
 
     function selectAllManagers(): void {
-        setSelectedManagerIds(managers.map((manager) => manager.id));
+        setSelectedManagerIds(managers.map((manager) => manager.userId));
         setManagerSearch("");
     }
 
     function getSelectedManagerText(): string {
         if (selectedManagerIds.length === 0) return "담당자를 선택하세요";
 
-        const selectedManagers = managers.filter((manager) => selectedManagerIds.includes(manager.id));
+        const selectedManagers = managers.filter((manager) => selectedManagerIds.includes(manager.userId));
 
         if (selectedManagers.length === 0) return "담당자를 선택하세요";
         if (selectedManagers.length === 1) return selectedManagers[0].name;
@@ -293,14 +282,13 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         return `${selectedManagers[0].name} 외 ${selectedManagers.length - 1}명`;
     }
     function getSelectedManagerInputValue(): string {
-        const selectedManagers = managers.filter((manager) => selectedManagerIds.includes(manager.id));
+        const selectedManagers = managers.filter((manager) => selectedManagerIds.includes(manager.userId));
 
         return selectedManagers.map((manager) => `@ ${manager.name}`).join(", ");
     }
 
     const filteredManagers = managers.filter((manager) =>
-        manager.name.toLowerCase().includes(managerSearch.trim().toLowerCase()) ||
-        manager.position.toLowerCase().includes(managerSearch.trim().toLowerCase())
+        manager.name.toLowerCase().includes(managerSearch.trim().toLowerCase())
     );
 
     function handlePlanFileChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -335,11 +323,15 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             return;
         }
 
+        if (!center?.centerId) {
+            setSubmitError("센터 정보를 불러오지 못했습니다.");
+            return;
+        }
         setSubmitting(true);
         setSubmitError("");
 
         try {
-            await createExternalActivity(CENTER_ID, {
+            await createExternalActivity(center.centerId, {
                 name: activityName.trim(),
                 description: null,
                 startDate: toApiDate(startDate),
@@ -349,7 +341,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 managerUserIds: selectedManagerIds,
             });
 
-            navigate("/eca-admin");
+            navigate("/eca-admin/home");
         } catch (error) {
             setSubmitError("대외활동 생성에 실패했습니다.");
         } finally {
@@ -577,21 +569,22 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
                                         <div className="eca-manager-dropdown-list">
                                             {filteredManagers.map((manager) => {
-                                                const checked = selectedManagerIds.includes(manager.id);
+                                                const checked = selectedManagerIds.includes(manager.userId);
 
                                                 return (
-                                                    <label key={manager.id} className={"eca-manager-option" + (checked ? " is-selected" : "")}>
-                                                        <input type="checkbox" checked={checked} onChange={() => toggleManager(manager.id)} />
+                                                    <label key={manager.userId} className={"eca-manager-option" + (checked ? " is-selected" : "")}>
+                                                        <input type="checkbox" checked={checked} onChange={() => toggleManager(manager.userId)} />
 
-                                                        {manager.profileImage ? (
-                                                            <img className="eca-manager-avatar" src={manager.profileImage} alt="" />
-                                                        ) : (
-                                                            <span className="eca-manager-avatar" />
-                                                        )}
+                                                        <img
+                                                            className="eca-manager-avatar"
+                                                            src={manager.profileImage || DEFAULT_MANAGER_PROFILE_IMAGE}
+                                                            alt=""
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = DEFAULT_MANAGER_PROFILE_IMAGE;
+                                                            }}
+                                                        />
 
                                                         <strong>{manager.name}</strong>
-
-                                                        <small>{manager.position}</small>
                                                     </label>
                                                 );
                                             })}

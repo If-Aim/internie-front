@@ -1,7 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { getUserMe, getMyManagedExternalActivities, getMyManagedExternalActivitiesByStatus, getExternalActivitiesByCenter, getExternalActivitiesByStatus } from "../../../../../api/client";
-import type { UserMe, ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/client";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { getExternalActivitiesByCenter, getExternalActivitiesByStatus } from "../../../../../api/ea";
+import type { ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/ea";
+import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./home.css";
 
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
@@ -19,8 +20,6 @@ type Activity = {
     status: ActivityStatus;
     managers: ActivityManager[];
 };
-
-const CENTER_ID = 1;
 
 const activityStatuses: ActivityStatus[] = ["upcoming", "ongoing", "completed", "delayed"];
 
@@ -83,11 +82,24 @@ function toHomeActivity(activity: ExternalActivityResponse): Activity {
     };
 }
 
+function isActivityInYear(activity: ExternalActivityResponse, year: string): boolean {
+    const yearNumber = Number(year);
+
+    if (!Number.isFinite(yearNumber)) return true;
+
+    const yearStart = new Date(yearNumber, 0, 1);
+    const yearEnd = new Date(yearNumber, 11, 31);
+    const startDate = parseApiDate(activity.startDate);
+    const endDate = parseApiDate(activity.endDate);
+
+    return startDate.getTime() <= yearEnd.getTime() && endDate.getTime() >= yearStart.getTime();
+}
+
 function flattenByStatus(response: ExternalActivitiesByStatusResponse, selectedStatuses: ActivityStatus[]): Activity[] {
     return selectedStatuses.flatMap((status) => response[status].map(toHomeActivity));
 }
 
-function getDisplayAdminName(me: UserMe | null): string {
+function getDisplayAdminName(me: EcaClientAdminOutletContext["me"]): string {
     if (!me) return "";
     const nick = (me.nickname ?? "").trim();
     const name = (me.name ?? "").trim();
@@ -110,18 +122,17 @@ function ManagerProfile({ manager }: { manager: ActivityManager }): React.ReactE
 
 export default function EcaAdminHomePage(): React.ReactElement {
     const navigate = useNavigate();
-    const [me, setMe] = React.useState<UserMe | null>(null);
+    const { me, center, centerLoading, managedActivities } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [myActivities, setMyActivities] = React.useState<Activity[]>([]);
     const [centerActivities, setCenterActivities] = React.useState<Activity[]>([]);
-    const allStatuses: ActivityStatus[] = ["completed", "ongoing", "upcoming", "delayed"];
     const [selectedStatuses, setSelectedStatuses] = React.useState<ActivityStatus[]>(activityStatuses);
     const [filterOpen, setFilterOpen] = React.useState(false);
     const [yearOpen, setYearOpen] = React.useState(false);
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [searchKeyword, setSearchKeyword] = React.useState("");
     const [selectedYear, setSelectedYear] = React.useState("2026");
-
+    
     const [centerSelectedStatuses, setCenterSelectedStatuses] = React.useState<ActivityStatus[]>(activityStatuses);
     const [centerFilterOpen, setCenterFilterOpen] = React.useState(false);
     const [centerYearOpen, setCenterYearOpen] = React.useState(false);
@@ -131,6 +142,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
     const [statusMenuActivityId, setStatusMenuActivityId] = React.useState<number | null>(null);
     const [managerPopoverActivityId, setManagerPopoverActivityId] = React.useState<number | null>(null);
+    const [hoveredManagerPopoverActivityId, setHoveredManagerPopoverActivityId] = React.useState<number | null>(null);
     const [draggingActivityId, setDraggingActivityId] = React.useState<number | null>(null);
     
     const centerScrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -185,68 +197,37 @@ export default function EcaAdminHomePage(): React.ReactElement {
     }
 
     React.useEffect(() => {
-        let mounted = true;
-
-        (async () => {
-            try {
-                const data = await getUserMe();
-                if (!mounted) return;
-                setMe(data);
-            } catch (error) {
-                if (mounted) {
-                    setMe(null);
-                }
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-
-    React.useEffect(() => {
         loadMyActivities();
-    }, [selectedStatuses, selectedYear, searchKeyword]);
+    }, [managedActivities, selectedStatuses, selectedYear, searchKeyword]);
 
     React.useEffect(() => {
         loadCenterActivities();
-    }, [centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
+    }, [center?.centerId, centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
 
-    async function loadMyActivities(): Promise<void> {
-        try {
-            const isAllStatusSelected = selectedStatuses.length === activityStatuses.length;
-            const name = searchKeyword.trim() || undefined;
-            const year = selectedYear || undefined;
+    function loadMyActivities(): void {
+        const keyword = searchKeyword.trim().toLowerCase();
 
-            if (isAllStatusSelected) {
-                const result = await getMyManagedExternalActivities({
-                    year,
-                    name,
-                });
+        const filtered = managedActivities
+            .filter((activity) => selectedStatuses.includes(getCalculatedActivityStatus(activity)))
+            .filter((activity) => !keyword || activity.name.toLowerCase().includes(keyword))
+            .filter((activity) => isActivityInYear(activity, selectedYear));
 
-                setMyActivities(result.map(toHomeActivity));
-                return;
-            }
-
-            const result = await getMyManagedExternalActivitiesByStatus({
-                year,
-                name,
-            });
-
-            setMyActivities(flattenByStatus(result, selectedStatuses));
-        } catch (error) {
-            setMyActivities([]);
-        }
+        setMyActivities(filtered.map(toHomeActivity));
     }
 
     async function loadCenterActivities(): Promise<void> {
+        if (!center?.centerId) {
+            setCenterActivities([]);
+            return;
+        }
+
         try {
             const isAllStatusSelected = centerSelectedStatuses.length === activityStatuses.length;
             const name = centerSearchKeyword.trim() || undefined;
             const year = centerSelectedYear || undefined;
 
             if (isAllStatusSelected) {
-                const result = await getExternalActivitiesByCenter(CENTER_ID, {
+                const result = await getExternalActivitiesByCenter(center.centerId, {
                     year,
                     name,
                 });
@@ -255,7 +236,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                 return;
             }
 
-            const result = await getExternalActivitiesByStatus(CENTER_ID, {
+            const result = await getExternalActivitiesByStatus(center.centerId, {
                 year,
                 name,
             });
@@ -321,7 +302,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
             <div className="eca-home-toolbar" ref={toolbarRef}>
                 <div className="eca-home-toolbar-item">
                     <button type="button" className="eca-home-icon-button" onClick={onToggleFilter} aria-label="필터 열기">
-                        <img src={selectedStatuses.length === allStatuses.length ? "/icons/mynaui_filter_a0.svg" : "/icons/mynaui_filter_dot_a0.svg"} alt="" />
+                        <img src={selectedStatuses.length === activityStatuses.length ? "/icons/mynaui_filter_a0.svg" : "/icons/mynaui_filter_dot_a0.svg"} alt="" />
                     </button>
 
                     {filterOpen ? (
@@ -404,7 +385,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
         <div className="eca-home-page">
             <section className="eca-home-header">
                 <div className="eca-home-header-top">
-                    <h1>센터 이름</h1>
+                    <h1>{centerLoading ? "센터 정보를 불러오는 중" : center?.name ?? "센터 이름"}</h1>
                 </div>
 
                 <div className="eca-home-header-bottom">
@@ -601,7 +582,12 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 </div>
 
                                 {item.managers.length > 2 ? (
-                                    <div className="eca-home-center-more-wrap" ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}>
+                                    <div
+                                        className="eca-home-center-more-wrap"
+                                        ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}
+                                        onMouseEnter={() => setHoveredManagerPopoverActivityId(item.id)}
+                                        onMouseLeave={() => setHoveredManagerPopoverActivityId(null)}
+                                    >
                                         <button
                                             type="button"
                                             className="eca-home-more-button"
@@ -614,7 +600,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                             <span className="eca-home-more-button-title">더보기</span>
                                         </button>
 
-                                        {managerPopoverActivityId === item.id ? (
+                                        {(managerPopoverActivityId === item.id || hoveredManagerPopoverActivityId === item.id) ? (
                                             <div className="eca-home-manager-popover">
                                                 {item.managers.slice(2).map((manager, index) => (
                                                     <ManagerProfile

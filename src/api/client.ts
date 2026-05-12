@@ -48,7 +48,6 @@ export async function refreshAccessToken(): Promise<string> {
         refreshPromise = null;
     }
 }
-
 async function requestWithAutoRefresh(
     path: string,
     init: RequestInit = {},
@@ -57,15 +56,25 @@ async function requestWithAutoRefresh(
     const expectJson = opts?.expectJson ?? false;
     const skipAuthRefresh = opts?.skipAuthRefresh ?? false;
 
-    const makeHeaders = () => {
-        const h: Record<string, string> = {
-            ...(init.headers as Record<string, string> | undefined),
-            ...getAuthHeader(),
-        };
-        if (expectJson && !("Content-Type" in h)) {
-            h["Content-Type"] = "application/json";
+    const makeHeaders = (): Headers => {
+        const isFormData = init.body instanceof FormData;
+        const headers = new Headers(init.headers);
+
+        Object.entries(getAuthHeader()).forEach(([key, value]) => {
+            headers.set(key, value);
+        });
+
+        if (isFormData) {
+            headers.delete("Content-Type");
+            headers.delete("content-type");
+            return headers;
         }
-        return h;
+
+        if (expectJson && !headers.has("Content-Type")) {
+            headers.set("Content-Type", "application/json");
+        }
+
+        return headers;
     };
 
     const doFetch = async (): Promise<Response> => {
@@ -148,7 +157,9 @@ export async function api<T = unknown>(
         skipAuthRefresh: opts?.skipAuthRefresh ?? false,
     });
 
-	if (res.status === 204) return undefined as T;
+	if (res.status === 204) {
+        return null as T;
+    }
 
 	if (!res.ok) {
         const bodyText = await res.text().catch(() => "");
@@ -578,10 +589,7 @@ export async function apiUpload<T = unknown>(
             ...init,
             method: init.method ?? "POST",
             body: formData,
-            headers: {
-                ...(init.headers as Record<string, string> | undefined),
-                ...getAuthHeader(),
-            },
+            headers: init.headers,
         },
         { expectJson: false }
     );
@@ -590,7 +598,14 @@ export async function apiUpload<T = unknown>(
 
     if (!res.ok) {
         const bodyText = await res.text().catch(() => "");
-        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
+        const parsed = parseErrorBody(bodyText);
+
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
     }
 
     const ct = res.headers.get("content-type") ?? "";
@@ -600,6 +615,32 @@ export async function apiUpload<T = unknown>(
     }
 
     return (await res.text()) as unknown as T;
+}
+
+// 다운로드용 API
+export async function apiBlob(
+    path: string,
+    init: RequestInit = {},
+    opts?: { skipAuthRefresh?: boolean }
+): Promise<Blob> {
+    const res = await requestWithAutoRefresh(path, init, {
+        expectJson: false,
+        skipAuthRefresh: opts?.skipAuthRefresh ?? false,
+    });
+
+    if (!res.ok) {
+        const bodyText = await res.text().catch(() => "");
+        const parsed = parseErrorBody(bodyText);
+
+        throw new ApiError(
+            res.status,
+            parsed.message ?? `HTTP ${res.status}`,
+            bodyText,
+            parsed.code
+        );
+    }
+
+    return await res.blob();
 }
 
 // 맞춤 질문 조회
@@ -907,7 +948,6 @@ export async function submitMyOnboarding(
         body: JSON.stringify(payload),
     });
 }
-
 
 // 수료증 관련 타입
 export type AdminUserFile = {
@@ -1223,170 +1263,6 @@ export async function deleteClientAdminStudent(
     userId: number | string
 ): Promise<void> {
     return api<void>(`/admin-client/${clientType}/students/${userId}`, { method: "DELETE" });
-}
-
-/* - EA 관련 - */
-export type ExternalActivityProgressStatus = "UPCOMING" | "ONGOING" | "COMPLETED" | "DELAYED";
-
-export type CreateExternalActivityRequest = {
-    name: string;
-    description?: string | null;
-    startDate: string;
-    endDate: string;
-    activityPlanUrl?: string | null;
-    participantUserIds: number[];
-    managerUserIds: number[];
-};
-export type ExternalActivityManager = {
-    userId: number;
-    name: string;
-    profileImage?: string | null;
-    roleSet?: string[];
-};
-
-export type ExternalActivityResponse = {
-    externalActivityId: number;
-    centerId: number;
-    name: string;
-    description?: string | null;
-    participantNames?: string[] | null;
-    managerNames?: string[] | null;
-    managers?: ExternalActivityManager[] | null;
-    startDate: string;
-    endDate: string;
-    activityPlanUrl?: string | null;
-    progressStatus: ExternalActivityProgressStatus;
-};
-
-export type ExternalActivitiesByStatusQuery = {
-    year?: number | string;
-    name?: string;
-};
-
-export type ExternalActivityListQuery = ExternalActivitiesByStatusQuery & {
-    status?: ExternalActivityProgressStatus;
-};
-
-export type MyManagedExternalActivitiesQuery = ExternalActivityListQuery;
-
-export type ExternalActivitiesByStatusResponse = {
-    upcoming: ExternalActivityResponse[];
-    ongoing: ExternalActivityResponse[];
-    completed: ExternalActivityResponse[];
-    delayed: ExternalActivityResponse[];
-};
-
-export async function createExternalActivity( // 대외활동 생성
-    centerId: number | string,
-    request: CreateExternalActivityRequest
-): Promise<ExternalActivityResponse> {
-    return api<ExternalActivityResponse>(
-        `/centers/${centerId}/externalActivities`,
-        {
-            method: "POST",
-            body: JSON.stringify(request),
-        }
-    );
-}
-
-export async function getExternalActivityManagers( // 센터별 매니저 조회
-    centerId: number | string
-): Promise<ExternalActivityManager[]> {
-    return api<ExternalActivityManager[]>(`/centers/${centerId}/managers`, { method: "GET" });
-}
-
-export async function getExternalActivitiesByCenter( // 센터별 대외활동 전체 조회
-    centerId: number | string,
-    query?: ExternalActivityListQuery
-): Promise<ExternalActivityResponse[]> {
-    const params = new URLSearchParams();
-
-    if (query?.status) {
-        params.set("status", query.status);
-    }
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
-
-    return api<ExternalActivityResponse[]>(
-        `/centers/${centerId}/externalActivities${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
-}
-
-export async function getExternalActivitiesByStatus( // 센터 대외 활동 진행 상태별 대외 활동 조회
-    centerId: number | string,
-    query?: ExternalActivitiesByStatusQuery
-): Promise<ExternalActivitiesByStatusResponse> {
-    const params = new URLSearchParams();
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
-
-    return api<ExternalActivitiesByStatusResponse>(
-        `/centers/${centerId}/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
-}
-
-export async function getMyManagedExternalActivities( // 나의 대외활동 조회(관리자)
-    query?: MyManagedExternalActivitiesQuery
-): Promise<ExternalActivityResponse[]> {
-    const params = new URLSearchParams();
-
-    if (query?.status) {
-        params.set("status", query.status);
-    }
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
-
-    return api<ExternalActivityResponse[]>(
-        `/users/me/externalActivities${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
-}
-
-export async function getMyManagedExternalActivitiesByStatus( //나의 대외활동 진행상태별 조회
-    query?: ExternalActivitiesByStatusQuery
-): Promise<ExternalActivitiesByStatusResponse> {
-    const params = new URLSearchParams();
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
-
-    return api<ExternalActivitiesByStatusResponse>(
-        `/users/me/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
 }
 
 

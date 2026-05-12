@@ -1,20 +1,19 @@
 // src/pages/admin/desktop/ecaClient/ecaHome.tsx
 import React from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { ApiError, getUserMe, getMyManagedExternalActivities, type UserMe, type ExternalActivityResponse, } from "../../../../api/client"; 
+import { ApiError, getUserMe, } from "../../../../api/client";
+import { getMyCenter, getMyManagedExternalActivities } from "../../../../api/ea";
+import type { UserMe,} from "../../../../api/client";
+import type { CenterResponse, ExternalActivityResponse } from "../../../../api/ea";
+
 import "./ecaClientAdmin.css";
 
-type ManagedActivity = {
-    id: number;
-    title: string;
+export type EcaClientAdminOutletContext = {
+    me: UserMe | null;
+    center: CenterResponse | null;
+    centerLoading: boolean;
+    managedActivities: ExternalActivityResponse[];
 };
-
-function toManagedActivity(activity: ExternalActivityResponse): ManagedActivity {
-    return {
-        id: activity.externalActivityId,
-        title: activity.name,
-    };
-}
 
 function getDisplayAdminName(me: UserMe | null): string {
     if (!me) return "이름";
@@ -30,6 +29,8 @@ function isDefaultProfileImage(url?: string | null): boolean {
 
 export default function EcaClientAdminHome(): React.ReactElement{
     const [me, setMe] = React.useState<UserMe | null>(null);
+    const [center, setCenter] = React.useState<CenterResponse | null>(null);
+    const [centerLoading, setCenterLoading] = React.useState(false);
     const { pathname } = useLocation();
 
     React.useEffect(() => {
@@ -54,13 +55,45 @@ export default function EcaClientAdminHome(): React.ReactElement{
         };
     }, []);
 
+    React.useEffect(() => {
+        let mounted = true;
+
+        async function fetchCenter(): Promise<void> {
+            setCenterLoading(true);
+
+            try {
+                const data = await getMyCenter();
+
+                if (!mounted) return;
+
+                setCenter(data);
+            } catch (e) {
+                console.error(e);
+
+                if (mounted) {
+                    setCenter(null);
+                }
+            } finally {
+                if (mounted) {
+                    setCenterLoading(false);
+                }
+            }
+        }
+
+        fetchCenter();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
     const adminName = getDisplayAdminName(me);
     const adminProfileImg = isDefaultProfileImage(me?.profileImage)
         ? "/internie_mascot_normal.png"
         : (me?.profileImage ?? "/internie_mascot_normal.png");
 
-    const [openedActivityId, setOpenedActivityId] = React.useState<number | null>(null);
-    const [managedActivities, setManagedActivities] = React.useState<ManagedActivity[]>([]);
+    const [openedActivityIds, setOpenedActivityIds] = React.useState<number[]>([]);
+    const [managedActivities, setManagedActivities] = React.useState<ExternalActivityResponse[]>([]);
 
     React.useEffect(() => {
         let mounted = true;
@@ -69,7 +102,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
             try {
                 const data = await getMyManagedExternalActivities();
                 if (!mounted) return;
-                setManagedActivities(data.map(toManagedActivity));
+                setManagedActivities(data);
             } catch (e) {
                 console.error(e);
                 if (mounted) {
@@ -83,9 +116,10 @@ export default function EcaClientAdminHome(): React.ReactElement{
         };
     }, []);
 
-    function handleServicePreparing() {
-		alert("서비스 준비중입니다.");
-	}
+    function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
+        e.preventDefault();
+        alert("서비스 준비중입니다.");
+    }
     return (
         <div className="eca-client-admin-page">
             <aside className="eca-client-admin-sidebar">
@@ -104,52 +138,60 @@ export default function EcaClientAdminHome(): React.ReactElement{
                         <span className="eca-client-admin-submenu-empty">담당 대외활동이 없습니다</span>
                     ) : (
                         managedActivities.map((activity) => {
-                            const isOpen = openedActivityId === activity.id;
-                            const isActivityActive = pathname.startsWith(`/eca-admin/activities/${activity.id}/dashboard`);
+                            const activityId = activity.externalActivityId;
+                            const isOpen = openedActivityIds.includes(activityId);
+                            const isActivityActive = pathname.startsWith(`/eca-admin/activities/${activityId}/dashboard`)
+                                || pathname.startsWith(`/eca-admin/activities/${activityId}/assignment`);
                                 // 추후 하위 메뉴 API 연결 시 아래 경로도 active 조건에 추가
-                                // pathname.startsWith(`/eca-admin/activities/${activity.id}/assignment`)
-                                // pathname.startsWith(`/eca-admin/activities/${activity.id}/attendance`)
-                                // pathname.startsWith(`/eca-admin/activities/${activity.id}/team`)
+                                // pathname.startsWith(`/eca-admin/activities/${activityId}/attendance`)
+                                // pathname.startsWith(`/eca-admin/activities/${activityId}/team`)
 
                             return (
-                                <div className="eca-client-admin-menu-group" key={activity.id}>
+                                <div className="eca-client-admin-menu-group" key={activityId}>
                                     <button
                                         type="button"
                                         className={isActivityActive ? "eca-client-admin-menu-item eca-client-admin-menu-item--active eca-client-admin-menu-item--with-arrow" : "eca-client-admin-menu-item eca-client-admin-menu-item--with-arrow"}
-                                        onClick={() => setOpenedActivityId((prev) => prev === activity.id ? null : activity.id)}
+                                        onClick={() => {
+                                            setOpenedActivityIds((prev) => (
+                                                prev.includes(activityId)
+                                                    ? prev.filter((id) => id !== activityId)
+                                                    : [...prev, activityId]
+                                            ));
+                                        }}
                                     >
                                         <img
                                             className={isOpen ? "eca-client-admin-chevron eca-client-admin-chevron--open" : "eca-client-admin-chevron"}
                                             src="/icons/chevron-right-80.svg"
                                             alt=""
                                         />
-                                        <span>{activity.title}</span>
+                                        <span className="eca-client-admin-menu-title">{activity.name}</span>
                                     </button>
 
                                     {isOpen ? (
                                         <div className="eca-client-admin-submenu">
                                             <NavLink
-                                                to={`/eca-admin/activities/${activity.id}/dashboard`}
+                                                to={`/eca-admin/activities/${activityId}/dashboard`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
                                                 대시보드
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activity.id}/assignment`}
+                                                to={`/eca-admin/activities/${activityId}/assignment`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
-                                                과제 제출 현황
+                                                과제 현황
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activity.id}/attendance`}
+                                                to={`/eca-admin/activities/${activityId}/attendance`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                                 onClick={handleServicePreparing}
                                             >
                                                 출석 현황
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activity.id}/team-activity`}
+                                                to={`/eca-admin/activities/${activityId}/team-activity`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
+                                                onClick={handleServicePreparing}
                                             >
                                                 팀 활동
                                             </NavLink>
@@ -169,7 +211,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
 
             <main className="eca-client-admin-body">
                 <div className="eca-client-admin-surface">
-                    <Outlet />
+                    <Outlet context={{ me, center, centerLoading, managedActivities } satisfies EcaClientAdminOutletContext} />
                 </div>
             </main>
         </div>

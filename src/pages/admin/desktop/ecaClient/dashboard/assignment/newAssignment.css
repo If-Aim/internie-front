@@ -1,0 +1,183 @@
+.eca-new-assignment-page { width: 100%; max-width: 640px; margin: 0; padding: 30px 0; box-sizing: border-box; animation: eca-slide-in .28s ease both; }
+.eca-new-assignment-top { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 42px; margin-bottom: 29px; box-sizing: border-box; }
+.eca-new-assignment-top h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1.5; }
+.eca-new-assignment-temp-button { width: 116px; height: 46px; border: 0; border-radius: 10px; background: #DDD; color: #777; font-size: 16px; font-weight: 700; cursor: not-allowed; }
+
+.eca-new-assignment-card { position: relative; width: 100%; min-width: 640px; min-height: 640px; padding: 64px 50px 32px 56px; border: 1px solid #DDD; border-radius: 18px; background: #FFF; box-sizing: border-box; }
+.eca-new-assignment-field { position: relative; margin-bottom: 32px; }
+.eca-new-assignment-field label { display: block; padding-left: 7px; margin-bottom: 9px; color: #000; font-size: 14px; font-weight: 900; }
+.eca-new-assignment-field label span { color: #f00; }
+.eca-new-assignment-field input { width: 70%; height: 40px; padding: 0 10px; border: 1px solid #D9D9D9; border-radius: 4px; outline: 0; color: #111; font-size: 14px; box-sizing: border-box; }
+.eca-new-assignment-field input::placeholder { color: #A0A0A0; }
+
+.eca-new-assignment-date-row { display: flex; align-items: center; gap: 14px; }
+.eca-new-assignment-date-row > span { color: #808080; font-size: 20px; font-weight: 400; }
+.eca-new-assignment-date-box { position: relative; width: 206px; }
+.eca-new-assignment-date-button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 40px; padding: 0 10px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #111; font-size: 14px; cursor: pointer; box-sizing: border-box; }
+.eca-new-assignment-date-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-new-assignment-date-button span.is-placeholder { color: #A0A0A0; }
+.eca-new-assignment-date-button img { width: 24px; height: 24px; flex: 0 0 auto; }
+
+.eca-new-assignment-date-box > .cal { position: absolute; top: 80%; left: 54px; z-index: 1000; width: 252px; padding: 28px 28px 20px; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-new-assignment-date-box:last-child > .cal { left: auto; right: -198px; }
+.eca-new-assignment-date-box:last-child > .cal.cal--with-time { right: -122px; }
+
+.cal-time-panel { position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid #EEE; }
+.cal-time-icon { display: flex; align-items: center; justify-content: center; }
+.cal-time-unit-select { position: relative; }
+.cal-time-label { width: 50px; text-align: center; color: #808080; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.cal-time-unit-button { display: flex; align-items: center; justify-content: center; gap: 4px; width: 48px; height: 24px; padding: 0; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; cursor: pointer; box-sizing: border-box; }
+.cal-time-unit-button strong { color: #000; font-size: 12px; font-weight: 700; }
+.cal-time-unit-button span { color: #808080; font-size: 12px; font-weight: 700; }
+.cal-time-unit-menu { position: absolute; left: 0; top: calc(100% + 2px); z-index: 1200; width: 48px; max-height: 114px; padding: 4px 0; border-radius: 4px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); overflow-y: auto; }
+.cal-time-unit-menu button { display: flex; align-items: center; justify-content: left; width: 100%; height: 20px; padding-left: 9px; border: 0; background: #FFF; color: #808080; font-size: 12px; font-weight: 500; cursor: pointer; }
+.cal-time-unit-menu button:hover { background: #eee; }
+.cal-time-unit-menu button.is-selected { background: #BDD8FF; color: #0166FF; }
+
+.eca-new-assignment-dropdown-wrap { position: relative; width: 200px; }
+.eca-new-assignment-dropdown-wrap--result { position: relative; width: 360px; }
+.eca-new-assignment-select { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 40px; padding: 0 10px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #777; font-size: 14px; cursor: pointer; box-sizing: border-box; }
+.eca-new-assignment-select span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-new-assignment-chevron { display: flex; justify-content: center; align-items: center;  }
+.eca-new-assignment-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 900; border-radius: 8px; background: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); overflow: hidden; }
+.eca-new-assignment-menu--small { width: 200px; padding: 10px 0 ;}
+.eca-new-assignment-menu--small button:hover { background: #eee; }
+.eca-new-assignment-menu--small button { display: flex; align-items: center; width: 100%; height: 36px; padding: 0 18px; border: 0; background: #fff; color: #000; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
+.eca-new-assignment-menu--small button.is-selected { background: #BDD8FF; color: #0166FF; }
+
+.eca-new-assignment-participant-row { position: relative; display: flex; align-items: center; width: 360px; height: 40px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; box-sizing: border-box; }
+.eca-new-assignment-participant-input { flex: 1; height: 100%; padding: 0 10px; border: 0; background: transparent; color: #777; font-size: 14px; text-align: left; cursor: pointer; }
+.eca-new-assignment-participant-input:disabled { cursor: not-allowed; }
+.eca-new-assignment-participant-button { width: 66px; height: 28px; margin-right: 7px; border: 0; border-radius: 4px; background: #E3E3E3; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-new-assignment-participant-button:disabled { cursor: not-allowed; }
+.eca-new-assignment-participant-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 14px; }
+.eca-new-assignment-participant-actions button { border: 0; background: transparent; color: #0166FF; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+.eca-new-assignment-system-row { display: flex; align-items: flex-start; gap: 40px; }
+.eca-new-assignment-team-count-input { width: 200px !important; height: 40px; padding: 0 10px; border: 1px solid #D9D9D9; border-radius: 4px; outline: 0; background: #FFF; color: #111; font-size: 14px; box-sizing: border-box; }
+.eca-new-assignment-team-count-input::placeholder { color: #A0A0A0; }
+
+.eca-new-assignment-radio { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: 0 0 auto; }
+.eca-new-assignment-radio svg { display: block; width: 24px; height: 24px; }
+.eca-new-assignment-avatar { width: 32px; height: 32px; border-radius: 50%; background: #f2f2f2; overflow: hidden; }
+.eca-new-assignment-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.eca-new-assignment-menu--result { width: 360px; padding:4px 0;}
+.eca-new-assignment-menu--result button { display: grid; grid-template-columns: 47px auto 1fr; align-items: center; width: 100%; height: 48px; margin: 8px 0; padding: 0 30px; border: 0; background: #fff; cursor: pointer; box-sizing: border-box; }
+.eca-new-assignment-menu--result button:hover { background: #eee; }
+.eca-new-assignment-menu--result button.is-selected { background: #BDD8FF; }
+.eca-new-assignment-menu--result strong { color: #000; font-size: 14px; font-weight: 500; text-align: left; }
+.eca-new-assignment-menu--result small { margin-left: 4px; color: #000; font-size: 14px; font-weight: 500; text-align: left; }
+
+.eca-new-assignment-save-button { position: absolute; right: 50px; bottom: 32px; width: 126px; height: 50px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 900; cursor: pointer; }
+.eca-new-assignment-save-button:disabled { background: #D9D9D9; color: #808080; cursor: not-allowed; }
+.eca-new-assignment-error { margin: -10px 0 18px; color: #f00; font-size: 13px; font-weight: 600; }
+.eca-new-assignment-info { margin: -10px 0 18px; color: #777; font-size: 13px; font-weight: 600; }
+.eca-new-assignment-empty { margin: 16px; color: #777; font-size: 13px; }
+
+.eca-new-assignment-bottom-spacer {height: 200px;}
+
+
+.eca-assignment-participant-modal-backdrop { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(107, 107, 107, .50); backdrop-filter: blur(6px); }
+.eca-assignment-participant-modal { position: relative; width: 640px; height: 360px; padding: 52px 44px 32px 51px; border-radius: 20px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-assignment-participant-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 41px; }
+.eca-assignment-participant-modal-header h3 { margin: 0; color: #000; font-size: 20px; font-weight: 700; }
+.eca-assignment-participant-modal-close { position: absolute; top: 37px; right: 35px; width: 30px; height: 30px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-assignment-participant-modal-close img { width: 24px; height: 24px; display: block; }
+.eca-assignment-participant-modal-body { position: relative; }
+.eca-assignment-participant-modal-title { display: block; margin: 0 0 19px 6px; color: #000; font-size: 20px; font-weight: 700; line-height: 1; }
+.eca-assignment-participant-search-wrap { position: relative; width: 490px; }
+.eca-assignment-participant-search-wrap input { width: 100%; height: 48px; padding: 14px; border: 1px solid #ddd; border-radius: 8px; outline: none; color: #000; font-size: 20px; font-weight: 500; box-sizing: border-box; }
+.eca-assignment-participant-search-wrap input::placeholder { color: #808080; }
+.eca-assignment-participant-dropdown { position: absolute; top: 54px; left: 0; z-index: 2; width: 490px; max-height: 360px; overflow: auto; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-assignment-participant-dropdown-top { display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 6px 35px 0 33px; box-sizing: border-box; }
+.eca-assignment-participant-dropdown-top span { color: #808080; font-size: 14px; font-weight: 500; }
+.eca-assignment-participant-dropdown-actions { display: flex; align-items: center; gap: 12px; }
+.eca-assignment-participant-dropdown-actions button { padding: 0; border: 0; background: transparent; color: #808080; font-size: 14px; font-weight: 500; text-decoration: underline; cursor: pointer; }
+.eca-assignment-participant-dropdown-list { max-height: 320px; overflow-y: auto; }
+.eca-assignment-participant-option { display: grid; grid-template-columns: 38px 52px 1fr 1fr; align-items: center; height: 48px; padding: 0 35px 0 32px; margin-bottom: 14px; background: #fff; cursor: pointer; box-sizing: border-box; }
+.eca-assignment-participant-option:hover { background: #eee; }
+.eca-assignment-participant-option.is-selected { background: #BDD8FF; }
+.eca-assignment-participant-option input { width: 20px; height: 20px; margin: 0; accent-color: #0166FF; border: 1px solid #D9D9D9; cursor: pointer; }
+.eca-assignment-participant-avatar { width: 36px; height: 36px; border: 1px solid #D9D9D9; border-radius: 50%; background: #fff; object-fit: contain; }
+.eca-assignment-participant-option strong { min-width: 0; max-width: 12ch; overflow: hidden; color: #000; font-size: 20px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.eca-assignment-participant-option.is-selected strong { color: #0166FF; }
+.eca-assignment-participant-option small { color: #777; font-size: 13px; font-weight: 600; text-align: right; }
+.eca-assignment-participant-empty { margin: 0; padding: 28px 0; color: #888; font-size: 14px; font-weight: 600; text-align: center; }
+.eca-assignment-participant-modal-footer { position: absolute; right: 44px; bottom: 32px; display: flex; align-items: center; gap: 10px; }
+.eca-assignment-participant-confirm-button { width: 120px; height: 48px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 700; cursor: pointer; }
+
+.eca-new-assignment-team-build-button { width: 64px; height: 32px; margin: 0 8px; border: 0; border-radius: 4px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-new-assignment-team-build-button:disabled { cursor: not-allowed;  background: #E3E3E3; color: #808080; }
+
+.eca-team-mode-modal { position: relative; width: 640px; min-height: 360px; padding: 52px 44px 32px 51px; border-radius: 20px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-team-mode-body { margin-top: 28px; animation: eca-slide-in .28s ease both;}
+.eca-team-mode-body strong { display: block; margin: 0 0 24px 6px; color: #000; font-size: 20px; font-weight: 700; }
+.eca-team-mode-options { display: flex; align-items: center; gap: 84px; padding-left: 6px; }
+.eca-team-mode-option { display: flex; align-items: center; gap: 17px; color: #000; font-size: 20px; font-weight: 500; cursor: pointer; }
+.eca-team-mode-option input { width: 20px; height: 20px; margin: 0; accent-color: #0166FF; cursor: pointer; }
+.eca-team-mode-option.is-disabled { color: #A0A0A0; cursor: not-allowed; }
+.eca-team-mode-option.is-disabled input { cursor: not-allowed; }
+
+.eca-team-create-modal { position: relative; width: 640px; height: 480px; padding: 52px 44px 32px 51px; border-radius: 20px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); overflow: visible; box-sizing: border-box; }
+.eca-team-create-modal .eca-assignment-participant-modal-footer { z-index: 1; }
+.eca-team-create-body { position: relative; z-index: 2; overflow: visible; margin-bottom: 68px; padding-right: 8px; animation: eca-slide-in .28s ease both; }
+.eca-team-create-section { position: relative; margin-bottom: 34px; }
+.eca-team-create-section:last-child { margin-bottom: 0; }
+.eca-team-create-field { position: relative; margin-bottom: 28px; }
+.eca-team-create-field > label { display: block; margin: 0 0 19px 6px; color: #000; font-size: 20px; font-weight: 700; line-height: 1; }
+.eca-team-create-field > input { width: 490px; height: 48px; padding: 14px; border: 1px solid #DDD; border-radius: 8px; outline: none; color: #000; font-size: 20px; font-weight: 500; box-sizing: border-box; }
+.eca-team-create-field > input::placeholder { color: #808080; }
+.eca-team-create-error { margin: 12px 0 0 6px; color: #f00; font-size: 13px; font-weight: 600; }
+
+.eca-team-create-decide-button { width: 62px; height: 40px; border: 0; border-radius: 4px; background: #E3E3E3; color: #808080; font-size: 14px; font-weight: 700; cursor: pointer; }
+.eca-team-created-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.eca-team-created-tags button { display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-width: 82px; height: 30px; padding: 0 7px 0 10px; border: 0; border-radius: 12px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-weight: 700; cursor: pointer; }
+.eca-team-created-tags button span { display: block; max-width: 45px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-team-created-tags button b { display: flex; justify-content: center; align-items: center;}
+
+.eca-team-member-picker { position: relative; width: 490px; z-index: 30; }
+.eca-team-member-picker-row { display: flex; align-items: center; gap: 12px; width: 490px; }
+.eca-team-member-picker-input-wrap { position: relative; width: 420px; height: 48px; }
+.eca-team-member-picker-input { width: 100% !important; height: 48px !important; padding: 0 44px 0 14px !important; border: 1px solid #DDD !important; border-radius: 8px !important; outline: none; background: #FFF; color: #000 !important; font-size: 20px !important; font-weight: 500; box-sizing: border-box; }
+.eca-team-member-picker-input::placeholder { color: #808080; }
+.eca-team-member-picker-toggle { position: absolute; top: 0; right: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 48px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+
+.eca-team-member-dropdown { position: absolute; top: 56px; left: 0; z-index: 50; width: 416px; max-height: 360px; overflow: auto; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-team-member-dropdown-top { display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 6px 35px 0 33px; box-sizing: border-box; }
+.eca-team-member-dropdown-top span { color: #808080; font-size: 14px; font-weight: 500; }
+.eca-team-member-dropdown-actions { display: flex; align-items: center; gap: 12px; }
+.eca-team-member-dropdown-actions button { padding: 0; border: 0; background: transparent; color: #808080; font-size: 14px; font-weight: 500; text-decoration: underline; cursor: pointer; }
+.eca-team-member-dropdown-list { max-height: 310px; overflow-y: auto; }
+
+.eca-team-member-option { display: grid; grid-template-columns: 38px 52px 1fr 1fr; align-items: center; height: 48px; padding: 0 35px 0 32px; margin-bottom: 14px; background: #fff; cursor: pointer; box-sizing: border-box; }
+.eca-team-member-option:hover { background: #eee; }
+.eca-team-member-option.is-selected { background: #BDD8FF; }
+.eca-team-member-option input { width: 20px !important; height: 20px !important; margin: 0; padding: 0; accent-color: #0166FF; border: 1px solid #D9D9D9; cursor: pointer; }
+.eca-team-member-avatar { width: 36px; height: 36px; border: 1px solid #D9D9D9; border-radius: 50%; background: #fff; object-fit: contain; }
+.eca-team-member-option strong { min-width: 0; max-width: 12ch; overflow: hidden; color: #000; font-size: 20px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.eca-team-member-option.is-selected strong { color: #0166FF; }
+.eca-team-member-option small { color: #777; font-size: 13px; font-weight: 600; text-align: right; }
+
+.eca-team-existing-modal { position: relative; width: 640px; height: 360px; padding: 52px 44px 32px 51px; border-radius: 20px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-team-existing-modal .eca-assignment-participant-modal-footer { z-index: 1; }
+.eca-team-existing-body { position: relative; z-index: 2; }
+.eca-team-existing-body > strong { display: block; margin: 0 0 19px 6px; color: #000; font-size: 20px; font-weight: 700; line-height: 1; }
+.eca-team-existing-select-wrap { position: relative; width: 490px; }
+.eca-team-existing-selected { display: flex; align-items: center; justify-content: space-between; width: 490px; height: 48px; padding: 0 14px; margin-bottom: 3px; border: 1px solid #DDD; border-radius: 8px; background: #FFF; color: #808080; font-size: 18px; font-weight: 500; cursor: pointer; box-sizing: border-box; }
+.eca-team-existing-selected span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-team-existing-selected svg { flex: 0 0 auto; }
+.eca-team-existing-list { position: absolute;left: 0; z-index: 20; width: 490px; max-height: 210px; overflow-y: auto; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box;}
+.eca-team-existing-option { display: grid; grid-template-columns: 38px minmax(0, 1fr) 70px; align-items: center; width: 100%; min-height: 58px; padding: 0 18px; border: 0; background: #FFF; cursor: pointer; box-sizing: border-box; }
+.eca-team-existing-option:hover, .eca-team-existing-option.is-selected { background: #BDD8FF; }
+.eca-team-existing-radio { width: 20px; height: 20px; border: 1px solid #D9D9D9; border-radius: 50%; background: #FFF; box-sizing: border-box; }
+.eca-team-existing-option.is-selected .eca-team-existing-radio { border: 6px solid #0166FF; }
+.eca-team-existing-text { min-width: 0; display: flex; flex-direction: column; gap: 4px; text-align: left; }
+.eca-team-existing-text strong { overflow: hidden; color: #000; font-size: 16px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.eca-team-existing-text small { overflow: hidden; color: #808080; font-size: 12px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.eca-team-existing-option em { color: #808080; font-size: 12px; font-style: normal; font-weight: 500; text-align: right; }
+.eca-team-existing-option.is-selected strong { color: #0166FF; }
+
+.eca-team-build-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.eca-team-build-back-button { width: 120px; height: 48px; border: 1px solid #d9d9d9; border-radius: 10px; background: #fff; color: #808080; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-team-build-back-button:hover { background: #f7f7f7; }

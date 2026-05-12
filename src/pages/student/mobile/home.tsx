@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type UserMe, } from "../../../api/client";
+import { getMyParticipantCenter } from "../../../api/ea";
 
 import "../../../App.css"; 
 
@@ -972,7 +973,11 @@ function Home(): React.ReactElement {
 
 	const [loginGateOpen, setLoginGateOpen] = React.useState(false);
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
-	
+	const [activityPromptOpen, setActivityPromptOpen] = React.useState(false);
+	const [activityCenterId, setActivityCenterId] = React.useState<number | null>(null);
+	const [activityPromptPending, setActivityPromptPending] = React.useState(false);
+	const activityPromptCheckedRef = React.useRef(false);
+
 	// 이메일 인증
 	const [emailVerifyPopupOpen, setEmailVerifyPopupOpen] = React.useState(false);
 	const [needsEmailVerification, setNeedsEmailVerification] = React.useState(false);
@@ -1159,6 +1164,61 @@ function Home(): React.ReactElement {
 	const userName = (me?.name ?? "").trim() || "User";
 	const userEmail = (me?.email ?? "").trim();
 	const userRoleSet = Array.isArray(me?.roleSet) ? me.roleSet : [];
+
+	React.useEffect(() => {
+		if (!isAuthed) return;
+		if (!me) return;
+		if (activityPromptCheckedRef.current) return;
+
+		const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+
+		if (!isDesktop) return;
+
+		activityPromptCheckedRef.current = true;
+
+		const checkMyActivityCenter = async () => {
+			try {
+				const center = await getMyParticipantCenter();
+
+				if (!center) return;
+
+				setActivityCenterId(center.centerId);
+
+				if (emailVerifyPopupOpen || needsEmailVerification) {
+					setActivityPromptPending(true);
+					return;
+				}
+
+				setActivityPromptOpen(true);
+			} catch (error) {
+				console.error("getMyParticipantCenter failed:", error);
+			}
+		};
+
+		checkMyActivityCenter();
+	}, [isAuthed, me, emailVerifyPopupOpen, needsEmailVerification]);
+
+	React.useEffect(() => { // 이메일 팝업 닫힌 뒤 대외활동 팝업 오픈
+		if (!activityPromptPending) return;
+		if (emailVerifyPopupOpen || needsEmailVerification) return;
+		if (activityCenterId === null) return;
+
+		setActivityPromptPending(false);
+		setActivityPromptOpen(true);
+	}, [activityPromptPending, emailVerifyPopupOpen, needsEmailVerification, activityCenterId]);
+
+	function handleGoActivityDashboard() {
+		if (activityCenterId === null) return;
+
+		setActivityPromptPending(false);
+		setActivityPromptOpen(false);
+		navigate(`/student/activities/${activityCenterId}/assignment`);
+	}
+
+	function handleCloseActivityPrompt() {
+		setActivityPromptPending(false);
+		setActivityPromptOpen(false);
+	}
 
 	const userProfileImg = React.useMemo(() => {
 		const profile = me?.profileImage;
@@ -1609,6 +1669,33 @@ function Home(): React.ReactElement {
 								disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}
 							>
 								{emailVerifying ? "인증 중" : "인증하기"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{activityPromptOpen && (
+				<div className="activity-redirect-modal-overlay" role="presentation">
+					<div className="activity-redirect-modal" role="dialog" aria-modal="true">
+						<div className="activity-redirect-modal-icon">
+							?
+						</div>
+
+						<div className="activity-redirect-modal-text">
+							대외활동 대시보드로 이동하시겠습니까?
+						</div>
+
+						<div className="activity-redirect-modal-sub-text">
+							잘못 선택한 경우 새로고침 후 다시 응답할 수 있습니다.
+						</div>
+
+						<div className="activity-redirect-modal-actions">
+							<button type="button" className="activity-redirect-modal-btn primary" onClick={handleGoActivityDashboard}>
+								예
+							</button>
+							<button type="button" className="activity-redirect-modal-btn" onClick={handleCloseActivityPrompt}>
+								아니요
 							</button>
 						</div>
 					</div>

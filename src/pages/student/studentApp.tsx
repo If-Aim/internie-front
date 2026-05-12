@@ -2,19 +2,16 @@ import React from "react";
 import MobileStudentApp from "./mobile/studentApp";
 import DesktopStudentApp from "./desktop/studentApp";
 
-function useIsDesktop() {
-	const [isDesktop, setIsDesktop] = React.useState(false);
-	React.useEffect(() => {
-		const mql = window.matchMedia("(min-width: 1024px)");
-		const onChange = () => setIsDesktop(mql.matches);
-		onChange();
-		mql.addEventListener("change", onChange);
-		return () => mql.removeEventListener("change", onChange);
-	}, []);
-	return isDesktop;
+function getInitialIsDesktop(): boolean {
+    if (typeof window === "undefined") {
+        return false;
+    }
+
+    return window.matchMedia("(min-width: 1024px)").matches;
 }
 
 export default function StudentApp(): React.ReactElement {
-	const isDesktop = useIsDesktop();
-	return isDesktop ? <DesktopStudentApp /> : <MobileStudentApp />;
+    const [isDesktop] = React.useState(getInitialIsDesktop);
+
+    return isDesktop ? <DesktopStudentApp /> : <MobileStudentApp />;
 }

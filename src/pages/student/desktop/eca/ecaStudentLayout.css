@@ -1,0 +1,38 @@
+.eca-student-layout { min-height: 100vh; background: #F0F6FF; display: flex; overflow: auto; }
+
+.eca-student-sidebar { position: sticky; top: 0; max-width: 320px; min-width: 280px; height: 100dvh; background: #fff; border-right: 1px solid #E8E8E8; display: flex; flex-direction: column; padding: 43px 40px 17px 28px; box-sizing: border-box; overflow: hidden; }
+.eca-student-sidebar-logo-wrap { display: flex; align-items: flex-start; justify-content: flex-start; margin-bottom: 47px; }
+.eca-student-sidebar-logo-wrap a { text-decoration: none; }
+.eca-student-logo { display: block; width: 120px; line-height: 20px; font-size: 20px; font-weight: 700; color: var(--primary); text-align: center; font-family: "Montserrat", sans-serif; }
+
+.eca-student-nav { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 20px; }
+.eca-student-sidebar-menu-value { padding-left: 28px; }
+.eca-student-activity-list { display: flex; flex-direction: column; overflow-y: auto; }
+
+.eca-student-menu-group { display: flex; flex-direction: column; }
+.eca-student-menu-item { min-height: 48px; padding: 0 10px; margin: 4px 0; border-radius: 10px; color: #808080; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; box-sizing: border-box; transition: background-color .2s ease, color .2s ease; }
+.eca-student-menu-item:hover:not(.eca-student-menu-item--active) { background: #eeeeee; }
+.eca-student-menu-item--active { background: #BDD8FF; color: var(--primary); }
+.eca-student-menu-item--with-arrow { justify-content: flex-start; padding-right: 8px; gap: 8px; }
+button.eca-student-menu-item { width: 100%; border: 0; background: transparent; cursor: pointer; font-family: inherit; }
+.eca-student-submenu-empty { min-height: 40px; padding: 0 14px; color: #999; font-size: 14px; font-weight: 600; display: flex; align-items: center; box-sizing: border-box; }
+.eca-student-menu-item span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.eca-student-chevron { width: 20px; height: 20px; flex-shrink: 0; transition: transform .2s ease; }
+.eca-student-chevron--open { transform: rotate(90deg); }
+
+.eca-student-submenu { display: flex; flex-direction: column; gap: 8px; padding: 0; }
+.eca-student-submenu-item { min-height: 48px; padding: 0 38px; border-radius: 10px; color: #808080; font-size: 16px; font-weight: 500; text-decoration: none; display: flex; align-items: center; box-sizing: border-box; }
+.eca-student-submenu-item:hover:not(.eca-student-submenu-item--active) { background: #eeeeee; }
+.eca-student-submenu-item--active { background: #BDD8FF; color: var(--primary); }
+
+.eca-student-sidebar-profile { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 18px; border-top: 1px solid #e5eaf2; flex-shrink: 0; }
+.eca-student-name { color: #000; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-avatar-img { width: 32px; height: 32px; border-radius: 999px; object-fit: cover; background: #fff; border: 1px solid #D9D9D9; flex-shrink: 0; }
+
+.eca-student-body { flex: 1; min-width: 0; height: 100dvh; padding: 80px 120px; box-sizing: border-box; overflow-x: auto; }
+.eca-student-surface { min-width: 600px; min-height: calc(100vh - 160px); border-radius: 0; background: #F0F6FF; }
+
+.eca-student-nav::-webkit-scrollbar, .eca-student-activity-list::-webkit-scrollbar { width: 4px; }
+.eca-student-nav::-webkit-scrollbar-track, .eca-student-activity-list::-webkit-scrollbar-track { background: transparent; }
+.eca-student-nav::-webkit-scrollbar-thumb, .eca-student-activity-list::-webkit-scrollbar-thumb { background-color: #D9D9D9; border-radius: 999px; }

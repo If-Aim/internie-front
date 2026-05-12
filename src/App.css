@@ -85,6 +85,15 @@ pointer-events: none;}
 .sort-btn{flex: 1;height: 60px;border-radius: 10px;border: 1px solid #DFDFDF;background: #fff;font-size: 16px;font-weight: 500;color: rgba(0, 0, 0, 0.50);}
 .sort-btn.active{border: 2px solid var(--primary); color: #000}
 
+.activity-redirect-modal-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: rgba(107, 107, 107, 0.50); backdrop-filter: blur(5px); }
+.activity-redirect-modal { width: 656px; max-width: calc(100% - 32px); background: #fff; border-radius: 18px; padding: 78px 40px 70px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); text-align: center; box-sizing: border-box; }
+.activity-redirect-modal-icon { width: 66px; height: 66px; margin: 0 auto 28px; border-radius: 50%; background: #1E6BFF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; line-height: 1; }
+.activity-redirect-modal-text { color: #000; font-size: 20px; line-height: 30px; font-weight: 500; }
+.activity-redirect-modal-actions { display: flex; justify-content: center; gap: 64px; margin-top: 44px; }
+.activity-redirect-modal-btn { width: 166px; height: 56px; border: none; border-radius: 10px; background: #D9D9D9; color: #666; font-size: 16px; font-weight: 700; cursor: pointer; }
+.activity-redirect-modal-btn.primary { background: #1E6BFF; color: #fff; }
+.activity-redirect-modal-sub-text { margin-top: 12px; color: #999; font-size: 14px; line-height: 22px; font-weight: 400; }
+
 
 /*loading-dots*/
 .preparing-page {width: 100%;min-height: 100svh;display: flex;flex-direction: column;justify-content: center;padding: 0 20px 50px 20px;background: #F0F6FF;text-align: center;

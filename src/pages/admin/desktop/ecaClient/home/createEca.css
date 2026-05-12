@@ -78,7 +78,7 @@
 .eca-manager-option { display: grid; grid-template-columns: 38px 52px 1fr 1fr; align-items: center; height: 48px; padding: 0 35px 0 32px; margin-bottom:14px; background: #fff; cursor: pointer; box-sizing: border-box; }
 .eca-manager-option:hover{ background: #BDD8FF; }
 .eca-manager-option input { width: 20px; height: 20px; margin: 0; accent-color: #0166FF; border: 1px solid #D9D9D9; cursor: pointer; }
-.eca-manager-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E7E7E7; }
+.eca-manager-avatar { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #D9D9D9; object-fit: contain;}
 .eca-manager-option strong { color: #000; font-size: 20px; font-weight: 500; }
 .eca-manager-option:hover strong { color: #0166FF; }
 .eca-manager-option small { color: #777; font-size: 13px; font-weight: 600; text-align: right; }
