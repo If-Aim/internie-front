@@ -13,6 +13,7 @@ export type EcaClientAdminOutletContext = {
     center: CenterResponse | null;
     centerLoading: boolean;
     managedActivities: ExternalActivityResponse[];
+    refreshManagedActivities: () => Promise<void>;
 };
 
 function getDisplayAdminName(me: UserMe | null): string {
@@ -95,26 +96,19 @@ export default function EcaClientAdminHome(): React.ReactElement{
     const [openedActivityIds, setOpenedActivityIds] = React.useState<number[]>([]);
     const [managedActivities, setManagedActivities] = React.useState<ExternalActivityResponse[]>([]);
 
-    React.useEffect(() => {
-        let mounted = true;
-
-        (async () => {
-            try {
-                const data = await getMyManagedExternalActivities();
-                if (!mounted) return;
-                setManagedActivities(data);
-            } catch (e) {
-                console.error(e);
-                if (mounted) {
-                    setManagedActivities([]);
-                }
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
+    const refreshManagedActivities = React.useCallback(async (): Promise<void> => {
+        try {
+            const data = await getMyManagedExternalActivities();
+            setManagedActivities(data);
+        } catch (e) {
+            console.error(e);
+            setManagedActivities([]);
+        }
     }, []);
+
+    React.useEffect(() => {
+        void refreshManagedActivities();
+    }, [refreshManagedActivities]);
 
     function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
         e.preventDefault();
@@ -211,7 +205,15 @@ export default function EcaClientAdminHome(): React.ReactElement{
 
             <main className="eca-client-admin-body">
                 <div className="eca-client-admin-surface">
-                    <Outlet context={{ me, center, centerLoading, managedActivities } satisfies EcaClientAdminOutletContext} />
+                    <Outlet
+                        context={{
+                            me,
+                            center,
+                            centerLoading,
+                            managedActivities,
+                            refreshManagedActivities,
+                        } satisfies EcaClientAdminOutletContext}
+                    />
                 </div>
             </main>
         </div>

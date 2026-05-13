@@ -464,7 +464,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [teamMemberSearch, setTeamMemberSearch] = React.useState("");
     const [currentTeamName, setCurrentTeamName] = React.useState("");
     const [currentTeamMemberIds, setCurrentTeamMemberIds] = React.useState<number[]>([]);
-    const [resultForm, setResultForm] = React.useState<AssignmentResultForm | "">("");
+    const [resultForms, setResultForms] = React.useState<AssignmentResultForm[]>([]);
     const [existingAssignmentTeamOptions, setExistingAssignmentTeamOptions] = React.useState<ExistingAssignmentTeamOption[]>([]);
     const [selectedExistingAssignmentId, setSelectedExistingAssignmentId] = React.useState<number | null>(null);
     const [existingTeamSelectModalOpen, setExistingTeamSelectModalOpen] = React.useState(false);
@@ -579,7 +579,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }, [existingTeamListOpen]);
 
     const selectedSystemFormLabel = SYSTEM_FORM_OPTIONS.find((option) => option.value === systemForm)?.label ?? "개인";
-    const selectedResultForm = RESULT_FORM_OPTIONS.find((option) => option.value === resultForm);
+    const selectedResultForms = RESULT_FORM_OPTIONS.filter((option) => resultForms.includes(option.value));
     const selectedParticipantText = selectedUserIds.length === 0 ? "참여자를 선택하세요" : `${selectedUserIds.length}명 선택됨`;
     const canSelectSystemForm = selectedUserIds.length > 0;
     const filteredParticipants = participants.filter((participant) =>
@@ -597,7 +597,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const formValid = React.useMemo(() => {
         if (!name.trim()) return false;
         if (endDate.getTime() < startDate.getTime()) return false;
-        if (!resultForm) return false;
+        if (resultForms.length === 0) return false;
 
         if (systemForm === "INDIVIDUAL") {
             return selectedUserIds.length > 0;
@@ -619,7 +619,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         return false;
-    }, [draftTeams, endDate, name, resultForm, selectedExistingTeamIds.length, selectedUserIds.length, startDate, systemForm, teamBuildMode, teamCount]);
+    }, [draftTeams, endDate, name, resultForms.length, selectedExistingTeamIds.length, selectedUserIds.length, startDate, systemForm, teamBuildMode, teamCount]);
 
     function toggleDropdown(type: DropdownType): void {
         if (type === "systemForm" && !canSelectSystemForm) {
@@ -653,6 +653,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     function resetUsers(): void {
         setSelectedUserIds([]);
+    }
+
+    function toggleResultForm(value: AssignmentResultForm): void {
+        setResultForms((prev) => (
+            prev.includes(value)
+                ? prev.filter((form) => form !== value)
+                : [...prev, value]
+        ));
     }
 
     function handleTeamCountChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -911,7 +919,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             return;
         }
 
-        if (!formValid || !resultForm) {
+        if (!formValid || resultForms.length === 0) {
             setError("필수 항목을 모두 입력해주세요.");
             return;
         }
@@ -929,7 +937,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 endTime: formatTimeForApi(endTime),
                 deadlineAt: formatDateTimeForApi(endDate, endTime),
                 progressStatus: "UPCOMING",
-                resultForm,
+                resultForms,
                 systemForm,
                 maxAutoTeams: systemForm === "TEAM" ? Number(teamCount) : null,
                 assigneeUserIds: systemForm === "INDIVIDUAL" ? selectedUserIds : [],
@@ -1102,9 +1110,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         <label>
                             과제 산출물<span>*</span>
                         </label>
+
                         <div className="eca-new-assignment-dropdown-wrap--result">
                             <button type="button" className="eca-new-assignment-select" onClick={() => toggleDropdown("resultForm")}>
-                                <span>{selectedResultForm ? `${selectedResultForm.label}${selectedResultForm.subLabel ? ` (${selectedResultForm.subLabel})` : ""}` : "내용을 선택하세요"}</span>
+                                <span>
+                                    {selectedResultForms.length > 0
+                                        ? selectedResultForms
+                                            .map((option) => option.label)
+                                            .join(", ")
+                                        : "내용을 선택하세요"}
+                                </span>
+
                                 <div className="eca-new-assignment-chevron">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1114,32 +1130,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                             {openDropdown === "resultForm" ? (
                                 <div className="eca-new-assignment-menu eca-new-assignment-menu--result">
-                                    {RESULT_FORM_OPTIONS.map((option) => (
-                                        <button
-                                            type="button"
-                                            key={option.value}
-                                            className={resultForm === option.value ? "is-selected" : ""}
-                                            onClick={() => {
-                                                setResultForm(option.value);
-                                                setOpenDropdown(null);
-                                            }}
-                                        >
-                                            <span className="eca-new-assignment-radio">
-                                                {resultForm === option.value ? (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                        <circle cx="12" cy="12" r="11.5" fill="white" stroke="#E7E7E7" />
-                                                        <circle cx="12" cy="12" r="6" fill="#0166FF" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                        <circle cx="12" cy="12" r="11.5" fill="white" stroke="#E7E7E7" />
-                                                    </svg>
-                                                )}
-                                            </span>
-                                            <strong>{option.label}</strong>
-                                            {option.subLabel ? <small>({option.subLabel})</small> : null}
-                                        </button>
-                                    ))}
+                                    {RESULT_FORM_OPTIONS.map((option) => {
+                                        const checked = resultForms.includes(option.value);
+
+                                        return (
+                                            <label key={option.value} className={"eca-new-assignment-result-option" + (checked ? " is-selected" : "")} >
+                                                <input type="checkbox" checked={checked} onChange={() => toggleResultForm(option.value)} />
+                                                <strong>{option.label}</strong>
+                                                {option.subLabel ? <small>({option.subLabel})</small> : null}
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             ) : null}
                         </div>

@@ -6,8 +6,7 @@
 .eca-home-header-bottom { display: flex; align-items: center; justify-content: space-between; }
 .eca-home-add-button { height: 48px; padding: 0 18px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 16px; font-weight: 700; color:#808080; cursor: pointer; white-space: nowrap; }
 
-.eca-home-mypanel { width: 100%; min-height: 326px; max-height: 420px; padding: 18px 28px 30px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; overflow-y: auto; }
-.eca-home-mypanel::-webkit-scrollbar{width:0;}
+.eca-home-mypanel { display: flex; flex-direction: column; width: 100%; min-height: 326px; max-height: 420px; padding: 18px 28px 30px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; overflow: hidden; }
 .eca-home-centerpanel { width: 100%; height: 269px; padding: 18px 28px 0 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box;}
 .eca-home-mypanel + .eca-home-centerpanel { margin-top: 10px; }
 .eca-home-mypanel--center { min-height: 224px; padding-bottom: 26px; }
@@ -22,7 +21,7 @@
 .eca-home-icon-button img { width: 24px; height: 24px; display: block; }
 
 .eca-home-filter-popover { position: absolute; top: 34px; right: -14px; z-index: 20; width: 170px; padding: 12px 14px; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
-.eca-home-filter-option { width: 100%; height: 28px; padding: 0; border: 0; background: transparent; color: #A0A0A0; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left; }
+.eca-home-filter-option { width: 100%; height: 28px; padding: 0; border: 0; background: transparent; color: #000; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left; }
 .eca-home-filter-radio { width: 12px; height: 12px; flex-shrink: 0; display: block; }
 
 .eca-home-search-wrap { position: relative; display: flex; align-items: center; }
@@ -45,7 +44,8 @@
 .eca-home-status--delayed { background: #FFD6D2; color: #F00; }
 
 .eca-home-status-column { min-width: 0; }
-.eca-home-my-grid { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 20px; }
+.eca-home-my-grid { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 20px; flex: 1; min-height: 0; overflow-y: auto; padding-right: 2px; }
+.eca-home-my-grid::-webkit-scrollbar { width: 0; }
 .eca-home-card-column { min-height: 220px; display: flex; flex-direction: column; gap: 12px; }
 
 .eca-home-my-card { position: relative; height: 96px; padding: 46px 15px 14px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; box-sizing: border-box; }

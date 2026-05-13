@@ -26,7 +26,7 @@ export type AssignmentResponse = {
     description?: string | null;
     externalActivityId: number;
     systemForm: AssignmentSystemForm;
-    resultForm: AssignmentResultForm;
+    resultForms: AssignmentResultForm[];
     startDate: string;
     endDate: string;
     startTime?: string | null;
@@ -118,7 +118,7 @@ export type StudentAssignmentResponse = {
     name: string;
     description?: string | null;
     externalActivityId: number;
-    resultForm: AssignmentResultForm;
+    resultForms: AssignmentResultForm[];
     startDate: string;
     endDate: string;
     startTime?: string | null;
@@ -303,6 +303,12 @@ export type CreateExternalActivityRequest = {
     managerUserIds: number[];
 };
 
+export type UpdateExternalActivityRequest = CreateExternalActivityRequest;
+
+export type UpdateExternalActivityStatusRequest = {
+    completed: boolean;
+};
+
 export type ExternalActivityParticipant = {
     userId?: number | null;
     name?: string | null;
@@ -362,6 +368,44 @@ export async function createExternalActivity( // 대외활동 생성
             method: "POST",
             body: JSON.stringify(request),
         }
+    );
+}
+
+export async function updateExternalActivity( // 대외활동 수정
+    centerId: number | string,
+    externalActivityId: number | string,
+    request: UpdateExternalActivityRequest
+): Promise<ExternalActivityResponse> {
+    return api<ExternalActivityResponse>(
+        `/centers/${centerId}/externalActivities/${externalActivityId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function updateExternalActivityStatus(
+    centerId: number | string,
+    externalActivityId: number | string,
+    request: UpdateExternalActivityStatusRequest
+): Promise<ExternalActivityResponse> {
+    return api<ExternalActivityResponse>(
+        `/centers/${centerId}/externalActivities/${externalActivityId}/status`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function deleteExternalActivity( // 대외활동 삭제
+    centerId: number | string,
+    externalActivityId: number | string
+): Promise<void> {
+    await api<void>(
+        `/centers/${centerId}/externalActivities/${externalActivityId}`,
+        { method: "DELETE" }
     );
 }
 
@@ -485,7 +529,7 @@ export type CreateAssignmentRequest = {
     endTime?: string | null;
     deadlineAt?: string | null;
     progressStatus: ExternalActivityProgressStatus;
-    resultForm: AssignmentResultForm;
+    resultForms: AssignmentResultForm[];
     systemForm: AssignmentSystemForm;
     maxAutoTeams?: number | null;
     assigneeUserIds?: number[];

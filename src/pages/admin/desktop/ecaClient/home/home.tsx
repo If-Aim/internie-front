@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { getExternalActivitiesByCenter, getExternalActivitiesByStatus } from "../../../../../api/ea";
+import { getExternalActivitiesByCenter, getExternalActivitiesByStatus, updateExternalActivityStatus } from "../../../../../api/ea";
 import type { ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./home.css";
@@ -33,30 +33,18 @@ function parseApiDate(value: string): Date {
     return new Date(year, month - 1, day);
 }
 
-function getTodayDateOnly(): Date {
-    const now = new Date();
-
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+function getCalculatedActivityStatus(activity: ExternalActivityResponse): ActivityStatus {
+    if (activity.progressStatus === "UPCOMING") return "upcoming";
+    if (activity.progressStatus === "ONGOING") return "ongoing";
+    if (activity.progressStatus === "COMPLETED") return "completed";
+    return "delayed";
 }
 
-function getCalculatedActivityStatus(activity: ExternalActivityResponse): ActivityStatus {
-    if (activity.progressStatus === "COMPLETED") {
-        return "completed";
-    }
-
-    const today = getTodayDateOnly();
-    const startDate = parseApiDate(activity.startDate);
-    const endDate = parseApiDate(activity.endDate);
-
-    if (today.getTime() < startDate.getTime()) {
-        return "upcoming";
-    }
-
-    if (today.getTime() <= endDate.getTime()) {
-        return "ongoing";
-    }
-
-    return "delayed";
+function getActivityStatusLabel(status: ActivityStatus): string {
+    if (status === "upcoming") return "예정";
+    if (status === "ongoing") return "진행 중";
+    if (status === "completed") return "완료";
+    return "지연";
 }
 
 function toHomeActivity(activity: ExternalActivityResponse): Activity {
@@ -142,7 +130,6 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
     const [statusMenuActivityId, setStatusMenuActivityId] = React.useState<number | null>(null);
     const [managerPopoverActivityId, setManagerPopoverActivityId] = React.useState<number | null>(null);
-    const [hoveredManagerPopoverActivityId, setHoveredManagerPopoverActivityId] = React.useState<number | null>(null);
     const [draggingActivityId, setDraggingActivityId] = React.useState<number | null>(null);
     
     const centerScrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -185,14 +172,72 @@ export default function EcaAdminHomePage(): React.ReactElement {
         };
     }, [managerPopoverActivityId]);
 
-    function changeMyActivityStatus(activityId: number, status: ActivityStatus): void {
-        setMyActivities((prev) => prev.map((item) => item.id === activityId ? { ...item, status } : item));
+    async function changeMyActivityCompletion(activityId: number, completed: boolean): Promise<void> {
+        if (!center?.centerId) {
+            return;
+        }
+
+        const previousActivities = myActivities;
+
+        setMyActivities((prev) =>
+            prev.map((item) =>
+                item.id === activityId
+                    ? {
+                        ...item,
+                        status: completed
+                            ? "completed"
+                            : item.status,
+                    }
+                    : item
+            )
+        );
+
         setStatusMenuActivityId(null);
+
+        try {
+            const updated = await updateExternalActivityStatus(center.centerId, activityId, {
+                completed,
+            });
+
+            setMyActivities((prev) =>
+                prev.map((item) =>
+                    item.id === activityId
+                        ? {
+                            ...item,
+                            status: getCalculatedActivityStatus(updated),
+                        }
+                        : item
+                )
+            );
+        } catch (error) {
+            console.error(error);
+            setMyActivities(previousActivities);
+            window.alert("대외활동 상태 변경에 실패했습니다.");
+        }
     }
 
-    function handleDropToStatus(status: ActivityStatus): void {
-        if (draggingActivityId === null) return;
-        changeMyActivityStatus(draggingActivityId, status);
+    async function handleDropToStatus(status: ActivityStatus): Promise<void> {
+        if (draggingActivityId === null) {
+            return;
+        }
+
+        const draggingActivity = myActivities.find((activity) => activity.id === draggingActivityId);
+
+        if (!draggingActivity) {
+            setDraggingActivityId(null);
+            return;
+        }
+
+        if (status === "completed") {
+            await changeMyActivityCompletion(draggingActivityId, true);
+            setDraggingActivityId(null);
+            return;
+        }
+
+        if (draggingActivity.status === "completed") {
+            await changeMyActivityCompletion(draggingActivityId, false);
+        }
+
         setDraggingActivityId(null);
     }
 
@@ -320,7 +365,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                         }
                                         alt=""
                                     />
-                                    <span>{status}</span>
+                                    <span>{getActivityStatusLabel(status)}</span>
                                 </button>
                             ))}
                         </div>
@@ -448,7 +493,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                             onDrop={() => handleDropToStatus(status)}
                         >
                             <span className={`eca-home-status eca-home-status--${status}`}>
-                                {status} ({getStatusCount(myActivities, status)})
+                                {getActivityStatusLabel(status)} ({getStatusCount(myActivities, status)})
                             </span>
                         </div>
                     ))}
@@ -489,16 +534,27 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                                         {statusMenuActivityId === item.id ? (
                                             <div className="eca-home-status-menu">
-                                                {activityStatuses.map((statusItem) => (
+                                                {item.status === "completed" ? (
                                                     <button
                                                         type="button"
-                                                        key={statusItem}
-                                                        className={`eca-home-status-menu-option eca-home-status-menu-option--${statusItem}`}
-                                                        onClick={() => changeMyActivityStatus(item.id, statusItem)}
+                                                        className="eca-home-status-menu-option eca-home-status-menu-option--delayed"
+                                                        onClick={() => {
+                                                            void changeMyActivityCompletion(item.id, false);
+                                                        }}
                                                     >
-                                                        {statusItem}
+                                                        완료 해제
                                                     </button>
-                                                ))}
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="eca-home-status-menu-option eca-home-status-menu-option--completed"
+                                                        onClick={() => {
+                                                            void changeMyActivityCompletion(item.id, true);
+                                                        }}
+                                                    >
+                                                        완료
+                                                    </button>
+                                                )}
                                             </div>
                                         ) : null}
 
@@ -585,8 +641,6 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                     <div
                                         className="eca-home-center-more-wrap"
                                         ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}
-                                        onMouseEnter={() => setHoveredManagerPopoverActivityId(item.id)}
-                                        onMouseLeave={() => setHoveredManagerPopoverActivityId(null)}
                                     >
                                         <button
                                             type="button"
@@ -600,7 +654,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                             <span className="eca-home-more-button-title">더보기</span>
                                         </button>
 
-                                        {(managerPopoverActivityId === item.id || hoveredManagerPopoverActivityId === item.id) ? (
+                                        {managerPopoverActivityId === item.id ? (
                                             <div className="eca-home-manager-popover">
                                                 {item.managers.slice(2).map((manager, index) => (
                                                     <ManagerProfile
