@@ -47,12 +47,18 @@ function getSystemFormLabel(value?: string | null): string {
     return "개인";
 }
 
-function getResultFormLabel(value?: string | null): string {
+function getResultFormLabel(value?: AssignmentResultForm | null): string {
     if (value === "WRITING") return "글쓰기";
     if (value === "VIDEO") return "영상";
     if (value === "IMAGE") return "사진";
     if (value === "ETC") return "기타";
     return value ?? "-";
+}
+
+function getResultFormsLabel(values?: AssignmentResultForm[] | null): string {
+    if (!values || values.length === 0) return "-";
+
+    return values.map(getResultFormLabel).join(", ");
 }
 
 function getFileExtension(fileName: string): string {
@@ -73,8 +79,8 @@ function normalizeExtension(extension: string): string {
     return lower;
 }
 
-function isAllowedAssignmentFile(resultForm?: AssignmentResultForm | null, extension?: string | null): boolean {
-    if (!resultForm || !extension) return true;
+function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, extension?: string | null): boolean {
+    if (!resultForms || resultForms.length === 0 || !extension) return true;
 
     const normalizedExtension = normalizeExtension(extension);
 
@@ -85,21 +91,31 @@ function isAllowedAssignmentFile(resultForm?: AssignmentResultForm | null, exten
         ETC: [],
     };
 
-    const allowedExtensions = allowedExtensionsByResultForm[resultForm];
+    return resultForms.some((resultForm) => {
+        const allowedExtensions = allowedExtensionsByResultForm[resultForm];
 
-    if (allowedExtensions.length === 0) return true;
+        if (allowedExtensions.length === 0) return true;
 
-    return allowedExtensions.includes(normalizedExtension);
+        return allowedExtensions.includes(normalizedExtension);
+    });
 }
 
-function getAssignmentFileWarning(resultForm?: AssignmentResultForm | null, extension?: string | null): string {
-    if (isAllowedAssignmentFile(resultForm, extension)) return "";
+function getAssignmentFileWarning(resultForms?: AssignmentResultForm[] | null, extension?: string | null): string {
+    if (isAllowedAssignmentFile(resultForms, extension)) return "";
 
-    if (resultForm === "WRITING") return "글쓰기 과제는 txt, doc, pdf, hwp 파일 형식을 권장합니다.";
-    if (resultForm === "IMAGE") return "사진 과제는 jpg, png, gif, webp, svg 파일 형식을 권장합니다.";
-    if (resultForm === "VIDEO") return "영상 과제는 mp4, mov, avi, mpg 파일 형식을 권장합니다.";
+    const warningLabels = resultForms
+        ?.filter((resultForm) => resultForm !== "ETC")
+        .map((resultForm) => {
+            if (resultForm === "WRITING") return "문서(txt, doc, pdf, hwp)";
+            if (resultForm === "IMAGE") return "이미지(jpg, png, gif, webp, svg)";
+            if (resultForm === "VIDEO") return "영상(mp4, mov, avi, mpg)";
+            return "";
+        })
+        .filter(Boolean) ?? [];
 
-    return "";
+    if (warningLabels.length === 0) return "";
+
+    return `선택한 과제 산출물에 맞는 파일 형식을 권장합니다: ${warningLabels.join(", ")}`;
 }
 
 export default function EcaStudentAssignmentSubmit(): React.ReactElement {
@@ -279,7 +295,7 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         setSubmitResultModalOpen(false);
     }
 
-    const hasInvalidFileType = files.some((item) => !isAllowedAssignmentFile(assignment?.resultForm, item.extension));
+    const hasInvalidFileType = files.some((item) => !isAllowedAssignmentFile(assignment?.resultForms, item.extension));
     const hasAnyFile = existingFiles.length > 0 || files.length > 0;
     const submitDisabled = !hasAnyFile || hasInvalidFileType || submitting || loading || !!error;
 
@@ -333,7 +349,7 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
 
                                 <label>
                                     <span>과제 형태</span>
-                                    <input value={getResultFormLabel(assignment?.resultForm)} readOnly />
+                                    <input value={getResultFormsLabel(assignment?.resultForms)} readOnly />
                                 </label>
                             </div>
                         </section>
@@ -400,7 +416,7 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                             {files.length > 0 ? (
                                 <div className="eca-student-assignment-file-list">
                                     {files.map((item) => {
-                                        const warningMessage = getAssignmentFileWarning(assignment?.resultForm, item.extension);
+                                        const warningMessage = getAssignmentFileWarning(assignment?.resultForms, item.extension);
 
                                         return (
                                             <div className={warningMessage ? "eca-student-assignment-file-item has-warning" : "eca-student-assignment-file-item"} key={item.id}>
