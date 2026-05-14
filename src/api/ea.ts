@@ -568,6 +568,19 @@ export async function getAssignmentSubmissions( // 과제 전체 제출물 조�
     );
 }
 
+export async function updateAssignment(
+    assignmentId: number | string,
+    request: CreateAssignmentRequest
+): Promise<AssignmentResponse> {
+    return api<AssignmentResponse>(
+        `/assignments/${assignmentId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
 export async function deleteAssignment( // 과제 삭제
     assignmentId: number | string
 ): Promise<void> {

@@ -23,6 +23,7 @@ export default function EcaClientAdminApp(): React.ReactElement {
                 <Route path="activities/:externalActivityId/assignment" element={<EcaDashboardAssignment />} />
                 <Route path="activities/:externalActivityId/assignment/new" element={<EcaNewAssignmentPage />} />
                 <Route path="activities/:externalActivityId/assignment/:assignmentId" element={<EcaAssignmentDetailPage />} />
+                <Route path="activities/:externalActivityId/assignment/:assignmentId/edit" element={<EcaNewAssignmentPage />} />
                 <Route path="activities/:externalActivityId/attendance" element={<EcaDashboardAttendance />} />
                 <Route path="activities/:externalActivityId/team-activity" element={<EcaDashboardTeamActivity />} />
                 <Route path="settings" element={<EcaSettingsPage />} />

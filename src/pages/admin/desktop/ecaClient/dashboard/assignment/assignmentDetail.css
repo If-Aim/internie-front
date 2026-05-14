@@ -48,7 +48,7 @@
 .eca-assignment-detail-avatar,
 .eca-assignment-detail-row-arrow { flex-shrink: 0; overflow: hidden; }
 
-.eca-assignment-detail-avatar { width: 38px; height: 38px; border-radius: 999px; background: #D9D9D9; display: block; overflow: hidden; flex-shrink: 0; }
+.eca-assignment-detail-avatar { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #D9D9D9; box-sizing: border-box; background: #fff; display: block; overflow: hidden; flex-shrink: 0; }
 .eca-assignment-detail-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .eca-assignment-detail-submit-badge { display: inline-flex; align-items: center; justify-content: center; width: 78px; height: 34px; border-radius: 999px; font-size: 12px; font-style: normal; font-weight: 900; }
 .eca-assignment-detail-submit-badge--submitted { background: #BDD8FF; color: #0166FF; }
@@ -63,9 +63,9 @@
 .eca-assignment-detail-missing-head button { width: 60px; height: 24px; border: 0; border-radius: 10px; background: #E7E7E7; color: #808080; font-size: 10px; font-weight: 700; cursor: pointer; }
 .eca-assignment-detail-missing-list { display: flex; flex-direction: column; gap: 12px; max-height: 470px; overflow-y: auto; padding-right: 12px; box-sizing: border-box; }
 .eca-assignment-detail-missing-list.is-scrollable { padding-right: 8px; }
-.eca-assignment-detail-missing-row { display: grid; grid-template-columns: 38px 1fr 38px; align-items: center; gap: 12px; min-height: 64px; padding: 0 12px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; box-sizing: border-box; }
-.eca-assignment-detail-missing-row strong { color: #000; font-size: 14px; font-weight: 900; }
-.eca-assignment-detail-missing-row button { width: 38px; height: 38px; padding: 0; border: 1px solid #E2E2E2; border-radius: 999px; background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.eca-assignment-detail-missing-row { display: grid; grid-template-columns: 36px 1fr 32px; align-items: center; gap: 12px; min-height: 64px; padding: 0 12px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; box-sizing: border-box; }
+.eca-assignment-detail-missing-row strong { color: #000; font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-assignment-detail-missing-row button { width: 32px; height: 32px; padding: 0; border: 1px solid #D9D9D9; border-radius: 999px; background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box; }
 .eca-assignment-detail-missing-row img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
 .eca-assignment-detail-period { margin: 14px 0 0; color: #808080; font-size: 12px; font-weight: 700; }

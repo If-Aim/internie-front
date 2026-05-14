@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { createAssignment, getExternalActivity, getExternalActivityTeams } from "../../../../../../api/ea";
-import type { AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse } from "../../../../../../api/ea";
+import { createAssignment, getAssignment, getExternalActivity, getExternalActivityTeams, updateAssignment, } from "../../../../../../api/ea";
+import type { AssignmentResponse, AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse, } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./newAssignment.css";
 
@@ -29,6 +29,25 @@ type ExistingAssignmentTeamOption = {
     assignmentName: string;
     teamIds: number[];
     teamNames: string[];
+};
+
+type EditTeamSummary = {
+    teamId: number;
+    teamName: string;
+    leaderName: string;
+    memberNames: string[];
+};
+
+type EditableTeamMember = {
+    userId: number;
+    userName: string;
+    role: "LEADER" | "MEMBER";
+};
+
+type EditableTeam = {
+    teamId: number;
+    name: string;
+    members: EditableTeamMember[];
 };
 
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -120,6 +139,92 @@ function isSameDay(a: Date, b: Date): boolean {
 
 function addMonths(date: Date, amount: number): Date {
     return new Date(date.getFullYear(), date.getMonth() + amount, 1);
+}
+
+function parseDateFromApi(value?: string | null): Date {
+    if (!value) return stripTime(new Date());
+
+    const [year, month, day] = value.split("-").map(Number);
+
+    return stripTime(new Date(year, month - 1, day));
+}
+
+function parseTimeFromApi(value?: string | null, fallback: string = "09:00"): string {
+    if (!value) return fallback;
+
+    return value.slice(0, 5);
+}
+
+function getAssignmentTeamIds(assignment: AssignmentResponse): number[] {
+    return Array.from(
+        new Set(
+            (assignment.participants ?? [])
+                .filter((participant) => (
+                    participant.participantType === "TEAM" &&
+                    typeof participant.teamId === "number"
+                ))
+                .map((participant) => participant.teamId as number)
+        )
+    );
+}
+
+function getAssignedTeamMemberUserIds(
+    assignment: AssignmentResponse,
+    teams: TeamResponse[]
+): number[] {
+    const assignmentTeamIds = new Set(getAssignmentTeamIds(assignment));
+
+    return Array.from(
+        new Set(
+            teams
+                .filter((team) => assignmentTeamIds.has(team.teamId))
+                .flatMap((team) => team.members.map((member) => member.userId))
+        )
+    );
+}
+
+function toEditTeamSummaries(
+    assignment: AssignmentResponse | null,
+    teams: TeamResponse[]
+): EditTeamSummary[] {
+    if (!assignment || assignment.systemForm !== "TEAM") return [];
+
+    const assignmentTeamIds = new Set(getAssignmentTeamIds(assignment));
+
+    return teams
+        .filter((team) => assignmentTeamIds.has(team.teamId))
+        .map((team) => {
+            const leader = team.members.find((member) => member.role === "LEADER");
+            const members = team.members.filter((member) => member.role !== "LEADER");
+
+            return {
+                teamId: team.teamId,
+                teamName: team.name,
+                leaderName: leader?.userName ?? "-",
+                memberNames: members.map((member) => member.userName),
+            };
+        });
+}
+
+function toEditableTeams(
+    assignment: AssignmentResponse | null,
+    teams: TeamResponse[]
+): EditableTeam[] {
+    if (!assignment || assignment.systemForm !== "TEAM") return [];
+
+    const assignmentTeamIds = new Set(getAssignmentTeamIds(assignment));
+
+    return teams
+        .filter((team) => assignmentTeamIds.has(team.teamId))
+        .map((team) => ({
+            teamId: team.teamId,
+            name: team.name,
+            members: team.members.map((member) => ({
+                userId: member.userId,
+                userName: member.userName,
+                role: member.role,
+            })),
+        }));
 }
 
 function getMonthGrid(cursor: Date): { month: number; days: Date[] } {
@@ -437,12 +542,98 @@ function CalendarRange({
     );
 }
 
+function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
+    const memberTextRef = React.useRef<HTMLElement | null>(null);
+    const [displayText, setDisplayText] = React.useState("-");
+
+    const updateDisplayText = React.useCallback((): void => {
+        const target = memberTextRef.current;
+
+        if (!target) return;
+
+        if (names.length === 0) {
+            setDisplayText("-");
+            return;
+        }
+
+        const availableWidth = target.clientWidth;
+
+        if (availableWidth <= 0) return;
+
+        const computedStyle = window.getComputedStyle(target);
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+            setDisplayText(names.join(", "));
+            return;
+        }
+
+        context.font = `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+
+        for (let visibleCount = names.length; visibleCount >= 1; visibleCount -= 1) {
+            const visibleNames = names.slice(0, visibleCount).join(", ");
+            const hiddenCount = names.length - visibleCount;
+            const nextText = hiddenCount > 0
+                ? `${visibleNames} 외 ${hiddenCount}명`
+                : visibleNames;
+
+            if (context.measureText(nextText).width <= availableWidth) {
+                setDisplayText(nextText);
+                return;
+            }
+        }
+
+        const fallbackText = names.length === 1
+            ? names[0]
+            : `외 ${names.length}명`;
+
+        setDisplayText(fallbackText);
+    }, [names]);
+
+    React.useLayoutEffect(() => {
+        updateDisplayText();
+    }, [updateDisplayText]);
+
+    React.useEffect(() => {
+        const target = memberTextRef.current;
+
+        if (!target) return;
+
+        const observer = new ResizeObserver(() => {
+            updateDisplayText();
+        });
+
+        observer.observe(target);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [updateDisplayText]);
+
+    return (
+        <em
+            ref={memberTextRef}
+            className="eca-assignment-edit-team-members"
+            title={names.join(", ")}
+        >
+            {displayText}
+        </em>
+    );
+}
+
 export default function EcaNewAssignmentPage(): React.ReactElement {
     const navigate = useNavigate();
-    const { externalActivityId } = useParams<{ externalActivityId?: string }>();
+    const { externalActivityId, assignmentId } = useParams<{
+        externalActivityId?: string;
+        assignmentId?: string;
+    }>();
+
+    const isEditMode = Boolean(assignmentId);
     const { center, centerLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [/*activity*/, setActivity] = React.useState<ExternalActivityResponse | null>(null);
+    const [editingAssignment, setEditingAssignment] = React.useState<AssignmentResponse | null>(null);
     const [participants, setParticipants] = React.useState<SelectableParticipant[]>([]);
     const [selectedUserIds, setSelectedUserIds] = React.useState<number[]>([]);
     const [name, setName] = React.useState("");
@@ -454,7 +645,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [calendarResetKey, setCalendarResetKey] = React.useState(0);
     const [systemForm, setSystemForm] = React.useState<AssignmentSystemForm>("INDIVIDUAL");
     const [teamCount, setTeamCount] = React.useState("");
-    const [/*existingTeams*/, setExistingTeams] = React.useState<TeamResponse[]>([]);
+    const [existingTeams, setExistingTeams] = React.useState<TeamResponse[]>([]);
     const [selectedExistingTeamIds, setSelectedExistingTeamIds] = React.useState<number[]>([]);
     const [teamBuildMode, setTeamBuildMode] = React.useState<TeamBuildMode>("NEW");
     const [draftTeams, setDraftTeams] = React.useState<DraftTeam[]>([]);
@@ -470,6 +661,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [existingTeamSelectModalOpen, setExistingTeamSelectModalOpen] = React.useState(false);
     const [existingTeamListOpen, setExistingTeamListOpen] = React.useState(false);
     const existingTeamListWrapRef = React.useRef<HTMLDivElement | null>(null);
+    const [teamEditModalOpen, setTeamEditModalOpen] = React.useState(false);
+    const [editableTeams, setEditableTeams] = React.useState<EditableTeam[]>([]);
+    const [selectedEditableTeamId, setSelectedEditableTeamId] = React.useState<number | null>(null);
+    const [openTeamMemberMenuUserId, setOpenTeamMemberMenuUserId] = React.useState<number | null>(null);
 
     const [openDropdown, setOpenDropdown] = React.useState<DropdownType>(null);
 
@@ -478,7 +673,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [participantDropdownOpen, setParticipantDropdownOpen] = React.useState(false);
     const [participantInputFocused, setParticipantInputFocused] = React.useState(false);
     const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
-
+    const resultFormDropdownRef = React.useRef<HTMLDivElement | null>(null);
+    
     const [loading, setLoading] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [error, setError] = React.useState("");
@@ -487,8 +683,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const cardRef = React.useRef<HTMLFormElement | null>(null);
     
     React.useEffect(() => {
-        async function fetchActivity(): Promise<void> {
-            
+        async function fetchPageData(): Promise<void> {
             if (centerLoading) return;
 
             if (!center?.centerId || !externalActivityId) {
@@ -500,39 +695,92 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             setError("");
 
             try {
-                const [data, teamData] = await Promise.all([
+                const [activityData, teamData, assignmentData] = await Promise.all([
                     getExternalActivity(center.centerId, externalActivityId),
                     getExternalActivityTeams(externalActivityId),
+                    isEditMode && assignmentId
+                        ? getAssignment(assignmentId)
+                        : Promise.resolve(null),
                 ]);
 
-                const nextParticipants = (data.participants ?? [])
+                const nextParticipants = (activityData.participants ?? [])
                     .map(toSelectableParticipant)
                     .filter((participant): participant is SelectableParticipant => participant !== null);
 
-                const nextExistingAssignmentTeamOptions = toExistingAssignmentTeamOptions(data);
+                const nextExistingAssignmentTeamOptions = toExistingAssignmentTeamOptions(activityData);
 
-                setActivity(data);
+                setActivity(activityData);
                 setParticipants(nextParticipants);
                 setExistingTeams(teamData);
                 setExistingAssignmentTeamOptions(nextExistingAssignmentTeamOptions);
-                setSelectedExistingAssignmentId(nextExistingAssignmentTeamOptions[0]?.assignmentId ?? null);
-                setSelectedExistingTeamIds(nextExistingAssignmentTeamOptions[0]?.teamIds ?? []);
+
+                if (!assignmentData) {
+                    setEditingAssignment(null);
+                    setSelectedExistingAssignmentId(nextExistingAssignmentTeamOptions[0]?.assignmentId ?? null);
+                    setSelectedExistingTeamIds(nextExistingAssignmentTeamOptions[0]?.teamIds ?? []);
+                    return;
+                }
+
+                setEditingAssignment(assignmentData);
+                setName(assignmentData.name ?? "");
+                setStartDate(parseDateFromApi(assignmentData.startDate));
+                setEndDate(parseDateFromApi(assignmentData.endDate));
+                setStartTime(parseTimeFromApi(assignmentData.startTime, "09:00"));
+                setEndTime(parseTimeFromApi(assignmentData.endTime, "18:00"));
+                setSystemForm(assignmentData.systemForm);
+                setTeamCount(
+                    assignmentData.systemForm === "TEAM"
+                        ? String(assignmentData.maxAutoTeams ?? getAssignmentTeamIds(assignmentData).length)
+                        : ""
+                );
+                setResultForms(assignmentData.resultForms ?? []);
+
+                if (assignmentData.systemForm === "INDIVIDUAL") {
+                    const nextSelectedUserIds = (assignmentData.participants ?? [])
+                        .filter((participant) => (
+                            participant.participantType === "USER" &&
+                            typeof participant.userId === "number"
+                        ))
+                        .map((participant) => participant.userId as number);
+
+                    setSelectedUserIds(nextSelectedUserIds);
+                    setTeamBuildMode("NEW");
+                    setSelectedExistingAssignmentId(null);
+                    setSelectedExistingTeamIds([]);
+                }
+
+                if (assignmentData.systemForm === "TEAM") {
+                    const nextSelectedTeamIds = getAssignmentTeamIds(assignmentData);
+                    const nextSelectedUserIds = getAssignedTeamMemberUserIds(assignmentData, teamData);
+
+                    setSelectedUserIds(nextSelectedUserIds);
+                    setTeamBuildMode("EXISTING");
+                    setSelectedExistingAssignmentId(assignmentData.assignmentId);
+                    setSelectedExistingTeamIds(nextSelectedTeamIds);
+                }
+
+                setDraftTeams([]);
+                setCurrentTeamName("");
+                setCurrentTeamMemberIds([]);
+                setTeamMemberSearch("");
+                setTeamMemberDropdownOpen(false);
             } catch (e) {
                 console.error(e);
                 setActivity(null);
+                setEditingAssignment(null);
                 setParticipants([]);
                 setExistingTeams([]);
                 setExistingAssignmentTeamOptions([]);
                 setSelectedExistingAssignmentId(null);
                 setSelectedExistingTeamIds([]);
-                setError("대외활동 정보를 불러오지 못했습니다.");
+                setError(isEditMode ? "과제 정보를 불러오지 못했습니다." : "대외활동 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchActivity();
-    }, [center?.centerId, centerLoading, externalActivityId]);
+        fetchPageData();
+    }, [assignmentId, center?.centerId, centerLoading, externalActivityId, isEditMode]);
 
     React.useEffect(() => {
         function handleMouseDown(e: MouseEvent): void {
@@ -577,22 +825,66 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             document.removeEventListener("mousedown", handleMouseDown, true);
         };
     }, [existingTeamListOpen]);
+    
+    React.useEffect(() => {
+        if (openDropdown !== "resultForm") return;
 
+        function handleMouseDown(e: MouseEvent): void {
+            if (resultFormDropdownRef.current?.contains(e.target as Node)) return;
+
+            setOpenDropdown(null);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown, true);
+        };
+    }, [openDropdown]);
+    
     const selectedSystemFormLabel = SYSTEM_FORM_OPTIONS.find((option) => option.value === systemForm)?.label ?? "개인";
     const selectedResultForms = RESULT_FORM_OPTIONS.filter((option) => resultForms.includes(option.value));
-    const selectedParticipantText = selectedUserIds.length === 0 ? "참여자를 선택하세요" : `${selectedUserIds.length}명 선택됨`;
+    const selectedParticipantText = React.useMemo(() => {
+        if (selectedUserIds.length === 0) return "참여자를 선택하세요";
+
+        const selectedParticipants = participants
+            .filter((participant) => selectedUserIds.includes(participant.userId))
+            .sort((a, b) => a.userId - b.userId);
+
+        const firstParticipant = selectedParticipants[0];
+
+        if (!firstParticipant) return "참여자를 선택하세요";
+        if (selectedParticipants.length === 1) return firstParticipant.name;
+
+        return `@ ${firstParticipant.name} 외 ${selectedParticipants.length - 1}명`;
+    }, [participants, selectedUserIds]);
     const canSelectSystemForm = selectedUserIds.length > 0;
     const filteredParticipants = participants.filter((participant) =>
         participant.name.toLowerCase().includes(participantSearch.trim().toLowerCase())
     );
 
     const requestedTeamCount = Number(teamCount);
-
     const matchedExistingAssignmentTeamOptions = existingAssignmentTeamOptions.filter((option) => (
         Number.isInteger(requestedTeamCount) &&
         requestedTeamCount > 0 &&
         option.teamIds.length === requestedTeamCount
     ));
+    
+    const editTeamSummaries = React.useMemo(() => {
+        return toEditTeamSummaries(editingAssignment, existingTeams);
+    }, [editingAssignment, existingTeams]);
+
+    const selectedEditableTeam = editableTeams.find((team) => team.teamId === selectedEditableTeamId) ?? null;
+
+    const assignedEditableMemberCount = React.useMemo(() => {
+        return new Set(
+            editableTeams.flatMap((team) => team.members.map((member) => member.userId))
+        ).size;
+    }, [editableTeams]);
+
+    const unassignedEditableMemberCount = React.useMemo(() => {
+        return Math.max(selectedUserIds.length - assignedEditableMemberCount, 0);
+    }, [assignedEditableMemberCount, selectedUserIds.length]);
 
     const formValid = React.useMemo(() => {
         if (!name.trim()) return false;
@@ -621,6 +913,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         return false;
     }, [draftTeams, endDate, name, resultForms.length, selectedExistingTeamIds.length, selectedUserIds.length, startDate, systemForm, teamBuildMode, teamCount]);
 
+    
     function toggleDropdown(type: DropdownType): void {
         if (type === "systemForm" && !canSelectSystemForm) {
             alert("참여자를 먼저 선택해주세요.");
@@ -685,8 +978,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     function openParticipantModal(): void {
         setOpenDropdown(null);
         setOpenDatePicker(null);
+        setParticipantSearch("");
+        setParticipantInputFocused(false);
         setParticipantModalOpen(true);
-        setParticipantDropdownOpen(true);
+        setParticipantDropdownOpen(!isEditMode);
     }
 
     function closeParticipantModal(): void {
@@ -707,9 +1002,16 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }
 
     function getSelectedParticipantInputValue(): string {
-        const selectedParticipants = participants.filter((participant) => selectedUserIds.includes(participant.userId));
+        const selectedParticipants = participants
+            .filter((participant) => selectedUserIds.includes(participant.userId))
+            .sort((a, b) => a.userId - b.userId);
 
-        return selectedParticipants.map((participant) => `@ ${participant.name}`).join(", ");
+        const firstParticipant = selectedParticipants[0];
+
+        if (!firstParticipant) return "";
+        if (selectedParticipants.length === 1) return `@ ${firstParticipant.name}`;
+
+        return `@ ${firstParticipant.name} 외 ${selectedParticipants.length - 1}명`;
     }
 
     function getAssignedUserIds(): Set<number> {
@@ -911,6 +1213,20 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }));
     }
 
+    function openTeamEditModal(): void {
+        const nextEditableTeams = toEditableTeams(editingAssignment, existingTeams);
+
+        setEditableTeams(nextEditableTeams);
+        setSelectedEditableTeamId(nextEditableTeams[0]?.teamId ?? null);
+        setOpenTeamMemberMenuUserId(null);
+        setTeamEditModalOpen(true);
+    }
+
+    function closeTeamEditModal(): void {
+        setTeamEditModalOpen(false);
+        setOpenTeamMemberMenuUserId(null);
+    }
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
 
@@ -928,7 +1244,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         setError("");
 
         try {
-            await createAssignment(externalActivityId, {
+            const request = {
                 name: name.trim(),
                 description: null,
                 startDate: formatDateForApi(startDate),
@@ -936,29 +1252,57 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 startTime: formatTimeForApi(startTime),
                 endTime: formatTimeForApi(endTime),
                 deadlineAt: formatDateTimeForApi(endDate, endTime),
-                progressStatus: "UPCOMING",
+                progressStatus: "UPCOMING" as const,
                 resultForms,
                 systemForm,
                 maxAutoTeams: systemForm === "TEAM" ? Number(teamCount) : null,
                 assigneeUserIds: systemForm === "INDIVIDUAL" ? selectedUserIds : [],
                 teamIds: systemForm === "TEAM" && teamBuildMode === "EXISTING" ? selectedExistingTeamIds : [],
                 inlineTeams: systemForm === "TEAM" && teamBuildMode === "NEW" ? toInlineTeams() : [],
-            });
+            };
 
+            if (isEditMode) {
+                if (!assignmentId) {
+                    setError("수정할 과제 정보를 찾을 수 없습니다.");
+                    return;
+                }
+
+                await updateAssignment(assignmentId, request);
+
+                navigate(
+                    `/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}`,
+                    { replace: true }
+                );
+                return;
+            }
+
+            await createAssignment(externalActivityId, request);
             navigate(-1);
         } catch (e) {
             console.error(e);
-            setError("과제를 저장하지 못했습니다.");
+            setError(isEditMode ? "과제를 수정하지 못했습니다." : "과제를 저장하지 못했습니다.");
         } finally {
             setSaving(false);
         }
     }
 
+    function moveBack(): void {
+        navigate(-1);
+    }
     return (
         <>
-            <div className="eca-new-assignment-page">
+            <div className={"eca-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode")}>
                 <div className="eca-new-assignment-top">
-                    <h1>새로운 과제 생성</h1>
+                    <div className="eca-new-assignment-top-left">
+                        <button type="button" className="eca-assignment-detail-back-button" onClick={moveBack} aria-label="뒤로가기">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+
+                        <h1>{isEditMode ? "과제 수정하기" : "새로운 과제 생성"}</h1>
+                    </div>
+
                     <button type="button" className="eca-new-assignment-temp-button" disabled>
                         임시저장
                     </button>
@@ -1039,7 +1383,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                             참여자<span>*</span>
                         </label>
                         <div className="eca-new-assignment-participant-row">
-                            <button type="button" className="eca-new-assignment-participant-input" onClick={openParticipantModal}>
+                            <button type="button" className={ "eca-new-assignment-participant-input" + (selectedUserIds.length === 0 ? " is-placeholder" : "") } onClick={openParticipantModal} > 
                                 {selectedParticipantText}
                             </button>
                             <button type="button" className="eca-new-assignment-participant-button" onClick={openParticipantModal}>
@@ -1106,17 +1450,56 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         </div>
                     </div>
 
+                    {isEditMode && systemForm === "TEAM" ? (
+                        <div className="eca-new-assignment-field eca-assignment-edit-team-status">
+                            <div className="eca-assignment-edit-team-status-head">
+                                <label>
+                                    팀 구성 현황<span>*</span>
+                                </label>
+                                <button type="button" className="eca-assignment-edit-team-status-button" onClick={openTeamEditModal}>
+                                    수정
+                                </button>
+                            </div>
+
+                            <div className="eca-assignment-edit-team-table-head">
+                                <span>팀명</span>
+                                <span>팀장</span>
+                                <span>팀원</span>
+                            </div>
+
+                            <div className="eca-assignment-edit-team-table-body">
+                                {editTeamSummaries.length === 0 ? (
+                                    <p className="eca-new-assignment-empty">
+                                        연결된 팀 정보가 없습니다.
+                                    </p>
+                                ) : (
+                                    editTeamSummaries.map((team) => (
+                                        <div key={team.teamId} className="eca-assignment-edit-team-row" >
+                                            <strong>{team.teamName}</strong>
+                                            <span>{team.leaderName}</span>
+                                            <TeamMemberNames names={team.memberNames} />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    ) : null}
+
                     <div className="eca-new-assignment-field">
                         <label>
                             과제 산출물<span>*</span>
                         </label>
 
-                        <div className="eca-new-assignment-dropdown-wrap--result">
-                            <button type="button" className="eca-new-assignment-select" onClick={() => toggleDropdown("resultForm")}>
-                                <span>
+                        <div className="eca-new-assignment-dropdown-wrap--result" ref={resultFormDropdownRef}>
+                                <button type="button" className={ "eca-new-assignment-select" + (selectedResultForms.length === 0 ? " is-placeholder" : "") } onClick={() => toggleDropdown("resultForm")} > 
+                                    <span>
                                     {selectedResultForms.length > 0
                                         ? selectedResultForms
-                                            .map((option) => option.label)
+                                            .map((option) => (
+                                                option.subLabel
+                                                    ? `${option.label} (${option.subLabel})`
+                                                    : option.label
+                                            ))
                                             .join(", ")
                                         : "내용을 선택하세요"}
                                 </span>
@@ -1150,7 +1533,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     {loading ? <p className="eca-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
 
                     <button type="submit" className="eca-new-assignment-save-button" disabled={!formValid || saving || loading}>
-                        {saving ? "저장 중" : "저장"}
+                        {saving
+                            ? isEditMode
+                                ? "수정 중"
+                                : "저장 중"
+                            : "저장"}
                     </button>
                 </form>
             </div>
@@ -1381,7 +1768,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                             </div>
 
                             <div className="eca-team-create-field">
-                                <label>팀원을 선택하세요</label>
+                                <div className="eca-team-create-field-label-row">
+                                    <label>팀원을 선택하세요</label>
+                                    <span>첫 번째로 선택한 팀원이 팀장으로 자동 지정됩니다</span>
+                                </div>
                                 <div className="eca-team-member-picker" onMouseDown={(e) => e.stopPropagation()}>
                                     <div className="eca-team-member-picker-row">
                                         <div className="eca-team-member-picker-input-wrap">
@@ -1489,6 +1879,173 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     </div>
                 </div>
             ) : null}
-    </>
+
+            {teamEditModalOpen ? (
+                <div className="eca-assignment-participant-modal-backdrop" onMouseDown={closeTeamEditModal}>
+                    <div className="eca-team-edit-modal" onMouseDown={(e) => e.stopPropagation()}>
+                        <div className="eca-team-edit-header">
+                            <h3>팀 빌딩 수정</h3>
+
+                            <button
+                                type="button"
+                                className="eca-assignment-participant-modal-close"
+                                onClick={closeTeamEditModal}
+                                aria-label="닫기"
+                            >
+                                <img src="/icons/x-01.svg" alt="" />
+                            </button>
+                        </div>
+
+                        <div className="eca-team-edit-summary">
+                            <div>
+                                <span>전체 팀:</span>
+                                <strong>{editableTeams.length}개</strong>
+                            </div>
+
+                            <div>
+                                <span>배정 인원:</span>
+                                <strong>{assignedEditableMemberCount}명</strong>
+                            </div>
+
+                            <div>
+                                <span>미배정 인원:</span>
+                                <strong>{unassignedEditableMemberCount}명</strong>
+                            </div>
+                        </div>
+
+                        <div className="eca-team-edit-body">
+                            <section className="eca-team-edit-left-panel">
+                                <strong className="eca-team-edit-panel-title">팀 목록</strong>
+
+                                <div className="eca-team-edit-team-list">
+                                    {editableTeams.map((team) => (
+                                        <button
+                                            type="button"
+                                            key={team.teamId}
+                                            className={
+                                                "eca-team-edit-team-item" +
+                                                (selectedEditableTeamId === team.teamId ? " is-selected" : "")
+                                            }
+                                            onClick={() => {
+                                                setSelectedEditableTeamId(team.teamId);
+                                                setOpenTeamMemberMenuUserId(null);
+                                            }}
+                                        >
+                                            {team.name}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button type="button" className="eca-team-edit-add-team-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                            <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73699 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73699 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
+                                        </svg>
+                                    </span>
+                                    팀 추가
+                                </button>
+                            </section>
+
+                            <section className="eca-team-edit-right-panel">
+                                {selectedEditableTeam ? (
+                                    <>
+                                        <div className="eca-team-edit-selected-team-head">
+                                            <h4>{selectedEditableTeam.name}</h4>
+
+                                            <button type="button" className="eca-team-edit-delete-team-button">
+                                                팀 삭제
+                                            </button>
+                                        </div>
+
+                                        <div className="eca-team-edit-name-field">
+                                            <label htmlFor="editableTeamName">팀명</label>
+                                            <input
+                                                id="editableTeamName"
+                                                value={selectedEditableTeam.name}
+                                                onChange={(e) => {
+                                                    const nextName = e.target.value;
+
+                                                    setEditableTeams((prev) =>
+                                                        prev.map((team) =>
+                                                            team.teamId === selectedEditableTeam.teamId
+                                                                ? { ...team, name: nextName }
+                                                                : team
+                                                        )
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="eca-team-edit-member-section">
+                                            <strong>팀원</strong>
+
+                                            <div className="eca-team-edit-member-list">
+                                                {selectedEditableTeam.members.map((member) => (
+                                                    <div key={member.userId} className="eca-team-edit-member-row">
+                                                        <span>{member.userName}</span>
+
+                                                        {member.role === "LEADER" ? (
+                                                            <em>팀장</em>
+                                                        ) : null}
+
+                                                        <div className="eca-team-edit-member-more-wrap">
+                                                            <button
+                                                                type="button"
+                                                                className="eca-team-edit-member-more-button"
+                                                                onClick={() => {
+                                                                    setOpenTeamMemberMenuUserId((prev) =>
+                                                                        prev === member.userId ? null : member.userId
+                                                                    );
+                                                                }}
+                                                                aria-label="팀원 메뉴"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="3" height="13" viewBox="0 0 3 13" fill="none">
+                                                                    <circle cx="1.5" cy="1.5" r="1.5" fill="#D9D9D9"/>
+                                                                    <circle cx="1.5" cy="6.5" r="1.5" fill="#D9D9D9"/>
+                                                                    <circle cx="1.5" cy="11.5" r="1.5" fill="#D9D9D9"/>
+                                                                </svg>
+                                                            </button>
+
+                                                            {openTeamMemberMenuUserId === member.userId ? (
+                                                                <div className="eca-team-edit-member-menu">
+                                                                    <button type="button">팀장으로 지정</button>
+                                                                    <button type="button">다른 팀으로 이동</button>
+                                                                    <button type="button">팀에서 제외</button>
+                                                                </div>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <button type="button" className="eca-team-edit-add-member-button">
+                                                <span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                        <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73699 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73699 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
+                                                    </svg>
+                                                </span>
+                                                팀원 추가
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="eca-new-assignment-empty">표시할 팀이 없습니다.</p>
+                                )}
+                            </section>
+                        </div>
+
+                        <div className="eca-team-edit-footer">
+                            <button type="button" className="eca-team-edit-cancel-button" onClick={closeTeamEditModal}>
+                                취소
+                            </button>
+
+                            <button type="button" className="eca-team-edit-confirm-button" disabled>
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </>
     );
 }

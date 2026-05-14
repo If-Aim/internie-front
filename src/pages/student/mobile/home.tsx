@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type UserMe, } from "../../../api/client";
-import { getMyParticipantCenter } from "../../../api/ea";
+import { getMyParticipantCenter, getMyParticipatingExternalActivities } from "../../../api/ea";
 
 import "../../../App.css"; 
 
@@ -974,7 +974,7 @@ function Home(): React.ReactElement {
 	const [loginGateOpen, setLoginGateOpen] = React.useState(false);
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
 	const [activityPromptOpen, setActivityPromptOpen] = React.useState(false);
-	const [activityCenterId, setActivityCenterId] = React.useState<number | null>(null);
+	const [activityExternalActivityId, setActivityExternalActivityId] = React.useState<number | null>(null);
 	const [activityPromptPending, setActivityPromptPending] = React.useState(false);
 	const activityPromptCheckedRef = React.useRef(false);
 
@@ -1182,7 +1182,15 @@ function Home(): React.ReactElement {
 
 				if (!center) return;
 
-				setActivityCenterId(center.centerId);
+				const activities = await getMyParticipatingExternalActivities();
+
+				if (activities.length === 0) return;
+
+				const targetActivity = [...activities].sort(
+					(a, b) => a.externalActivityId - b.externalActivityId
+				)[0];
+
+				setActivityExternalActivityId(targetActivity.externalActivityId);
 
 				if (emailVerifyPopupOpen || needsEmailVerification) {
 					setActivityPromptPending(true);
@@ -1191,7 +1199,7 @@ function Home(): React.ReactElement {
 
 				setActivityPromptOpen(true);
 			} catch (error) {
-				console.error("getMyParticipantCenter failed:", error);
+				console.error("getMyParticipantCenter or getMyParticipatingExternalActivities failed:", error);
 			}
 		};
 
@@ -1201,18 +1209,18 @@ function Home(): React.ReactElement {
 	React.useEffect(() => { // 이메일 팝업 닫힌 뒤 대외활동 팝업 오픈
 		if (!activityPromptPending) return;
 		if (emailVerifyPopupOpen || needsEmailVerification) return;
-		if (activityCenterId === null) return;
+    	if (activityExternalActivityId === null) return;
 
 		setActivityPromptPending(false);
 		setActivityPromptOpen(true);
-	}, [activityPromptPending, emailVerifyPopupOpen, needsEmailVerification, activityCenterId]);
+	}, [activityPromptPending, emailVerifyPopupOpen, needsEmailVerification, activityExternalActivityId]);
 
 	function handleGoActivityDashboard() {
-		if (activityCenterId === null) return;
+		if (activityExternalActivityId === null) return;
 
 		setActivityPromptPending(false);
 		setActivityPromptOpen(false);
-		navigate(`/student/activities/${activityCenterId}/assignment`);
+		navigate(`/student/activities/${activityExternalActivityId}/assignment`);
 	}
 
 	function handleCloseActivityPrompt() {
