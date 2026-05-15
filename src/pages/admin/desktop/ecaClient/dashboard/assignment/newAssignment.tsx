@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { createAssignment, getAssignment, getExternalActivity, getExternalActivityTeams, updateAssignment, } from "../../../../../../api/ea";
+import { createAssignment, getAssignment, getExternalActivity, getExternalActivityTeams, updateAssignmentMeta, updateAssignmentSchedule, updateAssignmentAssignees, updateAssignmentTeamConfiguration, } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse, } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./newAssignment.css";
@@ -45,7 +45,8 @@ type EditableTeamMember = {
 };
 
 type EditableTeam = {
-    teamId: number;
+    teamClientId: string;
+    teamId: number | null;
     name: string;
     members: EditableTeamMember[];
 };
@@ -168,19 +169,26 @@ function getAssignmentTeamIds(assignment: AssignmentResponse): number[] {
     );
 }
 
-function getAssignedTeamMemberUserIds(
-    assignment: AssignmentResponse,
-    teams: TeamResponse[]
-): number[] {
-    const assignmentTeamIds = new Set(getAssignmentTeamIds(assignment));
+function areSameUserIdSets(left: number[], right: number[]): boolean {
+    const leftSet = new Set(left);
+    const rightSet = new Set(right);
 
-    return Array.from(
-        new Set(
-            teams
-                .filter((team) => assignmentTeamIds.has(team.teamId))
-                .flatMap((team) => team.members.map((member) => member.userId))
-        )
-    );
+    if (leftSet.size !== rightSet.size) {
+        return false;
+    }
+
+    return Array.from(leftSet).every((userId) => rightSet.has(userId));
+}
+
+function areSameStringSets(left: string[], right: string[]): boolean {
+    const leftSet = new Set(left);
+    const rightSet = new Set(right);
+
+    if (leftSet.size !== rightSet.size) {
+        return false;
+    }
+
+    return Array.from(leftSet).every((value) => rightSet.has(value));
 }
 
 function toEditTeamSummaries(
@@ -217,6 +225,7 @@ function toEditableTeams(
     return teams
         .filter((team) => assignmentTeamIds.has(team.teamId))
         .map((team) => ({
+            teamClientId: `existing-${team.teamId}`,
             teamId: team.teamId,
             name: team.name,
             members: team.members.map((member) => ({
@@ -639,8 +648,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [name, setName] = React.useState("");
     const [startDate, setStartDate] = React.useState<Date>(stripTime(new Date()));
     const [endDate, setEndDate] = React.useState<Date>(stripTime(new Date()));
-    const [startTime, setStartTime] = React.useState("09:00");
-    const [endTime, setEndTime] = React.useState("18:00");
+    const [startTime, setStartTime] = React.useState("00:00");
+    const [endTime, setEndTime] = React.useState("23:59");
     const [openDatePicker, setOpenDatePicker] = React.useState<"start" | "end" | null>(null);
     const [calendarResetKey, setCalendarResetKey] = React.useState(0);
     const [systemForm, setSystemForm] = React.useState<AssignmentSystemForm>("INDIVIDUAL");
@@ -663,8 +672,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const existingTeamListWrapRef = React.useRef<HTMLDivElement | null>(null);
     const [teamEditModalOpen, setTeamEditModalOpen] = React.useState(false);
     const [editableTeams, setEditableTeams] = React.useState<EditableTeam[]>([]);
-    const [selectedEditableTeamId, setSelectedEditableTeamId] = React.useState<number | null>(null);
+    const [selectedEditableTeamClientId, setSelectedEditableTeamClientId] = React.useState<string | null>(null);
     const [openTeamMemberMenuUserId, setOpenTeamMemberMenuUserId] = React.useState<number | null>(null);
+    const [teamEditAddMemberOpen, setTeamEditAddMemberOpen] = React.useState(false);
+    const [teamEditAddMemberSearch, setTeamEditAddMemberSearch] = React.useState("");
 
     const [openDropdown, setOpenDropdown] = React.useState<DropdownType>(null);
 
@@ -675,6 +686,20 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
     const resultFormDropdownRef = React.useRef<HTMLDivElement | null>(null);
     
+    const isTeamMemberConfigurationLocked =
+        isEditMode &&
+        systemForm === "TEAM" &&
+        editingAssignment?.teamMemberConfigurationLocked === true;
+        
+    const [movingMember, setMovingMember] = React.useState<{
+        sourceTeamClientId: string;
+        userId: number;
+        userName: string;
+    } | null>(null);
+
+    const [moveTargetTeamClientId, setMoveTargetTeamClientId] = React.useState<string | null>(null);
+    const [teamEditSaving, setTeamEditSaving] = React.useState(false);
+
     const [loading, setLoading] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
     const [error, setError] = React.useState("");
@@ -751,7 +776,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                 if (assignmentData.systemForm === "TEAM") {
                     const nextSelectedTeamIds = getAssignmentTeamIds(assignmentData);
-                    const nextSelectedUserIds = getAssignedTeamMemberUserIds(assignmentData, teamData);
+                    const nextSelectedUserIds = assignmentData.assigneeUserIds ?? [];
 
                     setSelectedUserIds(nextSelectedUserIds);
                     setTeamBuildMode("EXISTING");
@@ -874,17 +899,50 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         return toEditTeamSummaries(editingAssignment, existingTeams);
     }, [editingAssignment, existingTeams]);
 
-    const selectedEditableTeam = editableTeams.find((team) => team.teamId === selectedEditableTeamId) ?? null;
-
-    const assignedEditableMemberCount = React.useMemo(() => {
+    const selectedEditableTeam = editableTeams.find((team) => team.teamClientId === selectedEditableTeamClientId) ?? null;
+    const assignedEditableMemberUserIds = React.useMemo(() => {
         return new Set(
             editableTeams.flatMap((team) => team.members.map((member) => member.userId))
-        ).size;
+        );
     }, [editableTeams]);
 
-    const unassignedEditableMemberCount = React.useMemo(() => {
-        return Math.max(selectedUserIds.length - assignedEditableMemberCount, 0);
-    }, [assignedEditableMemberCount, selectedUserIds.length]);
+    const assignedEditableMemberCount = assignedEditableMemberUserIds.size;
+    const unassignedEditableParticipants = React.useMemo(() => {
+        return participants.filter((participant) => (
+            selectedUserIds.includes(participant.userId) &&
+            !assignedEditableMemberUserIds.has(participant.userId)
+        ));
+    }, [assignedEditableMemberUserIds, participants, selectedUserIds]);
+    const unassignedEditableMemberCount = unassignedEditableParticipants.length;
+
+    const filteredUnassignedEditableParticipants = React.useMemo(() => {
+        const keyword = teamEditAddMemberSearch.trim().toLowerCase();
+
+        if (!keyword) return unassignedEditableParticipants;
+
+        return unassignedEditableParticipants.filter((participant) => (
+            participant.name.toLowerCase().includes(keyword) ||
+            participant.schoolName.toLowerCase().includes(keyword) ||
+            (participant.email ?? "").toLowerCase().includes(keyword)
+        ));
+    }, [teamEditAddMemberSearch, unassignedEditableParticipants]);
+
+    const selectedExistingTeamMemberUserIds = React.useMemo(() => {
+        return Array.from(
+            new Set(
+                existingTeams
+                    .filter((team) => selectedExistingTeamIds.includes(team.teamId))
+                    .flatMap((team) => team.members.map((member) => member.userId))
+            )
+        );
+    }, [existingTeams, selectedExistingTeamIds]);
+    const draftTeamMemberUserIds = React.useMemo(() => {
+        return Array.from(
+            new Set(
+                draftTeams.flatMap((team) => team.memberUserIds)
+            )
+        );
+    }, [draftTeams]);
 
     const formValid = React.useMemo(() => {
         if (!name.trim()) return false;
@@ -897,7 +955,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
         if (systemForm === "TEAM") {
             if (teamBuildMode === "EXISTING") {
-                return selectedExistingTeamIds.length > 0;
+                if (selectedExistingTeamIds.length === 0) return false;
+
+                return areSameUserIdSets(
+                    selectedUserIds,
+                    selectedExistingTeamMemberUserIds
+                );
             }
 
             const count = Number(teamCount);
@@ -907,11 +970,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             if (draftTeams.some((team) => !team.name.trim())) return false;
             if (draftTeams.some((team) => team.memberUserIds.length === 0)) return false;
 
-            return true;
+            return areSameUserIdSets(
+                selectedUserIds,
+                draftTeamMemberUserIds
+            );
         }
 
         return false;
-    }, [draftTeams, endDate, name, resultForms.length, selectedExistingTeamIds.length, selectedUserIds.length, startDate, systemForm, teamBuildMode, teamCount]);
+    }, [draftTeams, endDate, name, resultForms.length, selectedExistingTeamIds, selectedExistingTeamMemberUserIds, selectedUserIds, startDate, systemForm, teamBuildMode, teamCount]);
 
     
     function toggleDropdown(type: DropdownType): void {
@@ -976,6 +1042,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }
 
     function openParticipantModal(): void {
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 이 과제의 참여자는 변경할 수 없습니다.");
+            return;
+        }
+
         setOpenDropdown(null);
         setOpenDatePicker(null);
         setParticipantSearch("");
@@ -1179,6 +1250,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             return;
         }
 
+        if (!areSameUserIdSets(selectedUserIds, selectedExistingTeamMemberUserIds)) {
+            window.alert("현재 선택한 과제 참여자와 이전 팀의 팀원이 일치하지 않습니다. 참여자 명단을 다시 확인해주세요.");
+            return;
+        }
+
         setDraftTeams([]);
         setCurrentTeamName("");
         setCurrentTeamMemberIds([]);
@@ -1217,14 +1293,343 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         const nextEditableTeams = toEditableTeams(editingAssignment, existingTeams);
 
         setEditableTeams(nextEditableTeams);
-        setSelectedEditableTeamId(nextEditableTeams[0]?.teamId ?? null);
+        setSelectedEditableTeamClientId(nextEditableTeams[0]?.teamClientId ?? null);
         setOpenTeamMemberMenuUserId(null);
+        setTeamEditAddMemberOpen(false);
+        setTeamEditAddMemberSearch("");
+        setMovingMember(null);
+        setMoveTargetTeamClientId(null);
         setTeamEditModalOpen(true);
     }
 
     function closeTeamEditModal(): void {
         setTeamEditModalOpen(false);
         setOpenTeamMemberMenuUserId(null);
+        setTeamEditAddMemberOpen(false);
+        setTeamEditAddMemberSearch("");
+        setMovingMember(null);
+        setMoveTargetTeamClientId(null);
+    }
+
+    function addEditableTeam(): void {
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 팀을 추가할 수 없습니다.");
+            return;
+        }
+
+        const nextTeam: EditableTeam = {
+            teamClientId: crypto.randomUUID(),
+            teamId: null,
+            name: `새 팀 ${editableTeams.length + 1}`,
+            members: [],
+        };
+
+        setEditableTeams((prev) => [...prev, nextTeam]);
+        setSelectedEditableTeamClientId(nextTeam.teamClientId);
+        setOpenTeamMemberMenuUserId(null);
+        setTeamEditAddMemberOpen(false);
+        setTeamEditAddMemberSearch("");
+    }
+
+    function deleteSelectedEditableTeam(): void {
+        if (!selectedEditableTeam) {
+            return;
+        }
+
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 팀을 삭제할 수 없습니다.");
+            return;
+        }
+
+        if (editableTeams.length <= 1) {
+            window.alert("팀 과제에는 최소 1개의 팀이 필요합니다.");
+            return;
+        }
+
+        const confirmed = window.confirm(`${selectedEditableTeam.name}을(를) 삭제하시겠습니까?`);
+
+        if (!confirmed) {
+            return;
+        }
+
+        const removedTeamHadMembers = selectedEditableTeam.members.length > 0;
+        const nextTeams = editableTeams.filter((team) => team.teamClientId !== selectedEditableTeam.teamClientId);
+
+        setEditableTeams(nextTeams);
+        setSelectedEditableTeamClientId(nextTeams[0]?.teamClientId ?? null);
+        setOpenTeamMemberMenuUserId(null);
+        setTeamEditAddMemberOpen(false);
+        setTeamEditAddMemberSearch("");
+        setMovingMember(null);
+        setMoveTargetTeamClientId(null);
+
+        if (removedTeamHadMembers) {
+            window.alert("삭제한 팀의 팀원은 미배정 상태가 되었습니다. 다른 팀에 다시 배정해주세요.");
+        }
+    }
+
+    async function handleConfirmTeamEdit(): Promise<void> {
+        if (teamEditSaving) return;
+
+        if (!assignmentId || !externalActivityId) {
+            window.alert("과제 또는 대외활동 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        const blankNameTeam = editableTeams.find((team) => !team.name.trim());
+
+        if (blankNameTeam) {
+            window.alert("팀 이름을 입력해주세요.");
+            return;
+        }
+
+        const emptyTeam = editableTeams.find((team) => team.members.length === 0);
+
+        if (emptyTeam) {
+            window.alert("모든 팀에는 최소 1명의 팀원이 필요합니다.");
+            return;
+        }
+
+        const noLeaderTeam = editableTeams.find((team) =>
+            !team.members.some((member) => member.role === "LEADER")
+        );
+
+        if (noLeaderTeam) {
+            window.alert("모든 팀에는 팀장이 필요합니다.");
+            return;
+        }
+
+        if (hasUnassignedEditableParticipants()) {
+            alertUnassignedEditableParticipants();
+            return;
+        }
+
+        setTeamEditSaving(true);
+
+        try {
+            const updatedAssignment = await updateAssignmentTeamConfiguration(assignmentId, {
+                assigneeUserIds: selectedUserIds,
+                teams: editableTeams.map((team) => {
+                    const leader = team.members.find((member) => member.role === "LEADER");
+
+                    return {
+                        teamId: team.teamId,
+                        name: team.name.trim(),
+                        memberUserIds: team.members.map((member) => member.userId),
+                        leaderUserId: leader?.userId ?? null,
+                    };
+                }),
+            });
+
+            const refreshedTeams = await getExternalActivityTeams(externalActivityId);
+
+            setEditingAssignment(updatedAssignment);
+            setExistingTeams(refreshedTeams);
+            setEditableTeams(toEditableTeams(updatedAssignment, refreshedTeams));
+            setTeamCount(String(updatedAssignment.maxAutoTeams ?? editableTeams.length));
+            setSelectedExistingAssignmentId(updatedAssignment.assignmentId);
+            setSelectedExistingTeamIds(getAssignmentTeamIds(updatedAssignment));
+            setOpenTeamMemberMenuUserId(null);
+            setTeamEditAddMemberOpen(false);
+            setTeamEditAddMemberSearch("");
+            setMovingMember(null);
+            setMoveTargetTeamClientId(null);
+            setTeamEditModalOpen(false);
+        } catch (e) {
+            console.error(e);
+
+            const message = e instanceof Error && e.message
+                ? e.message
+                : "팀 구성을 저장하지 못했습니다.";
+
+            window.alert(message);
+        } finally {
+            setTeamEditSaving(false);
+        }
+    }
+
+    function handleChangeTeamLeader(teamClientId: string, userId: number): void {
+        setEditableTeams((prev) =>
+            prev.map((team) => {
+                if (team.teamClientId !== teamClientId) return team;
+
+                return {
+                    ...team,
+                    members: team.members.map((member) => ({
+                        ...member,
+                        role: member.userId === userId ? "LEADER" : "MEMBER",
+                    })),
+                };
+            })
+        );
+
+        setOpenTeamMemberMenuUserId(null);
+    }
+
+    function handleAddEditableTeamMember(
+        teamClientId: string,
+        participant: SelectableParticipant
+    ): void {
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 팀원은 추가할 수 없습니다.");
+            return;
+        }
+
+        const alreadyAssigned = editableTeams.some((team) =>
+            team.members.some((member) => member.userId === participant.userId)
+        );
+
+        if (alreadyAssigned) {
+            window.alert("이미 다른 팀에 배정된 참여자입니다.");
+            return;
+        }
+
+        setEditableTeams((prev) =>
+            prev.map((team) => {
+                if (team.teamClientId !== teamClientId) return team;
+
+                return {
+                    ...team,
+                    members: [
+                        ...team.members,
+                        {
+                            userId: participant.userId,
+                            userName: participant.name,
+                            role: "MEMBER",
+                        },
+                    ],
+                };
+            })
+        );
+
+        setTeamEditAddMemberOpen(false);
+        setTeamEditAddMemberSearch("");
+    }
+
+    function openMoveMemberSelect(teamClientId: string, member: EditableTeamMember): void {
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 팀원은 이동할 수 없습니다.");
+            return;
+        }
+
+        if (member.role === "LEADER") {
+            window.alert("팀장은 바로 이동할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.");
+            return;
+        }
+
+        const firstTargetTeam = editableTeams.find((team) => team.teamClientId !== teamClientId);
+
+        if (!firstTargetTeam) {
+            window.alert("이동할 다른 팀이 없습니다.");
+            return;
+        }
+
+        setMovingMember({
+            sourceTeamClientId: teamClientId,
+            userId: member.userId,
+            userName: member.userName,
+        });
+        setMoveTargetTeamClientId(firstTargetTeam.teamClientId);
+        setOpenTeamMemberMenuUserId(null);
+    }
+
+    function confirmMoveMember(): void {
+        if (!movingMember || !moveTargetTeamClientId) return;
+
+        const sourceTeam = editableTeams.find((team) => team.teamClientId === movingMember.sourceTeamClientId);
+        const movingMemberData = sourceTeam?.members.find((member) => member.userId === movingMember.userId);
+
+        if (!movingMemberData) {
+            window.alert("이동할 팀원 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        setEditableTeams((prev) =>
+            prev.map((team) => {
+                if (team.teamClientId === movingMember.sourceTeamClientId) {
+                    return {
+                        ...team,
+                        members: team.members.filter((member) => member.userId !== movingMember.userId),
+                    };
+                }
+
+                if (team.teamClientId === moveTargetTeamClientId) {
+                    return {
+                        ...team,
+                        members: [
+                            ...team.members,
+                            {
+                                ...movingMemberData,
+                                role: "MEMBER",
+                            },
+                        ],
+                    };
+                }
+
+                return team;
+            })
+        );
+
+        setMovingMember(null);
+        setMoveTargetTeamClientId(null);
+    }
+
+    function handleRemoveEditableTeamMember(
+        teamClientId: string,
+        member: EditableTeamMember
+    ): void {
+        if (isTeamMemberConfigurationLocked) {
+            window.alert("제출물이 존재하여 팀원은 제외할 수 없습니다.");
+            return;
+        }
+
+        const targetTeam = editableTeams.find((team) => team.teamClientId === teamClientId);
+
+        if (!targetTeam) {
+            window.alert("팀 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        if (member.role === "LEADER") {
+            window.alert("팀장은 바로 제외할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.");
+            return;
+        }
+
+        if (targetTeam.members.length <= 1) {
+            window.alert("모든 팀에는 최소 1명의 팀원이 필요합니다.");
+            return;
+        }
+
+        const confirmed = window.confirm(`${member.userName}님을 팀에서 제외하시겠습니까?`);
+
+        if (!confirmed) return;
+
+        const nextEditableTeams = editableTeams.map((team) =>
+            team.teamClientId === teamClientId
+                ? {
+                    ...team,
+                    members: team.members.filter((item) => item.userId !== member.userId),
+                }
+                : team
+        );
+
+        setEditableTeams(nextEditableTeams);
+
+        if (hasUnassignedEditableParticipants(nextEditableTeams)) {
+            alertUnassignedEditableParticipants();
+        }
+    }
+
+    function hasUnassignedEditableParticipants(teams: EditableTeam[] = editableTeams): boolean {
+        const assignedUserIds = new Set(
+            teams.flatMap((team) => team.members.map((member) => member.userId))
+        );
+
+        return selectedUserIds.some((userId) => !assignedUserIds.has(userId));
+    }
+
+    function alertUnassignedEditableParticipants(): void {
+        window.alert("팀이 지정되지 않은 참가자가 있습니다. 팀을 생성하거나 기존 팀에 포함시켜 주세요.");
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
@@ -1240,47 +1645,148 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             return;
         }
 
+        if (!isEditMode) {
+            if (
+                systemForm === "TEAM" &&
+                teamBuildMode === "EXISTING" &&
+                !areSameUserIdSets(selectedUserIds, selectedExistingTeamMemberUserIds)
+            ) {
+                setError("불러온 이전 팀의 전체 팀원이 현재 선택한 과제 참여자와 일치해야 합니다.");
+                return;
+            }
+
+            if (
+                systemForm === "TEAM" &&
+                teamBuildMode === "NEW" &&
+                !areSameUserIdSets(selectedUserIds, draftTeamMemberUserIds)
+            ) {
+                setError("선택한 과제 참여자가 모두 팀에 배정되어야 합니다.");
+                return;
+            }
+
+            setSaving(true);
+            setError("");
+
+            try {
+                const request = {
+                    name: name.trim(),
+                    description: null,
+                    startDate: formatDateForApi(startDate),
+                    endDate: formatDateForApi(endDate),
+                    startTime: formatTimeForApi(startTime),
+                    endTime: formatTimeForApi(endTime),
+                    deadlineAt: formatDateTimeForApi(endDate, endTime),
+                    progressStatus: "UPCOMING" as const,
+                    resultForms,
+                    systemForm,
+                    maxAutoTeams: systemForm === "TEAM" ? Number(teamCount) : null,
+                    assigneeUserIds: selectedUserIds,
+                    teamIds: systemForm === "TEAM" && teamBuildMode === "EXISTING" ? selectedExistingTeamIds : [],
+                    inlineTeams: systemForm === "TEAM" && teamBuildMode === "NEW" ? toInlineTeams() : [],
+                };
+
+                await createAssignment(externalActivityId, request);
+                navigate(-1);
+            } catch (e) {
+                console.error(e);
+                setError("과제를 저장하지 못했습니다.");
+            } finally {
+                setSaving(false);
+            }
+
+            return;
+        }
+
+        if (!assignmentId || !editingAssignment) {
+            setError("수정할 과제 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        if (systemForm === "TEAM") {
+            const currentAssigneeUserIds = editingAssignment.assigneeUserIds ?? [];
+
+            if (!areSameUserIdSets(selectedUserIds, currentAssigneeUserIds)) {
+                setError("팀 과제 참여자 변경은 팀 구성 현황의 수정 버튼에서 팀 배정까지 완료한 뒤 저장해주세요.");
+                return;
+            }
+        }
+
         setSaving(true);
         setError("");
 
         try {
-            const request = {
-                name: name.trim(),
-                description: null,
-                startDate: formatDateForApi(startDate),
-                endDate: formatDateForApi(endDate),
-                startTime: formatTimeForApi(startTime),
-                endTime: formatTimeForApi(endTime),
-                deadlineAt: formatDateTimeForApi(endDate, endTime),
-                progressStatus: "UPCOMING" as const,
-                resultForms,
-                systemForm,
-                maxAutoTeams: systemForm === "TEAM" ? Number(teamCount) : null,
-                assigneeUserIds: systemForm === "INDIVIDUAL" ? selectedUserIds : [],
-                teamIds: systemForm === "TEAM" && teamBuildMode === "EXISTING" ? selectedExistingTeamIds : [],
-                inlineTeams: systemForm === "TEAM" && teamBuildMode === "NEW" ? toInlineTeams() : [],
-            };
+            const nextStartDate = formatDateForApi(startDate);
+            const nextEndDate = formatDateForApi(endDate);
+            const nextStartTime = formatTimeForApi(startTime);
+            const nextEndTime = formatTimeForApi(endTime);
+            const nextDeadlineAt = formatDateTimeForApi(endDate, endTime);
 
-            if (isEditMode) {
-                if (!assignmentId) {
-                    setError("수정할 과제 정보를 찾을 수 없습니다.");
-                    return;
-                }
+            const currentStartTime = editingAssignment.startTime
+                ? formatTimeForApi(parseTimeFromApi(editingAssignment.startTime, startTime))
+                : null;
 
-                await updateAssignment(assignmentId, request);
+            const currentEndTime = editingAssignment.endTime
+                ? formatTimeForApi(parseTimeFromApi(editingAssignment.endTime, endTime))
+                : null;
 
-                navigate(
-                    `/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}`,
-                    { replace: true }
+            const metaChanged =
+                editingAssignment.name !== name.trim() ||
+                !areSameStringSets(editingAssignment.resultForms ?? [], resultForms);
+
+            const scheduleChanged =
+                editingAssignment.startDate !== nextStartDate ||
+                editingAssignment.endDate !== nextEndDate ||
+                currentStartTime !== nextStartTime ||
+                currentEndTime !== nextEndTime ||
+                editingAssignment.deadlineAt !== nextDeadlineAt;
+
+            const individualAssigneesChanged =
+                systemForm === "INDIVIDUAL" &&
+                !areSameUserIdSets(
+                    editingAssignment.assigneeUserIds ?? [],
+                    selectedUserIds
                 );
-                return;
+
+            let latestAssignment = editingAssignment;
+
+            if (individualAssigneesChanged) {
+                latestAssignment = await updateAssignmentAssignees(assignmentId, {
+                    assigneeUserIds: selectedUserIds,
+                });
             }
 
-            await createAssignment(externalActivityId, request);
-            navigate(-1);
+            if (metaChanged) {
+                latestAssignment = await updateAssignmentMeta(assignmentId, {
+                    name: name.trim(),
+                    description: null,
+                    resultForms,
+                });
+            }
+
+            if (scheduleChanged) {
+                latestAssignment = await updateAssignmentSchedule(assignmentId, {
+                    startDate: nextStartDate,
+                    endDate: nextEndDate,
+                    startTime: nextStartTime,
+                    endTime: nextEndTime,
+                    deadlineAt: nextDeadlineAt,
+                });
+            }
+
+            setEditingAssignment(latestAssignment);
+
+            navigate(
+                `/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}`,
+                { replace: true }
+            );
         } catch (e) {
             console.error(e);
-            setError(isEditMode ? "과제를 수정하지 못했습니다." : "과제를 저장하지 못했습니다.");
+
+            const message = e instanceof Error && e.message
+                ? e.message
+                : "과제를 수정하지 못했습니다.";
+
+            setError(message);
         } finally {
             setSaving(false);
         }
@@ -1428,10 +1934,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                 </div>
                             </div>
 
-                            {systemForm === "TEAM" ? (
+                            {systemForm === "TEAM" && !isEditMode ? (
                                 <div>
                                     <label htmlFor="teamCount">
-                                        팀 개수<span>*</span>
+                                        팀 수<span>*</span>
                                     </label>
                                     <input
                                         id="teamCount"
@@ -1533,11 +2039,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     {loading ? <p className="eca-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
 
                     <button type="submit" className="eca-new-assignment-save-button" disabled={!formValid || saving || loading}>
-                        {saving
-                            ? isEditMode
-                                ? "수정 중"
-                                : "저장 중"
-                            : "저장"}
+                        {saving ? isEditMode ? "수정 중" : "저장 중" : "저장"}
                     </button>
                 </form>
             </div>
@@ -1850,7 +2352,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         </div>
                                     ) : null}
                                 </div>
-
+                                <div className="eca-team-created-count">
+                                    <strong>{draftTeams.length}/{Number(teamCount) || 0}</strong>
+                                    <span>팀</span>
+                                </div>
                                 <div className="eca-team-created-tags">
                                     {draftTeams.map((team) => (
                                         <button type="button" key={team.tempId} onClick={() => removeDraftTeam(team.tempId)}>
@@ -1886,12 +2391,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         <div className="eca-team-edit-header">
                             <h3>팀 빌딩 수정</h3>
 
-                            <button
-                                type="button"
-                                className="eca-assignment-participant-modal-close"
-                                onClick={closeTeamEditModal}
-                                aria-label="닫기"
-                            >
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeTeamEditModal} aria-label="닫기" >
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
@@ -1912,6 +2412,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                 <strong>{unassignedEditableMemberCount}명</strong>
                             </div>
                         </div>
+                        {isTeamMemberConfigurationLocked ? (
+                            <p className="eca-assignment-team-edit-lock-guide">
+                                제출물이 존재하여 참여자 및 팀원 구성은 변경할 수 없습니다. 팀명과 팀장은 수정할 수 있습니다.
+                            </p>
+                        ) : null}
 
                         <div className="eca-team-edit-body">
                             <section className="eca-team-edit-left-panel">
@@ -1921,14 +2426,16 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                     {editableTeams.map((team) => (
                                         <button
                                             type="button"
-                                            key={team.teamId}
+                                            key={team.teamClientId}
                                             className={
                                                 "eca-team-edit-team-item" +
-                                                (selectedEditableTeamId === team.teamId ? " is-selected" : "")
+                                                (selectedEditableTeamClientId === team.teamClientId ? " is-selected" : "")
                                             }
                                             onClick={() => {
-                                                setSelectedEditableTeamId(team.teamId);
+                                                setSelectedEditableTeamClientId(team.teamClientId);
                                                 setOpenTeamMemberMenuUserId(null);
+                                                setTeamEditAddMemberOpen(false);
+                                                setTeamEditAddMemberSearch("");
                                             }}
                                         >
                                             {team.name}
@@ -1936,8 +2443,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                     ))}
                                 </div>
 
-                                <button type="button" className="eca-team-edit-add-team-button">
-                                    <span>
+                                <button type="button" className="eca-team-edit-add-team-button" onClick={addEditableTeam}  disabled={isTeamMemberConfigurationLocked} >
+                                        <span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73699 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73699 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
                                         </svg>
@@ -1952,7 +2459,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         <div className="eca-team-edit-selected-team-head">
                                             <h4>{selectedEditableTeam.name}</h4>
 
-                                            <button type="button" className="eca-team-edit-delete-team-button">
+                                            <button type="button" className="eca-team-edit-delete-team-button" onClick={deleteSelectedEditableTeam} disabled={isTeamMemberConfigurationLocked} > 
                                                 팀 삭제
                                             </button>
                                         </div>
@@ -1967,7 +2474,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                                                     setEditableTeams((prev) =>
                                                         prev.map((team) =>
-                                                            team.teamId === selectedEditableTeam.teamId
+                                                            team.teamClientId === selectedEditableTeam.teamClientId
                                                                 ? { ...team, name: nextName }
                                                                 : team
                                                         )
@@ -2008,9 +2515,30 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                                                             {openTeamMemberMenuUserId === member.userId ? (
                                                                 <div className="eca-team-edit-member-menu">
-                                                                    <button type="button">팀장으로 지정</button>
-                                                                    <button type="button">다른 팀으로 이동</button>
-                                                                    <button type="button">팀에서 제외</button>
+                                                                    {member.role !== "LEADER" ? (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleChangeTeamLeader(selectedEditableTeam.teamClientId, member.userId)}
+                                                                        >
+                                                                            팀장으로 지정
+                                                                        </button>
+                                                                    ) : null}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openMoveMemberSelect(selectedEditableTeam.teamClientId, member)}
+                                                                        disabled={isTeamMemberConfigurationLocked}
+                                                                    >
+                                                                        다른 팀으로 이동
+                                                                    </button>
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemoveEditableTeamMember(selectedEditableTeam.teamClientId, member)}
+                                                                        disabled={isTeamMemberConfigurationLocked}
+                                                                    >
+                                                                        팀에서 제외
+                                                                    </button>
                                                                 </div>
                                                             ) : null}
                                                         </div>
@@ -2018,14 +2546,49 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                 ))}
                                             </div>
 
-                                            <button type="button" className="eca-team-edit-add-member-button">
-                                                <span>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                        <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73699 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73699 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
-                                                    </svg>
-                                                </span>
-                                                팀원 추가
-                                            </button>
+                                            <div className="eca-team-edit-add-member-wrap">
+                                                <button
+                                                    type="button"
+                                                    className="eca-team-edit-add-member-button"
+                                                    onClick={() => setTeamEditAddMemberOpen((prev) => !prev)}
+                                                    disabled={isTeamMemberConfigurationLocked}
+                                                >
+                                                    <span>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                            <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73698 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73698 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
+                                                        </svg>
+                                                    </span>
+                                                    팀원 추가
+                                                </button>
+
+                                                {teamEditAddMemberOpen && selectedEditableTeam ? (
+                                                    <div className="eca-team-edit-add-member-dropdown">
+                                                        <input
+                                                            type="text"
+                                                            value={teamEditAddMemberSearch}
+                                                            onChange={(e) => setTeamEditAddMemberSearch(e.target.value)}
+                                                            placeholder="추가할 참가자 검색"
+                                                        />
+
+                                                        <div className="eca-team-edit-add-member-list">
+                                                            {filteredUnassignedEditableParticipants.map((participant) => (
+                                                                <button
+                                                                    type="button"
+                                                                    key={participant.userId}
+                                                                    onClick={() => handleAddEditableTeamMember(selectedEditableTeam.teamClientId, participant)}
+                                                                >
+                                                                    <strong>{participant.name}</strong>
+                                                                    <span>{participant.email ?? participant.schoolName}</span>
+                                                                </button>
+                                                            ))}
+
+                                                            {filteredUnassignedEditableParticipants.length === 0 ? (
+                                                                <p>추가 가능한 참가자가 없습니다.</p>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                ) : null}
+                                            </div>
                                         </div>
                                     </>
                                 ) : (
@@ -2034,13 +2597,52 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                             </section>
                         </div>
 
+                        {movingMember ? (
+                            <div className="eca-team-edit-move-panel">
+                                <strong>{movingMember.userName}님이 이동할 팀을 선택하세요</strong>
+
+                                <div className="eca-team-edit-move-row">
+                                    <select
+                                        value={moveTargetTeamClientId ?? ""}
+                                        onChange={(e) => setMoveTargetTeamClientId(e.target.value || null)}
+                                    >
+                                        {editableTeams
+                                            .filter((team) => team.teamClientId !== movingMember.sourceTeamClientId)
+                                            .map((team) => (
+                                                <option key={team.teamClientId} value={team.teamClientId}>
+                                                    {team.name}
+                                                </option>
+                                            ))}
+                                    </select>
+
+                                    <button
+                                        type="button"
+                                        onClick={confirmMoveMember}
+                                        disabled={!moveTargetTeamClientId || teamEditSaving}
+                                    >
+                                        이동
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setMovingMember(null);
+                                            setMoveTargetTeamClientId(null);
+                                        }}
+                                    >
+                                        취소
+                                    </button>
+                                </div>
+                            </div>
+                        ) : null}
+
                         <div className="eca-team-edit-footer">
-                            <button type="button" className="eca-team-edit-cancel-button" onClick={closeTeamEditModal}>
+                            <button type="button" className="eca-team-edit-cancel-button" onClick={closeTeamEditModal} disabled={teamEditSaving}>
                                 취소
                             </button>
 
-                            <button type="button" className="eca-team-edit-confirm-button" disabled>
-                                확인
+                            <button type="button" className="eca-team-edit-confirm-button" onClick={handleConfirmTeamEdit} disabled={teamEditSaving}>
+                                {teamEditSaving ? "저장 중" : "확인"}
                             </button>
                         </div>
                     </div>

@@ -33,6 +33,8 @@ export type AssignmentResponse = {
     endTime?: string | null;
     deadlineAt: string;
     maxAutoTeams?: number | null;
+    assigneeUserIds: number[];
+    teamMemberConfigurationLocked: boolean;
     participants: AssignmentParticipantResponse[];
 };
 
@@ -70,11 +72,10 @@ export type TeamMemberRequest = {
     role?: TeamRole | null;
 };
 
-export type InlineTeamCreateRequest = {
-    name: string;
-    description?: string | null;
-    memberUserIds: number[];
-    leaderUserId?: number | null;
+export type InlineTeamCreateRequest = TeamCreateRequest;
+
+export type TeamMemberMoveRequest = {
+    targetTeamId: number;
 };
 
 /* - Center 관련 (Student) - */
@@ -532,7 +533,7 @@ export type CreateAssignmentRequest = {
     resultForms: AssignmentResultForm[];
     systemForm: AssignmentSystemForm;
     maxAutoTeams?: number | null;
-    assigneeUserIds?: number[];
+    assigneeUserIds: number[];
     teamIds?: number[];
     inlineTeams?: InlineTeamCreateRequest[];
 };
@@ -568,12 +569,58 @@ export async function getAssignmentSubmissions( // 과제 전체 제출물 조�
     );
 }
 
-export async function updateAssignment(
+export type UpdateAssignmentMetaRequest = {
+    name?: string | null;
+    description?: string | null;
+    progressStatus?: ExternalActivityProgressStatus | null;
+    resultForms?: AssignmentResultForm[] | null;
+    maxAutoTeams?: number | null;
+};
+
+export type UpdateAssignmentScheduleRequest = {
+    startDate: string;
+    endDate: string;
+    startTime?: string | null;
+    endTime?: string | null;
+    deadlineAt?: string | null;
+};
+
+export type UpdateAssignmentAssigneesRequest = {
+    assigneeUserIds: number[];
+};
+
+export async function updateAssignmentMeta(
     assignmentId: number | string,
-    request: CreateAssignmentRequest
+    request: UpdateAssignmentMetaRequest
 ): Promise<AssignmentResponse> {
     return api<AssignmentResponse>(
         `/assignments/${assignmentId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function updateAssignmentSchedule(
+    assignmentId: number | string,
+    request: UpdateAssignmentScheduleRequest
+): Promise<AssignmentResponse> {
+    return api<AssignmentResponse>(
+        `/assignments/${assignmentId}/schedule`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function updateAssignmentAssignees(
+    assignmentId: number | string,
+    request: UpdateAssignmentAssigneesRequest
+): Promise<AssignmentResponse> {
+    return api<AssignmentResponse>(
+        `/assignments/${assignmentId}/assignees`,
         {
             method: "PATCH",
             body: JSON.stringify(request),
@@ -661,7 +708,7 @@ export async function downloadSubmissionZip(
 }
 
 /* - Team 관련 (Admin) - */
-export async function createExternalActivityTeam(
+export async function createExternalActivityTeam( // 대외활동 팀 생성
     externalActivityId: number | string,
     request: TeamCreateRequest
 ): Promise<TeamResponse> {
@@ -674,7 +721,7 @@ export async function createExternalActivityTeam(
     );
 }
 
-export async function getExternalActivityTeams(
+export async function getExternalActivityTeams( // 대외활동 팀 조회
     externalActivityId: number | string
 ): Promise<TeamResponse[]> {
     return api<TeamResponse[]>(
@@ -683,7 +730,32 @@ export async function getExternalActivityTeams(
     );
 }
 
-export async function getTeam(
+export type UpdateAssignmentTeamConfigurationTeamRequest = {
+    teamId: number | null;
+    name: string;
+    memberUserIds: number[];
+    leaderUserId?: number | null;
+};
+
+export type UpdateAssignmentTeamConfigurationRequest = {
+    assigneeUserIds: number[];
+    teams: UpdateAssignmentTeamConfigurationTeamRequest[];
+};
+
+export async function updateAssignmentTeamConfiguration( // 팀 구성 일괄 수정
+    assignmentId: number | string,
+    request: UpdateAssignmentTeamConfigurationRequest
+): Promise<AssignmentResponse> {
+    return api<AssignmentResponse>(
+        `/assignments/${assignmentId}/team-configuration`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getTeam( // 팀 조회
     teamId: number | string
 ): Promise<TeamResponse> {
     return api<TeamResponse>(
@@ -692,7 +764,7 @@ export async function getTeam(
     );
 }
 
-export async function updateTeam(
+export async function updateTeam( // 팀 수정
     teamId: number | string,
     request: TeamUpdateRequest
 ): Promise<TeamResponse> {
@@ -705,7 +777,7 @@ export async function updateTeam(
     );
 }
 
-export async function addTeamMember(
+export async function addTeamMember( // 팀원 추가
     teamId: number | string,
     request: TeamMemberRequest
 ): Promise<TeamResponse> {
@@ -718,7 +790,31 @@ export async function addTeamMember(
     );
 }
 
-export async function removeTeamMember(
+export async function changeTeamLeader(
+    teamId: number | string,
+    userId: number | string
+): Promise<TeamResponse> {
+    return api<TeamResponse>(
+        `/teams/${teamId}/members/${userId}/leader`,
+        { method: "PATCH" }
+    );
+}
+
+export async function moveTeamMember(
+    teamId: number | string,
+    userId: number | string,
+    request: TeamMemberMoveRequest
+): Promise<void> {
+    await api<void>(
+        `/teams/${teamId}/members/${userId}/move`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function removeTeamMember( // 팀원 삭제 
     teamId: number | string,
     userId: number | string
 ): Promise<void> {
@@ -728,7 +824,7 @@ export async function removeTeamMember(
     );
 }
 
-export async function deleteTeam(
+export async function deleteTeam( // 팀 삭제
     teamId: number | string
 ): Promise<void> {
     await api<void>(

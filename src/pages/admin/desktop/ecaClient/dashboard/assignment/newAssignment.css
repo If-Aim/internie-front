@@ -129,8 +129,12 @@
 .eca-team-create-field > input::placeholder { color: #808080; }
 .eca-team-create-error { margin: 12px 0 0 6px; color: #f00; font-size: 13px; font-weight: 600; }
 
+.eca-team-created-count { display: flex; align-items: center; gap: 2px; margin-top: 8px; color: #0166ff; font-size: 12px; font-weight: 700; line-height: 16px; }
+.eca-team-created-count strong { font-size: 12px; font-weight: 700; line-height: 16px; }
+.eca-team-created-count span { font-size: 12px; font-weight: 700; line-height: 16px; }
+
 .eca-team-create-decide-button { width: 62px; height: 40px; border: 0; border-radius: 4px; background: #E3E3E3; color: #808080; font-size: 14px; font-weight: 700; cursor: pointer; }
-.eca-team-created-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.eca-team-created-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .eca-team-created-tags button { display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-width: 82px; height: 30px; padding: 0 7px 0 10px; border: 0; border-radius: 12px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-weight: 700; cursor: pointer; }
 .eca-team-created-tags button span { display: block; max-width: 45px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .eca-team-created-tags button b { display: flex; justify-content: center; align-items: center;}
@@ -247,4 +251,30 @@
 .eca-team-edit-confirm-button { width: 120px; height: 48px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; }
 .eca-team-edit-cancel-button { border: 1px solid #DDD; background: #FFF; color: #000; }
 .eca-team-edit-cancel-button:hover { background: #eee;}
+.eca-team-edit-cancel-button:disabled,
+.eca-team-edit-confirm-button:disabled { cursor: not-allowed;}
 .eca-team-edit-confirm-button { border: 0; background: #E7E7E7; color: #808080; cursor: not-allowed; }
+
+.eca-team-edit-add-member-wrap { position: relative; }
+.eca-team-edit-add-member-button:disabled { background: #F5F5F5; color: #A0A0A0; cursor: not-allowed; }
+.eca-team-edit-add-member-button:disabled svg path { fill: #A0A0A0; }
+
+.eca-team-edit-add-member-dropdown { position: absolute; left: 0; top: calc(100% + 6px); z-index: 50; width: 100%; padding: 12px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-team-edit-add-member-dropdown input { width: 100%; height: 34px; padding: 0 10px; margin-bottom: 10px; border: 1px solid #DDD; border-radius: 4px; outline: none; color: #000; font-size: 13px; box-sizing: border-box; }
+.eca-team-edit-add-member-dropdown input::placeholder { color: #808080; }
+
+.eca-team-edit-add-member-list { max-height: 160px; overflow-y: auto; }
+.eca-team-edit-add-member-list button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 38px; padding: 0 10px; border: 0; background: #FFF; cursor: pointer; box-sizing: border-box; }
+.eca-team-edit-add-member-list button:hover { background: #BDD8FF; }
+.eca-team-edit-add-member-list button strong { min-width: 0; overflow: hidden; color: #000; font-size: 13px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.eca-team-edit-add-member-list button span { flex: 0 0 auto; margin-left: 10px; color: #808080; font-size: 12px; font-weight: 500; }
+.eca-team-edit-add-member-list p { margin: 0; padding: 18px 0; color: #808080; font-size: 13px; font-weight: 500; text-align: center; }
+
+
+.eca-team-edit-move-panel { position: absolute; left: 48px; right: 48px; bottom: 88px; padding: 14px 16px; border: 1px solid #DDD; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, .12); box-sizing: border-box; }
+.eca-team-edit-move-panel strong { display: block; margin-bottom: 10px; color: #000; font-size: 13px; font-weight: 700; }
+.eca-team-edit-move-row { display: flex; align-items: center; gap: 8px; }
+.eca-team-edit-move-row select { flex: 1; height: 34px; padding: 0 10px; border: 1px solid #DDD; border-radius: 4px; outline: none; background: #FFF; color: #000; font-size: 13px; box-sizing: border-box; }
+.eca-team-edit-move-row button { width: 58px; height: 34px; border: 0; border-radius: 4px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-team-edit-move-row button:first-of-type { background: #BDD8FF; color: #0166FF; }
+.eca-team-edit-move-row button:disabled { background: #E7E7E7; color: #A0A0A0; cursor: not-allowed; }
