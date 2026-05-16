@@ -48,8 +48,7 @@
 .eca-home-my-grid::-webkit-scrollbar { width: 0; }
 .eca-home-card-column { min-height: 220px; display: flex; flex-direction: column; gap: 12px; }
 
-.eca-home-my-card { position: relative; height: 96px; padding: 46px 15px 14px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; box-sizing: border-box; }
-.eca-home-my-card:active { cursor: grabbing; }
+.eca-home-my-card { position: relative; height: 96px; padding: 46px 15px 14px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; box-sizing: border-box; cursor: pointer; }
 .eca-home-my-card-title { font-size: 14px; font-weight: 700; line-height: 16px; color: #000; margin: 0;}
 .eca-home-my-card-date { font-size: 10px; font-weight: 500; line-height: 12px; color: #808080; margin: 8px 0 0;}
 .eca-home-card-drag-handle { position: absolute; top: 0; left: 0; width: 100%; height: 40px; cursor: grab; }

@@ -131,7 +131,8 @@ export default function EcaAdminHomePage(): React.ReactElement {
     const [statusMenuActivityId, setStatusMenuActivityId] = React.useState<number | null>(null);
     const [managerPopoverActivityId, setManagerPopoverActivityId] = React.useState<number | null>(null);
     const [draggingActivityId, setDraggingActivityId] = React.useState<number | null>(null);
-    
+    const draggedCardRef = React.useRef(false);
+
     const centerScrollRef = React.useRef<HTMLDivElement | null>(null);
     const managerPopoverRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -290,6 +291,15 @@ export default function EcaAdminHomePage(): React.ReactElement {
         } catch (error) {
             setCenterActivities([]);
         }
+    }
+
+    function handleMyActivityCardClick(activityId: number): void {
+        if (draggedCardRef.current) {
+            draggedCardRef.current = false;
+            return;
+        }
+
+        navigate(`/eca-admin/activities/${activityId}/dashboard`);
     }
 
     interface HomeToolbarProps {
@@ -511,12 +521,21 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 onDrop={() => handleDropToStatus(status)}
                             >
                                 {myActivities.filter((item) => item.status === status).map((item) => (
-                                    <div key={item.id} className="eca-home-my-card">
+                                    <div key={item.id} className="eca-home-my-card" onClick={() => handleMyActivityCardClick(item.id)} > 
                                         <div
                                             className="eca-home-card-drag-handle"
                                             draggable
-                                            onDragStart={() => setDraggingActivityId(item.id)}
-                                            onDragEnd={() => setDraggingActivityId(null)}
+                                            onDragStart={() => {
+                                                draggedCardRef.current = true;
+                                                setDraggingActivityId(item.id);
+                                            }}
+                                            onDragEnd={() => {
+                                                setDraggingActivityId(null);
+
+                                                window.setTimeout(() => {
+                                                    draggedCardRef.current = false;
+                                                }, 0);
+                                            }}
                                         />
 
                                         <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
@@ -533,12 +552,13 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                         </button>
 
                                         {statusMenuActivityId === item.id ? (
-                                            <div className="eca-home-status-menu">
+                                            <div className="eca-home-status-menu" onClick={(e) => e.stopPropagation()} >
                                                 {item.status === "completed" ? (
                                                     <button
                                                         type="button"
                                                         className="eca-home-status-menu-option eca-home-status-menu-option--delayed"
-                                                        onClick={() => {
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             void changeMyActivityCompletion(item.id, false);
                                                         }}
                                                     >
@@ -548,7 +568,8 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                                     <button
                                                         type="button"
                                                         className="eca-home-status-menu-option eca-home-status-menu-option--completed"
-                                                        onClick={() => {
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             void changeMyActivityCompletion(item.id, true);
                                                         }}
                                                     >
