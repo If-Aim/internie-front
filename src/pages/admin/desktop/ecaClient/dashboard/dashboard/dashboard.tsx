@@ -582,7 +582,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                 <article className="eca-dashboard-summary-card">
                     <span>활동 수료율</span>
-                    <strong>60%</strong>
+                    <strong>{assignmentProgressRate}%</strong>
                 </article>
 
                 <article className="eca-dashboard-summary-card">
