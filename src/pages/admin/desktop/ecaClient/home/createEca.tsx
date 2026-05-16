@@ -183,7 +183,7 @@ function CalendarRange({
 
 export default function EcaActivityCreatePage(): React.ReactElement {
     const navigate = useNavigate();
-    const { center } = useOutletContext<EcaClientAdminOutletContext>();
+    const { center, refreshManagedActivities } = useOutletContext<EcaClientAdminOutletContext>();
     const [managers, setManagers] = React.useState<ExternalActivityManager[]>([]);
     const [selectedManagerIds, setSelectedManagerIds] = React.useState<number[]>([]);
     const [participantUserIds, setParticipantUserIds] = React.useState<number[]>([]);
@@ -341,6 +341,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 managerUserIds: selectedManagerIds,
             });
 
+            await refreshManagedActivities();
             navigate("/eca-admin/home");
         } catch (error) {
             setSubmitError("대외활동 생성에 실패했습니다.");

@@ -105,6 +105,7 @@
 .eca-assignment-participant-empty { margin: 0; padding: 28px 0; color: #888; font-size: 14px; font-weight: 600; text-align: center; }
 .eca-assignment-participant-modal-footer { position: absolute; right: 44px; bottom: 32px; display: flex; align-items: center; gap: 10px; }
 .eca-assignment-participant-confirm-button { width: 120px; height: 48px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-assignment-participant-confirm-button:disabled { background: #E3E3E3; color: #808080; cursor: not-allowed; }
 
 .eca-new-assignment-team-build-button { width: 64px; height: 32px; margin-left: 8px; border: 0; border-radius: 4px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-weight: 700; cursor: pointer; }
 .eca-new-assignment-team-build-button:disabled { cursor: not-allowed;  background: #E3E3E3; color: #808080; }
@@ -248,12 +249,11 @@
 .eca-team-edit-add-member-button:hover{background: #eee;}
 .eca-team-edit-footer { position: absolute; right: 54px; bottom: 24px; display: flex; align-items: center; gap: 15px; }
 .eca-team-edit-cancel-button,
-.eca-team-edit-confirm-button { width: 120px; height: 48px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.eca-team-edit-confirm-button { width: 120px; height: 48px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; border: 0; background: #BDD8FF; color: #0166FF; cursor: pointer; }
 .eca-team-edit-cancel-button { border: 1px solid #DDD; background: #FFF; color: #000; }
 .eca-team-edit-cancel-button:hover { background: #eee;}
 .eca-team-edit-cancel-button:disabled,
-.eca-team-edit-confirm-button:disabled { cursor: not-allowed;}
-.eca-team-edit-confirm-button { border: 0; background: #E7E7E7; color: #808080; cursor: not-allowed; }
+.eca-team-edit-confirm-button:disabled { background: #E7E7E7; color: #808080; cursor: not-allowed; }
 
 .eca-team-edit-add-member-wrap { position: relative; }
 .eca-team-edit-add-member-button:disabled { background: #F5F5F5; color: #A0A0A0; cursor: not-allowed; }
@@ -265,7 +265,7 @@
 
 .eca-team-edit-add-member-list { max-height: 160px; overflow-y: auto; }
 .eca-team-edit-add-member-list button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 38px; padding: 0 10px; border: 0; background: #FFF; cursor: pointer; box-sizing: border-box; }
-.eca-team-edit-add-member-list button:hover { background: #BDD8FF; }
+.eca-team-edit-add-member-list button:hover { background: #BDD8FF; border-radius: 10px;}
 .eca-team-edit-add-member-list button strong { min-width: 0; overflow: hidden; color: #000; font-size: 13px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 .eca-team-edit-add-member-list button span { flex: 0 0 auto; margin-left: 10px; color: #808080; font-size: 12px; font-weight: 500; }
 .eca-team-edit-add-member-list p { margin: 0; padding: 18px 0; color: #808080; font-size: 13px; font-weight: 500; text-align: center; }

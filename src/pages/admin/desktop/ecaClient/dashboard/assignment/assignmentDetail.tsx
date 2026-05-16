@@ -244,6 +244,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
     const submittedRows = rows.filter((row) => isSubmittedStatus(row.status));
     const missingRows = rows.filter((row) => isMissingStatus(row.status));
+    const hasSubmittedParticipant = submittedRows.length > 0;
     const totalCount = rows.length;
     const submittedCount = submittedRows.length;
     const missingCount = missingRows.length;
@@ -438,7 +439,10 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                             </button>
                             <button
                                 type="button"
+                                disabled={hasSubmittedParticipant}
                                 onClick={() => {
+                                    if (hasSubmittedParticipant) return;
+
                                     setMenuOpen(false);
                                     navigate(`/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}/edit`);
                                 }}

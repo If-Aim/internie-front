@@ -685,7 +685,9 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     const [participantInputFocused, setParticipantInputFocused] = React.useState(false);
     const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
     const resultFormDropdownRef = React.useRef<HTMLDivElement | null>(null);
-    
+    const teamEditAddMemberWrapRef = React.useRef<HTMLDivElement | null>(null);
+    const teamEditMemberMenuWrapRef = React.useRef<HTMLDivElement | null>(null);
+
     const isTeamMemberConfigurationLocked =
         isEditMode &&
         systemForm === "TEAM" &&
@@ -866,6 +868,39 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             document.removeEventListener("mousedown", handleMouseDown, true);
         };
     }, [openDropdown]);
+
+    React.useEffect(() => {
+        if (!teamEditAddMemberOpen) return;
+
+        function handleMouseDown(e: MouseEvent): void {
+            if (teamEditAddMemberWrapRef.current?.contains(e.target as Node)) return;
+
+            setTeamEditAddMemberOpen(false);
+            setTeamEditAddMemberSearch("");
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown, true);
+        };
+    }, [teamEditAddMemberOpen]);
+
+    React.useEffect(() => {
+        if (openTeamMemberMenuUserId === null) return;
+
+        function handleMouseDown(e: MouseEvent): void {
+            if (teamEditMemberMenuWrapRef.current?.contains(e.target as Node)) return;
+
+            setOpenTeamMemberMenuUserId(null);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown, true);
+        };
+    }, [openTeamMemberMenuUserId]);
     
     const selectedSystemFormLabel = SYSTEM_FORM_OPTIONS.find((option) => option.value === systemForm)?.label ?? "개인";
     const selectedResultForms = RESULT_FORM_OPTIONS.filter((option) => resultForms.includes(option.value));
@@ -894,6 +929,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         requestedTeamCount > 0 &&
         option.teamIds.length === requestedTeamCount
     ));
+    const canConfirmNewTeamBuild =
+        Number.isInteger(requestedTeamCount) &&
+        requestedTeamCount > 0 &&
+        draftTeams.length === requestedTeamCount;
     
     const editTeamSummaries = React.useMemo(() => {
         return toEditTeamSummaries(editingAssignment, existingTeams);
@@ -2038,7 +2077,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     {error ? <p className="eca-new-assignment-error">{error}</p> : null}
                     {loading ? <p className="eca-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
 
-                    <button type="submit" className="eca-new-assignment-save-button" disabled={!formValid || saving || loading}>
+                     <button type="submit" className="eca-new-assignment-save-button" disabled={saving || loading || (!isEditMode && !formValid)} >
                         {saving ? isEditMode ? "수정 중" : "저장 중" : "저장"}
                     </button>
                 </form>
@@ -2377,7 +2416,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                 이전
                             </button>
 
-                            <button type="button" className="eca-assignment-participant-confirm-button" onClick={closeTeamCreateModal} >
+                            <button type="button" className="eca-assignment-participant-confirm-button" onClick={closeTeamCreateModal} disabled={!canConfirmNewTeamBuild}>
                                 확인
                             </button>
                         </div>
@@ -2495,7 +2534,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                             <em>팀장</em>
                                                         ) : null}
 
-                                                        <div className="eca-team-edit-member-more-wrap">
+                                                        <div className="eca-team-edit-member-more-wrap" ref={openTeamMemberMenuUserId === member.userId ? teamEditMemberMenuWrapRef : null}>
                                                             <button
                                                                 type="button"
                                                                 className="eca-team-edit-member-more-button"
@@ -2546,7 +2585,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                 ))}
                                             </div>
 
-                                            <div className="eca-team-edit-add-member-wrap">
+                                            <div className="eca-team-edit-add-member-wrap" ref={teamEditAddMemberWrapRef}>
                                                 <button
                                                     type="button"
                                                     className="eca-team-edit-add-member-button"
@@ -2641,7 +2680,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                 취소
                             </button>
 
-                            <button type="button" className="eca-team-edit-confirm-button" onClick={handleConfirmTeamEdit} disabled={teamEditSaving}>
+                            <button type="button" className="eca-team-edit-confirm-button" onClick={handleConfirmTeamEdit} disabled={teamEditSaving || unassignedEditableMemberCount > 0} >
                                 {teamEditSaving ? "저장 중" : "확인"}
                             </button>
                         </div>
