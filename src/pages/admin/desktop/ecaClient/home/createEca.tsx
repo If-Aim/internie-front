@@ -1,13 +1,20 @@
 import React from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { getClientAdminStudents, type ClientType,} from "../../../../../api/client";
-import { createExternalActivity, getExternalActivityManagers, type ExternalActivityManager } from "../../../../../api/ea";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { createExternalActivity, downloadExternalActivityPlan, getCenterParticipants, getExternalActivity, getExternalActivityManagers, updateExternalActivity, type ExternalActivityManager, type ExternalActivityParticipant, } from "../../../../../api/ea"; 
 import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./createEca.css"; 
+import "././../ecaCalendar.css";
 
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-const CLIENT_TYPE: ClientType = "esg";
 const DEFAULT_MANAGER_PROFILE_IMAGE = "/internie_mascot_normal.png";
+
+type SelectableParticipant = {
+    userId: number;
+    name: string;
+    schoolName: string;
+    email?: string | null;
+    profileImage?: string | null;
+};
 
 function toApiDate(value: string): string {
     return value.replaceAll(".", "-");
@@ -39,6 +46,18 @@ function getMonthGrid(cursor: Date): { month: number; days: Date[] } {
     const days = Array.from({ length: normalizedTotalDays }, (_, index) => new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + index));
 
     return { month, days };
+}
+
+function toSelectableParticipant(participant: ExternalActivityParticipant): SelectableParticipant | null {
+    if (typeof participant.userId !== "number") return null;
+
+    return {
+        userId: participant.userId,
+        name: participant.name ?? "이름 없음",
+        schoolName: participant.schoolName ?? "-",
+        email: participant.email ?? null,
+        profileImage: participant.profileImage ?? null,
+    };
 }
 
 function CalendarRange({
@@ -129,35 +148,35 @@ function CalendarRange({
     };
 
     return (
-        <div className={"cal" + (isSixWeeks ? " cal--6w" : " cal--5w")}>
-            <div className="cal-header">
-                <div className="cal-header-bottom">
-                    <div className="cal-title">{title}</div>
-                    <div className="cal-nav">
-                        <button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="이전 달">
+        <div className={"eca-cal" + (isSixWeeks ? " eca-cal--6w" : " eca-cal--5w")}>
+            <div className="eca-cal-header">
+                <div className="eca-cal-header-bottom">
+                    <div className="eca-cal-title">{title}</div>
+                    <div className="eca-cal-nav">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="이전 달">
                             <img className="icon" src="/icons/Previous (Stroke).svg" alt="" />
                         </button>
-                        <button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="다음 달">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="다음 달">
                             <img className="icon" src="/icons/Next (Stroke).svg" alt="" />
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="cal-body">
-                <div className="cal-week">
+            <div className="eca-cal-body">
+                <div className="eca-cal-week">
                     {WEEK_LABELS.map((w) => (
-                        <div key={w} className="cal-weekday">{w}</div>
+                        <div key={w} className="eca-cal-weekday">{w}</div>
                     ))}
                 </div>
 
-                <div className="cal-grid">
+                <div className="eca-cal-grid">
                     {days.map((d) => {
                         const inMonth = d.getMonth() === month;
                         const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
                         if (!inMonth) {
-                            return <div key={key} className="cal-cell cal-cell--empty" aria-hidden="true" />;
+                            return <div key={key} className="eca-cal-cell eca-cal-cell--empty" aria-hidden="true" />;
                         }
 
                         const day = stripTime(d);
@@ -167,9 +186,9 @@ function CalendarRange({
                         const showRange = !sameDay && (between || isStart || isEnd);
 
                         return (
-                            <div key={key} className={"cal-cell" + (between ? " is-inrange" : "") + (isStart ? " is-start" : "") + (isEnd ? " is-end" : "")}>
-                                {showRange && <div className="cal-range" aria-hidden="true" />}
-                                <button type="button" className={"cal-day" + ((sameDay && isSameDay(day, s)) ? " is-selected" : "") + (isStart || isEnd ? " is-selected" : "")} onClick={() => handlePick(day)}>
+                            <div key={key} className={"eca-cal-cell" + (between ? " is-inrange" : "") + (isStart ? " is-start" : "") + (isEnd ? " is-end" : "")}>
+                                {showRange && <div className="eca-cal-range" aria-hidden="true" />}
+                                <button type="button" className={"eca-cal-day" + ((sameDay && isSameDay(day, s)) ? " is-selected" : "") + (isStart || isEnd ? " is-selected" : "")} onClick={() => handlePick(day)}>
                                     {day.getDate()}
                                 </button>
                             </div>
@@ -183,10 +202,24 @@ function CalendarRange({
 
 export default function EcaActivityCreatePage(): React.ReactElement {
     const navigate = useNavigate();
+    const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const { center, refreshManagedActivities } = useOutletContext<EcaClientAdminOutletContext>();
+
+    const isEditMode = Boolean(externalActivityId);
     const [managers, setManagers] = React.useState<ExternalActivityManager[]>([]);
     const [selectedManagerIds, setSelectedManagerIds] = React.useState<number[]>([]);
     const [participantUserIds, setParticipantUserIds] = React.useState<number[]>([]);
+    const [participants, setParticipants] = React.useState<SelectableParticipant[]>([]);
+    const [participantModalOpen, setParticipantModalOpen] = React.useState(false);
+    const [participantSearch, setParticipantSearch] = React.useState("");
+    const [participantDropdownOpen, setParticipantDropdownOpen] = React.useState(false);
+    const [participantInputFocused, setParticipantInputFocused] = React.useState(false);
+    const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
+
+    const [existingPlanUrl, setExistingPlanUrl] = React.useState<string | null>(null);
+    const [existingPlanOriginalFileName, setExistingPlanOriginalFileName] = React.useState<string | null>(null);
+    const [existingPlanSizeBytes, setExistingPlanSizeBytes] = React.useState<number | null>(null);
+    const [/*pageLoading*/, setPageLoading] = React.useState(false);
 
     const [managerModalOpen, setManagerModalOpen] = React.useState(false);
     const [managerSearch, setManagerSearch] = React.useState("");
@@ -207,33 +240,72 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchInitData(): Promise<void> {
-            if (!center?.centerId) {
-                return;
-            }
+            if (!center?.centerId) return;
+
+            setPageLoading(true);
+            setSubmitError("");
 
             try {
-                const [students, managerUsers] = await Promise.all([
-                    getClientAdminStudents(CLIENT_TYPE),
+                const [students, managerUsers, activityData] = await Promise.all([
+                    getCenterParticipants(center.centerId),
                     getExternalActivityManagers(center.centerId),
+                    isEditMode && externalActivityId
+                        ? getExternalActivity(center.centerId, externalActivityId)
+                        : Promise.resolve(null),
                 ]);
 
-                const participantIds = students
-                    .map((student) => student.userId)
-                    .filter((id): id is number => typeof id === "number");
+                const nextParticipants: SelectableParticipant[] = students
+                    .filter((student) => typeof student.userId === "number")
+                    .map((student) => ({
+                        userId: student.userId,
+                        name: student.name ?? "이름 없음",
+                        schoolName: student.schoolName ?? "-",
+                        email: student.email ?? null,
+                        profileImage: student.profileImage ?? null,
+                    }));
 
                 const nextManagers = managerUsers
                     .filter((manager) => typeof manager.userId === "number");
 
-                setParticipantUserIds(participantIds);
+                setParticipants(nextParticipants);
                 setManagers(nextManagers);
+
+                if (!activityData) {
+                    setParticipantUserIds(nextParticipants.map((participant) => participant.userId));
+                    return;
+                }
+
+                const nextSelectedParticipantIds = (activityData.participants ?? [])
+                    .map(toSelectableParticipant)
+                    .filter((participant): participant is SelectableParticipant => participant !== null)
+                    .map((participant) => participant.userId);
+
+                const nextSelectedManagerIds = (activityData.managers ?? [])
+                    .map((manager) => manager.userId)
+                    .filter((userId): userId is number => typeof userId === "number");
+
+                setActivityName(activityData.name ?? "");
+                setStartDate(activityData.startDate.replaceAll("-", "."));
+                setEndDate(activityData.endDate.replaceAll("-", "."));
+                setParticipantUserIds(nextSelectedParticipantIds);
+                setSelectedManagerIds(nextSelectedManagerIds);
+                setExistingPlanUrl(activityData.activityPlanUrl ?? null);
+                setExistingPlanOriginalFileName(activityData.activityPlanOriginalFileName ?? null);
+                setExistingPlanSizeBytes(activityData.activityPlanSizeBytes ?? null);
             } catch (e) {
                 console.error(e);
-                setSubmitError("초기 데이터를 불러오지 못했습니다.");
+                setSubmitError(
+                    isEditMode
+                        ? "대외활동 정보를 불러오지 못했습니다."
+                        : "초기 데이터를 불러오지 못했습니다."
+                );
+            } finally {
+                setPageLoading(false);
             }
         }
 
         fetchInitData();
-    }, [center?.centerId]);
+    }, [center?.centerId, externalActivityId, isEditMode]);
 
     React.useEffect(() => {
         if (!datePickerTarget) return;
@@ -287,6 +359,69 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         return selectedManagers.map((manager) => `@ ${manager.name}`).join(", ");
     }
 
+    function toggleParticipant(id: number): void {
+        setParticipantUserIds((prev) =>
+            prev.includes(id)
+                ? prev.filter((item) => item !== id)
+                : [...prev, id]
+        );
+
+        setParticipantSearch("");
+    }
+
+    function clearParticipants(): void {
+        setParticipantUserIds([]);
+        setParticipantSearch("");
+    }
+
+    function selectAllParticipants(): void {
+        setParticipantUserIds(participants.map((participant) => participant.userId));
+        setParticipantSearch("");
+    }
+
+    function getSelectedParticipantText(): string {
+        if (participantUserIds.length === 0) return "참여자를 선택하세요";
+
+        const selectedParticipants = participants.filter((participant) =>
+            participantUserIds.includes(participant.userId)
+        );
+
+        if (selectedParticipants.length === 0) return "참여자를 선택하세요";
+        if (selectedParticipants.length === 1) return selectedParticipants[0].name;
+
+        return `${selectedParticipants[0].name} 외 ${selectedParticipants.length - 1}명`;
+    }
+
+    function getSelectedParticipantInputValue(): string {
+        const selectedParticipants = participants.filter((participant) =>
+            participantUserIds.includes(participant.userId)
+        );
+
+        return selectedParticipants.map((participant) => `@ ${participant.name}`).join(", ");
+    }
+
+    function closeParticipantModal(): void {
+        setParticipantSearch("");
+        setParticipantDropdownOpen(false);
+        setParticipantModalOpen(false);
+    }
+
+    function handleParticipantModalMouseDown(e: React.MouseEvent<HTMLDivElement>): void {
+        e.stopPropagation();
+
+        if (!participantDropdownOpen) return;
+        if (participantSearchWrapRef.current?.contains(e.target as Node)) return;
+
+        setParticipantInputFocused(false);
+        setParticipantDropdownOpen(false);
+    }
+
+    const filteredParticipants = participants.filter((participant) =>
+        participant.name.toLowerCase().includes(participantSearch.trim().toLowerCase()) ||
+        participant.schoolName.toLowerCase().includes(participantSearch.trim().toLowerCase()) ||
+        (participant.email ?? "").toLowerCase().includes(participantSearch.trim().toLowerCase())
+    );
+
     const filteredManagers = managers.filter((manager) =>
         manager.name.toLowerCase().includes(managerSearch.trim().toLowerCase())
     );
@@ -294,7 +429,48 @@ export default function EcaActivityCreatePage(): React.ReactElement {
     function handlePlanFileChange(e: React.ChangeEvent<HTMLInputElement>): void {
         const file = e.target.files?.[0] ?? null;
 
+        if (!file) {
+            setPlanFile(null);
+            return;
+        }
+
+        const allowedExtensions = [".pdf", ".doc", ".docx", ".hwp", ".hwpx", ".ppt", ".pptx"];
+        const lowerName = file.name.toLowerCase();
+        const isAllowedExtension = allowedExtensions.some((extension) => lowerName.endsWith(extension));
+        const maxFileSize = 20 * 1024 * 1024;
+
+        if (!isAllowedExtension) {
+            window.alert("PDF, DOC, DOCX, HWP, HWPX, PPT, PPTX 파일만 업로드할 수 있습니다.");
+            e.target.value = "";
+            setPlanFile(null);
+            return;
+        }
+
+        if (file.size > maxFileSize) {
+            window.alert("활동 계획서는 20MB 이하 파일만 업로드할 수 있습니다.");
+            e.target.value = "";
+            setPlanFile(null);
+            return;
+        }
+
         setPlanFile(file);
+    }
+
+    async function handleDownloadExistingPlan(): Promise<void> {
+        if (!center?.centerId || !externalActivityId || !existingPlanUrl) {
+            return;
+        }
+
+        try {
+            await downloadExternalActivityPlan(
+                center.centerId,
+                externalActivityId,
+                existingPlanOriginalFileName
+            );
+        } catch (error) {
+            console.error(error);
+            window.alert("활동 계획서 다운로드에 실패했습니다.");
+        }
     }
 
     async function handleSubmit(): Promise<void> {
@@ -308,18 +484,13 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             return;
         }
 
+        if (participantUserIds.length === 0) {
+            setSubmitError("참여자를 1명 이상 선택해주세요.");
+            return;
+        }
+
         if (selectedManagerIds.length === 0) {
             setSubmitError("담당자를 선택해주세요.");
-            return;
-        }
-
-        if (participantUserIds.length === 0) {
-            setSubmitError("참여 학생 목록을 불러오지 못했습니다.");
-            return;
-        }
-
-        if (!planFile) {
-            setSubmitError("활동 계획서를 업로드해주세요.");
             return;
         }
 
@@ -327,24 +498,38 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             setSubmitError("센터 정보를 불러오지 못했습니다.");
             return;
         }
+
         setSubmitting(true);
         setSubmitError("");
 
         try {
-            await createExternalActivity(center.centerId, {
+            const request = {
                 name: activityName.trim(),
                 description: null,
                 startDate: toApiDate(startDate),
                 endDate: toApiDate(endDate),
-                activityPlanUrl: null,
                 participantUserIds,
                 managerUserIds: selectedManagerIds,
-            });
+            };
+
+            if (isEditMode && externalActivityId) {
+                await updateExternalActivity( center.centerId, externalActivityId, request, planFile );
+                await refreshManagedActivities();
+                navigate(`/eca-admin/activities/${externalActivityId}/dashboard`);
+                return;
+            }
+
+            await createExternalActivity(center.centerId, request, planFile );
 
             await refreshManagedActivities();
             navigate("/eca-admin/home");
         } catch (error) {
-            setSubmitError("대외활동 생성에 실패했습니다.");
+            console.error(error);
+            setSubmitError(
+                isEditMode
+                    ? "대외활동 수정에 실패했습니다."
+                    : "대외활동 생성에 실패했습니다."
+            );
         } finally {
             setSubmitting(false);
         }
@@ -390,7 +575,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 <section className="eca-create-header">
                     <h1>{center?.name ?? ""}</h1>
                     <div className="eca-create-title-row">
-                        <h2>대외활동 생성</h2>
+                        <h2>{isEditMode ? "대시보드 수정" : "대외활동 생성"}</h2>
                         <button type="button" className="eca-create-temp-button" disabled>임시저장</button>
                     </div>
                 </section>
@@ -477,6 +662,28 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                             </div>
                         </div>
 
+                        {isEditMode ? (
+                            <div className="eca-create-field eca-create-field--participant">
+                                <span>참여자 명단<b>*</b></span>
+
+                                <button
+                                    type="button"
+                                    className={"eca-create-participant-box" + (participantUserIds.length > 0 ? " is-filled" : "")}
+                                    onClick={() => setParticipantModalOpen(true)}
+                                >
+                                    <span className="eca-create-participant-placeholder">
+                                        {getSelectedParticipantText()}
+                                    </span>
+
+                                    <span className="eca-create-participant-head">
+                                        <span className="eca-create-participant-button-text">
+                                            편집
+                                        </span>
+                                    </span>
+                                </button>
+                            </div>
+                        ) : null}
+            
                         <div className="eca-create-field eca-create-field--manager">
                             <span>담당자 지정<b>*</b></span>
 
@@ -494,7 +701,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                         </div>
 
                         <div className="eca-create-field">
-                            <span>활동 계획서<b>*</b></span>
+                            <span>활동 계획서</span>
 
                             <input
                                 ref={planFileInputRef}
@@ -504,13 +711,35 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                                 accept=".pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx"
                             />
 
-                            <button
-                                type="button"
-                                className={"eca-create-upload-button" + (planFile ? " is-filled" : "")}
-                                onClick={() => planFileInputRef.current?.click()}
-                            >
-                                {planFile ? planFile.name : "업로드 하기"}
-                            </button>
+                            <div className="eca-create-plan-actions">
+                                <button
+                                    type="button"
+                                    className={"eca-create-upload-button" + (planFile || existingPlanUrl ? " is-filled" : "")}
+                                    onClick={() => planFileInputRef.current?.click()}
+                                >
+                                    {planFile
+                                        ? planFile.name
+                                        : existingPlanOriginalFileName
+                                            ? existingPlanOriginalFileName
+                                            : "업로드 하기"}
+                                </button>
+
+                                {isEditMode && existingPlanUrl ? (
+                                    <button
+                                        type="button"
+                                        className="eca-create-plan-download-button"
+                                        onClick={handleDownloadExistingPlan}
+                                    >
+                                        다운로드
+                                    </button>
+                                ) : null}
+                            </div>
+
+                            {isEditMode && existingPlanUrl && existingPlanSizeBytes !== null ? (
+                                <small className="eca-create-plan-meta">
+                                    기존 파일 · {Math.ceil(existingPlanSizeBytes / 1024)}KB
+                                </small>
+                            ) : null}
                         </div>
                     </div>
 
@@ -524,6 +753,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                     </div>
                 </section>
             </div>
+
             {managerModalOpen ? (
                 <div className="eca-manager-modal-backdrop" onMouseDown={closeManagerModal}>
                     <div className="eca-manager-modal" onMouseDown={handleManagerModalMouseDown}>
@@ -607,6 +837,91 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                     </div>
                 </div>
             ) : null}
+            {participantModalOpen ? (
+                <div className="eca-manager-modal-backdrop" onMouseDown={closeParticipantModal}>
+                    <div className="eca-manager-modal" onMouseDown={handleParticipantModalMouseDown}>
+                        <div className="eca-manager-modal-header">
+                            <h3>참여자 명단</h3>
+
+                            <button type="button" className="eca-manager-modal-close" onClick={closeParticipantModal} aria-label="닫기">
+                                <img src="/icons/x-01.svg" alt="" />
+                            </button>
+                        </div>
+
+                        <div className="eca-manager-modal-body">
+                            <strong className="eca-manager-modal-title">참여자를 선택하세요</strong>
+
+                            <div className="eca-manager-search-wrap" ref={participantSearchWrapRef}>
+                                <input
+                                    type="text"
+                                    value={participantInputFocused ? participantSearch : getSelectedParticipantInputValue()}
+                                    onFocus={() => {
+                                        setParticipantInputFocused(true);
+                                        setParticipantSearch("");
+                                        setParticipantDropdownOpen(true);
+                                    }}
+                                    onBlur={() => {
+                                        setParticipantInputFocused(false);
+                                    }}
+                                    onChange={(e) => {
+                                        setParticipantSearch(e.target.value);
+                                        setParticipantDropdownOpen(true);
+                                    }}
+                                    placeholder="@ 참여자A"
+                                />
+
+                                {participantDropdownOpen ? (
+                                    <div className="eca-manager-dropdown">
+                                        <div className="eca-manager-dropdown-top">
+                                            <span>{participantUserIds.length}명 / {participants.length}명</span>
+
+                                            <div className="eca-manager-dropdown-actions">
+                                                <button type="button" onClick={clearParticipants}>초기화</button>
+                                                <button type="button" onClick={selectAllParticipants}>전체선택</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="eca-manager-dropdown-list">
+                                            {filteredParticipants.map((participant) => {
+                                                const checked = participantUserIds.includes(participant.userId);
+
+                                                return (
+                                                    <label key={participant.userId} className={"eca-manager-option" + (checked ? " is-selected" : "")}>
+                                                        <input type="checkbox" checked={checked} onChange={() => toggleParticipant(participant.userId)} />
+
+                                                        <img
+                                                            className="eca-manager-avatar"
+                                                            src={participant.profileImage || DEFAULT_MANAGER_PROFILE_IMAGE}
+                                                            alt=""
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = DEFAULT_MANAGER_PROFILE_IMAGE;
+                                                            }}
+                                                        />
+
+                                                        <strong>{participant.name}</strong>
+                                                        <small>{participant.email ?? "-"}</small>
+                                                    </label>
+                                                );
+                                            })}
+
+                                            {filteredParticipants.length === 0 ? (
+                                                <p className="eca-manager-empty">검색 결과가 없습니다.</p>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+
+                        <div className="eca-manager-modal-footer">
+                            <button type="button" className="eca-manager-confirm-button" onClick={closeParticipantModal}>
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
         </>
     );
 }

@@ -293,13 +293,12 @@ export async function getMyTeam(
     );
 }
 
-
+/* - EA 관련 (Admin) - */
 export type CreateExternalActivityRequest = {
     name: string;
     description?: string | null;
     startDate: string;
     endDate: string;
-    activityPlanUrl?: string | null;
     participantUserIds: number[];
     managerUserIds: number[];
 };
@@ -338,6 +337,8 @@ export type ExternalActivityResponse = {
     startDate: string;
     endDate: string;
     activityPlanUrl?: string | null;
+    activityPlanOriginalFileName?: string | null;
+    activityPlanSizeBytes?: number | null;
     progressStatus: ExternalActivityProgressStatus;
 };
 
@@ -361,28 +362,48 @@ export type ExternalActivitiesByStatusResponse = {
 
 export async function createExternalActivity( // 대외활동 생성
     centerId: number | string,
-    request: CreateExternalActivityRequest
+    request: CreateExternalActivityRequest,
+    planFile?: File | null
 ): Promise<ExternalActivityResponse> {
-    return api<ExternalActivityResponse>(
+    const formData = new FormData();
+
+    formData.append(
+        "meta",
+        new Blob([JSON.stringify(request)], { type: "application/json" })
+    );
+
+    if (planFile) {
+        formData.append("planFile", planFile);
+    }
+
+    return apiUpload<ExternalActivityResponse>(
         `/centers/${centerId}/externalActivities`,
-        {
-            method: "POST",
-            body: JSON.stringify(request),
-        }
+        formData,
+        { method: "POST" }
     );
 }
 
 export async function updateExternalActivity( // 대외활동 수정
     centerId: number | string,
     externalActivityId: number | string,
-    request: UpdateExternalActivityRequest
+    request: UpdateExternalActivityRequest,
+    planFile?: File | null
 ): Promise<ExternalActivityResponse> {
-    return api<ExternalActivityResponse>(
+    const formData = new FormData();
+
+    formData.append(
+        "meta",
+        new Blob([JSON.stringify(request)], { type: "application/json" })
+    );
+
+    if (planFile) {
+        formData.append("planFile", planFile);
+    }
+
+    return apiUpload<ExternalActivityResponse>(
         `/centers/${centerId}/externalActivities/${externalActivityId}`,
-        {
-            method: "PATCH",
-            body: JSON.stringify(request),
-        }
+        formData,
+        { method: "PATCH" }
     );
 }
 
@@ -516,6 +537,24 @@ export async function getMyManagedExternalActivitiesByStatus( //나의 대외활
 
     return api<ExternalActivitiesByStatusResponse>(
         `/users/me/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+/* - Center 관련 (Admin) - */
+export type CenterParticipantResponse = {
+    userId: number;
+    name?: string | null;
+    email?: string | null;
+    schoolName?: string | null;
+    profileImage?: string | null;
+};
+
+export async function getCenterParticipants(
+    centerId: number | string
+): Promise<CenterParticipantResponse[]> {
+    return api<CenterParticipantResponse[]>(
+        `/centers/${centerId}/participants`,
         { method: "GET" }
     );
 }
@@ -659,6 +698,23 @@ function saveBlob(blob: Blob, fileName: string): void {
     anchor.remove();
 
     window.URL.revokeObjectURL(objectUrl);
+}
+
+export async function downloadExternalActivityPlan( // 활동 계획서 다운
+    centerId: number | string,
+    externalActivityId: number | string,
+    fileName?: string | null
+): Promise<void> {
+    const blob = await apiBlob(
+        `/centers/${centerId}/externalActivities/${externalActivityId}/plan/download`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fileName?.trim()
+        ? sanitizeDownloadName(fileName)
+        : `activity-plan-${externalActivityId}`;
+
+    saveBlob(blob, safeFileName);
 }
 
 export async function downloadSubmissionFile( // 개별 과제 다운

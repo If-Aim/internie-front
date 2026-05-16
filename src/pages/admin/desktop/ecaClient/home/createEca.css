@@ -3,7 +3,7 @@
 .eca-create-header h1 { display: none; }
 .eca-create-title-row { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 42px; box-sizing: border-box; }
 .eca-create-title-row h2 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1.5; }
-.eca-create-temp-button { width: 116px; height: 46px; border: 0; border-radius: 10px; background: #DDD; color: #777; font-size: 16px; font-weight: 700; cursor: pointer; }
+.eca-create-temp-button { width: 116px; height: 46px; border: 0; border-radius: 10px; background: #DDD; color: #777; font-size: 16px; font-weight: 700; cursor: not-allowed; }
 
 .eca-create-card { width: 100%; min-height: 640px; padding: 64px 38px 52px 56px; border: 1px solid #DDD; border-radius: 18px; background: #FFF; box-sizing: border-box; }
 .eca-create-step-bars, .eca-create-step-text { display: none; }
@@ -24,26 +24,6 @@
 .eca-create-date-button img { width: 24px; height: 24px; flex: 0 0 24px; display: block; }
 .eca-create-date-separator { color: #777; font-size: 18px; font-weight: 700; width: 20px; text-align: center;}
 .eca-create-calendar-popover { position: absolute; top: 34px; left: 144px; z-index: 50; width: 240px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); box-sizing: border-box; }
-
-.cal { position: relative; width: 240px; padding: 25px 21px 28px 25px; box-sizing: border-box; }
-.cal-header { margin-bottom: 1px; }
-.cal-header-bottom { display: flex; align-items: center; justify-content: space-between; }
-.cal-title { color: #000; font-size: 14px; font-weight: 700; margin-left: 4px;}
-.cal-nav { display: flex; align-items: center; gap: 10px; }
-.cal-nav-btn { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.cal-nav-btn .icon { width: auto; height: 9px; display: block; }
-.cal-body { width: 100%; }
-.cal-week { display: grid; grid-template-columns: repeat(7, 24px); column-gap: 4px; margin-bottom: 4px; }
-.cal-weekday { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: #333; font-size: 12px; font-weight: 500; text-align: center; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 24px); column-gap: 4px; row-gap: 4px; }
-.cal-cell { position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; min-width:24px;}
-.cal-cell--empty { pointer-events: none; }
-.cal-day { position: relative; z-index: 2; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #666; font-size: 10px; font-weight: 500; cursor: pointer; }
-.cal-day.is-selected { background: var(--primary); color: #fff; }
-.cal-range { position: absolute; top: 50%; left: -2px; right: -2px; height: 24px; background: rgba(1, 102, 255, 0.1); transform: translateY(-50%); }
-.cal-cell.is-start .cal-range { left: 50%; right: -2px; }
-.cal-cell.is-end .cal-range { left: -2px; right: 50%; }
-.cal-cell.is-start.is-end .cal-range { display: none; }
 
 .eca-create-manager-box { width: 100%; height: 40px; max-width: 360px; padding: 0; border: 1px solid #DDD; border-radius: 4px; background: #FFF; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; overflow: hidden; cursor: pointer; }
 .eca-create-manager-placeholder { min-width: 0; padding-left: 9px; overflow: hidden; color: #808080; font-size: 13px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
@@ -79,12 +59,24 @@
 .eca-manager-option:hover{ background: #BDD8FF; }
 .eca-manager-option input { width: 20px; height: 20px; margin: 0; accent-color: #0166FF; border: 1px solid #D9D9D9; cursor: pointer; }
 .eca-manager-avatar { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #D9D9D9; object-fit: contain;}
-.eca-manager-option strong { color: #000; font-size: 20px; font-weight: 500; }
+.eca-manager-option strong { color: #000; font-size: 20px; font-weight: 500; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eca-manager-option:hover strong { color: #0166FF; }
 .eca-manager-option small { color: #777; font-size: 13px; font-weight: 600; text-align: right; }
 .eca-manager-empty { margin: 0; padding: 28px 0; color: #888; font-size: 14px; font-weight: 600; text-align: center; }
 .eca-manager-modal-footer { position: absolute; right: 44px; bottom: 32px; display: flex; align-items: center; gap: 10px; }
 .eca-manager-confirm-button { width: 122px; height: 48px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 16px; font-weight: 900; cursor: pointer; }
+
+.eca-create-field--participant { margin-top: 20px; }
+.eca-create-participant-box { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 360px; height: 40px; padding: 0; border: 1px solid #DDD; border-radius: 4px; background: #FFF; box-sizing: border-box; overflow: hidden; cursor: pointer; }
+.eca-create-participant-placeholder { min-width: 0; padding-left: 9px; overflow: hidden; color: #808080; font-size: 13px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.eca-create-participant-box.is-filled .eca-create-participant-placeholder { color: #000; }
+.eca-create-participant-head { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; margin: 0 7px 0 8px; }
+.eca-create-participant-button-text { width: 64px; height: 24px; border: 0; border-radius: 4px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; line-height: 24px; text-align: center; }
+
+.eca-create-plan-actions { display: flex; align-items: center; gap: 8px; }
+.eca-create-plan-download-button { flex: 0 0 auto; height: 40px; padding: 0 14px; border: 1px solid #BDD8FF; border-radius: 4px; background: #FFF; color: #0166FF; font-size: 13px; font-weight: 700; cursor: pointer; box-sizing: border-box; }
+.eca-create-plan-download-button:hover { background: #F4F8FF; }
+.eca-create-plan-meta { display: block; margin-top: 6px; color: #808080; font-size: 12px; font-weight: 500; }
 
 .eca-create-selected-managers { display: none; }
 

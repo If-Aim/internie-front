@@ -4,6 +4,7 @@ import { createAssignment, getAssignment, getExternalActivity, getExternalActivi
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse, } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./newAssignment.css";
+import "./../../ecaCalendar.css";
 
 type DropdownType = "systemForm" | "resultForm" | null;
 
@@ -285,14 +286,14 @@ function CalendarTimeUnitSelect({
     onChange: (value: string) => void;
 }): React.ReactElement {
     return (
-        <div className="cal-time-unit-select">
-            <button type="button" className="cal-time-unit-button" onClick={onToggle}>
+        <div className="eca-cal-time-unit-select">
+            <button type="button" className="eca-cal-time-unit-button" onClick={onToggle}>
                 <strong>{value}</strong>
                 <span>{label}</span>
             </button>
 
             {open ? (
-                <div className="cal-time-unit-menu">
+                <div className="eca-cal-time-unit-menu">
                     {options.map((option) => (
                         <button type="button" key={option} className={value === option ? "is-selected" : ""} onClick={() => onChange(option)} >
                             {option}
@@ -469,35 +470,35 @@ function CalendarRange({
     }
 
     return (
-        <div ref={calendarRef} className={"cal" + (isSixWeeks ? " cal--6w" : " cal--5w") + (showTime ? " cal--with-time" : "")}>
-            <div className="cal-header">
-                <div className="cal-header-bottom">
-                    <div className="cal-title">{title}</div>
-                    <div className="cal-nav">
-                        <button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="이전 달">
+        <div ref={calendarRef} className={"eca-cal" + (isSixWeeks ? " eca-cal--6w" : " eca-cal--5w") + (showTime ? " cal--with-time" : "")}>
+            <div className="eca-cal-header">
+                <div className="eca-cal-header-bottom">
+                    <div className="eca-cal-title">{title}</div>
+                    <div className="eca-cal-nav">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="이전 달">
                             <img className="icon" src="/icons/Previous (Stroke).svg" alt="" />
                         </button>
-                        <button type="button" className="cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="다음 달">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="다음 달">
                             <img className="icon" src="/icons/Next (Stroke).svg" alt="" />
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="cal-body">
-                <div className="cal-week">
+            <div className="eca-cal-body">
+                <div className="eca-cal-week">
                     {WEEK_LABELS.map((w) => (
-                        <div key={w} className="cal-weekday">{w}</div>
+                        <div key={w} className="eca-cal-weekday">{w}</div>
                     ))}
                 </div>
 
-                <div className="cal-grid">
+                <div className="eca-cal-grid">
                     {days.map((d) => {
                         const inMonth = d.getMonth() === month;
                         const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
                         if (!inMonth) {
-                            return <div key={key} className="cal-cell cal-cell--empty" aria-hidden="true" />;
+                            return <div key={key} className="eca-cal-cell eca-cal-cell--empty" aria-hidden="true" />;
                         }
 
                         const day = stripTime(d);
@@ -507,9 +508,9 @@ function CalendarRange({
                         const showRange = !sameDay && (between || isStart || isEnd);
 
                         return (
-                            <div key={key} className={"cal-cell" + (between ? " is-inrange" : "") + (isStart ? " is-start" : "") + (isEnd ? " is-end" : "")}>
-                                {showRange && <div className="cal-range" aria-hidden="true" />}
-                                <button type="button" className={"cal-day" + ((sameDay && isSameDay(day, s)) ? " is-selected" : "") + (isStart || isEnd ? " is-selected" : "")} onClick={() => handlePick(day)}>
+                            <div key={key} className={"eca-cal-cell" + (between ? " is-inrange" : "") + (isStart ? " is-start" : "") + (isEnd ? " is-end" : "")}>
+                                {showRange && <div className="eca-cal-range" aria-hidden="true" />}
+                                <button type="button" className={"eca-cal-day" + ((sameDay && isSameDay(day, s)) ? " is-selected" : "") + (isStart || isEnd ? " is-selected" : "")} onClick={() => handlePick(day)}>
                                     {day.getDate()}
                                 </button>
                             </div>
@@ -519,14 +520,14 @@ function CalendarRange({
             </div>
 
             {showTime ? (
-                <div className="cal-time-panel">
-                    <div className="cal-time-icon" aria-label="시간 선택">
+                <div className="eca-cal-time-panel">
+                    <div className="eca-cal-time-icon" aria-label="시간 선택">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path d="M10.64 11.76L11.76 10.64L8.8 7.68V4H7.2V8.32L10.64 11.76ZM8 16C6.89333 16 5.85333 15.79 4.88 15.37C3.90667 14.95 3.06 14.38 2.34 13.66C1.62 12.94 1.05 12.0933 0.63 11.12C0.21 10.1467 0 9.10667 0 8C0 6.89333 0.21 5.85333 0.63 4.88C1.05 3.90667 1.62 3.06 2.34 2.34C3.06 1.62 3.90667 1.05 4.88 0.63C5.85333 0.21 6.89333 0 8 0C9.10667 0 10.1467 0.21 11.12 0.63C12.0933 1.05 12.94 1.62 13.66 2.34C14.38 3.06 14.95 3.90667 15.37 4.88C15.79 5.85333 16 6.89333 16 8C16 9.10667 15.79 10.1467 15.37 11.12C14.95 12.0933 14.38 12.94 13.66 13.66C12.94 14.38 12.0933 14.95 11.12 15.37C10.1467 15.79 9.10667 16 8 16ZM8 14.4C9.77333 14.4 11.2833 13.7767 12.53 12.53C13.7767 11.2833 14.4 9.77333 14.4 8C14.4 6.22667 13.7767 4.71667 12.53 3.47C11.2833 2.22333 9.77333 1.6 8 1.6C6.22667 1.6 4.71667 2.22333 3.47 3.47C2.22333 4.71667 1.6 6.22667 1.6 8C1.6 9.77333 2.22333 11.2833 3.47 12.53C4.71667 13.7767 6.22667 14.4 8 14.4Z" fill="#808080"/>
                         </svg>
                     </div>
 
-                     <span className="cal-time-label">{timeLabel}</span>
+                     <span className="eca-cal-time-label">{timeLabel}</span>
 
                     <CalendarTimeUnitSelect
                         label="시"

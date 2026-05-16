@@ -18,6 +18,7 @@ export default function EcaClientAdminApp(): React.ReactElement {
                 <Route index element={<Navigate to="home" replace />} />
                 <Route path="home" element={<EcaHomePage />} />
                 <Route path="activities/new" element={<EcaActivityCreatePage />} />
+                <Route path="activities/:externalActivityId/edit" element={<EcaActivityCreatePage />} />
                 <Route path="activities/:externalActivityId" element={<Navigate to="dashboard" replace />} />
                 <Route path="activities/:externalActivityId/dashboard" element={<EcaDashboardDashboard />} />
                 <Route path="activities/:externalActivityId/assignment" element={<EcaDashboardAssignment />} />

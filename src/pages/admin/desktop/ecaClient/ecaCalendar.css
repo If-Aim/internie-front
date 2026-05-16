@@ -1,0 +1,19 @@
+.eca-cal { position: relative; width: 240px; padding: 25px 21px 28px 25px; box-sizing: border-box; }
+.eca-cal-header { margin-bottom: 1px; }
+.eca-cal-header-bottom { display: flex; align-items: center; justify-content: space-between; }
+.eca-cal-title { margin-left: 4px; color: #000; font-size: 14px; font-weight: 700; }
+.eca-cal-nav { display: flex; align-items: center; gap: 10px; }
+.eca-cal-nav-btn { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-cal-nav-btn .icon { display: block; width: auto; height: 9px; }
+.eca-cal-body { width: 100%; }
+.eca-cal-week { display: grid; grid-template-columns: repeat(7, 24px); column-gap: 4px; margin-bottom: 4px; }
+.eca-cal-weekday { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: #333; font-size: 12px; font-weight: 500; text-align: center; }
+.eca-cal-grid { display: grid; grid-template-columns: repeat(7, 24px); column-gap: 4px; row-gap: 4px; }
+.eca-cal-cell { position: relative; display: flex; align-items: center; justify-content: center; width: 24px; min-width: 24px; height: 24px; }
+.eca-cal-cell--empty { pointer-events: none; }
+.eca-cal-day { position: relative; z-index: 2; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #666; font-size: 10px; font-weight: 500; cursor: pointer; }
+.eca-cal-day.is-selected { background: var(--primary); color: #fff; }
+.eca-cal-range { position: absolute; top: 50%; left: -2px; right: -2px; height: 24px; background: rgba(1, 102, 255, 0.1); transform: translateY(-50%); }
+.eca-cal-cell.is-start .eca-cal-range { left: 50%; right: -2px; }
+.eca-cal-cell.is-end .eca-cal-range { left: -2px; right: 50%; }
+.eca-cal-cell.is-start.is-end .eca-cal-range { display: none; }
