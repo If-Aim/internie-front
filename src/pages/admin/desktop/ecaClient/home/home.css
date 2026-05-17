@@ -69,7 +69,7 @@
 
 .eca-home-center-scroll { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 25px; }
 .eca-home-center-scroll::-webkit-scrollbar{width:0; height:5px;}
-.eca-home-center-card { position: relative; min-width: 180px; height: 160px; padding: 51px 15px 0; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; }
+.eca-home-center-card { position: relative; min-width: 180px; height: 160px; padding: 51px 15px 0; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; cursor: pointer; }
 .eca-home-center-card h3 { margin: 0 0 8px; color: #000; font-size: 14px; font-weight: 700; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eca-home-center-card .eca-home-status { min-width: 0; height: 20px; padding: 0 8px; font-size: 9px; margin-bottom: 10px; }
 .eca-home-center-card p { margin: 0 0 8px; color: #777; font-size: 12px; font-weight: 500; line-height: 12px; white-space: nowrap; }

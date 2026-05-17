@@ -83,6 +83,7 @@ function formatRoleChip(role: string): string {
     if (role === "ROLE_JUMP_STUDENT") return "JUMP 상생지락";
     if (role === "ROLE_KAKAO_STUDENT") return "소셜벤처창업";
     if (role === "ROLE_ESG_STUDENT") return "용산";
+    if (role === "ROLE_COMPANY") return "기업 회원";
     if (role === "ROLE_STUDENT") return "학생";
     return role.replace(/^ROLE_/, "");
 }
@@ -190,7 +191,7 @@ function matchQuery(user: AdminUser, query: string): boolean {
 
     const name = getDisplayName(user).toLowerCase();
     const primaryText = getStudentMetaPrimaryText(user).toLowerCase();
-    const roles = normalizeRoleSet(user).map((role) => formatRoleLabel(role).toLowerCase());
+    const roles = normalizeRoleSet(user).map((role) => formatRoleChip(role).toLowerCase());
 
     return name.includes(q) || primaryText.includes(q) || roles.some((role) => role.includes(q));
 }
@@ -389,7 +390,7 @@ export default function AdminReportsPage(): React.ReactElement {
 
 		for (const user of users) {
 			for (const role of normalizeRoleSet(user)) {
-				if (role === "ROLE_STUDENT" || role === "ROLE_JUMP_STUDENT"  || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ) {
+				if (role === "ROLE_STUDENT" || role === "ROLE_COMPANY" || role === "ROLE_JUMP_STUDENT"  || role === "ROLE_KAKAO_STUDENT" || role === "ROLE_ESG_STUDENT" || role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ) {
 					set.add(role);
 				}
 			}
@@ -1131,7 +1132,7 @@ export default function AdminReportsPage(): React.ReactElement {
                         {filtered.map((user, idx) => {
 							const isSelected = user.userId === selectedId;
 							const chips = normalizeRoleSet(user).filter((role) => {
-                                return isAdminRole(role) || isStudentRole(role);
+                                return isAdminRole(role) || isStudentRole(role) || role === "ROLE_COMPANY";
                             });
 
 							return (
@@ -1151,6 +1152,7 @@ export default function AdminReportsPage(): React.ReactElement {
 												className={[
                                                     "admin-report-chip",
                                                     role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ? "is-admin" : "is-student",
+                                                    role === "ROLE_COMPANY" ? "is-company" : role === "ROLE_ADMIN" || role === "ROLE_JUMP_ADMIN" || role === "ROLE_KAKAO_ADMIN" || role === "ROLE_ESG_ADMIN" ? "is-admin" : "is-student",
                                                     role === "ROLE_JUMP_ADMIN" || role === "ROLE_JUMP_STUDENT" ? "is-jump" : "",
                                                     role === "ROLE_KAKAO_ADMIN" || role === "ROLE_KAKAO_STUDENT" ? "is-kakao" : "",
                                                     role === "ROLE_ESG_ADMIN" || role === "ROLE_ESG_STUDENT" ? "is-esg" : "",

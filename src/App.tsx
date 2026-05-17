@@ -12,7 +12,7 @@ const FindId = lazy(() => import("./pages/auth/findId"))
 const ResetPassword = lazy(() => import("./pages/auth/resetPassword"))
 const KakaoCallback = lazy(() => import("./pages/kakaoCallback"));
 const PrivacyPolicy = lazy(() => import("./pages/privacy/privacyPolicy"))
-const OnBoarding = lazy(() => import("./pages/auth/mobile/onBoarding"));
+const OnBoarding = lazy(() => import("./pages/auth/onboarding"));
 
 const StudentApp = lazy(() => import("./pages/student/studentApp"));
 const AdminApp = lazy(() => import("./pages/admin/adminApp"));

@@ -731,6 +731,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         : Promise.resolve(null),
                 ]);
 
+                if (activityData.manageableByMe === false) {
+                    window.alert("해당 대외활동의 관리 권한이 없습니다.");
+                    navigate(`/eca-admin/activities/${externalActivityId}/dashboard`, { replace: true });
+                    return;
+                }
+
                 const nextParticipants = (activityData.participants ?? [])
                     .map(toSelectableParticipant)
                     .filter((participant): participant is SelectableParticipant => participant !== null);
@@ -808,7 +814,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         fetchPageData();
-    }, [assignmentId, center?.centerId, centerLoading, externalActivityId, isEditMode]);
+    }, [assignmentId, center?.centerId, centerLoading, externalActivityId, isEditMode, navigate]);
 
     React.useEffect(() => {
         function handleMouseDown(e: MouseEvent): void {

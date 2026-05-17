@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, sendMyEmailCode, verifyMyEmailCode } from "../../../api/client";
+import { ApiError, getUserMe, verifyClientUser, getMyJumpOrganizations, submitMyOnboarding, type JumpOrganization, } from "../../../api/client";
 import { useTranslation } from "react-i18next";
-import "./onBoarding.css"
+import "./onboarding.css"
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4 ;
+type MemberType = "STUDENT" | "COMPANY";
 
 type FormState = {
-    email: string;
-    emailCode: string;
     name: string;
+    memberType: MemberType;
     studentNumber: string;
     interestJob: string;
     interestCompany: string;
@@ -21,16 +21,14 @@ type FormState = {
 };
 
 
-export default function OnBoarding(): React.ReactElement {
+export default function MobileOnboarding(): React.ReactElement {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [step, setStep] = React.useState<Step>(1);
-    const ENABLE_EMAIL_VERIFICATION = false; // 이메일인증은 아직 숨김
 
     const [form, setForm] = React.useState<FormState>({
-        email:"",
-        emailCode:"",
         name: "",
+        memberType: "STUDENT",
         studentNumber: "",
         interestJob: "",
         interestCompany: "",
@@ -42,13 +40,6 @@ export default function OnBoarding(): React.ReactElement {
 
     const [submitting, setSubmitting] = React.useState(false);
     const [codeError, setCodeError] = React.useState<string | null>(null);
-
-
-    // 이메일 인증
-    const [emailSending, setEmailSending] = React.useState(false);
-    const [emailVerifying, setEmailVerifying] = React.useState(false);
-    const [emailSentMessage, setEmailSentMessage] = React.useState<string | null>(null);
-    const [emailError, setEmailError] = React.useState<string | null>(null);
 
     // ROLE 검증
     const [verifiedRoleSet, setVerifiedRoleSet] = React.useState<string[] | null>(null);
@@ -90,7 +81,7 @@ export default function OnBoarding(): React.ReactElement {
                 setForm((p) => ({
                     ...p,
                     name: (me.name ?? "").trim(),
-                    email: (me.email ?? "").trim(),
+                    memberType: Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_COMPANY") ? "COMPANY" : "STUDENT",
                     studentNumber: (me.studentNumber ?? "").trim(),
                     jumpOrganizationId: me.jumpOrganization?.id ?? null,
                     jumpOrganizationName: me.jumpOrganization?.name ?? "",
@@ -127,98 +118,23 @@ export default function OnBoarding(): React.ReactElement {
         return () => document.removeEventListener("mousedown", onDocDown);
     }, [instOpen]);
 
-    function next() {
-        setStep((s) => (s < 5 ? ((s + 1) as Step) : s));
+    function finishNameStep(): void {
+        if (!form.name.trim()) {
+            return;
+        }
+
+        setStep(2);
     }
 
-    function goToNameStep() { // 이메일 인증 숨김용
-        setStep(ENABLE_EMAIL_VERIFICATION ? 3 : 4);
+    function finishInterestStep(): void {
+        setStep(3);
     }
 
     // function back() { 
     //     setStep((s) => (s > 1 ? ((s - 1) as Step) : s));
     // }  추후 필요 시 사용  ("이전") 버튼용
 
-    async function submitSendEmailCode() {
-        const email = form.email.trim();
-        if (!email) {
-            setEmailError("이메일을 입력해주세요.");
-            return;
-        }
-        setEmailSending(true);
-        setEmailError(null);
-        setEmailSentMessage(null);
-        try {
-            const res = await sendMyEmailCode(email);
-
-            if (res.status === "EXISTING_ACCOUNT_FOUND") {
-                alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
-                localStorage.removeItem("accessToken");
-                navigate("/login", { replace: true });
-                return;
-            }
-
-            setEmailSentMessage(`${res.maskedEmail}로 인증코드를 발송했습니다.`);
-        } catch (e) {
-            if (e instanceof ApiError) {
-                setEmailError("인증코드 발송에 실패했습니다.");
-                return;
-            }
-            setEmailError("이메일 전송 중 오류가 발생했습니다.");
-        } finally {
-            setEmailSending(false);
-        }
-    }
-
-    async function submitVerifyEmailCode() {
-        const email = form.email.trim();
-        const code = form.emailCode.trim();
-        if (!email) {
-            setEmailError("이메일을 입력해주세요."); // TODO: 이메일 인증 번호 전송 시 남은시간과 함께 로딩하는듯한 버튼 애니메이션 추가
-            return;
-        }
-        if (!code) {
-            setEmailError("인증코드를 입력해주세요.");
-            return;
-        }
-        setEmailVerifying(true);
-        setEmailError(null);
-        try {
-            const res = await verifyMyEmailCode(email, code);
-
-            if (res.existingAccountFound) {
-                alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
-                localStorage.removeItem("accessToken");
-                navigate("/login", { replace: true });
-                return;
-            }
-
-            if (!res.verified) {
-                setEmailError("이메일 인증에 실패했습니다.");
-                return;
-            }
-
-            setStep(4);
-        } catch (e) {
-            if (e instanceof ApiError) {
-                if (e.code === "AUTH_EXISTING_ACCOUNT") {
-                    alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
-                    localStorage.removeItem("accessToken");
-                    navigate("/login", { replace: true });
-                    return;
-                }
-
-                setEmailError("인증코드가 올바르지 않거나 만료되었습니다.");
-                return;
-            }
-            setEmailError("이메일 인증 중 오류가 발생했습니다.");
-        } finally {
-            setEmailVerifying(false);
-        }
-    }
-
-
-    function skipVerify() {
+    async function skipVerify(): Promise<void> {
         setCodeError(null);
         setVerifiedRoleSet(null);
         setInstitutions([]);
@@ -229,10 +145,15 @@ export default function OnBoarding(): React.ReactElement {
             jumpOrganizationId: null,
             jumpOrganizationName: "",
         }));
-        goToNameStep(); // setStep(3); 이메일 인증X
+
+        await finishOnboarding();
     }
 
-    async function submitVerifyCode() {
+    async function submitVerifyCode(): Promise<void> {
+        if (form.memberType === "COMPANY") {
+            return;
+        }
+
         const code = form.verifyCode.trim();
 
         if (!code) {
@@ -268,16 +189,17 @@ export default function OnBoarding(): React.ReactElement {
             }
 
             if ((hasJumpRole && !hasJumpOrganization) || (hasKakaoRole && !hasStudentNumber)) {
-                setStep(2);
+                setStep(4);
                 return;
             }
 
-            goToNameStep();
+            await finishOnboarding();
         } catch (e) {
             if (e instanceof ApiError) {
                 setCodeError("인증 코드가 올바르지 않습니다.");
                 return;
             }
+
             setCodeError("인증 중 오류가 발생했습니다.");
         } finally {
             setSubmitting(false);
@@ -293,7 +215,7 @@ export default function OnBoarding(): React.ReactElement {
         setInstOpen(false);
     }
 
-    function finishStep2() {
+    async function finishFollowupStep(): Promise<void> {
         if (needsJumpOrganization && !form.jumpOrganizationId) {
             return;
         }
@@ -302,36 +224,110 @@ export default function OnBoarding(): React.ReactElement {
             return;
         }
 
-        goToNameStep();
+        await finishOnboarding();
     }
 
-    async function finishOnboarding() {
+    async function finishOnboarding(): Promise<void> {
         try {
             await submitMyOnboarding({
                 name: form.name.trim(),
-                ...(isKakaoVerified ? { studentNumber: form.studentNumber.trim() } : {}),
-                ...(isJumpVerified ? { jumpOrganizationId: form.jumpOrganizationId } : {}),
-                ...(form.interestJob.trim() ? { interestJob: form.interestJob.trim() } : {}),
-                ...(form.interestCompany.trim() ? { interestCompany: form.interestCompany.trim() } : {}),
+                userType: form.memberType,
+
+                ...(form.memberType === "STUDENT" && isKakaoVerified
+                    ? { studentNumber: form.studentNumber.trim() }
+                    : {}),
+                ...(form.memberType === "STUDENT" && isJumpVerified
+                    ? { jumpOrganizationId: form.jumpOrganizationId }
+                    : {}),
+                ...(form.memberType === "STUDENT" && form.interestJob.trim()
+                    ? { interestJob: form.interestJob.trim() }
+                    : {}),
+                ...(form.memberType === "STUDENT" && form.interestCompany.trim()
+                    ? { interestCompany: form.interestCompany.trim() }
+                    : {}),
             });
+
             navigate("/student", { replace: true });
         } catch {
             alert("온보딩 저장에 실패했습니다.");
         }
     }
 
-    const canGoStep1 = form.verifyCode.trim().length > 0;
-    const canGoStep2 =
+    const canGoStep1 = form.name.trim().length > 0;
+    const canGoStep2 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
+    const canGoStep3 = form.verifyCode.trim().length > 0;
+    const canGoStep4 =
         (!needsJumpOrganization || form.jumpOrganizationId != null) &&
         (!needsStudentNumber || form.studentNumber.trim().length > 0);
-    const canGoStep3 = form.email.trim().length > 0 && form.emailCode.trim().length > 0;
-    const canGoStep4 = form.name.trim().length > 0;
-    const canGoStep5 = form.interestJob.trim().length > 0 || form.interestCompany.trim().length > 0;
 
     return (
         <div className="ob-step">
             <div className="ob-content">
                 {step === 1 && (
+                    <>
+                        <h1 className="ob-title">{t("onboarding.step1Title")}</h1>
+
+                        <div className="ob-field">
+                            <input
+                                className="ob-input"
+                                value={form.name}
+                                onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                                placeholder={t("onboarding.namePlaceholder")}
+                                autoComplete="name"
+                            />
+                        </div>
+
+                        <span className="ob-alert">{t("onboarding.nameAlert")}</span>
+
+                        <div className="ob-member-type">
+                            <span className="ob-member-type-title">회원 유형</span>
+
+                            <div className="ob-member-type-grid">
+                                <button
+                                    type="button"
+                                    className={`ob-member-type-btn ${form.memberType === "STUDENT" ? "is-active" : ""}`}
+                                    onClick={() => setForm((p) => ({ ...p, memberType: "STUDENT" }))}
+                                >
+                                    학생
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className={`ob-member-type-btn ${form.memberType === "COMPANY" ? "is-active" : ""}`}
+                                    onClick={() => setForm((p) => ({ ...p, memberType: "COMPANY" }))}
+                                >
+                                    기업
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {step === 2 && (
+                    <>
+                        <h1 className="ob-title">{t("onboarding.step2Title")}</h1>
+
+                        <div className="ob-field ob-field--icon">
+                            <input
+                                className="ob-input"
+                                value={form.interestJob}
+                                onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
+                                placeholder={t("onboarding.interestJobPlaceholder")}
+                            />
+                        </div>
+
+                        <div className="ob-field ob-field--icon">
+                            <input
+                                className="ob-input"
+                                value={form.interestCompany}
+                                onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
+                                placeholder={t("onboarding.interestCompanyPlaceholder")}
+                            />
+                        </div>
+                    </>
+                )}
+
+                {step === 3 && (
                     <>
                         <h1 className="ob-title">{t("onboarding.step3Title")}</h1>
 
@@ -341,8 +337,16 @@ export default function OnBoarding(): React.ReactElement {
                                 value={form.verifyCode}
                                 onChange={(e) => setForm((p) => ({ ...p, verifyCode: e.target.value }))}
                                 placeholder={t("onboarding.verifyCodePlaceholder")}
+                                disabled={form.memberType === "COMPANY"}
                             />
                         </div>
+
+                        {form.memberType === "COMPANY" && (
+                            <div className="ob-info">
+                                기업 회원 인증코드는 아직 적용되지 않았습니다. 건너뛰기를 선택해주세요.
+                            </div>
+                        )}
+
                         {hasTriedVerify && verifiedMessages.length > 0 && (
                             <div className="ob-info">
                                 {verifiedMessages.map((msg, idx) => (
@@ -350,12 +354,12 @@ export default function OnBoarding(): React.ReactElement {
                                 ))}
                             </div>
                         )}
+
                         {codeError && <div className="ob-error">{codeError}</div>}
                     </>
                 )}
 
-                {/* JUMP */}
-                {step === 2 && (
+                {step === 4 && (
                     <>
                         {shouldShowJumpOrganization && (
                             <>
@@ -419,120 +423,50 @@ export default function OnBoarding(): React.ReactElement {
                     </>
                 )}
 
-                {ENABLE_EMAIL_VERIFICATION && step === 3 && (
-                    <>
-                        <h1 className="ob-title">이메일 인증</h1>
-                        <div className="ob-field">
-                            <input
-                                className="ob-input"
-                                value={form.email}
-                                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                                placeholder="이메일을 입력해주세요"
-                                autoComplete="email"
-                            />
-                        </div>
-                        <div className="ob-field">
-                            <button className="ob-btn ob-btn--ghost" onClick={submitSendEmailCode} disabled={emailSending} type="button">
-                                인증코드 받기
-                            </button>
-                        </div>
-                        <div className="ob-field">
-                            <input
-                                className="ob-input"
-                                value={form.emailCode}
-                                onChange={(e) => setForm((p) => ({ ...p, emailCode: e.target.value }))}
-                                placeholder="인증코드를 입력해주세요"
-                            />
-                        </div>
-                        {emailSentMessage && <div className="ob-info">{emailSentMessage}</div>}
-                        {emailError && <div className="ob-error">{emailError}</div>}
-                    </>
-                )}
-
-                {step === 4 && (
-                    <>
-                        <h1 className="ob-title">{t("onboarding.step1Title")}</h1>
-                        <div className="ob-field">
-                            <input
-                            className="ob-input"
-                            value={form.name}
-                            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                            placeholder={t("onboarding.namePlaceholder")}
-                            autoComplete="name"
-                            />
-                        </div>
-                        <span className="ob-alert">{t("onboarding.nameAlert")}</span>
-                    </>
-                )}
-
-                {step === 5 && (
-                    <>
-                        <h1 className="ob-title">{t("onboarding.step2Title")}</h1>
-
-                        <div className="ob-field ob-field--icon">
-                            <input
-                                className="ob-input"
-                                value={form.interestJob}
-                                onChange={(e) => setForm((p) => ({ ...p, interestJob: e.target.value }))}
-                                placeholder={t("onboarding.interestJobPlaceholder")}
-                            />
-                        </div>
-
-                        <div className="ob-field ob-field--icon">
-                            <input
-                                className="ob-input"
-                                value={form.interestCompany}
-                                onChange={(e) => setForm((p) => ({ ...p, interestCompany: e.target.value }))}
-                                placeholder={t("onboarding.interestCompanyPlaceholder")}
-                            />
-                        </div>
-                    </>
-                )}
             </div>
 
             <div className="ob-footer"> {/* 각 step별 하단 버튼 */}
-   
                 {step === 1 && (
+                    <button className="ob-btn ob-btn--primary" onClick={finishNameStep} disabled={!canGoStep1} type="button">
+                        {t("onboarding.next")}
+                    </button>
+                )}
+
+                {step === 2 && (
+                    <>
+                        {!canGoStep2 ? (
+                            <button className="ob-btn ob-btn--ghost" onClick={finishInterestStep} type="button">
+                                {t("onboarding.skip")}
+                            </button>
+                        ) : (
+                            <button className="ob-btn ob-btn--primary" onClick={finishInterestStep} type="button">
+                                {t("onboarding.next")}
+                            </button>
+                        )}
+                    </>
+                )}
+
+                {step === 3 && (
                     <>
                         <button className="ob-btn ob-btn--ghost" onClick={skipVerify} type="button">
                             {t("onboarding.skip")}
                         </button>
-                        <button className="ob-btn ob-btn--primary" onClick={submitVerifyCode} disabled={submitting || !canGoStep1} type="button">
+
+                        <button
+                            className="ob-btn ob-btn--primary"
+                            onClick={submitVerifyCode}
+                            disabled={form.memberType === "COMPANY" || submitting || !canGoStep3}
+                            type="button"
+                        >
                             {t("onboarding.next")}
                         </button>
                     </>
                 )}
 
-                {step === 2 && (
-                    <button className="ob-btn ob-btn--primary" onClick={finishStep2} disabled={!canGoStep2} type="button">
-                        {t("onboarding.next")}
-                    </button>
-                )}
-                
-                {ENABLE_EMAIL_VERIFICATION && step === 3 && (
-                    <button className="ob-btn ob-btn--primary" onClick={submitVerifyEmailCode} disabled={emailVerifying || !canGoStep3} type="button">
-                        {t("onboarding.finish")}
-                    </button>
-                )}
-
                 {step === 4 && (
-                    <button className="ob-btn ob-btn--primary" onClick={next} disabled={!canGoStep4} type="button">
-                        {t("onboarding.next")}
+                    <button className="ob-btn ob-btn--primary" onClick={finishFollowupStep} disabled={!canGoStep4} type="button">
+                        {t("common.done")}
                     </button>
-                )}
-                
-                {step === 5 && (
-                    <>
-                        {!canGoStep5 ?(
-                            <button className="ob-btn ob-btn--ghost" onClick={finishOnboarding} type="button">
-                                {t("onboarding.skip")}
-                            </button>   
-                        ):(
-                            <button className="ob-btn ob-btn--primary" onClick={finishOnboarding} disabled={!canGoStep5} type="button">
-                                {t("common.done")}
-                            </button>
-                        )}
-                    </>
                 )}
             </div>
         </div>

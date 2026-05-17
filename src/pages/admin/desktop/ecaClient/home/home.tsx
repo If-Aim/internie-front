@@ -302,6 +302,10 @@ export default function EcaAdminHomePage(): React.ReactElement {
         navigate(`/eca-admin/activities/${activityId}/dashboard`);
     }
 
+    function handleCenterActivityCardClick(activityId: number): void {
+        navigate(`/eca-admin/activities/${activityId}/dashboard`);
+    }
+
     interface HomeToolbarProps {
         selectedStatuses: ActivityStatus[];
         selectedYear: string;
@@ -645,8 +649,8 @@ export default function EcaAdminHomePage(): React.ReactElement {
                         <div className="eca-home-empty">데이터가 없습니다</div>
                     ) : (
                         centerActivities.map((item) => (
-                            <div key={item.id} className="eca-home-center-card">
-                                <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
+                            <div key={item.id} className="eca-home-center-card" onClick={() => handleCenterActivityCardClick(item.id)} >
+                                    <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
                                 <h3>{item.title}</h3>
                                 <p>{item.date}</p>
                                 <div className="eca-home-center-manager-row">

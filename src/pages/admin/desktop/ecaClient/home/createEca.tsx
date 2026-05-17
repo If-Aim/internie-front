@@ -254,6 +254,12 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                         : Promise.resolve(null),
                 ]);
 
+                if (isEditMode && activityData?.manageableByMe === false) {
+                    window.alert("해당 대외활동의 관리 권한이 없습니다.");
+                    navigate(`/eca-admin/activities/${externalActivityId}/dashboard`, { replace: true });
+                    return;
+                }
+
                 const nextParticipants: SelectableParticipant[] = students
                     .filter((student) => typeof student.userId === "number")
                     .map((student) => ({
@@ -305,7 +311,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         }
 
         fetchInitData();
-    }, [center?.centerId, externalActivityId, isEditMode]);
+    }, [center?.centerId, externalActivityId, isEditMode, navigate]);
 
     React.useEffect(() => {
         if (!datePickerTarget) return;

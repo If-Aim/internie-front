@@ -691,34 +691,45 @@ export type JumpOrganization = {
     id: number;
     name: string;
 };
+export type OnboardingUserType = "STUDENT" | "COMPANY";
+
 export type SubmitOnboardingInput = {
     name?: string | null;
-	studentNumber?: string | null;
+    userType?: OnboardingUserType | null;
+
+    studentNumber?: string | null;
     interestJob?: string | null;
     interestCompany?: string | null;
     jumpOrganizationId?: number | null;
+
+    companyName?: string | null;
+    departmentName?: string | null;
 };
+
 export type UserBase = {
-	userId: number;
-	email: string | null,
-	emailVerified: boolean | null,
-	name?: string | null;
-	kakaoName?: string | null;
+    userId: number;
+    email: string | null;
+    emailVerified: boolean | null;
+    name?: string | null;
+    kakaoName?: string | null;
 
-	nickname: string | null;
-	profileImage: string | null;
-	verificationImage: string | null;
-	roleSet: string[];
-	status: string;
+    nickname: string | null;
+    profileImage: string | null;
+    verificationImage: string | null;
+    roleSet: string[];
+    status: string;
     rejectionReason?: string | null;
-	school: UserSchool | null;
+    school: UserSchool | null;
 
-	studentNumber?: string | null;
+    studentNumber?: string | null;
 
-	interestJob?: string | null;
+    interestJob?: string | null;
     interestCompany?: string | null;
-	jumpOrganization?: JumpOrganization | null;
 
+    companyName?: string | null;
+    departmentName?: string | null;
+
+    jumpOrganization?: JumpOrganization | null;
 };
 
 export type SubmitOnboardingResponse = UserBase;
@@ -932,15 +943,22 @@ export async function submitMyOnboarding(
     const studentNumber = (input.studentNumber ?? "").trim();
     const interestJob = (input.interestJob ?? "").trim();
     const interestCompany = (input.interestCompany ?? "").trim();
+    const companyName = (input.companyName ?? "").trim();
+    const departmentName = (input.departmentName ?? "").trim();
 
     const payload: SubmitOnboardingInput = {
         ...(input.name != null ? { name } : {}),
+        ...(input.userType != null ? { userType: input.userType } : {}),
+
         ...(input.studentNumber != null ? { studentNumber } : {}),
         ...(input.interestJob != null ? { interestJob } : {}),
         ...(input.interestCompany != null ? { interestCompany } : {}),
         ...(input.jumpOrganizationId != null && !Number.isNaN(Number(input.jumpOrganizationId))
             ? { jumpOrganizationId: Number(input.jumpOrganizationId) }
             : {}),
+
+        ...(input.companyName != null ? { companyName } : {}),
+        ...(input.departmentName != null ? { departmentName } : {}),
     };
 
     return api<SubmitOnboardingResponse>("/users/me/onboarding", {

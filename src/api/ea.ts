@@ -340,6 +340,7 @@ export type ExternalActivityResponse = {
     activityPlanOriginalFileName?: string | null;
     activityPlanSizeBytes?: number | null;
     progressStatus: ExternalActivityProgressStatus;
+    manageableByMe: boolean;
 };
 
 export type ExternalActivitiesByStatusQuery = {

@@ -190,7 +190,8 @@ export default function EcaDashboardAssignment(): React.ReactElement {
     const upcomingCount = assignments.filter((assignment) => assignment.status === "upcoming").length;
     const ongoingCount = assignments.filter((assignment) => assignment.status === "ongoing").length;
     const completedCount = assignments.filter((assignment) => assignment.status === "completed").length;
-
+    
+    const isReadOnly = activity?.manageableByMe === false;
     const filteredAssignments = assignments.filter((assignment) => {
         const normalizedKeyword = keyword.trim().toLowerCase();
         const matchesKeyword = !normalizedKeyword || assignment.name.toLowerCase().includes(normalizedKeyword);
@@ -283,10 +284,12 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                                 </div>
                             ) : null}
                         </div>
-
-                        <button type="button" className="eca-assignment-icon-button" aria-label="과제 생성" onClick={moveToCreateAssignment} >
-                            <img src="/icons/plus-01-a0.svg" alt="" />
-                        </button>
+                        
+                        {!isReadOnly ? (
+                            <button type="button" className="eca-assignment-icon-button" aria-label="과제 생성" onClick={moveToCreateAssignment} >
+                                <img src="/icons/plus-01-a0.svg" alt="" />
+                            </button>
+                        ) : null}
 
                         <div className="eca-assignment-search-wrap">
                             <button type="button" className="eca-assignment-icon-button" aria-label="검색" onClick={() => { setSearchOpen((prev) => !prev); setFilterOpen(false); }}>
