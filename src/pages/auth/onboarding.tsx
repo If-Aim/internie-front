@@ -1,5 +1,5 @@
 import React from "react";
-import MobileOnboarding from "./mobile/onboarding";
+import MobileOnboarding from "./mobile/onboarding"; 
 import DesktopOnboarding from "./desktop/onboarding";
 
 function useIsDesktop(): boolean {
