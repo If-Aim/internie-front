@@ -846,22 +846,16 @@ export async function selectMySchool(input: SelectMySchoolInput): Promise<Select
 export type ApplyVerificationResponse = UserBase;
 
 export async function applyMyVerification(
-	file: File
+    file: File
 ): Promise<ApplyVerificationResponse> {
-	const userId = getUserIdFromAccessToken();
+    const formData = new FormData();
+    formData.append("verificationImage", file);
 
-	if (!userId) {
-		throw new ApiError(401, "로그인 정보에서 userId를 찾을 수 없습니다.");
-	}
-
-	const formData = new FormData();
-	formData.append("verificationImage", file); 
-
-	return apiUpload<ApplyVerificationResponse>(
-		`/users/${userId}/apply-verification`,
-		formData,
-		{ method: "POST" }
-	);
+    return apiUpload<ApplyVerificationResponse>(
+        "/users/me/apply-verification",
+        formData,
+        { method: "POST" }
+    );
 }
 
 // 각 업체별 사용자 인증

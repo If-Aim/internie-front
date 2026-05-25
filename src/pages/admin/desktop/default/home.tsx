@@ -65,6 +65,12 @@ export default function AdminHome(): React.ReactElement {
 					>
 						<span>기록 열람</span>
 					</NavLink>
+					<NavLink
+						to="/system-admin/organizations"
+						className={({ isActive }) => (isActive ? "admin-tab admin-tab--active" : "admin-tab")}
+					>
+						<span>기관 관리</span>
+					</NavLink>
 				</nav>
 
 				<div className="admin-topbar-right">

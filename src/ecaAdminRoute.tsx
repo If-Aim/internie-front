@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { ApiError, getUserMe } from "./api/client";
+import { ApiError } from "./api/client";
+import { getMyOrganizations } from "./api/organizationClient";
 
 export default function EcaAdminRoute(): React.ReactElement | null {
     const location = useLocation();
@@ -11,11 +12,11 @@ export default function EcaAdminRoute(): React.ReactElement | null {
 
         (async () => {
             try {
-                const me = await getUserMe();
+                const organizations = await getMyOrganizations();
 
                 if (!mounted) return;
 
-                if (Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ESG_ADMIN")) {
+                if (Array.isArray(organizations) && organizations.length > 0) {
                     setState("allowed");
                     return;
                 }
@@ -45,7 +46,7 @@ export default function EcaAdminRoute(): React.ReactElement | null {
         }
 
         if (state === "forbidden") {
-            alert("대외활동 관리자만 접근할 수 있는 페이지입니다.");
+            alert("기관 관계자만 접근할 수 있는 페이지입니다.");
         }
     }, [state]);
 

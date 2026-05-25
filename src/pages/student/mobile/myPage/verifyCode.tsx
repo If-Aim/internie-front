@@ -98,25 +98,13 @@ export default function VerifyCodePage() {
         setError(null);
 
         try {
-            const prevRoleSet = me?.roleSet ?? [];
-
             const refreshed = await verifyClientUser(trimmed);
             const nextRoleSet = refreshed.roleSet ?? [];
-
-            // 추가된 역할 찾기
-            const addedRoles = nextRoleSet.filter(
-                (role) => !prevRoleSet.includes(role)
-            );
 
             setMe(refreshed);
             setCode("");
             setError(null);
-
-            if (addedRoles.length === 0) {
-                triggerVerifiedMessage("이미 인증된 코드입니다.");
-            } else {
-                triggerVerifiedMessage("인증이 완료되었습니다.");
-            }
+            triggerVerifiedMessage("인증이 완료되었습니다.");
 
             const hasJumpRole = nextRoleSet.includes("ROLE_JUMP_STUDENT");
 
@@ -125,11 +113,17 @@ export default function VerifyCodePage() {
             }
 
             syncClientPopups(refreshed);
-
         } catch (e) {
             if (e instanceof ApiError) {
-                if (e.status === 400) setError("인증 코드가 올바르지 않습니다.");
-                else setError("인증에 실패했습니다.");
+                if (e.status === 400 || e.status === 401 || e.code === "AUTH_TOKEN_INVALID") {
+                    setError("인증 코드가 올바르지 않습니다.");
+                } else if (e.code === "EXTERNAL_ACTIVITY_PARTICIPANT_ALREADY_EXISTS") {
+                    setError("이미 참가 등록된 대외활동입니다.");
+                } else if (e.code === "EXTERNAL_ACTIVITY_STUDENT_INVITE_DISABLED") {
+                    setError("비활성화된 초대코드입니다.");
+                } else {
+                    setError("인증에 실패했습니다.");
+                }
             } else {
                 setError("인증에 실패했습니다.");
             }

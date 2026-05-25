@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type UserMe, } from "../../../api/client";
-import { getMyParticipantCenter, getMyParticipatingExternalActivities } from "../../../api/ea";
+import { getMyParticipatingExternalActivities } from "../../../api/ea";
+import { getMyOrganizations } from "../../../api/organizationClient";
+import type { MyOrganizationResponse } from "../../../api/organizationClient";
 
 import "../../../App.css"; 
 
@@ -541,15 +543,17 @@ function MonthPickerModal({
 }
 
 type SideMenuProps = {
-	isOpen: boolean;
-	onClose: () => void;
-	userName: string;
-	userEmail: string;
-	userProfileImg: string;
-	userRoleSet: string[];
-	onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
+    isOpen: boolean;
+    onClose: () => void;
+    userName: string;
+    userEmail: string;
+    userProfileImg: string;
+    userRoleSet: string[];
+    organizations: MyOrganizationResponse[];
+    onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
 };
-function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRoleSet, onRequireAuth }: SideMenuProps) {
+
+function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRoleSet, organizations, onRequireAuth }: SideMenuProps) {
 	const navigate = useNavigate();
 	const { t, i18n } = useTranslation();
 	const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
@@ -776,18 +780,18 @@ function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRo
 							<span>KAKAO 관리자 페이지</span>
 						</button>
 					)}
-					{userRoleSet.includes("ROLE_ESG_ADMIN") && (
+					{organizations.length > 0 && (
 						<button
-						className="drawer-menu-item"
-						onClick={() => {
-							onRequireAuth("/eca-admin/home", () => {
-							navigate("/eca-admin/home");
-							closeWithSnap();
-							});
-						}}
+							className="drawer-menu-item"
+							onClick={() => {
+								onRequireAuth("/eca-admin/home", () => {
+									navigate("/eca-admin/home");
+									closeWithSnap();
+								});
+							}}
 						>
 							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>용산 청소년 센터 관리자 페이지</span>
+							<span>대외활동 관리자 페이지</span>
 						</button>
 					)}
 				</div>
@@ -1160,6 +1164,7 @@ function Home(): React.ReactElement {
 	const isSelectedLocked = !!selectedItem?.isLocked;
 
 	const [me, setMe] = React.useState<UserMe | null>(null);
+	const [organizations, setOrganizations] = React.useState<MyOrganizationResponse[]>([]);
 	const [profileTick, setProfileTick] = React.useState(0);
 	const userName = (me?.name ?? "").trim() || "User";
 	const userEmail = (me?.email ?? "").trim();
@@ -1176,12 +1181,8 @@ function Home(): React.ReactElement {
 
 		activityPromptCheckedRef.current = true;
 
-		const checkMyActivityCenter = async () => {
+		const checkMyActivity = async () => {
 			try {
-				const center = await getMyParticipantCenter();
-
-				if (!center) return;
-
 				const activities = await getMyParticipatingExternalActivities();
 
 				if (activities.length === 0) return;
@@ -1199,11 +1200,11 @@ function Home(): React.ReactElement {
 
 				setActivityPromptOpen(true);
 			} catch (error) {
-				console.error("getMyParticipantCenter or getMyParticipatingExternalActivities failed:", error);
+				console.error("getMyParticipatingExternalActivities failed:", error);
 			}
 		};
 
-		checkMyActivityCenter();
+		void checkMyActivity();
 	}, [isAuthed, me, emailVerifyPopupOpen, needsEmailVerification]);
 
 	React.useEffect(() => { // 이메일 팝업 닫힌 뒤 대외활동 팝업 오픈
@@ -1249,6 +1250,7 @@ function Home(): React.ReactElement {
 		(async () => {
 			if (!isAuthed) {
 				setMe(null);
+				setOrganizations([]);
 				setNeedsEmailVerification(false);
 				setEmailVerifyPopupOpen(false);
 				setEmailForm({ email: "", code: "" });
@@ -1258,8 +1260,13 @@ function Home(): React.ReactElement {
 			}
 
 			try {
-				const nextMe = await getUserMe();
+				const [nextMe, myOrganizations] = await Promise.all([
+					getUserMe(),
+					getMyOrganizations(),
+				]);
+
 				setMe(nextMe);
+				setOrganizations(Array.isArray(myOrganizations) ? myOrganizations : []);
 
 				const needsVerify = !nextMe.email || nextMe.emailVerified !== true;
 				setNeedsEmailVerification(needsVerify);
@@ -1271,8 +1278,9 @@ function Home(): React.ReactElement {
 				setEmailSentMessage(null);
 				setEmailError(null);
 			} catch (e) {
-				console.error("getUserMe failed:", e);
+				console.error("getUserMe or getMyOrganizations failed:", e);
 				setMe(null);
+				setOrganizations([]);
 				setNeedsEmailVerification(false);
 				setEmailVerifyPopupOpen(false);
 				setEmailForm({ email: "", code: "" });
@@ -1495,6 +1503,7 @@ function Home(): React.ReactElement {
 					userEmail={userEmail}
 					userProfileImg={userProfileImg}
 					userRoleSet={userRoleSet}
+					organizations={organizations}
 					onRequireAuth={(path, action) => requireAuth(path, action)}
 				/>
 

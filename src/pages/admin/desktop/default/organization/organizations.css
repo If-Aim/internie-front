@@ -1,0 +1,90 @@
+.admin-organization-page { width: 100%; display: grid; grid-template-columns: minmax(460px, 1fr) minmax(360px, 0.82fr); gap: 28px; align-items: start; box-sizing: border-box; }
+
+.admin-organization-left, .admin-organization-right { width: 100%; min-width: 0; }
+
+.admin-organization-head { margin-bottom: 24px; }
+.admin-organization-head h1 { margin: 0 0 8px; color: #000; font-size: 26px; font-weight: 800; line-height: 34px; }
+.admin-organization-head p { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 600; line-height: 22px; }
+
+.admin-organization-form-card, .admin-organization-preview-card { width: 100%; padding: 30px 30px 32px; border: 1px solid #DDD; border-radius: 18px; background: #FFF; box-sizing: border-box; }
+
+.admin-organization-form-card { display: flex; flex-direction: column; gap: 28px; }
+
+.admin-organization-field { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.admin-organization-field label { color: #000; font-size: 15px; font-weight: 800; line-height: 20px; }
+
+.admin-organization-field input { width: 100%; height: 48px; padding: 0 14px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; color: #000; font-size: 15px; font-weight: 600; outline: none; box-sizing: border-box; }
+.admin-organization-field input::placeholder { color: #999; font-weight: 600; }
+
+.admin-organization-field textarea { width: 100%; min-height: 104px; padding: 14px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; color: #000; font-size: 15px; font-weight: 600; line-height: 22px; outline: none; resize: vertical; box-sizing: border-box; }
+.admin-organization-field textarea::placeholder { color: #999; font-weight: 600; }
+
+.admin-organization-help-text { margin: 0; color: #808080; font-size: 12px; font-weight: 600; line-height: 18px; }
+
+.admin-organization-owner-picker { position: relative; width: 100%; }
+
+.admin-organization-owner-dropdown { position: absolute; top: 54px; left: 0; z-index: 30; width: 100%; max-height: 320px; overflow-y: auto; border-radius: 12px; background: #FFF; box-shadow: 0 0 12px rgba(0, 0, 0, 0.18); box-sizing: border-box; }
+
+.admin-organization-owner-option { width: 100%; min-height: 60px; padding: 12px 16px; border: 0; background: #FFF; display: grid; grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.2fr) 72px; align-items: center; gap: 12px; text-align: left; cursor: pointer; box-sizing: border-box; }
+.admin-organization-owner-option:hover { background: #F0F6FF; }
+
+.admin-organization-owner-name { overflow: hidden; color: #000; font-size: 14px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; }
+.admin-organization-owner-email { overflow: hidden; color: #6B6B6B; font-size: 13px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.admin-organization-owner-id { color: #0166FF; font-size: 12px; font-weight: 800; text-align: right; white-space: nowrap; }
+
+.admin-organization-owner-empty { min-height: 72px; padding: 0 18px; color: #808080; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
+.admin-organization-selected-owner { min-height: 40px; padding: 0 14px; border-radius: 10px; background: #F0F6FF; color: #6B6B6B; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-sizing: border-box; }
+.admin-organization-selected-owner strong { color: #0166FF; font-size: 14px; font-weight: 800; }
+.admin-organization-selected-owner span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.admin-organization-error { min-height: 44px; padding: 0 14px; border-radius: 10px; background: #FFD6D2; color: #F00; font-size: 13px; font-weight: 800; display: flex; align-items: center; box-sizing: border-box; }
+
+.admin-organization-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 2px; }
+
+.admin-organization-reset-button { width: 112px; height: 46px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; color: #6B6B6B; font-size: 15px; font-weight: 800; cursor: pointer; }
+.admin-organization-submit-button { width: 132px; height: 46px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 15px; font-weight: 800; cursor: pointer; }
+
+.admin-organization-reset-button:disabled, .admin-organization-submit-button:disabled { background: #DDD; border-color: #DDD; color: #777; cursor: default; }
+
+.admin-organization-preview-card { min-height: 520px; display: flex; flex-direction: column; }
+
+.admin-organization-preview-head { margin-bottom: 28px; }
+.admin-organization-preview-head h2 { margin: 0 0 8px; color: #000; font-size: 20px; font-weight: 800; line-height: 28px; }
+.admin-organization-preview-head p { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 600; line-height: 20px; }
+
+.admin-organization-empty-result { flex: 1; min-height: 320px; border: 1px dashed #DDD; border-radius: 14px; color: #808080; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
+.admin-organization-result { display: flex; flex-direction: column; gap: 18px; }
+
+.admin-organization-result-row { min-height: 62px; padding: 14px 16px; border: 1px solid #E2E2E2; border-radius: 12px; background: #FFF; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }
+.admin-organization-result-row span, .admin-organization-result-centers > span { color: #6B6B6B; font-size: 13px; font-weight: 800; line-height: 18px; }
+.admin-organization-result-row strong, .admin-organization-result-centers > strong { color: #000; font-size: 16px; font-weight: 800; line-height: 22px; }
+.admin-organization-result-row em { color: #6B6B6B; font-style: normal; font-size: 13px; font-weight: 700; }
+
+.admin-organization-result-centers { min-height: 96px; padding: 14px 16px; border: 1px solid #E2E2E2; border-radius: 12px; background: #FFF; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+
+.admin-organization-center-chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-organization-center-chip { min-height: 32px; padding: 0 12px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-weight: 800; display: inline-flex; align-items: center; }
+
+.admin-organization-center-empty { width: 100%; min-height: 76px; padding: 0 16px; border: 1px dashed #DDD; border-radius: 10px; color: #808080; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
+.admin-organization-center-select-list { width: 100%; max-height: 260px; padding: 10px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box; }
+
+.admin-organization-center-option { width: 100%; min-height: 52px; padding: 0 14px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; display: grid; grid-template-columns: 20px 240px minmax(0, 1fr) auto; align-items: center; gap: 10px; cursor: pointer; box-sizing: border-box; }
+.admin-organization-center-option:hover { background: #F0F6FF; }
+.admin-organization-center-option.is-selected { border-color: #BDD8FF; background: #F0F6FF; }
+
+.admin-organization-center-option input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+
+.admin-organization-center-checkbox { width: 20px; height: 20px; border: 1px solid #D9D9D9; border-radius: 4px; background: #FFF; box-sizing: border-box; position: relative; }
+.admin-organization-center-option.is-selected .admin-organization-center-checkbox { border-color: #0166FF; background: #0166FF; }
+.admin-organization-center-option.is-selected .admin-organization-center-checkbox::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border-right: 2px solid #FFF; border-bottom: 2px solid #FFF; transform: rotate(45deg); }
+
+.admin-organization-center-name { overflow: hidden; color: #000; font-size: 14px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; }
+.admin-organization-center-id { color: #0166FF; font-size: 12px; font-weight: 800; white-space: nowrap; }
+
+@media (max-width: 1180px) {
+    .admin-organization-page { grid-template-columns: 1fr; }
+    .admin-organization-preview-card { min-height: auto; }
+}

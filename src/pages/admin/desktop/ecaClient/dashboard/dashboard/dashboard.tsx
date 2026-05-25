@@ -1,8 +1,9 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { getExternalActivity, deleteExternalActivity, getExternalActivityTeams } from "../../../../../../api/ea";
-import type { AssignmentResponse, ExternalActivityResponse, TeamResponse } from "../../../../../../api/ea";
+import { ApiError } from "../../../../../../api/client";
+import { createExternalActivityStudentInvite, deleteExternalActivity, /*disableExternalActivityStudentInvite,*/ getExternalActivity, getExternalActivityStudentInvites, getExternalActivityTeams, } from "../../../../../../api/ea";
+import type { AssignmentResponse, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./dashboard.css";
 
@@ -111,6 +112,31 @@ function toAssignmentSummary(assignment: AssignmentResponse): AssignmentSummary 
     };
 }
 
+// function buildStudentInviteUrl(token: string): string {
+//     return `${window.location.origin}/invite/external-activity/${encodeURIComponent(token)}`;
+// }
+
+// function getStudentInviteStatusLabel(status: ExternalActivityStudentInviteResponse["status"]): string {
+//     if (status === "ACTIVE") return "사용 가능";
+//     return "비활성화";
+// }
+
+// function formatInviteCreatedAt(value?: string | null): string {
+//     if (!value) return "-";
+
+//     const date = new Date(value);
+
+//     if (Number.isNaN(date.getTime())) return value;
+
+//     return date.toLocaleString("ko-KR", {
+//         year: "numeric",
+//         month: "2-digit",
+//         day: "2-digit",
+//         hour: "2-digit",
+//         minute: "2-digit",
+//     });
+// }
+
 function toTeamSummaries(activity: ExternalActivityResponse, teams: TeamResponse[]): TeamSummary[] {
     const teamAssignmentMap = new Map<number, TeamAssignmentSummary[]>();
 
@@ -167,8 +193,8 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const {
-        center,
-        centerLoading,
+        organization,
+        organizationLoading,
         refreshManagedActivities,
     } = useOutletContext<EcaClientAdminOutletContext>();
     const [activity, setActivity] = React.useState<ExternalActivityResponse | null>(null);
@@ -184,6 +210,12 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     const [assignmentError, setAssignmentError] = React.useState("");
     const [assignmentPage, setAssignmentPage] = React.useState(0);
     const [attendancePage, setAttendancePage] = React.useState(0);
+
+    const [participantInviteOpen, setParticipantInviteOpen] = React.useState(false);
+    const [studentInvites, setStudentInvites] = React.useState<ExternalActivityStudentInviteResponse[]>([]);
+    const [studentInviteLoading, setStudentInviteLoading] = React.useState(false);
+    const [studentInviteCreating, setStudentInviteCreating] = React.useState(false);
+    // const [studentInviteDisablingId, setStudentInviteDisablingId] = React.useState<number | null>(null);
 
     const [participants, setParticipants] = React.useState<Participant[]>([]);
     const [participantLoading, setParticipantLoading] = React.useState(false);
@@ -210,9 +242,9 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchActivity(): Promise<void> {
-            if (centerLoading) return;
+            if (organizationLoading) return;
 
-            if (!center?.centerId || !externalActivityId) {
+            if (!organization?.organizationId || !externalActivityId) {
                 setActivityError("대외활동 정보를 찾을 수 없습니다.");
                 setAssignmentError("과제 목록을 불러오지 못했습니다.");
                 setParticipantError("참여자 목록을 불러오지 못했습니다.");
@@ -227,10 +259,12 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             setAssignmentError("");
 
             try {
-                const [activityData, teamData] = await Promise.all([
-                    getExternalActivity(center.centerId, externalActivityId),
-                    getExternalActivityTeams(externalActivityId),
-                ]);
+                const activityData = await getExternalActivity(
+                    organization.organizationId,
+                    externalActivityId
+                );
+
+                const teamData = await getExternalActivityTeams(externalActivityId);
 
                 const nextParticipants: Participant[] = (activityData.participants ?? [])
                     .flatMap((participant) => {
@@ -254,13 +288,34 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                 setAssignmentPage(0);
             } catch (e) {
                 console.error(e);
+
                 setActivity(null);
                 setParticipants([]);
                 setAssignments([]);
                 setDashboardTeams([]);
-                setActivityError("대외활동 정보를 불러오지 못했습니다.");
-                setParticipantError("참여자 목록을 불러오지 못했습니다.");
-                setAssignmentError("과제 목록을 불러오지 못했습니다.");
+
+                if (e instanceof ApiError) {
+                    if (e.status === 404 || e.code === "EXTERNAL_ACTIVITY_NOT_FOUND") {
+                        window.alert("삭제되었거나 존재하지 않는 대외활동입니다.");
+                        navigate("/eca-admin/home", { replace: true });
+                        return;
+                    }
+
+                    if (e.status === 403 || e.code === "FORBIDDEN") {
+                        window.alert("접근 권한이 없습니다.");
+                        navigate("/eca-admin/home", { replace: true });
+                        return;
+                    }
+
+                    if (e.status === 400) {
+                        window.alert(e.message || "정보를 불러올 수 없습니다.");
+                        navigate("/eca-admin/home", { replace: true });
+                        return;
+                    }
+                }
+
+                window.alert("정보를 불러오지 못했습니다.");
+                navigate("/eca-admin/home", { replace: true });
             } finally {
                 setActivityLoading(false);
                 setParticipantLoading(false);
@@ -269,7 +324,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         }
 
         fetchActivity();
-    }, [center?.centerId, centerLoading, externalActivityId]);
+    }, [organization?.organizationId, organizationLoading, externalActivityId]);
 
     React.useEffect(() => { // 대시보드 수정 모달 바깥 클릭 감지
         if (!dashboardMenuOpen) return;
@@ -392,8 +447,124 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     const canMovePrevAttendancePage = attendancePage > 0;
     const canMoveNextAttendancePage = attendancePage < attendancePageCount - 1;
 
+    // async function loadStudentInvites(): Promise<void> { // 초대코드 목록 조회
+    //     if (!externalActivityId) return;
+
+    //     setStudentInviteLoading(true);
+
+    //     try {
+    //         const data = await getExternalActivityStudentInvites(externalActivityId);
+    //         setStudentInvites(data);
+    //     } catch (error) {
+    //         console.error(error);
+    //         setStudentInvites([]);
+    //         window.alert("참가자 초대코드 목록을 불러오지 못했습니다.");
+    //     } finally {
+    //         setStudentInviteLoading(false);
+    //     }
+    // }
+
+    async function openParticipantInviteModal(): Promise<void> {
+        if (!externalActivityId) return;
+
+        setParticipantInviteOpen(true);
+        setStudentInviteLoading(true);
+
+        try {
+            const data = await getExternalActivityStudentInvites(externalActivityId);
+
+            if (data.length > 0) {
+                setStudentInvites(data);
+                return;
+            }
+
+            const created = await createExternalActivityStudentInvite(externalActivityId);
+            setStudentInvites([created]);
+        } catch (error) {
+            console.error(error);
+            setStudentInvites([]);
+            window.alert("참가자 초대코드를 불러오지 못했습니다.");
+        } finally {
+            setStudentInviteLoading(false);
+        }
+    }
+
+    async function handleCreateStudentInvite(): Promise<void> {
+        if (!externalActivityId || studentInviteCreating) return;
+
+        setStudentInviteCreating(true);
+
+        try {
+            const created = await createExternalActivityStudentInvite(externalActivityId);
+
+            setStudentInvites((prev) => [created, ...prev]);
+
+            try {
+                await navigator.clipboard.writeText(created.code);
+                window.alert("참가자 초대코드가 생성되었고 클립보드에 복사되었습니다.");
+            } catch {
+                window.alert("참가자 초대코드가 생성되었습니다. 팝업에서 복사할 수 있습니다.");
+            }
+        } catch (error) {
+            console.error(error);
+
+            if (error instanceof ApiError) {
+                window.alert(error.message || "참가자 초대코드 발급에 실패했습니다.");
+                return;
+            }
+
+            window.alert("참가자 초대코드 발급에 실패했습니다.");
+        } finally {
+            setStudentInviteCreating(false);
+        }
+    }
+
+    async function handleCopyStudentInvite(invite: ExternalActivityStudentInviteResponse): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(invite.code);
+            window.alert("참가자 초대코드를 복사했습니다.");
+        } catch (error) {
+            console.error(error);
+            window.alert("참가자 초대코드 복사에 실패했습니다.");
+        }
+    }
+    
+    // async function handleDisableStudentInvite(invite: ExternalActivityStudentInviteResponse): Promise<void> {
+    //     if (!externalActivityId || invite.status !== "ACTIVE" || studentInviteDisablingId !== null) return;
+
+    //     const confirmed = window.confirm("이 참가자 초대코드를 비활성화하시겠습니까?");
+
+    //     if (!confirmed) return;
+
+    //     setStudentInviteDisablingId(invite.externalActivityStudentInviteId);
+
+    //     try {
+    //         await disableExternalActivityStudentInvite(
+    //             externalActivityId,
+    //             invite.externalActivityStudentInviteId
+    //         );
+
+    //         setStudentInvites((prev) => prev.map((item) => (
+    //             item.externalActivityStudentInviteId === invite.externalActivityStudentInviteId
+    //                 ? { ...item, status: "DISABLED" }
+    //                 : item
+    //         )));
+    //     } catch (error) {
+    //         console.error(error);
+
+    //         if (error instanceof ApiError) {
+    //             window.alert(error.message || "참가자 초대코드 비활성화에 실패했습니다.");
+    //             return;
+    //         }
+
+    //         window.alert("참가자 초대코드 비활성화에 실패했습니다.");
+    //     } finally {
+    //         setStudentInviteDisablingId(null);
+    //     }
+    // }
+
     async function handleDeleteActivity(): Promise<void> {
-        if (!center?.centerId || !externalActivityId || deletingActivity) {
+        if (!organization?.organizationId || !externalActivityId || deletingActivity) {
             return;
         }
 
@@ -407,7 +578,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         setDashboardMenuOpen(false);
 
         try {
-            await deleteExternalActivity(center.centerId, externalActivityId);
+            await deleteExternalActivity(organization.organizationId, externalActivityId);
             await refreshManagedActivities();
             navigate("/eca-admin/home");
         } catch (error) {
@@ -691,28 +862,47 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                         <div className="eca-dashboard-panel-head">
                             <h2>참여자({filteredParticipants.length})</h2>
 
-                            <div className="eca-dashboard-search-wrap" ref={participantSearchWrapRef}>
-                                <button type="button" className="eca-dashboard-search-button" aria-label="참여자 검색" onClick={() => setParticipantSearchOpen((prev) => !prev)} >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
-                                    </svg>
-                                </button>
-
-                                {participantSearchOpen ? (
-                                    <div className="eca-dashboard-search-popover">
-                                        <input
-                                            className="eca-dashboard-search-input"
-                                            value={participantSearchKeyword}
-                                            onChange={(e) => setParticipantSearchKeyword(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <button type="button" className="eca-dashboard-search-reset" onClick={() => setParticipantSearchKeyword("")} >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                <path d="M13.3332 2.66699L2.6665 13.3337M13.3332 13.3337L2.6665 2.66699" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                            <div className="eca-dashboard-panel-actions">
+                                {!isReadOnly ? (
+                                    <button type="button" aria-label="참가자추가" className="eca-dashboard-participant-add" onClick={() => void openParticipantInviteModal()}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z" fill="#808080" />
+                                        </svg>
+                                    </button>
                                 ) : null}
+
+                                <div className="eca-dashboard-search-wrap" ref={participantSearchWrapRef}>
+                                    <button
+                                        type="button"
+                                        className="eca-dashboard-participant-search"
+                                        aria-label="참여자 검색"
+                                        onClick={() => setParticipantSearchOpen((prev) => !prev)}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                            <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
+                                        </svg>
+                                    </button>
+
+                                    {participantSearchOpen ? (
+                                        <div className="eca-dashboard-search-popover">
+                                            <input
+                                                className="eca-dashboard-search-input"
+                                                value={participantSearchKeyword}
+                                                onChange={(e) => setParticipantSearchKeyword(e.target.value)}
+                                                autoFocus
+                                            />
+                                            <button
+                                                type="button"
+                                                className="eca-dashboard-search-reset"
+                                                onClick={() => setParticipantSearchKeyword("")}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                    <path d="M13.3332 2.66699L2.6665 13.3337M13.3332 13.3337L2.6665 2.66699" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ) : null}
+                                </div>
                             </div>
                         </div>
 
@@ -851,6 +1041,45 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                     </section>
                 </aside>
             </div>
+
+            {participantInviteOpen ? (
+                <div className="eca-dashboard-invite-modal-backdrop" onMouseDown={() => setParticipantInviteOpen(false)}>
+                    <div className="eca-dashboard-invite-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+                        <div className="eca-dashboard-invite-modal-head">
+                            <div className="eca-dashboard-invite-modal-head-text">
+                                <h3>참가자 초대</h3>
+                                <p>인증코드를 입력한 학생은 해당 대외활동의 참가자로 등록됩니다</p>
+                            </div>
+                            <button type="button" className="eca-dashboard-invite-modal-close" onClick={() => setParticipantInviteOpen(false)} aria-label="닫기">
+                                <img src="/icons/x-01.svg" alt="" />
+                            </button>
+                        </div>
+
+                        <div className="eca-dashboard-invite-codebox">
+                            {studentInviteLoading ? (
+                                <span className="eca-dashboard-invite-codebox-loading">초대코드를 불러오는 중입니다.</span>
+                            ) : studentInvites.length === 0 ? (
+                                <button type="button" className="eca-dashboard-invite-codebox-create" onClick={() => void handleCreateStudentInvite()} disabled={studentInviteCreating}>
+                                    {studentInviteCreating ? "발급 중" : "초대코드 발급"}
+                                </button>
+                            ) : (
+                                <>
+                                    <strong>{studentInvites[0].code}</strong>
+                                    <button type="button" onClick={() => void handleCopyStudentInvite(studentInvites[0])}>
+                                        복사
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="eca-dashboard-invite-modal-footer">
+                            <button type="button" className="eca-dashboard-invite-confirm-button" onClick={() => setParticipantInviteOpen(false)}>
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }

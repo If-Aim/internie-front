@@ -168,16 +168,26 @@ export default function DesktopOnboarding(): React.ReactElement {
             }));
 
             const hasJumpRole = roleSet.includes("ROLE_JUMP_STUDENT");
+            const hasKakaoRole = roleSet.includes("ROLE_KAKAO_STUDENT");
+            const hasJumpOrganization = refreshed.jumpOrganization?.id != null;
+            const hasStudentNumber = (refreshed.studentNumber ?? "").trim().length > 0;
 
             if (hasJumpRole) {
                 const orgs = await getMyJumpOrganizations();
                 setInstitutions(orgs);
             }
+
+            if ((hasJumpRole && !hasJumpOrganization) || (hasKakaoRole && !hasStudentNumber)) {
+                return;
+            }
+
+            await finishOnboarding();
         } catch (e) {
             if (e instanceof ApiError) {
                 setCodeError("인증 코드가 올바르지 않습니다.");
                 return;
             }
+
             setCodeError("인증 중 오류가 발생했습니다.");
         } finally {
             setSubmitting(false);

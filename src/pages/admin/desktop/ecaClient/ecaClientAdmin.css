@@ -28,7 +28,9 @@ button.eca-client-admin-menu-item { width: auto; border: 0; background: transpar
 .eca-client-admin-submenu-item--active { background: #BDD8FF; color: var(--primary); }
 .eca-client-admin-submenu-empty { min-height: 40px; padding: 0 14px; color: #999; font-size: 14px; font-weight: 600; display: flex; align-items: center; box-sizing: border-box; }
 
-.eca-client-admin-sidebar-profile { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 18px; border-top: 1px solid #e5eaf2; flex-shrink: 0; }
+.eca-client-admin-sidebar-profile { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 18px 8px 0 0; border-top: 1px solid #e5eaf2; flex-shrink: 0; text-decoration: none; cursor: pointer; box-sizing: border-box; }
+.eca-client-admin-sidebar-profile:hover .eca-client-admin-name { color: var(--primary); }
+.eca-client-admin-sidebar-profile--active .eca-client-admin-name { color: var(--primary); }
 .eca-client-admin-name { color: #000; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eca-client-admin-avatar-img { width: 32px; height: 32px; border-radius: 999px; object-fit: cover; background: #fff; border: 1px solid #D9D9D9; flex-shrink: 0; }
 

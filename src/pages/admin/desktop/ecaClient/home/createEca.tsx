@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { createExternalActivity, downloadExternalActivityPlan, getCenterParticipants, getExternalActivity, getExternalActivityManagers, updateExternalActivity, type ExternalActivityManager, type ExternalActivityParticipant, } from "../../../../../api/ea"; 
+import { createExternalActivity, downloadExternalActivityPlan, getExternalActivity, getExternalActivityManagers, updateExternalActivity, type ExternalActivityManager, type ExternalActivityParticipant, } from "../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./createEca.css"; 
 import "././../ecaCalendar.css";
@@ -203,7 +203,7 @@ function CalendarRange({
 export default function EcaActivityCreatePage(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
-    const { center, refreshManagedActivities } = useOutletContext<EcaClientAdminOutletContext>();
+    const { organization, refreshManagedActivities } = useOutletContext<EcaClientAdminOutletContext>();
 
     const isEditMode = Boolean(externalActivityId);
     const [managers, setManagers] = React.useState<ExternalActivityManager[]>([]);
@@ -240,17 +240,16 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchInitData(): Promise<void> {
-            if (!center?.centerId) return;
+            if (!organization?.organizationId) return;
 
             setPageLoading(true);
             setSubmitError("");
 
             try {
-                const [students, managerUsers, activityData] = await Promise.all([
-                    getCenterParticipants(center.centerId),
-                    getExternalActivityManagers(center.centerId),
+                const [managerUsers, activityData] = await Promise.all([
+                    getExternalActivityManagers(organization.organizationId),
                     isEditMode && externalActivityId
-                        ? getExternalActivity(center.centerId, externalActivityId)
+                        ? getExternalActivity(organization.organizationId, externalActivityId)
                         : Promise.resolve(null),
                 ]);
 
@@ -260,36 +259,28 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                     return;
                 }
 
-                const nextParticipants: SelectableParticipant[] = students
-                    .filter((student) => typeof student.userId === "number")
-                    .map((student) => ({
-                        userId: student.userId,
-                        name: student.name ?? "이름 없음",
-                        schoolName: student.schoolName ?? "-",
-                        email: student.email ?? null,
-                        profileImage: student.profileImage ?? null,
-                    }));
-
                 const nextManagers = managerUsers
                     .filter((manager) => typeof manager.userId === "number");
 
-                setParticipants(nextParticipants);
                 setManagers(nextManagers);
 
                 if (!activityData) {
-                    setParticipantUserIds(nextParticipants.map((participant) => participant.userId));
+                    setParticipantUserIds([]);
                     return;
                 }
 
-                const nextSelectedParticipantIds = (activityData.participants ?? [])
+                const nextParticipants = (activityData.participants ?? [])
                     .map(toSelectableParticipant)
-                    .filter((participant): participant is SelectableParticipant => participant !== null)
+                    .filter((participant): participant is SelectableParticipant => participant !== null);
+
+                const nextSelectedParticipantIds = nextParticipants
                     .map((participant) => participant.userId);
 
                 const nextSelectedManagerIds = (activityData.managers ?? [])
                     .map((manager) => manager.userId)
                     .filter((userId): userId is number => typeof userId === "number");
 
+                setParticipants(nextParticipants);
                 setActivityName(activityData.name ?? "");
                 setStartDate(activityData.startDate.replaceAll("-", "."));
                 setEndDate(activityData.endDate.replaceAll("-", "."));
@@ -310,8 +301,8 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             }
         }
 
-        fetchInitData();
-    }, [center?.centerId, externalActivityId, isEditMode, navigate]);
+        void fetchInitData();
+    }, [organization?.organizationId, externalActivityId, isEditMode, navigate]);
 
     React.useEffect(() => {
         if (!datePickerTarget) return;
@@ -463,13 +454,13 @@ export default function EcaActivityCreatePage(): React.ReactElement {
     }
 
     async function handleDownloadExistingPlan(): Promise<void> {
-        if (!center?.centerId || !externalActivityId || !existingPlanUrl) {
+        if (!organization?.organizationId || !externalActivityId || !existingPlanUrl) {
             return;
         }
 
         try {
             await downloadExternalActivityPlan(
-                center.centerId,
+                organization.organizationId,
                 externalActivityId,
                 existingPlanOriginalFileName
             );
@@ -490,18 +481,13 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             return;
         }
 
-        if (participantUserIds.length === 0) {
-            setSubmitError("참여자를 1명 이상 선택해주세요.");
-            return;
-        }
-
         if (selectedManagerIds.length === 0) {
             setSubmitError("담당자를 선택해주세요.");
             return;
         }
 
-        if (!center?.centerId) {
-            setSubmitError("센터 정보를 불러오지 못했습니다.");
+        if (!organization?.organizationId) {
+            setSubmitError("기관 정보를 불러오지 못했습니다.");
             return;
         }
 
@@ -509,23 +495,35 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         setSubmitError("");
 
         try {
-            const request = {
+            const baseRequest = {
                 name: activityName.trim(),
                 description: null,
                 startDate: toApiDate(startDate),
                 endDate: toApiDate(endDate),
-                participantUserIds,
                 managerUserIds: selectedManagerIds,
             };
 
             if (isEditMode && externalActivityId) {
-                await updateExternalActivity( center.centerId, externalActivityId, request, planFile );
+                await updateExternalActivity(
+                    organization.organizationId,
+                    externalActivityId,
+                    {
+                        ...baseRequest,
+                        participantUserIds,
+                    },
+                    planFile
+                );
+
                 await refreshManagedActivities();
                 navigate(`/eca-admin/activities/${externalActivityId}/dashboard`);
                 return;
             }
 
-            await createExternalActivity(center.centerId, request, planFile );
+            await createExternalActivity(
+                organization.organizationId,
+                baseRequest,
+                planFile
+            );
 
             await refreshManagedActivities();
             navigate("/eca-admin/home");
@@ -579,23 +577,14 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         <>
             <div className="eca-create-page">
                 <section className="eca-create-header">
-                    <h1>{center?.name ?? ""}</h1>
+                    <h1>{organization?.organizationName ?? ""}</h1>
                     <div className="eca-create-title-row">
-                        <h2>{isEditMode ? "대시보드 수정" : "대외활동 생성"}</h2>
+                        <h2>{isEditMode ? "대외활동 수정" : "대외활동 생성"}</h2>
                         <button type="button" className="eca-create-temp-button" disabled>임시저장</button>
                     </div>
                 </section>
 
                 <section className="eca-create-card">
-                    <div className="eca-create-step-bars">
-                        <span />
-                        <span />
-                        <span />
-                        <span />
-                    </div>
-
-                    <p className="eca-create-step-text">1/4 단계</p>
-
                     <div className="eca-create-form">
                         <label className="eca-create-field">
                             <span>대외활동명<b>*</b></span>

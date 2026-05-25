@@ -130,7 +130,7 @@ function getSubmissionFileName(files: SubmissionFileResponse[]): string {
 export default function EcaAssignmentDetailPage(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId, assignmentId } = useParams<{ externalActivityId?: string; assignmentId?: string }>();
-    const { center, centerLoading } = useOutletContext<EcaClientAdminOutletContext>();
+    const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [activity, setActivity] = React.useState<ExternalActivityResponse | null>(null);
     const [assignment, setAssignment] = React.useState<AssignmentResponse | null>(null);
@@ -156,9 +156,9 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
     React.useEffect(() => {
         async function fetchAssignment(): Promise<void> {
-            if (centerLoading) return;
+            if (organizationLoading) return;
 
-            if (!center?.centerId || !externalActivityId || !assignmentId) {
+            if (!organization?.organizationId || !externalActivityId || !assignmentId) {
                 setError("과제 정보를 찾을 수 없습니다.");
                 return;
             }
@@ -167,7 +167,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
             setError("");
 
             try {
-                const data = await getExternalActivity(center.centerId, externalActivityId);
+                const data = await getExternalActivity(organization.organizationId, externalActivityId);
                 const foundAssignment = (data.assignments ?? []).find((item) => String(item.assignmentId) === assignmentId) ?? null;
 
                 setActivity(data);
@@ -199,7 +199,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
         }
 
         fetchAssignment();
-    }, [assignmentId, center?.centerId, centerLoading, externalActivityId]);
+    }, [assignmentId, organization?.organizationId, organizationLoading, externalActivityId]);
 
     React.useEffect(() => {
         if (!menuOpen) return;

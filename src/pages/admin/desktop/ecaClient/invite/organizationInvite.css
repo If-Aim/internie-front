@@ -1,0 +1,14 @@
+.organization-invite-page { width: 100%; min-height: 100vh; padding: 40px 20px; background: #F0F6FF; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
+.organization-invite-card { width: 100%; max-width: 520px; min-height: 280px; padding: 48px 42px; border: 1px solid #DDD; border-radius: 20px; background: #FFF; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; }
+
+.organization-invite-title { margin: 0 0 16px; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; text-align: center; }
+
+.organization-invite-desc { margin: 0; color: #6B6B6B; font-size: 15px; font-weight: 600; line-height: 24px; text-align: center; }
+.organization-invite-desc strong { color: #0166FF; font-weight: 800; }
+
+.organization-invite-button-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 32px; }
+
+.organization-invite-primary-button { min-width: 160px; height: 46px; padding: 0 18px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 15px; font-weight: 800; cursor: pointer; }
+
+.organization-invite-secondary-button { min-width: 130px; height: 46px; padding: 0 18px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; color: #6B6B6B; font-size: 15px; font-weight: 800; cursor: pointer; }

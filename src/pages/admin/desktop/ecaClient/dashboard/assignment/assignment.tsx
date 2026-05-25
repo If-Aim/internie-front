@@ -120,7 +120,7 @@ function getStatusDotClass(status: AssignmentStatus): string {
 export default function EcaDashboardAssignment(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
-    const { center, centerLoading } = useOutletContext<EcaClientAdminOutletContext>();
+    const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [activity, setActivity] = React.useState<ExternalActivityResponse | null>(null);
     const [assignments, setAssignments] = React.useState<AssignmentViewModel[]>([]);
@@ -136,9 +136,9 @@ export default function EcaDashboardAssignment(): React.ReactElement {
     
     React.useEffect(() => {
         async function fetchAssignments(): Promise<void> {
-            if (centerLoading) return;
+            if (organizationLoading) return;
 
-            if (!center?.centerId || !externalActivityId) {
+            if (!organization?.organizationId || !externalActivityId) {
                 setError("대외활동 정보를 찾을 수 없습니다.");
                 return;
             }
@@ -147,7 +147,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
             setError("");
 
             try {
-                const data = await getExternalActivity(center.centerId, externalActivityId);
+                const data = await getExternalActivity(organization.organizationId, externalActivityId);
                 setActivity(data);
                 setAssignments((data.assignments ?? []).map(toAssignmentViewModel));
             } catch (e) {
@@ -161,7 +161,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
         }
 
         fetchAssignments();
-    }, [center?.centerId, centerLoading, externalActivityId]);
+    }, [organization?.organizationId, organizationLoading, externalActivityId]);
 
     React.useEffect(() => {
         if (!filterOpen && !searchOpen) return;

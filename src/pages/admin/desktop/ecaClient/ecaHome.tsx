@@ -2,17 +2,23 @@
 import React from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { ApiError, getUserMe, } from "../../../../api/client";
-import { getMyCenter, getMyManagedExternalActivities } from "../../../../api/ea";
+import { getMyManagedExternalActivities } from "../../../../api/ea";
+import { getMyOrganizations } from "../../../../api/organizationClient";
 import type { UserMe,} from "../../../../api/client";
-import type { CenterResponse, ExternalActivityResponse } from "../../../../api/ea";
-
+import type { ExternalActivityResponse } from "../../../../api/ea";
+import type { MyOrganizationResponse } from "../../../../api/organizationClient";
 import "./ecaClientAdmin.css";
+
+const SELECTED_ORGANIZATION_STORAGE_KEY = "eca.selectedOrganizationId";
 
 export type EcaClientAdminOutletContext = {
     me: UserMe | null;
-    center: CenterResponse | null;
-    centerLoading: boolean;
+    organizations: MyOrganizationResponse[];
+    organization: MyOrganizationResponse | null;
+    selectedOrganizationId: number | null;
+    organizationLoading: boolean;
     managedActivities: ExternalActivityResponse[];
+    setSelectedOrganizationId: React.Dispatch<React.SetStateAction<number | null>>;
     refreshManagedActivities: () => Promise<void>;
 };
 
@@ -30,9 +36,32 @@ function isDefaultProfileImage(url?: string | null): boolean {
 
 export default function EcaClientAdminHome(): React.ReactElement{
     const [me, setMe] = React.useState<UserMe | null>(null);
-    const [center, setCenter] = React.useState<CenterResponse | null>(null);
-    const [centerLoading, setCenterLoading] = React.useState(false);
+    const [organizations, setOrganizations] = React.useState<MyOrganizationResponse[]>([]);
+    const [selectedOrganizationId, setSelectedOrganizationId] = React.useState<number | null>(() => {
+        const saved = sessionStorage.getItem(SELECTED_ORGANIZATION_STORAGE_KEY);
+        const parsed = saved ? Number(saved) : NaN;
+
+        return Number.isFinite(parsed) ? parsed : null;
+    });
+    const [organizationLoading, setOrganizationLoading] = React.useState(false);
+
+    const organization = React.useMemo(() => {
+        return organizations.find((item) => item.organizationId === selectedOrganizationId) ?? null;
+    }, [organizations, selectedOrganizationId]);
     const { pathname } = useLocation();
+
+    React.useEffect(() => {
+        if (selectedOrganizationId) {
+            sessionStorage.setItem(SELECTED_ORGANIZATION_STORAGE_KEY, String(selectedOrganizationId));
+            return;
+        }
+
+        sessionStorage.removeItem(SELECTED_ORGANIZATION_STORAGE_KEY);
+    }, [selectedOrganizationId]);
+
+    React.useEffect(() => {
+        setOpenedActivityIds([]);
+    }, [selectedOrganizationId]);
 
     React.useEffect(() => {
         let mounted = true;
@@ -59,29 +88,37 @@ export default function EcaClientAdminHome(): React.ReactElement{
     React.useEffect(() => {
         let mounted = true;
 
-        async function fetchCenter(): Promise<void> {
-            setCenterLoading(true);
+        async function fetchOrganizations(): Promise<void> {
+            setOrganizationLoading(true);
 
             try {
-                const data = await getMyCenter();
+                const data = await getMyOrganizations();
 
                 if (!mounted) return;
 
-                setCenter(data);
+                setOrganizations(data);
+                setSelectedOrganizationId((prev) => {
+                    if (prev && data.some((item) => item.organizationId === prev)) {
+                        return prev;
+                    }
+
+                    return data[0]?.organizationId ?? null;
+                });
             } catch (e) {
                 console.error(e);
 
                 if (mounted) {
-                    setCenter(null);
+                    setOrganizations([]);
+                    setSelectedOrganizationId(null);
                 }
             } finally {
                 if (mounted) {
-                    setCenterLoading(false);
+                    setOrganizationLoading(false);
                 }
             }
         }
 
-        fetchCenter();
+        void fetchOrganizations();
 
         return () => {
             mounted = false;
@@ -97,14 +134,22 @@ export default function EcaClientAdminHome(): React.ReactElement{
     const [managedActivities, setManagedActivities] = React.useState<ExternalActivityResponse[]>([]);
 
     const refreshManagedActivities = React.useCallback(async (): Promise<void> => {
+        if (!selectedOrganizationId) {
+            setManagedActivities([]);
+            return;
+        }
+
         try {
             const data = await getMyManagedExternalActivities();
-            setManagedActivities(data);
+
+            setManagedActivities(
+                data.filter((activity) => activity.organizationId === selectedOrganizationId)
+            );
         } catch (e) {
             console.error(e);
             setManagedActivities([]);
         }
-    }, []);
+    }, [selectedOrganizationId]);
 
     React.useEffect(() => {
         void refreshManagedActivities();
@@ -197,10 +242,17 @@ export default function EcaClientAdminHome(): React.ReactElement{
                     )}
                 </div>
 
-                <div className="eca-client-admin-sidebar-profile">
+                <NavLink
+                    to="/eca-admin/settings"
+                    className={({ isActive }) => (
+                        isActive
+                            ? "eca-client-admin-sidebar-profile eca-client-admin-sidebar-profile--active"
+                            : "eca-client-admin-sidebar-profile"
+                    )}
+                >
                     <img className="eca-client-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
                     <span className="eca-client-admin-name">관리자 {adminName}님</span>
-                </div>
+                </NavLink>
             </aside>
 
             <main className="eca-client-admin-body">
@@ -208,9 +260,12 @@ export default function EcaClientAdminHome(): React.ReactElement{
                     <Outlet
                         context={{
                             me,
-                            center,
-                            centerLoading,
+                            organizations,
+                            organization,
+                            selectedOrganizationId,
+                            organizationLoading,
                             managedActivities,
+                            setSelectedOrganizationId,
                             refreshManagedActivities,
                         } satisfies EcaClientAdminOutletContext}
                     />

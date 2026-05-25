@@ -1,0 +1,80 @@
+.eca-settings-page { margin: 0 auto; padding: 0 0 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; }
+
+.eca-settings-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.eca-settings-header h1 { margin: 0 0 0 29px; color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-settings-header p { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 600; line-height: 20px; }
+
+.eca-settings-card { width: 100%; padding: 24px 24px 26px; border: 1px solid #E7E7E7; border-radius: 10px; background: #FFF; box-sizing: border-box; }
+
+.eca-settings-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.eca-settings-card-head h2 { margin: 0 0 6px; color: #000; font-size: 18px; font-weight: 700; line-height: 24px; }
+.eca-settings-card-head p { margin: 0; color: #6B6B6B; font-size: 13px; font-weight: 600; line-height: 20px; }
+.eca-settings-card-head--action { align-items: center; }
+
+.eca-settings-organization-select-wrap { position: relative; width: 360px; height: 40px; }
+.eca-settings-organization-name-select { width: 100%; height: 100%; padding: 0 40px 0 9px; border: 1px solid #E7E7E7; border-radius: 4px; background: #fff; color: #000; font-size: 13px; font-weight: 600; box-sizing: border-box; outline: none; appearance: none; cursor: pointer; }
+.eca-settings-organization-name-select:disabled { color: #000; opacity: 1; cursor: default; }
+.eca-settings-organization-select-arrow { position: absolute; top: 50%; right: 10px; width: 20px; height: 20px; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+
+.eca-settings-primary-button { flex: 0 0 auto; height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 800; cursor: pointer; }
+.eca-settings-primary-button:disabled { background: #DDD; color: #777; cursor: default; }
+
+.eca-settings-secondary-button { height: 36px; padding: 0 16px; border: 0; border-radius: 8px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.eca-settings-secondary-button:disabled { background: #DDD; color: #777; cursor: default; }
+
+.eca-settings-empty { width: 100%; min-height: 70px; border: 1px dashed #DDD; border-radius: 10px; color: #808080; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-settings-empty--large { min-height: 120px; }
+
+.eca-settings-member-list { display: flex; flex-direction: column; gap: 8px; }
+.eca-settings-member-row { width: 100%; min-height: 80px; padding: 0 8px 0 20px; border: 1px solid #E7E7E7; border-radius: 4px; background: #fff; display: grid; grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.4fr) auto; align-items: center; gap: 20px; box-sizing: border-box; }
+.eca-settings-member-name { overflow: hidden; color: #000; font-size: 14px; font-weight: 500; line-height: 20px; white-space: nowrap; text-overflow: ellipsis; }
+.eca-settings-member-email { overflow: hidden; color: #000; text-align: end; font-size: 14px; font-weight: 500; line-height: 20px; white-space: nowrap; text-overflow: ellipsis; }
+.eca-settings-member-role { height: 40px; width: 80px; padding: 0 10px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; box-sizing: border-box; }
+.eca-settings-member-role--owner { background: #FFF1C2; color: #C88A00; }
+.eca-settings-member-role--member { background: #BDD8FF; color: #0166FF; }
+
+.eca-settings-member-management-card { width: 640px; min-height: 720px; padding: 64px 36px 48px 56px; border-radius: 20px; }
+.eca-settings-member-management-head { display: flex; flex-direction: column; gap: 32px; margin-bottom: 34px; }
+.eca-settings-form-label { display: block; margin: 0 0 8px 7px; color: #000; font-size: 14px; font-weight: 700; line-height: 16px; }
+.eca-settings-form-label span { color: #f00; }
+.eca-settings-role-select-wrap { position: relative; width: 200px; height: 42px; }
+.eca-settings-role-select { width: 100%; height: 100%; padding: 0 44px 0 12px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #000; font-size: 13px; font-weight: 600; box-sizing: border-box; outline: none; appearance: none; opacity: 1; cursor: not-allowed; }
+.eca-settings-role-select-arrow { position: absolute; top: 50%; right: 12px; width: 20px; height: 20px; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.eca-settings-manager-section { margin-bottom: 14px; }
+.eca-settings-manager-title { display: block; margin: 0 0 12px 7px; color: #000; font-size: 14px; font-weight: 700; line-height: 16px; }
+.eca-settings-add-member-button { width: 80px; height: 32px; border: 0; border-radius: 10px; margin-left: 7px; background: #E6E6E6; color: #6B6B6B; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-settings-add-member-button:disabled { opacity: .5; cursor: default; }
+
+.eca-settings-invite-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(107,107,107,.5); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+.eca-settings-invite-modal { width: 560px; min-height: 310px; padding: 36px 44px 40px; border-radius: 14px; background: #fff; box-shadow: 0 0 18px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-settings-invite-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+.eca-settings-invite-modal-head h3 { margin: 0; color: #000; font-size: 18px; font-weight: 700; line-height: 28px; }
+.eca-settings-invite-modal-close { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-settings-invite-modal-close img { width: 20px; height: 20px; display: block; }
+.eca-settings-invite-modal-guide { display: block; margin-bottom: 18px; color: #000; font-size: 16px; font-weight: 700; line-height: 24px; }
+.eca-settings-invite-modal-linkbox { width: 100%; height: 42px; padding: 0 6px 0 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.eca-settings-invite-modal-linkbox span { min-width: 0; flex: 1; color: #808080; font-size: 15px; font-weight: 600; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-settings-invite-modal-linkbox button { width: 70px; height: 30px; border: 0; border-radius: 8px; background: #eee; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-settings-invite-modal-linkbox button:hover { color: #000; }
+
+.eca-settings-member-row.is-clickable { cursor: pointer; }
+.eca-settings-member-row.is-clickable:hover { border-color: #BDD8FF; background: #F8FBFF; }
+.eca-settings-owner-transfer-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(107,107,107,.5); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+.eca-settings-owner-transfer-modal { width: 520px; min-height: 300px; padding: 36px 40px 34px; border-radius: 14px; background: #fff; box-shadow: 0 0 18px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-settings-owner-transfer-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+.eca-settings-owner-transfer-modal-head h3 { margin: 0; color: #000; font-size: 18px; font-weight: 700; line-height: 28px; }
+.eca-settings-owner-transfer-modal-close { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-settings-owner-transfer-modal-close img { width: 20px; height: 20px; display: block; }
+.eca-settings-owner-transfer-message { margin: 0; color: #000; font-size: 16px; font-weight: 700; line-height: 24px; }
+.eca-settings-owner-transfer-message strong { color: #0166FF; font-weight: 800; }
+.eca-settings-owner-transfer-desc { margin: 12px 0 0; color: #808080; font-size: 13px; font-weight: 600; line-height: 20px; }
+.eca-settings-owner-transfer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 44px; }
+.eca-settings-owner-transfer-cancel { width: 96px; height: 42px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #808080; font-size: 14px; font-weight: 700; cursor: pointer; }
+.eca-settings-owner-transfer-confirm { width: 124px; height: 42px; border: 0; border-radius: 8px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 800; cursor: pointer; }
+.eca-settings-owner-transfer-cancel:disabled, .eca-settings-owner-transfer-confirm:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 960px) {
+    .eca-settings-page { width: 100%; min-width: 680px; }
+    .eca-settings-summary-grid { grid-template-columns: 1fr; }
+    .eca-settings-card-head--action { align-items: flex-start; flex-direction: column; }
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { getExternalActivitiesByCenter, getExternalActivitiesByStatus, updateExternalActivityStatus } from "../../../../../api/ea";
+import { getExternalActivitiesByOrganization, getExternalActivitiesByStatus, updateExternalActivityStatus } from "../../../../../api/ea";
 import type { ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../ecaHome";
 import "./home.css";
@@ -22,6 +22,7 @@ type Activity = {
 };
 
 const activityStatuses: ActivityStatus[] = ["upcoming", "ongoing", "completed", "delayed"];
+const ORGANIZATION_DISPLAY_LABEL = "센터";
 
 function formatActivityDate(startDate: string, endDate: string): string {
     return `${startDate.replaceAll("-", ".")} ~ ${endDate.replaceAll("-", ".")}`;
@@ -110,7 +111,10 @@ function ManagerProfile({ manager }: { manager: ActivityManager }): React.ReactE
 
 export default function EcaAdminHomePage(): React.ReactElement {
     const navigate = useNavigate();
-    const { me, center, centerLoading, managedActivities } = useOutletContext<EcaClientAdminOutletContext>();
+    const { me, organizations, organization, selectedOrganizationId, organizationLoading, managedActivities, setSelectedOrganizationId, } = useOutletContext<EcaClientAdminOutletContext>();
+
+    const [organizationSelectOpen, setOrganizationSelectOpen] = React.useState(false);
+    const organizationSelectRef = React.useRef<HTMLDivElement | null>(null);
 
     const [myActivities, setMyActivities] = React.useState<Activity[]>([]);
     const [centerActivities, setCenterActivities] = React.useState<Activity[]>([]);
@@ -128,6 +132,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
     const [centerSearchOpen, setCenterSearchOpen] = React.useState(false);
     const [centerSearchKeyword, setCenterSearchKeyword] = React.useState("");
 
+
     const [statusMenuActivityId, setStatusMenuActivityId] = React.useState<number | null>(null);
     const [managerPopoverActivityId, setManagerPopoverActivityId] = React.useState<number | null>(null);
     const [draggingActivityId, setDraggingActivityId] = React.useState<number | null>(null);
@@ -135,6 +140,22 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
     const centerScrollRef = React.useRef<HTMLDivElement | null>(null);
     const managerPopoverRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        if (!organizationSelectOpen) return;
+
+        function handleMouseDown(e: MouseEvent): void {
+            if (organizationSelectRef.current?.contains(e.target as Node)) return;
+
+            setOrganizationSelectOpen(false);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown, true);
+        };
+    }, [organizationSelectOpen]);
 
     React.useEffect(() => {
         function handleWheel(e: WheelEvent): void {
@@ -174,7 +195,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
     }, [managerPopoverActivityId]);
 
     async function changeMyActivityCompletion(activityId: number, completed: boolean): Promise<void> {
-        if (!center?.centerId) {
+        if (!organization?.organizationId) {
             return;
         }
 
@@ -196,7 +217,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
         setStatusMenuActivityId(null);
 
         try {
-            const updated = await updateExternalActivityStatus(center.centerId, activityId, {
+            const updated = await updateExternalActivityStatus(organization.organizationId, activityId, {
                 completed,
             });
 
@@ -244,28 +265,37 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
     React.useEffect(() => {
         loadMyActivities();
-    }, [managedActivities, selectedStatuses, selectedYear, searchKeyword]);
+    }, [managedActivities, selectedOrganizationId, selectedStatuses, selectedYear, searchKeyword]);
 
     React.useEffect(() => {
         loadCenterActivities();
-    }, [center?.centerId, centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
+    }, [organization?.organizationId, centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
 
     function loadMyActivities(): void {
         const keyword = searchKeyword.trim().toLowerCase();
 
         const filtered = managedActivities
+            .filter((activity) => !selectedOrganizationId || activity.organizationId === selectedOrganizationId)
             .filter((activity) => selectedStatuses.includes(getCalculatedActivityStatus(activity)))
             .filter((activity) => !keyword || activity.name.toLowerCase().includes(keyword))
             .filter((activity) => isActivityInYear(activity, selectedYear));
 
         setMyActivities(filtered.map(toHomeActivity));
     }
+    const selectedOrganizationIdRef = React.useRef<number | null>(selectedOrganizationId);
+    React.useEffect(() => {
+        selectedOrganizationIdRef.current = selectedOrganizationId;
+    }, [selectedOrganizationId]);
 
     async function loadCenterActivities(): Promise<void> {
-        if (!center?.centerId) {
+        const requestOrganizationId = organization?.organizationId;
+
+        if (!requestOrganizationId) {
             setCenterActivities([]);
             return;
         }
+
+        setCenterActivities([]);
 
         try {
             const isAllStatusSelected = centerSelectedStatuses.length === activityStatuses.length;
@@ -273,23 +303,31 @@ export default function EcaAdminHomePage(): React.ReactElement {
             const year = centerSelectedYear || undefined;
 
             if (isAllStatusSelected) {
-                const result = await getExternalActivitiesByCenter(center.centerId, {
+                const result = await getExternalActivitiesByOrganization(requestOrganizationId, {
                     year,
                     name,
                 });
+
+                if (selectedOrganizationIdRef.current !== requestOrganizationId) return;
 
                 setCenterActivities(result.map(toHomeActivity));
                 return;
             }
 
-            const result = await getExternalActivitiesByStatus(center.centerId, {
+            const result = await getExternalActivitiesByStatus(requestOrganizationId, {
                 year,
                 name,
             });
 
+            if (selectedOrganizationIdRef.current !== requestOrganizationId) return;
+
             setCenterActivities(flattenByStatus(result, centerSelectedStatuses));
         } catch (error) {
-            setCenterActivities([]);
+            console.error(error);
+
+            if (selectedOrganizationIdRef.current === requestOrganizationId) {
+                setCenterActivities([]);
+            }
         }
     }
 
@@ -437,20 +475,74 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
         return activityStatuses.filter((item) => next.includes(item));
     }
-
     const adminName = getDisplayAdminName(me);
 
     return (
         <div className="eca-home-page">
             <section className="eca-home-header">
                 <div className="eca-home-header-top">
-                    <h1>{centerLoading ? "센터 정보를 불러오는 중" : center?.name ?? "센터 이름"}</h1>
+                    {organizationLoading ? (
+                        <h1>{ORGANIZATION_DISPLAY_LABEL} 정보를 불러오는 중</h1>
+                    ) : organizations.length > 1 ? (
+                        <div className="eca-home-organization-select-wrap" ref={organizationSelectRef}>
+                            <button
+                                type="button"
+                                className={"eca-home-organization-select-button" + (organizationSelectOpen ? " is-open" : "")}
+                                onClick={() => setOrganizationSelectOpen((prev) => !prev)}
+                            >
+                                <span>{organization?.organizationName ?? `${ORGANIZATION_DISPLAY_LABEL} 선택`}</span>
+                                <img src="/icons/chevron-down-80.svg" alt="" />
+                            </button>
+
+                            {organizationSelectOpen ? (
+                                <div className="eca-home-organization-select-menu">
+                                    {organizations.map((item) => (
+                                        <button
+                                            type="button"
+                                            key={item.organizationId}
+                                            className={"eca-home-organization-select-option" + (item.organizationId === selectedOrganizationId ? " is-selected" : "")}
+                                            onClick={() => {
+                                                if (item.organizationId === selectedOrganizationId) {
+                                                    setOrganizationSelectOpen(false);
+                                                    return;
+                                                }
+
+                                                setSelectedOrganizationId(item.organizationId);
+                                                setOrganizationSelectOpen(false);
+                                                setStatusMenuActivityId(null);
+                                                setManagerPopoverActivityId(null);
+                                                setDraggingActivityId(null);
+                                                setCenterActivities([]);
+                                                setMyActivities([]);
+                                            }}
+                                        >
+                                            {item.organizationName}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : (
+                        <h1>{organization?.organizationName ?? `${ORGANIZATION_DISPLAY_LABEL} 이름`}</h1>
+                    )}
                 </div>
 
                 <div className="eca-home-header-bottom">
                     <p>환영합니다, {adminName ? `${adminName} 관리자님` : "관리자님"}</p>
 
-                    <button type="button" className="eca-home-add-button" onClick={() => navigate("/eca-admin/activities/new")} >
+                    <button
+                        type="button"
+                        className="eca-home-add-button"
+                        disabled={!organization?.organizationId}
+                        onClick={() => {
+                            if (!organization?.organizationId) {
+                                window.alert(`${ORGANIZATION_DISPLAY_LABEL}를 먼저 선택해주세요.`);
+                                return;
+                            }
+
+                            navigate("/eca-admin/activities/new");
+                        }}
+                    >
                         + 대외활동 등록
                     </button>
                 </div>
@@ -595,7 +687,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
             <section className="eca-home-centerpanel">
                 <div className="eca-home-centerpanel-head">
-                    <h2>센터 전체 대외활동</h2>
+                    <h2>{ORGANIZATION_DISPLAY_LABEL} 전체 대외활동</h2>
                     <HomeToolbar
                         selectedStatuses={centerSelectedStatuses}
                         selectedYear={centerSelectedYear}

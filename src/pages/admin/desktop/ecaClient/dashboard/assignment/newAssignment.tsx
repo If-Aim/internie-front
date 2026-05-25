@@ -441,7 +441,7 @@ function CalendarRange({
         setFocus("start");
     };
     
-    const activeTime = mode === "endOnly" ? (endTime ?? "18:00") : (startTime ?? "09:00");
+    const activeTime = mode === "endOnly" ? (endTime ?? "23:59") : (startTime ?? "00:00");
     const activeTimeParts = splitTime(activeTime);
     const timeLabel = mode === "endOnly" ? "마감시간" : "시작시간";
 
@@ -622,11 +622,7 @@ function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
     }, [updateDisplayText]);
 
     return (
-        <em
-            ref={memberTextRef}
-            className="eca-assignment-edit-team-members"
-            title={names.join(", ")}
-        >
+        <em ref={memberTextRef} className="eca-assignment-edit-team-members" title={names.join(", ")} >
             {displayText}
         </em>
     );
@@ -640,7 +636,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }>();
 
     const isEditMode = Boolean(assignmentId);
-    const { center, centerLoading } = useOutletContext<EcaClientAdminOutletContext>();
+    const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [/*activity*/, setActivity] = React.useState<ExternalActivityResponse | null>(null);
     const [editingAssignment, setEditingAssignment] = React.useState<AssignmentResponse | null>(null);
@@ -712,9 +708,9 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     
     React.useEffect(() => {
         async function fetchPageData(): Promise<void> {
-            if (centerLoading) return;
+            if (organizationLoading) return;
 
-            if (!center?.centerId || !externalActivityId) {
+            if (!organization?.organizationId || !externalActivityId) {
                 setError("대외활동 정보를 찾을 수 없습니다.");
                 return;
             }
@@ -724,7 +720,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
             try {
                 const [activityData, teamData, assignmentData] = await Promise.all([
-                    getExternalActivity(center.centerId, externalActivityId),
+                    getExternalActivity(organization.organizationId, externalActivityId),
                     getExternalActivityTeams(externalActivityId),
                     isEditMode && assignmentId
                         ? getAssignment(assignmentId)
@@ -759,8 +755,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 setName(assignmentData.name ?? "");
                 setStartDate(parseDateFromApi(assignmentData.startDate));
                 setEndDate(parseDateFromApi(assignmentData.endDate));
-                setStartTime(parseTimeFromApi(assignmentData.startTime, "09:00"));
-                setEndTime(parseTimeFromApi(assignmentData.endTime, "18:00"));
+                setStartTime(parseTimeFromApi(assignmentData.startTime, "00:00"));
+                setEndTime(parseTimeFromApi(assignmentData.endTime, "23:59"));
                 setSystemForm(assignmentData.systemForm);
                 setTeamCount(
                     assignmentData.systemForm === "TEAM"
@@ -814,7 +810,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         fetchPageData();
-    }, [assignmentId, center?.centerId, centerLoading, externalActivityId, isEditMode, navigate]);
+    }, [assignmentId, organization?.organizationId, organizationLoading, externalActivityId, isEditMode, navigate]);
 
     React.useEffect(() => {
         function handleMouseDown(e: MouseEvent): void {
@@ -2201,7 +2197,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             setSelectedExistingTeamIds(firstOption?.teamIds ?? []);
                                         }}
                                     />
-                                    <span>이전 팀 유지하기</span>
+                                    <span>이전 팀 불러오기</span>
                                 </label>
 
                                 <label className={"eca-team-mode-option" + (teamBuildMode === "NEW" ? " is-selected" : "")}>
@@ -2334,7 +2330,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                     setTeamMemberSearch(e.target.value);
                                                     setTeamMemberDropdownOpen(true);
                                                 }}
-                                                placeholder="@ 학생A"
+                                                placeholder="선택해주세요"
                                             />
 
                                             <button
@@ -2352,7 +2348,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             </button>
                                         </div>
 
-                                        <button type="button" className="eca-team-create-decide-button" onClick={addCurrentTeam}>
+                                        <button type="button" className={"eca-team-create-decide-button" + (currentTeamMemberIds.length > 0 ? " is-active" : "")} onClick={addCurrentTeam}>
                                             결정
                                         </button>
                                     </div>
@@ -2371,22 +2367,24 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             <div className="eca-team-member-dropdown-list">
                                                 {getCurrentAvailableParticipants().map((participant) => {
                                                     const checked = currentTeamMemberIds.includes(participant.userId);
+                                                    const isLeader = checked && currentTeamMemberIds[0] === participant.userId;
 
                                                     return (
-                                                        <label key={participant.userId} className={"eca-team-member-option" + (checked ? " is-selected" : "")}>
+                                                        <label key={participant.userId} className={"eca-team-member-option" + (checked ? " is-selected" : "") + (isLeader ? " is-leader" : "")}>
                                                             <input type="checkbox" checked={checked} onChange={() => toggleCurrentTeamMember(participant.userId)} />
-
-                                                            <img
-                                                                className="eca-team-member-avatar"
-                                                                src={participant.profileImage || "/internie_mascot_normal.png"}
-                                                                alt=""
-                                                                onError={(e) => {
-                                                                    e.currentTarget.src = "/internie_mascot_normal.png";
-                                                                }}
-                                                            />
-
+                                                            <span className="eca-team-member-checkbox" aria-hidden="true">
+                                                                {checked ? (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                                        <rect width="20" height="20" rx="2" fill={isLeader ? "#FF0000" : "#0166FF"} />
+                                                                        <path d="M5 8L8.75281 14.5L14.2376 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                                    </svg>
+                                                                ) : null}
+                                                            </span>
                                                             <strong>{participant.name}</strong>
-                                                            <small>{participant.email ?? participant.schoolName}</small>
+                                                            <span className="eca-team-member-info">
+                                                                {isLeader ? <b>팀장</b> : null}
+                                                                <small>{participant.email ?? participant.schoolName}</small>
+                                                            </span>
                                                         </label>
                                                     );
                                                 })}

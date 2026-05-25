@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { ApiError } from "../../../../../api/client";
 import { getMyExternalActivityAssignments } from "../../../../../api/ea";
 import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentAssignmentTeam } from "../../../../../api/ea";
 import type { EcaStudentOutletContext } from "../ecaStudentLayout";
@@ -109,7 +110,8 @@ export default function EcaStudentAssignment(): React.ReactElement {
     React.useEffect(() => {
         async function fetchAssignments(): Promise<void> {
             if (!externalActivityId) {
-                setError("대외활동 정보를 찾을 수 없습니다.");
+                window.alert("대외활동 정보를 찾을 수 없습니다.");
+                navigate("/student", { replace: true });
                 return;
             }
 
@@ -122,14 +124,36 @@ export default function EcaStudentAssignment(): React.ReactElement {
             } catch (e) {
                 console.error(e);
                 setAssignments([]);
-                setError("과제 목록을 불러오지 못했습니다.");
+
+                if (e instanceof ApiError) {
+                    if (e.status === 404 || e.code === "EXTERNAL_ACTIVITY_NOT_FOUND") {
+                        window.alert("삭제되었거나 존재하지 않는 대외활동입니다.");
+                        navigate("/student", { replace: true });
+                        return;
+                    }
+
+                    if (e.status === 403 || e.code === "FORBIDDEN" || e.code === "SUBMISSION_NOT_ALLOWED") {
+                        window.alert("접근할 수 없는 대외활동입니다.");
+                        navigate("/student", { replace: true });
+                        return;
+                    }
+
+                    if (e.status === 400) {
+                        window.alert(e.message || "대외활동 정보를 불러올 수 없습니다.");
+                        navigate("/student", { replace: true });
+                        return;
+                    }
+                }
+
+                window.alert("대외활동 정보를 불러오지 못했습니다.");
+                navigate("/student", { replace: true });
             } finally {
                 setLoading(false);
             }
         }
 
         fetchAssignments();
-    }, [externalActivityId]);
+    }, [externalActivityId, navigate]);
 
     React.useEffect(() => {
         if (!filterOpen && !searchOpen) return;

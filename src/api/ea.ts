@@ -78,24 +78,11 @@ export type TeamMemberMoveRequest = {
     targetTeamId: number;
 };
 
-/* - Center 관련 (Student) - */
-export type CenterResponse = {
-    centerId: number;
-    name: string;
-};
-
-export async function getMyCenter(): Promise<CenterResponse> {
-    return api<CenterResponse>("/centers/me");
-}
-export async function getMyParticipantCenter(): Promise<CenterResponse | null> {
-    return api<CenterResponse | null>("/centers/me/participant");
-}
-
 /* - EA 관련 (Student) - */
 export type StudentExternalActivityResponse = {
     externalActivityId: number;
-    centerId: number;
-    centerName: string;
+    organizationId: number;
+    organizationName: string;
     name: string;
     startDate: string;
     endDate: string;
@@ -293,17 +280,85 @@ export async function getMyTeam(
     );
 }
 
+/* - EA 학생 초대코드 관련 - */
+export type ExternalActivityStudentInviteStatus = "ACTIVE" | "DISABLED";
+
+export type ExternalActivityStudentInviteResponse = {
+    externalActivityStudentInviteId: number;
+    externalActivityId: number;
+    externalActivityName: string;
+    code: string;
+    token: string;
+    status: ExternalActivityStudentInviteStatus;
+    createdByUserId: number;
+    createdByName: string;
+    createdAt: string;
+};
+
+export type AcceptExternalActivityStudentInviteResponse = {
+    externalActivityId: number;
+    externalActivityName: string;
+    organizationId: number;
+    organizationName: string;
+    participantUserId: number;
+    participantName: string;
+};
+
+export async function createExternalActivityStudentInvite(
+    externalActivityId: number | string
+): Promise<ExternalActivityStudentInviteResponse> {
+    return api<ExternalActivityStudentInviteResponse>(
+        `/externalActivities/${externalActivityId}/student-invites`,
+        { method: "POST" }
+    );
+}
+
+export async function getExternalActivityStudentInvites(
+    externalActivityId: number | string
+): Promise<ExternalActivityStudentInviteResponse[]> {
+    return api<ExternalActivityStudentInviteResponse[]>(
+        `/externalActivities/${externalActivityId}/student-invites`,
+        { method: "GET" }
+    );
+}
+
+export async function disableExternalActivityStudentInvite(
+    externalActivityId: number | string,
+    externalActivityStudentInviteId: number | string
+): Promise<void> {
+    await api<void>(
+        `/externalActivities/${externalActivityId}/student-invites/${externalActivityStudentInviteId}`,
+        { method: "DELETE" }
+    );
+}
+
+export async function acceptExternalActivityStudentInvite(
+    token: string
+): Promise<AcceptExternalActivityStudentInviteResponse> {
+    return api<AcceptExternalActivityStudentInviteResponse>(
+        `/student-invites/tokens/${encodeURIComponent(token.trim())}/accept`,
+        { method: "POST" }
+    );
+}
+
 /* - EA 관련 (Admin) - */
 export type CreateExternalActivityRequest = {
     name: string;
     description?: string | null;
     startDate: string;
     endDate: string;
-    participantUserIds: number[];
+    progressStatus?: ExternalActivityProgressStatus | null;
     managerUserIds: number[];
 };
 
-export type UpdateExternalActivityRequest = CreateExternalActivityRequest;
+export type UpdateExternalActivityRequest = {
+    name: string;
+    description?: string | null;
+    startDate: string;
+    endDate: string;
+    participantUserIds?: number[] | null;
+    managerUserIds: number[];
+};
 
 export type UpdateExternalActivityStatusRequest = {
     completed: boolean;
@@ -326,7 +381,7 @@ export type ExternalActivityManager = {
 
 export type ExternalActivityResponse = {
     externalActivityId: number;
-    centerId: number;
+    organizationId: number;
     name: string;
     description?: string | null;
     participantNames?: string[] | null;
@@ -362,7 +417,7 @@ export type ExternalActivitiesByStatusResponse = {
 };
 
 export async function createExternalActivity( // 대외활동 생성
-    centerId: number | string,
+    organizationId: number | string,
     request: CreateExternalActivityRequest,
     planFile?: File | null
 ): Promise<ExternalActivityResponse> {
@@ -378,14 +433,14 @@ export async function createExternalActivity( // 대외활동 생성
     }
 
     return apiUpload<ExternalActivityResponse>(
-        `/centers/${centerId}/externalActivities`,
+        `/organizations/${organizationId}/externalActivities`,
         formData,
         { method: "POST" }
     );
 }
 
 export async function updateExternalActivity( // 대외활동 수정
-    centerId: number | string,
+    organizationId: number | string,
     externalActivityId: number | string,
     request: UpdateExternalActivityRequest,
     planFile?: File | null
@@ -402,19 +457,19 @@ export async function updateExternalActivity( // 대외활동 수정
     }
 
     return apiUpload<ExternalActivityResponse>(
-        `/centers/${centerId}/externalActivities/${externalActivityId}`,
+        `/organizations/${organizationId}/externalActivities/${externalActivityId}`,
         formData,
         { method: "PATCH" }
     );
 }
 
 export async function updateExternalActivityStatus(
-    centerId: number | string,
+    organizationId: number | string,
     externalActivityId: number | string,
     request: UpdateExternalActivityStatusRequest
 ): Promise<ExternalActivityResponse> {
     return api<ExternalActivityResponse>(
-        `/centers/${centerId}/externalActivities/${externalActivityId}/status`,
+        `/organizations/${organizationId}/externalActivities/${externalActivityId}/status`,
         {
             method: "PATCH",
             body: JSON.stringify(request),
@@ -423,33 +478,33 @@ export async function updateExternalActivityStatus(
 }
 
 export async function deleteExternalActivity( // 대외활동 삭제
-    centerId: number | string,
+    organizationId: number | string,
     externalActivityId: number | string
 ): Promise<void> {
     await api<void>(
-        `/centers/${centerId}/externalActivities/${externalActivityId}`,
+        `/organizations/${organizationId}/externalActivities/${externalActivityId}`,
         { method: "DELETE" }
     );
 }
 
 export async function getExternalActivity( // 대외활동 상세 조회
-    centerId: number | string,
+    organizationId: number | string,
     externalActivityId: number | string
 ): Promise<ExternalActivityResponse> {
     return api<ExternalActivityResponse>(
-        `/centers/${centerId}/externalActivities/${externalActivityId}`,
+        `/organizations/${organizationId}/externalActivities/${externalActivityId}`,
         { method: "GET" }
     );
 }
 
-export async function getExternalActivityManagers( // 센터별 매니저 조회
-    centerId: number | string
+export async function getExternalActivityManagers( // 기관별 대외활동 관리자 후보 조회
+    organizationId: number | string
 ): Promise<ExternalActivityManager[]> {
-    return api<ExternalActivityManager[]>(`/centers/${centerId}/managers`, { method: "GET" });
+    return api<ExternalActivityManager[]>(`/organizations/${organizationId}/managers`, { method: "GET" });
 }
 
-export async function getExternalActivitiesByCenter( // 센터별 대외활동 전체 조회
-    centerId: number | string,
+export async function getExternalActivitiesByOrganization( // 기관별 대외활동 전체 조회
+    organizationId: number | string,
     query?: ExternalActivityListQuery
 ): Promise<ExternalActivityResponse[]> {
     const params = new URLSearchParams();
@@ -469,13 +524,13 @@ export async function getExternalActivitiesByCenter( // 센터별 대외활동 �
     const queryString = params.toString();
 
     return api<ExternalActivityResponse[]>(
-        `/centers/${centerId}/externalActivities${queryString ? `?${queryString}` : ""}`,
+        `/organizations/${organizationId}/externalActivities${queryString ? `?${queryString}` : ""}`,
         { method: "GET" }
     );
 }
 
-export async function getExternalActivitiesByStatus( // 센터 대외 활동 진행 상태별 대외 활동 조회
-    centerId: number | string,
+export async function getExternalActivitiesByStatus( // 기관 대외활동 진행 상태별 조회
+    organizationId: number | string,
     query?: ExternalActivitiesByStatusQuery
 ): Promise<ExternalActivitiesByStatusResponse> {
     const params = new URLSearchParams();
@@ -491,7 +546,7 @@ export async function getExternalActivitiesByStatus( // 센터 대외 활동 진
     const queryString = params.toString();
 
     return api<ExternalActivitiesByStatusResponse>(
-        `/centers/${centerId}/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        `/organizations/${organizationId}/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
         { method: "GET" }
     );
 }
@@ -538,24 +593,6 @@ export async function getMyManagedExternalActivitiesByStatus( //나의 대외활
 
     return api<ExternalActivitiesByStatusResponse>(
         `/users/me/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
-}
-
-/* - Center 관련 (Admin) - */
-export type CenterParticipantResponse = {
-    userId: number;
-    name?: string | null;
-    email?: string | null;
-    schoolName?: string | null;
-    profileImage?: string | null;
-};
-
-export async function getCenterParticipants(
-    centerId: number | string
-): Promise<CenterParticipantResponse[]> {
-    return api<CenterParticipantResponse[]>(
-        `/centers/${centerId}/participants`,
         { method: "GET" }
     );
 }
@@ -702,12 +739,12 @@ function saveBlob(blob: Blob, fileName: string): void {
 }
 
 export async function downloadExternalActivityPlan( // 활동 계획서 다운
-    centerId: number | string,
+    organizationId: number | string,
     externalActivityId: number | string,
     fileName?: string | null
 ): Promise<void> {
     const blob = await apiBlob(
-        `/centers/${centerId}/externalActivities/${externalActivityId}/plan/download`,
+        `/organizations/${organizationId}/externalActivities/${externalActivityId}/plan/download`,
         { method: "GET" }
     );
 

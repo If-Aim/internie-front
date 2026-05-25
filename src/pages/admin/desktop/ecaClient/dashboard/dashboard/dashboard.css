@@ -29,9 +29,28 @@
 .eca-dashboard-panel-right { width: 100%; padding: 23px 9px 26px 20px; border: 1px solid #ddd; border-radius: 10px; background: #fff; box-sizing: border-box; }
 .eca-dashboard-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 19px; padding: 0 8px 0 4px; }
 .eca-dashboard-panel-head h2 { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
-.eca-dashboard-panel-actions { display: flex; align-items: center; gap: 9px; }
+.eca-dashboard-panel-actions { display: flex; align-items: center; gap: 5px; }
 .eca-dashboard-panel-actions button { width: 32px; height: 32px; border: 0; border-radius: 999px; background: #F6F6F6; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-dashboard-panel-actions button:disabled { opacity: .35; cursor: default; }
+
+.eca-dashboard-invite-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(107,107,107,.5); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-invite-modal { width: 640px; min-height: 360px; padding: 40px 38px 32px 52px; border-radius: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-dashboard-invite-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 0; }
+.eca-dashboard-invite-modal-head-text { margin-top: 12px; }
+.eca-dashboard-invite-modal-head h3 { margin: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 28px; }
+.eca-dashboard-invite-modal-head p { margin: 8px 0 0; color: #808080; font-size: 14px; font-weight: 500; line-height: 20px; }
+.eca-dashboard-invite-modal-close { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-dashboard-invite-modal-close img { width: 20px; height: 20px; display: block; }
+.eca-dashboard-invite-modal-action { display: none; }
+.eca-dashboard-invite-codebox { width: 480px; height: 48px; margin-top: 52px; padding: 0 10px 0 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; }
+.eca-dashboard-invite-codebox strong { color: #000; font-size: 20px; font-weight: 500; line-height: 28px; letter-spacing: .2px; }
+.eca-dashboard-invite-codebox button { width: 80px; height: 32px; border: 1px solid #d8d8d8; border-radius: 10px; background: #fff; color: #808080; font-size: 14px; font-weight: 500; cursor: pointer; }
+.eca-dashboard-invite-codebox button:hover { border-color: #bdbdbd; color: #555; }
+.eca-dashboard-invite-codebox button:disabled { opacity: .45; cursor: not-allowed; }
+.eca-dashboard-invite-codebox-loading { color: #808080; font-size: 14px; font-weight: 500; }
+.eca-dashboard-invite-codebox-create { width: auto !important; padding: 0 16px; }
+.eca-dashboard-invite-modal-footer { display: flex; justify-content: flex-end; margin-top: 76px; }
+.eca-dashboard-invite-confirm-button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #BDD8FF; color: var(--primary); font-size: 20px; font-weight: 700; cursor: pointer; margin-right: 6px; }
 
 .eca-dashboard-list-left { display: flex; flex-direction: column; gap: 8px; }
 .eca-dashboard-list-right { display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; padding-right: 7px;}
@@ -63,9 +82,14 @@
 .eca-dashboard-search-input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 0; outline: none; color: #000; font-size: 14px; font-weight: 700; box-sizing: border-box; }
 .eca-dashboard-search-reset { width: 24px; height: 24px; border: 0; border-radius: 10px; background: none; cursor: pointer; }
 
+
+.eca-dashboard-participant-add { background:none !important; border-radius: 0 !important; }
+.eca-dashboard-participant-search { background:none !important; border-radius: 0 !important; }
+
+
 .eca-dashboard-person-row { min-height: 64px; padding: 0 14px; gap: 14px; }
 .eca-dashboard-avatar-wrap { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
-.eca-dashboard-avatar { width: 38px; height: 38px; border-radius: 999px; background: #e1e1e1; display: block; flex-shrink: 0; }
+.eca-dashboard-avatar { width: 38px; height: 38px; border-radius: 999px; background: #fff; border: 1px solid #d9d9d9; display: block; flex-shrink: 0; }
 .eca-dashboard-active-dot { position: absolute; right: -2px; bottom: 2px; width: 12px; height: 12px; border-radius: 999px; background: var(--primary); border: 2px solid #fff; box-sizing: border-box; }
 .eca-dashboard-person-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .eca-dashboard-person-info strong { display: block; max-width: 100%; overflow: hidden; color: #000; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 700; line-height: 16px; }

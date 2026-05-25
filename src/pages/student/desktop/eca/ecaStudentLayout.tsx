@@ -9,6 +9,7 @@ import "./ecaStudentLayout.css";
 export type EcaStudentOutletContext = {
     me: UserMe | null;
     activities: StudentExternalActivityResponse[];
+    activitiesLoading: boolean;
 };
 
 function getDisplayStudentName(me: UserMe | null): string {
@@ -45,7 +46,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
     const [me, setMe] = React.useState<UserMe | null>(null);
     const [activities, setActivities] = React.useState<StudentExternalActivityResponse[]>([]);
-    const [activitiesLoading, setActivitiesLoading] = React.useState(false);
+    const [activitiesLoading, setActivitiesLoading] = React.useState(true);
     const [openedActivityId, setOpenedActivityId] = React.useState<number | null>(externalActivityId ? Number(externalActivityId) : null);
 
     React.useEffect(() => {
@@ -112,7 +113,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
         const nextActivityId = Number(externalActivityId);
 
-        if (!Number.isNaN(nextActivityId)) {
+        if (Number.isFinite(nextActivityId)) {
             setOpenedActivityId(nextActivityId);
         }
     }, [externalActivityId]);
@@ -193,7 +194,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
             <main className="eca-student-body">
                 <div className="eca-student-surface">
-                    <Outlet context={{ me, activities } satisfies EcaStudentOutletContext} />
+                    <Outlet context={{ me, activities, activitiesLoading } satisfies EcaStudentOutletContext} />
                 </div>
             </main>
         </div>

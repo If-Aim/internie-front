@@ -8,6 +8,7 @@ import AdminHome from "./home";
 import Users from "./studentIdCard/users";
 import Certificates from "./upload/certificates";
 import Reports from "./record/reports";
+import Organizations from "./organization/organizations";
 
 
 export default function DesktopAdminApp(): React.ReactElement {
@@ -19,6 +20,7 @@ export default function DesktopAdminApp(): React.ReactElement {
 					<Route path="users" element={<Users />} />
 					<Route path="certificates" element={<Certificates />} />
 					<Route path="reports" element={<Reports />} />
+					<Route path="organizations" element={<Organizations />} />
 					<Route path="*" element={<Navigate to="users" replace />} />
 				</Route>
 			</Route>
