@@ -5,6 +5,7 @@ import ProtectedRoute from "./protectedRoute";
 import AdminRoute from "./adminRoute";
 import AdminClientRoute from "./clientAdminRoute";
 import EcaAdminRoute from "./ecaAdminRoute";
+import GlobalModalHost from "./globalModalHost"
 
 const Auth = lazy(() => import("./pages/auth/auth"));
 const Signup = lazy(() => import("./pages/auth/signup"));
@@ -58,6 +59,7 @@ export default function App(): React.ReactElement {
 
                 <Route path="*" element={<Navigate to="/student" replace />} />
             </Routes>
+            <GlobalModalHost />
         </Suspense>
     );
 }

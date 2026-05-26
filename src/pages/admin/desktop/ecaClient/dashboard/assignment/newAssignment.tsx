@@ -60,9 +60,10 @@ const SYSTEM_FORM_OPTIONS: { label: string; value: AssignmentSystemForm }[] = [
 ];
 
 const RESULT_FORM_OPTIONS: { label: string; subLabel: string; value: AssignmentResultForm }[] = [
-    { label: "문서", subLabel: "DOCX, HWP, PPT 등", value: "WRITING" },
+    { label: "문서", subLabel: "DOCX, HWP, PPT, PDF 등", value: "WRITING" },
     { label: "이미지", subLabel: "PNG, JPG, JPEG 등", value: "IMAGE" },
     { label: "영상", subLabel: "MP4, MOV, AVI 등", value: "VIDEO" },
+    { label: "링크", subLabel: "인스타그램, 유튜브 등", value: "LINK" },
     { label: "기타", subLabel: "", value: "ETC" },
 ];
 
@@ -2382,7 +2383,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                             </span>
                                                             <strong>{participant.name}</strong>
                                                             <span className="eca-team-member-info">
-                                                                {isLeader ? <b>팀장</b> : null}
+                                                                <b className={isLeader ? "" : "is-empty"}>팀장</b>
                                                                 <small>{participant.email ?? participant.schoolName}</small>
                                                             </span>
                                                         </label>

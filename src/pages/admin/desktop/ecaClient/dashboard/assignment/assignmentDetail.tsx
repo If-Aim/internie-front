@@ -117,14 +117,40 @@ function formatSubmittedAt(value?: string | null): string {
     return `${year}.${month}.${day}. ${hour}:${minute}`;
 }
 
-function getSubmissionFileName(files: SubmissionFileResponse[]): string {
+function getSubmissionFiles(files: SubmissionFileResponse[]): SubmissionFileResponse[] {
+    return files.filter((file) => file.submitType !== "LINK");
+}
+
+function getSubmissionLinks(files: SubmissionFileResponse[]): SubmissionFileResponse[] {
+    return files.filter((file) => file.submitType === "LINK");
+}
+
+function getSubmissionDisplayName(files: SubmissionFileResponse[]): string {
     if (files.length === 0) return "-";
 
-    const firstName = files[0].originalFileName ?? "파일명 없음";
+    const fileItems = getSubmissionFiles(files);
+    const linkItems = getSubmissionLinks(files);
 
-    if (files.length === 1) return firstName;
+    if (fileItems.length > 0) {
+        const firstName = fileItems[0].originalFileName ?? `submission-file-${fileItems[0].submissionFileId}`;
 
-    return `${firstName} 외 ${files.length - 1}개`;
+        if (fileItems.length + linkItems.length === 1) return firstName;
+
+        return `${firstName} 외 ${fileItems.length + linkItems.length - 1}개`;
+    }
+
+    if (linkItems.length > 0) {
+        const firstUrl = linkItems[0].url ?? "링크";
+
+        if (linkItems.length === 1) return firstUrl;
+
+        return `${firstUrl} 외 ${linkItems.length - 1}개`;
+    }
+
+    return "-";
+}
+function getSubmissionFileName(files: SubmissionFileResponse[]): string {
+    return getSubmissionDisplayName(files);
 }
 
 export default function EcaAssignmentDetailPage(): React.ReactElement {
@@ -341,14 +367,29 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     }
 
     async function handleDownloadRowFiles(row: SubmissionRow): Promise<void> {
-        if (row.files.length === 0) {
+        const fileItems = getSubmissionFiles(row.files);
+        const linkItems = getSubmissionLinks(row.files);
+
+        if (fileItems.length === 0 && linkItems.length > 0) {
+            const firstLink = linkItems[0].url;
+
+            if (firstLink) {
+                window.open(firstLink, "_blank", "noopener,noreferrer");
+                return;
+            }
+
+            window.alert("열 수 있는 링크가 없습니다.");
+            return;
+        }
+
+        if (fileItems.length === 0) {
             window.alert("다운로드할 파일이 없습니다.");
             return;
         }
 
         try {
-            if (row.files.length === 1) {
-                await downloadSubmissionFile(row.files[0]);
+            if (fileItems.length === 1) {
+                await downloadSubmissionFile(fileItems[0]);
                 return;
             }
 
@@ -590,7 +631,25 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                     </span>
                                     <strong>{row.participantName}</strong>
                                     <span>{row.submittedAt}</span>
-                                    <span>{row.fileName}</span>
+                                    <span className="eca-assignment-detail-submission-result">
+                                        {getSubmissionFiles(row.files).length > 0 ? (
+                                            <em>{getSubmissionFileName(getSubmissionFiles(row.files))}</em>
+                                        ) : null}
+
+                                        {getSubmissionLinks(row.files).map((link) => (
+                                            <a
+                                                key={link.submissionFileId}
+                                                href={link.url ?? "#"}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {link.url}
+                                            </a>
+                                        ))}
+
+                                        {row.files.length === 0 ? "-" : null}
+                                    </span>
                                     {row.status === "LATE_SUBMITTED" ? (
                                         <i className={getSubmissionStatusClass(row.status)}>
                                             {getSubmissionStatusLabel(row.status)}

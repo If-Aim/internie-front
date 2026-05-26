@@ -6,6 +6,7 @@ import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type User
 import { getMyParticipatingExternalActivities } from "../../../api/ea";
 import { getMyOrganizations } from "../../../api/organizationClient";
 import type { MyOrganizationResponse } from "../../../api/organizationClient";
+import { hasPendingGlobalModal } from "../../../globalModalStorage";
 
 import "../../../App.css"; 
 
@@ -974,15 +975,20 @@ function EventModal({ item, onClose, onRecord, eventDaysForThisEvent }: EventMod
 function Home(): React.ReactElement {
 	const navigate = useNavigate();
 	const { t, i18n } = useTranslation();
-
+	const [globalModalOpen, setGlobalModalOpen] = React.useState(false);
+	
 	const [loginGateOpen, setLoginGateOpen] = React.useState(false);
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
 	const [activityPromptOpen, setActivityPromptOpen] = React.useState(false);
 	const [activityExternalActivityId, setActivityExternalActivityId] = React.useState<number | null>(null);
 	const [activityPromptPending, setActivityPromptPending] = React.useState(false);
 	const activityPromptCheckedRef = React.useRef(false);
-
+	
 	// 이메일 인증
+	const EMAIL_VERIFY_DISMISSED_KEY = "student.emailVerify.dismissed";
+	const [emailVerifyDismissed, setEmailVerifyDismissed] = React.useState(() => {
+		return sessionStorage.getItem(EMAIL_VERIFY_DISMISSED_KEY) === "true";
+	});
 	const [emailVerifyPopupOpen, setEmailVerifyPopupOpen] = React.useState(false);
 	const [needsEmailVerification, setNeedsEmailVerification] = React.useState(false);
 	const [emailForm, setEmailForm] = React.useState({ email: "", code: "" });
@@ -990,6 +996,22 @@ function Home(): React.ReactElement {
 	const [emailVerifying, setEmailVerifying] = React.useState(false);
 	const [emailSentMessage, setEmailSentMessage] = React.useState<string | null>(null);
 	const [emailError, setEmailError] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		function syncGlobalModalOpen(): void {
+			setGlobalModalOpen(hasPendingGlobalModal());
+		}
+
+		syncGlobalModalOpen();
+
+		window.addEventListener("pendingGlobalModalChanged", syncGlobalModalOpen);
+		window.addEventListener("storage", syncGlobalModalOpen);
+
+		return () => {
+			window.removeEventListener("pendingGlobalModalChanged", syncGlobalModalOpen);
+			window.removeEventListener("storage", syncGlobalModalOpen);
+		};
+	}, []);
 
 	async function handleSendEmailCode() {
 		const email = emailForm.email.trim();
@@ -1066,6 +1088,8 @@ function Home(): React.ReactElement {
 			}
 
 			const nextMe = await getUserMe();
+			sessionStorage.removeItem(EMAIL_VERIFY_DISMISSED_KEY);
+			setEmailVerifyDismissed(false);
 			setMe(nextMe);
 			setNeedsEmailVerification(false);
 			setEmailVerifyPopupOpen(false);
@@ -1096,12 +1120,18 @@ function Home(): React.ReactElement {
 		}
 	}
 
-	function handleCloseEmailVerifyPopup() {
+	function dismissEmailVerifyPopup(): void {
+		sessionStorage.setItem(EMAIL_VERIFY_DISMISSED_KEY, "true");
+		setEmailVerifyDismissed(true);
 		setEmailVerifyPopupOpen(false);
 	}
 
-	function handleEmailPopupBackdropClick() {
-		setEmailVerifyPopupOpen(false);
+	function handleCloseEmailVerifyPopup(): void {
+		dismissEmailVerifyPopup();
+	}
+
+	function handleEmailPopupBackdropClick(): void {
+		dismissEmailVerifyPopup();
 	}
 
 	const isAuthed = !!localStorage.getItem("accessToken");
@@ -1249,6 +1279,8 @@ function Home(): React.ReactElement {
 	React.useEffect(() => {
 		(async () => {
 			if (!isAuthed) {
+				sessionStorage.removeItem(EMAIL_VERIFY_DISMISSED_KEY);
+				setEmailVerifyDismissed(false);
 				setMe(null);
 				setOrganizations([]);
 				setNeedsEmailVerification(false);
@@ -1269,14 +1301,12 @@ function Home(): React.ReactElement {
 				setOrganizations(Array.isArray(myOrganizations) ? myOrganizations : []);
 
 				const needsVerify = !nextMe.email || nextMe.emailVerified !== true;
+				const hasGlobalModal = hasPendingGlobalModal();
+				const dismissed = sessionStorage.getItem(EMAIL_VERIFY_DISMISSED_KEY) === "true";
+
 				setNeedsEmailVerification(needsVerify);
-				setEmailVerifyPopupOpen(needsVerify);
-				setEmailForm({
-					email: (nextMe.email ?? "").trim(),
-					code: "",
-				});
-				setEmailSentMessage(null);
-				setEmailError(null);
+				setEmailVerifyDismissed(dismissed);
+				setEmailVerifyPopupOpen(needsVerify && !hasGlobalModal && !dismissed);
 			} catch (e) {
 				console.error("getUserMe or getMyOrganizations failed:", e);
 				setMe(null);
@@ -1289,6 +1319,16 @@ function Home(): React.ReactElement {
 			}
 		})();
 	}, [isAuthed, profileTick]);
+
+	React.useEffect(() => {
+		if (!isAuthed) return;
+		if (!needsEmailVerification) return;
+		if (globalModalOpen) return;
+		if (emailVerifyPopupOpen) return;
+		if (emailVerifyDismissed) return;
+
+		setEmailVerifyPopupOpen(true);
+	}, [isAuthed, needsEmailVerification, globalModalOpen, emailVerifyPopupOpen, emailVerifyDismissed]);
 
 	React.useEffect(() => {
 		(async () => {

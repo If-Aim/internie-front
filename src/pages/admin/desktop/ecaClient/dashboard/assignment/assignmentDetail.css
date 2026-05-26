@@ -45,6 +45,11 @@
 .eca-assignment-detail-submit-row > i,
 .eca-assignment-detail-submit-row > em { padding: 0 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+.eca-assignment-detail-submission-result { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.eca-assignment-detail-submission-result em { min-width: 0; color: #000; font-size: 13px; font-style: normal; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-assignment-detail-submission-result a { min-width: 0; color: #0166FF; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-assignment-detail-submission-result a:hover { text-decoration: underline; }
+
 .eca-assignment-detail-avatar,
 .eca-assignment-detail-row-arrow { flex-shrink: 0; overflow: hidden; }
 

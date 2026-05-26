@@ -975,7 +975,16 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                             ) : (
                                 filteredTeams.map((item) => (
                                     <div className="eca-dashboard-team-row" key={item.id}>
-                                        <span className="eca-dashboard-avatar" />
+                                        <span className="eca-dashboard-avatar-wrap">
+                                            <img
+                                                className="eca-dashboard-avatar"
+                                                src="/internie_mascot_normal.png"
+                                                alt=""
+                                                onError={(e) => {
+                                                    e.currentTarget.src = "/internie_mascot_normal.png";
+                                                }}
+                                            />
+                                        </span>
 
                                         <span className="eca-dashboard-team-info">
                                             <strong>{item.name}</strong>

@@ -5,7 +5,7 @@ export type ExternalActivityProgressStatus = "UPCOMING" | "ONGOING" | "COMPLETED
 
 /* - Assignment 공통 타입 - */
 export type AssignmentSystemForm = "INDIVIDUAL" | "TEAM";
-export type AssignmentResultForm = "WRITING" | "IMAGE" | "VIDEO" | "ETC";
+export type AssignmentResultForm = "WRITING" | "IMAGE" | "VIDEO" | "LINK" | "ETC";
 export type AssignmentParticipantType = "USER" | "TEAM";
 export type AssignmentParticipantStatus = "NOT_SUBMITTED" | "SUBMITTED" | "LATE_SUBMITTED" | "LATE";
 export type TeamRole = "LEADER" | "MEMBER";
@@ -117,8 +117,12 @@ export type StudentAssignmentResponse = {
     status: AssignmentParticipantStatus;
 };
 
+export type SubmissionFileSubmitType = "FILE" | "LINK";
+
 export type SubmissionFileResponse = {
     submissionFileId: number;
+    url?: string | null;
+    submitType?: SubmissionFileSubmitType | null;
     originalFileName?: string | null;
     contentType?: string | null;
     sizeBytes?: number | null;

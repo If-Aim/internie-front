@@ -48,9 +48,10 @@ function getSystemFormLabel(value?: string | null): string {
 }
 
 function getResultFormLabel(value?: AssignmentResultForm | null): string {
-    if (value === "WRITING") return "글쓰기";
+    if (value === "WRITING") return "문서";
     if (value === "VIDEO") return "영상";
     if (value === "IMAGE") return "사진";
+    if (value === "LINK") return "링크";
     if (value === "ETC") return "기타";
     return value ?? "-";
 }
@@ -84,27 +85,29 @@ function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, ex
 
     const normalizedExtension = normalizeExtension(extension);
 
-    const allowedExtensionsByResultForm: Record<AssignmentResultForm, string[]> = {
+    const allowedExtensionsByResultForm: Record<Exclude<AssignmentResultForm, "LINK">, string[]> = {
         WRITING: ["txt", "doc", "pdf", "hwp"],
         IMAGE: ["jpg", "png", "gif", "webp", "svg"],
         VIDEO: ["mp4", "mov", "avi", "mpg"],
         ETC: [],
     };
 
-    return resultForms.some((resultForm) => {
-        const allowedExtensions = allowedExtensionsByResultForm[resultForm];
+    return resultForms
+        .filter((resultForm): resultForm is Exclude<AssignmentResultForm, "LINK"> => resultForm !== "LINK")
+        .some((resultForm) => {
+            const allowedExtensions = allowedExtensionsByResultForm[resultForm];
 
-        if (allowedExtensions.length === 0) return true;
+            if (allowedExtensions.length === 0) return true;
 
-        return allowedExtensions.includes(normalizedExtension);
-    });
+            return allowedExtensions.includes(normalizedExtension);
+        });
 }
 
 function getAssignmentFileWarning(resultForms?: AssignmentResultForm[] | null, extension?: string | null): string {
     if (isAllowedAssignmentFile(resultForms, extension)) return "";
 
     const warningLabels = resultForms
-        ?.filter((resultForm) => resultForm !== "ETC")
+        ?.filter((resultForm) => resultForm !== "ETC" && resultForm !== "LINK")
         .map((resultForm) => {
             if (resultForm === "WRITING") return "문서(txt, doc, pdf, hwp)";
             if (resultForm === "IMAGE") return "이미지(jpg, png, gif, webp, svg)";
@@ -138,6 +141,8 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     const [submitting, setSubmitting] = React.useState(false);
     const [error, setError] = React.useState("");
     const [files, setFiles] = React.useState<UploadFileItem[]>([]);
+    const [linkUrl, setLinkUrl] = React.useState("");
+    const [existingLinks, setExistingLinks] = React.useState<SubmissionFileResponse[]>([]);
     const [submitResultModalOpen, setSubmitResultModalOpen] = React.useState(false);
     const [submitResult, setSubmitResult] = React.useState<"success" | "fail">("success");
     const [submitActionType, setSubmitActionType] = React.useState<"create" | "update">("create");
@@ -146,8 +151,13 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         const data = await getMyAssignmentSubmissions(targetAssignmentId);
         const latestSubmission = data[0] ?? null;
 
+        const nextFiles = latestSubmission?.files?.filter((file) => file.submitType !== "LINK") ?? [];
+        const nextLinks = latestSubmission?.files?.filter((file) => file.submitType === "LINK") ?? [];
+
         setMySubmission(latestSubmission);
-        setExistingFiles(latestSubmission?.files ?? []);
+        setExistingFiles(nextFiles);
+        setExistingLinks(nextLinks);
+        setLinkUrl("");
     }
 
     React.useEffect(() => {
@@ -170,6 +180,8 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                 setAssignment(null);
                 setMySubmission(null);
                 setExistingFiles([]);
+                setExistingLinks([]);
+                setLinkUrl("");
                 setError("과제 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
@@ -233,6 +245,24 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         setExistingFiles((prev) => prev.filter((file) => file.submissionFileId !== fileId));
     }
 
+    function removeExistingLink(fileId: number): void {
+        setExistingLinks((prev) => prev.filter((file) => file.submissionFileId !== fileId));
+    }
+
+    function isValidHttpUrl(value: string): boolean {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) return false;
+
+        try {
+            const url = new URL(trimmedValue);
+
+            return url.protocol === "http:" || url.protocol === "https:";
+        } catch {
+            return false;
+        }
+    }
+
     async function handleDownloadExistingFile(file: SubmissionFileResponse): Promise<void> {
         try {
             await downloadSubmissionFile(file);
@@ -249,11 +279,23 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
             .map((item) => item.file)
             .filter((file): file is File => file instanceof File && file.size > 0);
 
-        const keepFileIds = existingFiles.map((file) => file.submissionFileId);
-        const hasAnyFile = keepFileIds.length > 0 || uploadFiles.length > 0;
+        const keepFileIds = [
+            ...existingFiles.map((file) => file.submissionFileId),
+            ...existingLinks.map((file) => file.submissionFileId),
+        ];
 
-        if (!hasAnyFile) {
-            window.alert("제출할 파일을 업로드해주세요. 비어 있는 파일은 제출할 수 없습니다.");
+        const nextUrls = trimmedLinkUrl ? [trimmedLinkUrl] : [];
+        const hasAnyFile = existingFiles.length > 0 || uploadFiles.length > 0;
+        const hasAnyLink = existingLinks.length > 0 || nextUrls.length > 0;
+        const hasRequiredSubmission = (acceptsFile && hasAnyFile) || (acceptsLink && hasAnyLink);
+
+        if (!hasRequiredSubmission) {
+            window.alert(acceptsLink && !acceptsFile ? "제출할 링크를 입력해주세요." : "제출할 파일 또는 링크를 입력해주세요.");
+            return;
+        }
+
+        if (hasInvalidLink) {
+            window.alert("http 또는 https로 시작하는 올바른 링크를 입력해주세요.");
             return;
         }
 
@@ -271,15 +313,18 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                 await updateAssignmentSubmission(mySubmission.submissionId, {
                     files: uploadFiles,
                     keepFileIds,
+                    urls: nextUrls,
                 });
             } else {
                 await submitAssignment(assignmentId, {
                     files: uploadFiles,
+                    urls: nextUrls,
                 });
             }
 
             await fetchMySubmission(assignmentId);
             setFiles([]);
+            setLinkUrl("");
             setSubmitResult("success");
             setSubmitResultModalOpen(true);
         } catch (e) {
@@ -295,9 +340,16 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         setSubmitResultModalOpen(false);
     }
 
+    const resultForms = assignment?.resultForms ?? [];
+    const acceptsLink = resultForms.includes("LINK");
+    const acceptsFile = resultForms.some((form) => form !== "LINK");
+    const trimmedLinkUrl = linkUrl.trim();
+    const hasAnyLink = existingLinks.length > 0 || trimmedLinkUrl.length > 0;
+    const hasInvalidLink = trimmedLinkUrl.length > 0 && !isValidHttpUrl(trimmedLinkUrl);
     const hasInvalidFileType = files.some((item) => !isAllowedAssignmentFile(assignment?.resultForms, item.extension));
     const hasAnyFile = existingFiles.length > 0 || files.length > 0;
-    const submitDisabled = !hasAnyFile || hasInvalidFileType || submitting || loading || !!error;
+    const hasRequiredSubmission = (acceptsFile && hasAnyFile) || (acceptsLink && hasAnyLink);
+    const submitDisabled = !hasRequiredSubmission || hasInvalidFileType || hasInvalidLink || submitting || loading || !!error;
 
     return (
         <>
@@ -357,15 +409,57 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                         <section className="eca-student-assignment-upload-card">
                             <h2>과제 업로드</h2>
 
-                            <button type="button" className="eca-student-assignment-upload-box" onClick={openFilePicker}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path fillRule="evenodd" clipRule="evenodd" d="M16.0003 2.6665C14.4571 2.66618 12.9467 3.11224 11.6512 3.9509C10.3557 4.78956 9.33044 5.98502 8.69899 7.39317C8.60917 7.59505 8.51716 7.79595 8.42299 7.99584L8.39633 7.99717C8.31099 7.99984 8.19499 7.99984 8.00033 7.99984C6.58584 7.99984 5.22928 8.56174 4.22909 9.56193C3.2289 10.5621 2.66699 11.9187 2.66699 13.3332C2.66699 14.7477 3.2289 16.1042 4.22909 17.1044C5.22928 18.1046 6.58584 18.6665 8.00033 18.6665H8.22966L10.8963 15.9998H8.00033C7.29308 15.9998 6.6148 15.7189 6.11471 15.2188C5.61461 14.7187 5.33366 14.0404 5.33366 13.3332C5.33366 12.6259 5.61461 11.9476 6.11471 11.4476C6.6148 10.9475 7.29308 10.6665 8.00033 10.6665H8.08566C8.36299 10.6665 8.68566 10.6678 8.95233 10.6132C9.28427 10.5564 9.60157 10.434 9.88566 10.2532C10.207 10.0452 10.4283 9.7865 10.5963 9.5505C10.6993 9.39849 10.7889 9.2379 10.8643 9.0705C10.9354 8.92206 11.0225 8.73184 11.1257 8.49984L11.131 8.4865C11.5515 7.54672 12.2351 6.74871 13.0991 6.18877C13.9631 5.62883 14.9707 5.33089 16.0003 5.33089C17.0299 5.33089 18.0375 5.62883 18.9015 6.18877C19.7656 6.74871 20.4491 7.54672 20.8697 8.4865L20.8763 8.49984C20.9785 8.73095 21.0652 8.92117 21.1363 9.0705C21.1977 9.19984 21.2883 9.38784 21.4043 9.5505C21.5723 9.78517 21.7923 10.0452 22.115 10.2545C22.4377 10.4625 22.7643 10.5572 23.0483 10.6145C23.315 10.6678 23.6377 10.6678 23.915 10.6678L24.0003 10.6665C24.7076 10.6665 25.3858 10.9475 25.8859 11.4476C26.386 11.9476 26.667 12.6259 26.667 13.3332C26.667 14.0404 26.386 14.7187 25.8859 15.2188C25.3858 15.7189 24.7076 15.9998 24.0003 15.9998H21.1043L23.771 18.6665H24.0003C25.4148 18.6665 26.7714 18.1046 27.7716 17.1044C28.7718 16.1042 29.3337 14.7477 29.3337 13.3332C29.3337 11.9187 28.7718 10.5621 27.7716 9.56193C26.7714 8.56174 25.4148 7.99984 24.0003 7.99984C23.8057 7.99984 23.6897 7.99984 23.6043 7.99717H23.5777L23.5443 7.9265C23.4618 7.74947 23.3809 7.57169 23.3017 7.39317C22.6702 5.98502 21.6449 4.78956 20.3495 3.9509C19.054 3.11224 17.5436 2.66618 16.0003 2.6665Z" fill="#808080"/>
-                                    <path d="M15.9996 16.0001L15.057 15.0574L15.9996 14.1147L16.9423 15.0574L15.9996 16.0001ZM17.333 28.0001C17.333 28.3537 17.1925 28.6928 16.9424 28.9429C16.6924 29.1929 16.3533 29.3334 15.9996 29.3334C15.646 29.3334 15.3069 29.1929 15.0568 28.9429C14.8068 28.6928 14.6663 28.3537 14.6663 28.0001H17.333ZM9.72363 20.3907L15.057 15.0574L16.9423 16.9427L11.609 22.2761L9.72363 20.3907ZM16.9423 15.0574L22.2756 20.3907L20.3903 22.2761L15.057 16.9427L16.9423 15.0574ZM17.333 16.0001V28.0001H14.6663V16.0001H17.333Z" fill="#808080"/>
-                                </svg>
-                                <span>파일을 업로드해주세요</span>
-                            </button>
+                            {acceptsFile ? (
+                                <>
+                                    <button type="button" className="eca-student-assignment-upload-box" onClick={openFilePicker}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                            <path fillRule="evenodd" clipRule="evenodd" d="M16.0003 2.6665C14.4571 2.66618 12.9467 3.11224 11.6512 3.9509C10.3557 4.78956 9.33044 5.98502 8.69899 7.39317C8.60917 7.59505 8.51716 7.79595 8.42299 7.99584L8.39633 7.99717C8.31099 7.99984 8.19499 7.99984 8.00033 7.99984C6.58584 7.99984 5.22928 8.56174 4.22909 9.56193C3.2289 10.5621 2.66699 11.9187 2.66699 13.3332C2.66699 14.7477 3.2289 16.1042 4.22909 17.1044C5.22928 18.1046 6.58584 18.6665 8.00033 18.6665H8.22966L10.8963 15.9998H8.00033C7.29308 15.9998 6.6148 15.7189 6.11471 15.2188C5.61461 14.7187 5.33366 14.0404 5.33366 13.3332C5.33366 12.6259 5.61461 11.9476 6.11471 11.4476C6.6148 10.9475 7.29308 10.6665 8.00033 10.6665H8.08566C8.36299 10.6665 8.68566 10.6678 8.95233 10.6132C9.28427 10.5564 9.60157 10.434 9.88566 10.2532C10.207 10.0452 10.4283 9.7865 10.5963 9.5505C10.6993 9.39849 10.7889 9.2379 10.8643 9.0705C10.9354 8.92206 11.0225 8.73184 11.1257 8.49984L11.131 8.4865C11.5515 7.54672 12.2351 6.74871 13.0991 6.18877C13.9631 5.62883 14.9707 5.33089 16.0003 5.33089C17.0299 5.33089 18.0375 5.62883 18.9015 6.18877C19.7656 6.74871 20.4491 7.54672 20.8697 8.4865L20.8763 8.49984C20.9785 8.73095 21.0652 8.92117 21.1363 9.0705C21.1977 9.19984 21.2883 9.38784 21.4043 9.5505C21.5723 9.78517 21.7923 10.0452 22.115 10.2545C22.4377 10.4625 22.7643 10.5572 23.0483 10.6145C23.315 10.6678 23.6377 10.6678 23.915 10.6678L24.0003 10.6665C24.7076 10.6665 25.3858 10.9475 25.8859 11.4476C26.386 11.9476 26.667 12.6259 26.667 13.3332C26.667 14.0404 26.386 14.7187 25.8859 15.2188C25.3858 15.7189 24.7076 15.9998 24.0003 15.9998H21.1043L23.771 18.6665H24.0003C25.4148 18.6665 26.7714 18.1046 27.7716 17.1044C28.7718 16.1042 29.3337 14.7477 29.3337 13.3332C29.3337 11.9187 28.7718 10.5621 27.7716 9.56193C26.7714 8.56174 25.4148 7.99984 24.0003 7.99984C23.8057 7.99984 23.6897 7.99984 23.6043 7.99717H23.5777L23.5443 7.9265C23.4618 7.74947 23.3809 7.57169 23.3017 7.39317C22.6702 5.98502 21.6449 4.78956 20.3495 3.9509C19.054 3.11224 17.5436 2.66618 16.0003 2.6665Z" fill="#808080"/>
+                                            <path d="M15.9996 16.0001L15.057 15.0574L15.9996 14.1147L16.9423 15.0574L15.9996 16.0001ZM17.333 28.0001C17.333 28.3537 17.1925 28.6928 16.9424 28.9429C16.6924 29.1929 16.3533 29.3334 15.9996 29.3334C15.646 29.3334 15.3069 29.1929 15.0568 28.9429C14.8068 28.6928 14.6663 28.3537 14.6663 28.0001H17.333ZM9.72363 20.3907L15.057 15.0574L16.9423 16.9427L11.609 22.2761L9.72363 20.3907ZM16.9423 15.0574L22.2756 20.3907L20.3903 22.2761L15.057 16.9427L16.9423 15.0574ZM17.333 16.0001V28.0001H14.6663V16.0001H17.333Z" fill="#808080"/>
+                                        </svg>
+                                        <span>파일을 업로드해주세요</span>
+                                    </button>
 
-                            <input ref={fileInputRef} type="file" multiple className="eca-student-assignment-file-input" onChange={handleFileChange} />
+                                    <input ref={fileInputRef} type="file" multiple className="eca-student-assignment-file-input" onChange={handleFileChange} />
+                                </>
+                            ) : null}
+                            {acceptsLink ? (
+                                <div className={acceptsFile ? "eca-student-assignment-link-area" : "eca-student-assignment-link-area is-only"}>
+                                    <input
+                                        type="url"
+                                        value={linkUrl}
+                                        onChange={(e) => setLinkUrl(e.target.value)}
+                                        placeholder="링크를 붙여주세요"
+                                        className={hasInvalidLink ? "is-invalid" : ""}
+                                    />
+
+                                    {existingLinks.length > 0 ? (
+                                        <div className="eca-student-assignment-link-list">
+                                            {existingLinks.map((link) => (
+                                                <div className="eca-student-assignment-link-item" key={link.submissionFileId}>
+                                                    {link.url ? (
+                                                        <a href={link.url} target="_blank" rel="noreferrer">
+                                                            {link.url}
+                                                        </a>
+                                                    ) : (
+                                                        <span>링크 정보 없음</span>
+                                                    )}
+
+                                                    <button type="button" onClick={() => removeExistingLink(link.submissionFileId)} aria-label="링크 삭제">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                            <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : null}
+                                    {hasInvalidLink ? (
+                                        <small className="eca-student-assignment-link-warning">
+                                            http 또는 https로 시작하는 링크를 입력해주세요.
+                                        </small>
+                                    ) : null}
+                                </div>
+                            ) : null}
 
                             {mySubmission ? (
                                 <div className="eca-student-assignment-submitted-info">

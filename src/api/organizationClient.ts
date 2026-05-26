@@ -2,7 +2,8 @@ import { api } from "./client";
 
 /* - Organization 공통 타입 - */
 export type OrganizationMemberRole = "OWNER" | "MEMBER";
-export type OrganizationInviteStatus = "PENDING" | "ACCEPTED" | "EXPIRED" | "CANCELED";
+export type OrganizationMemberStatus = "PENDING" | "ACTIVE" | "REJECTED";
+export type OrganizationInviteStatus = "PENDING" | "EXPIRED" | "CANCELED";
 
 export type OrganizationResponse = {
     organizationId: number;
@@ -15,6 +16,7 @@ export type MyOrganizationResponse = {
     organizationId: number;
     organizationName: string;
     memberRole: OrganizationMemberRole;
+    memberStatus: OrganizationMemberStatus;
 };
 
 export type OrganizationInviteResponse = {
@@ -31,6 +33,7 @@ export type AcceptOrganizationInviteResponse = {
     organizationName: string;
     organizationMemberId: number;
     memberRole: OrganizationMemberRole;
+    memberStatus: OrganizationMemberStatus;
 };
 
 export type OrganizationMemberResponse = {
@@ -39,6 +42,14 @@ export type OrganizationMemberResponse = {
     userName: string | null;
     email: string | null;
     role: OrganizationMemberRole;
+    status: OrganizationMemberStatus;
+    requestedAt: string | null;
+    reviewedAt: string | null;
+};
+
+export type OrganizationInvitePreviewResponse = {
+    organizationName: string;
+    expiresAt: string;
 };
 
 export type CreateOrganizationRequest = {
@@ -108,6 +119,15 @@ export async function deleteOrganizationInvite(
     );
 }
 
+export async function getOrganizationInvitePreview(
+    token: string
+): Promise<OrganizationInvitePreviewResponse> {
+    return api<OrganizationInvitePreviewResponse>(
+        `/admin-client/organizations/invites/${token}/preview`,
+        { method: "GET" }
+    );
+}
+
 export async function acceptOrganizationInvite(
     token: string
 ): Promise<AcceptOrganizationInviteResponse> {
@@ -124,6 +144,45 @@ export async function getOrganizationMembers(
     return api<OrganizationMemberResponse[]>(
         `/admin-client/organizations/${organizationId}/members`,
         { method: "GET" }
+    );
+}
+
+export async function getPendingOrganizationMembers(
+    organizationId: number | string
+): Promise<OrganizationMemberResponse[]> {
+    return api<OrganizationMemberResponse[]>(
+        `/admin-client/organizations/${organizationId}/members/pending`,
+        { method: "GET" }
+    );
+}
+
+export async function approveOrganizationMember(
+    organizationId: number | string,
+    organizationMemberId: number | string
+): Promise<OrganizationMemberResponse> {
+    return api<OrganizationMemberResponse>(
+        `/admin-client/organizations/${organizationId}/members/${organizationMemberId}/approve`,
+        { method: "POST" }
+    );
+}
+
+export async function rejectOrganizationMember(
+    organizationId: number | string,
+    organizationMemberId: number | string
+): Promise<OrganizationMemberResponse> {
+    return api<OrganizationMemberResponse>(
+        `/admin-client/organizations/${organizationId}/members/${organizationMemberId}/reject`,
+        { method: "POST" }
+    );
+}
+
+export async function deleteOrganizationMember(
+    organizationId: number | string,
+    organizationMemberId: number | string
+): Promise<void> {
+    await api<void>(
+        `/admin-client/organizations/${organizationId}/members/${organizationMemberId}`,
+        { method: "DELETE" }
     );
 }
 
