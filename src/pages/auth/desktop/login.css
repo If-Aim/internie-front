@@ -15,10 +15,10 @@
 
 .login-desktop-card { display: flex; flex-direction: column; gap: 23px; position: relative;}
 .login-desktop-ac { display: flex; flex-direction: column; gap: 11px; }
-.login-desktop-input-title { font-size: 16px; line-height: 20px; font-weight: 600; color: #666; text-align: left; }
+.login-desktop-input-title { font-size: 16px; line-height: 20px; font-weight: 500; color: #666; text-align: left; }
 
 .login-desktop-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-right: 10px;}
-.login-desktop-input-findac { font-size: 12px; line-height: 20px; font-weight: 600; color: #6B6B6B; text-decoration: underline; cursor: pointer; background: transparent; border: none;}
+.login-desktop-input-findac { font-size: 12px; line-height: 20px; font-weight: 500; color: #6B6B6B; text-decoration: underline; cursor: pointer; background: transparent; border: none;}
 
 .login-desktop-input-wrap { position: relative; }
 .login-desktop-input { width: 100%; height: 48px; border: 1px solid #DDD; border-radius: 10px; background: #fff; padding: 0 18px; font-size: 16px; color: #000; outline: none; }
@@ -51,6 +51,13 @@
 
 .login-desktop-error-text { margin: -6px 0 14px; color: #FF3B30; font-size: 13px; font-weight: 500; line-height: 1.45; }
 .login-desktop-input.is-error { border-color: #FF3B30; }
+
+.login-desktop-toast { position: fixed; top: 52px; left: 50%; z-index: 1000; width: 480px; max-width: calc(100% - 32px); min-height: 80px; padding: 0 84px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center; gap: 9px; transform: translateX(-50%); animation: loginToastSlideDown 0.28s ease-out; }
+.login-desktop-toast.is-closing { animation: loginToastSlideUp 0.28s ease-in forwards; }
+.login-desktop-toast-icon { width: 24px; height: 24px; flex: 0 0 24px; display: flex; align-items: center; justify-content: center; }
+.login-desktop-toast-text { font-size: 16px; line-height: 24px; font-weight: 500; color: #000; word-break: keep-all; }
+@keyframes loginToastSlideDown { from { opacity: 0; transform: translate(-50%, -24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes loginToastSlideUp { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -24px); } }
 
 @media (max-width: 640px) {
     .login-desktop-main { padding: 24px 16px 40px; }

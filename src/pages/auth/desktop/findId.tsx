@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ApiError, sendFindLoginIdCode, verifyFindLoginIdCode, } from "../../../api/client"; import "./findId.css";
+import { ApiError, sendFindLoginIdCode, verifyFindLoginIdCode, } from "../../../api/client";
 import "./findId.css"
 
 type Step = 1 | 2;
@@ -20,28 +20,91 @@ export default function FindId(): React.ReactElement {
     const [verifying, setVerifying] = React.useState(false);
 
     const [error, setError] = React.useState<string | null>(null);
+    const [errorVisible, setErrorVisible] = React.useState(false);
     const [sentMessage, setSentMessage] = React.useState<string | null>(null);
+    const [sentMessageVisible, setSentMessageVisible] = React.useState(false);
 
     const [popupType, setPopupType] = React.useState<"none" | "notFound" | "success">("none");
     const [popupMessage, setPopupMessage] = React.useState("");
 
     const language = (i18n.resolvedLanguage ?? i18n.language ?? "ko").startsWith("en") ? "en" : "ko";
 
+    const messageTimerRef = React.useRef<number | null>(null);
+    const messageFadeTimerRef = React.useRef<number | null>(null);
+
+    function clearMessageTimers() {
+        if (messageTimerRef.current) {
+            window.clearTimeout(messageTimerRef.current);
+        }
+
+        if (messageFadeTimerRef.current) {
+            window.clearTimeout(messageFadeTimerRef.current);
+        }
+    }
+
+    function showInfo(message: string) {
+        clearMessageTimers();
+        setError(null);
+        setErrorVisible(false);
+        setSentMessage(message);
+        setSentMessageVisible(true);
+
+        messageTimerRef.current = window.setTimeout(() => {
+            setSentMessageVisible(false);
+
+            messageFadeTimerRef.current = window.setTimeout(() => {
+                setSentMessage(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showError(message: string) {
+        clearMessageTimers();
+        setSentMessage(null);
+        setSentMessageVisible(false);
+        setError(message);
+        setErrorVisible(true);
+
+        messageTimerRef.current = window.setTimeout(() => {
+            setErrorVisible(false);
+
+            messageFadeTimerRef.current = window.setTimeout(() => {
+                setError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function hideNotice() {
+        setSentMessageVisible(false);
+        setErrorVisible(false);
+        clearMessageTimers();
+
+        messageFadeTimerRef.current = window.setTimeout(() => {
+            setSentMessage(null);
+            setError(null);
+        }, 350);
+    }
+
+    React.useEffect(() => {
+        return () => {
+            clearMessageTimers();
+        };
+    }, []);
+
     async function handleSendCode() {
         const email = form.email.trim();
 
         if (!email) {
-            setError(t("findId.emailRequired"));
+            showError(t("findId.emailRequired"));
             return;
         }
 
         setSending(true);
-        setError(null);
-        setSentMessage(null);
+        hideNotice();
 
         try {
             const res = await sendFindLoginIdCode(email, language);
-            setSentMessage(t("findId.codeSent", { email: res.maskedEmail }));
+            showInfo(t("findId.codeSent", { email: res.maskedEmail }));
             setStep(2);
         } catch (e: any) {
             if (e instanceof ApiError) {
@@ -54,20 +117,20 @@ export default function FindId(): React.ReactElement {
                 }
 
                 if (code === "ALREADY_REGISTERED_WITH_GOOGLE") {
-                    setError(t("findId.alreadyGoogle"));
+                    showError(t("findId.alreadyGoogle"));
                     return;
                 }
 
                 if (code === "ALREADY_REGISTERED_WITH_KAKAO") {
-                    setError(t("findId.alreadyKakao"));
+                    showError(t("findId.alreadyKakao"));
                     return;
                 }
 
-                setError(e.message || t("findId.codeSendFail"));
+                showError(e.message || t("findId.codeSendFail"));
                 return;
             }
 
-            setError(t("findId.codeSendFail"));
+            showError(t("findId.codeSendFail"));
         } finally {
             setSending(false);
         }
@@ -78,12 +141,12 @@ export default function FindId(): React.ReactElement {
         const code = form.code.trim();
 
         if (!code) {
-            setError(t("findId.codeRequired"));
+            showError(t("findId.codeRequired"));
             return;
         }
 
         setVerifying(true);
-        setError(null);
+        hideNotice();
 
         try {
             const res = await verifyFindLoginIdCode(email, code, language);
@@ -91,11 +154,11 @@ export default function FindId(): React.ReactElement {
             setPopupMessage(t("findId.idSent", { email: res.maskedEmail }));
         } catch (e: any) {
             if (e instanceof ApiError) {
-                setError(e.message || t("findId.codeVerifyFail"));
+                showError(e.message || t("findId.codeVerifyFail"));
                 return;
             }
 
-            setError(t("findId.codeVerifyFail"));
+            showError(t("findId.codeVerifyFail"));
         } finally {
             setVerifying(false);
         }
@@ -124,9 +187,9 @@ export default function FindId(): React.ReactElement {
                                         value={form.email}
                                         onChange={(e) => {
                                             const value = e.target.value;
-                                            setForm((prev) => ({ ...prev, email: value }));
-                                            setError(null);
-                                            setSentMessage(null);
+                                            setForm((prev) => ({ ...prev, email: value, code: "" }));
+                                            hideNotice();
+
                                             if (step === 2) {
                                                 setStep(1);
                                             }
@@ -134,12 +197,7 @@ export default function FindId(): React.ReactElement {
                                         placeholder={t("findId.emailPlaceholder")}
                                         autoComplete="email"
                                     />
-                                    <button
-                                        type="button"
-                                        className="find-id-desktop-inline-btn"
-                                        onClick={handleSendCode}
-                                        disabled={sending || !form.email.trim()}
-                                    >
+                                    <button type="button" className="find-id-desktop-inline-btn" onClick={handleSendCode} disabled={sending || !form.email.trim()} >
                                         {sending ? t("signup.sending") : step === 2 ? t("signup.resendEmailVC") : t("signup.getEmailVC")}
                                     </button>
                                 </div>
@@ -154,7 +212,7 @@ export default function FindId(): React.ReactElement {
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             setForm((prev) => ({ ...prev, code: value }));
-                                            setError(null);
+                                            hideNotice();
                                         }}
                                         placeholder={t("findId.codePlaceholder")}
                                         onKeyDown={(e) => {
@@ -165,10 +223,9 @@ export default function FindId(): React.ReactElement {
                                     />
                                 </div>
                             )}
-
-                            {sentMessage && <div className="find-id-desktop-info">{sentMessage}</div>}
-                            {error && <div className="find-id-desktop-error">{error}</div>}
-
+                            <div className={`find-id-desktop-notice ${(sentMessageVisible || errorVisible) ? "is-visible" : ""} ${error ? "is-error" : ""}`}>
+                                {error ?? sentMessage ?? ""}
+                            </div>
                             <div className="find-id-desktop-actions">
                                 <button type="button" className="find-id-desktop-btn primary" onClick={handleVerifyCode} disabled={step !== 2 || verifying || !form.code.trim()} >
                                     {verifying ? t("signup.verifying") : t("signup.next")}

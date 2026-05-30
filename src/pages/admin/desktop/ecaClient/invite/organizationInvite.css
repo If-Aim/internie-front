@@ -7,9 +7,27 @@
 .organization-invite-primary-button { width: 120px; height: 48px; padding: 0 12px; border: 0; border-radius: 10px; background: #0166FF; color: #FFF; font-size: 20px; font-weight: 700; cursor: pointer; }
 .organization-invite-secondary-button { min-width: 120px; height: 48px; padding: 0 12px; border: 1px solid #E7E7E7; border-radius: 10px; box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25); background: #FFF; color: #000; font-size: 20px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 4px rgba(0, 0, 0, 0.10); }
 .organization-invite-primary-button:disabled, .organization-invite-secondary-button:disabled { cursor: default; opacity: 0.6; }
+.organization-invite-close-icon { width: 24px; height: 24px; display: block; }
 
 .organization-invite-success-icon { width: 80px; height: 80px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; }
 .organization-invite-success-icon svg { width: 80px; height: 80px; display: block; flex-shrink: 0; }
 .organization-invite-success-message { color: #000; font-size: 20px; font-weight: 700; line-height: 24px; text-align: center; }
 .organization-invite-home-button { min-width: 240px; height: 48px; margin-top: 24px; padding: 0 28px; border: 0; border-radius: 10px; background: #0166FF; color: #FFF; font-size: 20px; font-weight: 700; cursor: pointer; }
 .organization-invite-home-button:disabled { cursor: default; opacity: 0.6; }
+
+@media (max-width: 767px) {
+    .organization-invite-modal-backdrop { padding: 0 47px; background: rgba(209, 209, 209, 0.50); backdrop-filter: blur(2px); }
+    .organization-invite-modal { width: 100%; max-width: 300px; min-height: 304px; padding: 68px 24px 45px; border: 0; border-radius: 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); }
+    .organization-invite-modal-close { top: 16px; right: 14px; width: 32px; height: 32px; padding: 0; }
+    .organization-invite-modal-close img { width: 26px; height: 26px; display: block; }
+    .organization-invite-icon { width: 80px; height: 80px; margin-bottom: 3px; }
+    .organization-invite-message { font-size: 20px; font-weight: 500; line-height: 1.35; word-break: keep-all; }
+    .organization-invite-button-row { gap: 35px; margin-top: 19px; }
+    .organization-invite-primary-button { width: 80px; height: 48px; padding: 0; border-radius: 8px; font-size: 16px; font-weight: 700; }
+    .organization-invite-secondary-button { min-width: 80px; width: 80px; height: 48px; padding: 0; border-radius: 8px; box-shadow: none; font-size: 16px; font-weight: 700; }
+    .organization-invite-close-icon { width: 24px; height: 24px; }
+
+    .organization-invite-success-icon { width: 80px; height: 80px; margin-bottom: 3px; }
+    .organization-invite-success-message { font-size: 20px; font-weight: 400; line-height: 1.35; word-break: keep-all; }
+    .organization-invite-home-button { min-width: 160px; width: 160px; height: 48px; margin-top: 19px; padding: 0; border-radius: 8px; font-size: 16px; font-weight: 700; }
+}

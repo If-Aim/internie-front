@@ -100,6 +100,7 @@ export default function Signup(): React.ReactElement {
     const [verifyingCode, setVerifyingCode] = React.useState(false);
     const [emailVerified, setEmailVerified] = React.useState(false);
     const [emailInfo, setEmailInfo] = React.useState<string | null>(null);
+    const [emailInfoVisible, setEmailInfoVisible] = React.useState(false);
     const [emailCodeSent, setEmailCodeSent] = React.useState(false);
     const [emailCodeExpiresAt, setEmailCodeExpiresAt] = React.useState<number | null>(null);
     const [emailCodeTimeLeft, setEmailCodeTimeLeft] = React.useState(0);
@@ -113,16 +114,26 @@ export default function Signup(): React.ReactElement {
         email: "",
     });
     const [submitting, setSubmitting] = React.useState(false);
+    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPasswordConfirm, setShowPasswordConfirm] = React.useState(false);
 
     const [signupError, setSignupError] = React.useState<string | null>(null);
+    const [signupErrorVisible, setSignupErrorVisible] = React.useState(false);
     const [loginIdError, setLoginIdError] = React.useState<string | null>(null);
+    const [loginIdErrorVisible, setLoginIdErrorVisible] = React.useState(false);
     const [emailError, setEmailError] = React.useState<string | null>(null);
+    const [emailErrorVisible, setEmailErrorVisible] = React.useState(false);
+
+    const [loginIdGuideMessage, setLoginIdGuideMessage] = React.useState(t("signup.loginIdGuide"));
+    const [loginIdGuideVisible, setLoginIdGuideVisible] = React.useState(false);
+    const [passwordGuideMessage, setPasswordGuideMessage] = React.useState(t("signup.passwordGuide"));
+    const [passwordGuideVisible, setPasswordGuideVisible] = React.useState(false);
 
     const canGoNext = form.email.trim().length > 0 && emailVerified;
 
     const canSubmit =
-        form.loginId.trim().length > 0 &&
-        form.password.length > 0 &&
+        isValidLoginId(form.loginId.trim()) &&
+        isValidPassword(form.password) &&
         form.passwordConfirm.length > 0 &&
         form.email.trim().length > 0 &&
         emailVerified &&
@@ -130,19 +141,238 @@ export default function Signup(): React.ReactElement {
         loginIdChecked &&
         loginIdAvailable === true;
 
-    const prevLoginIdRef = React.useRef(form.loginId);
+    function isValidLoginId(value: string): boolean {
+        return /^[a-z0-9_-]{4,20}$/.test(value);
+    }
+
+    function isValidPassword(value: string): boolean {
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/.test(value);
+    }
+
+    function getLoginIdGuideMessage(value: string): string | null {
+        if (value.length === 0) {
+            return null;
+        }
+
+        if (!/^[a-z0-9_-]*$/.test(value)) {
+            return t("signup.loginIdInvalidChar");
+        }
+
+        if (value.length < 4 || value.length > 20) {
+            return t("signup.loginIdInvalidLength");
+        }
+
+        return null;
+    }
+
+    function getPasswordGuideMessage(value: string): string | null {
+        if (value.length === 0) {
+            return null;
+        }
+
+        if (!/^[A-Za-z\d@$!%*#?&]*$/.test(value)) {
+            return t("signup.passwordInvalidChar");
+        }
+
+        if (value.length < 8 || value.length > 20) {
+            return t("signup.passwordInvalidLength");
+        }
+
+        if (!/[A-Za-z]/.test(value)) {
+            return t("signup.passwordMissingLetter");
+        }
+
+        if (!/\d/.test(value)) {
+            return t("signup.passwordMissingNumber");
+        }
+
+        if (!/[@$!%*#?&]/.test(value)) {
+            return t("signup.passwordMissingSpecial");
+        }
+
+        return null;
+    }
+
     const prevEmailRef = React.useRef(form.email);
+
+    const prevLoginIdRef = React.useRef(form.loginId);
+    const emailInfoTimerRef = React.useRef<number | null>(null);
+    const emailErrorTimerRef = React.useRef<number | null>(null);
+    const loginIdErrorTimerRef = React.useRef<number | null>(null);
+    const signupErrorTimerRef = React.useRef<number | null>(null);
+
+    const emailInfoFadeTimerRef = React.useRef<number | null>(null);
+    const emailErrorFadeTimerRef = React.useRef<number | null>(null);
+    const loginIdErrorFadeTimerRef = React.useRef<number | null>(null);
+    const signupErrorFadeTimerRef = React.useRef<number | null>(null);
+
+    const loginIdGuideTimerRef = React.useRef<number | null>(null);
+    const passwordGuideTimerRef = React.useRef<number | null>(null);
+
+    function showEmailInfo(message: string) {
+        setEmailInfo(message);
+        setEmailInfoVisible(true);
+
+        if (emailInfoTimerRef.current) {
+            window.clearTimeout(emailInfoTimerRef.current);
+        }
+
+        if (emailInfoFadeTimerRef.current) {
+            window.clearTimeout(emailInfoFadeTimerRef.current);
+        }
+
+        emailInfoTimerRef.current = window.setTimeout(() => {
+            setEmailInfoVisible(false);
+
+            emailInfoFadeTimerRef.current = window.setTimeout(() => {
+                setEmailInfo(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showEmailError(message: string) {
+        setEmailError(message);
+        setEmailErrorVisible(true);
+
+        if (emailErrorTimerRef.current) {
+            window.clearTimeout(emailErrorTimerRef.current);
+        }
+
+        if (emailErrorFadeTimerRef.current) {
+            window.clearTimeout(emailErrorFadeTimerRef.current);
+        }
+
+        emailErrorTimerRef.current = window.setTimeout(() => {
+            setEmailErrorVisible(false);
+
+            emailErrorFadeTimerRef.current = window.setTimeout(() => {
+                setEmailError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showLoginIdGuide(message?: string) {
+        setLoginIdGuideMessage(message ?? t("signup.loginIdGuide"));
+        setLoginIdGuideVisible(true);
+
+        if (loginIdGuideTimerRef.current) {
+            window.clearTimeout(loginIdGuideTimerRef.current);
+        }
+
+        loginIdGuideTimerRef.current = window.setTimeout(() => {
+            setLoginIdGuideVisible(false);
+        }, 3000);
+    }
+
+    function showPasswordGuide(message?: string) {
+        setPasswordGuideMessage(message ?? t("signup.passwordGuide"));
+        setPasswordGuideVisible(true);
+
+        if (passwordGuideTimerRef.current) {
+            window.clearTimeout(passwordGuideTimerRef.current);
+        }
+
+        passwordGuideTimerRef.current = window.setTimeout(() => {
+            setPasswordGuideVisible(false);
+        }, 3000);
+    }
+
+    function hideLoginIdGuide() {
+        setLoginIdGuideVisible(false);
+
+        if (loginIdGuideTimerRef.current) {
+            window.clearTimeout(loginIdGuideTimerRef.current);
+        }
+    }
+
+    function hidePasswordGuide() {
+        setPasswordGuideVisible(false);
+
+        if (passwordGuideTimerRef.current) {
+            window.clearTimeout(passwordGuideTimerRef.current);
+        }
+    }
+
+    function showLoginIdError(message: string) {
+        setLoginIdError(message);
+        setLoginIdErrorVisible(true);
+
+        if (loginIdErrorTimerRef.current) {
+            window.clearTimeout(loginIdErrorTimerRef.current);
+        }
+
+        if (loginIdErrorFadeTimerRef.current) {
+            window.clearTimeout(loginIdErrorFadeTimerRef.current);
+        }
+
+        loginIdErrorTimerRef.current = window.setTimeout(() => {
+            setLoginIdErrorVisible(false);
+
+            loginIdErrorFadeTimerRef.current = window.setTimeout(() => {
+                setLoginIdError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showSignupError(message: string) {
+        setSignupError(message);
+        setSignupErrorVisible(true);
+
+        if (signupErrorTimerRef.current) {
+            window.clearTimeout(signupErrorTimerRef.current);
+        }
+
+        if (signupErrorFadeTimerRef.current) {
+            window.clearTimeout(signupErrorFadeTimerRef.current);
+        }
+
+        signupErrorTimerRef.current = window.setTimeout(() => {
+            setSignupErrorVisible(false);
+
+            signupErrorFadeTimerRef.current = window.setTimeout(() => {
+                setSignupError(null);
+            }, 250);
+        }, 3000);
+    }
+    function hideEmailNotice() {
+        setEmailInfoVisible(false);
+        setEmailErrorVisible(false);
+
+        if (emailInfoTimerRef.current) {
+            window.clearTimeout(emailInfoTimerRef.current);
+        }
+
+        if (emailErrorTimerRef.current) {
+            window.clearTimeout(emailErrorTimerRef.current);
+        }
+
+        if (emailInfoFadeTimerRef.current) {
+            window.clearTimeout(emailInfoFadeTimerRef.current);
+        }
+
+        if (emailErrorFadeTimerRef.current) {
+            window.clearTimeout(emailErrorFadeTimerRef.current);
+        }
+
+        emailInfoFadeTimerRef.current = window.setTimeout(() => {
+            setEmailInfo(null);
+        }, 350);
+
+        emailErrorFadeTimerRef.current = window.setTimeout(() => {
+            setEmailError(null);
+        }, 350);
+    }
 
     React.useEffect(() => { // 이메일 변경 감지
         if (prevEmailRef.current === form.email) return;
         prevEmailRef.current = form.email;
         setEmailVerified(false);
         setCode("");
-        setEmailInfo(null);
-        setEmailError(null);
+        hideEmailNotice();
         setEmailCodeSent(false);
         setEmailCodeExpiresAt(null);
         setEmailCodeTimeLeft(0);
+
         if (step === 2) {
             setStep(1);
         }
@@ -170,6 +400,13 @@ export default function Signup(): React.ReactElement {
         return () => window.clearInterval(timer);
     }, [emailCodeExpiresAt]);
 
+    React.useEffect(() => {
+        if (step !== 2) return;
+
+        showLoginIdGuide();
+        showPasswordGuide();
+    }, [step]);
+
     React.useEffect(() => { // 아이디 변경 감지 
         if (prevLoginIdRef.current === form.loginId) return;
         prevLoginIdRef.current = form.loginId;
@@ -179,18 +416,61 @@ export default function Signup(): React.ReactElement {
         setLoginIdError(null);
     }, [form.loginId]);
 
+    React.useEffect(() => { // info, error 타이머 정리
+        return () => {
+            if (emailInfoTimerRef.current) {
+                window.clearTimeout(emailInfoTimerRef.current);
+            }
+
+            if (emailErrorTimerRef.current) {
+                window.clearTimeout(emailErrorTimerRef.current);
+            }
+
+            if (loginIdErrorTimerRef.current) {
+                window.clearTimeout(loginIdErrorTimerRef.current);
+            }
+
+            if (signupErrorTimerRef.current) {
+                window.clearTimeout(signupErrorTimerRef.current);
+            }
+
+            if (emailInfoFadeTimerRef.current) {
+                window.clearTimeout(emailInfoFadeTimerRef.current);
+            }
+
+            if (emailErrorFadeTimerRef.current) {
+                window.clearTimeout(emailErrorFadeTimerRef.current);
+            }
+
+            if (loginIdGuideTimerRef.current) {
+                window.clearTimeout(loginIdGuideTimerRef.current);
+            }
+
+            if (passwordGuideTimerRef.current) {
+                window.clearTimeout(passwordGuideTimerRef.current);
+            }
+
+            if (loginIdErrorFadeTimerRef.current) {
+                window.clearTimeout(loginIdErrorFadeTimerRef.current);
+            }
+
+            if (signupErrorFadeTimerRef.current) {
+                window.clearTimeout(signupErrorFadeTimerRef.current);
+            }
+        };
+    }, []);
+
     async function handleSendEmailCode() {
         const email = form.email.trim();
         const isResend = emailCodeSent;
 
         if (!email) {
-            setEmailError(t("signup.emailRequired"));
+            showEmailError(t("signup.emailRequired"));
             return;
         }
 
         setSendingCode(true);
-        setEmailError(null);
-        setEmailInfo(null);
+        hideEmailNotice();
         setEmailVerified(false);
         setCode("");
 
@@ -199,13 +479,13 @@ export default function Signup(): React.ReactElement {
 
             if (res.status === "EXISTING_ACCOUNT_FOUND") {
                 if (res.existingAccountType === "GOOGLE") {
-                    setEmailError(t("signup.alreadyGoogle"));
+                    showEmailError(t("signup.alreadyGoogle"));
                 } else if (res.existingAccountType === "KAKAO") {
-                    setEmailError(t("signup.alreadyKakao"));
+                    showEmailError(t("signup.alreadyKakao"));
                 } else if (res.existingAccountType === "LOCAL") {
-                    setEmailError(t("signup.alreadyLocal"));
+                    showEmailError(t("signup.alreadyLocal"));
                 } else {
-                    setEmailError(t("signup.emailAlreadyUsed"));
+                    showEmailError(t("signup.emailAlreadyUsed"));
                 }
                 return;
             }
@@ -213,7 +493,7 @@ export default function Signup(): React.ReactElement {
             setEmailCodeSent(true);
             setEmailCodeExpiresAt(Date.now() + 10 * 60 * 1000);
             setEmailCodeTimeLeft(10 * 60);
-            setEmailInfo(
+            showEmailInfo(
                 isResend
                     ? t("signup.emailCodeResent", { email: res.maskedEmail })
                     : t("signup.emailCodeSent", { email: res.maskedEmail })
@@ -227,7 +507,7 @@ export default function Signup(): React.ReactElement {
                     bodyText: e.bodyText,
                 });
             }
-            setEmailError(getSendEmailErrorMessage(e, t));
+            showEmailError(getSendEmailErrorMessage(e, t));
         } finally {
             setSendingCode(false);
         }
@@ -238,12 +518,12 @@ export default function Signup(): React.ReactElement {
         const trimmedCode = (inputCode ?? code).trim();
 
         if (!email) {
-            setEmailError(t("signup.emailRequired"));
+            showEmailError(t("signup.emailRequired"));
             return;
         }
 
         if (!trimmedCode) {
-            setEmailError(t("signup.emailCodeRequired"));
+            showEmailError(t("signup.emailCodeRequired"));
             return;
         }
 
@@ -252,7 +532,7 @@ export default function Signup(): React.ReactElement {
         }
 
         if (emailCodeTimeLeft <= 0) {
-            setEmailError(t("signup.emailCodeExpired"));
+            showEmailError(t("signup.emailCodeExpired"));
             return;
         }
 
@@ -261,7 +541,7 @@ export default function Signup(): React.ReactElement {
         }
 
         setVerifyingCode(true);
-        setEmailError(null);
+        if (emailError) { hideEmailNotice(); }
 
         try {
             const res = await verifyEmailCode(email, trimmedCode);
@@ -270,20 +550,20 @@ export default function Signup(): React.ReactElement {
                 setEmailVerified(true);
                 setEmailCodeExpiresAt(null);
                 setEmailCodeTimeLeft(0);
-                setEmailInfo(t("signup.emailVerifiedDone", { email: res.maskedEmail }));
+                showEmailInfo(t("signup.emailVerifiedDone", { email: res.maskedEmail }));
                 return;
             }
 
             if (res.existingAccountFound) {
                 setCode("");
                 setEmailVerified(false);
-                setEmailError(t("signup.emailAlreadyUsed"));
+                showEmailError(t("signup.emailAlreadyUsed"));
                 return;
             }
 
             setCode("");
             setEmailVerified(false);
-            setEmailError(t("signup.emailVerifyFail"));
+            showEmailError(t("signup.emailVerifyFail"));
         } catch (e: unknown) {
             if (e instanceof ApiError) {
                 console.log("verifyEmailCode error", {
@@ -296,7 +576,7 @@ export default function Signup(): React.ReactElement {
 
             setCode("");
             setEmailVerified(false);
-            setEmailError(getVerifyEmailErrorMessage(e, t));
+            showEmailError(getVerifyEmailErrorMessage(e, t));
         } finally {
             setVerifyingCode(false);
         }
@@ -306,7 +586,10 @@ export default function Signup(): React.ReactElement {
         const nextValue = value.replace(/\D/g, "").slice(0, 6);
 
         setCode(nextValue);
-        setEmailError(null);
+
+        if (emailError) {
+            hideEmailNotice();
+        }
 
         if (emailVerified) return;
         if (emailCodeTimeLeft <= 0) return;
@@ -317,34 +600,42 @@ export default function Signup(): React.ReactElement {
 
     function handleNextStep() {
         if (!form.email.trim()) {
-            setEmailError(t("signup.emailRequired"));
+            showEmailError(t("signup.emailRequired"));
             return;
         }
 
         if (emailCodeSent && emailCodeTimeLeft <= 0 && !emailVerified) {
-            setEmailError(t("signup.emailCodeExpired"));
+            showEmailError(t("signup.emailCodeExpired"));
             return;
         }
 
         if (!emailVerified) {
-            setEmailError(t("signup.emailVerifyRequired"));
+            showEmailError(t("signup.emailVerifyRequired"));
             return;
         }
 
-        setEmailError(null);
+        hideEmailNotice();
         setStep(2);
     }
 
     async function handleCheckLoginId() {
         const loginId = form.loginId.trim();
+        const guideMessage = getLoginIdGuideMessage(loginId);
 
         if (!loginId) {
-            setLoginIdError(t("signup.loginIdRequired"));
+            showLoginIdGuide();
+            return;
+        }
+
+        if (guideMessage) {
+            showLoginIdGuide(guideMessage);
             return;
         }
 
         setCheckingLoginId(true);
+        hideLoginIdGuide();
         setLoginIdError(null);
+        setLoginIdErrorVisible(false);
         setLoginIdInfo(null);
 
         try {
@@ -355,7 +646,7 @@ export default function Signup(): React.ReactElement {
             setLoginIdInfo(res.message);
 
             if (!res.available) {
-                setLoginIdError(res.message);
+                showLoginIdError(res.message);
             }
         } catch (e: unknown) {
             if (e instanceof ApiError) {
@@ -370,7 +661,7 @@ export default function Signup(): React.ReactElement {
             setLoginIdChecked(false);
             setLoginIdAvailable(false);
             setLoginIdInfo(null);
-            setLoginIdError(getCheckLoginIdErrorMessage(e, t));
+            showLoginIdError(getCheckLoginIdErrorMessage(e, t));
         } finally {
             setCheckingLoginId(false);
         }
@@ -383,19 +674,19 @@ export default function Signup(): React.ReactElement {
         const email = form.email.trim();
 
         if (!loginId || !password || !passwordConfirm || !email) {
-            setSignupError(t("signup.required"));
+            showSignupError(t("signup.required"));
             return;
         }
         if (!loginIdChecked || loginIdAvailable !== true) {
-            setSignupError(t("signup.loginIdCheckRequired"));
+            showSignupError(t("signup.loginIdCheckRequired"));
             return;
         }
         if (password !== passwordConfirm) {
-            setSignupError(t("signup.passwordMismatch"));
+            showSignupError(t("signup.passwordMismatch"));
             return;
         }
         if (!emailVerified) {
-            setSignupError(t("signup.emailVerifyRequired"));
+            showSignupError(t("signup.emailVerifyRequired"));
             return;
         }
         setSubmitting(true);
@@ -419,7 +710,7 @@ export default function Signup(): React.ReactElement {
                 });
             }
 
-            setSignupError(getSignupErrorMessage(e, t));
+            showSignupError(getSignupErrorMessage(e, t));
         } finally {
             setSubmitting(false);
         }
@@ -449,17 +740,24 @@ export default function Signup(): React.ReactElement {
                                 <div className="signup-desktop-field">
                                     <span className="signup-desktop-label">{t("signup.email")}</span>
                                     <div className="signup-desktop-inline">
-                                        <input
-                                            className="signup-desktop-input"
-                                            value={form.email}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setForm((prev) => ({ ...prev, email: value }));
-                                                setEmailError(null);
-                                            }}
-                                            placeholder={t("signup.emailPlaceholder")}
-                                            autoComplete="email"
-                                        />
+                                        <div className="signup-desktop-inline-stack">
+                                            <input
+                                                className="signup-desktop-input"
+                                                value={form.email}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setForm((prev) => ({ ...prev, email: value }));
+                                                    hideEmailNotice();
+                                                }}
+                                                placeholder={t("signup.emailPlaceholder")}
+                                                autoComplete="email"
+                                            />
+                                            {!emailCodeSent && (
+                                                <div className={`signup-desktop-info ${emailInfoVisible || emailErrorVisible ? "is-visible" : ""} ${emailError ? "is-error" : ""}`}>
+                                                    {emailError ?? emailInfo ?? ""}
+                                                </div>
+                                            )}
+                                        </div>
                                         <button type="button" className="signup-desktop-inline-btn" onClick={handleSendEmailCode} disabled={sendingCode || !form.email.trim()} >
                                             {sendingCode ? t("signup.sending") : emailCodeSent ? t("signup.resendEmailVC") : t("signup.getEmailVC")}
                                         </button>
@@ -470,29 +768,30 @@ export default function Signup(): React.ReactElement {
                                     <div className="signup-desktop-field">
                                         <span className="signup-desktop-label">{t("signup.verifyCode")}</span>
                                         <div className="signup-desktop-inline">
-                                            <div className="signup-desktop-input-wrap has-timer">
-                                                <input
-                                                    className="signup-desktop-input has-inner-timer"
-                                                    value={code}
-                                                    onChange={(e) => {
-                                                        void handleCodeChange(e.target.value);
-                                                    }}
-                                                    placeholder={t("signup.enterEmailVC")}
-                                                    disabled={emailVerified || emailCodeTimeLeft <= 0}
-                                                />
-                                                {!emailVerified && emailCodeTimeLeft > 0 && (
-                                                    <span className="signup-desktop-input-timer">
-                                                        {formatRemainingTime(emailCodeTimeLeft)}
-                                                    </span>
-                                                )}
+                                            <div className="signup-desktop-inline-stack">
+                                                <div className="signup-desktop-input-wrap has-timer">
+                                                    <input
+                                                        className="signup-desktop-input has-inner-timer"
+                                                        value={code}
+                                                        onChange={(e) => {
+                                                            void handleCodeChange(e.target.value);
+                                                        }}
+                                                        placeholder={t("signup.enterEmailVC")}
+                                                        disabled={emailVerified || emailCodeTimeLeft <= 0}
+                                                    />
+                                                    {!emailVerified && emailCodeTimeLeft > 0 && (
+                                                        <span className="signup-desktop-input-timer">
+                                                            {formatRemainingTime(emailCodeTimeLeft)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className={`signup-desktop-info ${emailInfoVisible || emailErrorVisible ? "is-visible" : ""} ${emailError ? "is-error" : ""}`}>
+                                                    {emailError ?? emailInfo ?? ""}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 )}
-
-                                {emailInfo && <div className="signup-desktop-info">{emailInfo}</div>}
-                                {emailError && <div className="signup-desktop-error">{emailError}</div>}
-
                                 <div className="signup-desktop-actions">
                                     <button type="button" className="signup-desktop-btn primary" onClick={handleNextStep} disabled={!canGoNext} >
                                         {t("signup.next")}
@@ -500,74 +799,119 @@ export default function Signup(): React.ReactElement {
                                 </div>
                             </>
                         )}
-
                         {step === 2 && (
                             <>
                                 <div className="signup-desktop-field">
                                     <span className="signup-desktop-label">{t("login.id")}</span>
-                                    <div className="signup-desktop-inline">
-                                        <input
-                                            className="signup-desktop-input"
-                                            value={form.loginId}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setForm((prev) => ({ ...prev, loginId: value }));
-                                                setLoginIdError(null);
-                                            }}
-                                            placeholder={t("signup.loginIdPlaceholder")}
-                                            autoComplete="username"
-                                        />
-                                        <button type="button" className="signup-desktop-inline-btn" onClick={handleCheckLoginId} disabled={checkingLoginId || !form.loginId.trim()} >
-                                            {checkingLoginId ? t("signup.checking") : t("signup.checkLoginId")}
-                                        </button>
-                                    </div>
-                                    <div className="signup-desktop-help">{t("signup.loginIdGuide")}</div>
-                                </div>
+                                    <div className="signup-desktop-control">
+                                        <div className="signup-desktop-inline-row">
+                                            <input
+                                                className="signup-desktop-input"
+                                                value={form.loginId}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    const trimmedValue = value.trim();
+                                                    const guideMessage = getLoginIdGuideMessage(trimmedValue);
 
-                                {loginIdInfo && (
-                                    <div className={`signup-desktop-info ${loginIdAvailable === false ? "is-error" : ""}`}>
-                                        {loginIdInfo}
+                                                    setForm((prev) => ({ ...prev, loginId: value }));
+                                                    setLoginIdChecked(false);
+                                                    setLoginIdAvailable(null);
+                                                    setLoginIdInfo(null);
+                                                    setLoginIdError(null);
+                                                    setLoginIdErrorVisible(false);
+
+                                                    if (guideMessage) {
+                                                        showLoginIdGuide(guideMessage);
+                                                    } else {
+                                                        hideLoginIdGuide();
+                                                    }
+                                                }}
+                                                placeholder={t("signup.loginIdPlaceholder")}
+                                                autoComplete="username"
+                                            />
+                                            <button type="button" className="signup-desktop-inline-btn" onClick={handleCheckLoginId} disabled={checkingLoginId || !form.loginId.trim()} >
+                                                {checkingLoginId ? t("signup.checking") : t("signup.checkLoginId")}
+                                            </button>
+                                        </div>
+                                        <div className={`signup-desktop-notice ${(loginIdGuideVisible || loginIdErrorVisible || loginIdInfo) ? "is-visible" : ""} ${(loginIdGuideVisible || loginIdError || loginIdAvailable === false) ? "is-error" : ""}`}>
+                                            {loginIdError ?? loginIdInfo ?? loginIdGuideMessage}
+                                        </div>
                                     </div>
-                                )}
-                                {loginIdError && <div className="signup-desktop-error">{loginIdError}</div>}
+                                </div>
 
                                 <div className="signup-desktop-field">
                                     <span className="signup-desktop-label">{t("login.pw")}</span>
-                                    <input
-                                        className="signup-desktop-input"
-                                        value={form.password}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setForm((prev) => ({ ...prev, password: value }));
-                                            setSignupError(null);
-                                        }}
-                                        placeholder={t("signup.passwordPlaceholder")}
-                                        type="password"
-                                        autoComplete="new-password"
-                                    />
-                                    <div className="signup-desktop-help">{t("signup.passwordGuide")}</div>
+                                    <div className="signup-desktop-control">
+                                        <div className="signup-desktop-input-wrap has-password">
+                                            <input
+                                                className="signup-desktop-input is-password"
+                                                value={form.password}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    const guideMessage = getPasswordGuideMessage(value);
+
+                                                    setForm((prev) => ({ ...prev, password: value }));
+                                                    setSignupError(null);
+                                                    setSignupErrorVisible(false);
+
+                                                    if (guideMessage) {
+                                                        showPasswordGuide(guideMessage);
+                                                    } else {
+                                                        hidePasswordGuide();
+                                                    }
+
+                                                    if (form.passwordConfirm.length > 0 && value !== form.passwordConfirm) {
+                                                        showSignupError(t("signup.passwordMismatch"));
+                                                    }
+                                                }}
+                                                placeholder={t("signup.passwordPlaceholder")}
+                                                type={showPassword ? "text" : "password"}
+                                                autoComplete="new-password"
+                                            />
+                                            <button type="button" className="signup-desktop-pw-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}>
+                                                <img className="signup-desktop-pw-blind" src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                                            </button>
+                                        </div>
+                                        <div className={`signup-desktop-notice ${passwordGuideVisible ? "is-visible" : ""} is-error`}>
+                                            {passwordGuideMessage}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="signup-desktop-field">
                                     <span className="signup-desktop-label">{t("signup.passwordConfirm")}</span>
-                                    <input
-                                        className="signup-desktop-input"
-                                        value={form.passwordConfirm}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setForm((prev) => ({ ...prev, passwordConfirm: value }));
-                                            setSignupError(null);
-                                        }}
-                                        placeholder={t("signup.passwordConfirmPlaceholder")}
-                                        type="password"
-                                        autoComplete="new-password"
-                                    />
+                                    <div className="signup-desktop-control">
+                                        <div className="signup-desktop-input-wrap has-password">
+                                            <input
+                                                className="signup-desktop-input is-password"
+                                                value={form.passwordConfirm}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+
+                                                    setForm((prev) => ({ ...prev, passwordConfirm: value }));
+                                                    setSignupError(null);
+                                                    setSignupErrorVisible(false);
+
+                                                    if (value.length > 0 && form.password !== value) {
+                                                        showSignupError(t("signup.passwordMismatch"));
+                                                    }
+                                                }}
+                                                placeholder={t("signup.passwordConfirmPlaceholder")}
+                                                type={showPasswordConfirm ? "text" : "password"}
+                                                autoComplete="new-password"
+                                            />
+                                            <button type="button" className="signup-desktop-pw-toggle" onClick={() => setShowPasswordConfirm((prev) => !prev)} aria-label={showPasswordConfirm ? "비밀번호 숨기기" : "비밀번호 보기"}>
+                                                <img className="signup-desktop-pw-blind" src={showPasswordConfirm ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                                            </button>
+                                        </div>
+                                        <div className={`signup-desktop-notice ${signupErrorVisible ? "is-visible" : ""} is-error`}>
+                                            {signupError ?? ""}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {signupError && <div className="signup-desktop-error">{signupError}</div>}
-
                                 <div className="signup-desktop-actions">
-                                    <button type="button" className="signup-desktop-btn ghost" onClick={() => { setSignupError(null); setStep(1); }} >
+                                    <button type="button" className="signup-desktop-btn ghost" onClick={() => { setSignupError(null); setSignupErrorVisible(false); hideLoginIdGuide(); hidePasswordGuide(); setStep(1); }} >
                                         {t("signup.prev")}
                                     </button>
 

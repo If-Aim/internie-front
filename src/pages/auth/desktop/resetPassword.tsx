@@ -38,14 +38,27 @@ export default function ResetPassword(): React.ReactElement {
     const [verifying, setVerifying] = React.useState(false);
     const [submitting, setSubmitting] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const [errorVisible, setErrorVisible] = React.useState(false);
 
     const [resetToken, setResetToken] = React.useState("");
     const [sendSuccess, setSendSuccess] = React.useState<string | null>(null);
+    const [sendSuccessVisible, setSendSuccessVisible] = React.useState(false);
     const [passwordError, setPasswordError] = React.useState<string | null>(null);
+    const [passwordErrorVisible, setPasswordErrorVisible] = React.useState(false);
     const [confirmError, setConfirmError] = React.useState<string | null>(null);
+    const [confirmErrorVisible, setConfirmErrorVisible] = React.useState(false);
 
     const [codeSent, setCodeSent] = React.useState(false);
     const [remainingSeconds, setRemainingSeconds] = React.useState(0);
+
+    const errorTimerRef = React.useRef<number | null>(null);
+    const errorFadeTimerRef = React.useRef<number | null>(null);
+    const sendSuccessTimerRef = React.useRef<number | null>(null);
+    const sendSuccessFadeTimerRef = React.useRef<number | null>(null);
+    const passwordErrorTimerRef = React.useRef<number | null>(null);
+    const passwordErrorFadeTimerRef = React.useRef<number | null>(null);
+    const confirmErrorTimerRef = React.useRef<number | null>(null);
+    const confirmErrorFadeTimerRef = React.useRef<number | null>(null);
 
     const canSendCode = form.loginId.trim().length > 0 && form.email.trim().length > 0;
     const canVerifyCode = form.code.trim().length > 0;
@@ -59,18 +72,157 @@ export default function ResetPassword(): React.ReactElement {
         form.newPassword === form.newPasswordConfirm &&
         !submitting;
 
+    const passwordNoticeMessage = passwordError ?? confirmError ?? (passwordMismatch ? t("resetPassword.passwordMismatch") : "");
+    const passwordNoticeVisible = passwordErrorVisible || confirmErrorVisible || passwordMismatch;
+
+    function clearTimer(timerRef: React.MutableRefObject<number | null>) {
+        if (timerRef.current) {
+            window.clearTimeout(timerRef.current);
+        }
+    }
+
+    function showError(message: string) {
+        setSendSuccess(null);
+        setSendSuccessVisible(false);
+        clearTimer(sendSuccessTimerRef);
+        clearTimer(sendSuccessFadeTimerRef);
+
+        setError(message);
+        setErrorVisible(true);
+        clearTimer(errorTimerRef);
+        clearTimer(errorFadeTimerRef);
+
+        errorTimerRef.current = window.setTimeout(() => {
+            setErrorVisible(false);
+
+            errorFadeTimerRef.current = window.setTimeout(() => {
+                setError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showSendSuccess(message: string) {
+        setError(null);
+        setErrorVisible(false);
+        clearTimer(errorTimerRef);
+        clearTimer(errorFadeTimerRef);
+
+        setSendSuccess(message);
+        setSendSuccessVisible(true);
+        clearTimer(sendSuccessTimerRef);
+        clearTimer(sendSuccessFadeTimerRef);
+
+        sendSuccessTimerRef.current = window.setTimeout(() => {
+            setSendSuccessVisible(false);
+
+            sendSuccessFadeTimerRef.current = window.setTimeout(() => {
+                setSendSuccess(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showPasswordError(message: string) {
+        setConfirmError(null);
+        setConfirmErrorVisible(false);
+        clearTimer(confirmErrorTimerRef);
+        clearTimer(confirmErrorFadeTimerRef);
+
+        setPasswordError(message);
+        setPasswordErrorVisible(true);
+        clearTimer(passwordErrorTimerRef);
+        clearTimer(passwordErrorFadeTimerRef);
+
+        passwordErrorTimerRef.current = window.setTimeout(() => {
+            setPasswordErrorVisible(false);
+
+            passwordErrorFadeTimerRef.current = window.setTimeout(() => {
+                setPasswordError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function showConfirmError(message: string) {
+        setPasswordError(null);
+        setPasswordErrorVisible(false);
+        clearTimer(passwordErrorTimerRef);
+        clearTimer(passwordErrorFadeTimerRef);
+
+        setConfirmError(message);
+        setConfirmErrorVisible(true);
+        clearTimer(confirmErrorTimerRef);
+        clearTimer(confirmErrorFadeTimerRef);
+
+        confirmErrorTimerRef.current = window.setTimeout(() => {
+            setConfirmErrorVisible(false);
+
+            confirmErrorFadeTimerRef.current = window.setTimeout(() => {
+                setConfirmError(null);
+            }, 250);
+        }, 3000);
+    }
+
+    function hideError() {
+        setErrorVisible(false);
+        clearTimer(errorTimerRef);
+        clearTimer(errorFadeTimerRef);
+
+        errorFadeTimerRef.current = window.setTimeout(() => {
+            setError(null);
+        }, 350);
+    }
+
+    function hideSendSuccess() {
+        setSendSuccessVisible(false);
+        clearTimer(sendSuccessTimerRef);
+        clearTimer(sendSuccessFadeTimerRef);
+
+        sendSuccessFadeTimerRef.current = window.setTimeout(() => {
+            setSendSuccess(null);
+        }, 350);
+    }
+
+    function hidePasswordError() {
+        setPasswordErrorVisible(false);
+        clearTimer(passwordErrorTimerRef);
+        clearTimer(passwordErrorFadeTimerRef);
+
+        passwordErrorFadeTimerRef.current = window.setTimeout(() => {
+            setPasswordError(null);
+        }, 350);
+    }
+
+    function hideConfirmError() {
+        setConfirmErrorVisible(false);
+        clearTimer(confirmErrorTimerRef);
+        clearTimer(confirmErrorFadeTimerRef);
+
+        confirmErrorFadeTimerRef.current = window.setTimeout(() => {
+            setConfirmError(null);
+        }, 350);
+    }
+
+    function hideStepOneNotice() {
+        hideError();
+        hideSendSuccess();
+    }
+
+    function hidePasswordNotice() {
+        hideError();
+        hidePasswordError();
+        hideConfirmError();
+    }
+
     async function handleSendCode() {
         const loginId = form.loginId.trim();
         const email = form.email.trim();
 
         if (!loginId || !email) {
-            setError("아이디와 이메일을 입력해주세요.");
+            showError(t("resetPassword.requiredLoginIdEmail"));
             return;
         }
 
         setSending(true);
-        setError(null);
-        setSendSuccess(null);
+        hideStepOneNotice();
 
         try {
             const res = await sendResetPasswordCode({
@@ -81,12 +233,12 @@ export default function ResetPassword(): React.ReactElement {
 
             setCodeSent(true);
             setRemainingSeconds(600);
-            setSendSuccess(res.message);
+            showSendSuccess(res.message);
         } catch (e) {
             if (e instanceof ApiError) {
-                setError(e.message);
+                showError(e.message);
             } else {
-                setError("인증코드 발송에 실패했습니다.");
+                showError(t("resetPassword.codeSendFail"));
             }
         } finally {
             setSending(false);
@@ -99,12 +251,12 @@ export default function ResetPassword(): React.ReactElement {
         const code = form.code.trim();
 
         if (!code) {
-            setError("인증코드를 입력해주세요.");
+            showError(t("resetPassword.codeRequired"));
             return;
         }
 
         setVerifying(true);
-        setError(null);
+        hideStepOneNotice();
 
         try {
             const res = await verifyResetPasswordCode({
@@ -115,13 +267,12 @@ export default function ResetPassword(): React.ReactElement {
             });
 
             setResetToken(res.resetToken);
-            setError(null);
             setStep(2);
         } catch (e) {
             if (e instanceof ApiError) {
-                setError(e.message);
+                showError(e.message);
             } else {
-                setError("인증코드가 올바르지 않습니다.");
+                showError(t("resetPassword.codeVerifyFail"));
             }
         } finally {
             setVerifying(false);
@@ -133,14 +284,12 @@ export default function ResetPassword(): React.ReactElement {
         const email = form.email.trim();
 
         if (form.newPassword !== form.newPasswordConfirm) {
-            setConfirmError("비밀번호가 일치하지 않습니다.");
+            showConfirmError(t("resetPassword.passwordMismatch"));
             return;
         }
 
         setSubmitting(true);
-        setError(null);
-        setPasswordError(null);
-        setConfirmError(null);
+        hidePasswordNotice();
 
         try {
             await resetPasswordWithToken({
@@ -155,20 +304,21 @@ export default function ResetPassword(): React.ReactElement {
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.code === "NEW_PASSWORD_SAME_AS_OLD") {
-                    setPasswordError("새 비밀번호는 이전에 사용하던 비밀번호와 달라야 합니다.");
+                    showPasswordError(t("resetPassword.passwordSameAsOld"));
                     return;
                 }
-                setError(e.message);
+
+                showConfirmError(e.message);
                 return;
             }
 
-            setError("비밀번호 재설정에 실패했습니다.");
+            showConfirmError(t("resetPassword.fail"));
         } finally {
             setSubmitting(false);
         }
     }
 
-    React.useEffect(() => {
+    React.useEffect(() => { // 인증코드 타이머
         if (!codeSent || remainingSeconds <= 0) return;
 
         const timer = window.setInterval(() => {
@@ -183,6 +333,19 @@ export default function ResetPassword(): React.ReactElement {
 
         return () => window.clearInterval(timer);
     }, [codeSent, remainingSeconds]);
+
+    React.useEffect(() => {
+        return () => {
+            clearTimer(errorTimerRef);
+            clearTimer(errorFadeTimerRef);
+            clearTimer(sendSuccessTimerRef);
+            clearTimer(sendSuccessFadeTimerRef);
+            clearTimer(passwordErrorTimerRef);
+            clearTimer(passwordErrorFadeTimerRef);
+            clearTimer(confirmErrorTimerRef);
+            clearTimer(confirmErrorFadeTimerRef);
+        };
+    }, []);
 
     return (
         <div className="reset-desktop-page">
@@ -201,85 +364,101 @@ export default function ResetPassword(): React.ReactElement {
                         {step === 1 && (
                             <>
                                 <div className="reset-desktop-field">
-                                    <span className="reset-desktop-label">아이디</span>
-                                    <input
-                                        className="reset-desktop-input"
-                                        value={form.loginId}
-                                        onChange={(e) => setForm((prev) => ({ ...prev, loginId: e.target.value }))}
-                                        placeholder="아이디를 입력해주세요"
-                                        autoComplete="username"
-                                    />
+                                    <span className="reset-desktop-label">{t("login.id")}</span>
+                                    <div className="reset-desktop-input-wrap">
+                                        <input
+                                            className="reset-desktop-input"
+                                            value={form.loginId}
+                                            onChange={(e) => {
+                                                setForm((prev) => ({ ...prev, loginId: e.target.value, code: "" }));
+                                                hideStepOneNotice();
+                                                setCodeSent(false);
+                                                setRemainingSeconds(0);
+                                            }}
+                                            placeholder={t("login.idPlaceholder")}
+                                            autoComplete="username"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="reset-desktop-field">
-                                    <span className="reset-desktop-label">이메일</span>
+                                    <span className="reset-desktop-label">{t("signup.email")}</span>
                                     <div className="reset-desktop-inline">
                                         <input
                                             className="reset-desktop-input"
                                             value={form.email}
-                                            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                                            placeholder="이메일을 입력해주세요"
+                                            onChange={(e) => {
+                                                setForm((prev) => ({ ...prev, email: e.target.value, code: "" }));
+                                                hideStepOneNotice();
+                                                setCodeSent(false);
+                                                setRemainingSeconds(0);
+                                            }}
+                                            placeholder={t("signup.emailPlaceholder")}
                                             autoComplete="email"
                                         />
                                         <button type="button" className="reset-desktop-btn ghost reset-desktop-inline-btn" onClick={handleSendCode} disabled={sending || !canSendCode} >
-                                            {codeSent ? "재전송" : "인증하기"}
+                                            {codeSent ? t("signup.resendEmailVC") : t("signup.getEmailVC")}
                                         </button>
                                     </div>
                                 </div>
 
                                 {codeSent && (
                                     <div className="reset-desktop-field">
-                                        <span className="reset-desktop-label">인증코드</span>
+                                        <span className="reset-desktop-label">{t("signup.verifyCode")}</span>
                                         <div className="reset-desktop-code-wrap">
                                             <input
                                                 className="reset-desktop-input reset-desktop-code-input"
                                                 value={form.code}
-                                                onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
-                                                placeholder="인증코드를 입력해주세요"
+                                                onChange={(e) => {setForm((prev) => ({ ...prev, code: e.target.value })); hideError(); }}
+                                                placeholder={t("signup.enterEmailVC")}
                                             />
                                             <span className="reset-desktop-code-timer">{formatTime(remainingSeconds)}</span>
                                         </div>
                                     </div>
                                 )}
-
-                                {sendSuccess && <div className="reset-desktop-info">{sendSuccess}</div>}
+                                <div className={`reset-desktop-notice ${error ? "is-error" : ""} ${(errorVisible || sendSuccessVisible) ? "is-visible" : ""}`}>
+                                    {error ?? sendSuccess ?? ""}
+                                </div>
                             </>
                         )}
 
                         {step === 2 && (
                             <>
                                 <div className="reset-desktop-field">
-                                    <span className="reset-desktop-label">비밀번호</span>
+                                    <span className="reset-desktop-label">{t("login.pw")}</span>
                                     <div className="reset-desktop-input-wrap">
                                         <input
                                             className="reset-desktop-input"
                                             value={form.newPassword}
                                             onChange={(e) => {
                                                 setForm((prev) => ({ ...prev, newPassword: e.target.value }));
-                                                setPasswordError(null);
+                                                hidePasswordError();
+
+                                                if (confirmError) {
+                                                    hideConfirmError();
+                                                }
                                             }}
                                             placeholder={t("login.passwordPlaceholder")}
                                             type={showNewPassword ? "text" : "password"}
                                             autoComplete="new-password"
                                         />
                                         <button type="button" className="reset-desktop-pw-toggle" onClick={() => setShowNewPassword((prev) => !prev)} aria-label={showNewPassword ? "비밀번호 숨기기" : "비밀번호 보기"} >
-                                            <img className="login-desktop-pw-blind" src={showNewPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                                            <img className="reset-desktop-pw-blind" src={showNewPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                         </button>
                                     </div>
-                                    {passwordError && <div className="reset-desktop-error">{passwordError}</div>}
                                 </div>
 
                                 <div className="reset-desktop-field">
-                                    <span className="reset-desktop-label">비밀번호 확인</span>
+                                    <span className="reset-desktop-label">{t("signup.passwordConfirm")}</span>
                                     <div className="reset-desktop-input-wrap">
                                         <input
                                             className="reset-desktop-input"
                                             value={form.newPasswordConfirm}
                                             onChange={(e) => {
                                                 setForm((prev) => ({ ...prev, newPasswordConfirm: e.target.value }));
-                                                setConfirmError(null);
+                                                hideConfirmError();
                                             }}
-                                            placeholder="비밀번호를 다시 입력해주세요"
+                                            placeholder={t("signup.passwordConfirmPlaceholder")}
                                             type={showNewPasswordConfirm ? "text" : "password"}
                                             autoComplete="new-password"
                                         />
@@ -287,27 +466,23 @@ export default function ResetPassword(): React.ReactElement {
                                             <img className="login-desktop-pw-blind" src={showNewPasswordConfirm ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                         </button>
                                     </div>
-                                    {(confirmError || passwordMismatch) && (
-                                        <div className="reset-desktop-error">
-                                            {confirmError ?? "비밀번호가 일치하지 않습니다."}
-                                        </div>
-                                    )}
+                                </div>
+                                <div className={`reset-desktop-notice is-error ${passwordNoticeVisible ? "is-visible" : ""}`}>
+                                    {passwordNoticeMessage}
                                 </div>
                             </>
                         )}
 
-                        {error && <div className="reset-desktop-error">{error}</div>}
-
                         <div className="reset-desktop-actions">
                             {step === 1 && (
                                 <button type="button" className="reset-desktop-btn primary" onClick={handleVerifyCode} disabled={verifying || !codeSent || !canVerifyCode || remainingSeconds <= 0} >
-                                    {verifying ? "확인 중..." : "다음"}
+                                    {verifying ? t("signup.verifying") : t("resetPassword.next")}
                                 </button>
                             )}
 
                             {step === 2 && (
                                 <button type="button" className="reset-desktop-btn primary" onClick={handleResetPassword} disabled={submitting || !canSubmit} >
-                                    {submitting ? "처리 중..." : "비밀번호 변경"}
+                                    {submitting ? t("resetPassword.submitting") : t("resetPassword.changePassword")}
                                 </button>
                             )}
                         </div>

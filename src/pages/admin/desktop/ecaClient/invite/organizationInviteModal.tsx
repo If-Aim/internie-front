@@ -79,7 +79,7 @@ export default function OrganizationInviteModal({
         <div className="organization-invite-modal-backdrop">
             <section className="organization-invite-modal" role="dialog" aria-modal="true">
                 <button type="button" className="organization-invite-modal-close" onClick={onClose} aria-label="닫기">
-                    <img src="/icons/x-01.svg" className="admin-report-confirm-close-icon" alt=""/>
+                    <img src="/icons/x-01.svg" className="organization-invite-close-icon" alt="" />
                 </button>
                 {state === "loading" ? (
                     <>

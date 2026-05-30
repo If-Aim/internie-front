@@ -9,8 +9,8 @@
 .find-id-desktop-title { margin: 0; font-size: 24px; line-height: 32px; font-weight: 700; color: #000; }
 .find-id-desktop-subtitle { display: none; }
 
-.find-id-desktop-card { display: flex; flex-direction: column; gap: 18px; margin-top: 42px; }
-.find-id-desktop-field { display: flex; flex-direction: column; gap: 11px; }
+.find-id-desktop-card { display: flex; flex-direction: column; margin-top: 30px; }
+.find-id-desktop-field { display: flex; flex-direction: column; margin-top: 12px; gap: 11px; }
 .find-id-desktop-label { font-size: 16px; line-height: 20px; font-weight: 600; color: #666; text-align: left; }
 
 .find-id-desktop-inline { display: flex; gap: 10px; }
@@ -25,11 +25,12 @@
 .find-id-desktop-inline-btn:not(:disabled) { background: #BDD8FF; color: #0B57FF; }
 .find-id-desktop-inline-btn:disabled { cursor: not-allowed; }
 
-.find-id-desktop-info { margin-top: -6px; font-size: 12px; line-height: 18px; font-weight: 500; color: #2E7D32; text-align: left; }
-.find-id-desktop-help { margin-top: -6px; font-size: 12px; line-height: 18px; font-weight: 500; color: #7a7a7a; text-align: left; }
-.find-id-desktop-error { margin-top: -4px; font-size: 12px; line-height: 18px; font-weight: 600; color: #D93025; text-align: left; }
+.find-id-desktop-help { margin-top: 0; font-size: 12px; line-height: 20px; font-weight: 500; color: #7a7a7a; text-align: left; }
+.find-id-desktop-notice { min-height: 20px; margin: 0 18px 0; font-size: 12px; line-height: 18px; font-weight: 500; color: #2E7D32; text-align: left; opacity: 0; transition: opacity 0.35s ease; pointer-events: none; }
+.find-id-desktop-notice.is-visible { opacity: 1; }
+.find-id-desktop-notice.is-error { color: #F00; font-weight: 600; }
 
-.find-id-desktop-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.find-id-desktop-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
 .find-id-desktop-btn { width: 100%; height: 50px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .find-id-desktop-btn.primary { background: #F6F6F6; color: #6B6B6B; }
 .find-id-desktop-btn.primary:not(:disabled) { background: var(--primary); color: #fff; }

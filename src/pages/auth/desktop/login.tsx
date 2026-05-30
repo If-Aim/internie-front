@@ -29,15 +29,59 @@ export default function Login(): React.ReactElement {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [toastClosing, setToastClosing] = useState(false);
+    const toastTimerRef = useRef<number | null>(null);
+    const toastCloseTimerRef = useRef<number | null>(null);
 
     const go = (url: string) => {
         window.location.href = url;
     };
 
     const canLogin = loginId.trim().length > 0 && password.length > 0;
+    const showErrorToast = (message: string) => {
+        setLoginError(message);
+        setToastClosing(false);
+        setToastMessage(null);
+
+        if (toastTimerRef.current) {
+            window.clearTimeout(toastTimerRef.current);
+        }
+
+        if (toastCloseTimerRef.current) {
+            window.clearTimeout(toastCloseTimerRef.current);
+        }
+
+        window.setTimeout(() => {
+            setToastMessage(message);
+        }, 0);
+
+        toastTimerRef.current = window.setTimeout(() => {
+            setToastClosing(true);
+
+            toastCloseTimerRef.current = window.setTimeout(() => {
+                setToastMessage(null);
+                setToastClosing(false);
+            }, 280);
+        }, 3000);
+    };
+
+    const clearLoginError = () => {
+        setLoginError(null);
+        setToastMessage(null);
+        setToastClosing(false);
+
+        if (toastTimerRef.current) {
+            window.clearTimeout(toastTimerRef.current);
+        }
+
+        if (toastCloseTimerRef.current) {
+            window.clearTimeout(toastCloseTimerRef.current);
+        }
+    };
     const handleGoogleClick = () => {
         if (!window.google?.accounts?.id) {
-            alert(t("login.googleNotReady"));
+            showErrorToast(t("login.googleNotReady"));
             return;
         }
 
@@ -47,7 +91,7 @@ export default function Login(): React.ReactElement {
         const trimmedLoginId = loginId.trim();
 
         if (!trimmedLoginId || !password) {
-            setLoginError(t("login.requiredLoginInfo"));
+            showErrorToast(t("login.requiredLoginInfo"));
             return;
         }
 
@@ -65,11 +109,11 @@ export default function Login(): React.ReactElement {
             console.error("일반 로그인 실패", e);
 
             if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
-                setLoginError(t("login.withdrawnAccount"));
+                showErrorToast(t("login.withdrawnAccount"));
                 return;
             }
 
-            setLoginError(t("login.invalidLogin"));
+            showErrorToast(t("login.invalidLogin"));
         } finally {
             setSubmitting(false);
         }
@@ -100,16 +144,16 @@ export default function Login(): React.ReactElement {
                         console.error("구글 로그인 실패", e);
 
                         if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
-                            setLoginError(t("login.withdrawnAccount"));
+                            showErrorToast(t("login.withdrawnAccount"));
                             return;
                         }
 
                         if (e instanceof ApiError) {
-                            setLoginError(e.message || t("login.googleLoginFailed"));
+                            showErrorToast(e.message || t("login.googleLoginFailed"));
                             return;
                         }
 
-                        setLoginError(t("login.googleLoginFailed"));
+                        showErrorToast(t("login.googleLoginFailed"));
                     }
                 },
             });
@@ -132,8 +176,32 @@ export default function Login(): React.ReactElement {
         };
     }, [navigate, t]);
 
+    useEffect(() => { // 3초 후 toast 사라짐
+        return () => {
+            if (toastTimerRef.current) {
+                window.clearTimeout(toastTimerRef.current);
+            }
+
+            if (toastCloseTimerRef.current) {
+                window.clearTimeout(toastCloseTimerRef.current);
+            }
+        };
+    }, []);
+
     return (
         <div className="login-desktop-page">
+            {toastMessage && (
+                <div className={`login-desktop-toast ${toastClosing ? "is-closing" : ""}`} role="alert">
+                    <span className="login-desktop-toast-icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="10" cy="10" r="10" fill="#FF0000" />
+                            <path d="M10 5.2V10.8" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                            <circle cx="10" cy="14.5" r="1.1" fill="white" />
+                        </svg>
+                    </span>
+                    <span className="login-desktop-toast-text">{toastMessage}</span>
+                </div>
+            )}
             <header className="login-desktop-header">
                 <div className="login-desktop-header-inner">
                     <span className="login-desktop-header-logo">internie</span>
@@ -161,7 +229,7 @@ export default function Login(): React.ReactElement {
                             <input
                                 className="login-desktop-input"
                                 value={loginId}
-                                onChange={(e) => { setLoginId(e.target.value); setLoginError(null); }}
+                                onChange={(e) => { setLoginId(e.target.value); clearLoginError(); }}
                                 placeholder={t("login.idPlaceholder")}
                                 autoComplete="username"
                                 onKeyDown={(e) => {
@@ -184,7 +252,7 @@ export default function Login(): React.ReactElement {
                                 <input
                                     className={`login-desktop-input is-password ${loginError ? "is-error" : ""}`}
                                     value={password}
-                                    onChange={(e) => {setPassword(e.target.value); setLoginError(null); }}
+                                    onChange={(e) => { setPassword(e.target.value); clearLoginError(); }}
                                     placeholder={t("login.passwordPlaceholder")}
                                     type={showPassword ? "text" : "password"}
                                     autoComplete="current-password"
@@ -200,11 +268,6 @@ export default function Login(): React.ReactElement {
                             </div>
                         </div>
 
-                        {loginError && (
-                            <div className="login-desktop-error-text">
-                                {loginError}
-                            </div>
-                        )}
                         <button type="button" className="login-desktop-btn primary" onClick={handleLocalLogin} disabled={!canLogin || submitting} >
                             {submitting ? t("login.loginLoading") : t("login.loginButton")}
                         </button>
