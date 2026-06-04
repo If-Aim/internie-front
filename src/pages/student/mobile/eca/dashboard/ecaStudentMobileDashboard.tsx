@@ -65,26 +65,14 @@ function isCompletedAssignment(assignment: StudentAssignmentResponse): boolean {
     return assignment.status === "SUBMITTED" || assignment.status === "LATE_SUBMITTED";
 }
 
-function toScheduleItems(activity: StudentExternalActivityDetailResponse | null, assignments: StudentAssignmentResponse[]): MobileScheduleItem[] {
-    const activityItems: MobileScheduleItem[] = activity ? [
-        {
-            id: -1,
-            title: "발대식",
-            date: formatDate(activity.startDate),
-            type: "activity",
-            completed: true,
-        },
-    ] : [];
-
-    const assignmentItems = assignments.map((assignment) => ({
+function toScheduleItems(assignments: StudentAssignmentResponse[]): MobileScheduleItem[] {
+    return assignments.map((assignment) => ({
         id: assignment.assignmentId,
         title: assignment.name,
         date: formatDate(assignment.deadlineAt),
         type: "assignment" as const,
         completed: isCompletedAssignment(assignment),
     }));
-
-    return [...activityItems, ...assignmentItems];
 }
 
 type HeaderProps = {
@@ -159,7 +147,7 @@ export default function EcaMobileDashboard(): React.ReactElement {
     const progressRate = getDateProgressRate(activity?.startDate, activity?.endDate);
     const completedAssignmentCount = assignments.filter(isCompletedAssignment).length;
     const assignmentRate = assignments.length === 0 ? 0 : Math.round((completedAssignmentCount / assignments.length) * 100);
-    const scheduleItems = toScheduleItems(activity, assignments);
+    const scheduleItems = toScheduleItems(assignments);
 
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
