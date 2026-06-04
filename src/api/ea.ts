@@ -43,6 +43,7 @@ export type TeamMemberResponse = {
     teamMemberId: number;
     userId: number;
     userName: string;
+    profileImage?: string | null;
     role: TeamRole;
     joinedAt: string;
 };
@@ -89,8 +90,21 @@ export type StudentExternalActivityResponse = {
     progressStatus: ExternalActivityProgressStatus;
 };
 
+export type StudentExternalActivityDetailResponse = StudentExternalActivityResponse & {
+    managers: ExternalActivityManager[];
+};
+
 export async function getMyParticipatingExternalActivities(): Promise<StudentExternalActivityResponse[]> { // 나의 대외활동 조회 (학생용)
     return api<StudentExternalActivityResponse[]>("/users/me/externalActivities/participating");
+}
+
+export async function getMyParticipatingExternalActivity(
+    externalActivityId: number | string
+): Promise<StudentExternalActivityDetailResponse> {
+    return api<StudentExternalActivityDetailResponse>(
+        `/users/me/externalActivities/participating/${externalActivityId}`,
+        { method: "GET" }
+    );
 }
 
 /* - Assignment 관련 (Student) - */
@@ -112,6 +126,7 @@ export type StudentAssignmentResponse = {
     startTime?: string | null;
     endTime?: string | null;
     deadlineAt: string;
+    submittedAt?: string | null;
     isTeamAssignment: boolean;
     myTeam?: StudentAssignmentTeam | null;
     status: AssignmentParticipantStatus;

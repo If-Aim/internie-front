@@ -33,6 +33,10 @@ button.eca-student-menu-item { width: 100%; border: 0; background: transparent; 
 .eca-student-body { flex: 1; min-width: 0; height: 100dvh; padding: 80px 120px; box-sizing: border-box; overflow-x: auto; }
 .eca-student-surface { min-width: 600px; min-height: calc(100vh - 160px); border-radius: 0; background: #F0F6FF; }
 
+::-webkit-scrollbar { width: 7px; height: 4px; color: #D9D9D9; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: #D9D9D9; border-radius: 999px; border: none; background-clip: content-box; }
+
 .eca-student-nav::-webkit-scrollbar, .eca-student-activity-list::-webkit-scrollbar { width: 4px; }
 .eca-student-nav::-webkit-scrollbar-track, .eca-student-activity-list::-webkit-scrollbar-track { background: transparent; }
 .eca-student-nav::-webkit-scrollbar-thumb, .eca-student-activity-list::-webkit-scrollbar-thumb { background-color: #D9D9D9; border-radius: 999px; }

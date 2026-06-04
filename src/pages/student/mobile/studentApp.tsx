@@ -18,6 +18,8 @@ import QuestionsPage from "./questions/questionsPage";
 import VerifyCodePage from "./myPage/verifyCode";
 import WithdrawPage from "./myPage/withdraw";
 
+import EcaStudentApp from "./eca/ecaStudentApp";
+
 export default function StudentApp(): React.ReactElement {
 	return (
 		<Routes>
@@ -36,6 +38,8 @@ export default function StudentApp(): React.ReactElement {
 				<Route path="schedule/:eventId" element={<EditSchedule />} />
 				<Route path="schedule/:eventDayId/detail" element={<DetailSchedule />} />
 				<Route path="schedule/:eventDayId/questions" element={<QuestionsPage />} />
+
+				<Route path="activities/*" element={<EcaStudentApp />} />
 
 				<Route path="*" element={<Navigate to="." replace />} />
 			</Route>

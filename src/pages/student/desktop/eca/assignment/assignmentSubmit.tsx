@@ -103,6 +103,15 @@ function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, ex
         });
 }
 
+function isSameNumberArray(a: number[], b: number[]): boolean {
+    if (a.length !== b.length) return false;
+
+    const sortedA = [...a].sort((prev, next) => prev - next);
+    const sortedB = [...b].sort((prev, next) => prev - next);
+
+    return sortedA.every((value, index) => value === sortedB[index]);
+}
+
 function getAssignmentFileWarning(resultForms?: AssignmentResultForm[] | null, extension?: string | null): string {
     if (isAllowedAssignmentFile(resultForms, extension)) return "";
 
@@ -142,6 +151,8 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     const [error, setError] = React.useState("");
     const [files, setFiles] = React.useState<UploadFileItem[]>([]);
     const [linkUrl, setLinkUrl] = React.useState("");
+    const [initialExistingFileIds, setInitialExistingFileIds] = React.useState<number[]>([]);
+    const [initialExistingLinkIds, setInitialExistingLinkIds] = React.useState<number[]>([]);
     const [existingLinks, setExistingLinks] = React.useState<SubmissionFileResponse[]>([]);
     const [submitResultModalOpen, setSubmitResultModalOpen] = React.useState(false);
     const [submitResult, setSubmitResult] = React.useState<"success" | "fail">("success");
@@ -157,6 +168,8 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         setMySubmission(latestSubmission);
         setExistingFiles(nextFiles);
         setExistingLinks(nextLinks);
+        setInitialExistingFileIds(nextFiles.map((file) => file.submissionFileId));
+        setInitialExistingLinkIds(nextLinks.map((file) => file.submissionFileId));
         setLinkUrl("");
     }
 
@@ -192,12 +205,7 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     }, [assignmentId]);
 
     function moveBack(): void {
-        if (!externalActivityId) {
-            navigate(-1);
-            return;
-        }
-
-        navigate(`/student/activities/${externalActivityId}/assignment`);
+        navigate(-1);
     }
 
     function openFilePicker(): void {
@@ -349,7 +357,12 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     const hasInvalidFileType = files.some((item) => !isAllowedAssignmentFile(assignment?.resultForms, item.extension));
     const hasAnyFile = existingFiles.length > 0 || files.length > 0;
     const hasRequiredSubmission = (acceptsFile && hasAnyFile) || (acceptsLink && hasAnyLink);
-    const submitDisabled = !hasRequiredSubmission || hasInvalidFileType || hasInvalidLink || submitting || loading || !!error;
+    const currentExistingFileIds = existingFiles.map((file) => file.submissionFileId);
+    const currentExistingLinkIds = existingLinks.map((file) => file.submissionFileId);
+    const hasFileChange = files.length > 0 || !isSameNumberArray(initialExistingFileIds, currentExistingFileIds);
+    const hasLinkChange = trimmedLinkUrl.length > 0 || !isSameNumberArray(initialExistingLinkIds, currentExistingLinkIds);
+    const hasSubmissionChange = !mySubmission || hasFileChange || hasLinkChange;
+    const submitDisabled = !hasRequiredSubmission || !hasSubmissionChange || hasInvalidFileType || hasInvalidLink || submitting || loading || !!error;
 
     return (
         <>
@@ -465,7 +478,7 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                                 <div className="eca-student-assignment-submitted-info">
                                     <span>제출된 과제</span>
                                     <strong>
-                                        마지막 수정: {formatSubmittedAt(getLatestSubmittedAt(mySubmission))}
+                                        마지막 수정 일시: {formatSubmittedAt(getLatestSubmittedAt(mySubmission))}
                                     </strong>
                                 </div>
                             ) : null}

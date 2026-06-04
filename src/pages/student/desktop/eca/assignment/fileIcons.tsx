@@ -195,7 +195,7 @@ function FileIcon({ extension }: { extension: FileIconExtension | "file" }): Rea
     const fontSize = getLabelFontSize(meta.label);
 
     return (
-        <svg className="eca-student-assignment-file-svg" width="100" height="115" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg className="eca-student-assignment-file-svg" width="21" height="24" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M25.7144 2.14258H63.3986L97.8573 36.6013V102.857C97.8573 107.985 93.7 112.143 88.5716 112.143H25.7144C20.586 112.143 16.4287 107.985 16.4287 102.857V11.4283C16.4287 6.29993 20.5861 2.14258 25.7144 2.14258Z" fill="white" stroke="#C8D2E1" strokeWidth="3" />
             <path d="M62.8574 2.85645V28.5707C62.8574 33.3046 66.695 37.1422 71.4288 37.1422H97.1431" stroke="#C8D2E1" strokeWidth="3" strokeLinecap="round" />
             <rect x="0" y="54.2861" width={labelWidth} height="45.7143" rx="5.71429" fill={meta.color} />

@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, getUserMe, sendMyEmailCode, verifyMyEmailCode, type UserMe, } from "../../../api/client";
-import { getMyParticipatingExternalActivities } from "../../../api/ea";
+import { getMyParticipatingExternalActivities, type StudentExternalActivityResponse } from "../../../api/ea";
 import { getMyOrganizations } from "../../../api/organizationClient";
 import type { MyOrganizationResponse } from "../../../api/organizationClient";
 import { hasPendingGlobalModal } from "../../../globalModalStorage";
 
+import StudentMobileSideMenu from "./studentMobileSideMenu";
 import "../../../App.css"; 
 
 type TimeRange = {
@@ -543,264 +544,6 @@ function MonthPickerModal({
 	);
 }
 
-type SideMenuProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    userName: string;
-    userEmail: string;
-    userProfileImg: string;
-    userRoleSet: string[];
-    organizations: MyOrganizationResponse[];
-    onRequireAuth: (pathAfterLogin: string, action: () => void) => void;
-};
-
-function SideMenu({ isOpen, onClose, userName, userEmail, userProfileImg, userRoleSet, organizations, onRequireAuth }: SideMenuProps) {
-	const navigate = useNavigate();
-	const { t, i18n } = useTranslation();
-	const widthRef = React.useRef<number>(Math.round(window.innerWidth * 0.95));
-	const rafRef = React.useRef<number | null>(null);
-	const panelRef = React.useRef<HTMLDivElement | null>(null);
-	const [x, setX] = React.useState<number>(() => -widthRef.current);
-	const startXRef = React.useRef(0);
-	const startPanelXRef = React.useRef(0);
-	const lastXRef = React.useRef(0);
-	const lastTRef = React.useRef(0);
-	const vxRef = React.useRef(0);
-
-	const [dragging, setDragging] = React.useState(false);
-	const [closing, setClosing] = React.useState(false);
-
-	const clamp = (v: number, min: number, max: number) =>
-		Math.max(min, Math.min(max, v));
-
-	React.useEffect(() => {
-		const w = panelRef.current?.offsetWidth ?? widthRef.current;
-		widthRef.current = w;
-
-		if (dragging) return;
-
-		setX(isOpen ? 0 : -w);
-	}, [isOpen, dragging]);
-
-	const openProgress = React.useMemo(() => {
-		const w = widthRef.current || 1;
-		return clamp(1 - Math.abs(x) / w, 0, 1);
-	}, [x]);
-
-	const closeWithSnap = React.useCallback(() => {
-		if (closing) return;
-
-		const w = widthRef.current;
-		setDragging(false);
-		setClosing(true);
-
-		setX(-w);
-
-		window.setTimeout(() => {
-			setClosing(false);
-			onClose();
-		}, 260);
-	}, [onClose, closing]);
-
-	const openWithSnap = React.useCallback(() => {
-		setDragging(false);
-		setX(0);
-	}, []);
-
-	const onPointerDown = (e: React.PointerEvent) => {
-		if (!panelRef.current) return;
-		if (!isOpen) return;
-
-		const target = e.target as HTMLElement;
-		if (
-			target.closest(
-				"button, a, input, textarea, select, [role='button']"
-			)
-		) {
-			return;
-		}
-		panelRef.current.setPointerCapture(e.pointerId);
-
-		const w = panelRef.current.offsetWidth;
-		widthRef.current = w;
-
-		setDragging(true);
-
-		startXRef.current = e.clientX;
-		startPanelXRef.current = x;
-		lastXRef.current = e.clientX;
-		lastTRef.current = performance.now();
-		vxRef.current = 0;
-	};
-
-	const onPointerMove = (e: React.PointerEvent) => {
-		if (!dragging) return;
-		if (!panelRef.current) return;
-
-		const now = performance.now();
-		const dx = e.clientX - startXRef.current;
-
-		const w = widthRef.current;
-		const nextX = clamp(startPanelXRef.current + dx, -w, 0);
-
-		const dt = now - lastTRef.current;
-		if (dt > 0) {
-			const v = (e.clientX - lastXRef.current) / dt;
-			vxRef.current = v;
-			lastXRef.current = e.clientX;
-			lastTRef.current = now;
-		}
-
-		if (rafRef.current) cancelAnimationFrame(rafRef.current);
-		rafRef.current = requestAnimationFrame(() => setX(nextX));
-	};
-
-	const onPointerUpOrCancel = (e: React.PointerEvent) => {
-		if (!dragging) return;
-
-		const w = widthRef.current;
-		const progress = clamp(1 - Math.abs(x) / w, 0, 1);
-
-		const v = vxRef.current;
-		const flingLeft = v < -0.6;
-		const passedThreshold = progress < 0.6;
-
-		setDragging(false);
-
-		if (flingLeft || passedThreshold) {
-			closeWithSnap();
-		} else {
-			openWithSnap();
-		}
-
-		try {
-			panelRef.current?.releasePointerCapture(e.pointerId);
-		} catch {}
-	};
-  
-	const canInteract = isOpen || dragging || closing;
-
-	const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
-	const toggleLang = async () => {
-		await i18n.changeLanguage(isKo ? "en" : "ko");
-	};
-	function handleServicePreparing() {
-		alert(isKo ? "서비스 준비중입니다.": "Coming Soon");
-	}
-	return (
-		<>
-			<div
-				className="drawer-backdrop"
-				onClick={() => {
-					if (!canInteract) return;
-					closeWithSnap();
-				}}
-				aria-hidden="true"
-				style={{
-					opacity: openProgress,
-					pointerEvents: canInteract ? "auto" : "none",
-					transition: dragging ? "none" : "opacity 220ms ease",
-				}}
-			/>
-			<div
-				ref={panelRef}
-				className="drawer-panel"
-				style={{
-					transform: `translateX(${x}px)`,
-					transition: dragging
-						? "none"
-						: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
-					pointerEvents: canInteract ? "auto" : "none",
-				}}
-				onPointerDown={onPointerDown}
-				onPointerMove={onPointerMove}
-				onPointerUp={onPointerUpOrCancel}
-				onPointerCancel={onPointerUpOrCancel}
-			>
-				<div className="drawer-header">
-					<div className="profile-wrap">
-						<div className="profile-info">
-							<div className="name">{userName}</div>
-							<div className="email">{userEmail}</div>
-						</div>
-						<img src={userProfileImg} alt={t("menu.profile")} className="profile-img" />
-					</div>
-				</div>
-
-				<div className="drawer-body">
-					<button className="drawer-menu-item" onClick={() => {onRequireAuth("/student/mypage", () => { navigate("/student/mypage");  closeWithSnap(); }); }} >
-						<img className="icon" src="/icons/user-profile-02.svg" alt={t("menu.mypage")} />{" "}
-						<span>{t("menu.mypage")}</span>
-					</button>
-					<button className="drawer-menu-item" onClick={handleServicePreparing}>
-						<img className="icon" src="/icons/settings.svg" alt={t("menu.settings")} />{" "}
-						<span>{t("menu.settings")}</span>
-					</button>
-					<button className="drawer-menu-item" onClick={toggleLang}>
-						<img className="icon" src="/icons/globe-01.svg" alt={t("menu.language")} />{" "}
-						<span>{t("menu.language")}</span>
-					</button>
-					{(userRoleSet.includes("ROLE_ADMIN") || userRoleSet.includes("ROLE_CAPTAIN")) && (
-						<button
-							type="button"
-							className="drawer-menu-item"
-							onClick={(e) => {
-								e.stopPropagation();
-								navigate("/system-admin/users");
-							}}
-						>
-							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>인터니 관리자 페이지</span>
-						</button>
-					)}
-					{userRoleSet.includes("ROLE_JUMP_ADMIN") && (
-						<button
-						className="drawer-menu-item"
-						onClick={() => {
-							onRequireAuth("/admin/jump/dashboard", () => {
-							navigate("/admin/jump/dashboard");
-							closeWithSnap();
-							});
-						}}
-						>
-							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>JUMP 관리자 페이지</span>
-						</button>
-					)}
-					{userRoleSet.includes("ROLE_KAKAO_ADMIN") && (
-						<button
-						className="drawer-menu-item"
-						onClick={() => {
-							onRequireAuth("/admin/kakao/dashboard", () => {
-							navigate("/admin/kakao/dashboard");
-							closeWithSnap();
-							});
-						}}
-						>
-							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>KAKAO 관리자 페이지</span>
-						</button>
-					)}
-					{organizations.length > 0 && (
-						<button
-							className="drawer-menu-item"
-							onClick={() => {
-								onRequireAuth("/eca-admin/home", () => {
-									navigate("/eca-admin/home");
-									closeWithSnap();
-								});
-							}}
-						>
-							<img className="icon" src="/icons/chevron-right.svg" alt="" />
-							<span>대외활동 관리자 페이지</span>
-						</button>
-					)}
-				</div>
-			</div>
-		</>
-	);
-}
-
 type MonthHeaderProps = { value: string; onOpen: () => void;};
 function MonthHeader({ value, onOpen }: MonthHeaderProps) {
 	const { t, i18n } = useTranslation();
@@ -979,11 +722,7 @@ function Home(): React.ReactElement {
 	
 	const [loginGateOpen, setLoginGateOpen] = React.useState(false);
 	const [pendingPath, setPendingPath] = React.useState<string | null>(null);
-	const [activityPromptOpen, setActivityPromptOpen] = React.useState(false);
-	const [activityExternalActivityId, setActivityExternalActivityId] = React.useState<number | null>(null);
-	const [activityPromptPending, setActivityPromptPending] = React.useState(false);
-	const activityPromptCheckedRef = React.useRef(false);
-	
+
 	// 이메일 인증
 	const EMAIL_VERIFY_DISMISSED_KEY = "student.emailVerify.dismissed";
 	const [emailVerifyDismissed, setEmailVerifyDismissed] = React.useState(() => {
@@ -1178,6 +917,9 @@ function Home(): React.ReactElement {
 	const [eventDaysByEventId, setEventDaysByEventId] = React.useState<Map<string, EventDay[]>>(new Map());
 	const [recordStage, setRecordStage] = React.useState<"idle" | "preparing">("idle");
 
+	// eca
+	const [myActivities, setMyActivities] = React.useState<StudentExternalActivityResponse[]>([]);
+
 	const byDate = React.useMemo<[string, ScheduleItem[]][]>(() => {
 		const g: Record<string, ScheduleItem[]> = {};
 		for (const it of items) (g[it.date] ??= []).push(it);
@@ -1199,65 +941,6 @@ function Home(): React.ReactElement {
 	const userName = (me?.name ?? "").trim() || "User";
 	const userEmail = (me?.email ?? "").trim();
 	const userRoleSet = Array.isArray(me?.roleSet) ? me.roleSet : [];
-
-	React.useEffect(() => {
-		if (!isAuthed) return;
-		if (!me) return;
-		if (activityPromptCheckedRef.current) return;
-
-		const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-
-		if (!isDesktop) return;
-
-		activityPromptCheckedRef.current = true;
-
-		const checkMyActivity = async () => {
-			try {
-				const activities = await getMyParticipatingExternalActivities();
-
-				if (activities.length === 0) return;
-
-				const targetActivity = [...activities].sort(
-					(a, b) => a.externalActivityId - b.externalActivityId
-				)[0];
-
-				setActivityExternalActivityId(targetActivity.externalActivityId);
-
-				if (emailVerifyPopupOpen || needsEmailVerification) {
-					setActivityPromptPending(true);
-					return;
-				}
-
-				setActivityPromptOpen(true);
-			} catch (error) {
-				console.error("getMyParticipatingExternalActivities failed:", error);
-			}
-		};
-
-		void checkMyActivity();
-	}, [isAuthed, me, emailVerifyPopupOpen, needsEmailVerification]);
-
-	React.useEffect(() => { // 이메일 팝업 닫힌 뒤 대외활동 팝업 오픈
-		if (!activityPromptPending) return;
-		if (emailVerifyPopupOpen || needsEmailVerification) return;
-    	if (activityExternalActivityId === null) return;
-
-		setActivityPromptPending(false);
-		setActivityPromptOpen(true);
-	}, [activityPromptPending, emailVerifyPopupOpen, needsEmailVerification, activityExternalActivityId]);
-
-	function handleGoActivityDashboard() {
-		if (activityExternalActivityId === null) return;
-
-		setActivityPromptPending(false);
-		setActivityPromptOpen(false);
-		navigate(`/student/activities/${activityExternalActivityId}/assignment`);
-	}
-
-	function handleCloseActivityPrompt() {
-		setActivityPromptPending(false);
-		setActivityPromptOpen(false);
-	}
 
 	const userProfileImg = React.useMemo(() => {
 		const profile = me?.profileImage;
@@ -1319,6 +1002,38 @@ function Home(): React.ReactElement {
 			}
 		})();
 	}, [isAuthed, profileTick]);
+
+	React.useEffect(() => {
+		let mounted = true;
+
+		async function fetchMyActivities(): Promise<void> {
+			if (!isAuthed) {
+				setMyActivities([]);
+				return;
+			}
+
+			try {
+				const data = await getMyParticipatingExternalActivities();
+				const sortedActivities = [...data].sort((a, b) => a.externalActivityId - b.externalActivityId);
+
+				if (mounted) {
+					setMyActivities(sortedActivities);
+				}
+			} catch (e) {
+				console.error("getMyParticipatingExternalActivities failed:", e);
+
+				if (mounted) {
+					setMyActivities([]);
+				}
+			}
+		}
+
+		fetchMyActivities();
+
+		return () => {
+			mounted = false;
+		};
+	}, [isAuthed]);
 
 	React.useEffect(() => {
 		if (!isAuthed) return;
@@ -1536,7 +1251,7 @@ function Home(): React.ReactElement {
 			)}
 			<Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} />
 			<div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
-				<SideMenu
+				<StudentMobileSideMenu
 					isOpen={isMenuOpen}
 					onClose={() => setMenuOpen(false)}
 					userName={userName}
@@ -1544,6 +1259,7 @@ function Home(): React.ReactElement {
 					userProfileImg={userProfileImg}
 					userRoleSet={userRoleSet}
 					organizations={organizations}
+					activities={myActivities}
 					onRequireAuth={(path, action) => requireAuth(path, action)}
 				/>
 
@@ -1726,33 +1442,6 @@ function Home(): React.ReactElement {
 								disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}
 							>
 								{emailVerifying ? "인증 중" : "인증하기"}
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{activityPromptOpen && (
-				<div className="activity-redirect-modal-overlay" role="presentation">
-					<div className="activity-redirect-modal" role="dialog" aria-modal="true">
-						<div className="activity-redirect-modal-icon">
-							?
-						</div>
-
-						<div className="activity-redirect-modal-text">
-							대외활동 대시보드로 이동하시겠습니까?
-						</div>
-
-						<div className="activity-redirect-modal-sub-text">
-							잘못 선택한 경우 새로고침 후 다시 응답할 수 있습니다.
-						</div>
-
-						<div className="activity-redirect-modal-actions">
-							<button type="button" className="activity-redirect-modal-btn primary" onClick={handleGoActivityDashboard}>
-								예
-							</button>
-							<button type="button" className="activity-redirect-modal-btn" onClick={handleCloseActivityPrompt}>
-								아니요
 							</button>
 						</div>
 					</div>

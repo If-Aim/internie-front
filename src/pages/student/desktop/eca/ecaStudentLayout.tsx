@@ -133,7 +133,12 @@ export default function EcaStudentLayout(): React.ReactElement {
                 </div>
 
                 <nav className="eca-student-nav">
-                    <NavLink to="/student" className={({ isActive }) => isActive ? "eca-student-menu-item eca-student-menu-item--active" : "eca-student-menu-item"} onClick={handleServicePreparing}>
+                    <NavLink
+                        to="/student"
+                        end
+                        className={({ isActive }) => isActive ? "eca-student-menu-item eca-student-menu-item--active" : "eca-student-menu-item"}
+                        onClick={handleServicePreparing}
+                    >
                         <span className="eca-student-sidebar-menu-value">홈</span>
                     </NavLink>
 
@@ -162,7 +167,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
                                         {isOpen ? (
                                             <div className="eca-student-submenu">
-                                                <NavLink to={`${basePath}/dashboard`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
+                                                <NavLink to={`${basePath}/dashboard`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
                                                     대시보드
                                                 </NavLink>
 

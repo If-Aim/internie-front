@@ -1,0 +1,33 @@
+.eca-mobile-dashboard-page { min-height: 100vh; background: #F0F6FF; box-sizing: border-box; }
+.eca-mobile-dashboard-main { padding: 27px 20px 30px; }
+.eca-mobile-dashboard-top-actions { display: flex; align-items: center; gap: 20px; }
+.eca-mobile-dashboard-icon-button { width: 36px; height: 36px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.eca-mobile-dashboard-profile { width: 48px; height: 48px; border-radius: 999px; background: #d9d9d9; display: block; }
+
+.eca-mobile-dashboard-title { margin-bottom: 24px; padding: 0 4px; }
+.eca-mobile-dashboard-title span { color: #808080; font-size: 16px; font-weight: 700; line-height: 20px; margin-left:3px; }
+.eca-mobile-dashboard-title h1 { margin: 11px 0 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-mobile-dashboard-progress-card { min-height: 160px; padding: 18px 16px 22px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 10px; }
+.eca-mobile-dashboard-progress-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; margin-left: 4px; }
+.eca-mobile-dashboard-progress-card strong { color: #000; margin-left: 7px; font-size: 36px; font-weight: 700; line-height: 1;}
+.eca-mobile-dashboard-progress-track { width: 100%; height: 8px; border-radius: 7px; background: #BDD8FF; overflow: hidden; }
+.eca-mobile-dashboard-progress-track div { height: 100%; border-radius: 7px; background: #0166FF; transition: width .2s ease; }
+
+.eca-mobile-dashboard-metric-card { width: 100%; min-height: 84px; margin-bottom: 10px; padding: 15px 12px 20px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; box-sizing: border-box; display: flex; align-items: center; cursor: pointer; }
+.eca-mobile-dashboard-metric-card div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; margin-left: 8px; }
+.eca-mobile-dashboard-metric-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
+.eca-mobile-dashboard-metric-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-mobile-dashboard-metric-card em { min-width: 84px; height: 36px; padding: 0 10px; border-radius: 18px; background: #BDD8FF; color: #0166FF; font-size: 16px; font-style: normal; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-mobile-dashboard-metric-card em.is-primary { background: #0166FF; color: #fff; }
+.eca-mobile-dashboard-metric-card i { width: 36px; height: 36px; margin-left: 2px; display: flex; align-items: center; justify-content: center; font-style: normal; }
+
+.eca-mobile-dashboard-schedule { margin-top: 47px; }
+.eca-mobile-dashboard-schedule h2 { margin: 0 11px 21px; padding: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 24px; }
+.eca-mobile-dashboard-schedule-list { display: flex; flex-direction: column; gap: 10px; }
+.eca-mobile-dashboard-schedule-item { width: 100%; min-height: 84px; padding: 18px 20px; border: 1px solid #E6E6E6; border-radius: 14px; background: #fff; display: flex; align-items: center; gap: 14px; box-sizing: border-box; cursor: pointer; text-align: left; }
+.eca-mobile-dashboard-schedule-icon { width: 48px; height: 48px; border-radius: 999px; background: #E7E7E7; display: flex; align-items: center; justify-content: center; flex: 0 0 48px; }
+.eca-mobile-dashboard-schedule-icon.is-completed { background: #BDD8FF; }
+.eca-mobile-dashboard-schedule-text { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.eca-mobile-dashboard-schedule-text strong { color: #000; font-size: 16px; font-weight: 700; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-mobile-dashboard-schedule-text em { color: rgba(0, 0, 0, 0.50); font-size: 14px; font-style: normal; font-weight: 500; line-height: 20px; }
+.eca-mobile-dashboard-empty { min-height: 120px; margin: 0; color: #808080; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
