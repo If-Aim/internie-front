@@ -98,7 +98,7 @@ function Header({ onMenuClick }: HeaderProps): React.ReactElement {
                     </svg>
                 </button>
 
-                <span className="eca-mobile-dashboard-profile" />
+                {/* <span className="eca-mobile-dashboard-profile" /> */}
             </div>
         </div>
     );
