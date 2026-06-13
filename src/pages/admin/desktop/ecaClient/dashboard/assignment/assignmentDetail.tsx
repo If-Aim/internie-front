@@ -345,7 +345,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     }
 
     function moveBack(): void {
-        navigate(`/eca-admin/activities/${externalActivityId}/assignment`);
+        navigate(`/program-admin/activities/${externalActivityId}/assignment`);
     }
  
     async function handleDownloadAllSubmittedFiles(): Promise<void> {
@@ -428,7 +428,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
         try {
             await deleteAssignment(assignmentId);
-            navigate(`/eca-admin/activities/${externalActivityId}/assignment`, { replace: true });
+            navigate(`/program-admin/activities/${externalActivityId}/assignment`, { replace: true });
         } catch (e) {
             console.error(e);
             window.alert("과제 삭제에 실패했습니다.");
@@ -487,7 +487,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                         if (hasSubmittedParticipant) return;
 
                                         setMenuOpen(false);
-                                        navigate(`/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}/edit`);
+                                        navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignmentId}/edit`);
                                     }}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">

@@ -27,7 +27,8 @@
         "googleNotReady": "구글 로그인을 준비 중입니다. 잠시 후 다시 시도해주세요.",
         "googleLoginFailed": "구글 로그인에 실패했습니다.",
         "invalidLogin": "아이디 또는 비밀번호가 올바르지 않습니다.",
-        "withdrawnAccount": "탈퇴한 계정입니다. 탈퇴 후 30일이 지나면 같은 이메일로 다시 가입할 수 있습니다."
+        "withdrawnAccount": "탈퇴한 계정입니다. 탈퇴 후 30일이 지나면 같은 이메일로 다시 가입할 수 있습니다.",
+        "privacy": "개인정보 처리방침"
     },
     "signup": {
         "title": "회원가입",
@@ -186,7 +187,8 @@
         "home": "홈",
         "recent": "최근 활동",
         "settings": "설정 및 개인정보",
-        "language": "언어 변경"
+        "language": "언어 변경",
+        "programAdminPage": "대외활동 관리자 페이지"
     },
     "empty": {
         "title": "아직 일정이 없어요",
@@ -359,6 +361,42 @@
         "skip": "건너뛰기",
         "finish": "완료"
     }, 
+
+    "ECA_admin" : "대외활동 관리자 관련",
+    "ecaAdmin" : {
+        "home": "홈",
+        "ecaClientAdminSubmenuEmpty": "담당 대외활동이 없습니다",
+        "dashboard": "대시보드",
+        "assignment": "과제 현황",
+        "attendance": "출석 현황",
+        "team": "팀 활동",
+        "ecaClientAdminName": "관리자 {{adminName}}님",
+
+        "status": {
+            "upcoming": "예정",
+            "ongoing": "진행 중",
+            "completed": "완료",
+            "delayed": "지연"
+        },
+
+        "organizationDisplayLabel": "기관",
+        "organizationLoading": "로딩 중...",
+        "organizationSelectPlaceholder": "{{organizationLabel}} 선택",
+        "organizationNameFallback": "{{organizationLabel}} 이름",
+        "selectOrganizationFirst": "{{organizationLabel}}을 먼저 선택해주세요.",
+        "welcomeAdmin": "환영합니다, {{adminName}}님",
+        "defaultAdminName": "관리자",
+        "createActivity": "+ 대외활동 등록",
+        "myActivities": "나의 대외활동",
+        "organizationAllActivities": "{{organizationLabel}} 전체 대외활동",
+        "emptyData": "데이터가 없습니다",
+        "reset": "초기화",
+        "more": "더보기",
+        "markCompleted": "완료",
+        "markIncomplete": "완료 해제",
+        "updateActivityStatusFailed": "대외활동 상태 변경에 실패했습니다."
+    },
+
 
     "comment_error": "에러 관련",
     "error": {

@@ -255,7 +255,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
 
                 if (isEditMode && activityData?.manageableByMe === false) {
                     window.alert("해당 대외활동의 관리 권한이 없습니다.");
-                    navigate(`/eca-admin/activities/${externalActivityId}/dashboard`, { replace: true });
+                    navigate(`/program-admin/activities/${externalActivityId}/dashboard`, { replace: true });
                     return;
                 }
 
@@ -515,7 +515,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 );
 
                 await refreshManagedActivities();
-                navigate(`/eca-admin/activities/${externalActivityId}/dashboard`);
+                navigate(`/program-admin/activities/${externalActivityId}/dashboard`);
                 return;
             }
 
@@ -526,7 +526,7 @@ export default function EcaActivityCreatePage(): React.ReactElement {
             );
 
             await refreshManagedActivities();
-            navigate("/eca-admin/home");
+            navigate("/program-admin/home");
         } catch (error) {
             console.error(error);
             setSubmitError(

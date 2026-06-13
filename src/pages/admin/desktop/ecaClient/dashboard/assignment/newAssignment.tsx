@@ -730,7 +730,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                 if (activityData.manageableByMe === false) {
                     window.alert("해당 대외활동의 관리 권한이 없습니다.");
-                    navigate(`/eca-admin/activities/${externalActivityId}/dashboard`, { replace: true });
+                    navigate(`/program-admin/activities/${externalActivityId}/dashboard`, { replace: true });
                     return;
                 }
 
@@ -1819,7 +1819,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             setEditingAssignment(latestAssignment);
 
             navigate(
-                `/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}`,
+                `/program-admin/activities/${externalActivityId}/assignment/${assignmentId}`,
                 { replace: true }
             );
         } catch (e) {

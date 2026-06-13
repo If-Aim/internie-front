@@ -1,10 +1,10 @@
 {
 	"comment_login": "로그인 관련",
 	"login": {
-        "title": "Welcome",
+        "title": "Log In",
         "subtitle": "A new standard of hiring built through process, Internie",
-		"desktopTitle": "Welcome",
-        "desktopSubtitle": "A new standard of hiring built through process, Internie",
+		"desktopTitle": "Log In",
+        "desktopSubtitle": "Welcome to Internie",
         "id": "ID",
 		"pw": "Password",
 		"idPlaceholder": "Enter your ID",
@@ -27,7 +27,8 @@
 		"googleNotReady": "Google login is being prepared. Please try again shortly.",
 		"googleLoginFailed": "Google login failed.",
 		"invalidLogin": "The ID or password is incorrect.",
-		"withdrawnAccount": "This account has been deleted. You can sign up again with the same email address after 30 days."
+		"withdrawnAccount": "This account has been deleted. You can sign up again with the same email address after 30 days.",
+		"privacy": "Privacy"
     },
     "signup": {
         "title": "Sign Up",
@@ -185,7 +186,8 @@
 		"home": "Home",
 		"recent": "Recent Activity",
 		"settings": "Settings & Privacy",
-		"language": "Language"
+		"language": "Language",
+		"programAdminPage": "Program Admin"
 	},
 	"empty": {
 		"title": "No schedules yet.",
@@ -357,6 +359,41 @@
 		"skip": "Skip",
 		"finish": "Done"
 	},
+
+	"ECA_admin" : "대외활동 관리자 관련",
+    "ecaAdmin" : {
+        "home": "Home",
+        "ecaClientAdminSubmenuEmpty": "No assigned programs",
+        "dashboard": "Dashboard",
+        "assignment": "Assignments",
+        "attendance": "Attendance",
+        "team": "Team",
+        "ecaClientAdminName": "{{adminName}}",
+
+		"status": {
+            "upcoming": "Scheduled",
+            "ongoing": "In Progress",
+            "completed": "Completed",
+            "delayed": "Delayed"
+        },
+
+		"organizationDisplayLabel": "Organization",
+        "organizationLoading": "Loading...",
+        "organizationSelectPlaceholder": "Select {{organizationLabel}}",
+        "organizationNameFallback": "{{organizationLabel}} name",
+        "selectOrganizationFirst": "Please select an {{organizationLabel}} first.",
+        "welcomeAdmin": "Welcome, {{adminName}}",
+        "defaultAdminName": "Manager",
+        "createActivity": "+ add program",
+        "myActivities": "My Programs",
+        "organizationAllActivities": "All {{organizationLabel}} Programs",
+        "emptyData": "No data available",
+        "reset": "Reset",
+        "more": "More",
+        "markCompleted": "Mark as completed",
+        "markIncomplete": "Mark as incomplete",
+        "updateActivityStatusFailed": "Failed to update the program status."
+    },
 
 	"comment_error": "에러 관련",
 	"error": {

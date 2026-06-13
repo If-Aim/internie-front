@@ -294,7 +294,7 @@ export default function Login(): React.ReactElement {
                         </div>
                         <div className="login-desktop-policy">
                             <button type="button" onClick={() => navigate("/privacy-policy")}>
-                                개인정보 처리방침
+                                {t("login.privacy")}
                             </button>
                         </div>
                     </section>

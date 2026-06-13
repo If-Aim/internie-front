@@ -20,12 +20,13 @@ button.eca-client-admin-menu-item { width: auto; border: 0; background: transpar
 
 .eca-client-admin-menu-link { flex: 1; height: 44px; color: inherit; text-decoration: none; display: flex; align-items: center; }
 .eca-client-admin-chevron { width: 20px; height: 20px; flex-shrink: 0; transition: transform .2s ease; }
-.eca-client-admin-chevron--open { transform: rotate(90deg); }
+.eca-client-admin-chevron--open { transform: rotate(90deg); color: var(--primary), }
 
 .eca-client-admin-submenu { display: flex; flex-direction: column; gap: 8px; padding:0; }
 .eca-client-admin-submenu-item { min-height: 48px; padding: 0 38px; margin: 0 6px; border-radius: 10px; color: #808080; font-size: 16px; font-weight: 500; text-decoration: none; display: flex; align-items: center; box-sizing: border-box; }
 .eca-client-admin-menu-item:hover:not(.eca-client-admin-menu-item--active) { background: #eeeeee; }
 .eca-client-admin-submenu-item--active { background: #BDD8FF; color: var(--primary); }
+.eca-client-admin-submenu-item:hover:not(.eca-client-admin-submenu-item--active) { background: #eeeeee; }
 .eca-client-admin-submenu-empty { min-height: 40px; padding: 0 14px; color: #999; font-size: 14px; font-weight: 600; display: flex; align-items: center; box-sizing: border-box; }
 
 .eca-client-admin-sidebar-profile { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 18px 8px 0 0; border-top: 1px solid #e5eaf2; flex-shrink: 0; text-decoration: none; cursor: pointer; box-sizing: border-box; }

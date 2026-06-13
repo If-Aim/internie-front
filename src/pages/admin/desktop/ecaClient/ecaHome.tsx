@@ -1,6 +1,7 @@
 // src/pages/admin/desktop/ecaClient/ecaHome.tsx
 import React from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ApiError, getUserMe, } from "../../../../api/client";
 import { getMyManagedExternalActivities } from "../../../../api/ea";
 import { getMyOrganizations } from "../../../../api/organizationClient";
@@ -23,7 +24,7 @@ export type EcaClientAdminOutletContext = {
 };
 
 function getDisplayAdminName(me: UserMe | null): string {
-    if (!me) return "이름";
+    if (!me) return "";
     const nick = (me.nickname ?? "").trim();
     const name = (me.name ?? "").trim();
     return nick || name || "";
@@ -35,6 +36,8 @@ function isDefaultProfileImage(url?: string | null): boolean {
 }
 
 export default function EcaClientAdminHome(): React.ReactElement{
+    const { t, i18n } = useTranslation();
+    const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
     const [me, setMe] = React.useState<UserMe | null>(null);
     const [organizations, setOrganizations] = React.useState<MyOrganizationResponse[]>([]);
     const [selectedOrganizationId, setSelectedOrganizationId] = React.useState<number | null>(() => {
@@ -157,8 +160,9 @@ export default function EcaClientAdminHome(): React.ReactElement{
 
     function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
         e.preventDefault();
-        alert("서비스 준비중입니다.");
+        alert(isKo ? "서비스 준비중입니다." : "Coming Soon");
     }
+
     return (
         <div className="eca-client-admin-page">
             <aside className="eca-client-admin-sidebar">
@@ -168,22 +172,22 @@ export default function EcaClientAdminHome(): React.ReactElement{
                     </a>
                 </div>
 
-                <NavLink to="/eca-admin/home" className={({ isActive }) => isActive ? "eca-client-admin-menu-item eca-client-admin-menu-item--active" : "eca-client-admin-menu-item"}>
-                    <span className="eca-client-admin-sidebar-menu-value">홈</span>
+                <NavLink to="/program-admin/home" className={({ isActive }) => isActive ? "eca-client-admin-menu-item eca-client-admin-menu-item--active" : "eca-client-admin-menu-item"}>
+                    <span className="eca-client-admin-sidebar-menu-value">{t("ecaAdmin.home")}</span>
                 </NavLink>
 
                 <div className="eca-client-admin-activity-list">
                     {managedActivities.length === 0 ? (
-                        <span className="eca-client-admin-submenu-empty">담당 대외활동이 없습니다</span>
+                        <span className="eca-client-admin-submenu-empty">{t("ecaAdmin.ecaClientAdminSubmenuEmpty")}</span>
                     ) : (
                         managedActivities.map((activity) => {
                             const activityId = activity.externalActivityId;
                             const isOpen = openedActivityIds.includes(activityId);
-                            const isActivityActive = pathname.startsWith(`/eca-admin/activities/${activityId}/dashboard`)
-                                || pathname.startsWith(`/eca-admin/activities/${activityId}/assignment`);
+                            const isActivityActive = pathname.startsWith(`/program-admin/activities/${activityId}/dashboard`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`);
                                 // 추후 하위 메뉴 API 연결 시 아래 경로도 active 조건에 추가
-                                // pathname.startsWith(`/eca-admin/activities/${activityId}/attendance`)
-                                // pathname.startsWith(`/eca-admin/activities/${activityId}/team`)
+                                // pathname.startsWith(`/program-admin/activities/${activityId}/attendance`)
+                                // pathname.startsWith(`/program-admin/activities/${activityId}/team`)
 
                             return (
                                 <div className="eca-client-admin-menu-group" key={activityId}>
@@ -198,41 +202,39 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                             ));
                                         }}
                                     >
-                                        <img
-                                            className={isOpen ? "eca-client-admin-chevron eca-client-admin-chevron--open" : "eca-client-admin-chevron"}
-                                            src="/icons/chevron-right-80.svg"
-                                            alt=""
-                                        />
+                                        <svg className={isOpen ? "eca-client-admin-chevron eca-client-admin-chevron--open" : "eca-client-admin-chevron"} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                            <path d="M8 5L13 10L8 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
                                         <span className="eca-client-admin-menu-title">{activity.name}</span>
                                     </button>
 
                                     {isOpen ? (
                                         <div className="eca-client-admin-submenu">
                                             <NavLink
-                                                to={`/eca-admin/activities/${activityId}/dashboard`}
+                                                to={`/program-admin/activities/${activityId}/dashboard`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
-                                                대시보드
+                                                {t("ecaAdmin.dashboard")}
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activityId}/assignment`}
+                                                to={`/program-admin/activities/${activityId}/assignment`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
-                                                과제 현황
+                                                {t("ecaAdmin.assignment")}
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activityId}/attendance`}
+                                                to={`/program-admin/activities/${activityId}/attendance`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                                 onClick={handleServicePreparing}
                                             >
-                                                출석 현황
+                                                {t("ecaAdmin.attendance")}
                                             </NavLink>
                                             <NavLink
-                                                to={`/eca-admin/activities/${activityId}/team-activity`}
+                                                to={`/program-admin/activities/${activityId}/team-activity`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                                 onClick={handleServicePreparing}
                                             >
-                                                팀 활동
+                                                {t("ecaAdmin.team")}
                                             </NavLink>
                                         </div>
                                     ) : null}
@@ -243,7 +245,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                 </div>
 
                 <NavLink
-                    to="/eca-admin/settings"
+                    to="/program-admin/settings"
                     className={({ isActive }) => (
                         isActive
                             ? "eca-client-admin-sidebar-profile eca-client-admin-sidebar-profile--active"
@@ -251,7 +253,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                     )}
                 >
                     <img className="eca-client-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
-                    <span className="eca-client-admin-name">관리자 {adminName}님</span>
+                    <span className="eca-client-admin-name">{t("ecaAdmin.ecaClientAdminName", { adminName })}</span>
                 </NavLink>
             </aside>
 

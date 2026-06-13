@@ -297,25 +297,25 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                 if (e instanceof ApiError) {
                     if (e.status === 404 || e.code === "EXTERNAL_ACTIVITY_NOT_FOUND") {
                         window.alert("삭제되었거나 존재하지 않는 대외활동입니다.");
-                        navigate("/eca-admin/home", { replace: true });
+                        navigate("/program-admin/home", { replace: true });
                         return;
                     }
 
                     if (e.status === 403 || e.code === "FORBIDDEN") {
                         window.alert("접근 권한이 없습니다.");
-                        navigate("/eca-admin/home", { replace: true });
+                        navigate("/program-admin/home", { replace: true });
                         return;
                     }
 
                     if (e.status === 400) {
                         window.alert(e.message || "정보를 불러올 수 없습니다.");
-                        navigate("/eca-admin/home", { replace: true });
+                        navigate("/program-admin/home", { replace: true });
                         return;
                     }
                 }
 
                 window.alert("정보를 불러오지 못했습니다.");
-                navigate("/eca-admin/home", { replace: true });
+                navigate("/program-admin/home", { replace: true });
             } finally {
                 setActivityLoading(false);
                 setParticipantLoading(false);
@@ -580,7 +580,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         try {
             await deleteExternalActivity(organization.organizationId, externalActivityId);
             await refreshManagedActivities();
-            navigate("/eca-admin/home");
+            navigate("/program-admin/home");
         } catch (error) {
             console.error(error);
             window.alert("대외활동 삭제에 실패했습니다.");
@@ -593,18 +593,18 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         if (!externalActivityId) return;
 
         setDashboardMenuOpen(false);
-        navigate(`/eca-admin/activities/${externalActivityId}/edit`);
+        navigate(`/program-admin/activities/${externalActivityId}/edit`);
     }
 
     function createAssignment(): void {
         if (!externalActivityId) return;
 
-        navigate(`/eca-admin/activities/${externalActivityId}/assignment/new`);
+        navigate(`/program-admin/activities/${externalActivityId}/assignment/new`);
     }
     function openAssignmentDetail(assignmentId: number): void {
         if (!externalActivityId) return;
 
-        navigate(`/eca-admin/activities/${externalActivityId}/assignment/${assignmentId}`);
+        navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignmentId}`);
     }
 
     function movePrevAssignmentPage(): void {

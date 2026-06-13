@@ -227,7 +227,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
     function moveToCreateAssignment(): void {
         if (!externalActivityId) return;
 
-        navigate(`/eca-admin/activities/${externalActivityId}/assignment/new`);
+        navigate(`/program-admin/activities/${externalActivityId}/assignment/new`);
     }
 
     return (
@@ -336,7 +336,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                                 type="button"
                                 className="eca-assignment-row"
                                 key={assignment.id}
-                                onClick={() => navigate(`/eca-admin/activities/${externalActivityId}/assignment/${assignment.id}`)}
+                                onClick={() => navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignment.id}`)}
                             >
                                 <span className="eca-assignment-name">{assignment.name}</span>
                                 <span>{getSystemFormLabel(assignment.systemForm)}</span>

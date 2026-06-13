@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { getExternalActivitiesByOrganization, getExternalActivitiesByStatus, updateExternalActivityStatus } from "../../../../../api/ea";
 import type { ExternalActivityResponse, ExternalActivitiesByStatusResponse } from "../../../../../api/ea";
@@ -22,10 +23,28 @@ type Activity = {
 };
 
 const activityStatuses: ActivityStatus[] = ["upcoming", "ongoing", "completed", "delayed"];
-const ORGANIZATION_DISPLAY_LABEL = "센터";
+const ORGANIZATION_DISPLAY_LABEL = "ecaAdmin.organizationDisplayLabel";
 
-function formatActivityDate(startDate: string, endDate: string): string {
-    return `${startDate.replaceAll("-", ".")} ~ ${endDate.replaceAll("-", ".")}`;
+function formatDatePart(value: string, language: string): string {
+    const [year, month, day] = value.split("-").map(Number);
+    const mm = String(month).padStart(2, "0");
+    const dd = String(day).padStart(2, "0");
+
+    if (language.startsWith("en")) {
+        return new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        }).format(new Date(year, month - 1, day));
+    }
+
+    return `${year}.${mm}.${dd}`;
+}
+
+function formatActivityDate(startDate: string, endDate: string, language: string): string {
+    const separator = language.startsWith("en") ? " - " : " ~ ";
+
+    return `${formatDatePart(startDate, language)}${separator}${formatDatePart(endDate, language)}`;
 }
 
 function parseApiDate(value: string): Date {
@@ -42,13 +61,13 @@ function getCalculatedActivityStatus(activity: ExternalActivityResponse): Activi
 }
 
 function getActivityStatusLabel(status: ActivityStatus): string {
-    if (status === "upcoming") return "예정";
-    if (status === "ongoing") return "진행 중";
-    if (status === "completed") return "완료";
-    return "지연";
+    if (status === "upcoming") return "ecaAdmin.status.upcoming";
+    if (status === "ongoing") return "ecaAdmin.status.ongoing";
+    if (status === "completed") return "ecaAdmin.status.completed";
+    return "ecaAdmin.status.delayed";
 }
 
-function toHomeActivity(activity: ExternalActivityResponse): Activity {
+function toHomeActivity(activity: ExternalActivityResponse, language: string): Activity {
     const managers: ActivityManager[] = Array.isArray(activity.managers)
         ? activity.managers.map((manager) => ({
             userId: manager.userId,
@@ -65,7 +84,7 @@ function toHomeActivity(activity: ExternalActivityResponse): Activity {
     return {
         id: activity.externalActivityId,
         title: activity.name,
-        date: formatActivityDate(activity.startDate, activity.endDate),
+        date: formatActivityDate(activity.startDate, activity.endDate, language),
         status: getCalculatedActivityStatus(activity),
         managers,
     };
@@ -84,8 +103,8 @@ function isActivityInYear(activity: ExternalActivityResponse, year: string): boo
     return startDate.getTime() <= yearEnd.getTime() && endDate.getTime() >= yearStart.getTime();
 }
 
-function flattenByStatus(response: ExternalActivitiesByStatusResponse, selectedStatuses: ActivityStatus[]): Activity[] {
-    return selectedStatuses.flatMap((status) => response[status].map(toHomeActivity));
+function flattenByStatus(response: ExternalActivitiesByStatusResponse, selectedStatuses: ActivityStatus[], language: string): Activity[] {
+    return selectedStatuses.flatMap((status) => response[status].map((activity) => toHomeActivity(activity, language)));
 }
 
 function getDisplayAdminName(me: EcaClientAdminOutletContext["me"]): string {
@@ -110,7 +129,9 @@ function ManagerProfile({ manager }: { manager: ActivityManager }): React.ReactE
 }
 
 export default function EcaAdminHomePage(): React.ReactElement {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const organizationDisplayLabel = t(ORGANIZATION_DISPLAY_LABEL);
     const { me, organizations, organization, selectedOrganizationId, organizationLoading, managedActivities, setSelectedOrganizationId, } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [organizationSelectOpen, setOrganizationSelectOpen] = React.useState(false);
@@ -234,7 +255,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
         } catch (error) {
             console.error(error);
             setMyActivities(previousActivities);
-            window.alert("대외활동 상태 변경에 실패했습니다.");
+            window.alert(t("ecaAdmin.updateActivityStatusFailed"));
         }
     }
 
@@ -265,11 +286,11 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
     React.useEffect(() => {
         loadMyActivities();
-    }, [managedActivities, selectedOrganizationId, selectedStatuses, selectedYear, searchKeyword]);
+    }, [managedActivities, selectedOrganizationId, selectedStatuses, selectedYear, searchKeyword, i18n.language]);
 
     React.useEffect(() => {
         loadCenterActivities();
-    }, [organization?.organizationId, centerSelectedStatuses, centerSelectedYear, centerSearchKeyword]);
+    }, [organization?.organizationId, centerSelectedStatuses, centerSelectedYear, centerSearchKeyword, i18n.language]);
 
     function loadMyActivities(): void {
         const keyword = searchKeyword.trim().toLowerCase();
@@ -280,7 +301,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
             .filter((activity) => !keyword || activity.name.toLowerCase().includes(keyword))
             .filter((activity) => isActivityInYear(activity, selectedYear));
 
-        setMyActivities(filtered.map(toHomeActivity));
+        setMyActivities(filtered.map((activity) => toHomeActivity(activity, i18n.language)));
     }
     const selectedOrganizationIdRef = React.useRef<number | null>(selectedOrganizationId);
     React.useEffect(() => {
@@ -310,7 +331,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                 if (selectedOrganizationIdRef.current !== requestOrganizationId) return;
 
-                setCenterActivities(result.map(toHomeActivity));
+                setCenterActivities(result.map((activity) => toHomeActivity(activity, i18n.language)));
                 return;
             }
 
@@ -321,7 +342,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
             if (selectedOrganizationIdRef.current !== requestOrganizationId) return;
 
-            setCenterActivities(flattenByStatus(result, centerSelectedStatuses));
+            setCenterActivities(flattenByStatus(result, centerSelectedStatuses, i18n.language));
         } catch (error) {
             console.error(error);
 
@@ -337,11 +358,11 @@ export default function EcaAdminHomePage(): React.ReactElement {
             return;
         }
 
-        navigate(`/eca-admin/activities/${activityId}/dashboard`);
+        navigate(`/program-admin/activities/${activityId}/dashboard`);
     }
 
     function handleCenterActivityCardClick(activityId: number): void {
-        navigate(`/eca-admin/activities/${activityId}/dashboard`);
+        navigate(`/program-admin/activities/${activityId}/dashboard`);
     }
 
     interface HomeToolbarProps {
@@ -417,7 +438,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                         }
                                         alt=""
                                     />
-                                    <span>{getActivityStatusLabel(status)}</span>
+                                    <span>{t(getActivityStatusLabel(status))}</span>
                                 </button>
                             ))}
                         </div>
@@ -431,14 +452,9 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                     {searchOpen ? (
                         <div className="eca-home-search-popover">
-                            <input
-                                className="eca-home-search-input"
-                                value={searchKeyword}
-                                onChange={(e) => onChangeSearchKeyword(e.target.value)}
-                                autoFocus
-                            />
+                            <input className="eca-home-search-input" value={searchKeyword} onChange={(e) => onChangeSearchKeyword(e.target.value)} autoFocus />
                             <button type="button" className="eca-home-search-reset" onClick={onResetSearchKeyword}>
-                                초기화
+                                {t("ecaAdmin.reset")}
                             </button>
                         </div>
                     ) : null}
@@ -482,15 +498,11 @@ export default function EcaAdminHomePage(): React.ReactElement {
             <section className="eca-home-header">
                 <div className="eca-home-header-top">
                     {organizationLoading ? (
-                        <h1>{ORGANIZATION_DISPLAY_LABEL} 정보를 불러오는 중</h1>
+                        <h1>{t("ecaAdmin.organizationLoading", { organizationLabel: organizationDisplayLabel })}</h1>
                     ) : organizations.length > 1 ? (
                         <div className="eca-home-organization-select-wrap" ref={organizationSelectRef}>
-                            <button
-                                type="button"
-                                className={"eca-home-organization-select-button" + (organizationSelectOpen ? " is-open" : "")}
-                                onClick={() => setOrganizationSelectOpen((prev) => !prev)}
-                            >
-                                <span>{organization?.organizationName ?? `${ORGANIZATION_DISPLAY_LABEL} 선택`}</span>
+                            <button type="button" className={"eca-home-organization-select-button" + (organizationSelectOpen ? " is-open" : "")} onClick={() => setOrganizationSelectOpen((prev) => !prev)} >
+                                <span>{organization?.organizationName ?? t("ecaAdmin.organizationSelectPlaceholder", { organizationLabel: organizationDisplayLabel })}</span>
                                 <img src="/icons/chevron-down-80.svg" alt="" />
                             </button>
 
@@ -523,12 +535,11 @@ export default function EcaAdminHomePage(): React.ReactElement {
                             ) : null}
                         </div>
                     ) : (
-                        <h1>{organization?.organizationName ?? `${ORGANIZATION_DISPLAY_LABEL} 이름`}</h1>
-                    )}
+                        <h1>{organization?.organizationName ?? t("ecaAdmin.organizationNameFallback", { organizationLabel: organizationDisplayLabel })}</h1>                    )}
                 </div>
 
                 <div className="eca-home-header-bottom">
-                    <p>환영합니다, {adminName ? `${adminName} 관리자님` : "관리자님"}</p>
+                    <p>{t("ecaAdmin.welcomeAdmin", { adminName: adminName || t("ecaAdmin.defaultAdminName") })}</p>
 
                     <button
                         type="button"
@@ -536,21 +547,21 @@ export default function EcaAdminHomePage(): React.ReactElement {
                         disabled={!organization?.organizationId}
                         onClick={() => {
                             if (!organization?.organizationId) {
-                                window.alert(`${ORGANIZATION_DISPLAY_LABEL}를 먼저 선택해주세요.`);
+                                window.alert(t("ecaAdmin.selectOrganizationFirst", { organizationLabel: organizationDisplayLabel }));
                                 return;
                             }
 
-                            navigate("/eca-admin/activities/new");
+                            navigate("/program-admin/activities/new");
                         }}
                     >
-                        + 대외활동 등록
+                        {t("ecaAdmin.createActivity")}
                     </button>
                 </div>
             </section>
 
             <section className="eca-home-mypanel">
                 <div className="eca-home-mypanel-head">
-                    <h2>나의 대외활동</h2>
+                    <h2>{t("ecaAdmin.myActivities")}</h2>
                     <HomeToolbar
                         selectedStatuses={selectedStatuses}
                         selectedYear={selectedYear}
@@ -599,7 +610,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
                             onDrop={() => handleDropToStatus(status)}
                         >
                             <span className={`eca-home-status eca-home-status--${status}`}>
-                                {getActivityStatusLabel(status)} ({getStatusCount(myActivities, status)})
+                                {t(getActivityStatusLabel(status))} ({getStatusCount(myActivities, status)})
                             </span>
                         </div>
                     ))}
@@ -607,15 +618,10 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                 <div className="eca-home-my-grid">
                     {myActivities.length === 0 ? (
-                        <div className="eca-home-empty">데이터가 없습니다</div>
+                        <div className="eca-home-empty">{t("ecaAdmin.emptyData")}</div>
                     ) : (
                         selectedStatuses.map((status) => (
-                            <div
-                                key={status}
-                                className="eca-home-card-column"
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={() => handleDropToStatus(status)}
-                            >
+                            <div key={status} className="eca-home-card-column" onDragOver={(e) => e.preventDefault()} onDrop={() => handleDropToStatus(status)} >
                                 {myActivities.filter((item) => item.status === status).map((item) => (
                                     <div key={item.id} className="eca-home-my-card" onClick={() => handleMyActivityCardClick(item.id)} > 
                                         <div
@@ -636,40 +642,19 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
                                         <div className={`eca-home-card-dot eca-home-card-dot--${item.status}`} />
 
-                                        <button
-                                            type="button"
-                                            className="eca-home-card-menu-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setStatusMenuActivityId((prev) => prev === item.id ? null : item.id);
-                                            }}
-                                        >
+                                        <button type="button" className="eca-home-card-menu-button" onClick={(e) => { e.stopPropagation(); setStatusMenuActivityId((prev) => prev === item.id ? null : item.id); }}>
                                             <img src="/icons/eca-home-card-menu-button.svg" alt="" />
                                         </button>
 
                                         {statusMenuActivityId === item.id ? (
                                             <div className="eca-home-status-menu" onClick={(e) => e.stopPropagation()} >
                                                 {item.status === "completed" ? (
-                                                    <button
-                                                        type="button"
-                                                        className="eca-home-status-menu-option eca-home-status-menu-option--delayed"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            void changeMyActivityCompletion(item.id, false);
-                                                        }}
-                                                    >
-                                                        완료 해제
+                                                    <button type="button" className="eca-home-status-menu-option eca-home-status-menu-option--delayed" onClick={(e) => { e.stopPropagation(); void changeMyActivityCompletion(item.id, false); }} >
+                                                        {t("ecaAdmin.markIncomplete")}
                                                     </button>
                                                 ) : (
-                                                    <button
-                                                        type="button"
-                                                        className="eca-home-status-menu-option eca-home-status-menu-option--completed"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            void changeMyActivityCompletion(item.id, true);
-                                                        }}
-                                                    >
-                                                        완료
+                                                    <button type="button" className="eca-home-status-menu-option eca-home-status-menu-option--completed" onClick={(e) => { e.stopPropagation(); void changeMyActivityCompletion(item.id, true); }} >
+                                                        {t("ecaAdmin.markCompleted")}
                                                     </button>
                                                 )}
                                             </div>
@@ -687,7 +672,7 @@ export default function EcaAdminHomePage(): React.ReactElement {
 
             <section className="eca-home-centerpanel">
                 <div className="eca-home-centerpanel-head">
-                    <h2>{ORGANIZATION_DISPLAY_LABEL} 전체 대외활동</h2>
+                    <h2>{t("ecaAdmin.organizationAllActivities", { organizationLabel: organizationDisplayLabel })}</h2>
                     <HomeToolbar
                         selectedStatuses={centerSelectedStatuses}
                         selectedYear={centerSelectedYear}
@@ -755,20 +740,10 @@ export default function EcaAdminHomePage(): React.ReactElement {
                                 </div>
 
                                 {item.managers.length > 2 ? (
-                                    <div
-                                        className="eca-home-center-more-wrap"
-                                        ref={managerPopoverActivityId === item.id ? managerPopoverRef : null}
-                                    >
-                                        <button
-                                            type="button"
-                                            className="eca-home-more-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setManagerPopoverActivityId((prev) => prev === item.id ? null : item.id);
-                                            }}
-                                        >
+                                    <div className="eca-home-center-more-wrap" ref={managerPopoverActivityId === item.id ? managerPopoverRef : null} >
+                                        <button type="button" className="eca-home-more-button" onClick={(e) => { e.stopPropagation(); setManagerPopoverActivityId((prev) => prev === item.id ? null : item.id); }} >
                                             <img className="eca-home-more-button-icon" src="/icons/eca-home-card-menu-button-00.svg" alt="" />
-                                            <span className="eca-home-more-button-title">더보기</span>
+                                            <span className="eca-home-more-button-title">{t("ecaAdmin.more")}</span>
                                         </button>
 
                                         {managerPopoverActivityId === item.id ? (
