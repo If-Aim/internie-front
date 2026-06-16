@@ -49,13 +49,18 @@
 .login-desktop-policy button { border: 0; background: transparent; color: #A2A2A2; font-size: 13px; font-weight: 500; text-decoration: underline; cursor: pointer; }
 .login-desktop-policy button:hover { color: #2563eb; }
 
-.login-desktop-error-text { margin: -6px 0 14px; color: #FF3B30; font-size: 13px; font-weight: 500; line-height: 1.45; }
-.login-desktop-input.is-error { border-color: #FF3B30; }
+.login-desktop-error-text { margin: -6px 0 14px; color: #F00; font-size: 13px; font-weight: 500; line-height: 1.45; }
+.login-desktop-input.is-error { border-color: #F00; }
 
 .login-desktop-toast { position: fixed; top: 52px; left: 50%; z-index: 1000; width: 480px; max-width: calc(100% - 32px); min-height: 80px; padding: 0 84px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); display: flex; align-items: center; justify-content: center; gap: 9px; transform: translateX(-50%); animation: loginToastSlideDown 0.28s ease-out; }
 .login-desktop-toast.is-closing { animation: loginToastSlideUp 0.28s ease-in forwards; }
 .login-desktop-toast-icon { width: 24px; height: 24px; flex: 0 0 24px; display: flex; align-items: center; justify-content: center; }
 .login-desktop-toast-text { font-size: 16px; line-height: 24px; font-weight: 500; color: #000; word-break: keep-all; }
+
+.login-desktop-toast.is-guide { width: 560px; min-height: 112px; padding: 18px 32px; align-items: flex-start; }
+.login-desktop-toast.is-guide .login-desktop-toast-icon { margin-top: 2px; }
+.login-desktop-toast.is-guide .login-desktop-toast-text { font-size: 14px; line-height: 21px; text-align: left; white-space: pre-line; }
+
 @keyframes loginToastSlideDown { from { opacity: 0; transform: translate(-50%, -24px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes loginToastSlideUp { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -24px); } }
 
@@ -64,4 +69,5 @@
     .login-desktop-container { padding: 40px 24px 32px; }
     .login-desktop-tabs { margin: 0 0 28px; }
     .login-desktop-socials { grid-template-columns: 1fr; }
+    .login-desktop-toast.is-guide { width: calc(100% - 32px); padding: 16px 20px; }
 }

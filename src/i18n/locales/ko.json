@@ -396,6 +396,41 @@
         "markIncomplete": "완료 해제",
         "updateActivityStatusFailed": "대외활동 상태 변경에 실패했습니다."
     },
+    "ECA_student" : "대외활동 학생 관련",
+    "ecaStudent" : {
+        "home": "홈",
+        "ecaStudentSubmenuEmpty": "참여 중인 대외활동이 없습니다.",
+        "ecaStudentSubmenuLoading": "대외활동을 불러오는 중입니다",
+        "dashboard": "대시보드",
+        "assignment": "과제 현황",
+        "attendance": "출석 현황",
+        "team": "팀 활동",
+        "ecaStudentName": "{{studentName}}님",
+
+        "status": {
+            "upcoming": "예정",
+            "ongoing": "진행 중",
+            "completed": "완료",
+            "delayed": "지연"
+        },
+
+        "organizationDisplayLabel": "기관",
+        "organizationLoading": "로딩 중...",
+        "organizationSelectPlaceholder": "{{organizationLabel}} 선택",
+        "organizationNameFallback": "{{organizationLabel}} 이름",
+        "selectOrganizationFirst": "{{organizationLabel}}을 먼저 선택해주세요.",
+        "welcomeAdmin": "환영합니다, {{adminName}}님",
+        "defaultAdminName": "관리자",
+        "createActivity": "+ 대외활동 등록",
+        "myActivities": "나의 대외활동",
+        "organizationAllActivities": "{{organizationLabel}} 전체 대외활동",
+        "emptyData": "데이터가 없습니다",
+        "reset": "초기화",
+        "more": "더보기",
+        "markCompleted": "완료",
+        "markIncomplete": "완료 해제",
+        "updateActivityStatusFailed": "대외활동 상태 변경에 실패했습니다."
+    },
 
 
     "comment_error": "에러 관련",

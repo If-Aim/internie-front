@@ -21,8 +21,10 @@ const kakaoAuthUrl =
 
 export default function Login(): React.ReactElement {
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const googleInitializedRef = useRef(false);
+    const currentLanguage = i18n.resolvedLanguage || i18n.language;
+    const isEnglish = currentLanguage.startsWith("en");
 
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
@@ -31,17 +33,22 @@ export default function Login(): React.ReactElement {
     const [loginError, setLoginError] = useState<string | null>(null);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastClosing, setToastClosing] = useState(false);
+    const [toastGuide, setToastGuide] = useState(false);
     const toastTimerRef = useRef<number | null>(null);
     const toastCloseTimerRef = useRef<number | null>(null);
+    const googleLoginFailCountRef = useRef(0);
 
     const go = (url: string) => {
         window.location.href = url;
     };
 
     const canLogin = loginId.trim().length > 0 && password.length > 0;
-    const showErrorToast = (message: string) => {
+    const showErrorToast = (message: string, options?: { guide?: boolean; duration?: number }) => {
+        const duration = options?.duration ?? 3000;
+
         setLoginError(message);
         setToastClosing(false);
+        setToastGuide(options?.guide === true);
         setToastMessage(null);
 
         if (toastTimerRef.current) {
@@ -62,14 +69,16 @@ export default function Login(): React.ReactElement {
             toastCloseTimerRef.current = window.setTimeout(() => {
                 setToastMessage(null);
                 setToastClosing(false);
+                setToastGuide(false);
             }, 280);
-        }, 3000);
+        }, duration);
     };
 
     const clearLoginError = () => {
         setLoginError(null);
         setToastMessage(null);
         setToastClosing(false);
+        setToastGuide(false);
 
         if (toastTimerRef.current) {
             window.clearTimeout(toastTimerRef.current);
@@ -79,14 +88,41 @@ export default function Login(): React.ReactElement {
             window.clearTimeout(toastCloseTimerRef.current);
         }
     };
+
+    const getGoogleLoginFailedMessage = () => {
+        return isEnglish ? "Google login failed. Please try again." : t("login.googleLoginFailed");
+    };
+
+    const getGoogleLoginGuideMessage = () => {
+        return isEnglish
+            ? "Google login keeps failing.\nPlease use a normal Chrome window and check whether cookies and pop-ups are allowed.\nSettings → Privacy and security → Third-party cookies\nSettings → Site settings → Pop-ups and redirects"
+            : "Google 로그인이 계속 실패하고 있습니다.\nChrome 일반 창에서 접속한 뒤, 쿠키와 팝업 허용 여부를 확인해주세요.\n설정 → 개인 정보 보호 및 보안 → 서드 파티 쿠키\n설정 → 사이트 설정 → 팝업 및 리디렉션";
+    };
+
+    const getGoogleCredentialMissingMessage = () => {
+        return isEnglish ? "Could not get your Google account information." : "Google 계정 정보를 받지 못했습니다.";
+    };
+
+    const showGoogleLoginFailureToast = (message?: string) => {
+        googleLoginFailCountRef.current += 1;
+
+        if (googleLoginFailCountRef.current >= 2) {
+            showErrorToast(getGoogleLoginGuideMessage(), { guide: true, duration: 8000 });
+            return;
+        }
+
+        showErrorToast(message || getGoogleLoginFailedMessage());
+    };
+
     const handleGoogleClick = () => {
         if (!window.google?.accounts?.id) {
-            showErrorToast(t("login.googleNotReady"));
+            showGoogleLoginFailureToast(t("login.googleNotReady"));
             return;
         }
 
         window.google.accounts.id.prompt();
     };
+
     const handleLocalLogin = async () => {
         const trimmedLoginId = loginId.trim();
 
@@ -133,12 +169,14 @@ export default function Login(): React.ReactElement {
                 callback: async (response: any) => {
                     const idToken = response?.credential;
                     if (!idToken) {
-                        console.error("Google idToken을 받지 못했습니다.");
+                        console.error("Google idToken을 받지 못했습니다.", response);
+                        showGoogleLoginFailureToast(getGoogleCredentialMissingMessage());
                         return;
                     }
 
                     try {
                         const data = await loginWithGoogle(idToken);
+                        googleLoginFailCountRef.current = 0;
                         navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
                     } catch (e) {
                         console.error("구글 로그인 실패", e);
@@ -149,11 +187,11 @@ export default function Login(): React.ReactElement {
                         }
 
                         if (e instanceof ApiError) {
-                            showErrorToast(e.message || t("login.googleLoginFailed"));
+                            showGoogleLoginFailureToast(isEnglish ? getGoogleLoginFailedMessage() : e.message || getGoogleLoginFailedMessage());
                             return;
                         }
 
-                        showErrorToast(t("login.googleLoginFailed"));
+                        showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
                     }
                 },
             });
@@ -191,7 +229,7 @@ export default function Login(): React.ReactElement {
     return (
         <div className="login-desktop-page">
             {toastMessage && (
-                <div className={`login-desktop-toast ${toastClosing ? "is-closing" : ""}`} role="alert">
+                <div className={`login-desktop-toast ${toastClosing ? "is-closing" : ""} ${toastGuide ? "is-guide" : ""}`} role="alert">
                     <span className="login-desktop-toast-icon" aria-hidden="true">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <circle cx="10" cy="10" r="10" fill="#FF0000" />
@@ -282,10 +320,12 @@ export default function Login(): React.ReactElement {
                                 <span>{t("login.loginWithGoogle")}</span>
                             </button>
 
-                            <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
-                                <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
-                                <span>{t("login.loginWithKakao")}</span>
-                            </button>
+                            {!isEnglish && (
+                                <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
+                                    <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
+                                    <span>{t("login.loginWithKakao")}</span>
+                                </button>
+                            )}
                         </div>
 
                         <div className="login-desktop-join">
