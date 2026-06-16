@@ -184,11 +184,11 @@ export default function EcaClientAdminHome(): React.ReactElement{
                             const activityId = activity.externalActivityId;
                             const isOpen = openedActivityIds.includes(activityId);
                             const isActivityActive = pathname.startsWith(`/program-admin/activities/${activityId}/dashboard`)
-                                || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`);
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/attendance`);
                                 // 추후 하위 메뉴 API 연결 시 아래 경로도 active 조건에 추가
-                                // pathname.startsWith(`/program-admin/activities/${activityId}/attendance`)
                                 // pathname.startsWith(`/program-admin/activities/${activityId}/team`)
-
+                                
                             return (
                                 <div className="eca-client-admin-menu-group" key={activityId}>
                                     <button
@@ -225,7 +225,6 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                             <NavLink
                                                 to={`/program-admin/activities/${activityId}/attendance`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
-                                                onClick={handleServicePreparing}
                                             >
                                                 {t("ecaAdmin.attendance")}
                                             </NavLink>
@@ -247,13 +246,22 @@ export default function EcaClientAdminHome(): React.ReactElement{
                 <NavLink
                     to="/program-admin/settings"
                     className={({ isActive }) => (
-                        isActive
-                            ? "eca-client-admin-sidebar-profile eca-client-admin-sidebar-profile--active"
-                            : "eca-client-admin-sidebar-profile"
+                        [
+                            "eca-client-admin-sidebar-profile",
+                            !isKo ? "eca-client-admin-sidebar-profile--en" : "",
+                            isActive ? "eca-client-admin-sidebar-profile--active" : "",
+                        ].filter(Boolean).join(" ")
                     )}
                 >
                     <img className="eca-client-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
-                    <span className="eca-client-admin-name">{t("ecaAdmin.ecaClientAdminName", { adminName })}</span>
+                    {isKo ? (
+                        <span className="eca-client-admin-name">{t("ecaAdmin.ecaClientAdminName", { adminName })}</span>
+                    ) : (
+                        <div className="eca-client-admin-profile-text-row">
+                            <span className="eca-client-admin-name">{adminName}</span>
+                            <span className="eca-client-admin-role">admin</span>
+                        </div>
+                    )}
                 </NavLink>
             </aside>
 

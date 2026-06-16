@@ -8,6 +8,7 @@ import EcaDashboardAssignment from "./dashboard/assignment/assignment";
 import EcaNewAssignmentPage from "./dashboard/assignment/newAssignment";
 import EcaAssignmentDetailPage from "./dashboard/assignment/assignmentDetail";
 import EcaDashboardAttendance from "./dashboard/attendance/attendance";
+import EcaDashboardAttendanceDetail from "./dashboard/attendance/attendanceDetail";
 import EcaDashboardTeamActivity from "./dashboard/teamActivity/teamActivity";
 import EcaSettingsPage from "./settings/settings";
 
@@ -26,6 +27,7 @@ export default function EcaClientAdminApp(): React.ReactElement {
                 <Route path="activities/:externalActivityId/assignment/:assignmentId" element={<EcaAssignmentDetailPage />} />
                 <Route path="activities/:externalActivityId/assignment/:assignmentId/edit" element={<EcaNewAssignmentPage />} />
                 <Route path="activities/:externalActivityId/attendance" element={<EcaDashboardAttendance />} />
+                <Route path="activities/:externalActivityId/attendance/:eventId" element={<EcaDashboardAttendanceDetail />} />
                 <Route path="activities/:externalActivityId/team-activity" element={<EcaDashboardTeamActivity />} />
                 <Route path="settings" element={<EcaSettingsPage />} />
             </Route>

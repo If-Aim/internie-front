@@ -38,6 +38,128 @@ export type AssignmentResponse = {
     participants: AssignmentParticipantResponse[];
 };
 
+/* - Attendance 관련 공통 타입 - */
+export type AttendanceEventProgress = "SCHEDULED" | "OPEN" | "CLOSED";
+export type AttendanceEventType = "CLASS_START" | "CLASS_END";
+export type AttendanceStatus = "NOT_CHECKED" | "PRESENT" | "LATE" | "VERY_LATE" | "EARLY_LEAVE" | "VERY_EARLY_LEAVE" | "ABSENT";
+
+export type AttendanceEventSort = "latest" | "oldest" | "rateAsc" | "rateDesc";
+export type AttendanceParticipantSort = "rateDesc" | "rateAsc" | "nameAsc";
+
+export type AttendanceEventCreateRequest = {
+    roundNumber: number;
+    name: string;
+    eventDate: string;
+    type: AttendanceEventType;
+    uploadWindowStart: string;
+    durationMinutes: number;
+    fullCreditThresholdMinutes?: number | null;
+    partialCreditThresholdMinutes?: number | null;
+    halfCreditThresholdMinutes?: number | null;
+};
+
+export type AttendanceEventResponse = {
+    eventId: number;
+    name: string;
+    roundNumber: number;
+    type: AttendanceEventType;
+    eventDate: string;
+    uploadWindowStart: string;
+    uploadWindowEnd: string;
+    durationMinutes: number;
+    fullCreditThresholdMinutes: number;
+    partialCreditThresholdMinutes: number;
+    halfCreditThresholdMinutes: number;
+    progress: AttendanceEventProgress;
+    attendanceRatePercent: number;
+};
+
+export type MyAttendanceEventResponse = {
+    eventId: number;
+    name: string;
+    roundNumber: number;
+    type: AttendanceEventType;
+    eventDate: string;
+    uploadWindowStart: string;
+    uploadWindowEnd: string;
+    durationMinutes: number;
+    fullCreditThresholdMinutes: number;
+    partialCreditThresholdMinutes: number;
+    halfCreditThresholdMinutes: number;
+    progress: AttendanceEventProgress;
+    status: AttendanceStatus;
+    score: number;
+    checkedAt?: string | null;
+};
+
+export type AttendanceCheckInResponse = {
+    status: AttendanceStatus;
+    score: number;
+    selfieUrl?: string | null;
+    checkedAt: string;
+};
+
+export type AttendanceSummaryResponse = {
+    totalParticipantCount: number;
+    attendanceMinimumRate?: number | null;
+    averageAttendanceRate: number;
+    belowThresholdCount: number;
+};
+
+export type AttendanceEventParticipantRecordResponse = {
+    recordId: number;
+    userId: number;
+    name: string;
+    profileImage?: string | null;
+    status: AttendanceStatus;
+    score: number;
+    checkedAt?: string | null;
+    selfieUrl?: string | null;
+};
+
+export type AttendanceEventDetailResponse = {
+    eventId: number;
+    name: string;
+    roundNumber: number;
+    type: AttendanceEventType;
+    eventDate: string;
+    uploadWindowStart: string;
+    uploadWindowEnd: string;
+    durationMinutes: number;
+    fullCreditThresholdMinutes: number;
+    partialCreditThresholdMinutes: number;
+    halfCreditThresholdMinutes: number;
+    progress: AttendanceEventProgress;
+    records: AttendanceEventParticipantRecordResponse[];
+};
+
+export type AttendanceParticipantRateResponse = {
+    userId: number;
+    name: string;
+    profileImage?: string | null;
+    cumulativeRate: number;
+    thresholdMet: boolean;
+};
+
+export type AttendanceWindowOpenRequest = {
+    type: AttendanceEventType;
+    openAt: string;
+};
+
+export type AttendanceWindowCloseRequest = {
+    closedAt: string;
+};
+
+export type AttendanceRecordStatusUpdateRequest = {
+    status: AttendanceStatus;
+};
+
+export type AttendanceCheckInEligibilityResponse = {
+    eligible: boolean;
+    alreadyChecked: boolean;
+};
+
+
 /* - Team 공통 타입 - */
 export type TeamMemberResponse = {
     teamMemberId: number;
@@ -277,6 +399,42 @@ export async function deleteAssignmentSubmission( // 제출한 과제 삭제
     await api<void>(
         `/submissions/${submissionId}`,
         { method: "DELETE" }
+    );
+}
+
+/* - Attendance 관련 (Student) - */
+export async function getMyAttendanceEvents(
+    externalActivityId: number | string
+): Promise<MyAttendanceEventResponse[]> {
+    return api<MyAttendanceEventResponse[]>(
+        `/externalActivities/${externalActivityId}/attendance-events/me`,
+        { method: "GET" }
+    );
+}
+
+export async function getAttendanceCheckInEligibility(
+    eventId: number | string
+): Promise<AttendanceCheckInEligibilityResponse> {
+    return api<AttendanceCheckInEligibilityResponse>(
+        `/attendance-events/${eventId}/check-in/eligibility`,
+        { method: "GET" }
+    );
+}
+
+export async function checkInAttendance(
+    eventId: number | string,
+    type: AttendanceEventType,
+    selfie: File
+): Promise<AttendanceCheckInResponse> {
+    const formData = new FormData();
+
+    formData.append("type", type);
+    formData.append("selfie", selfie);
+
+    return apiUpload<AttendanceCheckInResponse>(
+        `/attendance-events/${eventId}/check-in`,
+        formData,
+        { method: "POST" }
     );
 }
 
@@ -819,6 +977,158 @@ export async function downloadSubmissionZip(
 
     saveBlob(blob, `${safeFileName}.zip`);
 }
+
+/* - Attendance 관련 (Admin) - */
+export async function createAttendanceEvent(
+    externalActivityId: number | string,
+    request: AttendanceEventCreateRequest
+): Promise<AttendanceEventResponse> {
+    return api<AttendanceEventResponse>(
+        `/externalActivities/${externalActivityId}/attendance-events`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function openAttendanceWindow(
+    eventId: number | string,
+    request: AttendanceWindowOpenRequest
+): Promise<AttendanceEventResponse> {
+    return api<AttendanceEventResponse>(
+        `/attendance-events/${eventId}/open-window`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function closeAttendanceWindow(
+    eventId: number | string,
+    request: AttendanceWindowCloseRequest
+): Promise<AttendanceEventResponse> {
+    return api<AttendanceEventResponse>(
+        `/attendance-events/${eventId}/close-window`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getAttendanceEvents(
+    externalActivityId: number | string,
+    sort: AttendanceEventSort = "latest"
+): Promise<AttendanceEventResponse[]> {
+    const params = new URLSearchParams();
+    params.set("sort", sort);
+
+    return api<AttendanceEventResponse[]>(
+        `/externalActivities/${externalActivityId}/attendance-events?${params.toString()}`,
+        { method: "GET" }
+    );
+}
+
+export async function getAttendanceSummary(
+    externalActivityId: number | string
+): Promise<AttendanceSummaryResponse> {
+    return api<AttendanceSummaryResponse>(
+        `/externalActivities/${externalActivityId}/attendance/summary`,
+        { method: "GET" }
+    );
+}
+
+export async function getAttendanceEventDetail(
+    eventId: number | string
+): Promise<AttendanceEventDetailResponse> {
+    return api<AttendanceEventDetailResponse>(
+        `/attendance-events/${eventId}`,
+        { method: "GET" }
+    );
+}
+
+export async function getAttendanceParticipants(
+    externalActivityId: number | string,
+    query?: { search?: string; sort?: AttendanceParticipantSort }
+): Promise<AttendanceParticipantRateResponse[]> {
+    const params = new URLSearchParams();
+
+    if (query?.search?.trim()) {
+        params.set("search", query.search.trim());
+    }
+
+    if (query?.sort) {
+        params.set("sort", query.sort);
+    }
+
+    const queryString = params.toString();
+
+    return api<AttendanceParticipantRateResponse[]>(
+        `/externalActivities/${externalActivityId}/attendance/participants${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+export async function updateAttendanceRecordStatus(
+    recordId: number | string,
+    request: AttendanceRecordStatusUpdateRequest
+): Promise<AttendanceEventParticipantRecordResponse> {
+    return api<AttendanceEventParticipantRecordResponse>(
+        `/attendance-records/${recordId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function downloadAttendanceCsv(
+    externalActivityId: number | string,
+    fileName?: string
+): Promise<void> {
+    const blob = await apiBlob(
+        `/externalActivities/${externalActivityId}/attendance/export`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fileName?.trim()
+        ? sanitizeDownloadName(fileName)
+        : `external-activity-${externalActivityId}-attendance`;
+
+    saveBlob(blob, `${safeFileName}.csv`);
+}
+
+function toLocalDateTimePayload(date: Date = new Date()): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+    const second = String(date.getSeconds()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+}
+
+export async function startAttendanceEventNow(
+    eventId: number | string,
+    type: AttendanceEventType
+): Promise<AttendanceEventResponse> {
+    return openAttendanceWindow(eventId, {
+        type,
+        openAt: toLocalDateTimePayload(),
+    });
+}
+
+export async function endAttendanceEventNow(
+    eventId: number | string
+): Promise<AttendanceEventResponse> {
+    return closeAttendanceWindow(eventId, {
+        closedAt: toLocalDateTimePayload(),
+    });
+}
+
 
 /* - Team 관련 (Admin) - */
 export async function createExternalActivityTeam( // 대외활동 팀 생성
