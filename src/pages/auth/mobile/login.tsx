@@ -48,7 +48,7 @@ export default function Login() {
         const trimmedPassword = password.trim();
 
         if (!trimmedLoginId || !trimmedPassword) {
-            alert("아이디와 비밀번호를 입력해주세요.");
+            alert(t("signup.required"));
             return;
         }
 
@@ -159,7 +159,7 @@ export default function Login() {
                             type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
                         />
-                        <button type="button" className="mobile-login-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.passwordVisibilityToggle") || "비밀번호 표시 전환"}>
+                        <button type="button" className="mobile-login-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.pw")}>
                             <img src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                         </button>
                     </div>
@@ -208,7 +208,7 @@ export default function Login() {
 
                 <section className="mobile-login-policy-section">
                     <button type="button" className="mobile-login-policy-link" onClick={() => navigate("/privacy-policy")}>
-                        개인정보 처리방침
+                        {t("login.privacy")}
                     </button>
                 </section>
                 

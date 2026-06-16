@@ -258,18 +258,10 @@ export default function FindId(): React.ReactElement {
                                 </>
                             ) : (
                                 <>
-                                    <button
-                                        type="button"
-                                        className="find-id-modal-btn primary"
-                                        onClick={() => navigate("/login")}
-                                    >
+                                    <button type="button" className="find-id-modal-btn primary" onClick={() => navigate("/login")} >
                                         {t("findId.goLoginNow")}
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="find-id-modal-btn"
-                                        onClick={() => setPopupType("none")}
-                                    >
+                                    <button type="button" className="find-id-modal-btn" onClick={() => setPopupType("none")} >
                                         {t("findId.close")}
                                     </button>
                                 </>

@@ -1,5 +1,7 @@
 import React from "react";
 import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import { ApiError, getUserMe } from "../../../../api/client";
 import { getMyParticipatingExternalActivities } from "../../../../api/ea";
 import type { UserMe } from "../../../../api/client";
@@ -13,23 +15,18 @@ export type EcaStudentOutletContext = {
 };
 
 function getDisplayStudentName(me: UserMe | null): string {
-    if (!me) return "학생";
+    if (!me) return "";
 
     const nick = (me.nickname ?? "").trim();
     const name = (me.name ?? "").trim();
 
-    return nick || name || "학생";
+    return nick || name || "";
 }
 
 function isDefaultProfileImage(url?: string | null): boolean {
     if (!url) return true;
 
     return url.toLowerCase().includes("default");
-}
-
-function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
-    e.preventDefault();
-    alert("서비스 준비중입니다.");
 }
 
 function getActivityBasePath(activityId: number): string {
@@ -41,6 +38,8 @@ function isActivityPathActive(pathname: string, activityId: number): boolean {
 }
 
 export default function EcaStudentLayout(): React.ReactElement {
+    const { t, i18n } = useTranslation();
+    const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const { pathname } = useLocation();
 
@@ -118,6 +117,11 @@ export default function EcaStudentLayout(): React.ReactElement {
         }
     }, [externalActivityId]);
 
+    function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
+        e.preventDefault();
+        alert(isKo ? "서비스 준비중입니다." : "Coming Soon");
+    }
+
     const studentName = getDisplayStudentName(me);
     const profileImage = isDefaultProfileImage(me?.profileImage)
         ? "/internie_mascot_normal.png"
@@ -139,14 +143,14 @@ export default function EcaStudentLayout(): React.ReactElement {
                         className={({ isActive }) => isActive ? "eca-student-menu-item eca-student-menu-item--active" : "eca-student-menu-item"}
                         onClick={handleServicePreparing}
                     >
-                        <span className="eca-student-sidebar-menu-value">홈</span>
+                        <span className="eca-student-sidebar-menu-value">{t("ecaStudent.home")}</span>
                     </NavLink>
 
                     <div className="eca-student-activity-list">
                         {activitiesLoading ? (
-                            <span className="eca-student-submenu-empty">대외활동을 불러오는 중입니다</span>
+                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuLoading")}대외활동을 불러오는 중입니다</span>
                         ) : activities.length === 0 ? (
-                            <span className="eca-student-submenu-empty">참여 중인 대외활동이 없습니다</span>
+                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuEmpty")}</span>
                         ) : (
                             activities.map((activity) => {
                                 const activityId = activity.externalActivityId;
@@ -168,19 +172,19 @@ export default function EcaStudentLayout(): React.ReactElement {
                                         {isOpen ? (
                                             <div className="eca-student-submenu">
                                                 <NavLink to={`${basePath}/dashboard`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
-                                                    대시보드
+                                                    {t("ecaStudent.dashboard")}
                                                 </NavLink>
 
                                                 <NavLink to={`${basePath}/assignment`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
-                                                    과제 제출 현황
+                                                    {t("ecaStudent.assignment")}
                                                 </NavLink>
 
                                                 <NavLink to={`${basePath}/attendance`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
-                                                    출석 현황
+                                                    {t("ecaStudent.attendance")}
                                                 </NavLink>
 
                                                 <NavLink to={`${basePath}/team-activity`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
-                                                    팀 활동
+                                                    {t("ecaStudent.team")}
                                                 </NavLink>
                                             </div>
                                         ) : null}
@@ -193,7 +197,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
                 <div className="eca-student-sidebar-profile">
                     <img className="eca-student-avatar-img" src={profileImage} alt="student avatar" />
-                    <span className="eca-student-name">{studentName}님</span>
+                    <span className="eca-student-name">{t("ecaAdmin.ecaStudentName", { studentName })}</span>
                 </div>
             </aside>
 

@@ -1,13 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    ApiError,
-    getMyJumpOrganizations,
-    getUserMe,
-    submitMyOnboarding,
-    verifyClientUser,
-    type JumpOrganization,
-} from "../../../api/client";
+import { useTranslation } from "react-i18next";
+import { ApiError, getMyJumpOrganizations, getUserMe, submitMyOnboarding, verifyClientUser, type JumpOrganization, } from "../../../api/client";
 import "./onboarding.css";
 
 type MemberType = "STUDENT" | "COMPANY";
@@ -28,6 +22,7 @@ type FormState = {
 
 export default function DesktopOnboarding(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [step, setStep] = React.useState<Step>(1);
     const [form, setForm] = React.useState<FormState>({
@@ -148,7 +143,7 @@ export default function DesktopOnboarding(): React.ReactElement {
         const code = form.verifyCode.trim();
 
         if (!code) {
-            setCodeError("인증코드를 입력해주세요.");
+            setCodeError(t("onboarding.verifyCodeRequired"));
             return;
         }
 
@@ -184,11 +179,11 @@ export default function DesktopOnboarding(): React.ReactElement {
             await finishOnboarding();
         } catch (e) {
             if (e instanceof ApiError) {
-                setCodeError("인증 코드가 올바르지 않습니다.");
+                setCodeError(t("onboarding.invalidCode"));
                 return;
             }
 
-            setCodeError("인증 중 오류가 발생했습니다.");
+            setCodeError(t("onboarding.verifyFailedRetry"));
         } finally {
             setSubmitting(false);
         }
@@ -226,7 +221,7 @@ export default function DesktopOnboarding(): React.ReactElement {
 
             navigate("/student", { replace: true });
         } catch {
-            alert("온보딩 저장에 실패했습니다.");
+            alert(t("onboarding.saveFailed"));
         } finally {
             setSubmitting(false);
         }
@@ -255,53 +250,40 @@ export default function DesktopOnboarding(): React.ReactElement {
 
             <main className="onboarding-desktop-main">
                 <section className="onboarding-desktop-container">
-                    <h1 className="onboarding-desktop-title">회원 정보 입력</h1>
+                    <h1 className="onboarding-desktop-title">{t("onboarding.desktopTitle")}</h1>
 
                     {step === 1 && (
                         <>
                             <div className="onboarding-desktop-form">
                                 <div className="onboarding-desktop-field">
                                     <label className="onboarding-desktop-label" htmlFor="desktop-onboarding-name">
-                                        이름
+                                        {t("onboarding.nameLabel")}
                                     </label>
                                     <input
                                         id="desktop-onboarding-name"
                                         className="onboarding-desktop-input"
                                         value={form.name}
                                         onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                                        placeholder="반드시 본명을 입력하세요"
+                                        placeholder={t("onboarding.realNamePlaceholder")}
                                         autoComplete="name"
                                     />
                                 </div>
 
                                 <div className="onboarding-desktop-field">
-                                    <span className="onboarding-desktop-label">회원 유형</span>
+                                    <span className="onboarding-desktop-label">{t("onboarding.memberTypeLabel")}</span>
                                     <div className="onboarding-desktop-type-grid">
-                                        <button
-                                            type="button"
-                                            className={`onboarding-desktop-type-button ${form.memberType === "STUDENT" ? "is-active" : ""}`}
-                                            onClick={() => pickMemberType("STUDENT")}
-                                        >
-                                            학생
+                                        <button type="button" className={`onboarding-desktop-type-button ${form.memberType === "STUDENT" ? "is-active" : ""}`} onClick={() => pickMemberType("STUDENT")} >
+                                            {t("onboarding.student")}
                                         </button>
-                                        <button
-                                            type="button"
-                                            className={`onboarding-desktop-type-button ${form.memberType === "COMPANY" ? "is-active" : ""}`}
-                                            onClick={() => pickMemberType("COMPANY")}
-                                        >
-                                            기업
+                                        <button type="button" className={`onboarding-desktop-type-button ${form.memberType === "COMPANY" ? "is-active" : ""}`} onClick={() => pickMemberType("COMPANY")} >
+                                            {t("onboarding.company")}
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <button
-                                type="button"
-                                className={`onboarding-desktop-main-button ${canGoStep1 ? "is-active" : ""}`}
-                                onClick={goToStep2}
-                                disabled={!canGoStep1}
-                            >
-                                다음
+                            <button type="button" className={`onboarding-desktop-main-button ${canGoStep1 ? "is-active" : ""}`} onClick={goToStep2} disabled={!canGoStep1} >
+                                {t("onboarding.next")}
                             </button>
                         </>
                     )}
@@ -310,35 +292,30 @@ export default function DesktopOnboarding(): React.ReactElement {
                         <>
                             <div className="onboarding-desktop-form">
                                 <div className="onboarding-desktop-field">
-                                    <span className="onboarding-desktop-label">목표 설정하기</span>
+                                    <span className="onboarding-desktop-label">{t("onboarding.goalLabel")}</span>
                                     <div className="onboarding-desktop-double-inputs">
                                         <input
                                             className="onboarding-desktop-input"
                                             value={form.interestCompany}
                                             onChange={(e) => setForm((prev) => ({ ...prev, interestCompany: e.target.value }))}
-                                            placeholder="관심 기업"
+                                            placeholder={t("onboarding.interestCompanyPlaceholder")}
                                         />
                                         <input
                                             className="onboarding-desktop-input"
                                             value={form.interestJob}
                                             onChange={(e) => setForm((prev) => ({ ...prev, interestJob: e.target.value }))}
-                                            placeholder="관심 직무"
+                                            placeholder={t("onboarding.interestJobPlaceholder")}
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="onboarding-desktop-footer-actions">
-                                <button
-                                    type="button"
-                                    className={`onboarding-desktop-main-button ${canGoStudentStep2 ? "is-active" : ""}`}
-                                    onClick={goToStep3}
-                                    disabled={!canGoStudentStep2}
-                                >
-                                    다음
+                                <button type="button" className={`onboarding-desktop-main-button ${canGoStudentStep2 ? "is-active" : ""}`} onClick={goToStep3} disabled={!canGoStudentStep2} >
+                                    {t("onboarding.next")}
                                 </button>
                                 <button type="button" className="onboarding-desktop-skip-button" onClick={skipStep2}>
-                                    건너뛰기
+                                    {t("onboarding.skip")}
                                 </button>
                             </div>
                         </>
@@ -348,35 +325,30 @@ export default function DesktopOnboarding(): React.ReactElement {
                         <>
                             <div className="onboarding-desktop-form">
                                 <div className="onboarding-desktop-field">
-                                    <span className="onboarding-desktop-label">기업 정보</span>
+                                    <span className="onboarding-desktop-label">{t("onboarding.companyInfoLabel")}</span>
                                     <div className="onboarding-desktop-double-inputs">
                                         <input
                                             className="onboarding-desktop-input"
                                             value={form.companyName}
                                             onChange={(e) => setForm((prev) => ({ ...prev, companyName: e.target.value }))}
-                                            placeholder="기업명"
+                                            placeholder={t("onboarding.companyNamePlaceholder")}
                                         />
                                         <input
                                             className="onboarding-desktop-input"
                                             value={form.departmentName}
                                             onChange={(e) => setForm((prev) => ({ ...prev, departmentName: e.target.value }))}
-                                            placeholder="부서명"
+                                            placeholder={t("onboarding.departmentNamePlaceholder")}
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="onboarding-desktop-footer-actions">
-                                <button
-                                    type="button"
-                                    className={`onboarding-desktop-main-button ${canGoCompanyStep2 ? "is-active" : ""}`}
-                                    onClick={goToStep3}
-                                    disabled={!canGoCompanyStep2}
-                                >
-                                    다음
+                                <button type="button" className={`onboarding-desktop-main-button ${canGoCompanyStep2 ? "is-active" : ""}`} onClick={goToStep3} disabled={!canGoCompanyStep2} >
+                                    {t("onboarding.next")}
                                 </button>
                                 <button type="button" className="onboarding-desktop-skip-button" onClick={skipStep2}>
-                                    건너뛰기
+                                    {t("onboarding.skip")}
                                 </button>
                             </div>
                         </>
@@ -386,7 +358,7 @@ export default function DesktopOnboarding(): React.ReactElement {
                         <>
                             <div className="onboarding-desktop-form onboarding-desktop-form--verify">
                                 <div className="onboarding-desktop-field">
-                                    <span className="onboarding-desktop-label">인증코드</span>
+                                    <span className="onboarding-desktop-label">{t("onboarding.verifyCodeLabel")}</span>
                                     <input
                                         className="onboarding-desktop-input"
                                         value={form.verifyCode}
@@ -394,7 +366,7 @@ export default function DesktopOnboarding(): React.ReactElement {
                                             setForm((prev) => ({ ...prev, verifyCode: e.target.value }));
                                             setCodeError(null);
                                         }}
-                                        placeholder="인증코드를 입력하세요"
+                                        placeholder={t("onboarding.verifyCodePlaceholder")}
                                     />
                                 </div>
 
@@ -402,18 +374,11 @@ export default function DesktopOnboarding(): React.ReactElement {
 
                                 {shouldShowJumpOrganization && (
                                     <div className="onboarding-desktop-field">
-                                        <span className="onboarding-desktop-label">기관 선택</span>
-                                        <div
-                                            className={`onboarding-desktop-dropdown ${institutionOpen ? "is-open" : ""}`}
-                                            ref={institutionWrapRef}
-                                        >
-                                            <button
-                                                type="button"
-                                                className="onboarding-desktop-dropdown-trigger"
-                                                onClick={() => setInstitutionOpen((prev) => !prev)}
-                                            >
+                                        <span className="onboarding-desktop-label">{t("onboarding.institutionLabel")}</span>
+                                        <div className={`onboarding-desktop-dropdown ${institutionOpen ? "is-open" : ""}`} ref={institutionWrapRef} >
+                                            <button type="button" className="onboarding-desktop-dropdown-trigger" onClick={() => setInstitutionOpen((prev) => !prev)} >
                                                 <span className={form.jumpOrganizationName ? "" : "is-placeholder"}>
-                                                    {form.jumpOrganizationName || "기관을 선택해주세요"}
+                                                    {form.jumpOrganizationName || t("onboarding.institutionSelectPlaceholder")}
                                                 </span>
                                                 <img src="/icons/chevron-left.svg" alt="" />
                                             </button>
@@ -421,12 +386,7 @@ export default function DesktopOnboarding(): React.ReactElement {
                                             {institutionOpen && (
                                                 <div className="onboarding-desktop-dropdown-menu">
                                                     {institutions.map((org) => (
-                                                        <button
-                                                            key={org.id}
-                                                            type="button"
-                                                            className={`onboarding-desktop-dropdown-item ${form.jumpOrganizationId === org.id ? "is-active" : ""}`}
-                                                            onClick={() => pickInstitution(org)}
-                                                        >
+                                                        <button key={org.id} type="button" className={`onboarding-desktop-dropdown-item ${form.jumpOrganizationId === org.id ? "is-active" : ""}`} onClick={() => pickInstitution(org)} >
                                                             {org.name}
                                                         </button>
                                                     ))}
@@ -438,12 +398,12 @@ export default function DesktopOnboarding(): React.ReactElement {
 
                                 {shouldShowStudentNumber && (
                                     <div className="onboarding-desktop-field">
-                                        <span className="onboarding-desktop-label">학번</span>
+                                        <span className="onboarding-desktop-label">{t("onboarding.studentNumberLabel")}</span>
                                         <input
                                             className="onboarding-desktop-input"
                                             value={form.studentNumber}
                                             onChange={(e) => setForm((prev) => ({ ...prev, studentNumber: e.target.value }))}
-                                            placeholder="학번을 입력해주세요"
+                                            placeholder={t("onboarding.studentNumberPlaceholder")}
                                         />
                                     </div>
                                 )}
@@ -451,27 +411,17 @@ export default function DesktopOnboarding(): React.ReactElement {
 
                             {!shouldShowJumpOrganization && !shouldShowStudentNumber ? (
                                 <div className="onboarding-desktop-footer-actions">
-                                    <button
-                                        type="button"
-                                        className={`onboarding-desktop-main-button ${canSubmitVerifyCode ? "is-active" : ""}`}
-                                        onClick={submitVerifyCode}
-                                        disabled={!canSubmitVerifyCode || submitting}
-                                    >
-                                        다음
+                                    <button type="button" className={`onboarding-desktop-main-button ${canSubmitVerifyCode ? "is-active" : ""}`} onClick={submitVerifyCode} disabled={!canSubmitVerifyCode || submitting} >
+                                        {t("onboarding.next")}
                                     </button>
                                     <button type="button" className="onboarding-desktop-skip-button" onClick={skipVerify}>
-                                        건너뛰기
+                                        {t("onboarding.skip")}
                                     </button>
                                 </div>
                             ) : (
                                 <div className="onboarding-desktop-footer-actions">
-                                    <button
-                                        type="button"
-                                        className={`onboarding-desktop-main-button ${canFinishVerifiedStep ? "is-active" : ""}`}
-                                        onClick={finishVerifiedOnboarding}
-                                        disabled={!canFinishVerifiedStep || submitting}
-                                    >
-                                        완료
+                                    <button type="button" className={`onboarding-desktop-main-button ${canFinishVerifiedStep ? "is-active" : ""}`} onClick={finishVerifiedOnboarding} disabled={!canFinishVerifiedStep || submitting} >
+                                        {t("onboarding.finish")}
                                     </button>
                                 </div>
                             )}

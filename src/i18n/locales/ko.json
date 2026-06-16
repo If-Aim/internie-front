@@ -359,7 +359,25 @@
         "institutionPlaceholder": "전체",
         "next": "다음",
         "skip": "건너뛰기",
-        "finish": "완료"
+        "finish": "완료",
+
+        "desktopTitle": "회원 정보 입력",
+        "nameLabel": "이름",
+        "realNamePlaceholder": "반드시 본명을 입력하세요",
+        "memberTypeLabel": "회원 유형",
+        "student": "학생",
+        "company": "기업",
+        "goalLabel": "목표 설정하기",
+        "companyInfoLabel": "기업 정보",
+        "companyNamePlaceholder": "기업명",
+        "departmentNamePlaceholder": "부서명",
+        "verifyCodeLabel": "인증코드",
+        "verifyCodeRequired": "인증코드를 입력해주세요.",
+        "institutionLabel": "기관 선택",
+        "institutionSelectPlaceholder": "기관을 선택해주세요",
+        "studentNumberLabel": "학번",
+        "studentNumberPlaceholder": "학번을 입력해주세요",
+        "saveFailed": "온보딩 저장에 실패했습니다."
     }, 
 
     "ECA_admin" : "대외활동 관리자 관련",

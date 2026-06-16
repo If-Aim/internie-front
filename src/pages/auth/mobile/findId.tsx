@@ -99,7 +99,7 @@ export default function FindId(): React.ReactElement {
             {successModalOpen && (
                 <div className="find-id-mobile-modal-overlay" onClick={() => setSuccessModalOpen(false)}>
                     <div className="find-id-mobile-modal" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className="find-id-mobile-modal-close" onClick={() => setSuccessModalOpen(false)} aria-label={t("common.close", "닫기")} >
+                        <button type="button" className="find-id-mobile-modal-close" onClick={() => setSuccessModalOpen(false)} aria-label={t("common.close")}>
                             <img src="/icons/x-01.svg" alt="" />
                         </button>
 
@@ -108,15 +108,11 @@ export default function FindId(): React.ReactElement {
                         </div>
 
                         <div className="find-id-mobile-modal-text">
-                            {t("findId.checkMailbox", "메일함을 확인해주세요")}
+                            {t("findId.checkMailbox")}
                         </div>
 
-                        <button
-                            type="button"
-                            className="find-id-mobile-modal-confirm"
-                            onClick={() => navigate("/login", { replace: true })}
-                        >
-                            {t("findId.goLoginNow", "로그인 화면으로")}
+                        <button type="button" className="find-id-mobile-modal-confirm" onClick={() => navigate("/login", { replace: true })}>
+                            {t("findId.goLoginNow")}
                         </button>
                     </div>
                 </div>
@@ -124,12 +120,7 @@ export default function FindId(): React.ReactElement {
 
             <div className="find-id-mobile-content">
                 <header className="signup-mobile-header">
-                    <button
-                        type="button"
-                        className="signup-mobile-back-btn"
-                        onClick={() => navigate("/login")}
-                        aria-label={t("common.back", "뒤로가기")}
-                    >
+                    <button type="button" className="signup-mobile-back-btn" onClick={() => navigate("/login")} aria-label={t("findId.backToLogin")}>
                         <img src="/icons/chevron-left.svg" alt="" />
                     </button>
                     <div className="signup-mobile-header-title">{t("findId.title")}</div>
@@ -166,7 +157,7 @@ export default function FindId(): React.ReactElement {
                                 setForm((prev) => ({ ...prev, code: e.target.value }));
                                 setError(null);
                             }}
-                            placeholder={t("findId.codePlaceholder", "인증코드를 입력하세요")}
+                            placeholder={t("findId.codePlaceholder")}
                             inputMode="numeric"
                         />
                     </div>
@@ -178,22 +169,12 @@ export default function FindId(): React.ReactElement {
 
             <div className="find-id-mobile-footer">
                 {!codeSent ? (
-                    <button
-                        type="button"
-                        className="find-id-mobile-btn find-id-mobile-btn--primary"
-                        onClick={handleSendCode}
-                        disabled={sending || !canSendCode}
-                    >
-                        {sending ? t("signup.sending", "전송 중") : t("findId.next", "다음")}
+                    <button type="button" className="find-id-mobile-btn find-id-mobile-btn--primary" onClick={handleSendCode} disabled={sending || !canSendCode}>
+                        {sending ? t("signup.sending") : t("findId.next")}
                     </button>
                 ) : (
-                    <button
-                        type="button"
-                        className="find-id-mobile-btn find-id-mobile-btn--primary"
-                        onClick={handleVerifyCode}
-                        disabled={verifying || !canVerifyCode}
-                    >
-                        {verifying ? t("signup.verifying", "확인 중") : t("findId.getId", "아이디 찾기")}
+                    <button type="button" className="find-id-mobile-btn find-id-mobile-btn--primary" onClick={handleVerifyCode} disabled={verifying || !canVerifyCode} >
+                        {verifying ? t("signup.verifying") : t("findId.getId")}
                     </button>
                 )}
             </div>

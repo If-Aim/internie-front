@@ -357,7 +357,25 @@
 		"institutionPlaceholder": "Select a center",
 		"next": "Next",
 		"skip": "Skip",
-		"finish": "Done"
+		"finish": "Done",
+		
+		"desktopTitle": "Enter Member Information",
+		"nameLabel": "Name",
+		"realNamePlaceholder": "Please enter your real name",
+		"memberTypeLabel": "Member Type",
+		"student": "Student",
+		"company": "Company",
+		"goalLabel": "Set Your Goals",
+		"companyInfoLabel": "Company Information",
+		"companyNamePlaceholder": "Company Name",
+		"departmentNamePlaceholder": "Department Name",
+		"verifyCodeLabel": "Verification Code",
+		"verifyCodeRequired": "Please enter the verification code.",
+		"institutionLabel": "Select Institution",
+		"institutionSelectPlaceholder": "Please select an institution",
+		"studentNumberLabel": "Student Number",
+		"studentNumberPlaceholder": "Please enter your student number",
+		"saveFailed": "Failed to save onboarding information."
 	},
 
 	"ECA_admin" : "대외활동 관리자 관련",

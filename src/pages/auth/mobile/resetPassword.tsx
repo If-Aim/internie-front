@@ -164,7 +164,7 @@ export default function ResetPassword(): React.ReactElement {
         const email = form.email.trim();
 
         if (!loginId || !email) {
-            showError(t("resetPassword.requiredLoginIdEmail", "아이디와 이메일을 입력해주세요."));
+            showError(t("resetPassword.requiredLoginIdEmail"));
             return;
         }
 
@@ -184,12 +184,8 @@ export default function ResetPassword(): React.ReactElement {
             setRemainingSeconds(600);
             setForm((prev) => ({ ...prev, code: "" }));
             showInfo(t("resetPassword.codeSent", { email }));
-        } catch (e) {
-            if (e instanceof ApiError) {
-                showError(t("resetPassword.codeSendFail", "인증코드 발송에 실패했습니다."));
-            } else {
-                showError(t("resetPassword.codeSendFail", "인증코드 발송에 실패했습니다."));
-            }
+        } catch {
+            showError(t("resetPassword.codeSendFail"));
         } finally {
             setSending(false);
         }
@@ -201,7 +197,7 @@ export default function ResetPassword(): React.ReactElement {
         const code = form.code.trim();
 
         if (!code) {
-            setError(t("resetPassword.codeRequired", "인증코드를 입력해주세요."));
+            setError(t("resetPassword.codeRequired"));
             return;
         }
 
@@ -226,7 +222,7 @@ export default function ResetPassword(): React.ReactElement {
                 }
 
                 if (e.code === "EMAIL_CODE_EXPIRED") {
-                    setError(t("resetPassword.codeExpired"));
+                    setError(t("signup.emailCodeExpired"));
                     return;
                 }
 
@@ -244,17 +240,17 @@ export default function ResetPassword(): React.ReactElement {
         const email = form.email.trim();
 
         if (!form.newPassword || !form.newPasswordConfirm) {
-            setPasswordError(t("resetPassword.passwordRequired", "비밀번호를 입력해주세요."));
+            setPasswordError(t("resetPassword.passwordRequired"));
             return;
         }
 
         if (!isValidResetPassword(form.newPassword)) {
-            setPasswordError(t("resetPassword.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다."));
+            setPasswordError(t("resetPassword.passwordGuide"));
             return;
         }
 
         if (form.newPassword !== form.newPasswordConfirm) {
-            setConfirmError(t("resetPassword.passwordMismatch", "비밀번호가 일치하지 않습니다."));
+            setConfirmError(t("resetPassword.passwordMismatch"));
             return;
         }
 
@@ -275,15 +271,15 @@ export default function ResetPassword(): React.ReactElement {
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.code === "NEW_PASSWORD_SAME_AS_OLD") {
-                    setPasswordError(t("resetPassword.passwordSameAsOld", "새로 설정한 비밀번호는 이전 비밀번호와 달라야 합니다."));
+                    setPasswordError(t("resetPassword.passwordSameAsOld"));
                     return;
                 }
 
-                setError(e.message || t("resetPassword.fail", "비밀번호 재설정에 실패했습니다."));
+                setError(e.message || t("resetPassword.fail"));
                 return;
             }
 
-            setError(t("resetPassword.fail", "비밀번호 재설정에 실패했습니다."));
+            setError(t("resetPassword.fail"));
         } finally {
             setSubmitting(false);
         }
@@ -306,7 +302,7 @@ export default function ResetPassword(): React.ReactElement {
             {successModalOpen && (
                 <div className="find-id-modal-mobile-overlay" onClick={() => setSuccessModalOpen(false)}>
                     <div className="find-id-modal-mobile" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className="find-id-modal-mobile-close" onClick={() => setSuccessModalOpen(false)} aria-label={t("common.close", "닫기")} >
+                        <button type="button" className="find-id-modal-mobile-close" onClick={() => setSuccessModalOpen(false)} aria-label={t("common.close")}>
                             <img src="/icons/x-01.svg" alt="" />
                         </button>
 
@@ -315,11 +311,11 @@ export default function ResetPassword(): React.ReactElement {
                         </div>
 
                         <div className="find-id-modal-mobile-text">
-                            {t("resetPassword.resetDone", "비밀번호가 재설정 되었습니다")}
+                            {t("resetPassword.resetDone")}
                         </div>
 
-                        <button type="button" className="find-id-modal-mobile-confirm" onClick={() => navigate("/login", { replace: true })} >
-                            {t("resetPassword.goLogin", "로그인 화면으로")}
+                        <button type="button" className="find-id-modal-mobile-confirm" onClick={() => navigate("/login", { replace: true })}>
+                            {t("resetPassword.goLogin")}
                         </button>
                     </div>
                 </div>
@@ -327,16 +323,16 @@ export default function ResetPassword(): React.ReactElement {
 
             <div className="rp-page">
                 <header className="signup-mobile-header">
-                    <button type="button" className="signup-mobile-back-btn" onClick={handleBack} aria-label={t("common.back", "뒤로가기")} >
+                    <button type="button" className="signup-mobile-back-btn" onClick={handleBack} aria-label={t("resetPassword.goLogin")}>
                         <img src="/icons/chevron-left.svg" alt="" />
                     </button>
-                    <div className="signup-mobile-header-title">{t("resetPassword.title", "비밀번호 재설정")}</div>
+                    <div className="signup-mobile-header-title">{t("resetPassword.title")}</div>
                 </header>
 
                 <div className="rp-content">
                     {step === 1 && (
                         <>
-                            <h1 className="rp-title">{t("resetPassword.emailVerifyTitle", "이메일 인증하기")}</h1>
+                            <h1 className="rp-title">{t("resetPassword.emailVerifyTitle")}</h1>
 
                             <div className="rp-field">
                                 <input
@@ -346,7 +342,7 @@ export default function ResetPassword(): React.ReactElement {
                                         setForm((prev) => ({ ...prev, loginId: e.target.value }));
                                         setError(null);
                                     }}
-                                    placeholder={t("resetPassword.loginIdPlaceholder", "아이디 입력하기")}
+                                    placeholder={t("resetPassword.loginIdPlaceholder")}
                                     autoComplete="username"
                                 />
                             </div>
@@ -361,7 +357,7 @@ export default function ResetPassword(): React.ReactElement {
                                         setInfo(null);
                                         setInfoVisible(false);
                                     }}
-                                    placeholder={t("resetPassword.emailPlaceholder", "이메일 입력하기")}
+                                    placeholder={t("resetPassword.emailPlaceholder")}
                                     autoComplete="email"
                                     inputMode="email"
                                 />
@@ -376,7 +372,7 @@ export default function ResetPassword(): React.ReactElement {
                                             setForm((prev) => ({ ...prev, code: e.target.value }));
                                             setError(null);
                                         }}
-                                        placeholder={t("resetPassword.codePlaceholder", "인증코드를 입력하세요")}
+                                        placeholder={t("resetPassword.codePlaceholder")}
                                         inputMode="numeric"
                                     />
                                     {remainingSeconds > 0 && (
@@ -400,21 +396,21 @@ export default function ResetPassword(): React.ReactElement {
 
                     {step === 2 && (
                         <>
-                            <h1 className="rp-title">{t("resetPassword.resetTitle", "비밀번호 재설정")}</h1>
+                            <h1 className="rp-title">{t("resetPassword.resetTitle")}</h1>
 
                             <div className="rp-label-row" ref={openGuide === "password" ? guideWrapRef : null}>
-                                <span className="rp-label">{t("login.pw", "비밀번호")}</span>
+                                <span className="rp-label">{t("login.pw")}</span>
                                 <button
                                     type="button"
                                     className="rp-guide-btn"
-                                    aria-label={t("resetPassword.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다.")}
+                                    aria-label={t("resetPassword.passwordGuide")}
                                     onClick={() => setOpenGuide((prev) => (prev === "password" ? null : "password"))}
                                 >
                                     <img src="/icons/info-01-6b.svg" alt="" />
                                 </button>
                                 {openGuide === "password" && (
                                     <div className="rp-guide-bubble">
-                                        {t("resetPassword.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다.")}
+                                        {t("resetPassword.passwordGuide")}
                                     </div>
                                 )}
                             </div>
@@ -428,23 +424,18 @@ export default function ResetPassword(): React.ReactElement {
                                         setPasswordError(null);
                                         setError(null);
                                     }}
-                                    placeholder={t("resetPassword.newPasswordPlaceholder", "비밀번호를 입력해주세요")}
+                                    placeholder={t("resetPassword.newPasswordPlaceholder")}
                                     type={showPassword ? "text" : "password"}
                                     autoComplete="new-password"
                                 />
-                                <button
-                                    type="button"
-                                    className="rp-password-toggle"
-                                    onClick={() => setShowPassword((prev) => !prev)}
-                                    aria-label={t("login.passwordVisibilityToggle", "비밀번호 표시 전환")}
-                                >
+                                <button type="button" className="rp-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.pw")}>
                                     <img src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                 </button>
                             </div>
 
                             {(passwordInvalid || passwordError) && (
                                 <div className="rp-error-op1">
-                                    {passwordError || t("resetPassword.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다.")}
+                                    {passwordError || t("resetPassword.passwordGuide")}
                                 </div>
                             )}
 
@@ -457,23 +448,18 @@ export default function ResetPassword(): React.ReactElement {
                                         setConfirmError(null);
                                         setError(null);
                                     }}
-                                    placeholder={t("resetPassword.newPasswordConfirmPlaceholder", "비밀번호를 다시 입력해주세요")}
+                                    placeholder={t("resetPassword.newPasswordConfirmPlaceholder")}
                                     type={showPasswordConfirm ? "text" : "password"}
                                     autoComplete="new-password"
                                 />
-                                <button
-                                    type="button"
-                                    className="rp-password-toggle"
-                                    onClick={() => setShowPasswordConfirm((prev) => !prev)}
-                                    aria-label={t("login.passwordVisibilityToggle", "비밀번호 표시 전환")}
-                                >
+                                <button type="button" className="rp-password-toggle" onClick={() => setShowPasswordConfirm((prev) => !prev)} aria-label={t("login.pw")}>
                                     <img src={showPasswordConfirm ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                 </button>
                             </div>
 
                             {(passwordMismatch || confirmError) && (
                                 <div className="rp-error-op1">
-                                    {confirmError || t("resetPassword.passwordMismatch", "비밀번호가 일치하지 않습니다.")}
+                                    {confirmError || t("resetPassword.passwordMismatch")}
                                 </div>
                             )}
 
@@ -490,19 +476,14 @@ export default function ResetPassword(): React.ReactElement {
                     {step === 1 && (
                         <button className="rp-btn rp-btn--primary" type="button" onClick={codeSent ? handleVerifyCode : handleSendCode} disabled={codeSent ? !canVerifyCode : !canSendCode} >
                             {codeSent
-                                ? (verifying ? t("resetPassword.verifying", "확인 중") : t("resetPassword.next", "다음"))
-                                : (sending ? t("resetPassword.sending", "전송 중") : t("resetPassword.next", "다음"))}
+                                ? (verifying ? t("resetPassword.verifying") : t("resetPassword.next"))
+                                : (sending ? t("resetPassword.sending") : t("resetPassword.next"))}
                         </button>
                     )}
 
                     {step === 2 && (
-                        <button
-                            className="rp-btn rp-btn--primary"
-                            type="button"
-                            onClick={handleResetPassword}
-                            disabled={!canSubmit}
-                        >
-                            {submitting ? t("resetPassword.submitting", "처리 중") : t("resetPassword.changePassword", "비밀번호 변경")}
+                        <button className="rp-btn rp-btn--primary" type="button" onClick={handleResetPassword} disabled={!canSubmit} >
+                            {submitting ? t("resetPassword.submitting") : t("resetPassword.changePassword")}
                         </button>
                     )}
                 </div>

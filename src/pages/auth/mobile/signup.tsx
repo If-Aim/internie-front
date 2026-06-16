@@ -464,14 +464,14 @@ export default function Signup(): React.ReactElement {
     }
 
     function renderStepTitle(): string {
-        if (step === 1) return t("signup.mobileStepEmailTitle", "이메일 인증하기");
-        if (step === 2) return t("signup.mobileStepCodeTitle", "인증코드 입력");
-        if (step === 3) return t("signup.mobileStepLoginIdTitle", "회원가입");
-        return t("signup.mobileStepLoginIdTitle", "회원가입");
+        if (step === 1) return t("signup.mobileStepEmailTitle");
+        if (step === 2) return t("signup.mobileStepCodeTitle");
+        if (step === 3) return t("signup.mobileStepLoginIdTitle");
+        return t("signup.mobileStepLoginIdTitle");
     }
 
     function renderHeaderTitle(): string {
-        return t("signup.title", "회원가입");
+        return t("signup.title");
     }
 
     return (
@@ -479,7 +479,7 @@ export default function Signup(): React.ReactElement {
             {accountExistsModalOpen && (
                 <div className="signup-mobile-modal-overlay" onClick={() => setAccountExistsModalOpen(false)}>
                     <div className="signup-mobile-modal" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className="signup-mobile-modal-close" onClick={() => setAccountExistsModalOpen(false)} aria-label={t("common.close", "닫기")} >
+                        <button type="button" className="signup-mobile-modal-close" onClick={() => setAccountExistsModalOpen(false)} aria-label={t("common.close")}>
                             <img src="/icons/x-01.svg" alt="" />
                         </button>
 
@@ -492,14 +492,14 @@ export default function Signup(): React.ReactElement {
                         </div>
 
                         <button type="button" className="signup-mobile-modal-confirm" onClick={() => navigate("/login")} >
-                            {t("signup.goToLogin", "로그인 화면으로")}
+                            {t("signup.goToLogin")}
                         </button>
                     </div>
                 </div>
             )}
             <div className="signup-mobile-page">
                 <header className="signup-mobile-header">
-                    <button type="button" className="signup-mobile-back-btn" onClick={handleBack} aria-label={t("common.back", "뒤로가기")}>
+                    <button type="button" className="signup-mobile-back-btn" onClick={handleBack} aria-label={t("signup.goToLogin")}>
                         <img src="/icons/chevron-left.svg" alt="" />
                     </button>
                     <div className="signup-mobile-header-title">{renderHeaderTitle()}</div>
@@ -518,7 +518,7 @@ export default function Signup(): React.ReactElement {
                                             setForm((prev) => ({ ...prev, email: e.target.value }));
                                             setEmailError(null);
                                         }}
-                                        placeholder={t("signup.emailPlaceholder", "이메일 입력하기")}
+                                        placeholder={t("signup.emailPlaceholder")}
                                         autoComplete="email"
                                         inputMode="email"
                                     />
@@ -528,7 +528,7 @@ export default function Signup(): React.ReactElement {
                                 {emailError && <div className="signup-mobile-error">{emailError}</div>}
 
                                 <button type="button" className="signup-mobile-submit-btn" onClick={handleSendEmailCode} disabled={!canSendEmailCode} >
-                                    {sendingCode ? t("signup.sending", "전송 중") : t("signup.getEmailVC", "인증코드 보내기")}
+                                    {sendingCode ? t("signup.sending") : t("signup.getEmailVC")}
                                 </button>
                             </>
                         )}
@@ -543,11 +543,7 @@ export default function Signup(): React.ReactElement {
                                             onChange={(e) => {
                                                 void handleCodeChange(e.target.value);
                                             }}
-                                            placeholder={
-                                                language === "en"
-                                                    ? "Check your inbox for the verification code."
-                                                    : t("signup.enterEmailVC", "메일함에서 인증코드를 확인하세요")
-                                            }
+                                            placeholder={t("signup.enterEmailVC")}
                                             inputMode="numeric"
                                             disabled={emailVerified || emailCodeTimeLeft <= 0}
                                         />
@@ -561,12 +557,12 @@ export default function Signup(): React.ReactElement {
                                 {codeError && <div className="signup-mobile-error">{codeError}</div>}
                                 {emailCodeTimeLeft <= 0 && !emailVerified && (
                                     <div className="signup-mobile-error">
-                                        {t("signup.emailCodeExpired", "인증 시간이 만료되었습니다. 인증코드를 다시 요청해주세요.")}
+                                        {t("signup.emailCodeExpired")}
                                     </div>
                                 )}
 
                                 <button type="button" className="signup-mobile-submit-btn" onClick={() => handleVerifyEmailCode()} disabled={!canGoLoginIdStep && (code.trim().length !== 6 || verifyingCode)} >
-                                    {verifyingCode ? t("signup.verifying", "확인 중") : t("signup.next", "다음")}
+                                    {verifyingCode ? t("signup.verifying") : t("signup.next")}
                                 </button>
                             </>
                         )}
@@ -574,18 +570,18 @@ export default function Signup(): React.ReactElement {
                         {step === 3 && (
                             <>
                                 <div className="signup-mobile-label-row" ref={openGuide === "loginId" ? guideWrapRef : null}>
-                                    <span className="signup-mobile-label">{t("login.id", "아이디")}</span>
+                                    <span className="signup-mobile-label">{t("login.id")}</span>
                                     <button
                                         type="button"
                                         className="signup-mobile-guide-btn"
-                                        aria-label={t("signup.loginIdGuide", "영문 소문자 or 숫자를 활용해 4-20자로 만들어주세요")}
+                                        aria-label={t("signup.loginIdGuide")}
                                         onClick={() => setOpenGuide((prev) => (prev === "loginId" ? null : "loginId"))}
                                     >
                                         <img src="/icons/info-01-6b.svg" alt="" />
                                     </button>
                                     {openGuide === "loginId" && (
                                         <div className="signup-mobile-guide-bubble">
-                                            {t("signup.loginIdGuide", "영문 소문자 or 숫자를 활용해 4-20자로 만들어주세요")}
+                                            {t("signup.loginIdGuide")}
                                         </div>
                                     )}
                                 </div>
@@ -598,7 +594,7 @@ export default function Signup(): React.ReactElement {
                                             setForm((prev) => ({ ...prev, loginId: e.target.value }));
                                             setLoginIdError(null);
                                         }}
-                                        placeholder={t("signup.loginIdPlaceholder", "아이디를 입력하세요")}
+                                        placeholder={t("signup.loginIdPlaceholder")}
                                         autoComplete="username"
                                     />
                                     <button
@@ -608,10 +604,10 @@ export default function Signup(): React.ReactElement {
                                         disabled={checkingLoginId || (loginIdChecked && loginIdAvailable === true) || !form.loginId.trim()}
                                     >
                                         {checkingLoginId
-                                            ? t("signup.checking", "확인 중")
+                                            ? t("signup.checking")
                                             : loginIdChecked && loginIdAvailable === true
-                                                ? t("signup.checked", "확인됨")
-                                                : t("signup.checkLoginId", "중복확인")}
+                                                ? t("signup.checked")
+                                                : t("signup.checkLoginId")}
                                     </button>
                                 </div>
 
@@ -619,7 +615,7 @@ export default function Signup(): React.ReactElement {
                                 {loginIdError && <div className="signup-mobile-error">{loginIdError}</div>}
 
                                 <button type="button" className="signup-mobile-submit-btn" onClick={() => setStep(4)} disabled={!canGoPasswordStep} >
-                                    {t("signup.next", "다음")}
+                                    {t("signup.next")}
                                 </button>
                             </>
                         )}
@@ -627,18 +623,18 @@ export default function Signup(): React.ReactElement {
                         {step === 4 && (
                             <>
                                 <div className="signup-mobile-label-row" ref={openGuide === "password" ? guideWrapRef : null}>
-                                    <span className="signup-mobile-label">{t("login.pw", "비밀번호")}</span>
+                                    <span className="signup-mobile-label">{t("login.pw")}</span>
                                     <button
                                         type="button"
                                         className="signup-mobile-guide-btn"
-                                        aria-label={t("signup.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다")}
+                                        aria-label={t("signup.passwordGuide")}
                                         onClick={() => setOpenGuide((prev) => (prev === "password" ? null : "password"))}
                                     >
                                         <img src="/icons/info-01-6b.svg" alt="" />
                                     </button>
                                     {openGuide === "password" && (
                                         <div className="signup-mobile-guide-bubble">
-                                            {t("signup.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다")}
+                                            {t("signup.passwordGuide")}
                                         </div>
                                     )}
                                 </div>
@@ -652,23 +648,18 @@ export default function Signup(): React.ReactElement {
                                             setPasswordError(null);
                                             setSignupError(null);
                                         }}
-                                        placeholder={t("signup.passwordPlaceholder", "비밀번호를 입력하세요")}
+                                        placeholder={t("signup.passwordPlaceholder")}
                                         type={showPassword ? "text" : "password"}
                                         autoComplete="new-password"
                                     />
-                                    <button
-                                        type="button"
-                                        className="signup-mobile-password-toggle"
-                                        onClick={() => setShowPassword((prev) => !prev)}
-                                        aria-label={t("login.passwordVisibilityToggle", "비밀번호 표시 전환")}
-                                    >
+                                    <button type="button" className="signup-mobile-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.pw")} >
                                         <img src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                     </button>
                                 </div>
 
                                 {(passwordInvalid || passwordError) && (
                                     <div className="signup-mobile-error">
-                                        {passwordError || t("signup.passwordGuide", "영문, 숫자, 특수문자(@$!%*#?&)를 모두 포함한 8~20자여야 합니다")}
+                                        {passwordError || t("signup.passwordGuide")}
                                     </div>
                                 )}
 
@@ -681,29 +672,24 @@ export default function Signup(): React.ReactElement {
                                             setPasswordError(null);
                                             setSignupError(null);
                                         }}
-                                        placeholder={t("signup.passwordConfirmPlaceholder", "비밀번호를 다시 입력하세요")}
+                                        placeholder={t("signup.passwordConfirmPlaceholder")}
                                         type={showPasswordConfirm ? "text" : "password"}
                                         autoComplete="new-password"
                                     />
-                                    <button
-                                        type="button"
-                                        className="signup-mobile-password-toggle"
-                                        onClick={() => setShowPasswordConfirm((prev) => !prev)}
-                                        aria-label={t("login.passwordVisibilityToggle", "비밀번호 표시 전환")}
-                                    >
+                                    <button type="button" className="signup-mobile-password-toggle" onClick={() => setShowPasswordConfirm((prev) => !prev)} aria-label={t("login.pw")} >
                                         <img src={showPasswordConfirm ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
                                     </button>
                                 </div>
 
                                 {passwordConfirmInvalid && (
                                     <div className="signup-mobile-error">
-                                        {t("signup.passwordMismatch", "비밀번호가 일치하지 않습니다")}
+                                        {t("signup.passwordMismatch")}
                                     </div>
                                 )}
                                 {signupError && <div className="signup-mobile-error">{signupError}</div>}
 
                                 <button type="button" className="signup-mobile-submit-btn" onClick={handleSignup} disabled={!canSubmit}>
-                                    {submitting ? t("signup.submitting", "가입 중") : t("signup.submit", "회원가입")}
+                                    {submitting ? t("signup.submitting") : t("signup.submit")}
                                 </button>
                             </>
                         )}
