@@ -27,6 +27,7 @@
 		"googleNotReady": "Google login is being prepared. Please try again shortly.",
 		"googleLoginFailed": "Google login failed.",
 		"googlePreparing": "Preparing Google login",
+		"googleLoadFailedShort": "Google login unavailable",
         "googleLoadFailed": "Failed to load Google login. Please check your browser settings or network.",
 		"invalidLogin": "The ID or password is incorrect.",
 		"withdrawnAccount": "This account has been deleted. You can sign up again with the same email address after 30 days.",

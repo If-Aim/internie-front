@@ -53,3 +53,6 @@ body { margin: 0; font-family: "Pretendard Variable", Pretendard, sans-serif; ba
 .google-hidden-btn { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; pointer-events: none; opacity: 0; }
 
 .bottom-spacer{display: block; height: 132px; }
+
+.google-login-spinner { width: 16px; height: 16px; border: 2px solid #DADCE0; border-top-color: #4285F4; border-radius: 50%; animation: google-login-spin 0.8s linear infinite; display: inline-block; box-sizing: border-box; }
+@keyframes google-login-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

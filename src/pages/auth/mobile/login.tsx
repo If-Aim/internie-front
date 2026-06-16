@@ -26,11 +26,45 @@ const loadGoogleScript = () => {
             return;
         }
 
+        let completed = false;
+
+        const timeoutId = window.setTimeout(() => {
+            if (completed) return;
+
+            completed = true;
+
+            if (window.google?.accounts?.id) {
+                resolve();
+                return;
+            }
+
+            reject(new Error("Google SDK load timeout"));
+        }, 8000);
+
+        const resolveIfReady = () => {
+            if (completed) return;
+
+            if (window.google?.accounts?.id) {
+                completed = true;
+                window.clearTimeout(timeoutId);
+                resolve();
+            }
+        };
+
+        const rejectOnce = () => {
+            if (completed) return;
+
+            completed = true;
+            window.clearTimeout(timeoutId);
+            reject(new Error("Google SDK load failed"));
+        };
+
         const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://accounts.google.com/gsi/client"]');
 
         if (existingScript) {
-            existingScript.addEventListener("load", () => resolve(), { once: true });
-            existingScript.addEventListener("error", () => reject(new Error("Google SDK load failed")), { once: true });
+            existingScript.addEventListener("load", resolveIfReady, { once: true });
+            existingScript.addEventListener("error", rejectOnce, { once: true });
+            resolveIfReady();
             return;
         }
 
@@ -38,8 +72,8 @@ const loadGoogleScript = () => {
         script.src = "https://accounts.google.com/gsi/client";
         script.async = true;
         script.defer = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Google SDK load failed"));
+        script.onload = resolveIfReady;
+        script.onerror = rejectOnce;
         document.head.appendChild(script);
     });
 };
@@ -57,13 +91,15 @@ export default function Login() {
     const [submitting, setSubmitting] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [googleReady, setGoogleReady] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(true);
+    const [googleLoadFailed, setGoogleLoadFailed] = useState(false);
 
     const go = (url: string) => {
         window.location.href = url;
     };
 
     const handleGoogleClick = () => {
-        if (!googleReady || !window.google?.accounts?.id) {
+        if (googleLoading || googleLoadFailed || !googleReady || !window.google?.accounts?.id) {
             setLoginError(t("login.googleNotReady"));
             return;
         }
@@ -77,6 +113,7 @@ export default function Login() {
 
             if (notification.isSkippedMoment?.()) {
                 console.error("Google prompt skipped", notification.getSkippedReason?.());
+                setLoginError(t("login.googleLoginFailed"));
                 return;
             }
 
@@ -121,21 +158,43 @@ export default function Login() {
 
         const initializeGoogleLogin = async () => {
             try {
+                setGoogleReady(false);
+                setGoogleLoading(true);
+                setGoogleLoadFailed(false);
+
                 await loadGoogleScript();
 
-                if (cancelled || googleInitializedRef.current || !window.google?.accounts?.id) {
+                if (cancelled) {
+                    return;
+                }
+
+                const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+                if (!googleClientId) {
+                    console.error("구글 로그인이 설정되지 않았습니다.");
+                    setGoogleReady(false);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(true);
+                    setLoginError(t("login.googleLoadFailed"));
+                    return;
+                }
+
+                if (!window.google?.accounts?.id) {
+                    setGoogleReady(false);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(true);
+                    setLoginError(t("login.googleNotReady"));
+                    return;
+                }
+
+                if (googleInitializedRef.current) {
+                    setGoogleReady(true);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(false);
                     return;
                 }
 
                 googleInitializedRef.current = true;
-                const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-                if (!googleClientId) {
-                    console.error("구글로그인이 설정되지 않았습니다.");
-                    setGoogleReady(false);
-                    setLoginError(t("login.googleLoadFailed"));
-                    return;
-                }
 
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
@@ -143,7 +202,8 @@ export default function Login() {
                         const idToken = response?.credential;
 
                         if (!idToken) {
-                            console.error("Google idToken을 받지 못했습니다.");
+                            console.error("Google idToken을 받지 못했습니다.", response);
+                            setLoginError(t("login.googleLoginFailed"));
                             return;
                         }
 
@@ -169,9 +229,13 @@ export default function Login() {
                 });
 
                 setGoogleReady(true);
+                setGoogleLoading(false);
+                setGoogleLoadFailed(false);
             } catch (e) {
                 console.error("Google SDK 로드 실패", e);
                 setGoogleReady(false);
+                setGoogleLoading(false);
+                setGoogleLoadFailed(true);
                 setLoginError(t("login.googleLoadFailed"));
             }
         };
@@ -245,11 +309,15 @@ export default function Login() {
                         </button>
                     )}
 
-                    <button type="button" className="mobile-login-social-btn mobile-login-google-btn" onClick={handleGoogleClick} disabled={!googleReady} aria-label={t("login.startWithGoogleAria")}>
+                    <button type="button" className="mobile-login-social-btn mobile-login-google-btn" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
                         <span className="mobile-login-social-icon" aria-hidden="true">
                             <img src="/logos/google_Logo.svg" alt="" />
                         </span>
-                        <span className="mobile-login-social-text">{googleReady ? t("login.startWithGoogle") : t("login.googlePreparing")}</span>
+                        {googleLoading ? (
+                            <span className="google-login-spinner" aria-hidden="true"></span>
+                        ) : (
+                            <span className="mobile-login-social-text">{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.startWithGoogle")}</span>
+                        )}
                     </button>
                 </section>
 

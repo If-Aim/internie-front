@@ -91,6 +91,8 @@ export default function Login(): React.ReactElement {
     const [showPassword, setShowPassword] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [googleReady, setGoogleReady] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(true);
+    const [googleLoadFailed, setGoogleLoadFailed] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastClosing, setToastClosing] = useState(false);
     const [toastGuide, setToastGuide] = useState(false);
@@ -175,7 +177,7 @@ export default function Login(): React.ReactElement {
     };
 
     const handleGoogleClick = () => {
-        if (!googleReady || !window.google?.accounts?.id) {
+        if (googleLoading || googleLoadFailed || !googleReady || !window.google?.accounts?.id) {
             showGoogleLoginFailureToast(t("login.googleNotReady"));
             return;
         }
@@ -237,6 +239,8 @@ export default function Login(): React.ReactElement {
         const initializeGoogleLogin = async () => {
             try {
                 setGoogleReady(false);
+                setGoogleLoading(true);
+                setGoogleLoadFailed(false);
 
                 await loadGoogleScript();
 
@@ -248,17 +252,25 @@ export default function Login(): React.ReactElement {
 
                 if (!googleClientId) {
                     console.error("구글 로그인이 설정되지 않았습니다.");
+                    setGoogleReady(false);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(true);
                     showGoogleLoginFailureToast(isEnglish ? "Google login is not configured." : "Google 로그인 설정이 누락되었습니다.");
                     return;
                 }
 
                 if (!window.google?.accounts?.id) {
+                    setGoogleReady(false);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(true);
                     showGoogleLoginFailureToast(t("login.googleNotReady"));
                     return;
                 }
 
                 if (googleInitializedRef.current) {
                     setGoogleReady(true);
+                    setGoogleLoading(false);
+                    setGoogleLoadFailed(false);
                     return;
                 }
 
@@ -298,9 +310,13 @@ export default function Login(): React.ReactElement {
                 });
 
                 setGoogleReady(true);
+                setGoogleLoading(false);
+                setGoogleLoadFailed(false);
             } catch (e) {
                 console.error("Google SDK 로드 실패", e);
                 setGoogleReady(false);
+                setGoogleLoading(false);
+                setGoogleLoadFailed(true);
                 showGoogleLoginFailureToast(isEnglish ? "Failed to load Google login. Please check your browser settings or network." : "Google 로그인을 불러오지 못했습니다. 브라우저 설정 또는 네트워크를 확인해주세요.");
             }
         };
@@ -413,9 +429,13 @@ export default function Login(): React.ReactElement {
                         </div>
 
                         <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
-                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={!googleReady} aria-label={t("login.startWithGoogleAria")} >
+                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
                                 <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
-                                <span>{googleReady ? t("login.loginWithGoogle") : t("login.googlePreparing")}</span>
+                                {googleLoading ? (
+                                    <span className="google-login-spinner" aria-hidden="true"></span>
+                                ) : (
+                                    <span>{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.loginWithGoogle")}</span>
+                                )}
                             </button>
 
                             {!isEnglish && (

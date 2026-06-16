@@ -27,6 +27,7 @@
         "googleNotReady": "구글 로그인을 준비 중입니다. 잠시 후 다시 시도해주세요.",
         "googleLoginFailed": "구글 로그인에 실패했습니다.",
         "googlePreparing": "구글 로그인 준비중",
+        "googleLoadFailedShort": "Google 로그인 불러오기 실패",
         "googleLoadFailed": "구글 로그인을 불러오지 못했습니다. 브라우저 설정 또는 네트워크를 확인해주세요.",
         "invalidLogin": "아이디 또는 비밀번호가 올바르지 않습니다.",
         "withdrawnAccount": "탈퇴한 계정입니다. 탈퇴 후 30일이 지나면 같은 이메일로 다시 가입할 수 있습니다.",
