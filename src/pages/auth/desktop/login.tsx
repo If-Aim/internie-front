@@ -19,6 +19,65 @@ const kakaoAuthUrl =
     + `&client_id=${encodeURIComponent(kakaoClientId)}`
     + `&redirect_uri=${encodeURIComponent(kakaoRedirectUri)}`;
 
+const loadGoogleScript = () => {
+    return new Promise<void>((resolve, reject) => {
+        if (window.google?.accounts?.id) {
+            resolve();
+            return;
+        }
+
+        let completed = false;
+
+        const timeoutId = window.setTimeout(() => {
+            if (completed) return;
+
+            completed = true;
+
+            if (window.google?.accounts?.id) {
+                resolve();
+                return;
+            }
+
+            reject(new Error("Google SDK load timeout"));
+        }, 8000);
+
+        const resolveIfReady = () => {
+            if (completed) return;
+
+            if (window.google?.accounts?.id) {
+                completed = true;
+                window.clearTimeout(timeoutId);
+                resolve();
+            }
+        };
+
+        const rejectOnce = () => {
+            if (completed) return;
+
+            completed = true;
+            window.clearTimeout(timeoutId);
+            reject(new Error("Google SDK load failed"));
+        };
+
+        const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://accounts.google.com/gsi/client"]');
+
+        if (existingScript) {
+            existingScript.addEventListener("load", resolveIfReady, { once: true });
+            existingScript.addEventListener("error", rejectOnce, { once: true });
+            resolveIfReady();
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onload = resolveIfReady;
+        script.onerror = rejectOnce;
+        document.head.appendChild(script);
+    });
+};
+
 export default function Login(): React.ReactElement {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
@@ -31,6 +90,7 @@ export default function Login(): React.ReactElement {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
+    const [googleReady, setGoogleReady] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastClosing, setToastClosing] = useState(false);
     const [toastGuide, setToastGuide] = useState(false);
@@ -115,12 +175,28 @@ export default function Login(): React.ReactElement {
     };
 
     const handleGoogleClick = () => {
-        if (!window.google?.accounts?.id) {
+        if (!googleReady || !window.google?.accounts?.id) {
             showGoogleLoginFailureToast(t("login.googleNotReady"));
             return;
         }
 
-        window.google.accounts.id.prompt();
+        window.google.accounts.id.prompt((notification: any) => {
+            if (notification.isNotDisplayed?.()) {
+                console.error("Google prompt not displayed", notification.getNotDisplayedReason?.());
+                showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
+                return;
+            }
+
+            if (notification.isSkippedMoment?.()) {
+                console.error("Google prompt skipped", notification.getSkippedReason?.());
+                showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
+                return;
+            }
+
+            if (notification.isDismissedMoment?.()) {
+                console.error("Google prompt dismissed", notification.getDismissedReason?.());
+            }
+        });
     };
 
     const handleLocalLogin = async () => {
@@ -156,63 +232,85 @@ export default function Login(): React.ReactElement {
     };
 
     useEffect(() => {
-        let intervalId: number | null = null;
+        let cancelled = false;
 
-        const initializeGoogleLogin = () => {
-            if (!window.google?.accounts?.id) return false;
-            if (googleInitializedRef.current) return true;
+        const initializeGoogleLogin = async () => {
+            try {
+                setGoogleReady(false);
 
-            googleInitializedRef.current = true;
+                await loadGoogleScript();
 
-            window.google.accounts.id.initialize({
-                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-                callback: async (response: any) => {
-                    const idToken = response?.credential;
-                    if (!idToken) {
-                        console.error("Google idToken을 받지 못했습니다.", response);
-                        showGoogleLoginFailureToast(getGoogleCredentialMissingMessage());
-                        return;
-                    }
-
-                    try {
-                        const data = await loginWithGoogle(idToken);
-                        googleLoginFailCountRef.current = 0;
-                        navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
-                    } catch (e) {
-                        console.error("구글 로그인 실패", e);
-
-                        if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
-                            showErrorToast(t("login.withdrawnAccount"));
-                            return;
-                        }
-
-                        if (e instanceof ApiError) {
-                            showGoogleLoginFailureToast(isEnglish ? getGoogleLoginFailedMessage() : e.message || getGoogleLoginFailedMessage());
-                            return;
-                        }
-
-                        showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
-                    }
-                },
-            });
-
-            return true;
-        };
-
-        if (!initializeGoogleLogin()) {
-            intervalId = window.setInterval(() => {
-                if (initializeGoogleLogin() && intervalId) {
-                    window.clearInterval(intervalId);
+                if (cancelled) {
+                    return;
                 }
-            }, 300);
-        }
 
-        return () => {
-            if (intervalId) {
-                window.clearInterval(intervalId);
+                const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+                if (!googleClientId) {
+                    console.error("구글 로그인이 설정되지 않았습니다.");
+                    showGoogleLoginFailureToast(isEnglish ? "Google login is not configured." : "Google 로그인 설정이 누락되었습니다.");
+                    return;
+                }
+
+                if (!window.google?.accounts?.id) {
+                    showGoogleLoginFailureToast(t("login.googleNotReady"));
+                    return;
+                }
+
+                if (googleInitializedRef.current) {
+                    setGoogleReady(true);
+                    return;
+                }
+
+                googleInitializedRef.current = true;
+
+                window.google.accounts.id.initialize({
+                    client_id: googleClientId,
+                    callback: async (response: any) => {
+                        const idToken = response?.credential;
+
+                        if (!idToken) {
+                            console.error("Google idToken을 받지 못했습니다.", response);
+                            showGoogleLoginFailureToast(getGoogleCredentialMissingMessage());
+                            return;
+                        }
+
+                        try {
+                            const data = await loginWithGoogle(idToken);
+                            googleLoginFailCountRef.current = 0;
+                            navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
+                        } catch (e) {
+                            console.error("구글 로그인 실패", e);
+
+                            if (e instanceof ApiError && e.message.includes("탈퇴한 회원")) {
+                                showErrorToast(t("login.withdrawnAccount"));
+                                return;
+                            }
+
+                            if (e instanceof ApiError) {
+                                showGoogleLoginFailureToast(isEnglish ? getGoogleLoginFailedMessage() : e.message || getGoogleLoginFailedMessage());
+                                return;
+                            }
+
+                            showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
+                        }
+                    },
+                });
+
+                setGoogleReady(true);
+            } catch (e) {
+                console.error("Google SDK 로드 실패", e);
+                setGoogleReady(false);
+                showGoogleLoginFailureToast(isEnglish ? "Failed to load Google login. Please check your browser settings or network." : "Google 로그인을 불러오지 못했습니다. 브라우저 설정 또는 네트워크를 확인해주세요.");
             }
         };
-    }, [navigate, t]);
+
+        initializeGoogleLogin();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [navigate, t, isEnglish]);
 
     useEffect(() => { // 3초 후 toast 사라짐
         return () => {
@@ -315,9 +413,9 @@ export default function Login(): React.ReactElement {
                         </div>
 
                         <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
-                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} aria-label={t("login.startWithGoogleAria")} >
+                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={!googleReady} aria-label={t("login.startWithGoogleAria")} >
                                 <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
-                                <span>{t("login.loginWithGoogle")}</span>
+                                <span>{googleReady ? t("login.loginWithGoogle") : t("login.googlePreparing")}</span>
                             </button>
 
                             {!isEnglish && (
