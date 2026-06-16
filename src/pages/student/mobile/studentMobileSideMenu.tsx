@@ -262,7 +262,7 @@ export default function StudentMobileSideMenu({
                             })}
                         </div>
                     )}
-                    <div style={{ margin: "20px 0", display: "flex", flexDirection: "column", gap: 22 }}>
+                    <div style={{display: "flex", flexDirection: "column", gap: 22 }}>
                         {(userRoleSet.includes("ROLE_ADMIN") || userRoleSet.includes("ROLE_CAPTAIN")) && (
                             <button type="button" className="drawer-menu-item" onClick={() => { navigate("/system-admin/users"); closeWithSnap(); }}>
                                 <img className="icon" src="/icons/chevron-right.svg" alt="" />
