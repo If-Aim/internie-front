@@ -314,7 +314,7 @@ export default function Login(): React.ReactElement {
                             <span>{t("login.socialLogin")}</span>
                         </div>
 
-                        <div className="login-desktop-socials">
+                        <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
                             <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} aria-label={t("login.startWithGoogleAria")} >
                                 <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
                                 <span>{t("login.loginWithGoogle")}</span>

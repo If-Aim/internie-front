@@ -41,6 +41,8 @@
 
 .login-desktop-socials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -3px; }
 .login-desktop-socials .login-desktop-btn { height: 36px; font-size: 12px; font-weight: 700; }
+.login-desktop-socials.is-english { display: flex; justify-content: center; }
+.login-desktop-socials.is-english .login-desktop-btn.google { width: 240px; max-width: 100%; }
 
 .login-desktop-join { margin-top: 28px; font-size: 12px; line-height: 20px; color: #A2A2A2; }
 .login-desktop-join button { margin-left: 4px; border: none; background: transparent; padding: 0; font-size: 12px; line-height: 20px; font-weight: 500; color: #000; text-decoration: underline; cursor: pointer; }
