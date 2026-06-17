@@ -249,7 +249,7 @@ export default function MobileOnboarding(): React.ReactElement {
 
             navigate("/student", { replace: true });
         } catch {
-            alert("온보딩 저장에 실패했습니다.");
+            alert(t("onboarding.savedFailed"));
         }
     }
 
