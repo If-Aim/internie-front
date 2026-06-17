@@ -174,6 +174,8 @@
   
     "comment_main": "기본 컴포넌트 관련",
     "common": {
+        "filter": "필터",
+        "search": "검색",
         "time": "시간",
         "close": "닫기",
         "record": "기록하기",
@@ -385,6 +387,29 @@
 
     "ECA_admin" : "대외활동 관리자 관련",
     "ecaAdmin" : {
+        "systemForm": {
+            "individual": "개인",
+            "team": "팀"
+        },
+        
+        "tableAssignmentName": "과제명",
+        "tableSystemForm": "방식",
+        "tableSubmission": "제출 현황",
+        "tableStatus": "상태",
+        "assignmentLoading": "과제 목록을 불러오는 중입니다.",
+        "noAssignments": "생성된 과제가 없습니다",
+        "noSearchResults": "검색 결과가 없습니다",
+
+        "assignmentSearchPlaceholder": "과제명 검색",
+        "createAssignmentAria": "과제 생성",
+        "programNotFound": "대외활동 정보를 찾을 수 없습니다.",
+        "assignmentLoadFailed": "과제 목록을 불러오지 못했습니다.",
+
+        "assignmentSummary": {
+            "completed": "완료된 과제",
+            "ongoing": "진행 중인 과제",
+            "upcoming": "진행 예정 과제"
+        },
         "home": "홈",
         "ecaClientAdminSubmenuEmpty": "담당 대외활동이 없습니다",
         "dashboard": "대시보드",

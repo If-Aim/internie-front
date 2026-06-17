@@ -173,6 +173,7 @@
 
 	"comment_main": "기본 컴포넌트 관련",
 	"common": {
+		"search": "Search",
 		"time": "Time",
 		"close": "Close",
 		"record": "Record",
@@ -383,6 +384,28 @@
 
 	"ECA_admin" : "대외활동 관리자 관련",
     "ecaAdmin" : {
+		"systemForm": {
+            "individual": "Indiv.",
+            "team": "Team"
+        },
+		
+		"tableAssignmentName": "Assignment Name",
+        "tableSystemForm": "Type",
+        "tableSubmission": "Submissions",
+        "tableStatus": "Status",
+        "assignmentLoading": "Loading the assignment list...",
+        "noAssignments": "No assignments have been created.",
+        "noSearchResults": "",
+		
+		"assignmentSearchPlaceholder": "Search by assignment name",
+		"createAssignmentAria": "Create Assignment",
+		"programNotFound": "Could not find the program information.",
+        "assignmentLoadFailed": "Failed to load the assignment list.",
+		"assignmentSummary": {
+            "completed": "Completed",
+            "ongoing": "Ongoing",
+            "upcoming": "Scheduled"
+        },
         "home": "Home",
         "ecaClientAdminSubmenuEmpty": "No assigned programs",
         "dashboard": "Dashboard",

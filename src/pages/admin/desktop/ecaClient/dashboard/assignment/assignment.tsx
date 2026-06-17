@@ -1,9 +1,11 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { getExternalActivity } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentSystemForm, ExternalActivityResponse, } from "../../../../../../api/ea"; 
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./assignment.css";
+import i18n from "../../../../../../i18n";
 
 type AssignmentStatus = "upcoming" | "ongoing" | "completed" ;
 type AssignmentFilterStatus = AssignmentStatus;
@@ -49,8 +51,8 @@ function toAssignmentViewModel(assignment: AssignmentResponse): AssignmentViewMo
 }
 
 function getSystemFormLabel(value: AssignmentSystemForm): string {
-    if (value === "INDIVIDUAL") return "개인";
-    return "팀";
+    if (value === "INDIVIDUAL") return i18n.t("ecaAdmin.systemForm.individual");
+    return i18n.t("ecaAdmin.systemForm.team");
 }
 
 function isSubmittedStatus(status: string): boolean {
@@ -119,6 +121,7 @@ function getStatusDotClass(status: AssignmentStatus): string {
 
 export default function EcaDashboardAssignment(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
@@ -139,7 +142,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
             if (organizationLoading) return;
 
             if (!organization?.organizationId || !externalActivityId) {
-                setError("대외활동 정보를 찾을 수 없습니다.");
+                setError(t("ecaAdmin.programNotFound"));
                 return;
             }
 
@@ -154,7 +157,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                 console.error(e);
                 setActivity(null);
                 setAssignments([]);
-                setError("과제 목록을 불러오지 못했습니다.");
+                setError(t("ecaAdmin.assignmentLoadFailed"));
             } finally {
                 setLoading(false);
             }
@@ -233,22 +236,22 @@ export default function EcaDashboardAssignment(): React.ReactElement {
     return (
         <div className="eca-assignment-page">
             <header className="eca-assignment-head">
-                <h1>{activity?.name ?? ""} 과제 현황</h1>
+                <h1>{activity?.name ?? ""} {t("ecaAdmin.assignment")}</h1>
             </header>
 
             <section className="eca-assignment-summary-grid">
                 <article className="eca-assignment-summary-card">
-                    <span>완료된 과제</span>
+                    <span>{t("ecaAdmin.assignmentSummary.completed")}</span>
                     <strong>{completedCount}</strong>
                 </article>
 
                 <article className="eca-assignment-summary-card">
-                    <span>진행 중인 과제</span>
+                    <span>{t("ecaAdmin.assignmentSummary.ongoing")}</span>
                     <strong>{ongoingCount}</strong>
                 </article>
 
                 <article className="eca-assignment-summary-card">
-                    <span>진행 예정 과제</span>
+                    <span>{t("ecaAdmin.assignmentSummary.upcoming")}</span>
                     <strong>{upcomingCount}</strong>
                 </article>
             </section>
@@ -259,7 +262,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
 
                     <div className="eca-assignment-actions" ref={toolbarRef}>
                         <div className="eca-assignment-toolbar-item">
-                            <button type="button" className="eca-assignment-icon-button" aria-label="필터" onClick={() => { setFilterOpen((prev) => !prev); setSearchOpen(false); }} >
+                            <button type="button" className="eca-assignment-icon-button" aria-label={t("common.filter")} onClick={() => { setFilterOpen((prev) => !prev); setSearchOpen(false); }} >
                                 <img src={selectedStatuses.length === assignmentStatuses.length ? "/icons/mynaui_filter_a0.svg" : "/icons/mynaui_filter_dot_a0.svg"} alt="" />
                             </button>
 
@@ -286,13 +289,13 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                         </div>
                         
                         {!isReadOnly ? (
-                            <button type="button" className="eca-assignment-icon-button" aria-label="과제 생성" onClick={moveToCreateAssignment} >
+                            <button type="button" className="eca-assignment-icon-button" aria-label={t("ecaAdmin.createAssignmentAria")} onClick={moveToCreateAssignment} >
                                 <img src="/icons/plus-01-a0.svg" alt="" />
                             </button>
                         ) : null}
 
                         <div className="eca-assignment-search-wrap">
-                            <button type="button" className="eca-assignment-icon-button" aria-label="검색" onClick={() => { setSearchOpen((prev) => !prev); setFilterOpen(false); }}>
+                            <button type="button" className="eca-assignment-icon-button" aria-label={t("common.search")} onClick={() => { setSearchOpen((prev) => !prev); setFilterOpen(false); }}>
                                 <img src="/icons/search-01-a0.svg" alt="" />
                             </button>
 
@@ -301,11 +304,11 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                                     <input
                                         value={keyword}
                                         onChange={(e) => setKeyword(e.target.value)}
-                                        placeholder="과제명 검색"
+                                        placeholder={t("ecaAdmin.assignmentSearchPlaceholder")}
                                         autoFocus
                                     />
                                     <button type="button" onClick={resetSearchKeyword}>
-                                        초기화
+                                        {t("ecaAdmin.reset")}
                                     </button>
                                 </div>
                             ) : null}
@@ -314,22 +317,22 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                 </div>
 
                 <div className="eca-assignment-table-head">
-                    <span className="eca-assignment-table-head-title">과제명</span>
-                    <span>방식</span>
-                    <span>기간</span>
-                    <span>제출 현황</span>
-                    <span>상태</span>
+                    <span className="eca-assignment-table-head-title">{t("ecaAdmin.tableAssignmentName")}</span>
+                    <span>{t("ecaAdmin.tableSystemForm")}</span>
+                    <span>{t("common.dateRange")}</span>
+                    <span>{t("ecaAdmin.tableSubmission")}</span>
+                    <span>{t("ecaAdmin.tableStatus")}</span>
                 </div>
 
                 <div className={"eca-assignment-list-scroll" + (listScrollable ? " is-scrollable" : "")} ref={listScrollRef} >
                     {loading ? (
-                        <p className="eca-assignment-empty">과제 목록을 불러오는 중입니다.</p>
+                        <p className="eca-assignment-empty">{t("ecaAdmin.assignmentLoading")}</p>
                     ) : error ? (
                         <p className="eca-assignment-empty">{error}</p>
                     ) : assignments.length === 0 ? (
-                        <p className="eca-assignment-empty">생성된 과제가 없습니다.</p>
+                        <p className="eca-assignment-empty">{t("ecaAdmin.noAssignments")}</p>
                     ) : filteredAssignments.length === 0 ? (
-                        <p className="eca-assignment-empty">검색 결과가 없습니다.</p>
+                        <p className="eca-assignment-empty">{t("ecaAdmin.noSearchResults")}</p>
                     ) : (
                         filteredAssignments.map((assignment) => (
                             <button
