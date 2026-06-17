@@ -384,6 +384,49 @@
 
 	"ECA_admin" : "대외활동 관리자 관련",
     "ecaAdmin" : {
+		"download": "Download",
+        "nameOrFileSearchPlaceholder": "Search by student name or file name",
+
+		"participantCount": "Roster",
+        "nonSubmitters": "Not Submitted",
+        "participationRate": "Participation Rate",
+        "countPerson": "{{count}}",
+        "submissionStatus": "Status ({{count}})",
+
+		"goBack": "Back",
+        "deleting": "Deleting...",
+        "deleteAction": "Delete",
+        "editAction": "Edit",
+
+		"activityFallback": "Program",
+        "assignmentFallback": "Assignment",
+        "noFilesToDownload": "No submitted files to download.",
+        "downloadFailed": "Failed to download the file.",
+        "noLinkAvailable": "No accessible link available.",
+        "noFileAvailable": "No files available to download.",
+        "submissionNotFound": "Submission information could not be found.",
+        "assignmentDetailLoading": "Loading assignment information...",
+        "confirmDeleteAssignment": "Are you sure you want to delete this assignment? Deleted assignments cannot be recovered.",
+        "deleteFailed": "Failed to delete the assignment.",
+		
+		"noName": "No name",
+
+		"andMore": "and {{count}} more",
+		"link": "Link",
+
+		"assignmentNotFound": "Could not find the assignment information.",
+        "assignmentItemNotFound": "The requested assignment could not be found.",
+        "assignmentDetailLoadFailed": "Failed to load the assignment information.",
+
+		"submitFilter": {
+            "evaluated": "Graded",
+            "beforeEvaluation": "Not Graded",
+            "lateSubmitted": "Late",
+			"submitted": "Submitted",
+            "notSubmitted": "Not Submitted"
+
+        },
+		
 		"systemForm": {
             "individual": "Indiv.",
             "team": "Team"
