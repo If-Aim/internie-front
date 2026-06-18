@@ -615,11 +615,11 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
                     <div className={"eca-assignment-detail-submit-list" + (submitListScrollable ? " is-scrollable" : "")} ref={submitListRef} >
                         {submissionsLoading ? (
-                            <p className="eca-assignment-detail-empty">제출 파일 정보를 불러오는 중입니다.</p>
+                            <p className="eca-assignment-detail-empty">{t("ecaAdmin.submissionFilesLoading")}</p>
                         ) : submittedRows.length === 0 ? (
-                            <p className="eca-assignment-detail-empty">제출자가 없습니다.</p>
+                            <p className="eca-assignment-detail-empty">{t("ecaAdmin.noSubmitters")}</p>
                         ) : filteredSubmittedRows.length === 0 ? (
-                            <p className="eca-assignment-detail-empty">검색 결과가 없습니다.</p>
+                            <p className="eca-assignment-detail-empty">{t("ecaAdmin.noSearchResults")}</p>
                         ) : (
                             filteredSubmittedRows.map((row) => (
                                 <button type="button" className="eca-assignment-detail-submit-row" key={row.id} onClick={() => handleDownloadRowFiles(row)}>
@@ -661,7 +661,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                         <i className="eca-assignment-detail-submit-badge-placeholder" aria-hidden="true" />
                                     )}
                                     <em className={row.evaluationStatus === "DONE" ? "is-done" : ""}>
-                                        {row.evaluationStatus === "DONE" ? "평가 완료" : "평가 전"}
+                                        {row.evaluationStatus === "DONE" ? t("ecaAdmin.submitFilter.evaluated") : t("ecaAdmin.submitFilter.beforeEvaluation")}
                                     </em>
                                     <div className="eca-assignment-detail-row-arrow">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="31" height="36" viewBox="0 0 31 36" fill="none">
@@ -676,13 +676,13 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
                 <aside className="eca-assignment-detail-right">
                     <div className="eca-assignment-detail-missing-head">
-                        <h2>미제출자 ({missingRows.length})</h2>
-                        <button type="button">전체알림</button>
+                        <h2>{t("ecaAdmin.nonSubmitterCount", { count: missingRows.length })}</h2>
+                        <h2>{t("ecaAdmin.nonSubmitterCount", { count: missingRows.length })}</h2>
                     </div>
 
                     <div className={"eca-assignment-detail-missing-list" + (missingListScrollable ? " is-scrollable" : "")} ref={missingListRef} >
                         {missingRows.length === 0 ? (
-                            <p className="eca-assignment-detail-empty">미제출자가 없습니다.</p>
+                            <p className="eca-assignment-detail-empty">{t("ecaAdmin.noNonSubmitters")}</p>
                         ) : (
                             missingRows.map((row) => (
                                 <div className="eca-assignment-detail-missing-row" key={row.id}>
@@ -696,7 +696,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                         />
                                     </span>
                                     <strong>{row.participantName}</strong>
-                                    <button type="button" aria-label="알림 보내기">
+                                    <button type="button" aria-label={t("ecaAdmin.sendNotification")}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
                                             <path d="M15.2827 6.09522L3.61606 0.261891C3.15564 0.0327317 2.63574 -0.0488505 2.12725 0.0282672C1.61877 0.105385 1.14644 0.337449 0.774668 0.692821C0.402895 1.04819 0.14977 1.50958 0.049803 2.01407C-0.0501637 2.51856 0.00789349 3.0416 0.216059 3.51189L2.21606 7.98689C2.26144 8.09508 2.28481 8.21123 2.28481 8.32856C2.28481 8.44588 2.26144 8.56203 2.21606 8.67022L0.216059 13.1452C0.0466425 13.5258 -0.0249779 13.9427 0.00770662 14.358C0.0403911 14.7733 0.176344 15.1739 0.403211 15.5233C0.630077 15.8727 0.940664 16.1599 1.30674 16.3587C1.67283 16.5576 2.08279 16.6618 2.49939 16.6619C2.88958 16.658 3.27397 16.5669 3.62439 16.3952L15.2911 10.5619C15.7049 10.3537 16.0527 10.0346 16.2958 9.64029C16.5389 9.24593 16.6676 8.7918 16.6676 8.32856C16.6676 7.86531 16.5389 7.41118 16.2958 7.01683C16.0527 6.62247 15.7049 6.3034 15.2911 6.09522H15.2827ZM14.5411 9.07022L2.87439 14.9036C2.72119 14.9771 2.54917 15.0021 2.38138 14.9751C2.21359 14.9481 2.05807 14.8705 1.93565 14.7526C1.81324 14.6347 1.72979 14.4822 1.6965 14.3156C1.66321 14.1489 1.68166 13.9761 1.74939 13.8202L3.74106 9.34522C3.76684 9.28547 3.7891 9.22425 3.80773 9.16189H9.54939C9.77041 9.16189 9.98237 9.07409 10.1386 8.91781C10.2949 8.76153 10.3827 8.54957 10.3827 8.32856C10.3827 8.10754 10.2949 7.89558 10.1386 7.7393C9.98237 7.58302 9.77041 7.49522 9.54939 7.49522H3.80773C3.7891 7.43286 3.76684 7.37165 3.74106 7.31189L1.74939 2.83689C1.68166 2.68103 1.66321 2.50818 1.6965 2.34153C1.72979 2.17488 1.81324 2.02239 1.93565 1.90451C2.05807 1.78663 2.21359 1.709 2.38138 1.68202C2.54917 1.65504 2.72119 1.68 2.87439 1.75356L14.5411 7.58689C14.6776 7.65682 14.7921 7.76307 14.8721 7.89393C14.9521 8.02479 14.9944 8.17519 14.9944 8.32856C14.9944 8.48193 14.9521 8.63233 14.8721 8.76319C14.7921 8.89405 14.6776 9.00029 14.5411 9.07022Z" fill="#A0A0A0"/>
                                         </svg>

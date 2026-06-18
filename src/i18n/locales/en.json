@@ -408,6 +408,8 @@
         "assignmentDetailLoading": "Loading assignment information...",
         "confirmDeleteAssignment": "Are you sure you want to delete this assignment? Deleted assignments cannot be recovered.",
         "deleteFailed": "Failed to delete the assignment.",
+        "submissionFilesLoading": "Loading...",
+        "noSubmitters": "No submissions yet.",
 		
 		"noName": "No name",
 
