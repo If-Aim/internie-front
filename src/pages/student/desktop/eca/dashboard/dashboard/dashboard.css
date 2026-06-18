@@ -5,7 +5,7 @@
 
 .eca-student-dashboard-summary-grid { display: grid; width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
 .eca-student-dashboard-summary-card { width: 100%; min-height: 140px; padding: 18px 19px 27px 24px; border: 1px solid #ddd; border-radius: 10px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
-.eca-student-dashboard-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 800; line-height: 32px; }
+.eca-student-dashboard-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 32px; }
 .eca-student-dashboard-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
 .eca-student-dashboard-summary-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .eca-student-dashboard-summary-top em { height: 32px; max-width: 84px; padding: 0 22px; border-radius: 999px; font-size: 12px; font-style: normal; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }

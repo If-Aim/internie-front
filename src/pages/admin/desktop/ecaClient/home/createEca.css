@@ -11,7 +11,7 @@
 .eca-create-form { width: 100%; max-width: 420px; margin: 0; display: flex; flex-direction: column; gap: 34px; }
 .eca-create-field { display: flex; flex-direction: column; gap: 8px; }
 .eca-create-field--manager { margin-top: 20px; }
-.eca-create-field > span { color: #000; font-size: 14px; font-weight: 800; line-height: 1.3; margin-left:7px; }
+.eca-create-field > span { color: #000; font-size: 14px; font-weight: 700; line-height: 1.3; margin-left:7px; }
 .eca-create-field b { color: #F00; }
 
 .eca-create-field input[type="text"] { width: 100%; max-width: 360px; height: 40px; padding: 0 9px; border: 1px solid #DDD; border-radius: 4px; background: #FFF; color: #000; font-size: 13px; font-weight: 600; box-sizing: border-box; outline: none; }

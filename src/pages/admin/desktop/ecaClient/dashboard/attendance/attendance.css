@@ -1,139 +1,128 @@
-.attendance-page { position: relative; width: 100%; min-height: 100%; color: #000; background: #EEF4FC; font-family: inherit; }
-.attendance-page-inner { width: min(100%, 1210px); margin: 0 auto; box-sizing: border-box; }
-.attendance-title { margin: 0 0 94px 7px; font-size: 24px; font-weight: 700; line-height: 27px; color: #000; }
+.eca-admin-attendance-page { position: relative; width: 100%; min-height: 100%; color: #000; background: #EEF4FC; font-family: inherit; }
+.eca-admin-attendance-page-inner { width: min(100%, 1210px); margin: 0 auto; box-sizing: border-box; }
+.eca-admin-attendance-title { margin: 0 0 94px 7px; font-size: 24px; font-weight: 700; line-height: 27px; color: #000; }
 
-.attendance-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-bottom: 28px; }
-.attendance-summary-card { display: flex; flex-direction: column; min-height: 140px; padding: 28px 21px 26px; box-sizing: border-box; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF;}
-.attendance-summary-label { display: block; margin-bottom: 0; font-size: 14px; font-weight: 700; line-height: 23px; color: #6B6B6B; }
-.attendance-summary-value { display: flex; align-items: center; gap: 8px; margin-top: auto; font-size: 24px; font-weight: 700; line-height: 1; color: #000;}
-.attendance-summary-arrow { display: inline-block; transform: translateY(-1px); font-size: 28px; font-weight: 700; color: #000; }
+.eca-admin-attendance-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-bottom: 28px; }
+.eca-admin-attendance-summary-card { display: flex; flex-direction: column; min-height: 140px; padding: 28px 21px 26px; box-sizing: border-box; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF;}
+.eca-admin-attendance-summary-label { display: block; margin-bottom: 0; font-size: 14px; font-weight: 700; line-height: 23px; color: #6B6B6B; }
+.eca-admin-attendance-summary-value { display: flex; align-items: center; gap: 8px; margin-top: auto; font-size: 24px; font-weight: 700; line-height: 1; color: #000;}
+.eca-admin-attendance-summary-arrow { display: inline-block; transform: translateY(-1px); font-size: 28px; font-weight: 700; color: #000; }
 
-.attendance-content-grid { display: grid; grid-template-columns: 0.93fr 1fr; gap: 14px; align-items: stretch; }
-.attendance-panel { min-height: 581px; padding: 18px 24px 4px 24px; box-sizing: border-box; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; }
-.attendance-panel--scrollable { padding-right: 8px; }
-.attendance-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
-.attendance-panel-title { margin: 0; font-size: 16px; font-weight: 700; line-height: 20px; color: #6B6B6B; }
-.attendance-panel-actions { display: flex; align-items: center; gap: 22px; }
-.attendance-icon-button { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
-.attendance-icon-button:hover svg path { fill: #0166FF; }
-.attendance-icon-button--active svg path { fill: #0166FF; }
-.attendance-icon-button:disabled { opacity: 0.45; cursor: default; }
+.eca-admin-attendance-content-grid { display: grid; grid-template-columns: 0.93fr 1fr; gap: 14px; align-items: stretch; }
+.eca-admin-attendance-panel { min-height: 581px; padding: 18px 24px 4px 24px; box-sizing: border-box; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; }
+.eca-admin-attendance-panel--scrollable { padding-right: 8px; }
+.eca-admin-attendance-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+.eca-admin-attendance-panel-title { margin: 0; font-size: 16px; font-weight: 700; line-height: 20px; color: #6B6B6B; }
+.eca-admin-attendance-panel-actions { display: flex; align-items: center; gap: 22px; }
+.eca-admin-attendance-icon-button { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.eca-admin-attendance-icon-button:hover svg path { fill: #0166FF; }
+.eca-admin-attendance-icon-button--active svg path { fill: #0166FF; }
+.eca-admin-attendance-icon-button:disabled { opacity: 0.45; cursor: default; }
 
-.attendance-sort-wrap { position: relative; z-index: 60; }
-.attendance-sort-button { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 120px; height: 36px; padding: 0 9px 0 12px; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; font-size: 12px; font-weight: 700; line-height: 18px; color: #808080; cursor: pointer;}
-.attendance-sort-button:hover { border-color: #C8DDFC; color: #0166FF; }
-.attendance-sort-menu { position: absolute; top: calc(100% - 10px); right: 0; z-index: 1; width: 120px; padding: 12px 0 4px; box-sizing: border-box; border: 1px solid #E6E6E6; border-top: 0; border-radius: 0 0 0 10px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); overflow: hidden; }
-.attendance-sort-menu-item { display: block; width: 100%; height: 31px; padding: 0 12px; border: 0; background: #FFF; text-align: left; font-size: 14px; font-weight: 700; line-height: 23px; border-radius: 8px; color: #808080; cursor: pointer; }
-.attendance-sort-menu-item:hover { background: #F3F7FF; color: #0166FF; }
-.attendance-sort-menu-item--active { color: #0166FF; }
-.attendance-floating-backdrop { position: fixed; inset: 0; z-index: 40; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default; }
-.attendance-create-event-button { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 56px; margin-bottom: 8px; padding: 0 20px; box-sizing: border-box; border: 0; border-radius: 10px; background: #E5E5E5; font-size: 14px; font-weight: 700; line-height: 20px; color: #000; cursor: pointer; }
-.attendance-create-event-button:disabled { color: #000; opacity: 1; cursor: not-allowed; }
+.eca-admin-attendance-sort-wrap { position: relative; z-index: 60; }
+.eca-admin-attendance-sort-button { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; width: 120px; height: 36px; padding: 0 9px 0 12px; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; font-size: 12px; font-weight: 700; line-height: 18px; color: #808080; cursor: pointer;}
+.eca-admin-attendance-sort-button:hover { border-color: #C8DDFC; color: #0166FF; }
+.eca-admin-attendance-sort-menu { position: absolute; top: calc(100% - 10px); right: 0; z-index: 1; width: 120px; padding: 12px 0 4px; box-sizing: border-box; border: 1px solid #E6E6E6; border-top: 0; border-radius: 0 0 10px 10px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); overflow: hidden; }
+.eca-admin-attendance-sort-menu-item { display: block; width: 100%; height: 31px; padding: 0 12px; border: 0; background: #FFF; text-align: left; font-size: 14px; font-weight: 700; line-height: 23px; border-radius: 8px; color: #808080; cursor: pointer; }
+.eca-admin-attendance-sort-menu-item:hover { background: #F3F7FF; color: #0166FF; }
+.eca-admin-attendance-sort-menu-item--active { color: #0166FF; }
+.eca-admin-attendance-floating-backdrop { position: fixed; inset: 0; z-index: 40; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default; }
+.eca-admin-attendance-create-event-button { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 56px; margin-bottom: 8px; padding: 0 20px; box-sizing: border-box; border: 0; border-radius: 10px; background: #E5E5E5; font-size: 14px; font-weight: 700; line-height: 20px; color: #000; cursor: pointer; }
+.eca-admin-attendance-create-event-button:disabled { color: #000; opacity: 1; cursor: not-allowed; }
 
-.attendance-event-list { display: flex; flex-direction: column; gap: 10px; max-height: 581px; padding-top: 0; overflow-y: auto; }
-.attendance-event-list::-webkit-scrollbar { width: 4px; }
-.attendance-event-list::-webkit-scrollbar-thumb { border-radius: 10px; background: #808080; }
-.attendance-event-list::-webkit-scrollbar-track { background: transparent; }
-.attendance-event-row { display: grid; grid-template-columns: 100px 1fr auto 56px; align-items: center; width: 100%; min-height: 62px; padding: 0 0 0 18px; box-sizing: border-box; border: 1px solid #E3E3E3; border-radius: 10px; background: #FFF; text-align: left; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
-.attendance-event-row:hover{background-color: #eeeeee;}
-.attendance-event-date { font-size: 14px; font-weight: 600; line-height: 20px; color: #000; }
-.attendance-event-arrow { display: flex; justify-content: center; align-self: center; }
-.attendance-event-type { font-size: 12px; font-weight: 600; line-height: 18px; color: #808080; }
-.attendance-event-status { min-width: 92px; text-align: right; font-size: 12px; font-weight: 600; line-height: 20px; white-space: nowrap; }
-.attendance-event-status--rate { color: #0166FF; }
-.attendance-event-status--scheduled { color: #808080; }
-.attendance-event-status--progress { color: #34A853; }
+.eca-admin-attendance-event-list { display: flex; flex-direction: column; gap: 10px; max-height: 581px; padding-top: 0; overflow-y: auto; }
+.eca-admin-attendance-event-list::-webkit-scrollbar { width: 4px; }
+.eca-admin-attendance-event-list::-webkit-scrollbar-thumb { border-radius: 10px; background: #808080; }
+.eca-admin-attendance-event-list::-webkit-scrollbar-track { background: transparent; }
+.eca-admin-attendance-event-row { display: grid; grid-template-columns: 100px 1fr auto 56px; align-items: center; width: 100%; min-height: 62px; padding: 0 0 0 18px; box-sizing: border-box; border: 1px solid #E3E3E3; border-radius: 10px; background: #FFF; text-align: left; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+.eca-admin-attendance-event-row:hover{background-color: #eeeeee;}
+.eca-admin-attendance-event-date { font-size: 14px; font-weight: 600; line-height: 20px; color: #000; }
+.eca-admin-attendance-event-arrow { display: flex; justify-content: center; align-self: center; }
+.eca-admin-attendance-event-type { font-size: 12px; font-weight: 600; line-height: 18px; color: #808080; white-space: nowrap; }
+.eca-admin-attendance-event-status { min-width: 92px; text-align: right; font-size: 12px; font-weight: 600; line-height: 20px; white-space: nowrap; }
+.eca-admin-attendance-event-status--rate { color: #0166FF; }
+.eca-admin-attendance-event-status--scheduled { color: #808080; }
+.eca-admin-attendance-event-status--progress { color: #34A853; }
 
-.attendance-participant-list { display: flex; flex-direction: column; gap: 8px; max-height: 581px; overflow-y: auto; }
-.attendance-participant-list::-webkit-scrollbar { width: 4px; }
-.attendance-participant-list::-webkit-scrollbar-thumb { border-radius: 10px; background: #808080; }
-.attendance-participant-list::-webkit-scrollbar-track { background: transparent; }
-.attendance-participant-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 56px; padding: 12px}
-.attendance-participant-avatar { display: block; width: 40px; height: 40px; border-radius: 999px; background: #D9D9D9; }
-.attendance-participant-avatar-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
-.attendance-participant-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; line-height: 20px; color: #000; }
-.attendance-participant-rate { justify-self: end; min-width: 96px; font-size: 12px; font-weight: 600; line-height: 18px; color: #808080; text-align: right; }
-.attendance-participant-rate b { font-size: 14px; font-weight: 700; }
+.eca-admin-attendance-participant-list { display: flex; flex-direction: column; gap: 8px; max-height: 581px; overflow-y: auto; }
+.eca-admin-attendance-participant-list::-webkit-scrollbar { width: 4px; }
+.eca-admin-attendance-participant-list::-webkit-scrollbar-thumb { border-radius: 10px; background: #808080; }
+.eca-admin-attendance-participant-list::-webkit-scrollbar-track { background: transparent; }
+.eca-admin-attendance-participant-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 16px; min-height: 56px; padding: 12px}
+.eca-admin-attendance-participant-row { border: 0; background: transparent; text-align: left; cursor: pointer; }
+.eca-admin-attendance-participant-row:focus-visible { outline: 2px solid #0166FF; outline-offset: 2px; }
+.eca-admin-attendance-participant-avatar { display: block; width: 40px; height: 40px; border-radius: 999px; background: #D9D9D9; }
+.eca-admin-attendance-participant-avatar-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.eca-admin-attendance-participant-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; line-height: 20px; color: #000; }
+.eca-admin-attendance-participant-rate { justify-self: end; min-width: 96px; font-size: 12px; font-weight: 600; line-height: 18px; color: #808080; text-align: right; }
 
-.attendance-rate-blue { color: #0166FF; }
-.attendance-rate-red { color: #FF1D1D; }
-.attendance-search-chip { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; min-height: 34px; margin: -6px 0 10px 12px; padding: 0 12px; box-sizing: border-box; border-radius: 999px; background: #F3F7FF; color: #0166FF; font-size: 13px; font-weight: 700; }
-.attendance-search-chip button { padding: 0; border: 0; background: transparent; color: #808080; font-size: 13px; font-weight: 700; cursor: pointer; }
-.attendance-search-chip button:hover { color: #0166FF; }
-.attendance-empty-text { margin: 32px 0 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #808080; text-align: center; }
-.attendance-error { margin: 12px 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #FF1D1D; }
-.attendance-modal-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 32px; box-sizing: border-box; background: rgba(0, 0, 0, 0.28); backdrop-filter: blur(4px); }
+.eca-admin-attendance-rate-blue { color: #0166FF; }
+.eca-admin-attendance-rate-red { color: #f00; }
+.eca-admin-attendance-empty-text { margin: 32px 0 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #808080; text-align: center; }
+.eca-admin-attendance-error { margin: 12px 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #FF1D1D; }
 
-.attendance-search-modal { width: 420px; padding: 32px; box-sizing: border-box; border-radius: 16px; background: #FFF; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18); }
-.attendance-search-modal-title { margin: 0 0 22px; font-size: 22px; font-weight: 700; line-height: 28px; color: #000; letter-spacing: -0.4px; }
-.attendance-search-input { width: 100%; height: 48px; padding: 0 16px; box-sizing: border-box; border: 1px solid #DCDCDC; border-radius: 10px; background: #FFF; outline: none; font-size: 15px; font-weight: 600; line-height: 20px; color: #000; }
-.attendance-search-input::placeholder { color: #A0A0A0; }
-.attendance-search-input:focus { border-color: #0166FF; box-shadow: 0 0 0 3px rgba(1, 102, 255, 0.12); }
-.attendance-search-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
-.attendance-search-modal-button { min-width: 92px; height: 42px; padding: 0 18px; border-radius: 10px; font-size: 15px; font-weight: 700; line-height: 20px; cursor: pointer; }
-.attendance-search-modal-button--ghost { border: 1px solid #DCDCDC; background: #FFF; color: #808080; }
-.attendance-search-modal-button--primary { border: 1px solid #0166FF; background: #0166FF; color: #FFF; }
-.attendance-search-modal-button--ghost:hover { border-color: #BBD6FF; color: #0166FF; }
-.attendance-search-modal-button--primary:hover { background: #005BE5; border-color: #005BE5; }
-.attendance-create-event-button:hover { background: #DADADA; }
+.eca-admin-attendance-search-wrap { position: relative; z-index: 80; }
+.eca-admin-attendance-search-popover { position: absolute; top: 100%; right: 0; z-index: 90; width: 260px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); box-sizing: border-box; }
+.eca-admin-attendance-search-popover input { width: 100%; height: 48px; padding: 0 16px; border: 0; border-radius: 8px; outline: none; background: #FFF; color: #000; font-size: 16px; font-weight: 700; box-sizing: border-box; }
+.eca-admin-attendance-search-popover input::placeholder { color: #A0A0A0; font-size: 15px; font-weight: 600; }
 
-.attendance-create-modal-backdrop { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 32px; box-sizing: border-box; background: rgba(0, 0, 0, 0.28); backdrop-filter: blur(7px); }
-.attendance-create-modal { width: 640px; min-height: 640px; padding: 30px 24px 40px; box-sizing: border-box; border-radius: 16px; background: #FFF; box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2); }
-.attendance-create-progress { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 17px; }
-.attendance-create-progress-bar { display: block; height: 9px; border-radius: 999px; background: #BDD8FF; }
-.attendance-create-progress-bar { position: relative; overflow: hidden; background: #BDD8FF; }
-.attendance-create-progress-bar::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: #0166FF; transform: scaleX(0); transform-origin: left center; transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
-.attendance-create-progress-bar--active { background: #BDD8FF; }
-.attendance-create-progress-bar--active::before { transform: scaleX(1); }
+.eca-admin-attendance-create-modal-backdrop { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 32px; box-sizing: border-box; background: rgba(0, 0, 0, 0.28); backdrop-filter: blur(7px); }
+.eca-admin-attendance-create-modal { width: 640px; min-height: 640px; padding: 30px 24px 40px; box-sizing: border-box; border-radius: 16px; background: #FFF; box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2); }
+.eca-admin-attendance-create-progress { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 17px; }
+.eca-admin-attendance-create-progress-bar { display: block; height: 9px; border-radius: 999px; background: #BDD8FF; }
+.eca-admin-attendance-create-progress-bar { position: relative; overflow: hidden; background: #BDD8FF; }
+.eca-admin-attendance-create-progress-bar::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: #0166FF; transform: scaleX(0); transform-origin: left center; transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+.eca-admin-attendance-create-progress-bar--active { background: #BDD8FF; }
+.eca-admin-attendance-create-progress-bar--active::before { transform: scaleX(1); }
 
-.attendance-create-slide-viewport { position: relative; min-height: 342px; overflow: visible; }
-.attendance-create-slide-pane { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease; }
-.attendance-create-slide-pane.is-active { opacity: 1; pointer-events: auto; transform: translateX(0); }
-.attendance-create-slide-pane.is-before { transform: translateX(-42px); }
-.attendance-create-slide-pane.is-after { transform: translateX(42px); }
+.eca-admin-attendance-create-slide-viewport { position: relative; min-height: 342px; overflow: visible; }
+.eca-admin-attendance-create-slide-pane { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease; }
+.eca-admin-attendance-create-slide-pane.is-active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+.eca-admin-attendance-create-slide-pane.is-before { transform: translateX(-42px); }
+.eca-admin-attendance-create-slide-pane.is-after { transform: translateX(42px); }
 
-.attendance-create-step { margin: 0; font-size: 16px; font-weight: 400; line-height: 20px; color: #666; }
-.attendance-create-body { width: 500px; margin: 64px 0 0 27px; }
-.attendance-create-body--step2 { margin-top: 66px; }
-.attendance-create-title { margin: 0 6px 38px; text-align: left; font-size: 24px; font-weight: 700; line-height: 1; color: #000; }
+.eca-admin-attendance-create-step { margin: 0; font-size: 16px; font-weight: 400; line-height: 20px; color: #666; }
+.eca-admin-attendance-create-body { width: 500px; margin: 64px 0 0 27px; }
+.eca-admin-attendance-create-body--step2 { margin-top: 66px; }
+.eca-admin-attendance-create-title { margin: 0 6px 38px; text-align: left; font-size: 24px; font-weight: 700; line-height: 1; color: #000; }
 
-.attendance-create-date-field { margin: 0 13px 36px; }
-.attendance-create-date-picker-wrap { position: relative; width: 205px; }
-.attendance-create-date-button { display: flex; align-items: center; justify-content: space-between; width: 200px; height: 48px; padding: 0 14px 0 12px; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; color: #000; font-size: 20px; font-weight: 500; cursor: pointer; }
-.attendance-create-date-button img { display: block; width: 24px; height: 24px; opacity: 0.85; }
-.attendance-create-date-picker-wrap .eca-cal { position: absolute; top: 56px; left: 0; z-index: 30; background: #FFF; border: 1px solid #E7E7E7; border-radius: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14); }
+.eca-admin-attendance-create-date-field { margin: 0 13px 36px; }
+.eca-admin-attendance-create-date-picker-wrap { position: relative; width: 205px; }
+.eca-admin-attendance-create-date-button { display: flex; align-items: center; justify-content: space-between; width: 200px; height: 48px; padding: 0 14px 0 12px; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; color: #000; font-size: 20px; font-weight: 500; cursor: pointer; }
+.eca-admin-attendance-create-date-button img { display: block; width: 24px; height: 24px; opacity: 0.85; }
+.eca-admin-attendance-create-date-picker-wrap .eca-cal { position: absolute; top: 56px; left: 0; z-index: 30; background: #FFF; border: 1px solid #E7E7E7; border-radius: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14); }
 
-.attendance-create-type-block { margin: 0 13px 58px; }
-.attendance-create-type-grid { display: grid; grid-template-columns: 240px 240px; gap: 10px; width: auto; margin: 0; }
-.attendance-create-type-button { height: 49px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #737373; font-size: 20px; font-weight: 700; cursor: pointer; }
-.attendance-create-type-button--active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
+.eca-admin-attendance-create-type-block { margin: 0 13px 58px; }
+.eca-admin-attendance-create-type-grid { display: grid; grid-template-columns: 240px 240px; gap: 10px; width: auto; margin: 0; }
+.eca-admin-attendance-create-type-button { height: 49px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #737373; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-attendance-create-type-button--active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
 
-.attendance-create-next-button { display: block; width: 124px; height: 50px; margin: 0; border: 0; border-radius: 8px; background: #E7E7E7; color: #808080; font-size: 20px; font-weight: 800; cursor: pointer; }
-.attendance-create-next-button:hover { background: #DADADA; }
+.eca-admin-attendance-create-next-button { display: block; width: 120px; height: 48px; margin: 0; border: 0; border-radius: 8px; background: #E7E7E7; color: #808080; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-attendance-create-next-button:hover { background: #DADADA; }
 
-.attendance-create-time-form { display: flex; flex-direction: column; gap: 36px; margin: 0; }
-.attendance-create-time-block { margin: 0 13px; }
-.attendance-create-duration-block { margin: 0 13px; }
-.attendance-create-time-label { display: block; margin-bottom: 13px; font-size: 20px; font-weight: 400; line-height: 24px; color: #808080; }
-.attendance-create-time-row { display: flex; align-items: center; gap: 10px; }
-.attendance-create-time-input { width: 64px; height: 48px; padding: 0; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; text-align: center; outline: none; font-size: 20px; font-weight: 500; line-height: 24px; color: #000; }
-.attendance-create-time-input:focus { border-color: #0166FF; }
-.attendance-create-time-colon { font-size: 20px; font-weight: 500; line-height: 30px; color: #808080; }
+.eca-admin-attendance-create-time-form { display: flex; flex-direction: column; gap: 36px; margin: 0; }
+.eca-admin-attendance-create-time-block { margin: 0 13px; }
+.eca-admin-attendance-create-duration-block { margin: 0 13px; }
+.eca-admin-attendance-create-time-label { display: block; margin-bottom: 13px; font-size: 20px; font-weight: 400; line-height: 24px; color: #808080; }
+.eca-admin-attendance-create-time-row { display: flex; align-items: center; gap: 10px; }
+.eca-admin-attendance-create-time-input { width: 64px; height: 48px; padding: 0; box-sizing: border-box; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; text-align: center; outline: none; font-size: 20px; font-weight: 500; line-height: 24px; color: #000; }
+.eca-admin-attendance-create-time-input:focus { border-color: #0166FF; }
+.eca-admin-attendance-create-time-colon { font-size: 20px; font-weight: 500; line-height: 30px; color: #808080; }
 
-.attendance-create-period-buttons { display: flex; flex-direction: column; gap: 4px; width: 64px; height: 44px; margin-left: 0; }
-.attendance-create-period-button { width: 66px; height: 25px; border: 1px solid #E7E7E7; background: #FFF; color: #808080; font-size: 15px; font-weight: 600; line-height: 18px; cursor: pointer; }
-.attendance-create-period-button:first-child { border-radius: 4px 4px 0 0; }
-.attendance-create-period-button:last-child { margin-top: -1px; border-radius: 0 0 4px 4px; }
-.attendance-create-period-button--active { background: #F3F7FF; color: #0166FF; }
+.eca-admin-attendance-create-period-buttons { display: flex; flex-direction: column; gap: 4px; width: 64px; height: 44px; margin-left: 0; }
+.eca-admin-attendance-create-period-button { width: 66px; height: 25px; border: 1px solid #E7E7E7; background: #FFF; color: #808080; font-size: 15px; font-weight: 600; line-height: 18px; cursor: pointer; }
+.eca-admin-attendance-create-period-button:first-child { border-radius: 4px 4px 0 0; }
+.eca-admin-attendance-create-period-button:last-child { margin-top: -1px; border-radius: 0 0 4px 4px; }
+.eca-admin-attendance-create-period-button--active { background: #F3F7FF; color: #0166FF; }
 
-.attendance-create-duration-grid { display: grid; grid-template-columns: 245px 245px; gap: 10px; }
-.attendance-create-duration-button { height: 48px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #808080; font-size: 20px; font-weight: 700; line-height: 26px; cursor: pointer; box-sizing: border-box;}
-.attendance-create-duration-button--active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
+.eca-admin-attendance-create-duration-grid { display: grid; grid-template-columns: 245px 245px; gap: 10px; }
+.eca-admin-attendance-create-duration-button { height: 48px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #808080; font-size: 20px; font-weight: 700; line-height: 26px; cursor: pointer; box-sizing: border-box;}
+.eca-admin-attendance-create-duration-button--active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
 
-.attendance-create-error { width: auto; margin: 12px 0 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #f00; }
-.attendance-create-actions { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: auto; margin: 56px 0 0; }
-.attendance-create-back-button { width: 120px; height: 48px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #808080; font-size: 20px; font-weight: 700; cursor: pointer; }
-.attendance-create-submit-button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #FFF; font-size: 20px; font-weight: 700; cursor: pointer; }
-.attendance-create-submit-button:disabled { background: #BDD8FF; cursor: not-allowed; }
+.eca-admin-attendance-create-error { width: auto; margin: 12px 0 0; font-size: 14px; font-weight: 700; line-height: 20px; color: #f00; }
+.eca-admin-attendance-create-actions { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: auto; margin: 56px 0 0; }
+.eca-admin-attendance-create-back-button { width: 120px; height: 48px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #808080; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-attendance-create-submit-button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #FFF; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-attendance-create-submit-button:disabled { background: #BDD8FF; cursor: not-allowed; }
 
-@media (max-width: 1280px) { .attendance-page-inner { padding: 56px 36px 48px; } .attendance-title { margin-bottom: 58px; } .attendance-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .attendance-content-grid { grid-template-columns: 1fr; } .attendance-panel { min-height: auto; } }
+@media (max-width: 1280px) { .eca-admin-attendance-page-inner { padding: 56px 36px 48px; } .eca-admin-attendance-title { margin-bottom: 58px; } .eca-admin-attendance-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .eca-admin-attendance-content-grid { grid-template-columns: 1fr; } .eca-admin-attendance-panel { min-height: 300px;} }

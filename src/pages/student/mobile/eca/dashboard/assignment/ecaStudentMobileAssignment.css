@@ -1,0 +1,24 @@
+.eca-mobile-student-assignment-page { min-height: 100vh; padding: 0; background: #F0F6FF; box-sizing: border-box; }
+.eca-mobile-student-assignment-main {padding: 14px 20px 40px}
+.icon {width: 24px;height: 24px;display: block;}
+
+
+.eca-mobile-student-assignment-title-row { display: flex; align-items: center; justify-content: space-between; margin: 0 0 21px 4px; }
+.eca-mobile-student-assignment-title-row h2 { margin: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 36px; }
+.eca-mobile-student-assignment-filter-button { width: 36px; height: 36px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
+
+.eca-mobile-student-assignment-list { display: flex; flex-direction: column; gap: 10px; }
+.eca-mobile-student-assignment-card { width: 100%; min-height: 80px; padding: 17px 13px 20px 20px; border: 1px solid #E3E3E3; border-radius: 10px; background: #fff; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; text-align: left; }
+.eca-mobile-student-assignment-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.eca-mobile-student-assignment-info strong { color: #000; font-size: 16px; font-weight: 700; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-mobile-student-assignment-info em { color: #808080; font-size: 12px; font-style: normal; font-weight: 500; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-mobile-student-assignment-status { width: 84px; height: 36px; border-radius: 18px; font-size: 16px; font-style: normal; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex: 0 0 84px; }
+.eca-mobile-student-assignment-status.is-before { background: #E8E8E8; color: #808080; }
+.eca-mobile-student-assignment-status.is-submitted { background: #BDD8FF; color: #0166FF; }
+.eca-mobile-student-assignment-status.is-lateSubmitted { background: #FFEEBF; color: #FABB05; }
+.eca-mobile-student-assignment-status.is-missing { background: #FFD6D2; color: #F00; }
+
+.eca-mobile-student-assignment-card i { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-style: normal; flex: 0 0 28px; }
+.eca-mobile-student-assignment-empty { min-height: 160px; margin: 0; color: #808080; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+.eca-mobile-student-assignment-meta { display: block; margin-top: 4px; font-size: 12px; font-weight: 600; line-height: 16px; color: #808080; }

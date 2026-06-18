@@ -1,81 +1,87 @@
-.eca-assignment-detail-page { width: 100%; min-width: 868px; padding: 0 0 56px; box-sizing: border-box; animation: eca-slide-in .28s ease both; }
-.eca-assignment-detail-head { position: relative; display: flex; align-items: center; gap: 20px; margin-bottom: 34px; }
-.eca-assignment-detail-back-button { width: 20px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-.eca-assignment-detail-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
-.eca-assignment-detail-head strong { color: #0166FF; font-size: 20px; font-weight: 700; line-height: 36px; }
-.eca-assignment-detail-more-button { width: 36px; height: 36px; border: 0; padding: 0; background: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center;}
-.eca-assignment-detail-menu-wrap { position: relative; display: flex; align-items: center; }
-.eca-assignment-detail-menu { position: absolute; top: 0; left: 34px; z-index: 60; width: 110px; padding: 5px 0; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
-.eca-assignment-detail-menu button { display: flex; align-items: center; gap: 16px; width: 100%; height: 24px; margin: 12px 0; padding: 0 13px; border: 0; background: #fff; color: #777; font-size: 12px; font-weight: 700; cursor: pointer; }
-.eca-assignment-detail-menu button:disabled { opacity: .45; cursor: default; }
-.eca-assignment-detail-menu img { width: 20px; height: 20px; display: block; }
+.eca-admin-assignment-detail-page { width: 100%; max-width: 868px; min-width: 868px; margin: 0 auto; padding: 0 0 56px; box-sizing: border-box; animation: eca-slide-in .28s ease both; }
+.eca-admin-assignment-detail-head { position: relative; display: flex; align-items: center; gap: 20px; margin-bottom: 34px; }
+.eca-admin-assignment-detail-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
+.eca-admin-assignment-detail-head strong { color: #0166FF; font-size: 20px; font-weight: 700; line-height: 36px; }
+.eca-admin-assignment-detail-back-button { width: 20px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.eca-admin-assignment-detail-more-button { width: 36px; height: 36px; border: 0; padding: 0; background: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+.eca-admin-assignment-detail-menu-wrap { position: relative; display: flex; align-items: center; margin-left: auto; }
+.eca-admin-assignment-detail-menu { position: absolute; top: 0; left: 34px; z-index: 60; width: 110px; padding: 5px 0; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-admin-assignment-detail-menu button { display: flex; align-items: center; gap: 16px; width: 100%; height: 24px; margin: 12px 0; padding: 0 13px; border: 0; background: #fff; color: #777; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eca-admin-assignment-detail-menu button:disabled { opacity: .45; cursor: default; }
+.eca-admin-assignment-detail-menu img { width: 20px; height: 20px; display: block; }
 
-.eca-assignment-detail-action-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+.eca-admin-assignment-detail-summary-grid { min-width: 868px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+.eca-admin-assignment-detail-summary-card { height: 140px; padding: 26px 24px 24px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.eca-admin-assignment-detail-action-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
 
-.eca-assignment-detail-filter-popover { position: absolute; top: 34px; right: -10px; z-index: 70; width: 156px; padding: 9px 12px 8px; border-radius: 10px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
-.eca-assignment-detail-filter-option { display: flex; align-items: center; gap: 12px; width: 100% !important; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.eca-assignment-detail-filter-radio { width: 12px !important; height: 12px !important; display: block; }
-.eca-assignment-detail-filter-option span { color: #000; font-size: 12px; font-weight: 400; }
+.eca-admin-assignment-detail-filter-popover { position: absolute; top: 34px; right: -10px; z-index: 70; width: 156px; padding: 9px 12px 8px; border-radius: 10px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-admin-assignment-detail-filter-option { display: flex; align-items: center; gap: 12px; width: 100% !important; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-admin-assignment-detail-filter-radio { width: 12px !important; height: 12px !important; display: block; }
+.eca-admin-assignment-detail-filter-option span { color: #000; font-size: 12px; font-weight: 400; }
 
-.eca-assignment-detail-search-popover { position: absolute; top: 34px; right: 0; z-index: 70; width: 240px; height: 48px; padding: 0 18px 0 16px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); display: flex; align-items: center; gap: 10px; box-sizing: border-box; }
-.eca-assignment-detail-search-popover input { flex: 1; min-width: 0; height: 28px; padding: 0; border: 0; outline: none; color: #000; font-size: 14px; font-weight: 700; box-sizing: border-box; }
-.eca-assignment-detail-search-popover input::placeholder { color: #A0A0A0; }
-.eca-assignment-detail-search-popover button { width: 44px; height: 24px; padding: 0; border: 0; background: transparent; color: #A0A0A0; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+.eca-admin-assignment-detail-search-popover { position: absolute; top: 34px; right: 0; z-index: 70; width: 240px; height: 48px; padding: 0 18px 0 16px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); display: flex; align-items: center; gap: 10px; box-sizing: border-box; }
+.eca-admin-assignment-detail-search-popover input { flex: 1; min-width: 0; height: 28px; padding: 0; border: 0; outline: none; color: #000; font-size: 14px; font-weight: 700; box-sizing: border-box; }
+.eca-admin-assignment-detail-search-popover input::placeholder { color: #A0A0A0; }
+.eca-admin-assignment-detail-search-popover button { width: 44px; height: 24px; padding: 0; border: 0; background: transparent; color: #A0A0A0; cursor: pointer; display: flex; justify-content: center; align-items: center;}
 
-.eca-assignment-detail-summary-grid { min-width: 868px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; margin-bottom: 28px; }
-.eca-assignment-detail-summary-card { height: 140px; padding: 26px 24px 24px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
-.eca-assignment-detail-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 800; line-height: 20px; }
-.eca-assignment-detail-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-admin-assignment-detail-summary-grid { min-width: 868px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; margin-bottom: 28px; }
+.eca-admin-assignment-detail-summary-card { height: 140px; padding: 26px 24px 24px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.eca-admin-assignment-detail-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
+.eca-admin-assignment-detail-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
 
-.eca-assignment-detail-main-card { display: grid; min-width: 868px; grid-template-columns: minmax(520px, 1fr) 220px; gap: 34px; height: 560px; padding: 26px 15px 0 24px; border: 1px solid #DDD; border-radius: 10px; background: #FFF; box-sizing: border-box; overflow: hidden; }
-.eca-assignment-detail-left { min-width: 0; }
-.eca-assignment-detail-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-right: 12px; }
-.eca-assignment-detail-section-head h2, .eca-assignment-detail-missing-head h2 { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px;}
-.eca-assignment-detail-actions { display: flex; align-items: center; gap: 12px; }
-.eca-assignment-detail-actions button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.eca-assignment-detail-actions img { width: 24px; height: 24px; display: block; }
+.eca-admin-assignment-detail-main-card { display: grid; min-width: 868px; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; height: 560px; padding: 26px 24px 0; border: 1px solid #DDD; border-radius: 10px; background: #FFF; box-sizing: border-box; overflow: hidden; }
+.eca-admin-assignment-detail-left { min-width: 0; }
+.eca-admin-assignment-detail-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-right: 12px; }
+.eca-admin-assignment-detail-section-head h2, .eca-admin-assignment-detail-missing-head h2 { margin: 0; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px;}
+.eca-admin-assignment-detail-actions { display: flex; align-items: center; gap: 12px; }
+.eca-admin-assignment-detail-actions button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-admin-assignment-detail-actions img { width: 24px; height: 24px; display: block; }
 
-.eca-assignment-detail-submit-list { display: flex; flex-direction: column; gap: 12px; height: 470px; padding-right: 12px; overflow-y: auto; box-sizing: border-box; }
-.eca-assignment-detail-submit-list.is-scrollable { padding-right: 8px; }
-.eca-assignment-detail-submit-row { display: grid; grid-template-columns: 36px 96px 93px minmax(110px, 1fr) 90px 86px 36px; align-items: center; width: 100%; min-width: 578px; min-height: 64px; padding: 0 12px 0 24px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; color: #000; text-align: center; box-sizing: border-box; cursor: pointer; }
-.eca-assignment-detail-submit-row strong { color: #000; font-size: 14px; font-weight: 900; padding: 0 8px }
-.eca-assignment-detail-submit-row span { min-width: 0; color: #777; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-assignment-detail-submit-row > strong,
-.eca-assignment-detail-submit-row > span:not(.eca-assignment-detail-avatar):not(.eca-assignment-detail-row-arrow),
-.eca-assignment-detail-submit-row > i,
-.eca-assignment-detail-submit-row > em { padding: 0 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-assignment-detail-submit-row { display: grid; grid-template-columns: 36px minmax(120px, 1fr) minmax(160px, 1.4fr) 86px 86px 36px; align-items: center; gap: 14px; width: 100%; min-width: 0; min-height: 64px; padding: 0 14px 0 18px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; color: #000; text-align: left; box-sizing: border-box; cursor: pointer; }
+.eca-admin-assignment-detail-submit-row:hover { background: #F9FBFF; border-color: #BDD8FF; }
+.eca-admin-assignment-detail-submit-row strong { min-width: 0; padding: 0; color: #000; font-size: 16px; font-weight: 900; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-assignment-detail-submit-row span { min-width: 0; color: #777; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-assignment-detail-submit-row em { display: inline-flex; align-items: center; justify-content: center; width: 86px; height: 34px; border-radius: 999px; background: #F6F6F6; color: #808080; font-size: 12px; font-style: normal; font-weight: 900; }
+.eca-admin-assignment-detail-submit-row em.is-done { background: #BDD8FF; color: #0166FF; }
+.eca-admin-assignment-detail-submit-row > em { display: inline-flex; align-items: center; justify-content: center; width: 86px; height: 34px; border-radius: 999px; background: #F6F6F6; color: #808080; font-size: 12px; font-style: normal; font-weight: 900; }
+.eca-admin-assignment-detail-submit-row > em.is-done { background: #BDD8FF; color: #0166FF; }
 
-.eca-assignment-detail-submission-result { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.eca-assignment-detail-submission-result em { min-width: 0; color: #000; font-size: 13px; font-style: normal; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-assignment-detail-submission-result a { min-width: 0; color: #0166FF; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-assignment-detail-submission-result a:hover { text-decoration: underline; }
+.eca-admin-assignment-detail-submit-row > strong,
+.eca-admin-assignment-detail-submit-row > span:not(.eca-admin-assignment-detail-avatar):not(.eca-admin-assignment-detail-row-arrow),
+.eca-admin-assignment-detail-submit-row > i,
+.eca-admin-assignment-detail-submit-row > em { padding: 0 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.eca-assignment-detail-avatar,
-.eca-assignment-detail-row-arrow { flex-shrink: 0; overflow: hidden; }
+.eca-admin-assignment-detail-submission-result em { min-width: 0; color: #000; font-size: 13px; font-style: normal; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-assignment-detail-submission-result a { min-width: 0; color: #0166FF; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-assignment-detail-submission-result a:hover { text-decoration: underline; }
+.eca-admin-assignment-detail-avatar,
+.eca-admin-assignment-detail-row-arrow { display: flex; align-items: center; justify-content: center; }
 
-.eca-assignment-detail-avatar { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #D9D9D9; box-sizing: border-box; background: #fff; display: block; overflow: hidden; flex-shrink: 0; }
-.eca-assignment-detail-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.eca-assignment-detail-submit-badge { display: inline-flex; align-items: center; justify-content: center; width: 78px; height: 34px; border-radius: 999px; font-size: 12px; font-style: normal; font-weight: 900; }
-.eca-assignment-detail-submit-badge--submitted { background: #BDD8FF; color: #0166FF; }
-.eca-assignment-detail-submit-badge--late { background: #FFD6D2; color: #F00; }
-.eca-assignment-detail-submit-badge--missing { background: #F6F6F6; color: #808080; }
-.eca-assignment-detail-submit-row em { display: inline-flex; align-items: center; justify-content: center; width: 76px; height: 34px; border-radius: 999px; background: #F6F6F6; color: #808080; font-size: 12px; font-style: normal; font-weight: 900; }
-.eca-assignment-detail-submit-row em.is-done { background: #0166FF; color: #FFF; }
-.eca-assignment-detail-row-arrow { display: flex; align-items: center; justify-content: center; }
+.eca-admin-assignment-detail-avatar { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #D9D9D9; box-sizing: border-box; background: #fff; display: block; overflow: hidden; flex-shrink: 0; }
+.eca-admin-assignment-detail-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.eca-admin-assignment-detail-submit-badge { display: inline-flex; align-items: center; justify-content: center; width: 78px; height: 34px; border-radius: 999px; font-size: 12px; font-style: normal; font-weight: 900; }
+.eca-admin-assignment-detail-submit-badge--submitted { background: #BDD8FF; color: #0166FF; }
+.eca-admin-assignment-detail-submit-badge--late { background: #FFD6D2; color: #F00; }
+.eca-admin-assignment-detail-submit-badge--missing { background: #F6F6F6; color: #808080; }
+.eca-admin-assignment-detail-submit-badge-placeholder { width: 78px; height: 34px; display: block; }
+.eca-admin-assignment-detail-row-arrow { display: flex; align-items: center; justify-content: center; }
 
-.eca-assignment-detail-right { min-width: 0; }
-.eca-assignment-detail-missing-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-right: 12px; }
-.eca-assignment-detail-missing-head button { width: 60px; height: 24px; border: 0; border-radius: 10px; background: #E7E7E7; color: #808080; font-size: 10px; font-weight: 700; cursor: not-allowed; }
-.eca-assignment-detail-missing-list { display: flex; flex-direction: column; gap: 12px; max-height: 470px; overflow-y: auto; padding-right: 12px; box-sizing: border-box; }
-.eca-assignment-detail-missing-list.is-scrollable { padding-right: 8px; }
-.eca-assignment-detail-missing-row { display: grid; grid-template-columns: 36px 1fr 32px; align-items: center; gap: 12px; min-height: 64px; padding: 0 12px; border: 1px solid #E2E2E2; border-radius: 10px; background: #FFF; box-sizing: border-box; }
-.eca-assignment-detail-missing-row strong { color: #000; font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.eca-assignment-detail-missing-row button { width: 32px; height: 32px; padding: 0; border: 1px solid #D9D9D9; border-radius: 999px; background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box; }
-.eca-assignment-detail-missing-row img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.eca-admin-assignment-detail-right { min-width: 0; }
+.eca-admin-assignment-detail-missing-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-right: 12px; }
+.eca-admin-assignment-detail-missing-head button { width: 60px; height: 24px; border: 0; border-radius: 10px; background: #E7E7E7; color: #808080; font-size: 10px; font-weight: 700; cursor: not-allowed; }
+.eca-admin-assignment-detail-missing-head button { width: 86px; height: 34px; border: 0; border-radius: 999px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; cursor: not-allowed; }
+.eca-admin-assignment-detail-missing-list { display: flex; flex-direction: column; gap: 12px; max-height: 470px; overflow-y: auto; padding-right: 12px; box-sizing: border-box; }
+.eca-admin-assignment-detail-missing-list.is-scrollable { padding-right: 8px; }
+.eca-admin-assignment-detail-missing-row { display: flex; align-items: center; min-height: 46px; padding: 0 18px; border: 1px solid #E2E2E2; border-radius: 999px; background: #FFF; box-sizing: border-box; }
+.eca-admin-assignment-detail-missing-row strong { min-width: 0; color: #000; font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-admin-assignment-detail-missing-row button { width: 32px; height: 32px; padding: 0; border: 1px solid #D9D9D9; border-radius: 999px; background: #FFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-sizing: border-box; }
+.eca-admin-assignment-detail-missing-row img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
-.eca-assignment-detail-period { margin: 14px 0 0; color: #808080; font-size: 12px; font-weight: 700; }
-.eca-assignment-detail-empty { margin: 80px 0; color: #808080; font-size: 14px; font-weight: 700; text-align: center; }
+.eca-admin-assignment-detail-period { margin: 14px 0 0; color: #808080; font-size: 12px; font-weight: 700; }
+.eca-admin-assignment-detail-empty { margin: 80px 0; color: #808080; font-size: 14px; font-weight: 700; text-align: center; }
 
-.eca-assignment-detail-submit-list::-webkit-scrollbar, .eca-assignment-detail-missing-list::-webkit-scrollbar { width: 4px; }
-.eca-assignment-detail-submit-list::-webkit-scrollbar-track, .eca-assignment-detail-missing-list::-webkit-scrollbar-track { background: transparent; }
-.eca-assignment-detail-submit-list::-webkit-scrollbar-thumb, .eca-assignment-detail-missing-list::-webkit-scrollbar-thumb { background-color: #D9D9D9; border-radius: 999px; }
+.eca-admin-assignment-detail-submit-list { display: flex; flex-direction: column; gap: 12px; height: 470px; padding-right: 12px; overflow-y: auto; box-sizing: border-box; }
+.eca-admin-assignment-detail-submit-list.is-scrollable { padding-right: 8px; }
+.eca-admin-assignment-detail-submit-list::-webkit-scrollbar, .eca-admin-assignment-detail-missing-list::-webkit-scrollbar { width: 4px; }
+.eca-admin-assignment-detail-submit-list::-webkit-scrollbar-track, .eca-admin-assignment-detail-missing-list::-webkit-scrollbar-track { background: transparent; }
+.eca-admin-assignment-detail-submit-list::-webkit-scrollbar-thumb, .eca-admin-assignment-detail-missing-list::-webkit-scrollbar-thumb { background-color: #D9D9D9; border-radius: 999px; }

@@ -391,6 +391,7 @@
         "assignment": "과제 현황",
         "attendance": "출석 현황",
         "team": "팀 활동",
+        "leaderboard": "리더보드",
         "ecaClientAdminName": "관리자 {{adminName}}님",
 
         "status": {

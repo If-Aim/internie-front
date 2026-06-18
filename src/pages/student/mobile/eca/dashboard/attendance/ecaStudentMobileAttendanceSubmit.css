@@ -1,0 +1,95 @@
+.attendance-submit-page { position: relative; min-height: 100dvh; padding: 0; box-sizing: border-box; background: #F0F6FF; color: #000; overflow-x: hidden; }
+.attendance-submit-page.is-success { padding: 0; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-page.is-picker { padding-bottom: 160px; }
+.icon {width: 24px;height: 24px;display: block;}
+
+.app-title { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.app-title-status { color: #0166FF; }
+
+.eca-mobile-student-attendance-page { min-height: 100dvh; padding: 0; box-sizing: border-box; background: #F0F6FF; color: #000; }
+.eca-mobile-student-attendance-list { display: flex; flex-direction: column; gap: 11px; padding: 14px 20px 40px;}
+
+.attendance-submit-topbar { position: sticky; top: 0; z-index: 10; height: 198px; display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; background: #F2F6FD; }
+.attendance-submit-topbar strong { justify-self: center; font-size: 30px; font-weight: 700; line-height: 1.2; color: #000; white-space: nowrap; }
+.attendance-submit-back { width: 64px; height: 64px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-close { width: 64px; height: 64px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 11px 12px 200px; }
+
+.attendance-submit-empty { margin: 40px 0 0; font-size: 16px; font-weight: 700; line-height: 1; color: #808080; text-align: center; }
+.attendance-submit-photo.is-gallery { background: #BDD8FF80; color: #0166FF; }
+.attendance-submit-gallery-text { font-size: 20px; font-weight: 700; line-height: 1; color: #0166FF; }
+.attendance-submit-photo { position: relative; width: 100%; aspect-ratio: 1 / 1; padding: 0; border: 0; border-radius: 8px; background: #FFF; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.attendance-submit-photo.is-camera { background: #E3E3E3; }
+.attendance-submit-photo.is-selected span { position: absolute; right: 11px; bottom: 11px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-page.is-picker .attendance-submit-photo:not(.is-camera) { background: #DCEBFF; }
+.attendance-submit-page.is-picker .attendance-submit-photo:nth-child(5n) { background: #E9F3FF; }
+
+.attendance-submit-bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 50px 20px; box-sizing: border-box; background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #F0F6FF 14.69%); }
+.attendance-submit-primary { width: 100%; height: 60px; border: 0; border-radius: 10px; background: #0166FF; color: #FFF; font-size: 16px; font-weight: 700; line-height: 1; }
+.attendance-submit-primary:disabled { background: #E3E3E3; color: #808080; }
+.attendance-submit-file-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.attendance-submit-success-layer { position: fixed; inset: 0; z-index: 100000; width: 100vw; height: 100dvh; padding: 0; border: 0; background: #F0F6FF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #0166FF; cursor: pointer; animation: attendanceSuccessLayerIn 0.18s ease both; }
+.attendance-submit-success-icon-wrap { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+.attendance-submit-success-icon { width: 50px; height: 50px; display: block; overflow: visible; }
+.attendance-submit-success-circle { transform-box: fill-box; transform-origin: center; animation: attendanceSuccessCirclePop 0.38s ease-out both; }
+.attendance-submit-success-check { stroke-dasharray: 64; stroke-dashoffset: 64; animation: attendanceSuccessCheckDraw 0.72s ease-out 0.24s forwards; }
+.attendance-submit-success-layer strong { font-size: 20px; font-weight: 700; line-height: 50px; color: #0166FF; opacity: 0; transform: translateY(8px); animation: attendanceSuccessTextIn 0.28s ease 0.72s forwards; }
+
+@keyframes attendanceSuccessLayerIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes attendanceSuccessCirclePop {
+    0% { transform: scale(0.72); opacity: 0; }
+    70% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes attendanceSuccessCheckDraw {
+    from { stroke-dashoffset: 64; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes attendanceSuccessTextIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.attendance-submit-file-input { display: none; }
+.attendance-submit-photo { position: relative; overflow: hidden; }
+.attendance-submit-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.attendance-submit-photo.is-selected > span { position: absolute; right: 11px; bottom: 11px; z-index: 2; display: flex; align-items: center; justify-content: center; }
+.attendance-camera-layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 99999; width: 100vw; height: 100dvh; overflow: hidden; background: #000; }
+.attendance-camera-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.attendance-camera-video.is-front { transform: scaleX(-1); }
+.attendance-camera-video.is-back { transform: none; }
+
+.attendance-camera-switch { position: absolute; left: calc(50% + 98px); bottom: calc(env(safe-area-inset-bottom, 0px) + 89px); z-index: 2; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 999px; background: transparent; transform: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.attendance-camera-switch:disabled { opacity: 0.45; cursor: default; }
+.attendance-camera-switch-bg { position: absolute; inset: 0; width: 48px; height: 48px; display: block; }
+.attendance-camera-switch-icon { position: relative; z-index: 1; width: 32px; height: 32px; display: block; }
+
+.attendance-camera-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 11px); right: 12px; z-index: 2; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.attendance-camera-guide { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 62px); left: 50%; z-index: 2; width: 320px; height: 64px; background: rgba(255, 255, 255, 0.20); border: 1px solid #fff; border-radius: 12px; transform: translateX(-50%) scaleY(1); transform-origin: top center; display: flex; align-items: center; justify-content: center; color: #FFF; font-size: 16px; font-weight: 700; line-height: 1; box-sizing: border-box; opacity: 1; clip-path: inset(0 0 0 0 round 12px); transition: opacity 0.18s ease, transform 0.22s ease, clip-path 0.22s ease; overflow: hidden; pointer-events: auto; }
+.attendance-camera-guide.is-closed { opacity: 0; transform: translateX(-50%) scaleY(0); clip-path: inset(0 0 100% 0 round 12px); pointer-events: none; }
+.attendance-camera-guide-toggle { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 150px); left: 50%; z-index: 3; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: top 0.22s ease; }
+.attendance-camera-guide-toggle.is-closed { top: calc(env(safe-area-inset-top, 0px) + 62px); }
+.attendance-camera-guide-toggle-bg { position: absolute; inset: 0; width: 32px; height: 32px; display: block; }
+.attendance-camera-guide-toggle-icon { position: relative; z-index: 1; width: 24px; height: 24px; display: block; transition: transform 0.22s ease; }
+.attendance-camera-guide-toggle.is-closed .attendance-camera-guide-toggle-icon { transform: rotate(180deg); }
+.attendance-camera-error { position: absolute; top: 50%; left: 24px; right: 24px; z-index: 2; margin: 0; transform: translateY(-50%); color: #FFF; font-size: 16px; font-weight: 700; line-height: 24px; text-align: center; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+.attendance-camera-capture { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 60px); z-index: 2; width: 106px; height: 106px; padding: 0; border: 5px solid rgba(255, 255, 255, 0.5); border-radius: 999px; background: #FFF; transform: translateX(-50%); cursor: pointer; box-sizing: border-box; }
+.attendance-camera-capture:disabled { opacity: 0.45; cursor: default; }
+.attendance-camera-canvas { display: none; }
+
+.attendance-camera-review-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.attendance-camera-review-actions { position: absolute; left: 20px; right: 20px; bottom: calc(env(safe-area-inset-bottom, 0px) + 50px); z-index: 4; display: flex; flex-direction: column; gap: 16px; }
+.attendance-camera-review-button { width: 100%; height: 60px; padding: 0; border: 0; border-radius: 10px; font-size: 16px; font-weight: 700; line-height: 1; cursor: pointer; }
+.attendance-camera-review-button.is-retake { background: #BDD8FF; color: #0166FF; }
+.attendance-camera-review-button.is-checkin { background: #0166FF; color: #FFF; }
+.attendance-camera-review-button:disabled { opacity: 0.6; cursor: default; }
+
+.attendance-submit-page.is-camera-open { padding-bottom: 0; overflow: hidden; }
+.attendance-submit-page.is-camera-open .attendance-submit-bottom { display: none; }

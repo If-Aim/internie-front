@@ -45,8 +45,9 @@ body {background: var(--bg);color: var(--ink);}
 .topbar {display: flex;align-items: center;justify-content: space-between;padding: 0;}
 .iconbtn {background: transparent;border: 0;cursor: pointer;padding: 0;}
 .icon {width: 24px;height: 24px;display: block;}
+.topbar-spacer-icon { display: block; flex: 0 0 24px; width: 24px !important; min-width: 24px; max-width: 24px; height: 24px !important; min-height: 24px; max-height: 24px; pointer-events: none; }
 
-.app-title {font-size: 16px;font-weight: 800;}
+.app-title {font-size: 16px;font-weight: 700;}
 /* 플로팅 버튼 (우하단 +) */
 .fab-add {position: fixed;bottom: 29px;right: 20px;width: 88px;
 height: 88px;border-radius: 9999px;background-color: var(--primary);

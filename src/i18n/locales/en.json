@@ -389,6 +389,7 @@
         "assignment": "Assignments",
         "attendance": "Attendance",
         "team": "Team",
+		"leaderboard": "Leaderboard",
         "ecaClientAdminName": "{{adminName}}",
 
 		"status": {

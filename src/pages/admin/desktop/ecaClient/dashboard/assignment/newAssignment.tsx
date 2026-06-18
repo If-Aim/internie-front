@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { createAssignment, getAssignment, getExternalActivity, getExternalActivityTeams, updateAssignmentMeta, updateAssignmentSchedule, updateAssignmentAssignees, updateAssignmentTeamConfiguration, } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse, } from "../../../../../../api/ea";
+import { localDateTimeInputToServerKstParts, serverKstDateAndTimeToUserDate, serverKstDateAndTimeToUserTime } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./newAssignment.css";
 import "./../../ecaCalendar.css";
@@ -67,6 +68,12 @@ const RESULT_FORM_OPTIONS: { label: string; subLabel: string; value: AssignmentR
     { label: "기타", subLabel: "", value: "ETC" },
 ];
 
+function normalizeApiTime(value?: string | null): string | null {
+    if (!value) return null;
+
+    return value.slice(0, 8);
+}
+
 function formatDateForApi(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -83,14 +90,6 @@ function formatDateForDisplay(date: Date | null): string {
     const day = String(date.getDate()).padStart(2, "0");
 
     return `${year}.${month}.${day}`;
-}
-
-function formatTimeForApi(time: string): string {
-    return `${time}:00`;
-}
-
-function formatDateTimeForApi(date: Date, time: string): string {
-    return `${formatDateForApi(date)}T${formatTimeForApi(time)}`;
 }
 
 function toSelectableParticipant(participant: ExternalActivityParticipant): SelectableParticipant | null {
@@ -150,12 +149,6 @@ function parseDateFromApi(value?: string | null): Date {
     const [year, month, day] = value.split("-").map(Number);
 
     return stripTime(new Date(year, month - 1, day));
-}
-
-function parseTimeFromApi(value?: string | null, fallback: string = "09:00"): string {
-    if (!value) return fallback;
-
-    return value.slice(0, 5);
 }
 
 function getAssignmentTeamIds(assignment: AssignmentResponse): number[] {
@@ -754,10 +747,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                 setEditingAssignment(assignmentData);
                 setName(assignmentData.name ?? "");
-                setStartDate(parseDateFromApi(assignmentData.startDate));
-                setEndDate(parseDateFromApi(assignmentData.endDate));
-                setStartTime(parseTimeFromApi(assignmentData.startTime, "00:00"));
-                setEndTime(parseTimeFromApi(assignmentData.endTime, "23:59"));
+                setStartDate(serverKstDateAndTimeToUserDate(assignmentData.startDate, assignmentData.startTime, "00:00:00") ?? parseDateFromApi(assignmentData.startDate));
+                setEndDate(serverKstDateAndTimeToUserDate(assignmentData.endDate, assignmentData.endTime, "23:59:59") ?? parseDateFromApi(assignmentData.endDate));
+                setStartTime(serverKstDateAndTimeToUserTime(assignmentData.startDate, assignmentData.startTime, "00:00:00"));
+                setEndTime(serverKstDateAndTimeToUserTime(assignmentData.endDate, assignmentData.endTime, "23:59:59"));
                 setSystemForm(assignmentData.systemForm);
                 setTeamCount(
                     assignmentData.systemForm === "TEAM"
@@ -1711,14 +1704,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             setError("");
 
             try {
+                const startParts = localDateTimeInputToServerKstParts(formatDateForApi(startDate), startTime);
+                const endParts = localDateTimeInputToServerKstParts(formatDateForApi(endDate), endTime);
+
                 const request = {
                     name: name.trim(),
                     description: null,
-                    startDate: formatDateForApi(startDate),
-                    endDate: formatDateForApi(endDate),
-                    startTime: formatTimeForApi(startTime),
-                    endTime: formatTimeForApi(endTime),
-                    deadlineAt: formatDateTimeForApi(endDate, endTime),
+                    startDate: startParts.date,
+                    endDate: endParts.date,
+                    startTime: startParts.time,
+                    endTime: endParts.time,
+                    deadlineAt: endParts.dateTime,
                     progressStatus: "UPCOMING" as const,
                     resultForms,
                     systemForm,
@@ -1758,19 +1754,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         setError("");
 
         try {
-            const nextStartDate = formatDateForApi(startDate);
-            const nextEndDate = formatDateForApi(endDate);
-            const nextStartTime = formatTimeForApi(startTime);
-            const nextEndTime = formatTimeForApi(endTime);
-            const nextDeadlineAt = formatDateTimeForApi(endDate, endTime);
+            const nextStartParts = localDateTimeInputToServerKstParts(formatDateForApi(startDate), startTime);
+            const nextEndParts = localDateTimeInputToServerKstParts(formatDateForApi(endDate), endTime);
 
-            const currentStartTime = editingAssignment.startTime
-                ? formatTimeForApi(parseTimeFromApi(editingAssignment.startTime, startTime))
-                : null;
+            const nextStartDate = nextStartParts.date;
+            const nextEndDate = nextEndParts.date;
+            const nextStartTime = nextStartParts.time;
+            const nextEndTime = nextEndParts.time;
+            const nextDeadlineAt = nextEndParts.dateTime;
 
-            const currentEndTime = editingAssignment.endTime
-                ? formatTimeForApi(parseTimeFromApi(editingAssignment.endTime, endTime))
-                : null;
+            const currentStartTime = normalizeApiTime(editingAssignment.startTime);
+            const currentEndTime = normalizeApiTime(editingAssignment.endTime);
 
             const metaChanged =
                 editingAssignment.name !== name.trim() ||
@@ -1840,10 +1834,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }
     return (
         <>
-            <div className={"eca-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode")}>
-                <div className="eca-new-assignment-top">
-                    <div className="eca-new-assignment-top-left">
-                        <button type="button" className="eca-assignment-detail-back-button" onClick={moveBack} aria-label="뒤로가기">
+            <div className={"eca-admin-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode")}>
+                <div className="eca-admin-new-assignment-top">
+                    <div className="eca-admin-new-assignment-top-left">
+                        <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} aria-label="뒤로가기">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -1852,13 +1846,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         <h1>{isEditMode ? "과제 수정하기" : "새로운 과제 생성"}</h1>
                     </div>
 
-                    <button type="button" className="eca-new-assignment-temp-button" disabled>
+                    <button type="button" className="eca-admin-new-assignment-temp-button" disabled>
                         임시저장
                     </button>
                 </div>
 
-                <form className="eca-new-assignment-card" onSubmit={handleSubmit} ref={cardRef}>
-                    <div className="eca-new-assignment-field">
+                <form className="eca-admin-new-assignment-card" onSubmit={handleSubmit} ref={cardRef}>
+                    <div className="eca-admin-new-assignment-field">
                         <label htmlFor="assignmentName">
                             과제명<span>*</span>
                         </label>
@@ -1870,13 +1864,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         />
                     </div>
 
-                    <div className="eca-new-assignment-field">
+                    <div className="eca-admin-new-assignment-field">
                         <label>
                             과제 수행 기간<span>*</span>
                         </label>
-                        <div className="eca-new-assignment-date-row">
-                            <div className="eca-new-assignment-date-box">
-                                <button type="button" className="eca-new-assignment-date-button" onClick={() => openCalendar("start")}>
+                        <div className="eca-admin-new-assignment-date-row">
+                            <div className="eca-admin-new-assignment-date-box">
+                                <button type="button" className="eca-admin-new-assignment-date-button" onClick={() => openCalendar("start")}>
                                     <span>{`${formatDateForDisplay(startDate)} ${startTime}`}</span>
                                     <img src="/icons/calendar-07-80.svg" alt="" />
                                 </button>
@@ -1901,8 +1895,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                             <span>~</span>
 
-                            <div className="eca-new-assignment-date-box">
-                                <button type="button" className="eca-new-assignment-date-button" onClick={() => openCalendar("end")}>
+                            <div className="eca-admin-new-assignment-date-box">
+                                <button type="button" className="eca-admin-new-assignment-date-button" onClick={() => openCalendar("end")}>
                                     <span>{`${formatDateForDisplay(endDate)} ${endTime}`}</span>
                                     <img src="/icons/calendar-07-80.svg" alt="" />
                                 </button>
@@ -1927,30 +1921,30 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         </div>
                     </div>
 
-                    <div className="eca-new-assignment-field">
+                    <div className="eca-admin-new-assignment-field">
                         <label>
                             참여자<span>*</span>
                         </label>
-                        <div className="eca-new-assignment-participant-row">
-                            <button type="button" className={ "eca-new-assignment-participant-input" + (selectedUserIds.length === 0 ? " is-placeholder" : "") } onClick={openParticipantModal} > 
+                        <div className="eca-admin-new-assignment-participant-row">
+                            <button type="button" className={ "eca-admin-new-assignment-participant-input" + (selectedUserIds.length === 0 ? " is-placeholder" : "") } onClick={openParticipantModal} > 
                                 {selectedParticipantText}
                             </button>
-                            <button type="button" className="eca-new-assignment-participant-button" onClick={openParticipantModal}>
+                            <button type="button" className="eca-admin-new-assignment-participant-button" onClick={openParticipantModal}>
                                 {selectedUserIds.length > 0 ? "편집" : "선택"}
                             </button>
                         </div>
                     </div>
 
-                    <div className="eca-new-assignment-field">
-                        <div className="eca-new-assignment-system-row">
+                    <div className="eca-admin-new-assignment-field">
+                        <div className="eca-admin-new-assignment-system-row">
                             <div>
                                 <label>
                                     과제 방식<span>*</span>
                                 </label>
-                                <div className="eca-new-assignment-dropdown-wrap">
-                                    <button type="button" className="eca-new-assignment-select" onClick={() => toggleDropdown("systemForm")}>
+                                <div className="eca-admin-new-assignment-dropdown-wrap">
+                                    <button type="button" className="eca-admin-new-assignment-select" onClick={() => toggleDropdown("systemForm")}>
                                         <span>{selectedSystemFormLabel}</span>
-                                        <div className="eca-new-assignment-chevron">
+                                        <div className="eca-admin-new-assignment-chevron">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                 <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                             </svg>
@@ -1958,7 +1952,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                     </button>
 
                                     {openDropdown === "systemForm" ? (
-                                        <div className="eca-new-assignment-menu eca-new-assignment-menu--small">
+                                        <div className="eca-admin-new-assignment-menu eca-admin-new-assignment-menu--small">
                                             {SYSTEM_FORM_OPTIONS.map((option) => (
                                                 <button
                                                     type="button"
@@ -1984,14 +1978,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                     </label>
                                     <input
                                         id="teamCount"
-                                        className="eca-new-assignment-team-count-input"
+                                        className="eca-admin-new-assignment-team-count-input"
                                         type="text"
                                         inputMode="numeric"
                                         value={teamCount}
                                         onChange={handleTeamCountChange}
                                         placeholder="숫자만 입력해주세요"
                                     />
-                                    <button type="button" className="eca-new-assignment-team-build-button" onClick={openTeamModeModal} disabled={!teamCount}>
+                                    <button type="button" className="eca-admin-new-assignment-team-build-button" onClick={openTeamModeModal} disabled={!teamCount}>
                                         팀 빌딩
                                     </button>
                                 </div>
@@ -2000,7 +1994,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     </div>
 
                     {isEditMode && systemForm === "TEAM" ? (
-                        <div className="eca-new-assignment-field eca-assignment-edit-team-status">
+                        <div className="eca-admin-new-assignment-field eca-assignment-edit-team-status">
                             <div className="eca-assignment-edit-team-status-head">
                                 <label>
                                     팀 구성 현황<span>*</span>
@@ -2018,7 +2012,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                             <div className="eca-assignment-edit-team-table-body">
                                 {editTeamSummaries.length === 0 ? (
-                                    <p className="eca-new-assignment-empty">
+                                    <p className="eca-admin-new-assignment-empty">
                                         연결된 팀 정보가 없습니다.
                                     </p>
                                 ) : (
@@ -2034,13 +2028,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         </div>
                     ) : null}
 
-                    <div className="eca-new-assignment-field">
+                    <div className="eca-admin-new-assignment-field">
                         <label>
                             과제 산출물<span>*</span>
                         </label>
 
-                        <div className="eca-new-assignment-dropdown-wrap--result" ref={resultFormDropdownRef}>
-                                <button type="button" className={ "eca-new-assignment-select" + (selectedResultForms.length === 0 ? " is-placeholder" : "") } onClick={() => toggleDropdown("resultForm")} > 
+                        <div className="eca-admin-new-assignment-dropdown-wrap--result" ref={resultFormDropdownRef}>
+                                <button type="button" className={ "eca-admin-new-assignment-select" + (selectedResultForms.length === 0 ? " is-placeholder" : "") } onClick={() => toggleDropdown("resultForm")} > 
                                     <span>
                                     {selectedResultForms.length > 0
                                         ? selectedResultForms
@@ -2053,7 +2047,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         : "내용을 선택하세요"}
                                 </span>
 
-                                <div className="eca-new-assignment-chevron">
+                                <div className="eca-admin-new-assignment-chevron">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
@@ -2061,12 +2055,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                             </button>
 
                             {openDropdown === "resultForm" ? (
-                                <div className="eca-new-assignment-menu eca-new-assignment-menu--result">
+                                <div className="eca-admin-new-assignment-menu eca-admin-new-assignment-menu--result">
                                     {RESULT_FORM_OPTIONS.map((option) => {
                                         const checked = resultForms.includes(option.value);
 
                                         return (
-                                            <label key={option.value} className={"eca-new-assignment-result-option" + (checked ? " is-selected" : "")} >
+                                            <label key={option.value} className={"eca-admin-new-assignment-result-option" + (checked ? " is-selected" : "")} >
                                                 <input type="checkbox" checked={checked} onChange={() => toggleResultForm(option.value)} />
                                                 <strong>{option.label}</strong>
                                                 {option.subLabel ? <small>({option.subLabel})</small> : null}
@@ -2078,10 +2072,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         </div>
                     </div>
 
-                    {error ? <p className="eca-new-assignment-error">{error}</p> : null}
-                    {loading ? <p className="eca-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
+                    {error ? <p className="eca-admin-new-assignment-error">{error}</p> : null}
+                    {loading ? <p className="eca-admin-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
 
-                     <button type="submit" className="eca-new-assignment-save-button" disabled={saving || loading || (!isEditMode && !formValid)} >
+                     <button type="submit" className="eca-admin-new-assignment-save-button" disabled={saving || loading || (!isEditMode && !formValid)} >
                         {saving ? isEditMode ? "수정 중" : "저장 중" : "저장"}
                     </button>
                 </form>
@@ -2637,7 +2631,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         </div>
                                     </>
                                 ) : (
-                                    <p className="eca-new-assignment-empty">표시할 팀이 없습니다.</p>
+                                    <p className="eca-admin-new-assignment-empty">표시할 팀이 없습니다.</p>
                                 )}
                             </section>
                         </div>

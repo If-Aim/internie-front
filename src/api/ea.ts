@@ -15,6 +15,8 @@ export type AssignmentParticipantResponse = {
     participantType: AssignmentParticipantType;
     userId?: number | null;
     userName?: string | null;
+    userNickname?: string | null;
+    userLinkedinUrl?: string | null;
     teamId?: number | null;
     teamName?: string | null;
     status: AssignmentParticipantStatus;
@@ -52,6 +54,7 @@ export type AttendanceEventCreateRequest = {
     eventDate: string;
     type: AttendanceEventType;
     uploadWindowStart: string;
+    scoreReferenceAt: string;
     durationMinutes: number;
     fullCreditThresholdMinutes?: number | null;
     partialCreditThresholdMinutes?: number | null;
@@ -66,6 +69,7 @@ export type AttendanceEventResponse = {
     eventDate: string;
     uploadWindowStart: string;
     uploadWindowEnd: string;
+    scoreReferenceAt: string;
     durationMinutes: number;
     fullCreditThresholdMinutes: number;
     partialCreditThresholdMinutes: number;
@@ -82,6 +86,7 @@ export type MyAttendanceEventResponse = {
     eventDate: string;
     uploadWindowStart: string;
     uploadWindowEnd: string;
+    scoreReferenceAt: string;
     durationMinutes: number;
     fullCreditThresholdMinutes: number;
     partialCreditThresholdMinutes: number;
@@ -110,7 +115,9 @@ export type AttendanceEventParticipantRecordResponse = {
     recordId: number;
     userId: number;
     name: string;
+    nickname?: string | null;
     profileImage?: string | null;
+    linkedinUrl?: string | null;
     status: AttendanceStatus;
     score: number;
     checkedAt?: string | null;
@@ -125,6 +132,7 @@ export type AttendanceEventDetailResponse = {
     eventDate: string;
     uploadWindowStart: string;
     uploadWindowEnd: string;
+    scoreReferenceAt: string;
     durationMinutes: number;
     fullCreditThresholdMinutes: number;
     partialCreditThresholdMinutes: number;
@@ -133,10 +141,30 @@ export type AttendanceEventDetailResponse = {
     records: AttendanceEventParticipantRecordResponse[];
 };
 
+export type MyAttendanceSelfieResponse = {
+    recordId: number;
+    name: string;
+    selfieUrl?: string | null;
+};
+
+export type MyAttendanceEventDetailResponse = {
+    eventId: number;
+    name: string;
+    roundNumber: number;
+    type: AttendanceEventType;
+    eventDate: string;
+    uploadWindowStart: string;
+    uploadWindowEnd: string;
+    progress: AttendanceEventProgress;
+    records: MyAttendanceSelfieResponse[];
+};
+
 export type AttendanceParticipantRateResponse = {
     userId: number;
     name: string;
+    nickname?: string | null;
     profileImage?: string | null;
+    linkedinUrl?: string | null;
     cumulativeRate: number;
     thresholdMet: boolean;
 };
@@ -144,6 +172,7 @@ export type AttendanceParticipantRateResponse = {
 export type AttendanceWindowOpenRequest = {
     type: AttendanceEventType;
     openAt: string;
+    scoreReferenceAt: string;
 };
 
 export type AttendanceWindowCloseRequest = {
@@ -265,6 +294,15 @@ export type SubmissionFileResponse = {
     sizeBytes?: number | null;
 };
 
+export type SubmissionFilePreviewResponse = {
+    submissionFileId: number;
+    previewUrl: string;
+    originalFileName?: string | null;
+    contentType?: string | null;
+    sizeBytes?: number | null;
+    expiresInSeconds: number;
+};
+
 export type AssignmentSubmissionResponse = {
     submissionId: number;
     assignmentId: number;
@@ -384,6 +422,24 @@ export async function getMyAssignmentSubmissions( // 제출한 과제 조회
     );
 }
 
+export async function getSubmissionFilePreview(
+    submissionFileId: number | string
+): Promise<SubmissionFilePreviewResponse> {
+    return api<SubmissionFilePreviewResponse>(
+        `/submission-files/${submissionFileId}/preview`,
+        { method: "GET" }
+    );
+}
+
+export async function getSubmissionFilePreviewBlob(
+    submissionFileId: number | string
+): Promise<Blob> {
+    return apiBlob(
+        `/submission-files/${submissionFileId}/download`,
+        { method: "GET" }
+    );
+}
+
 export async function getAssignment(
     assignmentId: number | string
 ): Promise<AssignmentResponse> {
@@ -408,6 +464,15 @@ export async function getMyAttendanceEvents(
 ): Promise<MyAttendanceEventResponse[]> {
     return api<MyAttendanceEventResponse[]>(
         `/externalActivities/${externalActivityId}/attendance-events/me`,
+        { method: "GET" }
+    );
+}
+
+export async function getMyAttendanceEventDetail(
+    eventId: number | string
+): Promise<MyAttendanceEventDetailResponse> {
+    return api<MyAttendanceEventDetailResponse>(
+        `/attendance-events/${eventId}/me`,
         { method: "GET" }
     );
 }
@@ -524,6 +589,7 @@ export type CreateExternalActivityRequest = {
     description?: string | null;
     startDate: string;
     endDate: string;
+    attendanceMinimumRate?: number | null;
     progressStatus?: ExternalActivityProgressStatus | null;
     managerUserIds: number[];
 };
@@ -533,6 +599,7 @@ export type UpdateExternalActivityRequest = {
     description?: string | null;
     startDate: string;
     endDate: string;
+    attendanceMinimumRate?: number | null;
     participantUserIds?: number[] | null;
     managerUserIds: number[];
 };
@@ -544,9 +611,11 @@ export type UpdateExternalActivityStatusRequest = {
 export type ExternalActivityParticipant = {
     userId?: number | null;
     name?: string | null;
+    nickname?: string | null;
     schoolName?: string | null;
     email?: string | null;
     profileImage?: string | null;
+    linkedinUrl?: string | null;
 };
 
 export type ExternalActivityManager = {
@@ -568,6 +637,7 @@ export type ExternalActivityResponse = {
     assignments?: AssignmentResponse[] | null;
     startDate: string;
     endDate: string;
+    attendanceMinimumRate?: number | null;
     activityPlanUrl?: string | null;
     activityPlanOriginalFileName?: string | null;
     activityPlanSizeBytes?: number | null;
@@ -912,7 +982,9 @@ function saveBlob(blob: Blob, fileName: string): void {
     anchor.click();
     anchor.remove();
 
-    window.URL.revokeObjectURL(objectUrl);
+    window.setTimeout(() => {
+        window.URL.revokeObjectURL(objectUrl);
+    }, 1000);
 }
 
 export async function downloadExternalActivityPlan( // 활동 계획서 다운
@@ -1049,6 +1121,15 @@ export async function getAttendanceEventDetail(
     );
 }
 
+export async function deleteAttendanceEvent(
+    eventId: number | string
+): Promise<void> {
+    await api<void>(
+        `/attendance-events/${eventId}`,
+        { method: "DELETE" }
+    );
+}
+
 export async function getAttendanceParticipants(
     externalActivityId: number | string,
     query?: { search?: string; sort?: AttendanceParticipantSort }
@@ -1084,20 +1165,25 @@ export async function updateAttendanceRecordStatus(
     );
 }
 
-export async function downloadAttendanceCsv(
+export async function downloadAttendanceExcel(
     externalActivityId: number | string,
     fileName?: string
 ): Promise<void> {
     const blob = await apiBlob(
         `/externalActivities/${externalActivityId}/attendance/export`,
-        { method: "GET" }
+        {
+            method: "GET",
+            headers: {
+                Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+        }
     );
 
     const safeFileName = fileName?.trim()
         ? sanitizeDownloadName(fileName)
         : `external-activity-${externalActivityId}-attendance`;
 
-    saveBlob(blob, `${safeFileName}.csv`);
+    saveBlob(blob, `${safeFileName}.xlsx`);
 }
 
 function toLocalDateTimePayload(date: Date = new Date()): string {
@@ -1113,11 +1199,13 @@ function toLocalDateTimePayload(date: Date = new Date()): string {
 
 export async function startAttendanceEventNow(
     eventId: number | string,
-    type: AttendanceEventType
+    type: AttendanceEventType,
+    scoreReferenceAt: string
 ): Promise<AttendanceEventResponse> {
     return openAttendanceWindow(eventId, {
         type,
         openAt: toLocalDateTimePayload(),
+        scoreReferenceAt,
     });
 }
 

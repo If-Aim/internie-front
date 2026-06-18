@@ -71,3 +71,21 @@
     from { opacity: 0; transform: translateX(48px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+.eca-student-assignment-file-icon { width: 20px; height: 24px; padding: 0; border: 0; border-radius: 2px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-assignment-file-icon:disabled { cursor: default; opacity: .6; }
+
+.eca-student-assignment-preview-backdrop { position: fixed; inset: 0; z-index: 1200; background: rgba(0, 0, 0, .32); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-student-assignment-preview-close { position: fixed; top: 48px; right: 52px; z-index: 1202; width: 40px; height: 40px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-assignment-preview-modal { position: relative; z-index: 1201; max-height: 84vh; overflow: auto; background: transparent; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-student-assignment-preview-modal.is-landscape { width: min(76vw, 1120px); }
+.eca-student-assignment-preview-modal.is-portrait { width: min(54vw, 720px); }
+.eca-student-assignment-preview-image { width: 100%; max-height: 78vh; object-fit: contain; display: block; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .08); }
+.eca-student-assignment-preview-pdf-wrap { width: 100%; min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.eca-student-assignment-preview-pdf-pages { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.eca-student-assignment-preview-pdf-pages canvas { display: block; max-width: 100%; height: auto; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .08); }
+.eca-student-assignment-preview-message { min-height: 180px; margin: 0; color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.eca-student-assignment-preview-fallback { width: min(520px, 90vw); min-height: 240px; padding: 32px; border-radius: 16px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; box-sizing: border-box; }
+.eca-student-assignment-preview-fallback strong { color: #000; font-size: 16px; font-weight: 700; }
+.eca-student-assignment-preview-fallback span { color: #808080; font-size: 13px; font-weight: 500; }
+.eca-student-assignment-preview-fallback button { width: 120px; height: 40px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }

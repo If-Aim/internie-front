@@ -3,9 +3,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import EcaStudentLayout from "./ecaStudentLayout";
 import EcaStudentActivityGuard from "./ecaStudentActivityGuard";
 // import EcaStudentActivityList from "./home/activityList";
-import EcaStudentDashboard from "./dashboard/dashboard";
-import EcaStudentAssignment from "./assignment/assignment";
-import EcaStudentAssignmentSubmit from "./assignment/assignmentSubmit";
+import EcaStudentDashboard from "./dashboard/dashboard/dashboard";
+import EcaStudentAssignment from "./dashboard/assignment/assignment";
+import EcaStudentAssignmentSubmit from "./dashboard/assignment/assignmentSubmit";
 
 export default function EcaStudentApp(): React.ReactElement {
     return (

@@ -1,11 +1,16 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, submitAssignment, updateAssignmentSubmission, } from "../../../../../api/ea";
-import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, SubmissionFileResponse, } from "../../../../../api/ea";
-import type { EcaStudentOutletContext } from "../ecaStudentLayout";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getSubmissionFilePreview, getSubmissionFilePreviewBlob, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
+import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, StudentAssignmentResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
+import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import { getFileIconByExtension } from "./fileIcons";
 import "./assignmentSubmit.css";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 type UploadFileItem = {
     id: string;
@@ -13,21 +18,25 @@ type UploadFileItem = {
     extension: string;
 };
 
-function formatDateTime(date?: string | null, time?: string | null): string {
-    if (!date) return "-";
+type PreviewModalOrientation = "landscape" | "portrait";
 
-    const compactDate = date.slice(2).replaceAll("-", ".");
-    const compactTime = time ? time.slice(0, 5) : "";
+type PreviewModalState = {
+    file: SubmissionFileResponse;
+    preview: SubmissionFilePreviewResponse;
+    blobUrl: string;
+    orientation: PreviewModalOrientation;
+};
 
-    return compactTime ? `${compactDate}. ${compactTime}` : compactDate;
+function formatDateTime(date?: string | null, time?: string | null, fallbackTime: string = "00:00:00"): string {
+    return formatServerKstDateAndTimeCompactForUser(date, time, fallbackTime).slice(2);
 }
 
 function formatSubmittedAt(value?: string | null): string {
     if (!value) return "-";
 
-    const date = new Date(value);
+    const date = parseServerKstDateTime(value);
 
-    if (Number.isNaN(date.getTime())) return value;
+    if (!date) return value;
 
     const year = String(date.getFullYear()).slice(2);
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -40,11 +49,6 @@ function formatSubmittedAt(value?: string | null): string {
 
 function getLatestSubmittedAt(submission: AssignmentSubmissionResponse): string {
     return submission.updatedAt ?? submission.submittedAt;
-}
-
-function getSystemFormLabel(value?: string | null): string {
-    if (value === "TEAM") return "팀";
-    return "개인";
 }
 
 function getResultFormLabel(value?: AssignmentResultForm | null): string {
@@ -69,6 +73,25 @@ function getFileExtension(fileName: string): string {
 
     return extension.toLowerCase();
 }
+
+function isPreviewableSubmittedFile(file?: SubmissionFileResponse | null): boolean {
+    if (!file || file.submitType === "LINK") return false;
+
+    const fileName = file.originalFileName ?? "";
+    const extension = normalizeExtension(getFileExtension(fileName));
+    const contentType = (file.contentType ?? "").toLowerCase();
+
+    return contentType === "application/pdf" || contentType.startsWith("image/") || ["pdf", "jpg", "png", "gif", "webp"].includes(extension);
+}
+
+function isPdfPreview(preview?: SubmissionFilePreviewResponse | null): boolean {
+    return (preview?.contentType ?? "").toLowerCase() === "application/pdf";
+}
+
+function isImagePreview(preview?: SubmissionFilePreviewResponse | null): boolean {
+    return (preview?.contentType ?? "").toLowerCase().startsWith("image/");
+}
+
 function normalizeExtension(extension: string): string {
     const lower = extension.toLowerCase();
 
@@ -130,6 +153,110 @@ function getAssignmentFileWarning(resultForms?: AssignmentResultForm[] | null, e
     return `선택한 과제 산출물에 맞는 파일 형식을 권장합니다: ${warningLabels.join(", ")}`;
 }
 
+function getStudentAssignmentFormLabel(
+    assignment: AssignmentResponse | null,
+    studentAssignment: StudentAssignmentResponse | null
+): string {
+    const isTeamAssignment = studentAssignment?.isTeamAssignment ?? assignment?.systemForm === "TEAM";
+
+    if (!isTeamAssignment) return "개인";
+
+    const teamName = studentAssignment?.myTeam?.name?.trim();
+
+    return teamName ? `팀 · ${teamName}` : "팀";
+}
+
+type PdfPreviewProps = {
+    fileUrl: string;
+    onOrientationChange: (orientation: PreviewModalOrientation) => void;
+};
+
+function PdfPreview({ fileUrl, onOrientationChange }: PdfPreviewProps): React.ReactElement {
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState("");
+
+    React.useEffect(() => {
+        let cancelled = false;
+
+        if (containerRef.current === null) return;
+
+        const targetContainer = containerRef.current;
+
+        targetContainer.innerHTML = "";
+        setLoading(true);
+        setError("");
+
+        async function renderPdf(): Promise<void> {
+            try {
+                const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
+                const pdf = await loadingTask.promise;
+                const firstPage = await pdf.getPage(1);
+                const firstViewport = firstPage.getViewport({ scale: 1 });
+                const orientation: PreviewModalOrientation = firstViewport.width >= firstViewport.height ? "landscape" : "portrait";
+                const maxPageWidth = Math.min(window.innerWidth * (orientation === "landscape" ? 0.72 : 0.52), orientation === "landscape" ? 1120 : 720);
+                const maxPageHeight = Math.min(window.innerHeight * 0.78, orientation === "landscape" ? 760 : 900);
+
+                if (cancelled) return;
+
+                onOrientationChange(orientation);
+
+                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+                    const page = pageNumber === 1 ? firstPage : await pdf.getPage(pageNumber);
+                    const baseViewport = page.getViewport({ scale: 1 });
+                    const scale = Math.min(maxPageWidth / baseViewport.width, maxPageHeight / baseViewport.height);
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    const outputScale = window.devicePixelRatio || 1;
+
+                    if (!context || cancelled) return;
+
+                    canvas.width = Math.floor(viewport.width * outputScale);
+                    canvas.height = Math.floor(viewport.height * outputScale);
+                    canvas.style.width = `${viewport.width}px`;
+                    canvas.style.height = `${viewport.height}px`;
+
+                    context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+                    targetContainer.appendChild(canvas);
+
+                    await page.render({
+                        canvas,
+                        canvasContext: context,
+                        viewport,
+                    }).promise;
+                }
+
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            } catch (e) {
+                console.error(e);
+
+                if (!cancelled) {
+                    setLoading(false);
+                    setError("PDF 미리보기를 불러오지 못했습니다.");
+                }
+            }
+        }
+
+        renderPdf();
+
+        return () => {
+            cancelled = true;
+            targetContainer.innerHTML = "";
+        };
+    }, [fileUrl, onOrientationChange]);
+
+    return (
+        <div className="eca-student-assignment-preview-pdf-wrap">
+            {loading ? <p className="eca-student-assignment-preview-message">PDF를 불러오는 중입니다.</p> : null}
+            {error ? <p className="eca-student-assignment-preview-message">{error}</p> : null}
+            <div ref={containerRef} className="eca-student-assignment-preview-pdf-pages" />
+        </div>
+    );
+}
+
 export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId, assignmentId } = useParams<{
@@ -158,6 +285,12 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
     const [submitResult, setSubmitResult] = React.useState<"success" | "fail">("success");
     const [submitActionType, setSubmitActionType] = React.useState<"create" | "update">("create");
 
+    const [previewModal, setPreviewModal] = React.useState<PreviewModalState | null>(null);
+    const [previewModalLoading, setPreviewModalLoading] = React.useState(false);
+    const [/*previewModalError*/, setPreviewModalError] = React.useState("");
+
+    const [studentAssignment, setStudentAssignment] = React.useState<StudentAssignmentResponse | null>(null);
+
     async function fetchMySubmission(targetAssignmentId: string): Promise<void> {
         const data = await getMyAssignmentSubmissions(targetAssignmentId);
         const latestSubmission = data[0] ?? null;
@@ -184,14 +317,21 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
             setError("");
 
             try {
-                const data = await getAssignment(assignmentId);
+                const [assignmentData, assignmentListData] = await Promise.all([
+                    getAssignment(assignmentId),
+                    externalActivityId ? getMyExternalActivityAssignments(externalActivityId) : Promise.resolve([]),
+                ]);
 
-                setAssignment(data);
+                const matchedStudentAssignment = assignmentListData.find((item) => String(item.assignmentId) === String(assignmentId)) ?? null;
+
+                setAssignment(assignmentData);
+                setStudentAssignment(matchedStudentAssignment);
                 await fetchMySubmission(assignmentId);
             } catch (e) {
                 console.error(e);
                 setAssignment(null);
                 setMySubmission(null);
+                setStudentAssignment(null);
                 setExistingFiles([]);
                 setExistingLinks([]);
                 setLinkUrl("");
@@ -202,7 +342,15 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         }
 
         fetchAssignment();
-    }, [assignmentId]);
+    }, [assignmentId, externalActivityId]);
+
+    React.useEffect(() => {
+        return () => {
+            if (previewModal?.blobUrl) {
+                window.URL.revokeObjectURL(previewModal.blobUrl);
+            }
+        };
+    }, [previewModal?.blobUrl]);
 
     function moveBack(): void {
         navigate(-1);
@@ -278,6 +426,46 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
             console.error(e);
             window.alert("파일 다운로드에 실패했습니다.");
         }
+    }
+
+    const handlePreviewOrientationChange = React.useCallback((orientation: PreviewModalOrientation): void => {
+        setPreviewModal((prev) => prev ? { ...prev, orientation } : prev);
+    }, []);
+
+    async function openPreviewModal(file: SubmissionFileResponse): Promise<void> {
+        if (!isPreviewableSubmittedFile(file)) {
+            window.alert("미리보기를 지원하지 않는 파일입니다. 다운로드해서 확인해주세요.");
+            return;
+        }
+
+        setPreviewModalLoading(true);
+        setPreviewModalError("");
+
+        try {
+            const preview = await getSubmissionFilePreview(file.submissionFileId);
+            const blob = await getSubmissionFilePreviewBlob(file.submissionFileId);
+            const blobUrl = window.URL.createObjectURL(blob);
+            const orientation: PreviewModalOrientation = isImagePreview(preview) ? "landscape" : "portrait";
+
+            setPreviewModal({
+                file,
+                preview,
+                blobUrl,
+                orientation,
+            });
+        } catch (e) {
+            console.error(e);
+            setPreviewModal(null);
+            setPreviewModalError("미리보기를 불러오지 못했습니다.");
+            window.alert("미리보기를 불러오지 못했습니다.");
+        } finally {
+            setPreviewModalLoading(false);
+        }
+    }
+
+    function closePreviewModal(): void {
+        setPreviewModal(null);
+        setPreviewModalError("");
     }
 
     async function handleSubmit(): Promise<void> {
@@ -403,13 +591,13 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
 
                                     <label>
                                         <span>&nbsp;</span>
-                                        <input value={formatDateTime(assignment?.endDate, assignment?.endTime)} readOnly />
+                                        <input value={formatDateTime(assignment?.endDate, assignment?.endTime, "23:59:59")} readOnly />
                                     </label>
                                 </div>
 
                                 <label>
                                     <span>과제 방식</span>
-                                    <input value={getSystemFormLabel(assignment?.systemForm)} readOnly />
+                                    <input value={getStudentAssignmentFormLabel(assignment, studentAssignment)} readOnly />
                                 </label>
 
                                 <label>
@@ -492,9 +680,16 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                                         return (
                                             <div className="eca-student-assignment-file-item" key={file.submissionFileId}>
                                                 <div className="eca-student-assignment-file-main">
-                                                    <span className="eca-student-assignment-file-icon">
+                                                    <button
+                                                        type="button"
+                                                        className="eca-student-assignment-file-icon"
+                                                        onClick={() => openPreviewModal(file)}
+                                                        disabled={previewModalLoading}
+                                                        aria-label={`${fileName} 미리보기`}
+                                                        title="미리보기"
+                                                    >
                                                         {getFileIconByExtension(extension)}
-                                                    </span>
+                                                    </button>
 
                                                     <div className="eca-student-assignment-file-name-wrap">
                                                         <strong>{fileName}</strong>
@@ -563,6 +758,37 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                     </>
                 )}
             </div>
+
+            {previewModal ? createPortal(
+                <div className="eca-student-assignment-preview-backdrop" onClick={closePreviewModal}>
+                    <button type="button" className="eca-student-assignment-preview-close" onClick={closePreviewModal} aria-label="미리보기 닫기">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M8 8L24 24M24 8L8 24" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"/>
+                        </svg>
+                    </button>
+
+                    <div
+                        className={"eca-student-assignment-preview-modal " + (previewModal.orientation === "landscape" ? "is-landscape" : "is-portrait")}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {isPdfPreview(previewModal.preview) ? (
+                            <PdfPreview fileUrl={previewModal.blobUrl} onOrientationChange={handlePreviewOrientationChange} />
+                        ) : isImagePreview(previewModal.preview) ? (
+                            <img className="eca-student-assignment-preview-image" src={previewModal.blobUrl} alt={previewModal.preview.originalFileName ?? "제출 이미지"} />
+                        ) : (
+                            <div className="eca-student-assignment-preview-fallback">
+                                <strong>{previewModal.preview.originalFileName ?? "제출 파일"}</strong>
+                                <span>미리보기를 지원하지 않는 파일입니다.</span>
+                                <button type="button" onClick={() => handleDownloadExistingFile(previewModal.file)}>
+                                    다운로드
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            ) : null}
+
             {submitResultModalOpen ? createPortal(
                 <div className="eca-student-assignment-submit-modal-backdrop">
                     <div className="eca-student-assignment-submit-modal">

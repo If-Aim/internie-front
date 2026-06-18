@@ -109,10 +109,13 @@ function flattenByStatus(response: ExternalActivitiesByStatusResponse, selectedS
 
 function getDisplayAdminName(me: EcaClientAdminOutletContext["me"]): string {
     if (!me) return "";
-    const nick = (me.nickname ?? "").trim();
-    const name = (me.name ?? "").trim();
 
-    return nick || name || "";
+    const name = (me.name ?? "").trim();
+    const nick = (me.nickname ?? "").trim();
+
+    if (name && nick && name !== nick) return `${name} (${nick})`;
+
+    return name || nick || "";
 }
 
 function ManagerProfile({ manager }: { manager: ActivityManager }): React.ReactElement {

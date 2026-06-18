@@ -1,9 +1,10 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { ApiError } from "../../../../../api/client";
-import { getMyExternalActivityAssignments } from "../../../../../api/ea";
-import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentAssignmentTeam } from "../../../../../api/ea";
-import type { EcaStudentOutletContext } from "../ecaStudentLayout";
+import { ApiError } from "../../../../../../api/client";
+import { getMyExternalActivityAssignments } from "../../../../../../api/ea";
+import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentAssignmentTeam } from "../../../../../../api/ea";
+import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import "./assignment.css";
 
 type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
@@ -39,7 +40,11 @@ function getAssignmentStatus(status: AssignmentParticipantStatus, deadlineAt?: s
     if (status === "NOT_SUBMITTED") {
         if (!deadlineAt) return "before";
 
-        return Date.now() > new Date(deadlineAt).getTime() ? "missing" : "before";
+        const deadline = parseServerKstDateTime(deadlineAt);
+
+        if (!deadline) return "before";
+
+        return Date.now() > deadline.getTime() ? "missing" : "before";
     }
 
     return "before";
@@ -66,19 +71,9 @@ function getAssignmentFormLabel(assignment: StudentAssignmentViewModel): string 
     return assignment.myTeam?.name ? `팀 · ${assignment.myTeam.name}` : "팀";
 }
 
-function formatDate(value: string): string {
-    return value.replaceAll("-", ".");
-}
-
-function formatTime(value?: string | null): string {
-    if (!value) return "";
-
-    return value.slice(0, 5);
-}
-
 function formatPeriod(assignment: StudentAssignmentViewModel): string {
-    const start = `${formatDate(assignment.startDate)}${assignment.startTime ? ` ${formatTime(assignment.startTime)}` : ""}`;
-    const end = `${formatDate(assignment.endDate)}${assignment.endTime ? ` ${formatTime(assignment.endTime)}` : ""}`;
+    const start = formatServerKstDateAndTimeCompactForUser(assignment.startDate, assignment.startTime, "00:00:00");
+    const end = formatServerKstDateAndTimeCompactForUser(assignment.endDate, assignment.endTime, "23:59:59");
 
     return `${start} - ${end}`;
 }

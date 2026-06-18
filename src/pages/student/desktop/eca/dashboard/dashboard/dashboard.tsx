@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { getMyExternalActivityAssignments, getMyExternalActivityTeams, getMyParticipatingExternalActivity } from "../../../../../api/ea";
-import type { StudentAssignmentResponse, StudentExternalActivityDetailResponse, TeamResponse } from "../../../../../api/ea";
-import type { EcaStudentOutletContext } from "../ecaStudentLayout";
+import { getMyExternalActivityAssignments, getMyExternalActivityTeams, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
+import type { StudentAssignmentResponse, StudentExternalActivityDetailResponse, TeamResponse } from "../../../../../../api/ea";
+import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import "./dashboard.css";
 
 const ASSIGNMENT_PAGE_SIZE = 3;
@@ -30,7 +31,10 @@ function getDday(deadlineAt?: string | null): string {
     if (!deadlineAt) return "-";
 
     const today = new Date();
-    const deadline = new Date(deadlineAt);
+    const deadline = parseServerKstDateTime(deadlineAt);
+
+    if (!deadline) return "-";
+
     const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const deadlineDate = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
     const diff = Math.ceil((deadlineDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -105,17 +109,17 @@ function toStudentAssignmentSummary(assignment: StudentAssignmentResponse): Stud
 function getDeadlineTime(value?: string | null): number {
     if (!value) return Number.MAX_SAFE_INTEGER;
 
-    const time = new Date(value).getTime();
+    const date = parseServerKstDateTime(value);
 
-    return Number.isNaN(time) ? Number.MAX_SAFE_INTEGER : time;
+    return date ? date.getTime() : Number.MAX_SAFE_INTEGER;
 }
 
 function getSubmittedTime(value?: string | null): number {
     if (!value) return 0;
 
-    const time = new Date(value).getTime();
+    const date = parseServerKstDateTime(value);
 
-    return Number.isNaN(time) ? 0 : time;
+    return date ? date.getTime() : 0;
 }
 
 function sortStudentAssignments(assignments: StudentAssignmentSummary[]): StudentAssignmentSummary[] {

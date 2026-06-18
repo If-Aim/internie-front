@@ -1,10 +1,10 @@
-import { useTranslation } from "react-i18next";
-
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { ApiError } from "../../../../../api/client";
-import { getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../api/ea";
-import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentExternalActivityDetailResponse } from "../../../../../api/ea";
+import { ApiError } from "../../../../../../api/client";
+import { getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
+import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentAssignmentTeam, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
+import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAssignment.css";
 
 type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
@@ -12,6 +12,8 @@ type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
 type StudentAssignmentViewModel = {
     id: number;
     name: string;
+    isTeamAssignment: boolean;
+    myTeam?: StudentAssignmentTeam | null;
     startDate: string;
     endDate: string;
     startTime?: string | null;
@@ -28,7 +30,11 @@ function getAssignmentStatus(status: AssignmentParticipantStatus, deadlineAt?: s
     if (status === "NOT_SUBMITTED") {
         if (!deadlineAt) return "before";
 
-        return Date.now() > new Date(deadlineAt).getTime() ? "missing" : "before";
+        const deadline = parseServerKstDateTime(deadlineAt);
+
+        if (!deadline) return "before";
+
+        return Date.now() > deadline.getTime() ? "missing" : "before";
     }
 
     return "before";
@@ -38,6 +44,8 @@ function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): St
     return {
         id: assignment.assignmentId,
         name: assignment.name,
+        isTeamAssignment: assignment.isTeamAssignment,
+        myTeam: assignment.myTeam ?? null,
         startDate: assignment.startDate,
         endDate: assignment.endDate,
         startTime: assignment.startTime,
@@ -47,24 +55,19 @@ function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): St
     };
 }
 
-function formatDate(value?: string | null): string {
-    if (!value) return "-";
+function getAssignmentFormLabel(assignment: StudentAssignmentViewModel): string {
+    if (!assignment.isTeamAssignment) return "개인";
 
-    return value.replaceAll("-", ".");
-}
+    const teamName = assignment.myTeam?.name?.trim();
 
-function formatTime(value?: string | null): string {
-    if (!value) return "";
-
-    return value.slice(0, 5);
+    return teamName ? `팀 · ${teamName}` : "팀";
 }
 
 function formatMobilePeriod(assignment: StudentAssignmentViewModel): string {
-    const start = `${formatDate(assignment.startDate)}${assignment.startTime ? ` ${formatTime(assignment.startTime)}` : ""}`;
-    const endDate = formatDate(assignment.endDate).slice(5);
-    const end = `${endDate}${assignment.endTime ? ` ${formatTime(assignment.endTime)}` : ""}`;
+    const start = formatServerKstDateAndTimeCompactForUser(assignment.startDate, assignment.startTime, "00:00:00");
+    const end = formatServerKstDateAndTimeCompactForUser(assignment.endDate, assignment.endTime, "23:59:59");
 
-    return `${start} ~ ${end}`;
+    return `${start} ~ ${end.slice(5)}`;
 }
 
 function getAssignmentStatusLabel(status: AssignmentStatus): string {
@@ -75,7 +78,7 @@ function getAssignmentStatusLabel(status: AssignmentStatus): string {
 }
 
 function getAssignmentStatusClass(status: AssignmentStatus): string {
-    return `eca-mobile-assignment-status is-${status}`;
+    return `eca-mobile-student-assignment-status is-${status}`;
 }
 
 type HeaderProps = {
@@ -94,7 +97,7 @@ function Header({ activityName, onMenuClick }: HeaderProps): React.ReactElement 
 
             <div className="app-title">{activityName}</div>
 
-            <div />
+            <div style={{display: "block", width: 24, height: 24}} aria-hidden="true" />
         </div>
     );
 }
@@ -170,31 +173,32 @@ export default function EcaMobileAssignment(): React.ReactElement {
     }
 
     return (
-        <main className="eca-mobile-assignment-page">
+        <main className="eca-mobile-student-assignment-page">
             <Header activityName={activity?.name ?? ""} onMenuClick={openMenu} />
-            <div className="eca-mobile-assignment-main">
-                <section className="eca-mobile-assignment-title-row">
+            <div className="eca-mobile-student-assignment-main">
+                <section className="eca-mobile-student-assignment-title-row">
                     <h2>과제 현황</h2>
 
-                    <button type="button" className="eca-mobile-assignment-filter-button" onClick={handleFilterClick} aria-label="필터">
+                    <button type="button" className="eca-mobile-student-assignment-filter-button" onClick={handleFilterClick} aria-label="필터">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M6.46154 12H17.5385M4 7H20M10.1538 17H13.8462" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
                 </section>
 
-                <section className="eca-mobile-assignment-list">
+                <section className="eca-mobile-student-assignment-list">
                     {loading ? (
-                        <p className="eca-mobile-assignment-empty">과제 목록을 불러오는 중입니다.</p>
+                        <p className="eca-mobile-student-assignment-empty">과제 목록을 불러오는 중입니다.</p>
                     ) : error ? (
-                        <p className="eca-mobile-assignment-empty">{error}</p>
+                        <p className="eca-mobile-student-assignment-empty">{error}</p>
                     ) : assignments.length === 0 ? (
-                        <p className="eca-mobile-assignment-empty">배정된 과제가 없습니다.</p>
+                        <p className="eca-mobile-student-assignment-empty">배정된 과제가 없습니다.</p>
                     ) : (
                         assignments.map((assignment) => (
-                            <button type="button" className="eca-mobile-assignment-card" key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
-                                <span className="eca-mobile-assignment-info">
+                            <button type="button" className="eca-mobile-student-assignment-card" key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
+                                <span className="eca-mobile-student-assignment-info">
                                     <strong>{assignment.name}</strong>
+                                    <span className="eca-mobile-student-assignment-meta">{getAssignmentFormLabel(assignment)}</span>
                                     <em>{formatMobilePeriod(assignment)}</em>
                                 </span>
 

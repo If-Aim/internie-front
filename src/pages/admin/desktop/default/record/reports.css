@@ -136,7 +136,7 @@
 .admin-report-qdetail-head { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; margin-bottom: 18px; }
 .admin-report-back { width: 29px; height: 29px; border: none; background: transparent; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .admin-report-back img { width: 5px; height: 10px; }
-.admin-report-qdetail-title { text-align: left; font-size: 20px; font-weight: 800; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-report-qdetail-title { text-align: left; font-size: 20px; font-weight: 700; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-report-qwrap { display: flex; flex-direction: row; gap: 8px; flex: 1; min-height: 0; overflow: hidden; align-items: center; }
 .admin-report-qswap { flex: 1 1 auto; min-width: 0; width: 100%; display: flex; flex-direction: column; gap: 12px; height: 100%; padding: 0; }
 .admin-report-q { width: 100%; display: flex; align-items: center; border: 1px solid #E6E6E6; background: #F0F6FF; border-radius: 10px; padding: 13px 25px; font-weight: 400; font-size: 16px; line-height: 20px; color: #000; height: 66px; }

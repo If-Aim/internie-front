@@ -6,12 +6,79 @@ function buildUrl(path: string) {
 		? path
 		: `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
+
+function getStoredAccessToken(): string | null {
+    const token = localStorage.getItem("accessToken")?.trim();
+
+    if (!token || token === "null" || token === "undefined") {
+        return null;
+    }
+
+    return token;
+}
+
+function toAuthorizationHeader(token: string): string {
+    return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+}
+
+function getBareAccessToken(token: string): string {
+    return token.startsWith("Bearer ") ? token.slice(7) : token;
+}
+
 function getAuthHeader(): Record<string, string> {
-	const token = localStorage.getItem("accessToken");
-	if (!token) return {};
-	return {
-		Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
-	};
+    const token = getStoredAccessToken();
+
+    if (!token) {
+        return {};
+    }
+
+    return {
+        Authorization: toAuthorizationHeader(token),
+    };
+}
+
+function getJwtPayload(token: string): Record<string, unknown> | null {
+    const rawToken = getBareAccessToken(token);
+    const parts = rawToken.split(".");
+
+    if (parts.length < 2) {
+        return null;
+    }
+
+    try {
+        const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+        const binary = atob(padded);
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        const json = new TextDecoder().decode(bytes);
+
+        return JSON.parse(json) as Record<string, unknown>;
+    } catch {
+        return null;
+    }
+}
+
+function isAccessTokenExpiringSoon(token: string, bufferSeconds = 30): boolean {
+    const payload = getJwtPayload(token);
+    const exp = payload?.exp;
+
+    if (typeof exp !== "number") {
+        return false;
+    }
+
+    return exp * 1000 <= Date.now() + bufferSeconds * 1000;
+}
+
+async function ensureAccessTokenBeforeRequest(skipAuthRefresh: boolean): Promise<void> {
+    if (skipAuthRefresh) {
+        return;
+    }
+
+    const token = getStoredAccessToken();
+
+    if (!token || isAccessTokenExpiringSoon(token)) {
+        await refreshAccessToken();
+    }
 }
 
 let refreshPromise: Promise<string> | null = null;
@@ -37,9 +104,11 @@ export async function refreshAccessToken(): Promise<string> {
             throw new ApiError(200, "No Authorization header in /auth/refresh response", bodyText);
         }
 
-        localStorage.setItem("accessToken", newAuth);
+        const normalizedAuth = toAuthorizationHeader(newAuth);
 
-        return newAuth;
+        localStorage.setItem("accessToken", normalizedAuth);
+
+        return normalizedAuth;
     })();
 
     try {
@@ -84,6 +153,13 @@ async function requestWithAutoRefresh(
             credentials: "include",
         });
     };
+
+    try {
+        await ensureAccessTokenBeforeRequest(skipAuthRefresh);
+    } catch (e) {
+        localStorage.removeItem("accessToken");
+        throw e instanceof ApiError ? e : new ApiError(401, "Refresh failed");
+    }
 
     let res = await doFetch();
 
@@ -712,23 +788,21 @@ export type UserBase = {
     emailVerified: boolean | null;
     name?: string | null;
     kakaoName?: string | null;
-
     nickname: string | null;
+
+    linkedinUrl?: string | null;
     profileImage: string | null;
     verificationImage: string | null;
     roleSet: string[];
     status: string;
     rejectionReason?: string | null;
     school: UserSchool | null;
-
+    
     studentNumber?: string | null;
-
     interestJob?: string | null;
     interestCompany?: string | null;
-
     companyName?: string | null;
     departmentName?: string | null;
-
     jumpOrganization?: JumpOrganization | null;
 };
 
@@ -883,14 +957,16 @@ export async function resetUserRole(): Promise<UserMe> {
 
 // 프로필 수정
 export type UpdateMyProfileInput = {
-	name?: string | null;
-	nickname?: string | null;
-	imageFile?: File | null;
+    name?: string | null;
+    nickname?: string | null;
+    linkedinUrl?: string | null;
+    imageFile?: File | null;
 };
 
 export type UpdateMyProfileJsonInput = {
     name?: string | null;
     nickname?: string | null;
+    linkedinUrl?: string | null;
     interestJob?: string | null;
     interestCompany?: string | null;
 };
@@ -899,10 +975,11 @@ export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<
     return api<UserMe>("/users/me", {
         method: "PATCH",
         body: JSON.stringify({
-            name: (input.name ?? null),
-            nickname: (input.nickname ?? null),
-            interestJob: (input.interestJob ?? null),
-            interestCompany: (input.interestCompany ?? null),
+            name: input.name ?? null,
+            nickname: input.nickname ?? null,
+            linkedinUrl: input.linkedinUrl ?? null,
+            interestJob: input.interestJob ?? null,
+            interestCompany: input.interestCompany ?? null,
         }),
     });
 }

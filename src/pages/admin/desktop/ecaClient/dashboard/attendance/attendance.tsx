@@ -1,7 +1,10 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createAttendanceEvent, downloadAttendanceCsv, getAttendanceEvents, getAttendanceParticipants, getAttendanceSummary } from "../../../../../../api/ea";
+import { createAttendanceEvent, downloadAttendanceExcel, getAttendanceEvents, getAttendanceParticipants, getAttendanceSummary } from "../../../../../../api/ea";
 import type { AttendanceEventResponse, AttendanceEventType, AttendanceEventSort, AttendanceParticipantRateResponse, AttendanceParticipantSort, AttendanceSummaryResponse } from "../../../../../../api/ea";
+import { addMinutesToServerKstDateTime, localDateTimeInputToServerKst, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import AdminStudentProfileModal from "../AdminStudentProfileModal";
+import type { AdminStudentProfile } from "../AdminStudentProfileModal";
 import "./attendance.css";
 import "../../ecaCalendar.css"
 
@@ -9,6 +12,26 @@ type SortOption<T extends string> = {
     label: string;
     value: T;
 };
+
+type AttendanceStudentProfileSource = AttendanceParticipantRateResponse & {
+    nickname?: string | null;
+    userNickname?: string | null;
+    linkedinUrl?: string | null;
+    userLinkedinUrl?: string | null;
+};
+
+function toAdminStudentProfile(item: AttendanceParticipantRateResponse): AdminStudentProfile {
+    const source = item as AttendanceStudentProfileSource;
+    const nickname = source.nickname?.trim() || source.userNickname?.trim() || null;
+    const linkedinUrl = source.linkedinUrl?.trim() || source.userLinkedinUrl?.trim() || null;
+
+    return {
+        name: item.name?.trim() || "이름 없음",
+        nickname,
+        linkedinUrl,
+        profileImage: item.profileImage ?? null,
+    };
+}
 
 const eventSortOptions: SortOption<AttendanceEventSort>[] = [
     { label: "Newest", value: "latest" },
@@ -18,9 +41,9 @@ const eventSortOptions: SortOption<AttendanceEventSort>[] = [
 ];
 
 const participantSortOptions: SortOption<AttendanceParticipantSort>[] = [
+    { label: "Alphabetical", value: "nameAsc" },
     { label: "Highest", value: "rateDesc" },
     { label: "Lowest", value: "rateAsc" },
-    { label: "Alphabetical", value: "nameAsc" },
 ];
 
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -224,6 +247,19 @@ function getEventTypeLabel(type: AttendanceEventResponse["type"]): string {
     return type === "CLASS_START" ? "Start" : "End";
 }
 
+function getEventReferenceTimeLabel(value?: string | null): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) {
+        return "--:--";
+    }
+
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return `${hour}:${minute}`;
+}
+
 function getEventDateLabel(value: string): string {
     const date = new Date(`${value}T00:00:00`);
 
@@ -252,10 +288,6 @@ function getTodayDateInput(): string {
     const date = String(now.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${date}`;
-}
-
-function toLocalDateTimeString(date: string, time: string): string {
-    return `${date}T${time}:00`;
 }
 
 function getAutoAttendanceName(date: string): string {
@@ -290,28 +322,75 @@ function getAutoRoundNumber(events: AttendanceEventResponse[], eventDate: string
     return maxRoundNumber + 1;
 }
 
-function getEventStatusLabel(item: AttendanceEventResponse): string {
-    if (item.progress === "SCHEDULED") {
-        return "Scheduled";
+function getFullCreditBoundaryTime(item: AttendanceEventResponse): number | null {
+    const reference = parseServerKstDateTime(item.scoreReferenceAt);
+
+    if (!reference) {
+        return null;
     }
 
-    if (item.progress === "OPEN") {
+    const fullCreditMinutes = item.fullCreditThresholdMinutes ?? item.durationMinutes;
+
+    return reference.getTime() + fullCreditMinutes * 60 * 1000;
+}
+
+function getComputedEventProgress(item: AttendanceEventResponse, now: Date): AttendanceEventResponse["progress"] {
+    const start = parseServerKstDateTime(item.uploadWindowStart);
+    const end = parseServerKstDateTime(item.uploadWindowEnd);
+
+    if (!start || !end) {
+        return item.progress;
+    }
+
+    if (now.getTime() < start.getTime()) {
+        return "SCHEDULED";
+    }
+
+    if (now.getTime() > end.getTime()) {
+        return "CLOSED";
+    }
+
+    return "OPEN";
+}
+
+function isAttendanceTimerRunning(item: AttendanceEventResponse, now: Date): boolean {
+    const progress = getComputedEventProgress(item, now);
+    const reference = parseServerKstDateTime(item.scoreReferenceAt);
+    const boundaryTime = getFullCreditBoundaryTime(item);
+
+    if (progress !== "OPEN" || !reference || boundaryTime === null) {
+        return false;
+    }
+
+    return now.getTime() >= reference.getTime() && now.getTime() < boundaryTime;
+}
+
+function getEventStatusLabel(item: AttendanceEventResponse, now: Date): string {
+    const progress = getComputedEventProgress(item, now);
+
+    if (isAttendanceTimerRunning(item, now)) {
         return "In Progress";
+    }
+
+    if (progress === "SCHEDULED") {
+        return "Scheduled";
     }
 
     return `${item.attendanceRatePercent}%`;
 }
 
-function getEventStatusClassName(item: AttendanceEventResponse): string {
-    if (item.progress === "SCHEDULED") {
-        return "attendance-event-status attendance-event-status--scheduled";
+function getEventStatusClassName(item: AttendanceEventResponse, now: Date): string {
+    const progress = getComputedEventProgress(item, now);
+
+    if (isAttendanceTimerRunning(item, now)) {
+        return "eca-admin-attendance-event-status eca-admin-attendance-event-status--progress";
     }
 
-    if (item.progress === "OPEN") {
-        return "attendance-event-status attendance-event-status--progress";
+    if (progress === "SCHEDULED") {
+        return "eca-admin-attendance-event-status eca-admin-attendance-event-status--scheduled";
     }
 
-    return "attendance-event-status attendance-event-status--rate";
+    return "eca-admin-attendance-event-status eca-admin-attendance-event-status--rate";
 }
 
 function toTwentyFourHourTime(hour: string, minute: string, period: "AM" | "PM"): string {
@@ -322,12 +401,8 @@ function toTwentyFourHourTime(hour: string, minute: string, period: "AM" | "PM")
         return "";
     }
 
-    if (parsedHour < 0 || parsedHour > 23 || parsedMinute < 0 || parsedMinute > 59) {
+    if (parsedHour < 1 || parsedHour > 12 || parsedMinute < 0 || parsedMinute > 59) {
         return "";
-    }
-
-    if (parsedHour === 0 || parsedHour > 12) {
-        return `${String(parsedHour).padStart(2, "0")}:${String(parsedMinute).padStart(2, "0")}`;
     }
 
     let hour24 = parsedHour;
@@ -359,12 +434,12 @@ function SortMenu<T extends string>({
     }
 
     return (
-        <div className="attendance-sort-menu">
+        <div className="eca-admin-attendance-sort-menu">
             {options.map((option) => (
                 <button
                     key={option.value}
                     type="button"
-                    className={option.value === value ? "attendance-sort-menu-item attendance-sort-menu-item--active" : "attendance-sort-menu-item"}
+                    className={option.value === value ? "eca-admin-attendance-sort-menu-item eca-admin-attendance-sort-menu-item--active" : "eca-admin-attendance-sort-menu-item"}
                     onClick={() => onSelect(option.value)}
                 >
                     {option.label}
@@ -391,8 +466,10 @@ export default function EcaAttendancePage(): React.ReactElement {
     const [summary, setSummary] = React.useState<AttendanceSummaryResponse | null>(null);
     const [events, setEvents] = React.useState<AttendanceEventResponse[]>([]);
     const [participants, setParticipants] = React.useState<AttendanceParticipantRateResponse[]>([]);
+    const [selectedStudentProfile, setSelectedStudentProfile] = React.useState<AdminStudentProfile | null>(null);
+
     const [eventSort, setEventSort] = React.useState<AttendanceEventSort>("latest");
-    const [participantSort, setParticipantSort] = React.useState<AttendanceParticipantSort>("rateDesc");
+    const [participantSort, setParticipantSort] = React.useState<AttendanceParticipantSort>("nameAsc");
     const [participantSearch, setParticipantSearch] = React.useState("");
     const [participantSearchDraft, setParticipantSearchDraft] = React.useState("");
     const [eventSortOpen, setEventSortOpen] = React.useState(false);
@@ -400,15 +477,17 @@ export default function EcaAttendancePage(): React.ReactElement {
     const [participantSearchOpen, setParticipantSearchOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [downloading, setDownloading] = React.useState(false);
+    const [now, setNow] = React.useState(new Date());
     const [errorMessage, setErrorMessage] = React.useState("");
-
+        
     const eventListRef = React.useRef<HTMLDivElement | null>(null);
     const participantListRef = React.useRef<HTMLDivElement | null>(null);
+    const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
     const [eventListScrollable, setEventListScrollable] = React.useState(false);
     const [participantListScrollable, setParticipantListScrollable] = React.useState(false);
 
     const selectedEventSortLabel = eventSortOptions.find((option) => option.value === eventSort)?.label ?? "Newest";
-    const selectedParticipantSortLabel = participantSortOptions.find((option) => option.value === participantSort)?.label ?? "Highest";
+    const selectedParticipantSortLabel = participantSortOptions.find((option) => option.value === participantSort)?.label ?? "Alphabetical";
 
     const loadAttendanceData = React.useCallback(async (): Promise<void> => {
         if (!externalActivityId) {
@@ -445,6 +524,36 @@ export default function EcaAttendancePage(): React.ReactElement {
     React.useEffect(() => {
         void loadAttendanceData();
     }, [loadAttendanceData]);
+
+    React.useEffect(() => {
+        const timerId = window.setInterval(() => {
+            setNow(new Date());
+        }, 1000);
+
+        return () => {
+            window.clearInterval(timerId);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (!participantSearchOpen) {
+            return;
+        }
+
+        function handleMouseDown(event: MouseEvent): void {
+            if (participantSearchWrapRef.current?.contains(event.target as Node)) {
+                return;
+            }
+
+            setParticipantSearchOpen(false);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown, true);
+        };
+    }, [participantSearchOpen]);
 
     React.useEffect(() => {
         function syncScrollable(): void {
@@ -511,21 +620,48 @@ export default function EcaAttendancePage(): React.ReactElement {
 
     function handleOpenParticipantSearch(): void {
         setParticipantSearchDraft(participantSearch);
-        setParticipantSearchOpen(true);
+        setParticipantSearchOpen((prev) => !prev);
+        setEventSortOpen(false);
+        setParticipantSortOpen(false);
     }
 
-    function handleApplyParticipantSearch(): void {
-        setParticipantSearch(participantSearchDraft.trim());
-        setParticipantSearchOpen(false);
+    function handleChangeCreateStartHour(value: string): void {
+        const nextValue = value.replace(/\D/g, "").slice(0, 2);
+
+        if (!nextValue) {
+            setCreateStartHour("");
+            return;
+        }
+
+        const parsedHour = Number(nextValue);
+
+        if (parsedHour >= 13) {
+            alert("시간은 1부터 12까지 입력해주세요.");
+            return;
+        }
+
+        setCreateStartHour(nextValue);
     }
 
-    function handleClearParticipantSearch(): void {
-        setParticipantSearch("");
-        setParticipantSearchDraft("");
-        setParticipantSearchOpen(false);
+    function handleChangeCreateStartMinute(value: string): void {
+        const nextValue = value.replace(/\D/g, "").slice(0, 2);
+
+        if (!nextValue) {
+            setCreateStartMinute("");
+            return;
+        }
+
+        const parsedMinute = Number(nextValue);
+
+        if (parsedMinute >= 60) {
+            alert("분은 0부터 59까지 입력해주세요.");
+            return;
+        }
+
+        setCreateStartMinute(nextValue);
     }
 
-    async function handleDownloadCsv(): Promise<void> {
+    async function handleDownloadExcel(): Promise<void> {
         if (!externalActivityId || downloading) {
             return;
         }
@@ -533,7 +669,7 @@ export default function EcaAttendancePage(): React.ReactElement {
         setDownloading(true);
 
         try {
-            await downloadAttendanceCsv(externalActivityId);
+            await downloadAttendanceExcel(externalActivityId);
         } catch (error) {
             console.error(error);
             alert("출석 현황 파일을 다운로드하지 못했습니다.");
@@ -580,6 +716,19 @@ export default function EcaAttendancePage(): React.ReactElement {
         const attendanceStartTime = toTwentyFourHourTime(createStartHour, createStartMinute, createStartPeriod);
         const fullCreditMinutes = Number(createFullCreditMinutes);
 
+        const parsedHour = Number(createStartHour);
+        const parsedMinute = Number(createStartMinute);
+
+        if (!Number.isFinite(parsedHour) || parsedHour < 1 || parsedHour > 12) {
+            alert("시간은 1부터 12까지 입력해주세요.");
+            return;
+        }
+
+        if (!Number.isFinite(parsedMinute) || parsedMinute < 0 || parsedMinute > 59) {
+            alert("분은 0부터 59까지 입력해주세요.");
+            return;
+        }
+
         if (!createDate || !attendanceStartTime) {
             setCreateError("출석 날짜와 시작 시간을 입력해주세요.");
             return;
@@ -590,11 +739,13 @@ export default function EcaAttendancePage(): React.ReactElement {
             return;
         }
 
-        const uploadWindowStart = toLocalDateTimeString(createDate, attendanceStartTime);
-        const startDateTime = new Date(uploadWindowStart);
+        const scoreReferenceAt = localDateTimeInputToServerKst(createDate, attendanceStartTime);
+        const scoreReferenceDateTime = parseServerKstDateTime(scoreReferenceAt);
+        const halfCreditMinutes = 60;
+        const uploadWindowStart = createType === "CLASS_END" ? addMinutesToServerKstDateTime(scoreReferenceAt, -halfCreditMinutes) : scoreReferenceAt;
 
-        if (Number.isNaN(startDateTime.getTime())) {
-            setCreateError("출석 시작 시간이 올바르지 않습니다.");
+        if (!scoreReferenceDateTime) {
+            setCreateError("출석 기준 시간이 올바르지 않습니다.");
             return;
         }
 
@@ -604,14 +755,15 @@ export default function EcaAttendancePage(): React.ReactElement {
         try {
             await createAttendanceEvent(externalActivityId, {
                 roundNumber: getAutoRoundNumber(events, createDate),
-                name: `${getAutoAttendanceName(createDate)} ${createType === "CLASS_START" ? "Start" : "End"}`,
+                name: getAutoAttendanceName(createDate),
                 eventDate: createDate,
                 type: createType,
                 uploadWindowStart,
+                scoreReferenceAt,
                 durationMinutes: 60,
                 fullCreditThresholdMinutes: fullCreditMinutes,
                 partialCreditThresholdMinutes: 30,
-                halfCreditThresholdMinutes: 60,
+                halfCreditThresholdMinutes: halfCreditMinutes,
             });
 
             setCreateModalOpen(false);
@@ -633,50 +785,50 @@ export default function EcaAttendancePage(): React.ReactElement {
     }
 
     return (
-        <div className="attendance-page">
+        <div className="eca-admin-attendance-page">
             {(eventSortOpen || participantSortOpen) ? (
-                <button type="button" className="attendance-floating-backdrop" aria-label="close dropdown" onClick={closeFloatingMenus} />
+                <button type="button" className="eca-admin-attendance-floating-backdrop" aria-label="close dropdown" onClick={closeFloatingMenus} />
             ) : null}
 
-            <div className="attendance-page-inner">
-                <h1 className="attendance-title">Attendance</h1>
+            <div className="eca-admin-attendance-page-inner">
+                <h1 className="eca-admin-attendance-title">Attendance</h1>
 
-                <section className="attendance-summary-grid">
-                    <article className="attendance-summary-card">
-                        <span className="attendance-summary-label">Roster</span>
-                        <strong className="attendance-summary-value">{summary?.totalParticipantCount ?? 0}</strong>
+                <section className="eca-admin-attendance-summary-grid">
+                    <article className="eca-admin-attendance-summary-card">
+                        <span className="eca-admin-attendance-summary-label">Roster</span>
+                        <strong className="eca-admin-attendance-summary-value">{summary?.totalParticipantCount ?? 0}</strong>
                     </article>
 
-                    <article className="attendance-summary-card">
-                        <span className="attendance-summary-label">Attendance Requirement</span>
-                        <strong className="attendance-summary-value">{getPercentLabel(summary?.attendanceMinimumRate)} <span className="attendance-summary-arrow">↑</span></strong>
+                    <article className="eca-admin-attendance-summary-card">
+                        <span className="eca-admin-attendance-summary-label">Attendance Requirement</span>
+                        <strong className="eca-admin-attendance-summary-value">{getPercentLabel(summary?.attendanceMinimumRate)} <span className="eca-admin-attendance-summary-arrow">↑</span></strong>
                     </article>
 
-                    <article className="attendance-summary-card">
-                        <span className="attendance-summary-label">Avg. Attendance Rate</span>
-                        <strong className="attendance-summary-value">{getPercentLabel(summary?.averageAttendanceRate)}</strong>
+                    <article className="eca-admin-attendance-summary-card">
+                        <span className="eca-admin-attendance-summary-label">Avg. Attendance Rate</span>
+                        <strong className="eca-admin-attendance-summary-value">{getPercentLabel(summary?.averageAttendanceRate)}</strong>
                     </article>
 
-                    <article className="attendance-summary-card">
-                        <span className="attendance-summary-label">Students At Risk</span>
-                        <strong className="attendance-summary-value">{summary?.belowThresholdCount ?? 0}</strong>
+                    <article className="eca-admin-attendance-summary-card">
+                        <span className="eca-admin-attendance-summary-label">Students At Risk</span>
+                        <strong className="eca-admin-attendance-summary-value">{summary?.belowThresholdCount ?? 0}</strong>
                     </article>
                 </section>
 
-                <section className="attendance-content-grid">
-                    <article className={eventListScrollable ? "attendance-panel attendance-events-panel attendance-panel--scrollable" : "attendance-panel attendance-events-panel"}>
-                        <div className="attendance-panel-header">
-                            <h2 className="attendance-panel-title">Attendance</h2>
+                <section className="eca-admin-attendance-content-grid">
+                    <article className={eventListScrollable ? "eca-admin-attendance-panel eca-admin-attendance-events-panel eca-admin-attendance-panel--scrollable" : "eca-admin-attendance-panel eca-admin-attendance-events-panel"}>
+                        <div className="eca-admin-attendance-panel-header">
+                            <h2 className="eca-admin-attendance-panel-title">Attendance</h2>
 
-                            <div className="attendance-panel-actions">
-                                <button type="button" className="attendance-icon-button" aria-label="download attendance csv" onClick={handleDownloadCsv} disabled={downloading}>
+                            <div className="eca-admin-attendance-panel-actions">
+                                <button type="button" className="eca-admin-attendance-icon-button" aria-label="download attendance csv" onClick={handleDownloadExcel} disabled={downloading}>
                                     <DownloadIcon />
                                 </button>
 
-                                <div className="attendance-sort-wrap">
+                                <div className="eca-admin-attendance-sort-wrap">
                                     <button
                                         type="button"
-                                        className="attendance-sort-button"
+                                        className="eca-admin-attendance-sort-button"
                                         onClick={() => {
                                             setEventSortOpen((prev) => !prev);
                                             setParticipantSortOpen(false);
@@ -699,46 +851,76 @@ export default function EcaAttendancePage(): React.ReactElement {
                             </div>
                         </div>
 
-                        <button type="button" className="attendance-create-event-button" onClick={handleOpenCreateModal}>
+                        <button type="button" className="eca-admin-attendance-create-event-button" onClick={handleOpenCreateModal}>
                             <PlusIcon />
                             <span>출석체크 하기</span>
                         </button>
 
                         {errorMessage ? (
-                            <p className="attendance-error">{errorMessage}</p>
+                            <p className="eca-admin-attendance-error">{errorMessage}</p>
                         ) : null}
 
-                        <div ref={eventListRef} className="attendance-event-list">
+                        <div ref={eventListRef} className="eca-admin-attendance-event-list">
                             {loading ? (
-                                <p className="attendance-empty-text">Loading...</p>
+                                <p className="eca-admin-attendance-empty-text">Loading...</p>
                             ) : events.length === 0 ? (
-                                <p className="attendance-empty-text">No attendance events.</p>
+                                <p className="eca-admin-attendance-empty-text">No attendance events.</p>
                             ) : (
                                 events.map((item) => (
-                                    <button key={item.eventId} type="button" className="attendance-event-row" onClick={() => handleMoveDetail(item.eventId)}>
-                                        <span className="attendance-event-date">{getEventDateLabel(item.eventDate)}</span>
-                                        <span className="attendance-event-type">{getEventTypeLabel(item.type)}</span>
-                                        <span className={getEventStatusClassName(item)}>{getEventStatusLabel(item)}</span>
-                                        <div className="attendance-event-arrow"><ArrowRightIcon /></div>
+                                    <button key={item.eventId} type="button" className="eca-admin-attendance-event-row" onClick={() => handleMoveDetail(item.eventId)}>
+                                        <span className="eca-admin-attendance-event-date">{getEventDateLabel(item.eventDate)}</span>
+                                        <span className="eca-admin-attendance-event-type">
+                                            {getEventTypeLabel(item.type)}, {getEventReferenceTimeLabel(item.scoreReferenceAt)}
+                                        </span>
+                                        <span className={getEventStatusClassName(item, now)}>{getEventStatusLabel(item, now)}</span>
+                                        <div className="eca-admin-attendance-event-arrow"><ArrowRightIcon /></div>
                                     </button>
                                 ))
                             )}
                         </div>
                     </article>
 
-                    <article className={participantListScrollable ? "attendance-panel attendance-participants-panel attendance-panel--scrollable" : "attendance-panel attendance-participants-panel"}>
-                        <div className="attendance-panel-header">
-                            <h2 className="attendance-panel-title">Participants ({summary?.totalParticipantCount ?? participants.length})</h2>
+                    <article className={participantListScrollable ? "eca-admin-attendance-panel eca-admin-attendance-participants-panel eca-admin-attendance-panel--scrollable" : "eca-admin-attendance-panel eca-admin-attendance-participants-panel"}>
+                        <div className="eca-admin-attendance-panel-header">
+                            <h2 className="eca-admin-attendance-panel-title">Participants ({summary?.totalParticipantCount ?? participants.length})</h2>
 
-                            <div className="attendance-panel-actions">
-                                <button type="button" className={participantSearch ? "attendance-icon-button attendance-icon-button--active" : "attendance-icon-button"} aria-label="search participants" onClick={handleOpenParticipantSearch}>
-                                    <SearchIcon />
-                                </button>
+                            <div className="eca-admin-attendance-panel-actions">
+                                <div className="eca-admin-attendance-search-wrap" ref={participantSearchWrapRef}>
+                                    <button type="button" className={participantSearch ? "eca-admin-attendance-icon-button eca-admin-attendance-icon-button--active" : "eca-admin-attendance-icon-button"} aria-label="search participants" onClick={handleOpenParticipantSearch}>
+                                        <SearchIcon />
+                                    </button>
 
-                                <div className="attendance-sort-wrap">
+                                    {participantSearchOpen ? (
+                                        <div className="eca-admin-attendance-search-popover">
+                                            <input
+                                                autoFocus
+                                                value={participantSearchDraft}
+                                                placeholder="Enter student name"
+                                                onChange={(event) => {
+                                                    const value = event.target.value;
+
+                                                    setParticipantSearchDraft(value);
+                                                    setParticipantSearch(value.trim());
+                                                }}
+                                                onKeyDown={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        setParticipantSearch(participantSearchDraft.trim());
+                                                        setParticipantSearchOpen(false);
+                                                    }
+
+                                                    if (event.key === "Escape") {
+                                                        setParticipantSearchOpen(false);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    ) : null}
+                                </div>
+
+                                <div className="eca-admin-attendance-sort-wrap">
                                     <button
                                         type="button"
-                                        className="attendance-sort-button"
+                                        className="eca-admin-attendance-sort-button"
                                         onClick={() => {
                                             setParticipantSortOpen((prev) => !prev);
                                             setEventSortOpen(false);
@@ -761,85 +943,50 @@ export default function EcaAttendancePage(): React.ReactElement {
                             </div>
                         </div>
 
-                        {participantSearch ? (
-                            <div className="attendance-search-chip">
-                                <span>Search: {participantSearch}</span>
-                                <button type="button" onClick={handleClearParticipantSearch}>Clear</button>
-                            </div>
-                        ) : null}
-
-                        <div ref={participantListRef} className="attendance-participant-list">
+                        <div ref={participantListRef} className="eca-admin-attendance-participant-list">
                             {loading ? (
-                                <p className="attendance-empty-text">Loading...</p>
+                                <p className="eca-admin-attendance-empty-text">Loading...</p>
                             ) : participants.length === 0 ? (
-                                <p className="attendance-empty-text">No participants.</p>
+                                <p className="eca-admin-attendance-empty-text">No participants.</p>
                             ) : (
                                 participants.map((item) => (
-                                    <div key={item.userId} className="attendance-participant-row">
-                                        <span className="attendance-participant-avatar">
+                                    <button key={item.userId} type="button" className="eca-admin-attendance-participant-row" onClick={() => setSelectedStudentProfile(toAdminStudentProfile(item))} >
+                                        <span className="eca-admin-attendance-participant-avatar">
                                             {item.profileImage ? (
-                                                <img src={item.profileImage} alt="" className="attendance-participant-avatar-image" />
+                                                <img src={item.profileImage} alt="" className="eca-admin-attendance-participant-avatar-image" />
                                             ) : null}
                                         </span>
-                                        <strong className="attendance-participant-name">{item.name}</strong>
-                                        <span className="attendance-participant-rate">
-                                            출석률: <b className={item.thresholdMet ? "attendance-rate-blue" : "attendance-rate-red"}>{item.cumulativeRate}%</b>
+                                        <strong className="eca-admin-attendance-participant-name">{item.name}</strong>
+                                        <span className="eca-admin-attendance-participant-rate">
+                                            출석률: <b className={item.thresholdMet ? "eca-admin-attendance-rate-blue" : "eca-admin-attendance-rate-red"}>{item.cumulativeRate}%</b>
                                         </span>
-                                    </div>
+                                    </button>
                                 ))
                             )}
                         </div>
                     </article>
                 </section>
             </div>
-
-            {participantSearchOpen ? (
-                <div className="attendance-modal-backdrop" onMouseDown={() => setParticipantSearchOpen(false)}>
-                    <section className="attendance-search-modal" onMouseDown={(event) => event.stopPropagation()}>
-                        <h2 className="attendance-search-modal-title">Search Participants</h2>
-                        <input
-                            className="attendance-search-input"
-                            value={participantSearchDraft}
-                            placeholder="Enter student name"
-                            onChange={(event) => setParticipantSearchDraft(event.target.value)}
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") {
-                                    handleApplyParticipantSearch();
-                                }
-                            }}
-                        />
-                        <div className="attendance-search-modal-actions">
-                            <button type="button" className="attendance-search-modal-button attendance-search-modal-button--ghost" onClick={() => setParticipantSearchOpen(false)}>
-                                Cancel
-                            </button>
-                            <button type="button" className="attendance-search-modal-button attendance-search-modal-button--primary" onClick={handleApplyParticipantSearch}>
-                                Search
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            ) : null}
-
             {createModalOpen ? (
-                <div className="attendance-create-modal-backdrop" onMouseDown={handleCloseCreateModal}>
-                    <section className="attendance-create-modal" onMouseDown={(event) => event.stopPropagation()}>
-                        <div className="attendance-create-progress">
-                            <span className="attendance-create-progress-bar attendance-create-progress-bar--active" />
-                            <span className={createStep === 2 ? "attendance-create-progress-bar attendance-create-progress-bar--active" : "attendance-create-progress-bar"} />
+                <div className="eca-admin-attendance-create-modal-backdrop" onMouseDown={handleCloseCreateModal}>
+                    <section className="eca-admin-attendance-create-modal" onMouseDown={(event) => event.stopPropagation()}>
+                        <div className="eca-admin-attendance-create-progress">
+                            <span className="eca-admin-attendance-create-progress-bar eca-admin-attendance-create-progress-bar--active" />
+                            <span className={createStep === 2 ? "eca-admin-attendance-create-progress-bar eca-admin-attendance-create-progress-bar--active" : "eca-admin-attendance-create-progress-bar"} />
                         </div>
 
-                        <p className="attendance-create-step">Step {createStep}/2</p>
+                        <p className="eca-admin-attendance-create-step">Step {createStep}/2</p>
 
-                        <div className="attendance-create-slide-viewport">
-                            <div className={createStep === 1 ? "attendance-create-slide-pane attendance-create-slide-pane--step1 is-active" : "attendance-create-slide-pane attendance-create-slide-pane--step1 is-before"}>
-                                <div className="attendance-create-body">
-                                    <h2 className="attendance-create-title">Create Attendance</h2>
+                        <div className="eca-admin-attendance-create-slide-viewport">
+                            <div className={createStep === 1 ? "eca-admin-attendance-create-slide-pane eca-admin-attendance-create-slide-pane--step1 is-active" : "eca-admin-attendance-create-slide-pane eca-admin-attendance-create-slide-pane--step1 is-before"}>
+                                <div className="eca-admin-attendance-create-body">
+                                    <h2 className="eca-admin-attendance-create-title">Create Attendance</h2>
 
-                                    <div className="attendance-create-date-field">
-                                        <span className="attendance-create-time-label">Date</span>
+                                    <div className="eca-admin-attendance-create-date-field">
+                                        <span className="eca-admin-attendance-create-time-label">Date</span>
 
-                                        <div className="attendance-create-date-picker-wrap">
-                                            <button type="button" className="attendance-create-date-button" onClick={() => setCreateDatePickerOpen((prev) => !prev)}>
+                                        <div className="eca-admin-attendance-create-date-picker-wrap">
+                                            <button type="button" className="eca-admin-attendance-create-date-button" onClick={() => setCreateDatePickerOpen((prev) => !prev)}>
                                                 <span>{formatCreateDateButtonLabel(createDate)}</span>
                                                 <img src="/icons/calendar-07-80.svg" alt="" />
                                             </button>
@@ -854,69 +1001,61 @@ export default function EcaAttendancePage(): React.ReactElement {
                                         </div>
                                     </div>
 
-                                    <div className="attendance-create-type-block">
-                                        <span className="attendance-create-time-label">Start or End?</span>
+                                    <div className="eca-admin-attendance-create-type-block">
+                                        <span className="eca-admin-attendance-create-time-label">Start or End?</span>
 
-                                        <div className="attendance-create-type-grid">
-                                            <button
-                                                type="button"
-                                                className={createType === "CLASS_START" ? "attendance-create-type-button attendance-create-type-button--active" : "attendance-create-type-button"}
-                                                onClick={() => setCreateType("CLASS_START")}
-                                            >
+                                        <div className="eca-admin-attendance-create-type-grid">
+                                            <button type="button" className={createType === "CLASS_START" ? "eca-admin-attendance-create-type-button eca-admin-attendance-create-type-button--active" : "eca-admin-attendance-create-type-button"} onClick={() => setCreateType("CLASS_START")} >
                                                 Start
                                             </button>
 
-                                            <button
-                                                type="button"
-                                                className={createType === "CLASS_END" ? "attendance-create-type-button attendance-create-type-button--active" : "attendance-create-type-button"}
-                                                onClick={() => setCreateType("CLASS_END")}
-                                            >
+                                            <button type="button" className={createType === "CLASS_END" ? "eca-admin-attendance-create-type-button eca-admin-attendance-create-type-button--active" : "eca-admin-attendance-create-type-button"} onClick={() => setCreateType("CLASS_END")} >
                                                 End
                                             </button>
                                         </div>
                                     </div>
 
                                     {createStep === 1 && createError ? (
-                                        <p className="attendance-create-error">{createError}</p>
+                                        <p className="eca-admin-attendance-create-error">{createError}</p>
                                     ) : null}
 
-                                    <button type="button" className="attendance-create-next-button" onClick={handleNextCreateStep}>
+                                    <button type="button" className="eca-admin-attendance-create-next-button" onClick={handleNextCreateStep}>
                                         Next
                                     </button>
                                 </div>
                             </div>
 
-                            <div className={createStep === 2 ? "attendance-create-slide-pane attendance-create-slide-pane--step2 is-active" : "attendance-create-slide-pane attendance-create-slide-pane--step2 is-after"}>
-                                <div className="attendance-create-body attendance-create-body--step2">
-                                    <h2 className="attendance-create-title">{getDetailDateLabelForCreate(createDate)} Attendance</h2>
+                            <div className={createStep === 2 ? "eca-admin-attendance-create-slide-pane eca-admin-attendance-create-slide-pane--step2 is-active" : "eca-admin-attendance-create-slide-pane eca-admin-attendance-create-slide-pane--step2 is-after"}>
+                                <div className="eca-admin-attendance-create-body eca-admin-attendance-create-body--step2">
+                                    <h2 className="eca-admin-attendance-create-title">{getDetailDateLabelForCreate(createDate)} Attendance</h2>
 
-                                    <div className="attendance-create-time-form">
-                                        <div className="attendance-create-time-block">
-                                            <span className="attendance-create-time-label">Start Time</span>
+                                    <div className="eca-admin-attendance-create-time-form">
+                                        <div className="eca-admin-attendance-create-time-block">
+                                            <span className="eca-admin-attendance-create-time-label">{createType === "CLASS_START" ? "Start Time" : "End Time"}</span>
 
-                                            <div className="attendance-create-time-row">
+                                            <div className="eca-admin-attendance-create-time-row">
                                                 <input
-                                                    className="attendance-create-time-input"
+                                                    className="eca-admin-attendance-create-time-input"
                                                     value={createStartHour}
                                                     maxLength={2}
                                                     inputMode="numeric"
-                                                    onChange={(event) => setCreateStartHour(event.target.value.replace(/\D/g, "").slice(0, 2))}
+                                                    onChange={(event) => handleChangeCreateStartHour(event.target.value)}
                                                 />
 
-                                                <span className="attendance-create-time-colon">:</span>
+                                                <span className="eca-admin-attendance-create-time-colon">:</span>
 
                                                 <input
-                                                    className="attendance-create-time-input"
+                                                    className="eca-admin-attendance-create-time-input"
                                                     value={createStartMinute}
                                                     maxLength={2}
                                                     inputMode="numeric"
-                                                    onChange={(event) => setCreateStartMinute(event.target.value.replace(/\D/g, "").slice(0, 2))}
+                                                    onChange={(event) => handleChangeCreateStartMinute(event.target.value)}
                                                 />
 
-                                                <div className="attendance-create-period-buttons">
+                                                <div className="eca-admin-attendance-create-period-buttons">
                                                     <button
                                                         type="button"
-                                                        className={createStartPeriod === "AM" ? "attendance-create-period-button attendance-create-period-button--active" : "attendance-create-period-button"}
+                                                        className={createStartPeriod === "AM" ? "eca-admin-attendance-create-period-button eca-admin-attendance-create-period-button--active" : "eca-admin-attendance-create-period-button"}
                                                         onClick={() => setCreateStartPeriod("AM")}
                                                     >
                                                         AM
@@ -924,7 +1063,7 @@ export default function EcaAttendancePage(): React.ReactElement {
 
                                                     <button
                                                         type="button"
-                                                        className={createStartPeriod === "PM" ? "attendance-create-period-button attendance-create-period-button--active" : "attendance-create-period-button"}
+                                                        className={createStartPeriod === "PM" ? "eca-admin-attendance-create-period-button eca-admin-attendance-create-period-button--active" : "eca-admin-attendance-create-period-button"}
                                                         onClick={() => setCreateStartPeriod("PM")}
                                                     >
                                                         PM
@@ -933,13 +1072,13 @@ export default function EcaAttendancePage(): React.ReactElement {
                                             </div>
                                         </div>
 
-                                        <div className="attendance-create-duration-block">
-                                            <span className="attendance-create-time-label">Duration</span>
+                                        <div className="eca-admin-attendance-create-duration-block">
+                                            <span className="eca-admin-attendance-create-time-label">Duration</span>
 
-                                            <div className="attendance-create-duration-grid">
+                                            <div className="eca-admin-attendance-create-duration-grid">
                                                 <button
                                                     type="button"
-                                                    className={createFullCreditMinutes === "5" ? "attendance-create-duration-button attendance-create-duration-button--active" : "attendance-create-duration-button"}
+                                                    className={createFullCreditMinutes === "5" ? "eca-admin-attendance-create-duration-button eca-admin-attendance-create-duration-button--active" : "eca-admin-attendance-create-duration-button"}
                                                     onClick={() => setCreateFullCreditMinutes("5")}
                                                 >
                                                     For 5 minutes
@@ -947,7 +1086,7 @@ export default function EcaAttendancePage(): React.ReactElement {
 
                                                 <button
                                                     type="button"
-                                                    className={createFullCreditMinutes === "15" ? "attendance-create-duration-button attendance-create-duration-button--active" : "attendance-create-duration-button"}
+                                                    className={createFullCreditMinutes === "15" ? "eca-admin-attendance-create-duration-button eca-admin-attendance-create-duration-button--active" : "eca-admin-attendance-create-duration-button"}
                                                     onClick={() => setCreateFullCreditMinutes("15")}
                                                 >
                                                     For 15 minutes
@@ -957,15 +1096,15 @@ export default function EcaAttendancePage(): React.ReactElement {
                                     </div>
 
                                     {createStep === 2 && createError ? (
-                                        <p className="attendance-create-error">{createError}</p>
+                                        <p className="eca-admin-attendance-create-error">{createError}</p>
                                     ) : null}
 
-                                    <div className="attendance-create-actions">
-                                        <button type="button" className="attendance-create-back-button" onClick={() => setCreateStep(1)}>
+                                    <div className="eca-admin-attendance-create-actions">
+                                        <button type="button" className="eca-admin-attendance-create-back-button" onClick={() => setCreateStep(1)}>
                                             Back
                                         </button>
 
-                                        <button type="button" className="attendance-create-submit-button" onClick={handleCreateAttendanceEvent} disabled={creating}>
+                                        <button type="button" className="eca-admin-attendance-create-submit-button" onClick={handleCreateAttendanceEvent} disabled={creating}>
                                             {creating ? "Creating..." : "Create"}
                                         </button>
                                     </div>
@@ -975,7 +1114,10 @@ export default function EcaAttendancePage(): React.ReactElement {
                     </section>
                 </div>
             ) : null}
-
+            <AdminStudentProfileModal
+                student={selectedStudentProfile}
+                onClose={() => setSelectedStudentProfile(null)}
+            />
         </div>
     );
 }

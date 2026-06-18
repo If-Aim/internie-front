@@ -19,7 +19,7 @@
 .eca-settings-organization-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; width: 100%; max-height: 220px; padding: 6px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; box-shadow: 0 6px 16px rgba(0, 0, 0, .12); box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
 .eca-settings-organization-menu-item { width: 100%; min-height: 34px; padding: 0 10px; border: 0; border-radius: 6px; background: #FFF; color: #000; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; box-sizing: border-box; }
 .eca-settings-organization-menu-item:hover { background: #F0F6FF; color: #0166FF; }
-.eca-settings-organization-menu-item.is-selected { background: #BDD8FF; color: #0166FF; font-weight: 800; }
+.eca-settings-organization-menu-item.is-selected { background: #BDD8FF; color: #0166FF; font-weight: 700; }
 
 .eca-settings-primary-button { flex: 0 0 auto; height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 700; cursor: pointer; }
 .eca-settings-primary-button:disabled { background: #DDD; color: #777; cursor: default; }
@@ -95,11 +95,11 @@
 .eca-settings-owner-transfer-modal-close { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-settings-owner-transfer-modal-close img { width: 20px; height: 20px; display: block; }
 .eca-settings-owner-transfer-message { margin: 0; color: #000; font-size: 16px; font-weight: 700; line-height: 24px; }
-.eca-settings-owner-transfer-message strong { color: #0166FF; font-weight: 800; }
+.eca-settings-owner-transfer-message strong { color: #0166FF; font-weight: 700; }
 .eca-settings-owner-transfer-desc { margin: 12px 0 0; color: #808080; font-size: 13px; font-weight: 600; line-height: 20px; }
 .eca-settings-owner-transfer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 44px; }
 .eca-settings-owner-transfer-cancel { width: 96px; height: 42px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #808080; font-size: 14px; font-weight: 700; cursor: pointer; }
-.eca-settings-owner-transfer-confirm { width: 124px; height: 42px; border: 0; border-radius: 8px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 800; cursor: pointer; }
+.eca-settings-owner-transfer-confirm { width: 124px; height: 42px; border: 0; border-radius: 8px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 700; cursor: pointer; }
 .eca-settings-owner-transfer-cancel:disabled, .eca-settings-owner-transfer-confirm:disabled { opacity: .5; cursor: default; }
 
 @media (max-width: 960px) {

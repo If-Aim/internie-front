@@ -51,7 +51,7 @@ color: #000;display: flex;align-items: center;justify-content: center;}
 .client-report-calendar-card--right .admin-cal-card{padding: 133px 84px 185px;}
 .client-report-calendar-card--left .admin-cal-card{width: 100%;min-height: 520px;border-radius: 15px; padding: 62px 84px 52px;}
 
-.client-report-qbar{height: 54px;border-radius: 10px;background: #DCDCDC;display: flex;align-items: center;padding: 0 24px;gap: 14px;font-weight: 800; 
+.client-report-qbar{height: 54px;border-radius: 10px;background: #DCDCDC;display: flex;align-items: center;padding: 0 24px;gap: 14px;font-weight: 700; 
 overflow-x: auto;overflow-y: hidden;white-space: nowrap;-webkit-overflow-scrolling: touch;scrollbar-width: none;-ms-overflow-style: none;}
 .client-report-qbar::-webkit-scrollbar {display: none;}
 .client-report-qbar-left{display: flex;align-items: center;gap: 10px;flex: 0 0 auto;}

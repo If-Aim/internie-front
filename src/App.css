@@ -33,7 +33,7 @@ box-shadow: 0px 4px 4px rgba(56, 56, 56, 0.25);display: flex;flex-direction: col
 
 /*리스트 하단 기록하기 버튼*/
 .bottom-cta{position: fixed;left: 0;right: 0;bottom: 0;padding: 37px 20px 53px 20px;background: #F0F6FF;z-index: 20;}
-.record-btn{width: 100%;height: 60px;border-radius: 10px;font-size: 16px;font-weight: 800;border: none;background: #E3E3E3;color: #707070;}
+.record-btn{width: 100%;height: 60px;border-radius: 10px;font-size: 16px;font-weight: 700;border: none;background: #E3E3E3;color: #707070;}
 .record-btn.enabled{background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 12px; line-height:50px; padding: 5px 24px; cursor: pointer; width: 100%; }
 .record-btn:disabled{cursor: not-allowed;}
 
@@ -57,7 +57,7 @@ box-shadow: 0px 4px 4px rgba(56, 56, 56, 0.25);display: flex;flex-direction: col
 
 .period-sheet-picker-header{display: flex;align-items: center;justify-content: space-between;padding: 14px 12px;min-height: 64px;}
 .period-sheet-picker-back,.period-sheet-picker-close{width: 44px;height: 44px;border: none;background: transparent;font-size: 28px;display: inline-flex;align-items: center;justify-content: center;}
-.period-sheet-picker-year{font-size: 22px;font-weight: 800;}
+.period-sheet-picker-year{font-size: 22px;font-weight: 700;}
 .period-sheet-picker-body{padding: 10px 16px 0;flex: 1;}
 
 .wheel-wrap{position: relative;display: flex;justify-content: center;--wheel-item-h: 52px;height: calc(var(--wheel-item-h) * 5);padding: 0;}
@@ -82,7 +82,7 @@ pointer-events: none;}
 .monthpicker-sheet{width: 100%;background: #fff;border-top-left-radius: 20px;border-top-right-radius: 20px;padding: 20px 20px 53px;animation: sheetUp 180ms ease-out;}
 .monthpicker-header{display: flex;align-items: center;justify-content: space-between;margin: 1px 0 0 0}
 
-.monthpicker-title{font-size: 22px;font-weight: 800;}
+.monthpicker-title{font-size: 22px;font-weight: 700;}
 
 .monthpicker-close{width: 28px;height: 44px;border: none;background: transparent;display: inline-flex;align-items: center;justify-content: center;}
 .monthpicker-body{padding: 10px 0 0;}

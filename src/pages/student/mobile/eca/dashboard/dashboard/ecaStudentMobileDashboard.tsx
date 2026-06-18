@@ -1,9 +1,9 @@
-import { useTranslation } from "react-i18next";
-
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../api/ea";
-import type { StudentAssignmentResponse, StudentExternalActivityDetailResponse } from "../../../../../api/ea";
+import { getMyAttendanceEvents, getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
+import type { MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
+import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileDashboard.css";
 
 type MobileScheduleItem = {
@@ -26,15 +26,24 @@ function formatToday(): string {
 function formatDate(value?: string | null): string {
     if (!value) return "-";
 
-    const date = new Date(value);
+    const date = value.includes("T") ? parseServerKstDateTime(value) : null;
 
-    if (Number.isNaN(date.getTime())) return value;
+    if (date) {
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+        return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}.`;
+    }
 
-    return `${year}.${month}.${day}.`;
+    const dateText = value.includes("T") ? value.split("T")[0] : value;
+    const [year, month, day] = dateText.split("-").map(Number);
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+        return value;
+    }
+
+    return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}.`;
 }
 
 function getDateProgressRate(startDate?: string | null, endDate?: string | null): number {
@@ -65,14 +74,57 @@ function isCompletedAssignment(assignment: StudentAssignmentResponse): boolean {
     return assignment.status === "SUBMITTED" || assignment.status === "LATE_SUBMITTED";
 }
 
-function toScheduleItems(assignments: StudentAssignmentResponse[]): MobileScheduleItem[] {
-    return assignments.map((assignment) => ({
+function isCompletedAttendance(event: MyAttendanceEventResponse): boolean {
+    return event.status === "PRESENT"
+        || event.status === "LATE"
+        || event.status === "VERY_LATE"
+        || event.status === "EARLY_LEAVE"
+        || event.status === "VERY_EARLY_LEAVE";
+}
+
+function getAttendanceRate(events: MyAttendanceEventResponse[]): number {
+    const closedEvents = events.filter((event) => event.progress === "CLOSED");
+
+    if (closedEvents.length === 0) {
+        return 0;
+    }
+
+    const totalScore = closedEvents.reduce((sum, event) => sum + event.score, 0);
+
+    return Math.round((totalScore / closedEvents.length) * 100);
+}
+
+function formatAttendanceScheduleTitle(event: MyAttendanceEventResponse): string {
+    const baseDate = parseServerKstDateTime(event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart);
+
+    if (!baseDate) {
+        return `${event.name} ${event.type === "CLASS_START" ? "Start" : "End"}`;
+    }
+
+    const month = baseDate.getMonth() + 1;
+    const day = baseDate.getDate();
+
+    return `${month}월 ${day}일 출석 ${event.type === "CLASS_START" ? "Start" : "End"}`;
+}
+
+function toScheduleItems(assignments: StudentAssignmentResponse[], attendanceEvents: MyAttendanceEventResponse[]): MobileScheduleItem[] {
+    const assignmentItems = assignments.map((assignment) => ({
         id: assignment.assignmentId,
         title: assignment.name,
         date: formatDate(assignment.deadlineAt),
         type: "assignment" as const,
         completed: isCompletedAssignment(assignment),
     }));
+
+    const attendanceItems = attendanceEvents.map((event) => ({
+        id: event.eventId,
+        title: formatAttendanceScheduleTitle(event),
+        date: formatDate(event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart),
+        type: "attendance" as const,
+        completed: isCompletedAttendance(event),
+    }));
+
+    return [...assignmentItems, ...attendanceItems];
 }
 
 type HeaderProps = {
@@ -90,15 +142,15 @@ function Header({ onMenuClick }: HeaderProps): React.ReactElement {
 
             <div className="app-title"></div>
 
-            <div className="eca-mobile-dashboard-top-actions">
-                <button type="button" className="eca-mobile-dashboard-icon-button" aria-label="알림">
+            <div className="eca-mobile-student-dashboard-top-actions">
+                <button type="button" className="eca-mobile-student-dashboard-icon-button" aria-label="알림">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
                         <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
 
-                {/* <span className="eca-mobile-dashboard-profile" /> */}
+                {/* <span className="eca-mobile-student-dashboard-profile" /> */}
             </div>
         </div>
     );
@@ -110,6 +162,7 @@ export default function EcaMobileDashboard(): React.ReactElement {
 
     const [activity, setActivity] = React.useState<StudentExternalActivityDetailResponse | null>(null);
     const [assignments, setAssignments] = React.useState<StudentAssignmentResponse[]>([]);
+    const [attendanceEvents, setAttendanceEvents] = React.useState<MyAttendanceEventResponse[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
@@ -124,17 +177,20 @@ export default function EcaMobileDashboard(): React.ReactElement {
             setError("");
 
             try {
-                const [activityData, assignmentData] = await Promise.all([
+                const [activityData, assignmentData, attendanceData] = await Promise.all([
                     getMyParticipatingExternalActivity(externalActivityId),
                     getMyExternalActivityAssignments(externalActivityId),
+                    getMyAttendanceEvents(externalActivityId),
                 ]);
 
                 setActivity(activityData);
                 setAssignments(assignmentData);
+                setAttendanceEvents(attendanceData);
             } catch (e) {
                 console.error(e);
                 setActivity(null);
                 setAssignments([]);
+                setAttendanceEvents([]);
                 setError("대시보드 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
@@ -147,7 +203,8 @@ export default function EcaMobileDashboard(): React.ReactElement {
     const progressRate = getDateProgressRate(activity?.startDate, activity?.endDate);
     const completedAssignmentCount = assignments.filter(isCompletedAssignment).length;
     const assignmentRate = assignments.length === 0 ? 0 : Math.round((completedAssignmentCount / assignments.length) * 100);
-    const scheduleItems = toScheduleItems(assignments);
+    const attendanceRate = getAttendanceRate(attendanceEvents);
+    const scheduleItems = toScheduleItems(assignments, attendanceEvents);
 
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
@@ -159,6 +216,18 @@ export default function EcaMobileDashboard(): React.ReactElement {
         navigate(`/student/activities/${externalActivityId}/assignment`);
     }
 
+    function openAttendanceList(): void {
+        if (!externalActivityId) return;
+
+        navigate(`/student/activities/${externalActivityId}/attendance`);
+    }
+
+    function openAttendanceSubmit(eventId: number): void {
+        if (!externalActivityId) return;
+
+        navigate(`/student/activities/${externalActivityId}/attendance/${eventId}`);
+    }
+
     function openAssignmentSubmit(assignmentId: number): void {
         if (!externalActivityId) return;
 
@@ -166,29 +235,29 @@ export default function EcaMobileDashboard(): React.ReactElement {
     }
 
     return (
-        <main className="eca-mobile-dashboard-page">
+        <main className="eca-mobile-student-dashboard-page">
             <Header onMenuClick={openMenu} />
-            <div className="eca-mobile-dashboard-main">
-                <section className="eca-mobile-dashboard-title">
+            <div className="eca-mobile-student-dashboard-main">
+                <section className="eca-mobile-student-dashboard-title">
                     <span>{formatToday()}</span>
                     <h1>{activity?.name ?? "대외활동"}</h1>
                 </section>
 
                 {loading ? (
-                    <p className="eca-mobile-dashboard-empty">대시보드 정보를 불러오는 중입니다.</p>
+                    <p className="eca-mobile-student-dashboard-empty">대시보드 정보를 불러오는 중입니다.</p>
                 ) : error ? (
-                    <p className="eca-mobile-dashboard-empty">{error}</p>
+                    <p className="eca-mobile-student-dashboard-empty">{error}</p>
                 ) : (
                     <>
-                        <section className="eca-mobile-dashboard-progress-card">
+                        <section className="eca-mobile-student-dashboard-progress-card">
                             <span>활동 진행률</span>
                             <strong>{progressRate}%</strong>
-                            <div className="eca-mobile-dashboard-progress-track">
+                            <div className="eca-mobile-student-dashboard-progress-track">
                                 <div style={{ width: `${progressRate}%` }} />
                             </div>
                         </section>
 
-                        <section className="eca-mobile-dashboard-metric-card" onClick={openAssignmentList}>
+                        <section className="eca-mobile-student-dashboard-metric-card" onClick={openAssignmentList}>
                             <div>
                                 <span>나의 과제</span>
                                 <strong>{assignmentRate}%</strong>
@@ -201,12 +270,12 @@ export default function EcaMobileDashboard(): React.ReactElement {
                             </i>
                         </section>
 
-                        <section className="eca-mobile-dashboard-metric-card">
+                        <section className="eca-mobile-student-dashboard-metric-card" onClick={openAttendanceList}>
                             <div>
                                 <span>나의 출석</span>
-                                <strong>준비중</strong>
+                                <strong>{attendanceRate}%</strong>
                             </div>
-                            <em className="is-primary">-</em>
+                            <em className="is-primary">{attendanceEvents.length}개</em>
                             <i>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M8 5L13 10L8 15" stroke="#A0A0A0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -214,16 +283,16 @@ export default function EcaMobileDashboard(): React.ReactElement {
                             </i>
                         </section>
 
-                        <section className="eca-mobile-dashboard-schedule">
+                        <section className="eca-mobile-student-dashboard-schedule">
                             <h2>전체 일정</h2>
 
-                            <div className="eca-mobile-dashboard-schedule-list">
+                            <div className="eca-mobile-student-dashboard-schedule-list">
                                 {scheduleItems.length === 0 ? (
-                                    <p className="eca-mobile-dashboard-empty">등록된 일정이 없습니다.</p>
+                                    <p className="eca-mobile-student-dashboard-empty">등록된 일정이 없습니다.</p>
                                 ) : (
                                     scheduleItems.map((item) => (
-                                        <button type="button" className="eca-mobile-dashboard-schedule-item" key={`${item.type}-${item.id}`} onClick={() => item.type === "assignment" ? openAssignmentSubmit(item.id) : undefined}>
-                                            <span className={item.completed ? "eca-mobile-dashboard-schedule-icon is-completed" : "eca-mobile-dashboard-schedule-icon"}>
+                                        <button type="button" className="eca-mobile-student-dashboard-schedule-item" key={`${item.type}-${item.id}`} onClick={() => { if (item.type === "assignment") { openAssignmentSubmit(item.id); return; }  if (item.type === "attendance") { openAttendanceSubmit(item.id); } }}> 
+                                            <span className={item.completed ? "eca-mobile-student-dashboard-schedule-icon is-completed" : "eca-mobile-student-dashboard-schedule-icon"}>
                                                 {item.completed ? (
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
                                                         <path d="M25 13C25 19.6274 19.6274 25 13 25C6.37258 25 1 19.6274 1 13C1 6.37258 6.37258 1 13 1C14.8827 1 16.6642 1.43358 18.25 2.20635M22.75 5.5L12.25 16L9.25 13" stroke="#0166FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -235,7 +304,7 @@ export default function EcaMobileDashboard(): React.ReactElement {
                                                 )}
                                             </span>
 
-                                            <span className="eca-mobile-dashboard-schedule-text">
+                                            <span className="eca-mobile-student-dashboard-schedule-text">
                                                 <strong>{item.title}</strong>
                                                 <em>{item.date}</em>
                                             </span>

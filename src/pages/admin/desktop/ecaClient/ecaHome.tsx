@@ -185,9 +185,9 @@ export default function EcaClientAdminHome(): React.ReactElement{
                             const isOpen = openedActivityIds.includes(activityId);
                             const isActivityActive = pathname.startsWith(`/program-admin/activities/${activityId}/dashboard`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`)
-                                || pathname.startsWith(`/program-admin/activities/${activityId}/attendance`);
-                                // 추후 하위 메뉴 API 연결 시 아래 경로도 active 조건에 추가
-                                // pathname.startsWith(`/program-admin/activities/${activityId}/team`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/attendance`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/team-activity`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/leaderboard`);
                                 
                             return (
                                 <div className="eca-client-admin-menu-group" key={activityId}>
@@ -235,6 +235,12 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                             >
                                                 {t("ecaAdmin.team")}
                                             </NavLink>
+                                            <NavLink
+                                                to={`/program-admin/activities/${activityId}/leaderboard`}
+                                                className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
+                                            >
+                                                {t("ecaAdmin.leaderboard")}
+                                            </NavLink>
                                         </div>
                                     ) : null}
                                 </div>
@@ -248,20 +254,15 @@ export default function EcaClientAdminHome(): React.ReactElement{
                     className={({ isActive }) => (
                         [
                             "eca-client-admin-sidebar-profile",
-                            !isKo ? "eca-client-admin-sidebar-profile--en" : "",
                             isActive ? "eca-client-admin-sidebar-profile--active" : "",
                         ].filter(Boolean).join(" ")
                     )}
                 >
                     <img className="eca-client-admin-avatar-img" src={adminProfileImg} alt="admin avatar" />
-                    {isKo ? (
-                        <span className="eca-client-admin-name">{t("ecaAdmin.ecaClientAdminName", { adminName })}</span>
-                    ) : (
-                        <div className="eca-client-admin-profile-text-row">
-                            <span className="eca-client-admin-name">{adminName}</span>
-                            <span className="eca-client-admin-role">admin</span>
-                        </div>
-                    )}
+                    <div className="eca-client-admin-profile-text-row">
+                        <span className="eca-client-admin-role">Administrator</span>
+                        <span className="eca-client-admin-name">{adminName}</span>
+                    </div>
                 </NavLink>
             </aside>
 

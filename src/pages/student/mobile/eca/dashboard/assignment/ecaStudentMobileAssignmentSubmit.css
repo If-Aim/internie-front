@@ -1,0 +1,60 @@
+.eca-mobile-student-assignment-submit-page { min-height: 100vh; padding: 0; background: #F0F6FF; box-sizing: border-box; }
+.eca-mobile-student-assignment-submit-main { padding: 13px 20px 40px }
+.icon {width: 24px;height: 24px;display: block;}
+
+.eca-mobile-student-assignment-submit-title-row { display: flex; align-items: center; gap: 3px; margin-bottom: 10px; }
+.eca-mobile-student-assignment-submit-title-row button { width: 30px; height: 36px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.eca-mobile-student-assignment-submit-title-row h2 { margin: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 36px; }
+
+.eca-mobile-student-assignment-submit-card { width: 100%; margin-bottom: 16px; padding: 20px 17px 24px 20px; border: 1px solid #E3E3E3; border-radius: 14px; background: #fff; box-sizing: border-box; }
+.eca-mobile-student-assignment-submit-card h3 { margin: 0 0 24px; color: #000; font-size: 16px; font-weight: 700; line-height: 20px; }
+.eca-mobile-student-assignment-submit-field { margin-bottom: 20px; }
+.eca-mobile-student-assignment-submit-field span, .eca-mobile-student-assignment-submit-period > span, .eca-mobile-student-assignment-submit-grid label span { display: block; margin: 0 0 8px 7px; color: #000; font-size: 16px; font-weight: 700; line-height: 1; }
+.eca-mobile-student-assignment-submit-field input, .eca-mobile-student-assignment-submit-period input, .eca-mobile-student-assignment-submit-grid input { width: 100%; height: 48px; padding: 0 9px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #000; font-size: 14px; font-weight: 500; box-sizing: border-box; }
+.eca-mobile-student-assignment-submit-period { margin-bottom: 20px; }
+.eca-mobile-student-assignment-submit-period div { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); align-items: center; gap: 10px; }
+.eca-mobile-student-assignment-submit-period em { color: #808080; font-size: 20px; font-style: normal; font-weight: 500; text-align: center; }
+.eca-mobile-student-assignment-submit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+
+.eca-mobile-student-assignment-upload-box { margin-top: -8px; width: 100%; height: 100px; padding: 0; border: 1px dashed #E7E7E7; border-radius: 4px; background: #fff; color: #808080; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+.eca-mobile-student-assignment-upload-box span { color: #808080; font-size: 12px; font-weight: 500; line-height: 24px; }
+
+.eca-mobile-student-assignment-file-input { display: none; }
+.eca-mobile-student-assignment-link-area { margin-top: 16px; }
+.eca-mobile-student-assignment-link-area.is-only { margin-top: -8px; }
+.eca-mobile-student-assignment-link-area input { width: 100%; height: 36px; padding: 0 20px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #000; font-size: 12px; font-weight: 500; box-sizing: border-box; }
+.eca-mobile-student-assignment-link-area input.is-invalid { border-color: #F00; }
+.eca-mobile-student-assignment-link-area input::placeholder { color: #808080; }
+.eca-mobile-student-assignment-link-area small { display: block; margin-top: 8px; color: #F00; font-size: 12px; font-weight: 700; }
+
+.eca-mobile-student-assignment-link-item { min-height: 36px; margin-top: 12px; padding: 8px 12px; border: 1px solid #eee; border-radius: 8px; display: flex; align-items: center; gap: 8px; box-sizing: border-box; }
+.eca-mobile-student-assignment-link-item a, .eca-mobile-student-assignment-link-item span { flex: 1; min-width: 0; color: #0166FF; font-size: 12px; font-weight: 700; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-mobile-student-assignment-link-item button { display: flex; width: 28px; height: 28px; border: 0; background: transparent; color: #808080; font-size: 28px; line-height: 1; cursor: pointer; justify-content: center; align-items: center;}
+.eca-mobile-student-assignment-submitted-bar { height: 40px; margin-top: 16px; padding: 0 9px; border: 1px solid #E7E7E7; border-radius: 4px; background: #F1F1F1; display: flex; align-items: center; gap: 18px; box-sizing: border-box; }
+.eca-mobile-student-assignment-submitted-bar span { color: rgba(0, 0, 0, 0.72); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.eca-mobile-student-assignment-submitted-bar em { margin-left: auto; color: #000; font-size: 12px; font-style: normal; font-weight: 500; white-space: nowrap; }
+.eca-mobile-student-assignment-submitted-bar strong { color: #000; font-size: 12px; font-weight: 500; white-space: nowrap; }
+
+.eca-mobile-student-assignment-file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 4px; }
+.eca-mobile-student-assignment-file-item { min-height: 40px; display: flex; align-items: center; gap: 16px; }
+.eca-mobile-student-assignment-file-main { flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; display: flex; align-items: center; gap: 16px; text-align: left; }
+.eca-mobile-student-assignment-file-icon { width: 21px; height: 24px; display: flex; align-items: flex-end; justify-content: center; box-sizing: border-box; flex: 0 0 46px; }
+.eca-mobile-student-assignment-file-main span:last-child { min-width: 0; display: flex; flex-direction: column; }
+.eca-mobile-student-assignment-file-remove { display: flex; width: 32px; height: 32px; border: 0; background: transparent; cursor: pointer; justify-content: center; align-items: center;}
+
+.eca-mobile-student-assignment-file-name-wrap { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.eca-mobile-student-assignment-file-name-wrap strong { overflow: hidden; color: #000; font-size: 16px; font-weight: 700; line-height: 24px; text-overflow: ellipsis; white-space: nowrap; }
+.eca-mobile-student-assignment-file-name-wrap em { color: #F00; font-size: 12px; font-style: normal; font-weight: 500; line-height: 15px; }
+.eca-mobile-student-assignment-file-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+.eca-mobile-student-assignment-file-action-button { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+.eca-mobile-student-assignment-submit-button-row { display: flex; justify-content: flex-end; padding-bottom: 20px; }
+.eca-mobile-student-assignment-submit-button-row button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+.eca-mobile-student-assignment-submit-button-row button:disabled { background: #F1F1F1; color: #A2A2A2; cursor: default; }
+.eca-mobile-student-assignment-submit-empty { min-height: 240px; margin: 0; color: #808080; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+.eca-mobile-student-assignment-submit-modal-backdrop { position: fixed; inset: 0; z-index: 3000; background: rgba(209, 209, 209, 0.50); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 0 46px; box-sizing: border-box; }
+.eca-mobile-student-assignment-submit-modal { width: 100%; max-width: 300px; min-height: 304px; padding: 55px 70px 45px; border-radius: 20px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+.eca-mobile-student-assignment-submit-modal span { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.eca-mobile-student-assignment-submit-modal strong { color: #000; font-size: 20px; font-weight: 400; line-height: 27px; margin-bottom: 31px; }
+.eca-mobile-student-assignment-submit-modal button { width: 160px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
