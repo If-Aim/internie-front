@@ -181,3 +181,140 @@ export function formatServerKstDateAndTimeCompactForUser(date?: string | null, t
 
     return `${year}.${month}.${day} ${hour}:${minute}`;
 }
+
+export function formatServerKstDateTimeTimeForUser(value?: string | null, fallback: string = "--:--"): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) return fallback;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+    }).formatToParts(date);
+
+    const hour = getDatePart(parts, "hour");
+    const minute = getDatePart(parts, "minute");
+
+    return `${hour}:${minute}`;
+}
+
+export function formatServerKstDateTimeDateLabelForUser(value?: string | null, fallback: string = "-"): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) return fallback;
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: getUserTimeZone(),
+        month: "short",
+        day: "numeric",
+        weekday: "short",
+    }).format(date);
+}
+
+export function serverKstDateTimeToUserDateOnly(value?: string | null): Date | null {
+    const parsed = parseServerKstDateTime(value);
+
+    if (!parsed) return null;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(parsed);
+
+    const year = Number(getDatePart(parts, "year"));
+    const month = Number(getDatePart(parts, "month"));
+    const day = Number(getDatePart(parts, "day"));
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+        return null;
+    }
+
+    return new Date(year, month - 1, day);
+}
+
+export function getUserDateOnly(date: Date = new Date()): Date {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(date);
+
+    const year = Number(getDatePart(parts, "year"));
+    const month = Number(getDatePart(parts, "month"));
+    const day = Number(getDatePart(parts, "day"));
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    return new Date(year, month - 1, day);
+}
+
+export function formatServerKstDateTimeYYDotForUser(value?: string | null, fallback: string = "-"): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) return fallback;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+    }).formatToParts(date);
+
+    const year = getDatePart(parts, "year").slice(2);
+    const month = getDatePart(parts, "month");
+    const day = getDatePart(parts, "day");
+    const hour = getDatePart(parts, "hour");
+    const minute = getDatePart(parts, "minute");
+
+    return `${year}.${month}.${day}. ${hour}:${minute}`;
+}
+
+export function formatServerKstDateTimeWithWeekdayForUser(value?: string | null, fallback: string = ""): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) return fallback;
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: getUserTimeZone(),
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).format(date);
+}
+
+export function formatServerKstDateTimeDotForUser(value?: string | null, fallback: string = "-"): string {
+    const date = parseServerKstDateTime(value);
+
+    if (!date) return fallback;
+
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+    }).formatToParts(date);
+
+    const year = getDatePart(parts, "year");
+    const month = getDatePart(parts, "month");
+    const day = getDatePart(parts, "day");
+    const hour = getDatePart(parts, "hour");
+    const minute = getDatePart(parts, "minute");
+
+    return `${year}.${month}.${day} ${hour}:${minute}`;
+}

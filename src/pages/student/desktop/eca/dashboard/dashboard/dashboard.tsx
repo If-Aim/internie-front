@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { getMyExternalActivityAssignments, getMyExternalActivityTeams, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { StudentAssignmentResponse, StudentExternalActivityDetailResponse, TeamResponse } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { getUserDateOnly, parseServerKstDateTime, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import "./dashboard.css";
 
@@ -30,13 +30,11 @@ type PersonSummary = {
 function getDday(deadlineAt?: string | null): string {
     if (!deadlineAt) return "-";
 
-    const today = new Date();
-    const deadline = parseServerKstDateTime(deadlineAt);
+    const todayDate = getUserDateOnly();
+    const deadlineDate = serverKstDateTimeToUserDateOnly(deadlineAt);
 
-    if (!deadline) return "-";
+    if (!deadlineDate) return "-";
 
-    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const deadlineDate = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
     const diff = Math.ceil((deadlineDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diff > 0) return `D-${diff}`;
@@ -68,18 +66,34 @@ function getProgressStatusLabel(status?: StudentExternalActivityDetailResponse["
     return "ongoing";
 }
 
+function parseDateOnlyLocal(value?: string | null): Date | null {
+    if (!value) return null;
+
+    const [year, month, day] = value.split("-").map(Number);
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+        return null;
+    }
+
+    const date = new Date(year, month - 1, day);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+}
+
 function getDateProgressRate(startDate?: string | null, endDate?: string | null): number {
-    if (!startDate || !endDate) return 0;
+    const start = parseDateOnlyLocal(startDate);
+    const end = parseDateOnlyLocal(endDate);
 
-    const today = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    if (!start || !end) return 0;
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
-
-    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-    const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-    const endDateOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+    const today = getUserDateOnly();
+    const todayDate = today.getTime();
+    const startDateOnly = start.getTime();
+    const endDateOnly = end.getTime();
     const oneDay = 1000 * 60 * 60 * 24;
 
     if (endDateOnly < startDateOnly) return 0;

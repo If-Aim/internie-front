@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteAttendanceEvent, endAttendanceEventNow, getAttendanceEventDetail, startAttendanceEventNow, updateAttendanceRecordStatus, type AttendanceEventDetailResponse, type AttendanceEventParticipantRecordResponse, type AttendanceStatus, } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeDateLabelForUser, formatServerKstDateTimeWithWeekdayForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./attendanceDetail.css";
 
 type ViewMode = "list" | "gallery";
@@ -145,28 +145,12 @@ function getEventTypeLabel(type: AttendanceEventDetailResponse["type"]): string 
     return type === "CLASS_START" ? "Start" : "End";
 }
 
-function getDetailDateLabel(value: string): string {
-    const date = new Date(`${value}T00:00:00`);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" }).format(date);
+function getDetailDateLabel(value?: string | null): string {
+    return formatServerKstDateTimeDateLabelForUser(value);
 }
 
 function getCheckedAtLabel(value?: string | null): string {
-    if (!value) {
-        return "";
-    }
-
-    const date = parseServerKstDateTime(value);
-
-    if (!date) {
-        return value;
-    }
-
-    return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+    return formatServerKstDateTimeWithWeekdayForUser(value);
 }
 
 function getFullCreditBoundaryTime(detail: AttendanceEventDetailResponse | null): number | null {
@@ -679,7 +663,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                         <div className="eca-admin-attendance-detail-heading-row">
                             <div className="eca-admin-attendance-detail-heading-title-group">
                                 <h2 className="eca-admin-attendance-detail-event-title">
-                                    <span>{detail ? getDetailDateLabel(detail.eventDate) : "-"}</span>
+                                    <span>{detail ? getDetailDateLabel(detail.scoreReferenceAt) : "-"}</span>
                                     <b>{detail ? getEventTypeLabel(detail.type) : ""}</b>
                                 </h2>
 

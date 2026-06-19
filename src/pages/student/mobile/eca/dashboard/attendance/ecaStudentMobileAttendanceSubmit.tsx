@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkInAttendance, getAttendanceCheckInEligibility, getMyAttendanceEventDetail, getMyAttendanceEvents } from "../../../../../../api/ea";
 import type { MyAttendanceEventDetailResponse, MyAttendanceSelfieResponse, MyAttendanceEventResponse } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeDateLabelForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAttendanceSubmit.css";
 
 type LocationState = {
@@ -17,24 +17,17 @@ type GalleryItem = {
 
 type CameraFacingMode = "user" | "environment";
 
-function getEventBaseDate(event?: MyAttendanceEventResponse | null): Date | null {
+function getEventBaseDateTimeValue(event?: MyAttendanceEventResponse | null): string | null {
     if (!event) return null;
 
-    const value = event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
-
-    return parseServerKstDateTime(value);
+    return event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
 }
 
 function formatTitleParts(event?: MyAttendanceEventResponse | null): { dateText: string; typeText: string } {
     if (!event) return { dateText: "Attendance", typeText: "" };
 
-    const date = getEventBaseDate(event);
-    const dateText = date
-        ? new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" }).format(date)
-        : event.eventDate;
-
     return {
-        dateText,
+        dateText: formatServerKstDateTimeDateLabelForUser(getEventBaseDateTimeValue(event), event.eventDate),
         typeText: event.type === "CLASS_START" ? "Start" : "End",
     };
 }

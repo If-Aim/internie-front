@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMyAttendanceEvents, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { AttendanceEventType, AttendanceStatus, MyAttendanceEventResponse, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeDateLabelForUser, formatServerKstDateTimeTimeForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAttendance.css";
 
 type HeaderProps = {
@@ -27,34 +27,16 @@ function Header({ activityName, onMenuClick }: HeaderProps): React.ReactElement 
     );
 }
 
-function getEventBaseDate(event: MyAttendanceEventResponse): Date | null {
-    const value = event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
-
-    return parseServerKstDateTime(value);
+function getEventBaseDateTimeValue(event: MyAttendanceEventResponse): string | null {
+    return event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
 }
 
 function formatEventDate(event: MyAttendanceEventResponse): string {
-    const date = getEventBaseDate(event);
-
-    if (!date) return "-";
-
-    return new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-    }).format(date);
+    return formatServerKstDateTimeDateLabelForUser(getEventBaseDateTimeValue(event));
 }
 
 function getEventDisplayTime(event: MyAttendanceEventResponse): string {
-    const date = getEventBaseDate(event);
-
-    if (!date) return "";
-
-    return new Intl.DateTimeFormat("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-    }).format(date);
+    return formatServerKstDateTimeTimeForUser(getEventBaseDateTimeValue(event), "");
 }
 
 function getEventSortTime(event: MyAttendanceEventResponse): number {

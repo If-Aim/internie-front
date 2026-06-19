@@ -39,6 +39,7 @@
 		"hasAccount": "Already have an account?",
         "returnLogin": "Login",
 		"next": "Next",
+		"prev": "Back",
         "loginIdPlaceholder": "Enter your ID",
 		"checkLoginId": "Check ID",
 		"checking": "Checking...",
@@ -65,6 +66,7 @@
 		"passwordMissingSpecial": "Include at least one special character (@$!%*#?&)",
 		"sending": "Sending...",
 		"verifyCode": "Verification Code",
+		"sendVerifyCode": "Send Code",
 		"getEmailVC": "Send code",
 		"enterVerify": "Verify",
 		"resendEmailVC": "Resend",
@@ -173,6 +175,11 @@
 
 	"comment_main": "기본 컴포넌트 관련",
 	"common": {
+        "prev": "Back",
+        "edit": "Edit",
+        "select": "Select",
+        "filter": "Filter",
+		"search": "Search",
 		"time": "Time",
 		"close": "Close",
 		"record": "Record",
@@ -183,7 +190,9 @@
 		"save": "Save",
 		"dateRange": "Period",
         "loading": "Loading…",
-		"done": "Done"
+		"done": "Done",
+		"cancel": "Cancel",
+		"move": "Move"
 	},
 	"menu": {
 		"home": "Home",
@@ -383,6 +392,226 @@
 
 	"ECA_admin" : "대외활동 관리자 관련",
     "ecaAdmin" : {
+		"assignmentPage": {
+			"searchParticipantToAdd": "Search participants to add",
+			"noAddableParticipants": "No participants available to add.",
+			"noTeamsToDisplay": "No teams to display.",
+
+			"addTeam": "Add Team",
+			"deleteTeam": "Delete Team",
+			"teamMemberMenu": "Members",
+			"assignAsLeader": "Set as Leader",
+			"moveToAnotherTeam": "Move to Another Team",
+			"removeFromTeam": "Remove from Team",
+			"addTeamMember": "Add Member",
+			"teamNameFallback": "Team {{teamId}}",
+
+			"teamNamePlaceholder": "Enter a team name",
+			"selectTeamMembersLabel": "Select team members",
+			"moveMemberTargetTeam": "Select a team to move {{name}} to",
+			"invalidAssignmentPeriod": "The assignment end time cannot be earlier than the start time.",
+
+			"editTeamBuilding": "Edit Team",
+			"totalTeams": "Total Teams:",
+			"countUnit": "{{count}}",
+			"assignedMembers": "Assigned:",
+			"unassignedMembers": "Unassigned:",
+			"teamMemberConfigLocked": "Participants and team members cannot be changed because submissions already exist. You can still edit the team name and leader.",
+			"teamList": "Teams",
+
+			"noAvailableParticipants": "No participants available.",
+			"teamUnit": "team(s)",
+
+			"firstMemberAutoLeader": "The first selected member will be automatically assigned as the team leader",
+			"selectPlaceholder": "Select",
+			"openTeamMemberList": "Open team member list",
+			"decide": "Done",
+
+			"teamCount_display": "{{count}} team(s)",
+
+			"selectAssignmentToLoad": "Which assignment's team do you want to use?",
+			"teamBuildingMode": "Method",
+			"loadPreviousTeam": "Keep previous teams",
+			"createNewTeam": "Create New",
+
+			"selectedOfTotal": "{{selected}} / {{total}}",
+			"selectAll": "Select All",
+
+			"activityLoading": "Loading program information...",
+			"editing": "Editing...",
+			"saving": "Saving...",
+			"save": "Save",
+			"participantList": "Participant List",
+			"selectActivityParticipants": "Select activity participants",
+			"participantSearchExample": "@ Student A",
+
+			"teamStatus": "Team Status",
+			"modify": "Edit",
+			"teamName": "Team Name",
+			"teamLeader": "Leader",
+			"teamMembers": "Members",
+			"noLinkedTeam": "No linked team information.",
+			"assignmentDeliverable": "Submission Type",
+
+			"teamCount": "Number of Teams",
+			"numberOnlyPlaceholder": "Numbers only",
+			"teamBuilding": "Team Building",
+
+			"editAssignmentTitle": "Edit Assignment",
+			"newAssignmentTitle": "Create New Assignment",
+			"tempSave": "Save Draft",
+			"assignmentName": "Assignment Name",
+			"enterContent": "Enter content",
+			"assignmentPeriod": "Available",
+
+			"assignmentSaveFailed": "Failed to save the assignment.",
+			"editAssignmentNotFound": "Could not find the assignment to edit.",
+			"teamParticipantChangeGuide": "To change team assignment participants, complete the team allocation from the edit button in the team status section before saving.",
+			"assignmentEditFailed": "Failed to edit the assignment.",
+
+			"cannotDeleteTeamBySubmission": "Teams cannot be deleted because submissions already exist.",
+			"minOneTeamRequired": "A team assignment requires at least one team.",
+			"confirmDeleteTeam": "Are you sure you want to delete {{name}}?",
+			"removedTeamMembersUnassigned": "Members of the deleted team are now unassigned. Please reassign them to other teams.",
+			"assignmentOrActivityNotFound": "Could not find the assignment or program information.",
+			"minOneMemberPerTeam": "Every team needs at least one member.",
+			"leaderRequiredPerTeam": "Every team needs a leader.",
+			"teamSaveFailed": "Failed to save the teams.",
+			"cannotAddMemberBySubmission": "Members cannot be added because submissions already exist.",
+			"alreadyAssignedToTeam": "This participant is already assigned to another team.",
+			"cannotMoveMemberBySubmission": "Members cannot be moved because submissions already exist.",
+			"cannotMoveLeaderDirectly": "The leader cannot be moved directly. Please assign another member as leader first.",
+			"noOtherTeamToMove": "There is no other team to move to.",
+			"movingMemberNotFound": "Could not find the member to move.",
+			"cannotRemoveMemberBySubmission": "Members cannot be removed because submissions already exist.",
+			"teamNotFound": "Could not find the team information.",
+			"cannotRemoveLeaderDirectly": "The leader cannot be removed directly. Please assign another member as leader first.",
+			"confirmRemoveMember": "Remove {{name}} from the team?",
+			"unassignedParticipants": "Some participants are not assigned to a team. Please create a team or add them to an existing one.",
+			"fillAllRequired": "Please fill in all required fields.",
+			"existingTeamMembersMustMatch": "All members of the loaded previous team must match the currently selected assignment participants.",
+			"allParticipantsMustBeAssigned": "All selected assignment participants must be assigned to a team.",
+
+			"cannotAddTeamBySubmission": "Teams cannot be added because submissions already exist.",
+			"newTeamWithNumber": "New Team {{number}}",
+
+			"enterTeamCountFirst": "Please enter the number of teams first.",
+			"teamCountReached": "You have already created as many teams as entered.",
+			"enterTeamName": "Please enter a team name.",
+			"selectTeamMembers": "Please select team members.",
+
+			"noMatchingPreviousTeam": "No previous team assignment matches the entered number of teams.",
+			"selectPreviousTeam": "Please select a previous team to use.",
+			"selectPreviousTeamPlaceholder": "Select a previous team",
+			"participantTeamMismatch": "Team member mismatch. Please check again.",
+			"teamCountSuffix":"",
+
+			"selectTime": "Select time",
+			"hour": "",
+			"minute": "",
+
+			"prevMonth": "Previous month",
+			"nextMonth": "Next month",
+
+			"startTime": "Start Time",
+			"endTime": "End Time",
+
+			"selectContent": "Select Submission Type",
+			"andMorePerson": "and {{count}} more",
+			"resultForm": {
+				"writing": "Document",
+				"writingFormats": "DOCX, PPT, PDF, etc.",
+				"image": "Image",
+				"imageFormats": "PNG, JPG, JPEG, etc.",
+				"video": "Video",
+				"videoFormats": "MP4, MOV, AVI, etc.",
+				"link": "Link",
+				"linkFormats": "Instagram, YouTube, etc.",
+				"etc": "Other"
+			},
+
+			"participant": "Participants",
+			"selectParticipants": "Select Participants",
+			"assignmentSystemForm": "Team or Individual?",
+
+			"download": "Download",
+			"nameOrFileSearchPlaceholder": "Search by student name or file name",
+
+			"participantCount": "Roster",
+			"nonSubmitters": "Not Submitted",
+			"participationRate": "Participation Rate",
+			"countPerson": "{{count}}",
+			"submissionStatus": "Status ({{count}})",
+
+			"nonSubmitterCount": "Not Submitted ({{count}})",
+			"notifyAll": "Notify All",
+			"noNonSubmitters": "No one is missing.",
+			"sendNotification": "Notify",
+
+			"goBack": "Back",
+			"deleting": "Deleting...",
+			"deleteAction": "Delete",
+			"editAction": "Edit",
+
+			"activityFallback": "Program",
+			"assignmentFallback": "Assignment",
+			"noFilesToDownload": "No submitted files to download.",
+			"downloadFailed": "Failed to download the file.",
+			"noLinkAvailable": "No accessible link available.",
+			"noFileAvailable": "No files available to download.",
+			"submissionNotFound": "Submission information could not be found.",
+			"assignmentDetailLoading": "Loading assignment information...",
+			"confirmDeleteAssignment": "Are you sure you want to delete this assignment? Deleted assignments cannot be recovered.",
+			"deleteFailed": "Failed to delete the assignment.",
+			"submissionFilesLoading": "Loading...",
+			"noSubmitters": "No submissions yet.",
+			"noManagePermission": "Access Denied",
+			"activityLoadFailed": "Failed to load the program information.",
+			"selectParticipantsFirst": "Please select participants first.",
+			"participantLockedBySubmission": "Participants cannot be changed because submissions already exist.",
+			
+			"noName": "No name",
+
+			"andMore": "and {{count}} more",
+			"link": "Link",
+
+			"assignmentNotFound": "Could not find the assignment information.",
+			"assignmentItemNotFound": "The requested assignment could not be found.",
+			"assignmentDetailLoadFailed": "Failed to load the assignment information.",
+
+			"submitFilter": {
+				"evaluated": "Graded",
+				"beforeEvaluation": "Not Graded",
+				"lateSubmitted": "Late",
+				"submitted": "Submitted",
+				"notSubmitted": "Not Submitted"
+
+			},
+			
+			"systemForm": {
+				"individual": "Indiv.",
+				"team": "Team"
+			},
+			
+			"tableAssignmentName": "Assignment Name",
+			"tableSystemForm": "Type",
+			"tableSubmission": "Submissions",
+			"tableStatus": "Status",
+			"assignmentLoading": "Loading the assignment list...",
+			"noAssignments": "No assignments have been created.",
+			"noSearchResults": "No Results Found",
+			
+			"assignmentSearchPlaceholder": "Search by assignment name",
+			"createAssignmentAria": "Create Assignment",
+			"programNotFound": "Could not find the program information.",
+			"assignmentLoadFailed": "Failed to load the assignment list.",
+			"assignmentSummary": {
+				"completed": "Completed",
+				"ongoing": "Ongoing",
+				"upcoming": "Scheduled"
+			}
+		},
+
         "home": "Home",
         "ecaClientAdminSubmenuEmpty": "No assigned programs",
         "dashboard": "Dashboard",

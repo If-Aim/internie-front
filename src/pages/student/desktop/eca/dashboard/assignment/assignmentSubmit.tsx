@@ -5,7 +5,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getSubmissionFilePreview, getSubmissionFilePreviewBlob, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, StudentAssignmentResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
-import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateAndTimeCompactForUser, formatServerKstDateTimeYYDotForUser } from "../../../../../../utils/dateTime";
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import { getFileIconByExtension } from "./fileIcons";
 import "./assignmentSubmit.css";
@@ -32,19 +32,7 @@ function formatDateTime(date?: string | null, time?: string | null, fallbackTime
 }
 
 function formatSubmittedAt(value?: string | null): string {
-    if (!value) return "-";
-
-    const date = parseServerKstDateTime(value);
-
-    if (!date) return value;
-
-    const year = String(date.getFullYear()).slice(2);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
-
-    return `${year}.${month}.${day}. ${hour}:${minute}`;
+    return formatServerKstDateTimeYYDotForUser(value);
 }
 
 function getLatestSubmittedAt(submission: AssignmentSubmissionResponse): string {

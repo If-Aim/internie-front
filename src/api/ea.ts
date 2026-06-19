@@ -259,7 +259,7 @@ export async function getMyParticipatingExternalActivity(
 }
 
 /* - Assignment 관련 (Student) - */
-export type SubmissionStatus = "SUBMITTED";
+export type SubmissionStatus = "SUBMITTED" | "REVIEWED" | "REJECTED";
 export type StudentAssignmentTeam = {
     teamId: number;
     name: string;
@@ -862,6 +862,93 @@ export type CreateAssignmentRequest = {
     inlineTeams?: InlineTeamCreateRequest[];
 };
 
+export type AssignmentEvaluationCriterionResponse = {
+    criterionId: number;
+    name: string;
+    displayOrder: number;
+    maxScore: number;
+};
+
+export type AssignmentEvaluationCriterionRequest = {
+    criterionId?: number | null;
+    name: string;
+    maxScore?: number | null;
+};
+
+export type AssignmentEvaluationCriteriaUpdateRequest = {
+    criteria: AssignmentEvaluationCriterionRequest[];
+};
+
+export type AssignmentEvaluationScoreRequest = {
+    criterionId: number;
+    score: number;
+};
+
+export type AssignmentEvaluationSaveRequest = {
+    feedback?: string | null;
+    scores: AssignmentEvaluationScoreRequest[];
+};
+
+export type AssignmentEvaluationItemResponse = {
+    criterionId: number;
+    name: string;
+    displayOrder: number;
+    maxScore: number;
+    score: number;
+};
+
+export type AssignmentSubmissionEvaluationResponse = {
+    evaluationId?: number | null;
+    submissionId: number;
+    assignmentId: number;
+    participantId: number;
+    lateOnSubmission: boolean;
+    evaluatorUserId?: number | null;
+    evaluatorName?: string | null;
+    feedback?: string | null;
+    evaluatedAt?: string | null;
+    updatedAt?: string | null;
+    criteria: AssignmentEvaluationItemResponse[];
+};
+
+export type AssignmentEvaluationOverviewSummary = {
+    participantCount: number;
+    evaluatedCount: number;
+    averageTotalScore?: number | null;
+    highestTotalScore?: number | null;
+    lowestTotalScore?: number | null;
+};
+
+export type AssignmentEvaluationOverviewScore = {
+    criterionId: number;
+    criterionName: string;
+    displayOrder: number;
+    maxScore: number;
+    score?: number | null;
+};
+
+export type AssignmentEvaluationOverviewRow = {
+    participantId: number;
+    submissionId?: number | null;
+    participantType: AssignmentParticipantType;
+    participantName: string;
+    teamName?: string | null;
+    submissionStatus: AssignmentParticipantStatus;
+    lateSubmitted: boolean;
+    totalScore?: number | null;
+    submittedAt?: string | null;
+    evaluatedAt?: string | null;
+    scores: AssignmentEvaluationOverviewScore[];
+};
+
+export type AssignmentEvaluationOverviewResponse = {
+    assignmentId: number;
+    assignmentName: string;
+    criteria: AssignmentEvaluationCriterionResponse[];
+    summary: AssignmentEvaluationOverviewSummary;
+    rows: AssignmentEvaluationOverviewRow[];
+};
+
 export async function createAssignment( // 과제 생성
     externalActivityId: number | string,
     request: CreateAssignmentRequest
@@ -889,6 +976,59 @@ export async function getAssignmentSubmissions( // 과제 전체 제출물 조�
 ): Promise<AssignmentSubmissionResponse[]> {
     return api<AssignmentSubmissionResponse[]>(
         `/assignments/${assignmentId}/submissions`,
+        { method: "GET" }
+    );
+}
+
+export async function getAssignmentEvaluationCriteria(
+    assignmentId: number | string
+): Promise<AssignmentEvaluationCriterionResponse[]> {
+    return api<AssignmentEvaluationCriterionResponse[]>(
+        `/assignments/${assignmentId}/evaluation-criteria`,
+        { method: "GET" }
+    );
+}
+
+export async function updateAssignmentEvaluationCriteria(
+    assignmentId: number | string,
+    request: AssignmentEvaluationCriteriaUpdateRequest
+): Promise<AssignmentEvaluationCriterionResponse[]> {
+    return api<AssignmentEvaluationCriterionResponse[]>(
+        `/assignments/${assignmentId}/evaluation-criteria`,
+        {
+            method: "PUT",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getSubmissionEvaluation(
+    submissionId: number | string
+): Promise<AssignmentSubmissionEvaluationResponse> {
+    return api<AssignmentSubmissionEvaluationResponse>(
+        `/submissions/${submissionId}/evaluation`,
+        { method: "GET" }
+    );
+}
+
+export async function saveSubmissionEvaluation(
+    submissionId: number | string,
+    request: AssignmentEvaluationSaveRequest
+): Promise<AssignmentSubmissionEvaluationResponse> {
+    return api<AssignmentSubmissionEvaluationResponse>(
+        `/submissions/${submissionId}/evaluation`,
+        {
+            method: "PUT",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getAssignmentEvaluationOverview(
+    assignmentId: number | string
+): Promise<AssignmentEvaluationOverviewResponse> {
+    return api<AssignmentEvaluationOverviewResponse>(
+        `/assignments/${assignmentId}/evaluations/overview`,
         { method: "GET" }
     );
 }

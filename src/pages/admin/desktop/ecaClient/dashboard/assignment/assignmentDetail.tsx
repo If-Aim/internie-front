@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { deleteAssignment, downloadAssignmentSubmissionsZip, getAssignmentSubmissions, getExternalActivity } from "../../../../../../api/ea";
 import type { AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFileResponse } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeYYDotForUser } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./assignmentDetail.css";
 
@@ -120,19 +120,7 @@ function getSubmissionStatusClass(status: SubmissionStatus): string {
 }
 
 function formatSubmittedAt(value?: string | null): string {
-    if (!value) return "-";
-
-    const date = parseServerKstDateTime(value);
-
-    if (!date) return value;
-
-    const year = String(date.getFullYear()).slice(2);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
-
-    return `${year}.${month}.${day}. ${hour}:${minute}`;
+    return formatServerKstDateTimeYYDotForUser(value);
 }
 
 function getSubmissionFiles(files: SubmissionFileResponse[]): SubmissionFileResponse[] {
@@ -606,7 +594,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                     </span>
 
                                     <strong>{row.participantName}</strong>
-
+{/* 
                                     <span className="eca-admin-assignment-detail-submission-result">
                                         {getSubmissionFiles(row.files).length > 0 ? (
                                             <em>{getSubmissionFileName(getSubmissionFiles(row.files))}</em>
@@ -625,7 +613,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                         ))}
 
                                         {row.files.length === 0 ? "-" : null}
-                                    </span>
+                                    </span> */}
 
                                     {row.status === "LATE_SUBMITTED" ? (
                                         <i className={getSubmissionStatusClass(row.status)}>

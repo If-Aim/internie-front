@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { createAssignment, getAssignment, getExternalActivity, getExternalActivityTeams, updateAssignmentMeta, updateAssignmentSchedule, updateAssignmentAssignees, updateAssignmentTeamConfiguration, } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSystemForm, ExternalActivityParticipant, ExternalActivityResponse, InlineTeamCreateRequest, TeamResponse, } from "../../../../../../api/ea";
@@ -6,6 +7,7 @@ import { localDateTimeInputToServerKstParts, serverKstDateAndTimeToUserDate, ser
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./newAssignment.css";
 import "./../../ecaCalendar.css";
+import i18n from "../../../../../../i18n";
 
 type DropdownType = "systemForm" | "resultForm" | null;
 
@@ -56,16 +58,16 @@ type EditableTeam = {
 const WEEK_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 const SYSTEM_FORM_OPTIONS: { label: string; value: AssignmentSystemForm }[] = [
-    { label: "개인", value: "INDIVIDUAL" },
-    { label: "팀", value: "TEAM" },
+    { label: "ecaAdmin.assignmentPage.systemForm.individual", value: "INDIVIDUAL" },
+    { label: "ecaAdmin.assignmentPage.systemForm.team", value: "TEAM" },
 ];
 
 const RESULT_FORM_OPTIONS: { label: string; subLabel: string; value: AssignmentResultForm }[] = [
-    { label: "문서", subLabel: "DOCX, HWP, PPT, PDF 등", value: "WRITING" },
-    { label: "이미지", subLabel: "PNG, JPG, JPEG 등", value: "IMAGE" },
-    { label: "영상", subLabel: "MP4, MOV, AVI 등", value: "VIDEO" },
-    { label: "링크", subLabel: "인스타그램, 유튜브 등", value: "LINK" },
-    { label: "기타", subLabel: "", value: "ETC" },
+    { label: "ecaAdmin.assignmentPage.resultForm.writing", subLabel: "ecaAdmin.assignmentPage.resultForm.writingFormats", value: "WRITING" },
+    { label: "ecaAdmin.assignmentPage.resultForm.image", subLabel: "ecaAdmin.assignmentPage.resultForm.imageFormats", value: "IMAGE" },
+    { label: "ecaAdmin.assignmentPage.resultForm.video", subLabel: "ecaAdmin.assignmentPage.resultForm.videoFormats", value: "VIDEO" },
+    { label: "ecaAdmin.assignmentPage.resultForm.link", subLabel: "ecaAdmin.assignmentPage.resultForm.linkFormats", value: "LINK" },
+    { label: "ecaAdmin.assignmentPage.resultForm.etc", subLabel: "", value: "ETC" },
 ];
 
 function normalizeApiTime(value?: string | null): string | null {
@@ -97,7 +99,7 @@ function toSelectableParticipant(participant: ExternalActivityParticipant): Sele
 
     return {
         userId: participant.userId,
-        name: participant.name ?? "이름 없음",
+        name: participant.name ?? i18n.t("ecaAdmin.noName"),
         schoolName: participant.schoolName ?? "-",
         email: participant.email ?? null,
         profileImage: participant.profileImage ?? null,
@@ -116,7 +118,7 @@ function toExistingAssignmentTeamOptions(activity: ExternalActivityResponse): Ex
                 new Map(
                     teamParticipants.map((participant) => [
                         participant.teamId as number,
-                        participant.teamName ?? `팀 ${participant.teamId}`,
+                        participant.teamName?.trim() || i18n.t("ecaAdmin.assignmentPage.teamNameFallback", { teamId: participant.teamId }),
                     ])
                 ).entries()
             );
@@ -259,6 +261,36 @@ function splitTime(value: string): { hour: string; minute: string } {
 
 function joinTime(hour: string, minute: string): string {
     return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+}
+
+function buildLocalDateTime(date: Date, time: string): Date | null {
+    const { hour, minute } = splitTime(time);
+    const nextDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        Number(hour),
+        Number(minute),
+        0
+    );
+
+    if (Number.isNaN(nextDate.getTime())) return null;
+
+    return nextDate;
+}
+
+function isValidAssignmentPeriod(
+    startDate: Date,
+    startTime: string,
+    endDate: Date,
+    endTime: string
+): boolean {
+    const start = buildLocalDateTime(startDate, startTime);
+    const end = buildLocalDateTime(endDate, endTime);
+
+    if (!start || !end) return false;
+
+    return end.getTime() >= start.getTime();
 }
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, "0"));
@@ -437,7 +469,7 @@ function CalendarRange({
     
     const activeTime = mode === "endOnly" ? (endTime ?? "23:59") : (startTime ?? "00:00");
     const activeTimeParts = splitTime(activeTime);
-    const timeLabel = mode === "endOnly" ? "마감시간" : "시작시간";
+    const timeLabel = mode === "endOnly" ? i18n.t("ecaAdmin.assignmentPage.endTime") : i18n.t("ecaAdmin.assignmentPage.startTime");
 
     function updateHour(hour: string): void {
         const nextTime = joinTime(hour, activeTimeParts.minute);
@@ -469,10 +501,10 @@ function CalendarRange({
                 <div className="eca-cal-header-bottom">
                     <div className="eca-cal-title">{title}</div>
                     <div className="eca-cal-nav">
-                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label="이전 달">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, -1))} aria-label={i18n.t("ecaAdmin.assignmentPage.prevMonth")}>
                             <img className="icon" src="/icons/Previous (Stroke).svg" alt="" />
                         </button>
-                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label="다음 달">
+                        <button type="button" className="eca-cal-nav-btn" onClick={() => setCursor(addMonths(cursor, 1))} aria-label={i18n.t("ecaAdmin.assignmentPage.nextMonth")}>
                             <img className="icon" src="/icons/Next (Stroke).svg" alt="" />
                         </button>
                     </div>
@@ -515,7 +547,7 @@ function CalendarRange({
 
             {showTime ? (
                 <div className="eca-cal-time-panel">
-                    <div className="eca-cal-time-icon" aria-label="시간 선택">
+                    <div className="eca-cal-time-icon" aria-label={i18n.t("ecaAdmin.assignmentPage.selectTime")}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path d="M10.64 11.76L11.76 10.64L8.8 7.68V4H7.2V8.32L10.64 11.76ZM8 16C6.89333 16 5.85333 15.79 4.88 15.37C3.90667 14.95 3.06 14.38 2.34 13.66C1.62 12.94 1.05 12.0933 0.63 11.12C0.21 10.1467 0 9.10667 0 8C0 6.89333 0.21 5.85333 0.63 4.88C1.05 3.90667 1.62 3.06 2.34 2.34C3.06 1.62 3.90667 1.05 4.88 0.63C5.85333 0.21 6.89333 0 8 0C9.10667 0 10.1467 0.21 11.12 0.63C12.0933 1.05 12.94 1.62 13.66 2.34C14.38 3.06 14.95 3.90667 15.37 4.88C15.79 5.85333 16 6.89333 16 8C16 9.10667 15.79 10.1467 15.37 11.12C14.95 12.0933 14.38 12.94 13.66 13.66C12.94 14.38 12.0933 14.95 11.12 15.37C10.1467 15.79 9.10667 16 8 16ZM8 14.4C9.77333 14.4 11.2833 13.7767 12.53 12.53C13.7767 11.2833 14.4 9.77333 14.4 8C14.4 6.22667 13.7767 4.71667 12.53 3.47C11.2833 2.22333 9.77333 1.6 8 1.6C6.22667 1.6 4.71667 2.22333 3.47 3.47C2.22333 4.71667 1.6 6.22667 1.6 8C1.6 9.77333 2.22333 11.2833 3.47 12.53C4.71667 13.7767 6.22667 14.4 8 14.4Z" fill="#808080"/>
                         </svg>
@@ -524,7 +556,7 @@ function CalendarRange({
                      <span className="eca-cal-time-label">{timeLabel}</span>
 
                     <CalendarTimeUnitSelect
-                        label="시"
+                        label={i18n.t("ecaAdmin.assignmentPage.hour")}
                         value={activeTimeParts.hour}
                         options={HOUR_OPTIONS}
                         open={openTimePicker === "hour"}
@@ -533,7 +565,7 @@ function CalendarRange({
                     />
 
                     <CalendarTimeUnitSelect
-                        label="분"
+                        label={i18n.t("ecaAdmin.assignmentPage.minute")}
                         value={activeTimeParts.minute}
                         options={MINUTE_OPTIONS}
                         open={openTimePicker === "minute"}
@@ -547,6 +579,7 @@ function CalendarRange({
 }
 
 function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
+    const { t } = useTranslation();
     const memberTextRef = React.useRef<HTMLElement | null>(null);
     const [displayText, setDisplayText] = React.useState("-");
 
@@ -579,7 +612,7 @@ function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
             const visibleNames = names.slice(0, visibleCount).join(", ");
             const hiddenCount = names.length - visibleCount;
             const nextText = hiddenCount > 0
-                ? `${visibleNames} 외 ${hiddenCount}명`
+                ? `${visibleNames} ` + t("ecaAdmin.assignmentPage.andMorePerson", { count: hiddenCount })
                 : visibleNames;
 
             if (context.measureText(nextText).width <= availableWidth) {
@@ -590,7 +623,7 @@ function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
 
         const fallbackText = names.length === 1
             ? names[0]
-            : `외 ${names.length}명`;
+            : t("ecaAdmin.assignmentPage.andMorePerson", { count: names.length })
 
         setDisplayText(fallbackText);
     }, [names]);
@@ -624,6 +657,8 @@ function TeamMemberNames({ names }: { names: string[] }): React.ReactElement {
 
 export default function EcaNewAssignmentPage(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
     const { externalActivityId, assignmentId } = useParams<{
         externalActivityId?: string;
         assignmentId?: string;
@@ -705,7 +740,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             if (organizationLoading) return;
 
             if (!organization?.organizationId || !externalActivityId) {
-                setError("대외활동 정보를 찾을 수 없습니다.");
+                setError(t("ecaAdmin.assignmentPage.assignmentOrActivityNotFound"));
                 return;
             }
 
@@ -722,7 +757,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 ]);
 
                 if (activityData.manageableByMe === false) {
-                    window.alert("해당 대외활동의 관리 권한이 없습니다.");
+                    window.alert(t("ecaAdmin.assignmentPage.noManagePermission"));
                     navigate(`/program-admin/activities/${externalActivityId}/dashboard`, { replace: true });
                     return;
                 }
@@ -797,15 +832,15 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 setExistingAssignmentTeamOptions([]);
                 setSelectedExistingAssignmentId(null);
                 setSelectedExistingTeamIds([]);
-                setError(isEditMode ? "과제 정보를 불러오지 못했습니다." : "대외활동 정보를 불러오지 못했습니다.");
+                setError(isEditMode ? t("ecaAdmin.assignmentPage.assignmentDetailLoadFailed") : t("ecaAdmin.assignmentPage.activityLoadFailed"));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchPageData();
-    }, [assignmentId, organization?.organizationId, organizationLoading, externalActivityId, isEditMode, navigate]);
-
+    }, [assignmentId, organization?.organizationId, organizationLoading, externalActivityId, isEditMode, navigate, t]);
+    
     React.useEffect(() => {
         function handleMouseDown(e: MouseEvent): void {
             if (!cardRef.current) return;
@@ -813,9 +848,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
             setOpenDropdown(null);
         }
-
         document.addEventListener("mousedown", handleMouseDown);
-
         return () => {
             document.removeEventListener("mousedown", handleMouseDown);
         };
@@ -899,10 +932,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         };
     }, [openTeamMemberMenuUserId]);
     
-    const selectedSystemFormLabel = SYSTEM_FORM_OPTIONS.find((option) => option.value === systemForm)?.label ?? "개인";
+    const selectedSystemFormLabelKey = SYSTEM_FORM_OPTIONS.find((option) => option.value === systemForm)?.label ?? "ecaAdmin.systemForm.individual";
     const selectedResultForms = RESULT_FORM_OPTIONS.filter((option) => resultForms.includes(option.value));
     const selectedParticipantText = React.useMemo(() => {
-        if (selectedUserIds.length === 0) return "참여자를 선택하세요";
+        if (selectedUserIds.length === 0) return t("ecaAdmin.assignmentPage.selectParticipants");
 
         const selectedParticipants = participants
             .filter((participant) => selectedUserIds.includes(participant.userId))
@@ -910,11 +943,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
         const firstParticipant = selectedParticipants[0];
 
-        if (!firstParticipant) return "참여자를 선택하세요";
+        if (!firstParticipant) return t("ecaAdmin.assignmentPage.selectParticipants");
         if (selectedParticipants.length === 1) return firstParticipant.name;
 
-        return `@ ${firstParticipant.name} 외 ${selectedParticipants.length - 1}명`;
-    }, [participants, selectedUserIds]);
+        return `@ ${firstParticipant.name} ` + t("ecaAdmin.assignmentPage.andMorePerson", { count: selectedParticipants.length - 1 });
+    }, [participants, selectedUserIds, t]);
     const canSelectSystemForm = selectedUserIds.length > 0;
     const filteredParticipants = participants.filter((participant) =>
         participant.name.toLowerCase().includes(participantSearch.trim().toLowerCase())
@@ -982,7 +1015,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     const formValid = React.useMemo(() => {
         if (!name.trim()) return false;
-        if (endDate.getTime() < startDate.getTime()) return false;
+        if (!isValidAssignmentPeriod(startDate, startTime, endDate, endTime)) return false;
         if (resultForms.length === 0) return false;
 
         if (systemForm === "INDIVIDUAL") {
@@ -1013,12 +1046,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         return false;
-    }, [draftTeams, endDate, name, resultForms.length, selectedExistingTeamIds, selectedExistingTeamMemberUserIds, selectedUserIds, startDate, systemForm, teamBuildMode, teamCount]);
+    }, [draftTeams, endDate, endTime, name, resultForms.length, selectedExistingTeamIds, selectedExistingTeamMemberUserIds, selectedUserIds, startDate, startTime, systemForm, teamBuildMode, teamCount]);
 
     
     function toggleDropdown(type: DropdownType): void {
         if (type === "systemForm" && !canSelectSystemForm) {
-            alert("참여자를 먼저 선택해주세요.");
+            alert(t("ecaAdmin.assignmentPage.selectParticipantsFirst"));
             setOpenDatePicker(null);
             setOpenDropdown(null);
             return;
@@ -1079,7 +1112,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     function openParticipantModal(): void {
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 이 과제의 참여자는 변경할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.participantLockedBySubmission"));
             return;
         }
 
@@ -1118,7 +1151,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         if (!firstParticipant) return "";
         if (selectedParticipants.length === 1) return `@ ${firstParticipant.name}`;
 
-        return `@ ${firstParticipant.name} 외 ${selectedParticipants.length - 1}명`;
+        return `@ ${firstParticipant.name} ` + t("ecaAdmin.assignmentPage.andMorePerson", { count: selectedParticipants.length - 1 });
     }
 
     function getAssignedUserIds(): Set<number> {
@@ -1171,29 +1204,29 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         if (selectedParticipants.length === 0) return "";
         if (selectedParticipants.length === 1) return `@ ${selectedParticipants[0].name}`;
 
-        return `@ ${selectedParticipants[0].name} 외 ${selectedParticipants.length - 1}명`;
+        return `@ ${selectedParticipants[0].name} ` + t("ecaAdmin.assignmentPage.andMorePerson", { count: selectedParticipants.length - 1 });
     }
 
     function addCurrentTeam(): void {
         const maxCount = Number(teamCount);
 
         if (!Number.isInteger(maxCount) || maxCount < 1) {
-            setModalError("팀 개수를 먼저 입력해주세요.");
+            setModalError(t("ecaAdmin.assignmentPage.enterTeamCountFirst"));
             return;
         }
 
         if (draftTeams.length >= maxCount) {
-            setModalError("입력한 팀 개수만큼 이미 팀을 생성했습니다.");
+            setModalError(t("ecaAdmin.assignmentPage.teamCountReached"));
             return;
         }
 
         if (!currentTeamName.trim()) {
-            setModalError("팀 이름을 입력해주세요.");
+            setModalError(t("ecaAdmin.assignmentPage.enterTeamName"));
             return;
         }
 
         if (currentTeamMemberIds.length === 0) {
-            setModalError("팀원을 선택해주세요.");
+            setModalError(t("ecaAdmin.assignmentPage.selectTeamMembers"));
             return;
         }
 
@@ -1255,7 +1288,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     function confirmTeamMode(): void {
         if (teamBuildMode === "EXISTING") {
             if (matchedExistingAssignmentTeamOptions.length === 0) {
-                setError("입력한 팀 개수와 일치하는 이전 팀 과제가 없습니다.");
+                setError(t("ecaAdmin.assignmentPage.noMatchingPreviousTeam"));
                 return;
             }
 
@@ -1282,12 +1315,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     function confirmExistingTeamSelect(): void {
         if (selectedExistingTeamIds.length === 0) {
-            setError("사용할 이전 팀을 선택해주세요.");
+            setError(t("ecaAdmin.assignmentPage.selectPreviousTeam"));
             return;
         }
 
         if (!areSameUserIdSets(selectedUserIds, selectedExistingTeamMemberUserIds)) {
-            window.alert("현재 선택한 과제 참여자와 이전 팀의 팀원이 일치하지 않습니다. 참여자 명단을 다시 확인해주세요.");
+            window.alert(t("ecaAdmin.assignmentPage.participantTeamMismatch"));
             return;
         }
 
@@ -1304,9 +1337,9 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     function getSelectedExistingAssignmentLabel(): string {
         const selectedOption = matchedExistingAssignmentTeamOptions.find((option) => option.assignmentId === selectedExistingAssignmentId);
 
-        if (!selectedOption) return "이전 팀을 선택하세요";
+        if (!selectedOption) return t("ecaAdmin.assignmentPage.selectPreviousTeamPlaceholder");
 
-        return `${selectedOption.assignmentName} (${selectedOption.teamIds.length}개 팀)`;
+        return `${selectedOption.assignmentName} (${i18n.t("ecaAdmin.assignmentPage.teamCountSuffix", { count: selectedOption.teamIds.length })})`;
     }
 
     function closeTeamCreateModal(): void {
@@ -1349,14 +1382,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     function addEditableTeam(): void {
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 팀을 추가할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotAddTeamBySubmission"));
             return;
         }
 
         const nextTeam: EditableTeam = {
             teamClientId: crypto.randomUUID(),
             teamId: null,
-            name: `새 팀 ${editableTeams.length + 1}`,
+            name: t("ecaAdmin.assignmentPage.newTeamWithNumber", { number: editableTeams.length + 1 }),
             members: [],
         };
 
@@ -1373,16 +1406,16 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 팀을 삭제할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotDeleteTeamBySubmission"));
             return;
         }
 
         if (editableTeams.length <= 1) {
-            window.alert("팀 과제에는 최소 1개의 팀이 필요합니다.");
+            window.alert(t("ecaAdmin.assignmentPage.minOneTeamRequired"));
             return;
         }
 
-        const confirmed = window.confirm(`${selectedEditableTeam.name}을(를) 삭제하시겠습니까?`);
+        const confirmed = window.confirm(t("ecaAdmin.assignmentPage.confirmDeleteTeam", { name: selectedEditableTeam.name }));
 
         if (!confirmed) {
             return;
@@ -1400,7 +1433,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         setMoveTargetTeamClientId(null);
 
         if (removedTeamHadMembers) {
-            window.alert("삭제한 팀의 팀원은 미배정 상태가 되었습니다. 다른 팀에 다시 배정해주세요.");
+            window.alert(t("ecaAdmin.assignmentPage.removedTeamMembersUnassigned"));
         }
     }
 
@@ -1408,21 +1441,21 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         if (teamEditSaving) return;
 
         if (!assignmentId || !externalActivityId) {
-            window.alert("과제 또는 대외활동 정보를 찾을 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.assignmentOrActivityNotFound"));
             return;
         }
 
         const blankNameTeam = editableTeams.find((team) => !team.name.trim());
 
         if (blankNameTeam) {
-            window.alert("팀 이름을 입력해주세요.");
+            window.alert(t("ecaAdmin.assignmentPage.enterTeamName"));
             return;
         }
 
         const emptyTeam = editableTeams.find((team) => team.members.length === 0);
 
         if (emptyTeam) {
-            window.alert("모든 팀에는 최소 1명의 팀원이 필요합니다.");
+            window.alert(t("ecaAdmin.assignmentPage.minOneMemberPerTeam"));
             return;
         }
 
@@ -1431,7 +1464,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         );
 
         if (noLeaderTeam) {
-            window.alert("모든 팀에는 팀장이 필요합니다.");
+            window.alert(t("ecaAdmin.assignmentPage.leaderRequiredPerTeam"));
             return;
         }
 
@@ -1476,7 +1509,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
             const message = e instanceof Error && e.message
                 ? e.message
-                : "팀 구성을 저장하지 못했습니다.";
+                : t("ecaAdmin.assignmentPage.teamSaveFailed");
 
             window.alert(message);
         } finally {
@@ -1507,7 +1540,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         participant: SelectableParticipant
     ): void {
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 팀원은 추가할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotAddMemberBySubmission"));
             return;
         }
 
@@ -1516,7 +1549,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         );
 
         if (alreadyAssigned) {
-            window.alert("이미 다른 팀에 배정된 참여자입니다.");
+            window.alert(t("ecaAdmin.assignmentPage.alreadyAssignedToTeam"));
             return;
         }
 
@@ -1544,19 +1577,19 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     function openMoveMemberSelect(teamClientId: string, member: EditableTeamMember): void {
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 팀원은 이동할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotMoveMemberBySubmission"));
             return;
         }
 
         if (member.role === "LEADER") {
-            window.alert("팀장은 바로 이동할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotMoveLeaderDirectly"));
             return;
         }
 
         const firstTargetTeam = editableTeams.find((team) => team.teamClientId !== teamClientId);
 
         if (!firstTargetTeam) {
-            window.alert("이동할 다른 팀이 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.noOtherTeamToMove"));
             return;
         }
 
@@ -1576,7 +1609,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         const movingMemberData = sourceTeam?.members.find((member) => member.userId === movingMember.userId);
 
         if (!movingMemberData) {
-            window.alert("이동할 팀원 정보를 찾을 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.movingMemberNotFound"));
             return;
         }
 
@@ -1615,28 +1648,28 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         member: EditableTeamMember
     ): void {
         if (isTeamMemberConfigurationLocked) {
-            window.alert("제출물이 존재하여 팀원은 제외할 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotRemoveMemberBySubmission"));
             return;
         }
 
         const targetTeam = editableTeams.find((team) => team.teamClientId === teamClientId);
 
         if (!targetTeam) {
-            window.alert("팀 정보를 찾을 수 없습니다.");
+            window.alert(t("ecaAdmin.assignmentPage.teamNotFound"));
             return;
         }
 
         if (member.role === "LEADER") {
-            window.alert("팀장은 바로 제외할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.");
+            window.alert(t("ecaAdmin.assignmentPage.cannotRemoveLeaderDirectly"));
             return;
         }
 
         if (targetTeam.members.length <= 1) {
-            window.alert("모든 팀에는 최소 1명의 팀원이 필요합니다.");
+            window.alert(t("ecaAdmin.assignmentPage.minOneMemberPerTeam"));
             return;
         }
 
-        const confirmed = window.confirm(`${member.userName}님을 팀에서 제외하시겠습니까?`);
+        const confirmed = window.confirm(t("ecaAdmin.assignmentPage.confirmRemoveMember", { name: member.userName }));
 
         if (!confirmed) return;
 
@@ -1665,19 +1698,24 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }
 
     function alertUnassignedEditableParticipants(): void {
-        window.alert("팀이 지정되지 않은 참가자가 있습니다. 팀을 생성하거나 기존 팀에 포함시켜 주세요.");
+        window.alert(t("ecaAdmin.assignmentPage.unassignedParticipants"));
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
 
         if (!externalActivityId) {
-            setError("대외활동 정보를 찾을 수 없습니다.");
+            setError(t("ecaAdmin.programNotFound"));
             return;
         }
 
         if (!formValid || resultForms.length === 0) {
-            setError("필수 항목을 모두 입력해주세요.");
+            setError(t("ecaAdmin.assignmentPage.fillAllRequired"));
+            return;
+        }
+
+        if (!isValidAssignmentPeriod(startDate, startTime, endDate, endTime)) {
+            setError(t("error.failSetEndTime"));
             return;
         }
 
@@ -1687,7 +1725,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 teamBuildMode === "EXISTING" &&
                 !areSameUserIdSets(selectedUserIds, selectedExistingTeamMemberUserIds)
             ) {
-                setError("불러온 이전 팀의 전체 팀원이 현재 선택한 과제 참여자와 일치해야 합니다.");
+                setError(t("ecaAdmin.assignmentPage.existingTeamMembersMustMatch"));
                 return;
             }
 
@@ -1696,7 +1734,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 teamBuildMode === "NEW" &&
                 !areSameUserIdSets(selectedUserIds, draftTeamMemberUserIds)
             ) {
-                setError("선택한 과제 참여자가 모두 팀에 배정되어야 합니다.");
+                setError(t("ecaAdmin.assignmentPage.allParticipantsMustBeAssigned"));
                 return;
             }
 
@@ -1728,7 +1766,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 navigate(-1);
             } catch (e) {
                 console.error(e);
-                setError("과제를 저장하지 못했습니다.");
+                setError(t("ecaAdmin.assignmentPage.assignmentSaveFailed"));
             } finally {
                 setSaving(false);
             }
@@ -1737,7 +1775,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         }
 
         if (!assignmentId || !editingAssignment) {
-            setError("수정할 과제 정보를 찾을 수 없습니다.");
+            setError(t("ecaAdmin.assignmentPage.editAssignmentNotFound"));
             return;
         }
 
@@ -1745,7 +1783,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             const currentAssigneeUserIds = editingAssignment.assigneeUserIds ?? [];
 
             if (!areSameUserIdSets(selectedUserIds, currentAssigneeUserIds)) {
-                setError("팀 과제 참여자 변경은 팀 구성 현황의 수정 버튼에서 팀 배정까지 완료한 뒤 저장해주세요.");
+                setError(t("ecaAdmin.assignmentPage.teamParticipantChangeGuide"));
                 return;
             }
         }
@@ -1821,7 +1859,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
             const message = e instanceof Error && e.message
                 ? e.message
-                : "과제를 수정하지 못했습니다.";
+                : t("ecaAdmin.assignmentPage.assignmentEditFailed");
 
             setError(message);
         } finally {
@@ -1837,36 +1875,36 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
             <div className={"eca-admin-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode")}>
                 <div className="eca-admin-new-assignment-top">
                     <div className="eca-admin-new-assignment-top-left">
-                        <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} aria-label="뒤로가기">
+                        <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} aria-label={t("ecaAdmin.goBack")}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
 
-                        <h1>{isEditMode ? "과제 수정하기" : "새로운 과제 생성"}</h1>
+                        <h1>{isEditMode ? t("ecaAdmin.assignmentPage.editAssignmentTitle") : t("ecaAdmin.assignmentPage.newAssignmentTitle")}</h1>
                     </div>
 
                     <button type="button" className="eca-admin-new-assignment-temp-button" disabled>
-                        임시저장
+                        {t("ecaAdmin.assignmentPage.tempSave")}
                     </button>
                 </div>
 
                 <form className="eca-admin-new-assignment-card" onSubmit={handleSubmit} ref={cardRef}>
                     <div className="eca-admin-new-assignment-field">
                         <label htmlFor="assignmentName">
-                            과제명<span>*</span>
+                            {t("ecaAdmin.assignmentPage.assignmentName")}<span>*</span>
                         </label>
                         <input
                             id="assignmentName"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="내용을 입력하세요"
+                            placeholder={t("ecaAdmin.assignmentPage.enterContent")}
                         />
                     </div>
 
                     <div className="eca-admin-new-assignment-field">
                         <label>
-                            과제 수행 기간<span>*</span>
+                            {t("ecaAdmin.assignmentPage.assignmentPeriod")}<span>*</span>
                         </label>
                         <div className="eca-admin-new-assignment-date-row">
                             <div className="eca-admin-new-assignment-date-box">
@@ -1922,15 +1960,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     </div>
 
                     <div className="eca-admin-new-assignment-field">
-                        <label>
-                            참여자<span>*</span>
-                        </label>
+                        <label>{t("ecaAdmin.participant")}<span>*</span></label>
                         <div className="eca-admin-new-assignment-participant-row">
                             <button type="button" className={ "eca-admin-new-assignment-participant-input" + (selectedUserIds.length === 0 ? " is-placeholder" : "") } onClick={openParticipantModal} > 
                                 {selectedParticipantText}
                             </button>
                             <button type="button" className="eca-admin-new-assignment-participant-button" onClick={openParticipantModal}>
-                                {selectedUserIds.length > 0 ? "편집" : "선택"}
+                                {selectedUserIds.length > 0 ? t("common.edit") : t("common.select")}
                             </button>
                         </div>
                     </div>
@@ -1938,12 +1974,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     <div className="eca-admin-new-assignment-field">
                         <div className="eca-admin-new-assignment-system-row">
                             <div>
-                                <label>
-                                    과제 방식<span>*</span>
-                                </label>
+                                <label>{t("ecaAdmin.assignmentSystemForm")}<span>*</span></label>
                                 <div className="eca-admin-new-assignment-dropdown-wrap">
                                     <button type="button" className="eca-admin-new-assignment-select" onClick={() => toggleDropdown("systemForm")}>
-                                        <span>{selectedSystemFormLabel}</span>
+                                        <span>{t(selectedSystemFormLabelKey)}</span>
                                         <div className="eca-admin-new-assignment-chevron">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                 <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1963,7 +1997,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                         setOpenDropdown(null);
                                                     }}
                                                 >
-                                                    {option.label}
+                                                    {t(option.label)}
                                                 </button>
                                             ))}
                                         </div>
@@ -1973,9 +2007,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                             {systemForm === "TEAM" && !isEditMode ? (
                                 <div>
-                                    <label htmlFor="teamCount">
-                                        팀 수<span>*</span>
-                                    </label>
+                                    <label htmlFor="teamCount">{t("ecaAdmin.assignmentPage.teamCount")}<span>*</span></label>
                                     <input
                                         id="teamCount"
                                         className="eca-admin-new-assignment-team-count-input"
@@ -1983,10 +2015,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         inputMode="numeric"
                                         value={teamCount}
                                         onChange={handleTeamCountChange}
-                                        placeholder="숫자만 입력해주세요"
+                                        placeholder={t("ecaAdmin.assignmentPage.numberOnlyPlaceholder")}
                                     />
                                     <button type="button" className="eca-admin-new-assignment-team-build-button" onClick={openTeamModeModal} disabled={!teamCount}>
-                                        팀 빌딩
+                                        {t("ecaAdmin.assignmentPage.teamBuilding")}
                                     </button>
                                 </div>
                             ) : null}
@@ -1996,25 +2028,21 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     {isEditMode && systemForm === "TEAM" ? (
                         <div className="eca-admin-new-assignment-field eca-assignment-edit-team-status">
                             <div className="eca-assignment-edit-team-status-head">
-                                <label>
-                                    팀 구성 현황<span>*</span>
-                                </label>
+                                <label>{t("ecaAdmin.assignmentPage.teamStatus")}<span>*</span></label>
                                 <button type="button" className="eca-assignment-edit-team-status-button" onClick={openTeamEditModal}>
-                                    수정
+                                    {t("ecaAdmin.assignmentPage.modify")}
                                 </button>
                             </div>
 
                             <div className="eca-assignment-edit-team-table-head">
-                                <span>팀명</span>
-                                <span>팀장</span>
-                                <span>팀원</span>
+                                <span>{t("ecaAdmin.assignmentPage.teamName")}</span>
+                                <span>{t("ecaAdmin.assignmentPage.teamLeader")}</span>
+                                <span>{t("ecaAdmin.assignmentPage.teamMembers")}</span>
                             </div>
 
                             <div className="eca-assignment-edit-team-table-body">
                                 {editTeamSummaries.length === 0 ? (
-                                    <p className="eca-admin-new-assignment-empty">
-                                        연결된 팀 정보가 없습니다.
-                                    </p>
+                                    <p className="eca-admin-new-assignment-empty">{t("ecaAdmin.assignmentPage.noLinkedTeam")}</p>
                                 ) : (
                                     editTeamSummaries.map((team) => (
                                         <div key={team.teamId} className="eca-assignment-edit-team-row" >
@@ -2029,23 +2057,20 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     ) : null}
 
                     <div className="eca-admin-new-assignment-field">
-                        <label>
-                            과제 산출물<span>*</span>
-                        </label>
-
+                        <label>{t("ecaAdmin.assignmentPage.assignmentDeliverable")}<span>*</span></label>
                         <div className="eca-admin-new-assignment-dropdown-wrap--result" ref={resultFormDropdownRef}>
                                 <button type="button" className={ "eca-admin-new-assignment-select" + (selectedResultForms.length === 0 ? " is-placeholder" : "") } onClick={() => toggleDropdown("resultForm")} > 
                                     <span>
-                                    {selectedResultForms.length > 0
-                                        ? selectedResultForms
-                                            .map((option) => (
-                                                option.subLabel
-                                                    ? `${option.label} (${option.subLabel})`
-                                                    : option.label
-                                            ))
-                                            .join(", ")
-                                        : "내용을 선택하세요"}
-                                </span>
+                                        {selectedResultForms.length > 0
+                                            ? selectedResultForms
+                                                .map((option) => (
+                                                    option.subLabel
+                                                        ? `${t(option.label)} (${t(option.subLabel)})`
+                                                        : t(option.label)
+                                                ))
+                                                .join(", ")
+                                            : t("ecaAdmin.assignmentPage.selectContent")}
+                                    </span>
 
                                 <div className="eca-admin-new-assignment-chevron">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -2062,8 +2087,8 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         return (
                                             <label key={option.value} className={"eca-admin-new-assignment-result-option" + (checked ? " is-selected" : "")} >
                                                 <input type="checkbox" checked={checked} onChange={() => toggleResultForm(option.value)} />
-                                                <strong>{option.label}</strong>
-                                                {option.subLabel ? <small>({option.subLabel})</small> : null}
+                                                <strong>{t(option.label)}</strong>
+                                                {option.subLabel ? <small>({t(option.subLabel)})</small> : null}
                                             </label>
                                         );
                                     })}
@@ -2073,10 +2098,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     </div>
 
                     {error ? <p className="eca-admin-new-assignment-error">{error}</p> : null}
-                    {loading ? <p className="eca-admin-new-assignment-info">대외활동 정보를 불러오는 중입니다.</p> : null}
+                    {loading ? <p className="eca-admin-new-assignment-info">{t("ecaAdmin.assignmentPage.activityLoading")}</p> : null}
 
-                     <button type="submit" className="eca-admin-new-assignment-save-button" disabled={saving || loading || (!isEditMode && !formValid)} >
-                        {saving ? isEditMode ? "수정 중" : "저장 중" : "저장"}
+                    <button type="submit" className="eca-admin-new-assignment-save-button" disabled={saving || loading || (!isEditMode && !formValid)} >
+                        {saving ? (isEditMode ? t("ecaAdmin.assignmentPage.editing") : t("ecaAdmin.assignmentPage.saving")) : t("ecaAdmin.assignmentPage.save")}
                     </button>
                 </form>
             </div>
@@ -2085,14 +2110,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 <div className="eca-assignment-participant-modal-backdrop" onMouseDown={closeParticipantModal}>
                     <div className="eca-assignment-participant-modal" onMouseDown={handleParticipantModalMouseDown}>
                         <div className="eca-assignment-participant-modal-header">
-                            <h3>참여자 명단</h3>
-                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeParticipantModal} aria-label="닫기">
+                            <h3>{t("ecaAdmin.assignmentPage.participantList")}</h3>
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeParticipantModal}     aria-label={t("common.close")}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-assignment-participant-modal-body">
-                            <strong className="eca-assignment-participant-modal-title">활동 참여자를 선택하세요</strong>
+                            <strong className="eca-assignment-participant-modal-title">{t("ecaAdmin.assignmentPage.selectActivityParticipants")}</strong>
 
                             <div className="eca-assignment-participant-search-wrap" ref={participantSearchWrapRef}>
                                 <input
@@ -2110,17 +2135,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         setParticipantSearch(e.target.value);
                                         setParticipantDropdownOpen(true);
                                     }}
-                                    placeholder="@ 학생A"
+                                    placeholder={t("ecaAdmin.assignmentPage.participantSearchExample")}
                                 />
 
                                 {participantDropdownOpen ? (
                                     <div className="eca-assignment-participant-dropdown">
                                         <div className="eca-assignment-participant-dropdown-top">
-                                            <span>{selectedUserIds.length}명 / {participants.length}명</span>
+                                            <span>{t("ecaAdmin.assignmentPage.selectedOfTotal", { selected: selectedUserIds.length, total: participants.length })}</span>
 
                                             <div className="eca-assignment-participant-dropdown-actions">
-                                                <button type="button" onClick={resetUsers}>초기화</button>
-                                                <button type="button" onClick={selectAllUsers}>전체선택</button>
+                                                <button type="button" onClick={resetUsers}>{t("ecaAdmin.reset")}</button>
+                                                <button type="button" onClick={selectAllUsers}>{t("ecaAdmin.assignmentPage.selectAll")}</button>
                                             </div>
                                         </div>
 
@@ -2142,13 +2167,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                         />
 
                                                         <strong>{participant.name}</strong>
-                                                        <small>{participant.email}</small>
+                                                        {/* <small>{participant.email}</small> */}
                                                     </label>
                                                 );
                                             })}
 
                                             {filteredParticipants.length === 0 ? (
-                                                <p className="eca-assignment-participant-empty">검색 결과가 없습니다.</p>
+                                                <p className="eca-assignment-participant-empty">{t("ecaAdmin.noSearchResults")}</p>
                                             ) : null}
                                         </div>
                                     </div>
@@ -2158,7 +2183,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                         <div className="eca-assignment-participant-modal-footer">
                             <button type="button" className="eca-assignment-participant-confirm-button" onClick={closeParticipantModal}>
-                                확인
+                                {t("common.confirm")}
                             </button>
                         </div>
                     </div>
@@ -2169,14 +2194,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 <div className="eca-assignment-participant-modal-backdrop" onMouseDown={() => setTeamModeModalOpen(false)}>
                     <div className="eca-team-mode-modal" onMouseDown={(e) => e.stopPropagation()}>
                         <div className="eca-assignment-participant-modal-header">
-                            <h3>팀 빌딩</h3>
-                            <button type="button" className="eca-assignment-participant-modal-close" onClick={() => setTeamModeModalOpen(false)} aria-label="닫기">
+                            <h3>{t("ecaAdmin.assignmentPage.teamBuilding")}</h3>
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={() => setTeamModeModalOpen(false)} aria-label={t("common.close")}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-team-mode-body">
-                            <strong>팀 선정 방식</strong>
+                            <strong>{t("ecaAdmin.assignmentPage.teamBuildingMode")}</strong>
 
                             <div className="eca-team-mode-options">
                                 <label className={"eca-team-mode-option" + (teamBuildMode === "EXISTING" ? " is-selected" : "") + (matchedExistingAssignmentTeamOptions.length === 0 ? " is-disabled" : "")}>
@@ -2192,7 +2217,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             setSelectedExistingTeamIds(firstOption?.teamIds ?? []);
                                         }}
                                     />
-                                    <span>이전 팀 불러오기</span>
+                                    <span>{t("ecaAdmin.assignmentPage.loadPreviousTeam")}</span>
                                 </label>
 
                                 <label className={"eca-team-mode-option" + (teamBuildMode === "NEW" ? " is-selected" : "")}>
@@ -2204,14 +2229,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             setSelectedExistingTeamIds([]);
                                         }}
                                     />
-                                    <span>새로 만들기</span>
+                                    <span>{t("ecaAdmin.assignmentPage.createNewTeam")}</span>
                                 </label>
                             </div>
                         </div>
 
                         <div className="eca-assignment-participant-modal-footer">
                             <button type="button" className="eca-assignment-participant-confirm-button" onClick={confirmTeamMode}>
-                                확인
+                                {t("common.confirm")}
                             </button>
                         </div>
                     </div>
@@ -2222,14 +2247,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 <div className="eca-assignment-participant-modal-backdrop" onMouseDown={closeExistingTeamSelectModal}>
                     <div className="eca-team-existing-modal" onMouseDown={(e) => e.stopPropagation()}>
                         <div className="eca-assignment-participant-modal-header">
-                            <h3>팀 빌딩</h3>
-                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeExistingTeamSelectModal} aria-label="닫기">
+                            <h3>{t("ecaAdmin.assignmentPage.teamBuilding")}</h3>
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeExistingTeamSelectModal} aria-label={t("common.close")}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-team-existing-body">
-                            <strong>불러올 팀 과제를 선택하세요</strong>
+                            <strong>{t("ecaAdmin.assignmentPage.selectAssignmentToLoad")}</strong>
 
                             <div className="eca-team-existing-select-wrap" ref={existingTeamListWrapRef}>
                                 <button type="button" className="eca-team-existing-selected" onClick={() => setExistingTeamListOpen((prev) => !prev)} >
@@ -2253,16 +2278,16 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                 >
                                                     <span className="eca-team-existing-radio" />
                                                     <span className="eca-team-existing-text">
-                                                        <strong>{option.assignmentName}</strong>
+                                                        <strong>{t("ecaAdmin.assignmentPage.selectAssignmentToLoad")}</strong>
                                                         <small>{option.teamNames.join(", ")}</small>
                                                     </span>
-                                                    <em>{option.teamIds.length}개 팀</em>
+                                                    <em>{t("ecaAdmin.assignmentPage.teamCountSuffix", { count: option.teamIds.length })}</em>
                                                 </button>
                                             );
                                         })}
 
                                         {matchedExistingAssignmentTeamOptions.length === 0 ? (
-                                            <p className="eca-assignment-participant-empty">입력한 팀 개수와 일치하는 이전 팀 과제가 없습니다.</p>
+                                            <p className="eca-assignment-participant-empty">{t("ecaAdmin.assignmentPage.noMatchingPreviousTeam")}</p>
                                         ) : null}
                                     </div>
                                 ) : null}
@@ -2271,11 +2296,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                         <div className="eca-assignment-participant-modal-footer eca-team-build-footer">
                             <button type="button" className="eca-team-build-back-button" onClick={() => { setExistingTeamListOpen(false); setExistingTeamSelectModalOpen(false); setTeamModeModalOpen(true); }} >
-                                이전
+                                {t("common.prev")}
                             </button>
 
                             <button type="button" className="eca-assignment-participant-confirm-button" onClick={confirmExistingTeamSelect} >
-                                확인
+                                {t("common.confirm")}
                             </button>
                         </div>
                     </div>
@@ -2286,15 +2311,15 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 <div className="eca-assignment-participant-modal-backdrop" onMouseDown={closeTeamCreateModal}>
                     <div className="eca-team-create-modal" onMouseDown={(e) => { e.stopPropagation();  if (!(e.target as HTMLElement).closest(".eca-team-member-picker")) { setTeamMemberDropdownOpen(false); } }} >
                         <div className="eca-assignment-participant-modal-header">
-                            <h3>팀 빌딩</h3>
-                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeTeamCreateModal} aria-label="닫기">
+                            <h3>{t("ecaAdmin.assignmentPage.teamBuilding")}</h3>
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeTeamCreateModal}  aria-label={t("common.close")}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-team-create-body">
                             <div className="eca-team-create-field">
-                                <label htmlFor="currentTeamName">팀 이름</label>
+                                <label htmlFor="currentTeamName">{t("ecaAdmin.assignmentPage.teamName")}</label>
                                 <input
                                     id="currentTeamName"
                                     value={currentTeamName}
@@ -2302,14 +2327,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         setCurrentTeamName(e.target.value);
                                         setModalError("");
                                     }}
-                                    placeholder="팀 이름을 입력하세요"
+                                    placeholder={t("ecaAdmin.assignmentPage.enterTeamName")}
                                 />
                             </div>
 
                             <div className="eca-team-create-field">
                                 <div className="eca-team-create-field-label-row">
-                                    <label>팀원을 선택하세요</label>
-                                    <span>첫 번째로 선택한 팀원이 팀장으로 자동 지정됩니다</span>
+                                    <label>{t("ecaAdmin.assignmentPage.selectTeamMembers")}</label>
+                                    <span>{t("ecaAdmin.assignmentPage.firstMemberAutoLeader")}</span>
                                 </div>
                                 <div className="eca-team-member-picker" onMouseDown={(e) => e.stopPropagation()}>
                                     <div className="eca-team-member-picker-row">
@@ -2325,7 +2350,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                     setTeamMemberSearch(e.target.value);
                                                     setTeamMemberDropdownOpen(true);
                                                 }}
-                                                placeholder="선택해주세요"
+                                                placeholder={t("ecaAdmin.assignmentPage.selectPlaceholder")}
                                             />
 
                                             <button
@@ -2335,7 +2360,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                     setTeamMemberDropdownOpen((prev) => !prev);
                                                     setTeamMemberSearch("");
                                                 }}
-                                                aria-label="팀원 목록 열기"
+                                                aria-label={t("ecaAdmin.assignmentPage.openTeamMemberList")}
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                     <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -2344,18 +2369,18 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         </div>
 
                                         <button type="button" className={"eca-team-create-decide-button" + (currentTeamMemberIds.length > 0 ? " is-active" : "")} onClick={addCurrentTeam}>
-                                            결정
+                                            {t("ecaAdmin.assignmentPage.decide")}
                                         </button>
                                     </div>
 
                                     {teamMemberDropdownOpen ? (
                                         <div className="eca-team-member-dropdown">
                                             <div className="eca-team-member-dropdown-top">
-                                                <span>{currentTeamMemberIds.length}명 / {getCurrentAvailableParticipants().length}명</span>
+                                                <span>{t("ecaAdmin.assignmentPage.selectedOfTotal", { selected: currentTeamMemberIds.length, total: getCurrentAvailableParticipants().length })}</span>
 
                                                 <div className="eca-team-member-dropdown-actions">
-                                                    <button type="button" onClick={resetCurrentTeamMembers}>초기화</button>
-                                                    <button type="button" onClick={selectAllCurrentAvailableMembers}>전체선택</button>
+                                                    <button type="button" onClick={resetCurrentTeamMembers}>{t("ecaAdmin.reset")}</button>
+                                                    <button type="button" onClick={selectAllCurrentAvailableMembers}>{t("ecaAdmin.assignmentPage.selectAll")}</button>
                                                 </div>
                                             </div>
 
@@ -2377,7 +2402,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                             </span>
                                                             <strong>{participant.name}</strong>
                                                             <span className="eca-team-member-info">
-                                                                <b className={isLeader ? "" : "is-empty"}>팀장</b>
+                                                                <b className={isLeader ? "" : "is-empty"}>{t("ecaAdmin.assignmentPage.teamLeader")}</b>
                                                                 <small>{participant.email ?? participant.schoolName}</small>
                                                             </span>
                                                         </label>
@@ -2385,7 +2410,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                 })}
 
                                                 {getCurrentAvailableParticipants().length === 0 ? (
-                                                    <p className="eca-assignment-participant-empty">선택 가능한 참여자가 없습니다.</p>
+                                                    <p className="eca-assignment-participant-empty">{t("ecaAdmin.assignmentPage.noAvailableParticipants")}</p>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -2393,7 +2418,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                 </div>
                                 <div className="eca-team-created-count">
                                     <strong>{draftTeams.length}/{Number(teamCount) || 0}</strong>
-                                    <span>팀</span>
+                                    <span>{t("ecaAdmin.assignmentPage.teamUnit")}</span>
                                 </div>
                                 <div className="eca-team-created-tags">
                                     {draftTeams.map((team) => (
@@ -2413,11 +2438,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                         <div className="eca-assignment-participant-modal-footer eca-team-build-footer">
                             <button type="button" className="eca-team-build-back-button" onClick={() => { setTeamMemberDropdownOpen(false); setTeamCreateModalOpen(false); setTeamModeModalOpen(true); }} >
-                                이전
+                                {t("common.prev")}
                             </button>
 
                             <button type="button" className="eca-assignment-participant-confirm-button" onClick={closeTeamCreateModal} disabled={!canConfirmNewTeamBuild}>
-                                확인
+                                {t("common.confirm")}
                             </button>
                         </div>
                     </div>
@@ -2428,38 +2453,36 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                 <div className="eca-assignment-participant-modal-backdrop" onMouseDown={closeTeamEditModal}>
                     <div className="eca-team-edit-modal" onMouseDown={(e) => e.stopPropagation()}>
                         <div className="eca-team-edit-header">
-                            <h3>팀 빌딩 수정</h3>
+                            <h3>{t("ecaAdmin.assignmentPage.editTeamBuilding")}</h3>
 
-                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeTeamEditModal} aria-label="닫기" >
+                            <button type="button" className="eca-assignment-participant-modal-close" onClick={closeTeamEditModal} aria-label={t("common.close")} >
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-team-edit-summary">
                             <div>
-                                <span>전체 팀:</span>
-                                <strong>{editableTeams.length}개</strong>
+                                <span>{t("ecaAdmin.assignmentPage.totalTeams")}</span>
+                                <strong>{t("ecaAdmin.assignmentPage.countUnit", { count: editableTeams.length })}</strong>  
                             </div>
 
                             <div>
-                                <span>배정 인원:</span>
-                                <strong>{assignedEditableMemberCount}명</strong>
+                                <span>{t("ecaAdmin.assignmentPage.assignedMembers")}</span>
+                                <strong>{t("ecaAdmin.countPerson", { count: assignedEditableMemberCount })}</strong>
                             </div>
 
                             <div>
-                                <span>미배정 인원:</span>
-                                <strong>{unassignedEditableMemberCount}명</strong>
+                                <span>{t("ecaAdmin.assignmentPage.unassignedMembers")}</span>
+                                <strong>{t("ecaAdmin.countPerson", { count: unassignedEditableMemberCount })}</strong>
                             </div>
                         </div>
                         {isTeamMemberConfigurationLocked ? (
-                            <p className="eca-assignment-team-edit-lock-guide">
-                                제출물이 존재하여 참여자 및 팀원 구성은 변경할 수 없습니다. 팀명과 팀장은 수정할 수 있습니다.
-                            </p>
+                            <p className="eca-assignment-team-edit-lock-guide">{t("ecaAdmin.assignmentPage.teamMemberConfigLocked")}</p>
                         ) : null}
 
                         <div className="eca-team-edit-body">
                             <section className="eca-team-edit-left-panel">
-                                <strong className="eca-team-edit-panel-title">팀 목록</strong>
+                                <strong className="eca-team-edit-panel-title">{t("ecaAdmin.assignmentPage.teamList")}</strong>
 
                                 <div className="eca-team-edit-team-list">
                                     {editableTeams.map((team) => (
@@ -2488,7 +2511,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73699 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73699 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
                                         </svg>
                                     </span>
-                                    팀 추가
+                                    {t("ecaAdmin.assignmentPage.addTeam")}
                                 </button>
                             </section>
 
@@ -2499,12 +2522,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             <h4>{selectedEditableTeam.name}</h4>
 
                                             <button type="button" className="eca-team-edit-delete-team-button" onClick={deleteSelectedEditableTeam} disabled={isTeamMemberConfigurationLocked} > 
-                                                팀 삭제
+                                                {t("ecaAdmin.assignmentPage.deleteTeam")}
                                             </button>
                                         </div>
 
                                         <div className="eca-team-edit-name-field">
-                                            <label htmlFor="editableTeamName">팀명</label>
+                                            <label htmlFor="editableTeamName">{t("ecaAdmin.assignmentPage.teamName")}</label>
                                             <input
                                                 id="editableTeamName"
                                                 value={selectedEditableTeam.name}
@@ -2523,7 +2546,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         </div>
 
                                         <div className="eca-team-edit-member-section">
-                                            <strong>팀원</strong>
+                                            <strong>{t("ecaAdmin.assignmentPage.teamMembers")}</strong>
 
                                             <div className="eca-team-edit-member-list">
                                                 {selectedEditableTeam.members.map((member) => (
@@ -2531,7 +2554,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                         <span>{member.userName}</span>
 
                                                         {member.role === "LEADER" ? (
-                                                            <em>팀장</em>
+                                                            <em>{t("ecaAdmin.assignmentPage.teamLeader")}</em>
                                                         ) : null}
 
                                                         <div className="eca-team-edit-member-more-wrap" ref={openTeamMemberMenuUserId === member.userId ? teamEditMemberMenuWrapRef : null}>
@@ -2543,7 +2566,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                                         prev === member.userId ? null : member.userId
                                                                     );
                                                                 }}
-                                                                aria-label="팀원 메뉴"
+                                                                aria-label={t("ecaAdmin.assignmentPage.teamMemberMenu")}
                                                             >
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="3" height="13" viewBox="0 0 3 13" fill="none">
                                                                     <circle cx="1.5" cy="1.5" r="1.5" fill="#D9D9D9"/>
@@ -2555,28 +2578,17 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                             {openTeamMemberMenuUserId === member.userId ? (
                                                                 <div className="eca-team-edit-member-menu">
                                                                     {member.role !== "LEADER" ? (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleChangeTeamLeader(selectedEditableTeam.teamClientId, member.userId)}
-                                                                        >
-                                                                            팀장으로 지정
+                                                                        <button type="button" onClick={() => handleChangeTeamLeader(selectedEditableTeam.teamClientId, member.userId)} >
+                                                                            {t("ecaAdmin.assignmentPage.assignAsLeader")}
                                                                         </button>
                                                                     ) : null}
 
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => openMoveMemberSelect(selectedEditableTeam.teamClientId, member)}
-                                                                        disabled={isTeamMemberConfigurationLocked}
-                                                                    >
-                                                                        다른 팀으로 이동
+                                                                    <button type="button" onClick={() => openMoveMemberSelect(selectedEditableTeam.teamClientId, member)} disabled={isTeamMemberConfigurationLocked}>
+                                                                        {t("ecaAdmin.assignmentPage.moveToAnotherTeam")}
                                                                     </button>
 
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveEditableTeamMember(selectedEditableTeam.teamClientId, member)}
-                                                                        disabled={isTeamMemberConfigurationLocked}
-                                                                    >
-                                                                        팀에서 제외
+                                                                    <button type="button" onClick={() => handleRemoveEditableTeamMember(selectedEditableTeam.teamClientId, member)}disabled={isTeamMemberConfigurationLocked}>
+                                                                        {t("ecaAdmin.assignmentPage.removeFromTeam")}
                                                                     </button>
                                                                 </div>
                                                             ) : null}
@@ -2586,18 +2598,13 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             </div>
 
                                             <div className="eca-team-edit-add-member-wrap" ref={teamEditAddMemberWrapRef}>
-                                                <button
-                                                    type="button"
-                                                    className="eca-team-edit-add-member-button"
-                                                    onClick={() => setTeamEditAddMemberOpen((prev) => !prev)}
-                                                    disabled={isTeamMemberConfigurationLocked}
-                                                >
+                                                <button type="button" className="eca-team-edit-add-member-button" onClick={() => setTeamEditAddMemberOpen((prev) => !prev)} disabled={isTeamMemberConfigurationLocked}>
                                                     <span>
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                             <path d="M8.00008 2.66699C8.17689 2.66699 8.34646 2.73723 8.47149 2.86225C8.59651 2.98728 8.66675 3.15685 8.66675 3.33366V7.33366H12.6667C12.8436 7.33366 13.0131 7.4039 13.1382 7.52892C13.2632 7.65395 13.3334 7.82351 13.3334 8.00033C13.3334 8.17714 13.2632 8.34671 13.1382 8.47173C13.0131 8.59675 12.8436 8.66699 12.6667 8.66699H8.66675V12.667C8.66675 12.8438 8.59651 13.0134 8.47149 13.1384C8.34646 13.2634 8.17689 13.3337 8.00008 13.3337C7.82327 13.3337 7.6537 13.2634 7.52868 13.1384C7.40365 13.0134 7.33342 12.8438 7.33342 12.667V8.66699H3.33341C3.1566 8.66699 2.98703 8.59675 2.86201 8.47173C2.73698 8.34671 2.66675 8.17714 2.66675 8.00033C2.66675 7.82351 2.73698 7.65395 2.86201 7.52892C2.98703 7.4039 3.1566 7.33366 3.33341 7.33366H7.33342V3.33366C7.33342 3.15685 7.40365 2.98728 7.52868 2.86225C7.6537 2.73723 7.82327 2.66699 8.00008 2.66699Z" fill="#0166FF"/>
                                                         </svg>
                                                     </span>
-                                                    팀원 추가
+                                                    {t("ecaAdmin.assignmentPage.removeFromTeam")}
                                                 </button>
 
                                                 {teamEditAddMemberOpen && selectedEditableTeam ? (
@@ -2606,23 +2613,19 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                                             type="text"
                                                             value={teamEditAddMemberSearch}
                                                             onChange={(e) => setTeamEditAddMemberSearch(e.target.value)}
-                                                            placeholder="추가할 참가자 검색"
+                                                            placeholder={t("ecaAdmin.assignmentPage.searchParticipantToAdd")}
                                                         />
 
                                                         <div className="eca-team-edit-add-member-list">
                                                             {filteredUnassignedEditableParticipants.map((participant) => (
-                                                                <button
-                                                                    type="button"
-                                                                    key={participant.userId}
-                                                                    onClick={() => handleAddEditableTeamMember(selectedEditableTeam.teamClientId, participant)}
-                                                                >
+                                                                <button type="button" key={participant.userId} onClick={() => handleAddEditableTeamMember(selectedEditableTeam.teamClientId, participant)} >
                                                                     <strong>{participant.name}</strong>
                                                                     <span>{participant.email ?? participant.schoolName}</span>
                                                                 </button>
                                                             ))}
 
                                                             {filteredUnassignedEditableParticipants.length === 0 ? (
-                                                                <p>추가 가능한 참가자가 없습니다.</p>
+                                                                <p>{t("ecaAdmin.assignmentPage.noAddableParticipants")}</p>
                                                             ) : null}
                                                         </div>
                                                     </div>
@@ -2631,14 +2634,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                         </div>
                                     </>
                                 ) : (
-                                    <p className="eca-admin-new-assignment-empty">표시할 팀이 없습니다.</p>
+                                    <p className="eca-admin-new-assignment-empty">{t("ecaAdmin.assignmentPage.noTeamsToDisplay")}</p>
                                 )}
                             </section>
                         </div>
 
                         {movingMember ? (
                             <div className="eca-team-edit-move-panel">
-                                <strong>{movingMember.userName}님이 이동할 팀을 선택하세요</strong>
+                                <strong>{t("ecaAdmin.assignmentPage.moveMemberTargetTeam", { name: movingMember.userName })}</strong>
 
                                 <div className="eca-team-edit-move-row">
                                     <select
@@ -2654,22 +2657,12 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                                             ))}
                                     </select>
 
-                                    <button
-                                        type="button"
-                                        onClick={confirmMoveMember}
-                                        disabled={!moveTargetTeamClientId || teamEditSaving}
-                                    >
-                                        이동
+                                    <button type="button" onClick={confirmMoveMember} disabled={!moveTargetTeamClientId || teamEditSaving}> 
+                                        {t("common.move")}
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setMovingMember(null);
-                                            setMoveTargetTeamClientId(null);
-                                        }}
-                                    >
-                                        취소
+                                    <button type="button" onClick={() => { setMovingMember(null); setMoveTargetTeamClientId(null); }}>
+                                        {t("common.cancel")}
                                     </button>
                                 </div>
                             </div>
@@ -2677,11 +2670,11 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
                         <div className="eca-team-edit-footer">
                             <button type="button" className="eca-team-edit-cancel-button" onClick={closeTeamEditModal} disabled={teamEditSaving}>
-                                취소
+                                {t("common.cancel")}
                             </button>
 
                             <button type="button" className="eca-team-edit-confirm-button" onClick={handleConfirmTeamEdit} disabled={teamEditSaving || unassignedEditableMemberCount > 0} >
-                                {teamEditSaving ? "저장 중" : "확인"}
+                                {teamEditSaving ? t("ecaAdmin.assignmentPage.saving") : t("common.confirm")}
                             </button>
                         </div>
                     </div>

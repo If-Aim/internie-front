@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, SubmissionFileResponse } from "../../../../../../api/ea";
-import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateAndTimeCompactForUser, formatServerKstDateTimeDotForUser } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAssignmentSubmit.css";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 
@@ -19,19 +19,7 @@ function formatDateTime(date?: string | null, time?: string | null, fallbackTime
 }
 
 function formatSubmittedAt(value?: string | null): string {
-    if (!value) return "-";
-
-    const date = parseServerKstDateTime(value);
-
-    if (!date) return value;
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
-
-    return `${year}.${month}.${day} ${hour}:${minute}`;
+    return formatServerKstDateTimeDotForUser(value);
 }
 
 function getLatestSubmittedAt(submission: AssignmentSubmissionResponse): string {

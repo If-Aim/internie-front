@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMyAttendanceEvents, getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { getUserDateOnly, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileDashboard.css";
 
 type MobileScheduleItem = {
@@ -14,8 +14,34 @@ type MobileScheduleItem = {
     completed: boolean;
 };
 
+function formatDateOnlyDot(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}.${month}.${day}.`;
+}
+
+function parseDateOnlyLocal(value?: string | null): Date | null {
+    if (!value) return null;
+
+    const [year, month, day] = value.split("-").map(Number);
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+        return null;
+    }
+
+    const date = new Date(year, month - 1, day);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+}
+
 function formatToday(): string {
-    const date = new Date();
+    const date = getUserDateOnly();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     const weekdays = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
@@ -26,38 +52,27 @@ function formatToday(): string {
 function formatDate(value?: string | null): string {
     if (!value) return "-";
 
-    const date = value.includes("T") ? parseServerKstDateTime(value) : null;
+    if (value.includes("T")) {
+        const userDate = serverKstDateTimeToUserDateOnly(value);
 
-    if (date) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-
-        return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}.`;
+        return userDate ? formatDateOnlyDot(userDate) : value;
     }
 
-    const dateText = value.includes("T") ? value.split("T")[0] : value;
-    const [year, month, day] = dateText.split("-").map(Number);
+    const date = parseDateOnlyLocal(value);
 
-    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
-        return value;
-    }
-
-    return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}.`;
+    return date ? formatDateOnlyDot(date) : value;
 }
 
 function getDateProgressRate(startDate?: string | null, endDate?: string | null): number {
-    if (!startDate || !endDate) return 0;
+    const start = parseDateOnlyLocal(startDate);
+    const end = parseDateOnlyLocal(endDate);
 
-    const today = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    if (!start || !end) return 0;
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
-
-    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-    const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-    const endDateOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
+    const today = getUserDateOnly();
+    const todayDate = today.getTime();
+    const startDateOnly = start.getTime();
+    const endDateOnly = end.getTime();
     const oneDay = 1000 * 60 * 60 * 24;
 
     if (endDateOnly < startDateOnly) return 0;
@@ -95,7 +110,8 @@ function getAttendanceRate(events: MyAttendanceEventResponse[]): number {
 }
 
 function formatAttendanceScheduleTitle(event: MyAttendanceEventResponse): string {
-    const baseDate = parseServerKstDateTime(event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart);
+    const value = event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
+    const baseDate = serverKstDateTimeToUserDateOnly(value);
 
     if (!baseDate) {
         return `${event.name} ${event.type === "CLASS_START" ? "Start" : "End"}`;

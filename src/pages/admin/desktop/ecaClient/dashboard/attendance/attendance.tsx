@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createAttendanceEvent, downloadAttendanceExcel, getAttendanceEvents, getAttendanceParticipants, getAttendanceSummary } from "../../../../../../api/ea";
 import type { AttendanceEventResponse, AttendanceEventType, AttendanceEventSort, AttendanceParticipantRateResponse, AttendanceParticipantSort, AttendanceSummaryResponse } from "../../../../../../api/ea";
-import { addMinutesToServerKstDateTime, localDateTimeInputToServerKst, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { addMinutesToServerKstDateTime, formatServerKstDateTimeDateLabelForUser, formatServerKstDateTimeTimeForUser, localDateTimeInputToServerKstParts, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import AdminStudentProfileModal from "../AdminStudentProfileModal";
 import type { AdminStudentProfile } from "../AdminStudentProfileModal";
 import "./attendance.css";
@@ -248,29 +248,11 @@ function getEventTypeLabel(type: AttendanceEventResponse["type"]): string {
 }
 
 function getEventReferenceTimeLabel(value?: string | null): string {
-    const date = parseServerKstDateTime(value);
-
-    if (!date) {
-        return "--:--";
-    }
-
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
-
-    return `${hour}:${minute}`;
+    return formatServerKstDateTimeTimeForUser(value);
 }
 
-function getEventDateLabel(value: string): string {
-    const date = new Date(`${value}T00:00:00`);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    const monthDay = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
-    const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
-
-    return `${monthDay}, ${weekday}`;
+function getEventDateLabel(value?: string | null): string {
+    return formatServerKstDateTimeDateLabelForUser(value);
 }
 
 function getPercentLabel(value?: number | null): string {
@@ -739,7 +721,9 @@ export default function EcaAttendancePage(): React.ReactElement {
             return;
         }
 
-        const scoreReferenceAt = localDateTimeInputToServerKst(createDate, attendanceStartTime);
+        const scoreReferenceParts = localDateTimeInputToServerKstParts(createDate, attendanceStartTime);
+        const scoreReferenceAt = scoreReferenceParts.dateTime;
+        const eventDate = scoreReferenceParts.date;
         const scoreReferenceDateTime = parseServerKstDateTime(scoreReferenceAt);
         const halfCreditMinutes = 60;
         const uploadWindowStart = createType === "CLASS_END" ? addMinutesToServerKstDateTime(scoreReferenceAt, -halfCreditMinutes) : scoreReferenceAt;
@@ -754,9 +738,9 @@ export default function EcaAttendancePage(): React.ReactElement {
 
         try {
             await createAttendanceEvent(externalActivityId, {
-                roundNumber: getAutoRoundNumber(events, createDate),
-                name: getAutoAttendanceName(createDate),
-                eventDate: createDate,
+                roundNumber: getAutoRoundNumber(events, eventDate),
+                name: getAutoAttendanceName(eventDate),
+                eventDate,
                 type: createType,
                 uploadWindowStart,
                 scoreReferenceAt,
@@ -868,7 +852,7 @@ export default function EcaAttendancePage(): React.ReactElement {
                             ) : (
                                 events.map((item) => (
                                     <button key={item.eventId} type="button" className="eca-admin-attendance-event-row" onClick={() => handleMoveDetail(item.eventId)}>
-                                        <span className="eca-admin-attendance-event-date">{getEventDateLabel(item.eventDate)}</span>
+                                        <span className="eca-admin-attendance-event-date">{getEventDateLabel(item.scoreReferenceAt)}</span>
                                         <span className="eca-admin-attendance-event-type">
                                             {getEventTypeLabel(item.type)}, {getEventReferenceTimeLabel(item.scoreReferenceAt)}
                                         </span>

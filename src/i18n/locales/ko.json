@@ -174,6 +174,11 @@
   
     "comment_main": "기본 컴포넌트 관련",
     "common": {
+        "prev": "이전",
+        "edit": "편집",
+        "select": "선택",
+        "filter": "필터",
+        "search": "검색",
         "time": "시간",
         "close": "닫기",
         "record": "기록하기",
@@ -184,7 +189,9 @@
         "save": "저장하기",
         "dateRange": "기간",
         "loading": "불러오는 중…",
-        "done": "완료"
+        "done": "완료",
+        "cancel": "취소",
+        "move": "이동"
     },
     "menu": {
         "home": "홈",
@@ -385,6 +392,226 @@
 
     "ECA_admin" : "대외활동 관리자 관련",
     "ecaAdmin" : {
+        "assignmentPage":{   
+            "searchParticipantToAdd": "추가할 참가자 검색",
+            "noAddableParticipants": "추가 가능한 참가자가 없습니다.",
+            "noTeamsToDisplay": "표시할 팀이 없습니다.",
+
+            "addTeam": "팀 추가",
+            "deleteTeam": "팀 삭제",
+            "teamMemberMenu": "팀원 메뉴",
+            "assignAsLeader": "팀장으로 지정",
+            "moveToAnotherTeam": "다른 팀으로 이동",
+            "removeFromTeam": "팀에서 제외",
+            "addTeamMember": "팀원 추가",
+            "teamNameFallback": "팀 {{teamId}}",
+
+            "teamNamePlaceholder": "팀 이름을 입력하세요",
+            "selectTeamMembersLabel": "팀원을 선택하세요",
+            "moveMemberTargetTeam": "{{name}}님이 이동할 팀을 선택하세요",
+            "invalidAssignmentPeriod": "과제 종료 시각은 시작 시각보다 빠를 수 없습니다.",
+
+            "editTeamBuilding": "팀 빌딩 수정",
+            "totalTeams": "전체 팀:",
+            "countUnit": "{{count}}개",
+            "assignedMembers": "배정 인원:",
+            "unassignedMembers": "미배정 인원:",
+            "teamMemberConfigLocked": "제출물이 존재하여 참여자 및 팀원 구성은 변경할 수 없습니다. 팀명과 팀장은 수정할 수 있습니다.",
+            "teamList": "팀 목록",
+
+            "noAvailableParticipants": "선택 가능한 참여자가 없습니다.",
+            "teamUnit": "팀",
+
+            "firstMemberAutoLeader": "첫 번째로 선택한 팀원이 팀장으로 자동 지정됩니다",
+            "selectPlaceholder": "선택해주세요",
+            "openTeamMemberList": "팀원 목록 열기",
+            "decide": "결정",
+
+            "teamCount_display": "{{count}}개 팀",
+
+            "selectAssignmentToLoad": "어떤 과제의 팀을 불러올까요?",
+            "teamBuildingMode": "팀 선정 방식",
+            "loadPreviousTeam": "이전 팀 불러오기",
+            "createNewTeam": "새로 만들기",
+
+            "selectedOfTotal": "{{selected}}명 / {{total}}명",
+            "selectAll": "전체선택",
+
+            "activityLoading": "대외활동 정보를 불러오는 중입니다.",
+            "editing": "수정 중",
+            "saving": "저장 중",
+            "save": "저장",
+            "participantList": "참여자 명단",
+            "selectActivityParticipants": "활동 참여자를 선택하세요",
+            "participantSearchExample": "@ 학생A",
+
+            "teamStatus": "팀 구성 현황",
+            "modify": "수정",
+            "teamName": "팀명",
+            "teamLeader": "팀장",
+            "teamMembers": "팀원",
+            "noLinkedTeam": "연결된 팀 정보가 없습니다.",
+            "assignmentDeliverable": "과제 산출물",
+
+            "teamCount": "팀 수",
+            "numberOnlyPlaceholder": "숫자만 입력해주세요",
+            "teamBuilding": "팀 빌딩",
+
+            "editAssignmentTitle": "과제 수정하기",
+            "newAssignmentTitle": "새로운 과제 생성",
+            "tempSave": "임시저장",
+            "assignmentName": "과제명",
+            "enterContent": "내용을 입력하세요",
+            "assignmentPeriod": "과제 수행 기간",
+
+            "assignmentSaveFailed": "과제를 저장하지 못했습니다.",
+            "editAssignmentNotFound": "수정할 과제 정보를 찾을 수 없습니다.",
+            "teamParticipantChangeGuide": "팀 과제 참여자 변경은 팀 구성 현황의 수정 버튼에서 팀 배정까지 완료한 뒤 저장해주세요.",
+            "assignmentEditFailed": "과제를 수정하지 못했습니다.",
+            
+            "cannotDeleteTeamBySubmission": "제출물이 존재하여 팀을 삭제할 수 없습니다.",
+            "minOneTeamRequired": "팀 과제에는 최소 1개의 팀이 필요합니다.",
+            "confirmDeleteTeam": "{{name}}을(를) 삭제하시겠습니까?",
+            "removedTeamMembersUnassigned": "삭제한 팀의 팀원은 미배정 상태가 되었습니다. 다른 팀에 다시 배정해주세요.",
+            "assignmentOrActivityNotFound": "과제 또는 대외활동 정보를 찾을 수 없습니다.",
+            "minOneMemberPerTeam": "모든 팀에는 최소 1명의 팀원이 필요합니다.",
+            "leaderRequiredPerTeam": "모든 팀에는 팀장이 필요합니다.",
+            "teamSaveFailed": "팀 구성을 저장하지 못했습니다.",
+            "cannotAddMemberBySubmission": "제출물이 존재하여 팀원은 추가할 수 없습니다.",
+            "alreadyAssignedToTeam": "이미 다른 팀에 배정된 참여자입니다.",
+            "cannotMoveMemberBySubmission": "제출물이 존재하여 팀원은 이동할 수 없습니다.",
+            "cannotMoveLeaderDirectly": "팀장은 바로 이동할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.",
+            "noOtherTeamToMove": "이동할 다른 팀이 없습니다.",
+            "movingMemberNotFound": "이동할 팀원 정보를 찾을 수 없습니다.",
+            "cannotRemoveMemberBySubmission": "제출물이 존재하여 팀원은 제외할 수 없습니다.",
+            "teamNotFound": "팀 정보를 찾을 수 없습니다.",
+            "cannotRemoveLeaderDirectly": "팀장은 바로 제외할 수 없습니다. 먼저 다른 팀원을 팀장으로 지정해주세요.",
+            "confirmRemoveMember": "{{name}}님을 팀에서 제외하시겠습니까?",
+            "unassignedParticipants": "팀이 지정되지 않은 참가자가 있습니다. 팀을 생성하거나 기존 팀에 포함시켜 주세요.",
+            "fillAllRequired": "필수 항목을 모두 입력해주세요.",
+            "existingTeamMembersMustMatch": "불러온 이전 팀의 전체 팀원이 현재 선택한 과제 참여자와 일치해야 합니다.",
+            "allParticipantsMustBeAssigned": "선택한 과제 참여자가 모두 팀에 배정되어야 합니다.",
+
+            "cannotAddTeamBySubmission": "제출물이 존재하여 팀을 추가할 수 없습니다.",
+            "newTeamWithNumber": "새 팀 {{number}}",
+
+            "enterTeamCountFirst": "팀 개수를 먼저 입력해주세요.",
+            "teamCountReached": "입력한 팀 개수만큼 이미 팀을 생성했습니다.",
+            "enterTeamName": "팀 이름을 입력해주세요.",
+            "selectTeamMembers": "팀원을 선택해주세요.",
+
+            "noMatchingPreviousTeam": "입력한 팀 개수와 일치하는 이전 팀 정보가 없습니다.",
+            "selectPreviousTeam": "이전 팀을 선택해주세요.",
+            "selectPreviousTeamPlaceholder": "이전 팀을 선택하세요",
+            "participantTeamMismatch": "팀원 구성이 일치하지 않습니다. 참여자 명단을 다시 확인해 주세요.",
+            "teamCountSuffix": "{{count}}개 팀",
+            "selectTime": "시간 선택",
+            "hour": "시",
+            "minute": "분",
+
+            "prevMonth": "이전 달",
+            "nextMonth": "다음 달",
+
+            "startTime": "시작시간",
+            "endTime": "마감시간",
+
+            "selectContent": "내용을 선택하세요",
+            "andMorePerson": "외 {{count}}명",
+
+            "resultForm": {
+                "writing": "문서",
+                "writingFormats": "DOCX, HWP, PPT, PDF 등",
+                "image": "이미지",
+                "imageFormats": "PNG, JPG, JPEG 등",
+                "video": "영상",
+                "videoFormats": "MP4, MOV, AVI 등",
+                "link": "링크",
+                "linkFormats": "인스타그램, 유튜브 등",
+                "etc": "기타"
+            },
+
+            "participant": "참여자",
+            "selectParticipants": "참여자를 선택하세요",
+            "assignmentSystemForm": "팀/개인",
+
+            "download": "다운로드",
+            "nameOrFileSearchPlaceholder": "이름 또는 파일명 검색",
+
+            "participantCount": "참여자 수",
+            "nonSubmitters": "미제출자",
+            "participationRate": "참여율",
+            "countPerson": "{{count}}명",
+            "submissionStatus": "과제 제출 현황 ({{count}})",
+
+            "nonSubmitterCount": "미제출자 ({{count}})",
+            "notifyAll": "전체알림",
+            "noNonSubmitters": "미제출자가 없습니다.",
+            "sendNotification": "알림 보내기",
+
+            "goBack": "뒤로가기",
+            "deleting": "삭제 중",
+            "deleteAction": "삭제하기",
+            "editAction": "수정하기",
+
+            "activityFallback": "대외활동",
+            "assignmentFallback": "과제",
+            "noFilesToDownload": "다운로드할 제출 파일이 없습니다.",
+            "downloadFailed": "파일 다운로드에 실패했습니다.",
+            "noLinkAvailable": "열 수 있는 링크가 없습니다.",
+            "noFileAvailable": "다운로드할 파일이 없습니다.",
+            "submissionNotFound": "제출 정보를 찾을 수 없습니다.",
+            "assignmentDetailLoading": "과제 정보를 불러오는 중입니다.",
+            "confirmDeleteAssignment": "이 과제를 삭제하시겠습니까? 삭제된 과제는 복구할 수 없습니다.",
+            "deleteFailed": "과제 삭제에 실패했습니다.",
+            "submissionFilesLoading": "제출 파일 정보를 불러오는 중입니다.",
+            "noSubmitters": "제출자가 없습니다.",
+            "noManagePermission": "해당 대외활동의 관리 권한이 없습니다.",
+            "activityLoadFailed": "대외활동 정보를 불러오지 못했습니다.",
+            "selectParticipantsFirst": "참여자를 먼저 선택해주세요.",
+            "participantLockedBySubmission": "제출물이 존재하여 이 과제의 참여자는 변경할 수 없습니다.",
+
+            "noName": "이름 없음",
+
+            "andMore": "외 {{count}}개",
+            "link": "링크",
+
+            "assignmentNotFound": "과제 정보를 찾을 수 없습니다.",
+            "assignmentItemNotFound": "해당 과제를 찾을 수 없습니다.",
+            "assignmentDetailLoadFailed": "과제 정보를 불러오지 못했습니다.",
+
+            "submitFilter": {
+                "evaluated": "평가 완료",
+                "beforeEvaluation": "평가 전",
+                "lateSubmitted": "지각 제출",
+                "submitted": "제출 완료",
+                "notSubmitted": "미제출"
+            },
+
+            "systemForm": {
+                "individual": "개인",
+                "team": "팀"
+            },
+            
+            "tableAssignmentName": "과제명",
+            "tableSystemForm": "방식",
+            "tableSubmission": "제출 현황",
+            "tableStatus": "상태",
+            "assignmentLoading": "과제 목록을 불러오는 중입니다.",
+            "noAssignments": "생성된 과제가 없습니다",
+            "noSearchResults": "검색 결과가 없습니다",
+
+            "assignmentSearchPlaceholder": "과제명 검색",
+            "createAssignmentAria": "과제 생성",
+            "programNotFound": "대외활동 정보를 찾을 수 없습니다.",
+            "assignmentLoadFailed": "과제 목록을 불러오지 못했습니다.",
+
+            "assignmentSummary": {
+                "completed": "완료된 과제",
+                "ongoing": "진행 중인 과제",
+                "upcoming": "진행 예정 과제"
+            }
+        },
+        
         "home": "홈",
         "ecaClientAdminSubmenuEmpty": "담당 대외활동이 없습니다",
         "dashboard": "대시보드",
@@ -474,5 +701,4 @@
         "cannotLoadSchedule": "일정 정보를 불러올 수 없습니다. 목록에서 다시 선택해주세요.",
         "invalidAccessMissingEventId": "잘못된 접근입니다. (Event ID 누락)"
     }
-
 }

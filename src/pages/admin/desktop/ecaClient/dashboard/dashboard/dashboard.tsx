@@ -4,7 +4,7 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { ApiError } from "../../../../../../api/client";
 import { createExternalActivityStudentInvite, deleteExternalActivity, getAttendanceEventDetail, getAttendanceEvents, getExternalActivity, getExternalActivityAssignments, getExternalActivityStudentInvites, getExternalActivityTeams } from "../../../../../../api/ea";
 import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, ExternalActivityParticipant } from "../../../../../../api/ea";
-import { parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeDateLabelForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import AdminStudentProfileModal from "../AdminStudentProfileModal";
 import type { AdminStudentProfile } from "../AdminStudentProfileModal";
@@ -164,18 +164,7 @@ function toAssignmentSummary(assignment: AssignmentResponse): AssignmentSummary 
 }
 
 function formatAttendanceEventDate(value?: string | null): string {
-    if (!value) return "-";
-
-    const [year, month, day] = value.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-
-    if (Number.isNaN(date.getTime())) return value;
-
-    return new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-    }).format(date);
+    return formatServerKstDateTimeDateLabelForUser(value);
 }
 
 function getAttendanceEventTypeText(type: AttendanceEventResponse["type"]): string {
@@ -215,7 +204,7 @@ function toAttendanceSummary(
 
     return {
         id: event.eventId,
-        date: formatAttendanceEventDate(event.eventDate),
+        date: formatAttendanceEventDate(event.scoreReferenceAt),
         eventTypeText: getAttendanceEventTypeText(event.type),
         presentCount,
         totalCount: totalParticipantCount,

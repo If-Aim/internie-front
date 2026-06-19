@@ -183,7 +183,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         evidence: "",
     });
     const actionMenuRef = React.useRef<HTMLDivElement | null>(null);
-    
+    const rankingListRef = React.useRef<HTMLDivElement | null>(null);
+    const [rankingListScrollable, setRankingListScrollable] = React.useState(false);
+
     const sortedRankingRows = React.useMemo(() => {
         const copied = [...mockRankingRows];
 
@@ -216,6 +218,32 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             document.removeEventListener("pointerdown", handlePointerDown);
         };
     }, [menuOpen]);
+        
+    React.useLayoutEffect(() => {
+        function updateScrollable(): void {
+            const list = rankingListRef.current;
+
+            if (!list) return;
+
+            setRankingListScrollable(list.scrollHeight > list.clientHeight);
+        }
+
+        updateScrollable();
+
+        const list = rankingListRef.current;
+
+        if (!list) return;
+
+        const resizeObserver = new ResizeObserver(updateScrollable);
+        resizeObserver.observe(list);
+
+        window.addEventListener("resize", updateScrollable);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateScrollable);
+        };
+    }, [activeTab, sortedRankingRows.length]);
 
     function handleRevise(): void {
         setMenuOpen(false);
@@ -233,6 +261,10 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function handleConfirmDelete(): void {
         setDeleteModalOpen(false);
         alert("Delete API 연결 후 삭제 처리하면 됩니다.");
+    }
+
+    function getRankingListClassName(): string {
+        return rankingListScrollable ? "eca-admin-leaderboard-list" : "eca-admin-leaderboard-list eca-admin-leaderboard-list--not-scrollable";
     }
 
     function handleConfirmMissionDelete(): void {
@@ -313,23 +345,18 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                 <div className="eca-admin-leaderboard-toolbar-actions">
                     <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M4 7H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            <path d="M4 12H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            <path d="M4 17H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
                     <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="export">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M12 4V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            <path d="M8 11L12 15L16 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M5 20H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M11.625 15.513C11.5083 15.471 11.4 15.4 11.3 15.3L7.7 11.7C7.5 11.5 7.404 11.2667 7.412 11C7.42 10.7333 7.516 10.5 7.7 10.3C7.9 10.1 8.13767 9.996 8.413 9.988C8.68833 9.98 8.92567 10.0757 9.125 10.275L11 12.15V5C11 4.71667 11.096 4.47934 11.288 4.288C11.48 4.09667 11.7173 4.00067 12 4C12.2827 3.99934 12.5203 4.09534 12.713 4.288C12.9057 4.48067 13.0013 4.718 13 5V12.15L14.875 10.275C15.075 10.075 15.3127 9.979 15.588 9.987C15.8633 9.995 16.1007 10.0993 16.3 10.3C16.4833 10.5 16.5793 10.7333 16.588 11C16.5967 11.2667 16.5007 11.5 16.3 11.7L12.7 15.3C12.6 15.4 12.4917 15.471 12.375 15.513C12.2583 15.555 12.1333 15.5757 12 15.575C11.8667 15.5743 11.7417 15.5537 11.625 15.513ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V16C4 15.7167 4.096 15.4793 4.288 15.288C4.48 15.0967 4.71733 15.0007 5 15C5.28267 14.9993 5.52033 15.0953 5.713 15.288C5.90567 15.4807 6.00133 15.718 6 16V18H18V16C18 15.7167 18.096 15.4793 18.288 15.288C18.48 15.0967 18.7173 15.0007 19 15C19.2827 14.9993 19.5203 15.0953 19.713 15.288C19.9057 15.4807 20.0013 15.718 20 16V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="#A0A0A0"/>
                         </svg>
                     </button>
                     <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="search">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z" stroke="currentColor" strokeWidth="2" />
-                            <path d="M16 16L20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M15.5 14H14.71L14.43 13.73C15.0549 13.0039 15.5117 12.1487 15.7675 11.2256C16.0234 10.3024 16.072 9.33413 15.91 8.38998C15.44 5.60998 13.12 3.38997 10.32 3.04997C9.33559 2.92544 8.33576 3.02775 7.397 3.34906C6.45824 3.67038 5.60542 4.20219 4.90381 4.90381C4.20219 5.60542 3.67038 6.45824 3.34906 7.397C3.02775 8.33576 2.92544 9.33559 3.04997 10.32C3.38997 13.12 5.60998 15.44 8.38998 15.91C9.33413 16.072 10.3024 16.0234 11.2256 15.7675C12.1487 15.5117 13.0039 15.0549 13.73 14.43L14 14.71V15.5L18.25 19.75C18.66 20.16 19.33 20.16 19.74 19.75C20.15 19.34 20.15 18.67 19.74 18.26L15.5 14ZM9.49997 14C7.00997 14 4.99997 11.99 4.99997 9.49997C4.99997 7.00997 7.00997 4.99997 9.49997 4.99997C11.99 4.99997 14 7.00997 14 9.49997C14 11.99 11.99 14 9.49997 14Z" fill="#A0A0A0"/>
                         </svg>
                     </button>
                 </div>
@@ -349,7 +376,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     <span />
                 </div>
 
-                <div className="eca-admin-leaderboard-list">
+                <div ref={rankingListRef} className={getRankingListClassName()}>
                     {sortedRankingRows.map((row, index) => {
                         const rank = index + 1;
                         const isTopRank = rank <= 3;
@@ -528,10 +555,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     <h2>Completed Missions ({completedMissions.length})</h2>
                     <div className="eca-admin-leaderboard-detail-actions">
                         <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter completed missions">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M4 7H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M4 12H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M4 17H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
                         <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="search completed missions">
