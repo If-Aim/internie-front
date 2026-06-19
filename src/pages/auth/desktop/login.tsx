@@ -184,14 +184,20 @@ export default function Login(): React.ReactElement {
 
         window.google.accounts.id.prompt((notification: any) => {
             if (notification.isNotDisplayed?.()) {
-                console.error("Google prompt not displayed", notification.getNotDisplayedReason?.());
-                showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
+                const reason = notification.getNotDisplayedReason?.();
+
+                console.error("Google prompt not displayed", reason);
+
+                showErrorToast(getGoogleLoginGuideMessage(), { guide: true, duration: 8000 });
                 return;
             }
 
             if (notification.isSkippedMoment?.()) {
-                console.error("Google prompt skipped", notification.getSkippedReason?.());
-                showGoogleLoginFailureToast(getGoogleLoginFailedMessage());
+                const reason = notification.getSkippedReason?.();
+
+                console.error("Google prompt skipped", reason);
+
+                showErrorToast(getGoogleLoginGuideMessage(), { guide: true, duration: 8000 });
                 return;
             }
 
