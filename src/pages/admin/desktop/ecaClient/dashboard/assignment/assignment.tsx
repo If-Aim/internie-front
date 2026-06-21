@@ -220,6 +220,16 @@ export default function EcaDashboardAssignment(): React.ReactElement {
         navigate(`/program-admin/activities/${externalActivityId}/assignment/new`);
     }
 
+    function moveToAssignmentDetail(assignmentId: number): void {
+        if (!externalActivityId) return;
+
+        navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignmentId}`, {
+            state: {
+                assignmentDetailEntryDirection: "forward",
+            },
+        });
+    }
+
     return (
         <div className="eca-admin-assignment-page">
             <header className="eca-admin-assignment-head">
@@ -322,12 +332,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
                         <p className="eca-admin-assignment-empty">검색 결과가 없습니다.</p>
                     ) : (
                         filteredAssignments.map((assignment) => (
-                            <button
-                                type="button"
-                                className="eca-admin-assignment-row"
-                                key={assignment.id}
-                                onClick={() => navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignment.id}`)}
-                            >
+                            <button type="button" className="eca-admin-assignment-row" key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)} >
                                 <span className="eca-admin-assignment-name">{assignment.name}</span>
                                 <span>{getSystemFormLabel(assignment.systemForm)}</span>
                                 <span className="eca-admin-assignment-period">{formatPeriod(assignment)}</span>

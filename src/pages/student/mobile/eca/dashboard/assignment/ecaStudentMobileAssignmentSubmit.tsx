@@ -2,8 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
-import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
-import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, SubmissionFileResponse } from "../../../../../../api/ea";
+import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, getSubmissionEvaluation, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
+import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionEvaluationResponse, AssignmentSubmissionResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, SubmissionFileResponse } from "../../../../../../api/ea";
 import { formatServerKstDateAndTimeCompactForUser, formatServerKstDateTimeDotForUser } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAssignmentSubmit.css";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
@@ -125,6 +125,18 @@ function isValidHttpUrl(value: string): boolean {
     }
 }
 
+function getEvaluationTotalScore(evaluation?: AssignmentSubmissionEvaluationResponse | null): number {
+    return evaluation?.criteria.reduce((total, item) => total + item.score, 0) ?? 0;
+}
+
+function getEvaluationTotalMaxScore(evaluation?: AssignmentSubmissionEvaluationResponse | null): number {
+    return evaluation?.criteria.reduce((total, item) => total + item.maxScore, 0) ?? 0;
+}
+
+function isEvaluationCompleted(submission?: AssignmentSubmissionResponse | null, evaluation?: AssignmentSubmissionEvaluationResponse | null): boolean {
+    return submission?.status === "REVIEWED" || !!evaluation?.evaluationId || !!evaluation?.evaluatedAt;
+}
+
 type HeaderProps = {
     activityName: string;
     onMenuClick: () => void;
@@ -168,6 +180,7 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
     const [submitResultModalOpen, setSubmitResultModalOpen] = React.useState(false);
     const [submitResult, setSubmitResult] = React.useState<"success" | "fail">("success");
 
+    const [evaluation, setEvaluation] = React.useState<AssignmentSubmissionEvaluationResponse | null>(null);
     const [studentAssignment, setStudentAssignment] = React.useState<StudentAssignmentResponse | null>(null);
 
     async function fetchMySubmission(targetAssignmentId: string): Promise<void> {
@@ -182,6 +195,19 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
         setInitialExistingFileIds(nextFiles.map((file) => file.submissionFileId));
         setInitialExistingLinkIds(nextLinks.map((file) => file.submissionFileId));
         setLinkUrl("");
+
+        if (!latestSubmission) {
+            setEvaluation(null);
+            return;
+        }
+
+        try {
+            const evaluationData = await getSubmissionEvaluation(latestSubmission.submissionId);
+            setEvaluation(evaluationData);
+        } catch (e) {
+            console.error(e);
+            setEvaluation(null);
+        }
     }
 
     React.useEffect(() => {
@@ -217,6 +243,7 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                 setExistingLinks([]);
                 setFiles([]);
                 setLinkUrl("");
+                setEvaluation(null);
                 setError("과제 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
@@ -240,7 +267,13 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
     const hasFileChange = files.length > 0 || !isSameNumberArray(initialExistingFileIds, currentExistingFileIds);
     const hasLinkChange = trimmedLinkUrl.length > 0 || !isSameNumberArray(initialExistingLinkIds, currentExistingLinkIds);
     const hasSubmissionChange = !mySubmission || hasFileChange || hasLinkChange;
-    const submitDisabled = !hasRequiredSubmission || !hasSubmissionChange || hasInvalidFileType || hasInvalidLink || submitting || loading || !!error;
+
+    const evaluationCompleted = isEvaluationCompleted(mySubmission, evaluation);
+    const evaluationTotalScore = getEvaluationTotalScore(evaluation);
+    const evaluationTotalMaxScore = getEvaluationTotalMaxScore(evaluation);
+    
+    const submitDisabled = evaluationCompleted || !hasRequiredSubmission || !hasSubmissionChange || hasInvalidFileType || hasInvalidLink || submitting || loading || !!error;
+
 
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
@@ -251,10 +284,17 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
     }
 
     function openFilePicker(): void {
+        if (evaluationCompleted) return;
+
         fileInputRef.current?.click();
     }
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>): void {
+        if (evaluationCompleted) {
+            e.target.value = "";
+            return;
+        }
+
         const selectedFiles = Array.from(e.target.files ?? []);
 
         if (selectedFiles.length === 0) return;
@@ -284,14 +324,20 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
     }
 
     function removeFile(fileId: string): void {
+        if (evaluationCompleted) return;
+
         setFiles((prev) => prev.filter((item) => item.id !== fileId));
     }
 
     function removeExistingFile(fileId: number): void {
+        if (evaluationCompleted) return;
+
         setExistingFiles((prev) => prev.filter((file) => file.submissionFileId !== fileId));
     }
 
     function removeExistingLink(fileId: number): void {
+        if (evaluationCompleted) return;
+
         setExistingLinks((prev) => prev.filter((file) => file.submissionFileId !== fileId));
     }
 
@@ -305,7 +351,12 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
     }
 
     async function handleSubmit(): Promise<void> {
-        if (!assignmentId || submitting) return;
+        if (!assignmentId || submitting || evaluationCompleted) return;
+
+        if (!hasRequiredSubmission) {
+            window.alert(acceptsLink && !acceptsFile ? "제출할 링크를 입력해주세요." : "제출할 파일 또는 링크를 입력해주세요.");
+            return;
+        }
 
         if (!hasRequiredSubmission) {
             window.alert(acceptsLink && !acceptsFile ? "제출할 링크를 입력해주세요." : "제출할 파일 또는 링크를 입력해주세요.");
@@ -397,7 +448,7 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
 
                                     <div>
                                         <input value={formatDateTime(assignment?.startDate, assignment?.startTime)} readOnly />
-                                        <em>~</em>
+                                        <em>-</em>
                                         <input value={formatDateTime(assignment?.endDate, assignment?.endTime, "23:59:59")} readOnly />
                                     </div>
                                 </div>
@@ -420,7 +471,7 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
 
                                 {acceptsFile ? (
                                     <>
-                                        <button type="button" className="eca-mobile-student-assignment-upload-box" onClick={openFilePicker}>
+                                        <button type="button" className="eca-mobile-student-assignment-upload-box" onClick={openFilePicker} disabled={evaluationCompleted}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                                                 <path fillRule="evenodd" clipRule="evenodd" d="M16 2.666C14.457 2.666 12.947 3.112 11.651 3.951C10.356 4.79 9.33 5.985 8.699 7.393C8.609 7.595 8.517 7.796 8.423 7.996H8C6.586 7.996 5.229 8.558 4.229 9.558C3.229 10.558 2.667 11.915 2.667 13.329C2.667 14.744 3.229 16.1 4.229 17.1C5.229 18.101 6.586 18.663 8 18.663H8.23L10.896 15.996H8C7.293 15.996 6.615 15.715 6.115 15.215C5.615 14.715 5.334 14.037 5.334 13.329C5.334 12.622 5.615 11.944 6.115 11.444C6.615 10.944 7.293 10.663 8 10.663H8.086C8.363 10.663 8.686 10.664 8.952 10.61C9.284 10.553 9.602 10.431 9.886 10.25C10.207 10.042 10.428 9.783 10.596 9.547C10.699 9.395 10.789 9.234 10.864 9.067C10.935 8.919 11.023 8.728 11.126 8.496C11.546 7.556 12.23 6.758 13.094 6.198C13.958 5.638 14.966 5.34 15.996 5.34C17.026 5.34 18.034 5.638 18.898 6.198C19.762 6.758 20.445 7.556 20.866 8.496C20.978 8.728 21.065 8.919 21.136 9.067C21.198 9.196 21.288 9.384 21.404 9.547C21.572 9.782 21.792 10.042 22.115 10.251C22.438 10.459 22.764 10.554 23.048 10.611C23.315 10.664 23.638 10.664 23.915 10.664H24C24.708 10.664 25.386 10.944 25.886 11.444C26.386 11.944 26.667 12.622 26.667 13.329C26.667 14.037 26.386 14.715 25.886 15.215C25.386 15.715 24.708 15.996 24 15.996H21.104L23.771 18.663H24C25.415 18.663 26.771 18.101 27.772 17.1C28.772 16.1 29.334 14.744 29.334 13.329C29.334 11.915 28.772 10.558 27.772 9.558C26.771 8.558 25.415 7.996 24 7.996H23.578C23.462 7.746 23.381 7.568 23.302 7.393C22.67 5.985 21.645 4.79 20.349 3.951C19.054 3.112 17.543 2.666 16 2.666Z" fill="#808080"/>
                                                 <path d="M16 16L15.057 15.057L16 14.114L16.943 15.057L16 16ZM17.333 28C17.333 28.354 17.193 28.693 16.942 28.943C16.692 29.193 16.353 29.333 16 29.333C15.646 29.333 15.307 29.193 15.057 28.943C14.807 28.693 14.667 28.354 14.667 28H17.333ZM9.724 20.391L15.057 15.057L16.943 16.943L11.609 22.276L9.724 20.391ZM16.943 15.057L22.276 20.391L20.391 22.276L15.057 16.943L16.943 15.057ZM17.333 16V28H14.667V16H17.333Z" fill="#808080"/>
@@ -428,13 +479,13 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                             <span>파일을 업로드해주세요</span>
                                         </button>
 
-                                        <input ref={fileInputRef} type="file" multiple className="eca-mobile-student-assignment-file-input" onChange={handleFileChange} />
+                                        <input ref={fileInputRef} type="file" multiple className="eca-mobile-student-assignment-file-input" onChange={handleFileChange} disabled={evaluationCompleted} />
                                     </>
                                 ) : null}
 
                                 {acceptsLink ? (
                                     <div className={acceptsFile ? "eca-mobile-student-assignment-link-area" : "eca-mobile-student-assignment-link-area is-only"}>
-                                        <input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="링크를 붙여주세요" className={hasInvalidLink ? "is-invalid" : ""} />
+                                        <input type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="링크를 붙여주세요" className={hasInvalidLink ? "is-invalid" : ""} disabled={evaluationCompleted} />
 
                                         {existingLinks.map((link) => (
                                             <div className="eca-mobile-student-assignment-link-item" key={link.submissionFileId}>
@@ -444,11 +495,13 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                                     <span>링크 정보 없음</span>
                                                 )}
 
-                                                <button type="button" onClick={() => removeExistingLink(link.submissionFileId)} aria-label="링크 삭제">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                                        <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
-                                                    </svg>
-                                                </button>
+                                                {!evaluationCompleted ? (
+                                                    <button type="button" onClick={() => removeExistingLink(link.submissionFileId)} aria-label="링크 삭제">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                            <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                        </svg>
+                                                    </button>
+                                                ) : null}
                                             </div>
                                         ))}
 
@@ -463,6 +516,12 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                         <span>제출된 과제</span>
                                         <em>마지막 수정 일시:</em>
                                         <strong>{formatSubmittedAt(getLatestSubmittedAt(mySubmission))}</strong>
+                                    </div>
+                                ) : null}
+
+                                {evaluationCompleted ? (
+                                    <div className="eca-mobile-student-assignment-evaluated-bar">
+                                        평가가 완료되어 과제를 수정하거나 재제출할 수 없습니다.
                                     </div>
                                 ) : null}
 
@@ -493,11 +552,13 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                                             </svg>
                                                         </button>
 
-                                                        <button type="button" className="eca-mobile-student-assignment-file-action-button" onClick={() => removeExistingFile(file.submissionFileId)} aria-label="파일 삭제">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                                                <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
-                                                            </svg>
-                                                        </button>
+                                                        {!evaluationCompleted ? (
+                                                            <button type="button" className="eca-mobile-student-assignment-file-action-button" onClick={() => removeExistingFile(file.submissionFileId)} aria-label="파일 삭제">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                                    <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                                </svg>
+                                                            </button>
+                                                        ) : null}
                                                     </div>
                                                 </div>
                                             );
@@ -522,11 +583,13 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                                         </span>
                                                     </div>
 
-                                                    <button type="button" className="eca-mobile-student-assignment-file-remove" onClick={() => removeFile(item.id)} aria-label="파일 삭제">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                                            <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
-                                                        </svg>
-                                                    </button>
+                                                    {!evaluationCompleted ? (
+                                                        <button type="button" className="eca-mobile-student-assignment-file-remove" onClick={() => removeFile(item.id)} aria-label="파일 삭제">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                                <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                            </svg>
+                                                        </button>
+                                                    ) : null}
                                                 </div>
                                             );
                                         })}
@@ -536,9 +599,33 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
 
                             <div className="eca-mobile-student-assignment-submit-button-row">
                                 <button type="button" disabled={submitDisabled} onClick={handleSubmit}>
-                                    {submitting ? "저장 중" : mySubmission ? "수정하기" : "제출하기"}
+                                    {evaluationCompleted ? "평가 완료" : submitting ? "저장 중" : mySubmission ? "수정하기" : "제출하기"}
                                 </button>
                             </div>
+                            {evaluationCompleted && evaluation ? (
+                                <>
+                                    <section className="eca-mobile-student-assignment-submit-card eca-mobile-student-assignment-evaluation-card">
+                                        <h3>평가</h3>
+
+                                        <div className="eca-mobile-student-assignment-evaluation-row is-total">
+                                            <span>총점</span>
+                                            <strong>{evaluationTotalScore}/{evaluationTotalMaxScore}</strong>
+                                        </div>
+
+                                        {evaluation.criteria.map((criterion) => (
+                                            <div className="eca-mobile-student-assignment-evaluation-row" key={criterion.criterionId}>
+                                                <span>{criterion.name}</span>
+                                                <strong>{criterion.score}/{criterion.maxScore}</strong>
+                                            </div>
+                                        ))}
+                                    </section>
+
+                                    <section className="eca-mobile-student-assignment-submit-card eca-mobile-student-assignment-feedback-card">
+                                        <h3>피드백</h3>
+                                        <p>{evaluation.feedback?.trim() || "등록된 피드백이 없습니다."}</p>
+                                    </section>
+                                </>
+                            ) : null}
                         </>
                     )}
                 </div>

@@ -185,6 +185,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                             const isOpen = openedActivityIds.includes(activityId);
                             const isActivityActive = pathname.startsWith(`/program-admin/activities/${activityId}/dashboard`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`)
+                                || pathname.startsWith(`/program-admin/activities/${activityId}/evaluation`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/attendance`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/team-activity`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/leaderboard`);
@@ -221,6 +222,12 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
                                                 {t("ecaAdmin.assignment")}
+                                            </NavLink>
+                                            <NavLink
+                                                to={`/program-admin/activities/${activityId}/evaluation`}
+                                                className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
+                                            >
+                                                {t("ecaAdmin.evaluation")}
                                             </NavLink>
                                             <NavLink
                                                 to={`/program-admin/activities/${activityId}/attendance`}

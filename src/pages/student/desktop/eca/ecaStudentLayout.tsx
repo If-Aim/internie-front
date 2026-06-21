@@ -197,7 +197,7 @@ export default function EcaStudentLayout(): React.ReactElement {
 
                 <div className="eca-student-sidebar-profile">
                     <img className="eca-student-avatar-img" src={profileImage} alt="student avatar" />
-                    <span className="eca-student-name">{t("ecaAdmin.ecaStudentName", { studentName })}</span>
+                    <span className="eca-student-name">{t("ecaStudent.ecaStudentName", { studentName })}</span>
                 </div>
             </aside>
 

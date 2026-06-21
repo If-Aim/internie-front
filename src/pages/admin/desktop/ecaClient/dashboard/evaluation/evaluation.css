@@ -1,0 +1,69 @@
+.eca-admin-evaluation-page { width: 100%; min-width: 750px; margin: 0 auto; padding: 0 0 80px; box-sizing: border-box; }
+.eca-admin-evaluation-page.is-enter-back { animation: eca-admin-evaluation-enter-from-left .28s ease both; }
+.eca-admin-evaluation-page.is-enter-forward { animation: eca-admin-evaluation-enter-from-right .28s ease both; }
+.eca-admin-evaluation-head { display: flex; align-items: center; gap: 22px; margin-bottom: 34px; }
+.eca-admin-evaluation-back-button { width: 20px; height: 20px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .18s ease; }
+.eca-admin-evaluation-back-button:hover { transform: translateX(-3px);  }
+.eca-admin-evaluation-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
+
+.eca-admin-evaluation-summary-grid { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 31px; }
+.eca-admin-evaluation-summary-card { height: 140px; padding: 25px 24px; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.eca-admin-evaluation-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
+.eca-admin-evaluation-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
+
+.eca-admin-evaluation-list-card { width: 100%; min-height: 560px; padding: 28px 24px 40px; border: 1px solid #E6E6E6; border-radius: 12px; background: #FFF; box-sizing: border-box; }
+.eca-admin-evaluation-list-title { margin-bottom: 16px; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
+
+.eca-admin-evaluation-dropdown-wrap { position: relative; width: 240px; margin-bottom: 33px; z-index: 10; }
+.eca-admin-evaluation-dropdown-button { position: relative; z-index: 2; width: 240px; height: 36px; padding: 0 10px 0 14px; border: 1px solid #E7E7E7; border-radius: 8px; background: #FFF; color: #6B6B6B; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
+.eca-admin-evaluation-dropdown-menu { position: absolute; top: calc(100% - 10px); left: 0; z-index: 1; width: 240px; padding: 12px 0 4px; border: 1px solid #E6E6E6; border-top: 0; border-radius: 0 0 10px 10px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); overflow: hidden; box-sizing: border-box; }
+.eca-admin-evaluation-dropdown-menu button { display: block; width: 100%; height: 31px; padding: 0 14px; border: 0; border-radius: 8px; background: #FFF; color: #808080; font-size: 14px; font-weight: 700; line-height: 23px; text-align: left; cursor: pointer; box-sizing: border-box; }
+.eca-admin-evaluation-dropdown-menu button:hover { background: #F3F7FF; color: #0166FF; }
+.eca-admin-evaluation-dropdown-menu button.is-active { color: #0166FF; }
+
+.eca-admin-evaluation-table-head { margin: 0 18px 12px 16px; color: #808080; font-size: 12px; font-weight: 500; align-items: center; box-sizing: border-box; text-align: center; line-height: 24px;}
+.eca-admin-evaluation-table-head--all { display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px 64px 81px; column-gap: 15px; }
+.eca-admin-evaluation-table-head--assignment { display: grid; grid-template-columns: minmax(0, 1fr) 80px 64px 64px 64px 54px; column-gap: 4px; }
+.eca-admin-evaluation-table-head--student { display: grid; grid-template-columns: minmax(0, 1fr) 80px 64px 64px 64px 54px; column-gap: 4px; }
+
+.eca-admin-evaluation-row-list { display: flex; flex-direction: column; gap: 14px; }
+.eca-admin-evaluation-row { width: 100%; min-height: 68px; padding: 0 18px 0 16px; border: 1px solid #E5E5E5; border-radius: 10px; background: #FFF; color: #808080; font-size: 16px; font-weight: 500; cursor: pointer; align-items: center; box-sizing: border-box; }
+.eca-admin-evaluation-row:disabled { cursor: default; opacity: .55; }
+.eca-admin-evaluation-row--all { display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px 64px 81px; column-gap: 15px;}
+.eca-admin-evaluation-row--all .eca-admin-evaluation-arrow { justify-self: end; }
+.eca-admin-evaluation-row--assignment { display: grid; grid-template-columns: minmax(0, 1fr) 80px 64px 64px 64px 54px; column-gap: 4px; }
+.eca-admin-evaluation-row--assignment .eca-admin-evaluation-arrow { justify-self: end; }
+.eca-admin-evaluation-row--student { display: grid; grid-template-columns: minmax(0, 1fr) 80px 64px 64px 64px 54px; column-gap: 4px; }
+.eca-admin-evaluation-row--student .eca-admin-evaluation-arrow { justify-self: end; }
+.eca-admin-evaluation-row b { color: #0166FF; font-size: 18px; font-weight: 700; }
+.eca-admin-evaluation-row span { min-width: 0; }
+.eca-admin-evaluation-profile-cell { min-width: 0; display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; column-gap: 8px; }
+.eca-admin-evaluation-profile-cell strong { min-width: 0; color: #000; font-size: 17px; font-weight: 700; line-height: 20px; white-space: break-spaces; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+.eca-admin-evaluation-avatar { width: 36px; height: 36px; border-radius: 999px; background: #F6F6F6; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.eca-admin-evaluation-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eca-admin-evaluation-arrow { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.eca-admin-evaluation-assignment-name { min-width: 0; color: #000; font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+
+.eca-admin-evaluation-profile-card { --eca-profile-card-padding-x: 24px; position: relative; width: 100%; height: 140px; margin-bottom: 31px; padding: 30px calc(var(--eca-profile-card-padding-x) + 192px) 30px var(--eca-profile-card-padding-x); border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; display: grid; grid-template-columns: 80px minmax(0, 1fr) 130px; align-items: center; column-gap: 12px; box-sizing: border-box; }
+.eca-admin-evaluation-profile-card strong { min-width: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 24px; margin-left: 10px; white-space: break-spaces;  overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-evaluation-student-id { min-width: 0; color: #808080; font-size: 16px; font-weight: 500; text-align: center; display: flex; flex-direction: column; }
+.eca-admin-evaluation-student-id em { color: #808080; font-size: 16px; font-style: normal; font-weight: 500; line-height: 24px; }
+.eca-admin-evaluation-student-id span { color: #808080; font-size: 16px; font-weight: 500; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-admin-evaluation-linkedin-button { position: absolute; right: 24px; bottom: 24px; width: 164px; height: 50px; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; color: #6B6B6B; font-size: 18px; font-weight: 700; cursor: pointer; transition: border-color .18s ease, color .18s ease, background .18s ease; }
+.eca-admin-evaluation-linkedin-button:hover:not(:disabled) { border-color: #0166FF; color: #0166FF; background: #F3F7FF; }
+.eca-admin-evaluation-linkedin-button:disabled { cursor: default; opacity: .45; }
+.eca-admin-evaluation-profile-avatar { width: 80px; height: 80px; border-radius: 999px; background: #D9D9D9; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.eca-admin-evaluation-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.eca-admin-evaluation-empty { min-height: 260px; margin: 0; color: #777; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.eca-admin-evaluation-empty.is-card { min-height: 240px; }
+
+@keyframes eca-admin-evaluation-enter-from-left {
+    from { opacity: 0; transform: translateX(-48px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes eca-admin-evaluation-enter-from-right {
+    from { opacity: 0; transform: translateX(48px); }
+    to { opacity: 1; transform: translateX(0); }
+}

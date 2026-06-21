@@ -29,7 +29,7 @@
 .attendance-submit-primary { width: 100%; height: 60px; border: 0; border-radius: 10px; background: #0166FF; color: #FFF; font-size: 16px; font-weight: 700; line-height: 1; }
 .attendance-submit-primary:disabled { background: #E3E3E3; color: #808080; }
 .attendance-submit-file-input { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.attendance-submit-success-layer { position: fixed; inset: 0; z-index: 100000; width: 100vw; height: 100dvh; padding: 0; border: 0; background: #F0F6FF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #0166FF; cursor: pointer; animation: attendanceSuccessLayerIn 0.18s ease both; }
+.attendance-submit-success-layer { position: fixed; inset: 0; z-index: 100000; width: 100vw; height: 100dvh; padding: 0; border: 0; background: #F0F6FF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #0166FF; cursor: pointer; animation: attendanceSuccessLayerIn 0.28s ease both; }
 .attendance-submit-success-icon-wrap { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
 .attendance-submit-success-icon { width: 50px; height: 50px; display: block; overflow: visible; }
 .attendance-submit-success-circle { transform-box: fill-box; transform-origin: center; animation: attendanceSuccessCirclePop 0.38s ease-out both; }

@@ -1,16 +1,36 @@
 import React from "react";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { approveLeaderboardSubmission, createLeaderboardMission, deleteLeaderboardCompletedMission, getLeaderboard, getLeaderboardApprovals, getLeaderboardMissions, getLeaderboardStudentCompletedMissions, rejectLeaderboardSubmission, updateLeaderboardMission, } from "../../../../../../api/ea";
+import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, LeaderboardRankingResponse, LeaderboardSubmissionResponse, } from "../../../../../../api/ea"; 
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./leaderboard.css";
 
 type LeaderboardTab = "ranking" | "approvals" | "missions";
-type LeaderboardSort = "highest" | "lowest";
+type LeaderboardSort = "alphabetical" | "highest" | "lowest";
+type ApprovalSort = "alphabetical" | "latest" | "oldest";
+type ApprovalFilter = "all" | "pending" | "approved" | "rejected";
 type TrendDirection = "up" | "down" | "same";
-type ApprovalCategory = "Participation" | "Intent" | "Content";
-type MissionCategory = "Participation" | "Intents" | "Contents";
+type MissionCategory = "Elicit" | "Discover" | "Insight" | "Synthesize" | "Own" | "Nurture";
+type ApprovalCategory = MissionCategory | "Etc";
+type LeaderboardDropdownId = "rankingSort" | "approvalSort" | "missionCategory" | "missionEvidenceType" | null;
+type LeaderboardSearchTarget = "ranking" | "approvals" | "missions" | "completedMissions" | null;
+type ConcreteLeaderboardSearchTarget = Exclude<LeaderboardSearchTarget, null>;
+type ConcreteLeaderboardDropdownId = Exclude<LeaderboardDropdownId, null>;
+type CustomDropdownOption = {
+    value: string;
+    label: string;
+};
+type DropdownMenuPosition = {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+};
 
 type RankingRow = {
     id: number;
+    studentId: number;
     name: string;
     totalScore: number;
     trendDirection: TrendDirection;
@@ -19,9 +39,12 @@ type RankingRow = {
 
 type ApprovalRow = {
     id: number;
+    submissionId: number;
+    studentId: number;
     name: string;
     nickname: string;
     submittedAt: string;
+    submittedAtTime: number;
     category: ApprovalCategory;
     points: number;
     title: string;
@@ -30,6 +53,8 @@ type ApprovalRow = {
 
 type CompletedMission = {
     id: number;
+    submissionId: number;
+    missionId: number;
     title: string;
     category: string;
     points: number;
@@ -37,13 +62,18 @@ type CompletedMission = {
     evidenceUrls: string[];
 };
 
+type MissionEvidenceFormat = LeaderboardEvidenceType;
+
 type MissionRule = {
     id: number;
+    missionId: number;
     title: string;
     category: MissionCategory;
+    apiCategory: LeaderboardMissionCategory;
     points: number;
     maximum: number;
     evidence: string;
+    evidenceType: MissionEvidenceFormat;
     description: string;
 };
 
@@ -54,85 +84,195 @@ type MissionForm = {
     points: string;
     maximum: string;
     evidence: string;
+    evidenceType: MissionEvidenceFormat | "";
 };
 
-const rankingNames = [
-    "Eiza González Reyna",
-    "Eiza González Reyna",
-    "Eiza González Reyna",
-    "Eiza González Reyna",
-    "Diego Luna",
-    "Salma Hayek Pinault",
-    "Salma Hayek Pinault",
-    "Gael García Bernal",
+const missionCategories: MissionCategory[] = ["Elicit", "Discover", "Insight", "Synthesize", "Own", "Nurture"];
+
+const missionCategoryLabels: Record<MissionCategory, string> = {
+    Elicit: "Elicit",
+    Discover: "Discover",
+    Insight: "Insight",
+    Synthesize: "Synthesize",
+    Own: "Own",
+    Nurture: "Nurture",
+};
+
+const evidenceFormatLabels: Record<MissionEvidenceFormat, string> = {
+    DOCUMENT: "Document (DOCX, PDF, PPT, etc.)",
+    IMAGE: "Image (PNG, JPG, JPEG, etc.)",
+    VIDEO: "Video (MP4, MOV, AVI, etc.)",
+    LINK: "Link (Google Drive, YouTube, etc.)",
+    OTHER: "Others",
+};
+
+const evidenceFormats: MissionEvidenceFormat[] = ["DOCUMENT", "IMAGE", "VIDEO", "LINK", "OTHER"];
+const rankingSortOptions: CustomDropdownOption[] = [
+    { value: "alphabetical", label: "Alphabetical" },
+    { value: "highest", label: "Highest" },
+    { value: "lowest", label: "Lowest" },
 ];
 
-// Ranking
-const rankingScores = [10526, 9000, 8000, 7000, 6000, 500, 500, 500];
-
-const mockRankingRows: RankingRow[] = Array.from({ length: 30 }, (_, index) => ({
-    id: index + 1,
-    name: rankingNames[index % rankingNames.length],
-    totalScore: rankingScores[index] ?? Math.max(100, 500 - ((index - 7) * 20)),
-    trendDirection: index === 0 || index === 1 || index === 6 ? "up" : "down",
-    trendAmount: index === 0 ? 28 : index === 1 || index === 6 ? 2 : 1,
-}));
-
-const mockCompletedMissions: CompletedMission[] = Array.from({ length: 100 }, (_, index) => ({
-    id: index + 1,
-    title: "Coffee Chat with team members",
-    category: "Participation",
-    points: 100,
-    submittedAt: "July 10, 16:42",
-    evidenceUrls: [],
-}));
-
-// Approvals
-const approvalCategories: ApprovalCategory[] = ["Participation", "Intent", "Content", "Participation"];
-
-const mockApprovalRows: ApprovalRow[] = Array.from({ length: 13 }, (_, index) => ({
-    id: index + 1,
-    name: "Hernández Hernández, Juan",
-    nickname: "Nickname???",
-    submittedAt: "July 10, 16:42",
-    category: approvalCategories[index % approvalCategories.length],
-    points: 100,
-    title: "발표 · 데모데이 피칭",
-    evidenceUrls: [],
-}));
-
-// Missions
-const missionCategories: MissionCategory[] = ["Participation", "Intents", "Contents"];
-
-const mockMissionRules: MissionRule[] = [
-    ...Array.from({ length: 12 }, (_, index) => ({
-        id: index + 1,
-        title: "Coffee Chat with team",
-        category: "Participation" as MissionCategory,
-        points: 10,
-        maximum: 1,
-        evidence: "Explain what students need to submit as evidence",
-        description: "Complete coffee chat with team members.",
-    })),
-    ...Array.from({ length: 12 }, (_, index) => ({
-        id: index + 101,
-        title: index === 0 ? "Interview your customer" : "Coffee Chat with team",
-        category: "Intents" as MissionCategory,
-        points: 10,
-        maximum: 1,
-        evidence: "Explain what students need to submit as evidence",
-        description: "Complete the mission.",
-    })),
-    ...Array.from({ length: 12 }, (_, index) => ({
-        id: index + 201,
-        title: index === 0 ? "Interview your customer" : "Coffee Chat with team",
-        category: "Contents" as MissionCategory,
-        points: 10,
-        maximum: 1,
-        evidence: "Explain what students need to submit as evidence",
-        description: "Complete the mission.",
-    })),
+const approvalSortOptions: CustomDropdownOption[] = [
+    { value: "alphabetical", label: "Alphabetical" },
+    { value: "oldest", label: "Oldest" },
+    { value: "newest", label: "Newest" },
 ];
+
+const approvalFilterOptions: CustomDropdownOption[] = [
+    { value: "all", label: "전체" },
+    { value: "pending", label: "승인 전" },
+    { value: "approved", label: "승인 완료" },
+    { value: "rejected", label: "반려" },
+];
+
+const missionCategoryOptions: CustomDropdownOption[] = missionCategories.map((category) => ({
+    value: category,
+    label: missionCategoryLabels[category],
+}));
+
+const evidenceFormatOptions: CustomDropdownOption[] = evidenceFormats.map((format) => ({
+    value: format,
+    label: evidenceFormatLabels[format],
+}));
+
+function toUiTrendDirection(value?: string | null): TrendDirection {
+    if (value === "UP") return "up";
+    if (value === "DOWN") return "down";
+    return "same";
+}
+const apiMissionCategoryByUi: Record<MissionCategory, LeaderboardMissionCategory> = {
+    Elicit: "ELICIT",
+    Discover: "DISCOVER",
+    Insight: "INSIGHT",
+    Synthesize: "SYNTHESIZE",
+    Own: "OWN",
+    Nurture: "NURTURE",
+};
+
+const uiMissionCategoryByApi: Record<LeaderboardMissionCategory, MissionCategory> = {
+    ELICIT: "Elicit",
+    DISCOVER: "Discover",
+    INSIGHT: "Insight",
+    SYNTHESIZE: "Synthesize",
+    OWN: "Own",
+    NURTURE: "Nurture",
+};
+
+function isLeaderboardMissionCategory(value?: string | null): value is LeaderboardMissionCategory {
+    return value === "ELICIT" || value === "DISCOVER" || value === "INSIGHT" || value === "SYNTHESIZE" || value === "OWN" || value === "NURTURE";
+}
+
+function toApiMissionCategory(category: MissionCategory): LeaderboardMissionCategory {
+    return apiMissionCategoryByUi[category];
+}
+
+function toUiMissionCategory(category?: string | null): MissionCategory {
+    return isLeaderboardMissionCategory(category) ? uiMissionCategoryByApi[category] : "Elicit";
+}
+
+function toUiApprovalCategory(category?: string | null): ApprovalCategory {
+    return isLeaderboardMissionCategory(category) ? uiMissionCategoryByApi[category] : "Etc";
+}
+
+function formatDateTime(value?: string | null): string {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
+}
+
+function toApiApprovalSort(sortValue: ApprovalSort): "latest" | "oldest" {
+    if (sortValue === "oldest") return "oldest";
+
+    return "latest";
+}
+
+function toApiApprovalFilter(filter: ApprovalFilter): "pending" | "approved" | "rejected" | undefined {
+    if (filter === "all") return undefined;
+
+    return filter;
+}
+
+function getApprovalFilterTitle(filter: ApprovalFilter): string {
+    if (filter === "pending") return "Pending Approval";
+    if (filter === "approved") return "Approved";
+    if (filter === "rejected") return "Rejected";
+
+    return "All Approvals";
+}
+
+function toDateTimeValue(value?: string | null): number {
+    if (!value) return 0;
+
+    const time = new Date(value).getTime();
+
+    return Number.isNaN(time) ? 0 : time;
+}
+
+function mapRankingRow(row: LeaderboardRankingResponse): RankingRow {
+    return {
+        id: row.studentId,
+        studentId: row.studentId,
+        name: row.studentName,
+        totalScore: row.totalScore,
+        trendDirection: toUiTrendDirection(row.trendDirection),
+        trendAmount: row.trendValue ?? 0,
+    };
+}
+
+type LeaderboardSubmissionRow = LeaderboardSubmissionResponse & {
+    studentNickname?: string | null;
+    category?: LeaderboardMissionCategory | null;
+    score?: number | null;
+    approvedPoint?: number | null;
+    points?: number | null;
+};
+
+function mapApprovalRow(row: LeaderboardSubmissionResponse): ApprovalRow {
+    const submission = row as LeaderboardSubmissionRow;
+    const evidenceUrl = typeof row.evidenceUrl === "string" && row.evidenceUrl.trim() ? row.evidenceUrl.trim() : "";
+
+    return {
+        id: row.submissionId,
+        submissionId: row.submissionId,
+        studentId: row.studentId,
+        name: row.studentName,
+        nickname: submission.studentNickname ?? "",
+        submittedAt: formatDateTime(row.submittedAt),
+        submittedAtTime: toDateTimeValue(row.submittedAt),
+        category: toUiApprovalCategory(submission.category),
+        points: Number(submission.score ?? submission.approvedPoint ?? submission.points ?? 0),
+        title: row.missionName,
+        evidenceUrls: evidenceUrl ? [evidenceUrl] : [],
+    };
+}
+
+function mapMissionRule(row: LeaderboardMissionResponse): MissionRule {
+    return {
+        id: row.missionId,
+        missionId: row.missionId,
+        title: row.name,
+        category: toUiMissionCategory(row.category),
+        apiCategory: row.category,
+        points: row.points,
+        maximum: row.maximumPerStudent,
+        evidence: row.evidenceName ?? "",
+        evidenceType: row.evidenceType,
+        description: row.description ?? "",
+    };
+}
 
 function formatScore(score: number): string {
     return String(score);
@@ -155,44 +295,112 @@ function getApprovalCategoryClassName(category: ApprovalCategory): string {
 }
 
 export default function EcaDashboardLeaderboard(): React.ReactElement {
-    const navigate = useNavigate();
     const { externalActivityId } = useParams();
     const { managedActivities } = useOutletContext<EcaClientAdminOutletContext>();
     const activityId = Number(externalActivityId);
     const activity = managedActivities.find((item) => item.externalActivityId === activityId) ?? null;
     const [activeTab, setActiveTab] = React.useState<LeaderboardTab>("ranking");
     const [sort, setSort] = React.useState<LeaderboardSort>("highest");
-    const [menuOpen, setMenuOpen] = React.useState(false);
+    const [approvalSort, setApprovalSort] = React.useState<ApprovalSort>("alphabetical");
+    const [approvalFilter, setApprovalFilter] = React.useState<ApprovalFilter>("pending");
+    const [approvalFilterOpen, setApprovalFilterOpen] = React.useState(false);
+    // const [menuOpen, setMenuOpen] = React.useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
     const [selectedRankingRow, setSelectedRankingRow] = React.useState<RankingRow | null>(null);
     const [selectedMission, setSelectedMission] = React.useState<CompletedMission | null>(null);
-    const [completedMissions, setCompletedMissions] = React.useState<CompletedMission[]>(mockCompletedMissions);
+    const [completedMissions, setCompletedMissions] = React.useState<CompletedMission[]>([]);
     const [deleteMissionTarget, setDeleteMissionTarget] = React.useState<CompletedMission | null>(null);
-    
-    const [approvalRows, setApprovalRows] = React.useState<ApprovalRow[]>(mockApprovalRows);
+    const [rankingRows, setRankingRows] = React.useState<RankingRow[]>([]);
+    const [approvalRows, setApprovalRows] = React.useState<ApprovalRow[]>([]);
     const [selectedApprovalRow, setSelectedApprovalRow] = React.useState<ApprovalRow | null>(null);
-
-    const [missionRules, setMissionRules] = React.useState<MissionRule[]>(mockMissionRules);
+    const [missionRules, setMissionRules] = React.useState<MissionRule[]>([]);
+    const [/*loading*/, setLoading] = React.useState(false);
+    const [/*errorMessage*/, setErrorMessage] = React.useState<string | null>(null);
     const [missionModalOpen, setMissionModalOpen] = React.useState(false);
+    const [editingMission, setEditingMission] = React.useState<MissionRule | null>(null);
     const [missionForm, setMissionForm] = React.useState<MissionForm>({
         title: "",
         description: "",
-        category: "Participation",
+        category: "Elicit",
         points: "",
         maximum: "",
         evidence: "",
+        evidenceType: "",
     });
-    const actionMenuRef = React.useRef<HTMLDivElement | null>(null);
+    
+    const [openSearch, setOpenSearch] = React.useState<LeaderboardSearchTarget>(null);
+    const [rankingSearch, setRankingSearch] = React.useState("");
+    const [rankingSearchDraft, setRankingSearchDraft] = React.useState("");
+    const [approvalSearch, setApprovalSearch] = React.useState("");
+    const [approvalSearchDraft, setApprovalSearchDraft] = React.useState("");
+    const [missionSearch, setMissionSearch] = React.useState("");
+    const [missionSearchDraft, setMissionSearchDraft] = React.useState("");
+    const [completedMissionSearch, setCompletedMissionSearch] = React.useState("");
+    const [completedMissionSearchDraft, setCompletedMissionSearchDraft] = React.useState("");
+
+    const [openDropdown, setOpenDropdown] = React.useState<LeaderboardDropdownId>(null);
+    const missionModalBackdropRef = React.useRef<HTMLDivElement | null>(null);
+    const dropdownButtonRefs = React.useRef<Record<ConcreteLeaderboardDropdownId, HTMLButtonElement | null>>({
+        rankingSort: null,
+        approvalSort: null,
+        missionCategory: null,
+        missionEvidenceType: null,
+    });
+    const [dropdownMenuPosition, setDropdownMenuPosition] = React.useState<DropdownMenuPosition | null>(null);
+
+    // const actionMenuRef = React.useRef<HTMLDivElement | null>(null);
     const rankingListRef = React.useRef<HTMLDivElement | null>(null);
+    const missionColumnListRefs = React.useRef<Record<MissionCategory, HTMLDivElement | null>>({
+        Elicit: null,
+        Discover: null,
+        Insight: null,
+        Synthesize: null,
+        Own: null,
+        Nurture: null,
+    });
+    const [scrollableMissionCategories, setScrollableMissionCategories] = React.useState<Record<MissionCategory, boolean>>({
+        Elicit: false,
+        Discover: false,
+        Insight: false,
+        Synthesize: false,
+        Own: false,
+        Nurture: false,
+    });
     const [rankingListScrollable, setRankingListScrollable] = React.useState(false);
 
     const sortedRankingRows = React.useMemo(() => {
-        const copied = [...mockRankingRows];
+        const keyword = rankingSearch.trim().toLowerCase();
+        const copied = rankingRows.filter((row) => !keyword || row.name.toLowerCase().includes(keyword));
 
-        copied.sort((a, b) => sort === "highest" ? b.totalScore - a.totalScore : a.totalScore - b.totalScore);
+        copied.sort((a, b) => {
+            if (sort === "alphabetical") return a.name.localeCompare(b.name);
+            if (sort === "highest") return b.totalScore - a.totalScore;
+
+            return a.totalScore - b.totalScore;
+        });
 
         return copied;
-    }, [sort]);
+    }, [rankingRows, sort, rankingSearch]);
+
+    const filteredApprovalRows = React.useMemo(() => {
+        const keyword = approvalSearch.trim().toLowerCase();
+        const copied = approvalRows.filter((row) => !keyword || row.name.toLowerCase().includes(keyword));
+
+        copied.sort((a, b) => {
+            if (approvalSort === "alphabetical") return a.name.localeCompare(b.name);
+            if (approvalSort === "oldest") return a.submittedAtTime - b.submittedAtTime;
+
+            return b.submittedAtTime - a.submittedAtTime;
+        });
+
+        return copied;
+    }, [approvalRows, approvalSearch, approvalSort]);
+
+    const filteredCompletedMissions = React.useMemo(() => {
+        const keyword = completedMissionSearch.trim().toLowerCase();
+
+        return completedMissions.filter((mission) => !keyword || mission.title.toLowerCase().includes(keyword));
+    }, [completedMissions, completedMissionSearch]);
 
     const selectedRank = React.useMemo(() => {
         if (!selectedRankingRow) return 0;
@@ -200,16 +408,90 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return sortedRankingRows.findIndex((row) => row.id === selectedRankingRow.id) + 1;
     }, [selectedRankingRow, sortedRankingRows]);
 
+    const loadLeaderboardData = React.useCallback(async (): Promise<void> => {
+        if (!Number.isFinite(activityId)) return;
+
+        setLoading(true);
+        setErrorMessage(null);
+
+        try {
+            const [rankingData, approvalsData, missionsData] = await Promise.all([
+                getLeaderboard(activityId, { scope: "individual", sort: "score", page: 0, size: 50 }),
+                getLeaderboardApprovals(activityId, {
+                    ...(toApiApprovalFilter(approvalFilter) ? { status: toApiApprovalFilter(approvalFilter) } : {}),
+                    sort: toApiApprovalSort(approvalSort),
+                    page: 0,
+                    size: 50,
+                }),
+                getLeaderboardMissions(activityId),
+            ]);
+
+            setRankingRows(rankingData.rankings.map(mapRankingRow));
+            setApprovalRows(approvalsData.submissions.map(mapApprovalRow));
+            setMissionRules(missionsData.missions.map(mapMissionRule));
+        } catch (error) {
+            console.error("loadLeaderboardData error", error);
+            setErrorMessage("리더보드 정보를 불러오지 못했습니다.");
+        } finally {
+            setLoading(false);
+        }
+    }, [activityId, approvalSort, approvalFilter]);
+
     React.useEffect(() => {
-        if (!menuOpen) return;
+        loadLeaderboardData();
+    }, [loadLeaderboardData]);
+
+    React.useEffect(() => {
+        if (!selectedRankingRow || !Number.isFinite(activityId)) {
+            setCompletedMissions([]);
+            return;
+        }
+
+        let alive = true;
+        const currentActivityId = activityId;
+        const selectedStudentId = selectedRankingRow.studentId;
+
+        async function loadCompletedMissions(): Promise<void> {
+            try {
+                const data = await getLeaderboardStudentCompletedMissions(currentActivityId, selectedStudentId, { page: 0, size: 100 });
+
+                if (!alive) return;
+
+                setCompletedMissions(data.missions.map((mission) => ({
+                    id: mission.submissionId,
+                    submissionId: mission.submissionId,
+                    missionId: mission.missionId,
+                    title: mission.missionName,
+                    category: toUiMissionCategory(mission.category),
+                    points: mission.score,
+                    submittedAt: formatDateTime(mission.completedAt),
+                    evidenceUrls: [],
+                })));
+            } catch {
+                if (alive) {
+                    setCompletedMissions([]);
+                }
+            }
+        }
+
+        loadCompletedMissions();
+
+        return () => {
+            alive = false;
+        };
+    }, [activityId, selectedRankingRow]);
+
+    React.useEffect(() => {
+        if (!openDropdown) return;
 
         function handlePointerDown(event: PointerEvent): void {
             const target = event.target;
 
-            if (!(target instanceof Node)) return;
-            if (actionMenuRef.current?.contains(target)) return;
+            if (!(target instanceof Element)) return;
+            if (target.closest(".eca-admin-leaderboard-custom-dropdown")) return;
+            if (target.closest(".eca-admin-leaderboard-custom-dropdown-menu")) return;
 
-            setMenuOpen(false);
+            setOpenDropdown(null);
         }
 
         document.addEventListener("pointerdown", handlePointerDown);
@@ -217,8 +499,69 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return () => {
             document.removeEventListener("pointerdown", handlePointerDown);
         };
-    }, [menuOpen]);
-        
+    }, [openDropdown]);
+
+    React.useLayoutEffect(() => {
+        if (!openDropdown) {
+            setDropdownMenuPosition(null);
+            return;
+        }
+
+        const currentDropdown = openDropdown;
+
+        function handleUpdate(): void {
+            updateDropdownMenuPosition(currentDropdown);
+        }
+
+        handleUpdate();
+
+        window.addEventListener("resize", handleUpdate);
+        window.addEventListener("scroll", handleUpdate, true);
+
+        return () => {
+            window.removeEventListener("resize", handleUpdate);
+            window.removeEventListener("scroll", handleUpdate, true);
+        };
+    }, [openDropdown]);
+
+    React.useEffect(() => {
+        if (!openSearch) return;
+
+        function handlePointerDown(event: PointerEvent): void {
+            const target = event.target;
+
+            if (!(target instanceof Element)) return;
+            if (target.closest(".eca-admin-leaderboard-search-wrap")) return;
+
+            setOpenSearch(null);
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+        };
+    }, [openSearch]);
+
+    React.useEffect(() => {
+        if (!approvalFilterOpen) return;
+
+        function handlePointerDown(event: PointerEvent): void {
+            const target = event.target;
+
+            if (!(target instanceof Element)) return;
+            if (target.closest(".eca-admin-leaderboard-filter-wrap")) return;
+
+            setApprovalFilterOpen(false);
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+        };
+    }, [approvalFilterOpen]);
+
     React.useLayoutEffect(() => {
         function updateScrollable(): void {
             const list = rankingListRef.current;
@@ -245,18 +588,66 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         };
     }, [activeTab, sortedRankingRows.length]);
 
-    function handleRevise(): void {
-        setMenuOpen(false);
+    React.useLayoutEffect(() => {
+        function updateMissionColumnScrollable(): void {
+            const nextScrollable = missionCategories.reduce((acc, category) => {
+                const list = missionColumnListRefs.current[category];
 
-        if (!Number.isFinite(activityId)) return;
+                acc[category] = !!list && list.scrollHeight > list.clientHeight;
 
-        navigate(`/program-admin/activities/${activityId}/edit`);
+                return acc;
+            }, {} as Record<MissionCategory, boolean>);
+
+            setScrollableMissionCategories(nextScrollable);
+        }
+
+        updateMissionColumnScrollable();
+
+        const resizeObserver = new ResizeObserver(updateMissionColumnScrollable);
+
+        missionCategories.forEach((category) => {
+            const list = missionColumnListRefs.current[category];
+
+            if (list) {
+                resizeObserver.observe(list);
+            }
+        });
+
+        window.addEventListener("resize", updateMissionColumnScrollable);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateMissionColumnScrollable);
+        };
+    }, [activeTab, missionRules.length]);
+
+    function updateDropdownMenuPosition(id: ConcreteLeaderboardDropdownId): void {
+        const button = dropdownButtonRefs.current[id];
+
+        if (!button) return;
+
+        const rect = button.getBoundingClientRect();
+
+        setDropdownMenuPosition({
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+        });
     }
 
-    function handleDeleteClick(): void {
-        setMenuOpen(false);
-        setDeleteModalOpen(true);
-    }
+    // function handleRevise(): void {
+    //     setMenuOpen(false);
+
+    //     if (!Number.isFinite(activityId)) return;
+
+    //     navigate(`/program-admin/activities/${activityId}/edit`);
+    // }
+
+    // function handleDeleteClick(): void {
+    //     setMenuOpen(false);
+    //     setDeleteModalOpen(true);
+    // }
 
     function handleConfirmDelete(): void {
         setDeleteModalOpen(false);
@@ -267,17 +658,83 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return rankingListScrollable ? "eca-admin-leaderboard-list" : "eca-admin-leaderboard-list eca-admin-leaderboard-list--not-scrollable";
     }
 
-    function handleConfirmMissionDelete(): void {
-        if (!deleteMissionTarget) return;
+    async function handleConfirmMissionDelete(): Promise<void> {
+        if (!deleteMissionTarget || !selectedRankingRow || !Number.isFinite(activityId)) return;
 
-        setCompletedMissions((prev) => prev.filter((mission) => mission.id !== deleteMissionTarget.id));
-        setSelectedMission((prev) => prev?.id === deleteMissionTarget.id ? null : prev);
-        setDeleteMissionTarget(null);
+        try {
+            await deleteLeaderboardCompletedMission(activityId, selectedRankingRow.studentId, deleteMissionTarget.submissionId);
+            setCompletedMissions((prev) => prev.filter((mission) => mission.id !== deleteMissionTarget.id));
+            setSelectedMission((prev) => prev?.id === deleteMissionTarget.id ? null : prev);
+            setDeleteMissionTarget(null);
+            await loadLeaderboardData();
+        } catch {
+            alert("완료 미션 삭제에 실패했습니다.");
+        }
     }
 
-    function handleApprovalDecision(id: number): void {
-        setApprovalRows((prev) => prev.filter((row) => row.id !== id));
-        setSelectedApprovalRow(null);
+    async function handleApprovalDecision(id: number, decision: "approve" | "reject"): Promise<void> {
+        if (!Number.isFinite(activityId)) return;
+
+        try {
+            if (decision === "approve") {
+                await approveLeaderboardSubmission(activityId, id, { adjustPoint: null });
+            } else {
+                const reason = window.prompt("반려 사유를 입력해주세요.")?.trim();
+
+                if (!reason) return;
+
+                await rejectLeaderboardSubmission(activityId, id, { reason });
+            }
+
+            setApprovalRows((prev) => prev.filter((row) => row.submissionId !== id));
+            setSelectedApprovalRow(null);
+            await loadLeaderboardData();
+        } catch {
+            alert(decision === "approve" ? "승인 처리에 실패했습니다." : "반려 처리에 실패했습니다.");
+        }
+    }
+
+    async function handleSaveMission(): Promise<void> {
+        if (!Number.isFinite(activityId)) return;
+
+        const title = missionForm.title.trim();
+        const evidence = missionForm.evidence.trim();
+        const points = Number(missionForm.points);
+        const maximum = Number(missionForm.maximum);
+
+        if (!title || !evidence || !missionForm.evidenceType || !Number.isFinite(points) || !Number.isFinite(maximum) || points <= 0 || maximum <= 0) {
+            alert("필수값을 모두 올바르게 입력해주세요.");
+            return;
+        }
+
+        const request = {
+            name: title,
+            description: missionForm.description.trim() || null,
+            category: toApiMissionCategory(missionForm.category),
+            points,
+            maximumPerStudent: maximum,
+            evidenceName: evidence,
+            evidenceType: missionForm.evidenceType,
+            autoReflect: false,
+        };
+
+        try {
+            if (editingMission) {
+                const updated = await updateLeaderboardMission(activityId, editingMission.missionId, request);
+                setMissionRules((prev) => prev.map((mission) => mission.missionId === updated.missionId ? mapMissionRule(updated) : mission));
+            } else {
+                const created = await createLeaderboardMission(activityId, request);
+                setMissionRules((prev) => [mapMissionRule(created), ...prev]);
+            }
+
+            setOpenDropdown(null);
+            setMissionModalOpen(false);
+            setEditingMission(null);
+            resetMissionForm();
+            await loadLeaderboardData();
+        } catch {
+            alert(editingMission ? "미션 수정에 실패했습니다." : "미션 생성에 실패했습니다.");
+        }
     }
 
     function handleMissionFormChange<K extends keyof MissionForm>(key: K, value: MissionForm[K]): void {
@@ -291,74 +748,346 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         setMissionForm({
             title: "",
             description: "",
-            category: "Participation",
+            category: "Elicit",
             points: "",
             maximum: "",
             evidence: "",
+            evidenceType: "",
         });
     }
 
     function handleOpenMissionModal(): void {
+        setOpenDropdown(null);
+        setEditingMission(null);
         resetMissionForm();
         setMissionModalOpen(true);
     }
 
-    function handleCloseMissionModal(): void {
-        setMissionModalOpen(false);
+    function handleOpenMissionEditModal(mission: MissionRule): void {
+        setOpenDropdown(null);
+        setEditingMission(mission);
+        setMissionForm({
+            title: mission.title,
+            description: mission.description,
+            category: mission.category,
+            points: String(mission.points),
+            maximum: String(mission.maximum),
+            evidence: mission.evidence,
+            evidenceType: mission.evidenceType,
+        });
+        setMissionModalOpen(true);
     }
 
-    function handleCreateMission(): void {
-        const title = missionForm.title.trim();
-        const description = missionForm.description.trim();
-        const evidence = missionForm.evidence.trim();
-        const points = Number(missionForm.points);
-        const maximum = Number(missionForm.maximum);
-
-        if (!title || !description || !evidence || !Number.isFinite(points) || !Number.isFinite(maximum) || points <= 0 || maximum <= 0) {
-            alert("필수값을 모두 올바르게 입력해주세요.");
-            return;
-        }
-
-        const nextMission: MissionRule = {
-            id: Date.now(),
-            title,
-            category: missionForm.category,
-            points,
-            maximum,
-            evidence,
-            description,
-        };
-
-        setMissionRules((prev) => [nextMission, ...prev]);
+    function handleCloseMissionModal(): void {
+        setOpenDropdown(null);
         setMissionModalOpen(false);
-        resetMissionForm();
+        setEditingMission(null);
     }
 
     function getMissionRulesByCategory(category: MissionCategory): MissionRule[] {
-        return missionRules.filter((mission) => mission.category === category);
+        const keyword = missionSearch.trim().toLowerCase();
+
+        return missionRules.filter((mission) => {
+            if (mission.category !== category) return false;
+            if (!keyword) return true;
+
+            return mission.title.toLowerCase().includes(keyword);
+        });
     }
 
-    function renderToolbar(selectElement: React.ReactNode): React.ReactElement {
+    function getMissionColumnClassName(category: MissionCategory): string {
+        return scrollableMissionCategories[category] ? "eca-admin-leaderboard-mission-column eca-admin-leaderboard-mission-column--scrollable" : "eca-admin-leaderboard-mission-column";
+    }
+
+    function setSearchDraftValue(target: ConcreteLeaderboardSearchTarget, value: string): void {
+        if (target === "ranking") {
+            setRankingSearchDraft(value);
+            return;
+        }
+
+        if (target === "approvals") {
+            setApprovalSearchDraft(value);
+            return;
+        }
+
+        if (target === "missions") {
+            setMissionSearchDraft(value);
+            return;
+        }
+
+        setCompletedMissionSearchDraft(value);
+    }
+
+    function setSearchValue(target: ConcreteLeaderboardSearchTarget, value: string): void {
+        if (target === "ranking") {
+            setRankingSearch(value);
+            return;
+        }
+
+        if (target === "approvals") {
+            setApprovalSearch(value);
+            return;
+        }
+
+        if (target === "missions") {
+            setMissionSearch(value);
+            return;
+        }
+
+        setCompletedMissionSearch(value);
+    }
+
+    function handleOpenSearch(target: ConcreteLeaderboardSearchTarget): void {
+        setOpenDropdown(null);
+
+        if (openSearch === target) {
+            setOpenSearch(null);
+            return;
+        }
+
+        if (target === "ranking") setRankingSearchDraft(rankingSearch);
+        if (target === "approvals") setApprovalSearchDraft(approvalSearch);
+        if (target === "missions") setMissionSearchDraft(missionSearch);
+        if (target === "completedMissions") setCompletedMissionSearchDraft(completedMissionSearch);
+
+        setOpenSearch(target);
+    }
+
+    function renderSearchIcon(): React.ReactElement {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15.5 14H14.71L14.43 13.73C15.0549 13.0039 15.5117 12.1487 15.7675 11.2256C16.0234 10.3024 16.072 9.33413 15.91 8.38998C15.44 5.60998 13.12 3.38997 10.32 3.04997C9.33559 2.92544 8.33576 3.02775 7.397 3.34906C6.45824 3.67038 5.60542 4.20219 4.90381 4.90381C4.20219 5.60542 3.67038 6.45824 3.34906 7.397C3.02775 8.33576 2.92544 9.33559 3.04997 10.32C3.38997 13.12 5.60998 15.44 8.38998 15.91C9.33413 16.072 10.3024 16.0234 11.2256 15.7675C12.1487 15.5117 13.0039 15.0549 13.73 14.43L14 14.71V15.5L18.25 19.75C18.66 20.16 19.33 20.16 19.74 19.75C20.15 19.34 20.15 18.67 19.74 18.26L15.5 14ZM9.49997 14C7.00997 14 4.99997 11.99 4.99997 9.49997C4.99997 7.00997 7.00997 4.99997 9.49997 4.99997C11.99 4.99997 14 7.00997 14 9.49997C14 11.99 11.99 14 9.49997 14Z" fill="#A0A0A0"/>
+            </svg>
+        );
+    }
+
+    function renderSearchControl({
+        target,
+        searchValue,
+        draftValue,
+        placeholder,
+        ariaLabel,
+        buttonClassName,
+    }: {
+        target: ConcreteLeaderboardSearchTarget;
+        searchValue: string;
+        draftValue: string;
+        placeholder: string;
+        ariaLabel: string;
+        buttonClassName: string;
+    }): React.ReactElement {
+        const isOpen = openSearch === target;
+        const buttonFullClassName = [
+            buttonClassName,
+            searchValue ? "eca-admin-leaderboard-search-button--active" : "",
+        ].filter(Boolean).join(" ");
+
+        return (
+            <div className={isOpen ? "eca-admin-leaderboard-search-wrap eca-admin-leaderboard-search-wrap--open" : "eca-admin-leaderboard-search-wrap"}>
+                <button type="button" className={buttonFullClassName} aria-label={ariaLabel} onClick={() => handleOpenSearch(target)}>
+                    {renderSearchIcon()}
+                </button>
+
+                {isOpen ? (
+                    <div className="eca-admin-leaderboard-search-popover">
+                        <input
+                            autoFocus
+                            value={draftValue}
+                            placeholder={placeholder}
+                            onChange={(event) => {
+                                const value = event.target.value;
+
+                                setSearchDraftValue(target, value);
+                                setSearchValue(target, value.trim());
+                            }}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                    setSearchValue(target, draftValue.trim());
+                                    setOpenSearch(null);
+                                }
+
+                                if (event.key === "Escape") {
+                                    setOpenSearch(null);
+                                }
+                            }}
+                        />
+                    </div>
+                ) : null}
+            </div>
+        );
+    }
+
+
+    function renderApprovalFilterControl(): React.ReactElement {
+        //const selectedOption = approvalFilterOptions.find((option) => option.value === approvalFilter);
+        const buttonClassName = [
+            "eca-admin-leaderboard-icon-button",
+            "eca-admin-leaderboard-icon-button--filter",
+            approvalFilter !== "all" ? "eca-admin-leaderboard-icon-button--active" : "",
+        ].filter(Boolean).join(" ");
+
+        return (
+            <div className={approvalFilterOpen ? "eca-admin-leaderboard-filter-wrap eca-admin-leaderboard-filter-wrap--open" : "eca-admin-leaderboard-filter-wrap"}>
+                <button
+                    type="button"
+                    className={buttonClassName}
+                    aria-label="filter approvals"
+                    onClick={() => {
+                        setOpenDropdown(null);
+                        setOpenSearch(null);
+                        setApprovalFilterOpen((prev) => !prev);
+                    }}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+
+                {approvalFilterOpen ? (
+                    <div className="eca-admin-leaderboard-filter-popover">
+                        {approvalFilterOptions.map((option) => {
+                            const selected = option.value === approvalFilter;
+
+                            return (
+                                <button
+                                    type="button"
+                                    className={selected ? "eca-admin-leaderboard-filter-option eca-admin-leaderboard-filter-option--selected" : "eca-admin-leaderboard-filter-option"}
+                                    key={option.value}
+                                    onClick={() => {
+                                        setApprovalFilter(option.value as ApprovalFilter);
+                                        setSelectedApprovalRow(null);
+                                        setApprovalFilterOpen(false);
+                                    }}
+                                >
+                                    <span>{option.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ) : null}
+            </div>
+        );
+    }
+    function renderCustomDropdown({
+        id,
+        value,
+        options,
+        onChange,
+        ariaLabel,
+        className = "",
+        placeholder = "Select",
+        showCheckbox = false,
+    }: {
+        id: ConcreteLeaderboardDropdownId;
+        value: string;
+        options: CustomDropdownOption[];
+        onChange: (value: string) => void;
+        ariaLabel: string;
+        className?: string;
+        placeholder?: string;
+        showCheckbox?: boolean;
+    }): React.ReactElement {
+        const isOpen = openDropdown === id;
+        const isSubmissionFormatDropdown = id === "missionEvidenceType";
+        const selectedOption = options.find((option) => option.value === value);
+        const shouldPortal = missionModalOpen && (id === "missionCategory" || id === "missionEvidenceType");
+        const dropdownClassName = [
+            "eca-admin-leaderboard-custom-dropdown",
+            isOpen ? "eca-admin-leaderboard-custom-dropdown--open" : "",
+            className,
+        ].filter(Boolean).join(" ");
+        const menuClassName = [
+            "eca-admin-leaderboard-custom-dropdown-menu",
+            shouldPortal ? "eca-admin-leaderboard-custom-dropdown-menu--portal" : "",
+            isSubmissionFormatDropdown ? "eca-admin-leaderboard-custom-dropdown-menu--submission-format" : "",
+        ].filter(Boolean).join(" ");
+        const expectedOptionHeight = 48;
+        const expectedMenuHeight = dropdownMenuPosition ? dropdownMenuPosition.height + options.length * expectedOptionHeight + 8 : 0;
+        const availableMenuHeight = dropdownMenuPosition ? window.innerHeight - dropdownMenuPosition.top - 20 : 0;
+        const portalMenuMaxHeight = dropdownMenuPosition ? Math.max(dropdownMenuPosition.height + 96, Math.min(expectedMenuHeight, availableMenuHeight)) : 0;
+        const portalLayerStyle = shouldPortal && dropdownMenuPosition ? ({
+            top: `${dropdownMenuPosition.top}px`,
+            left: `${dropdownMenuPosition.left}px`,
+            width: `${dropdownMenuPosition.width}px`,
+            "--eca-dropdown-height": `${dropdownMenuPosition.height}px`,
+            "--eca-dropdown-menu-max-height": `${portalMenuMaxHeight}px`,
+        } as React.CSSProperties) : undefined;
+        const menuElement = (
+            <div className={menuClassName} role="listbox" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
+                {options.map((option) => {
+                    const selected = option.value === value;
+
+                    return (
+                        <button type="button" className={selected ? "eca-admin-leaderboard-custom-dropdown-option eca-admin-leaderboard-custom-dropdown-option--selected" : "eca-admin-leaderboard-custom-dropdown-option"} role="option" aria-selected={selected} key={option.value} onClick={() => { onChange(option.value); setOpenDropdown(null); }}>
+                            {showCheckbox ? (
+                                <span className={selected ? "eca-admin-leaderboard-custom-dropdown-check eca-admin-leaderboard-custom-dropdown-check--selected" : "eca-admin-leaderboard-custom-dropdown-check"} aria-hidden="true" />
+                            ) : null}
+                            <span>{option.label}</span>
+                        </button>
+                    );
+                })}
+            </div>
+        );
+        const portalElement = shouldPortal && portalLayerStyle ? (
+            <div className="eca-admin-leaderboard-custom-dropdown-portal-layer" style={portalLayerStyle} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
+                <button type="button" className="eca-admin-leaderboard-custom-dropdown-button eca-admin-leaderboard-custom-dropdown-button--portal" aria-label={ariaLabel} aria-expanded={isOpen} onClick={() => setOpenDropdown(null)}>
+                    <span>{selectedOption?.label ?? placeholder}</span>
+                    <svg className="eca-admin-leaderboard-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+                {menuElement}
+            </div>
+        ) : null;
+
+        return (
+            <div className={dropdownClassName}>
+                <button
+                    type="button"
+                    ref={(node) => {
+                        dropdownButtonRefs.current[id] = node;
+                    }}
+                    className="eca-admin-leaderboard-custom-dropdown-button"
+                    aria-label={ariaLabel}
+                    aria-expanded={isOpen}
+                    onClick={() => {
+                        if (openDropdown === id) {
+                            setOpenDropdown(null);
+                            return;
+                        }
+
+                        updateDropdownMenuPosition(id);
+                        setOpenDropdown(id);
+                    }}
+                >
+                    <div>{selectedOption?.label ?? placeholder}</div>
+                    <svg className="eca-admin-leaderboard-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+
+                {isOpen ? (
+                    shouldPortal && portalElement
+                        ? createPortal(portalElement, missionModalBackdropRef.current ?? document.body)
+                        : menuElement
+                ) : null}
+            </div>
+        );
+    }
+
+    function renderToolbar(selectElement: React.ReactNode, searchElement: React.ReactNode, filterElement?: React.ReactNode): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-toolbar">
                 {selectElement}
 
                 <div className="eca-admin-leaderboard-toolbar-actions">
-                    <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </button>
+                    {filterElement}
                     <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="export">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M11.625 15.513C11.5083 15.471 11.4 15.4 11.3 15.3L7.7 11.7C7.5 11.5 7.404 11.2667 7.412 11C7.42 10.7333 7.516 10.5 7.7 10.3C7.9 10.1 8.13767 9.996 8.413 9.988C8.68833 9.98 8.92567 10.0757 9.125 10.275L11 12.15V5C11 4.71667 11.096 4.47934 11.288 4.288C11.48 4.09667 11.7173 4.00067 12 4C12.2827 3.99934 12.5203 4.09534 12.713 4.288C12.9057 4.48067 13.0013 4.718 13 5V12.15L14.875 10.275C15.075 10.075 15.3127 9.979 15.588 9.987C15.8633 9.995 16.1007 10.0993 16.3 10.3C16.4833 10.5 16.5793 10.7333 16.588 11C16.5967 11.2667 16.5007 11.5 16.3 11.7L12.7 15.3C12.6 15.4 12.4917 15.471 12.375 15.513C12.2583 15.555 12.1333 15.5757 12 15.575C11.8667 15.5743 11.7417 15.5537 11.625 15.513ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V16C4 15.7167 4.096 15.4793 4.288 15.288C4.48 15.0967 4.71733 15.0007 5 15C5.28267 14.9993 5.52033 15.0953 5.713 15.288C5.90567 15.4807 6.00133 15.718 6 16V18H18V16C18 15.7167 18.096 15.4793 18.288 15.288C18.48 15.0967 18.7173 15.0007 19 15C19.2827 14.9993 19.5203 15.0953 19.713 15.288C19.9057 15.4807 20.0013 15.718 20 16V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="#A0A0A0"/>
                         </svg>
                     </button>
-                    <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="search">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M15.5 14H14.71L14.43 13.73C15.0549 13.0039 15.5117 12.1487 15.7675 11.2256C16.0234 10.3024 16.072 9.33413 15.91 8.38998C15.44 5.60998 13.12 3.38997 10.32 3.04997C9.33559 2.92544 8.33576 3.02775 7.397 3.34906C6.45824 3.67038 5.60542 4.20219 4.90381 4.90381C4.20219 5.60542 3.67038 6.45824 3.34906 7.397C3.02775 8.33576 2.92544 9.33559 3.04997 10.32C3.38997 13.12 5.60998 15.44 8.38998 15.91C9.33413 16.072 10.3024 16.0234 11.2256 15.7675C12.1487 15.5117 13.0039 15.0549 13.73 14.43L14 14.71V15.5L18.25 19.75C18.66 20.16 19.33 20.16 19.74 19.75C20.15 19.34 20.15 18.67 19.74 18.26L15.5 14ZM9.49997 14C7.00997 14 4.99997 11.99 4.99997 9.49997C4.99997 7.00997 7.00997 4.99997 9.49997 4.99997C11.99 4.99997 14 7.00997 14 9.49997C14 11.99 11.99 14 9.49997 14Z" fill="#A0A0A0"/>
-                        </svg>
-                    </button>
+                    {searchElement}
                 </div>
             </div>
         );
@@ -367,13 +1096,11 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderRankingContent(): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-ranking-content">
-                <div className="eca-admin-leaderboard-ranking-title">Students Ranking ({mockRankingRows.length})</div>
+                <div className="eca-admin-leaderboard-ranking-title">Students Ranking ({sortedRankingRows.length})</div>
                 <div className="eca-admin-leaderboard-table-header">
                     <span>Rank</span>
-                    <span />
                     <span>Name</span>
                     <span>Total Score</span>
-                    <span />
                 </div>
 
                 <div ref={rankingListRef} className={getRankingListClassName()}>
@@ -408,10 +1135,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderApprovalsContent(): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-approvals-content">
-                <div className="eca-admin-leaderboard-approvals-title">Pending Approval ({approvalRows.length})</div>
+                <div className="eca-admin-leaderboard-approvals-title">{getApprovalFilterTitle(approvalFilter)} ({filteredApprovalRows.length})</div>
 
                 <div className="eca-admin-leaderboard-approvals-header">
-                    <span />
                     <span>Name</span>
                     <span>Submission Date</span>
                     <span>Category</span>
@@ -419,7 +1145,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 </div>
 
                 <div className="eca-admin-leaderboard-approvals-list">
-                    {approvalRows.map((row) => (
+                    {filteredApprovalRows.map((row) => (
                         <button
                             type="button"
                             className={selectedApprovalRow?.id === row.id ? "eca-admin-leaderboard-approval-row eca-admin-leaderboard-approval-row--selected" : "eca-admin-leaderboard-approval-row"}
@@ -442,10 +1168,22 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return (
             <>
                 {renderToolbar(
-                    <select className="eca-admin-leaderboard-sort-select" value={sort} onChange={(event) => setSort(event.target.value as LeaderboardSort)} aria-label="sort ranking">
-                        <option value="highest">Highest</option>
-                        <option value="lowest">Lowest</option>
-                    </select>
+                    renderCustomDropdown({
+                        id: "rankingSort",
+                        value: sort,
+                        options: rankingSortOptions,
+                        onChange: (value) => setSort(value as LeaderboardSort),
+                        ariaLabel: "sort ranking",
+                        className: "eca-admin-leaderboard-custom-dropdown--sort",
+                    }),
+                    renderSearchControl({
+                        target: "ranking",
+                        searchValue: rankingSearch,
+                        draftValue: rankingSearchDraft,
+                        placeholder: "Enter student name",
+                        ariaLabel: "search ranking",
+                        buttonClassName: "eca-admin-leaderboard-icon-button",
+                    })
                 )}
                 {renderRankingContent()}
             </>
@@ -456,10 +1194,23 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return (
             <>
                 {renderToolbar(
-                    <select className="eca-admin-leaderboard-sort-select" defaultValue="latest" aria-label="sort approvals">
-                        <option value="latest">최신순</option>
-                        <option value="oldest">오래된순</option>
-                    </select>
+                    renderCustomDropdown({
+                        id: "approvalSort",
+                        value: approvalSort,
+                        options: approvalSortOptions,
+                        onChange: (value) => setApprovalSort(value as ApprovalSort),
+                        ariaLabel: "sort approvals",
+                        className: "eca-admin-leaderboard-custom-dropdown--sort",
+                    }),
+                    renderSearchControl({
+                        target: "approvals",
+                        searchValue: approvalSearch,
+                        draftValue: approvalSearchDraft,
+                        placeholder: "Enter student name",
+                        ariaLabel: "search approvals",
+                        buttonClassName: "eca-admin-leaderboard-icon-button",
+                    }),
+                    renderApprovalFilterControl()
                 )}
                 {renderApprovalsContent()}
             </>
@@ -472,12 +1223,14 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 <div className="eca-admin-leaderboard-missions-top">
                     <h2>Mission Mangement</h2>
                     <div className="eca-admin-leaderboard-missions-actions">
-                        <button type="button" className="eca-admin-leaderboard-missions-search-button" aria-label="search missions">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z" stroke="currentColor" strokeWidth="2" />
-                                <path d="M16 16L20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                        </button>
+                        {renderSearchControl({
+                            target: "missions",
+                            searchValue: missionSearch,
+                            draftValue: missionSearchDraft,
+                            placeholder: "Enter mission name",
+                            ariaLabel: "search missions",
+                            buttonClassName: "eca-admin-leaderboard-missions-search-button",
+                        })}
                         <button type="button" className="eca-admin-leaderboard-missions-add-button" onClick={handleOpenMissionModal}>
                             추가하기
                         </button>
@@ -489,15 +1242,15 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         const categoryMissions = getMissionRulesByCategory(category);
 
                         return (
-                            <section className="eca-admin-leaderboard-mission-column" key={category}>
-                                <h3>{category} ({categoryMissions.length})</h3>
-                                <div className="eca-admin-leaderboard-mission-column-list">
+                            <section className={getMissionColumnClassName(category)} key={category}>
+                                <h3>{missionCategoryLabels[category]} ({categoryMissions.length})</h3>
+                                <div ref={(node) => { missionColumnListRefs.current[category] = node; }} className="eca-admin-leaderboard-mission-column-list">
                                     {categoryMissions.map((mission) => (
                                         <article className="eca-admin-leaderboard-mission-rule-card" key={mission.id}>
                                             <strong>{mission.title}</strong>
                                             <div className="eca-admin-leaderboard-mission-rule-bottom">
                                                 <span>+{mission.points}</span>
-                                                <button type="button" className="eca-admin-leaderboard-mission-rule-edit-button" aria-label="edit mission">
+                                                <button type="button" className="eca-admin-leaderboard-mission-rule-edit-button" aria-label="edit mission" onClick={() => handleOpenMissionEditModal(mission)}>
                                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                                         <path d="M4 16.5V20H7.5L18.2 9.3L14.7 5.8L4 16.5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
                                                         <path d="M13.5 7L15.7 4.8C16.4 4.1 17.5 4.1 18.2 4.8L19.2 5.8C19.9 6.5 19.9 7.6 19.2 8.3L17 10.5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
@@ -552,24 +1305,26 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 </section>
 
                 <div className="eca-admin-leaderboard-detail-list-header">
-                    <h2>Completed Missions ({completedMissions.length})</h2>
+                    <h2>Completed Missions ({filteredCompletedMissions.length})</h2>
                     <div className="eca-admin-leaderboard-detail-actions">
                         <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter completed missions">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
-                        <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="search completed missions">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M11 18C14.866 18 18 14.866 18 11C18 7.13401 14.866 4 11 4C7.13401 4 4 7.13401 4 11C4 14.866 7.13401 18 11 18Z" stroke="currentColor" strokeWidth="2" />
-                                <path d="M16 16L20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                        </button>
+                        {renderSearchControl({
+                            target: "completedMissions",
+                            searchValue: completedMissionSearch,
+                            draftValue: completedMissionSearchDraft,
+                            placeholder: "Enter mission name",
+                            ariaLabel: "search completed missions",
+                            buttonClassName: "eca-admin-leaderboard-icon-button",
+                        })}
                     </div>
                 </div>
 
                 <div className="eca-admin-leaderboard-detail-mission-list">
-                    {completedMissions.map((mission) => (
+                    {filteredCompletedMissions.map((mission) => (
                         <article
                             className="eca-admin-leaderboard-detail-mission-card"
                             key={mission.id}
@@ -660,10 +1415,10 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 </div>
 
                 <div className="eca-admin-leaderboard-approval-detail-actions">
-                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--approve" onClick={() => handleApprovalDecision(selectedApprovalRow.id)}>
+                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--approve" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "approve")}>
                         Approve
                     </button>
-                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--reject" onClick={() => handleApprovalDecision(selectedApprovalRow.id)}>
+                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--reject" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "reject")}>
                         Reject
                     </button>
                 </div>
@@ -680,7 +1435,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             <div className="eca-admin-leaderboard-mission-modal-backdrop" role="presentation" onClick={() => setSelectedMission(null)}>
                 <section className="eca-admin-leaderboard-mission-modal" role="dialog" aria-modal="true" aria-labelledby="eca-admin-leaderboard-mission-modal-title" onClick={(event) => event.stopPropagation()}>
                     <button type="button" className="eca-admin-leaderboard-mission-modal-close" aria-label="close mission detail" onClick={() => setSelectedMission(null)}>
-                        ×
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
                     </button>
 
                     <div className="eca-admin-leaderboard-mission-modal-evidence-list">
@@ -747,62 +1504,78 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         );
     }
 
-
     function renderAddMissionModal(): React.ReactElement | null {
         if (!missionModalOpen) return null;
 
         return (
-            <div className="eca-admin-leaderboard-add-mission-backdrop" role="presentation" onClick={handleCloseMissionModal}>
+            <div ref={missionModalBackdropRef} className="eca-admin-leaderboard-add-mission-backdrop" role="presentation" onClick={handleCloseMissionModal}>
                 <section className="eca-admin-leaderboard-add-mission-modal" role="dialog" aria-modal="true" aria-labelledby="eca-admin-leaderboard-add-mission-title" onClick={(event) => event.stopPropagation()}>
-                    <button type="button" className="eca-admin-leaderboard-add-mission-close" aria-label="close add mission modal" onClick={handleCloseMissionModal}>
+                    <button type="button" className="eca-admin-leaderboard-add-mission-close" aria-label="close mission modal" onClick={handleCloseMissionModal}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
                         </svg>
                     </button>
 
-                    <h2 id="eca-admin-leaderboard-add-mission-title">Add Mission</h2>
+                    <h2 id="eca-admin-leaderboard-add-mission-title">{editingMission ? "Edit Mission" : "Add Mission"}</h2>
 
-                    <label className="eca-admin-leaderboard-add-mission-field">
+                    <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
                         <span>Mission Name</span>
                         <input value={missionForm.title} onChange={(event) => handleMissionFormChange("title", event.target.value)} placeholder="Enter Mission Name" />
                     </label>
 
-                    <label className="eca-admin-leaderboard-add-mission-field">
+                    <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
                         <span>Mission Description</span>
                         <input value={missionForm.description} onChange={(event) => handleMissionFormChange("description", event.target.value)} placeholder="Describe the Mission" />
                     </label>
 
-                    <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--half">
+                    <div className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
                         <span>Category</span>
-                        <select value={missionForm.category} onChange={(event) => handleMissionFormChange("category", event.target.value as MissionCategory)}>
-                            <option value="Participation">Participation</option>
-                            <option value="Intents">Intents</option>
-                            <option value="Contents">Contents</option>
-                        </select>
-                    </label>
+                        {renderCustomDropdown({
+                            id: "missionCategory",
+                            value: missionForm.category,
+                            options: missionCategoryOptions,
+                            onChange: (value) => handleMissionFormChange("category", value as MissionCategory),
+                            ariaLabel: "select mission category",
+                            placeholder: "Select Category",
+                        })}
+                    </div>
 
                     <div className="eca-admin-leaderboard-add-mission-grid">
-                        <label className="eca-admin-leaderboard-add-mission-field">
+                        <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
                             <span>Points</span>
                             <input value={missionForm.points} onChange={(event) => handleMissionFormChange("points", event.target.value)} placeholder="Number" inputMode="numeric" />
                         </label>
-                        <label className="eca-admin-leaderboard-add-mission-field">
+                        <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
                             <span>Maximum Missions per Student</span>
                             <input value={missionForm.maximum} onChange={(event) => handleMissionFormChange("maximum", event.target.value)} placeholder="Number" inputMode="numeric" />
                         </label>
                     </div>
 
-                    <label className="eca-admin-leaderboard-add-mission-field">
+                    <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
                         <span>Evidence</span>
                         <input value={missionForm.evidence} onChange={(event) => handleMissionFormChange("evidence", event.target.value)} placeholder="Explain what students need to submit as evidence" />
                     </label>
+
+                    <div className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--format">
+                        <span>Submission Format</span>
+                        {renderCustomDropdown({
+                            id: "missionEvidenceType",
+                            value: missionForm.evidenceType,
+                            options: evidenceFormatOptions,
+                            onChange: (value) => handleMissionFormChange("evidenceType", value as MissionEvidenceFormat),
+                            ariaLabel: "select submission format",
+                            placeholder: "Select a format of evidence",
+                            className: "eca-admin-leaderboard-custom-dropdown--submission-format",
+                            showCheckbox: true,
+                        })}
+                    </div>
 
                     <div className="eca-admin-leaderboard-add-mission-actions">
                         <button type="button" className="eca-admin-leaderboard-add-mission-button eca-admin-leaderboard-add-mission-button--cancel" onClick={handleCloseMissionModal}>
                             Cancel
                         </button>
-                        <button type="button" className="eca-admin-leaderboard-add-mission-button eca-admin-leaderboard-add-mission-button--create" onClick={handleCreateMission}>
-                            Create
+                        <button type="button" className="eca-admin-leaderboard-add-mission-button eca-admin-leaderboard-add-mission-button--create" onClick={handleSaveMission}>
+                            {editingMission ? "Save" : "Create"}
                         </button>
                     </div>
                 </section>
@@ -816,7 +1589,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 <div className="eca-admin-leaderboard-header-row">
                     <h1 className="eca-admin-leaderboard-title">{activity?.name ?? "Class Name"}</h1>
 
-                    <div className="eca-admin-leaderboard-menu-wrap" ref={actionMenuRef}>
+                    {/* <div className="eca-admin-leaderboard-menu-wrap" ref={actionMenuRef}>
                         <button type="button" className="eca-admin-leaderboard-more-button" aria-label="open menu" onClick={() => setMenuOpen((prev) => !prev)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <path d="M4 12C4 12.2652 4.10536 12.5196 4.29289 12.7071C4.48043 12.8946 4.73478 13 5 13C5.26522 13 5.51957 12.8946 5.70711 12.7071C5.89464 12.5196 6 12.2652 6 12C6 11.7348 5.89464 11.4804 5.70711 11.2929C5.51957 11.1054 5.26522 11 5 11C4.73478 11 4.48043 11.1054 4.29289 11.2929C4.10536 11.4804 4 11.7348 4 12ZM11 12C11 12.2652 11.1054 12.5196 11.2929 12.7071C11.4804 12.8946 11.7348 13 12 13C12.2652 13 12.5196 12.8946 12.7071 12.7071C12.8946 12.5196 13 12.2652 13 12C13 11.7348 12.8946 11.4804 12.7071 11.2929C12.5196 11.1054 12.2652 11 12 11C11.7348 11 11.4804 11.1054 11.2929 11.2929C11.1054 11.4804 11 11.7348 11 12ZM18 12C18 12.2652 18.1054 12.5196 18.2929 12.7071C18.4804 12.8946 18.7348 13 19 13C19.2652 13 19.5196 12.8946 19.7071 12.7071C19.8946 12.5196 20 12.2652 20 12C20 11.7348 19.8946 11.4804 19.7071 11.2929C19.5196 11.1054 19.2652 11 19 11C18.7348 11 18.4804 11.1054 18.2929 11.2929C18.1054 11.4804 18 11.7348 18 12Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -839,7 +1612,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                                 </button>
                             </div>
                         ) : null}
-                    </div>
+                    </div> */}
                 </div>
 
                 <nav className={getTabsClassName(activeTab)} aria-label="leaderboard tabs">
@@ -862,8 +1635,6 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     </div>
                 </div>
             </section>
-
-            <div className="eca-admin-leaderboard-last-update">Last update 6/16 09:00</div>
 
             {deleteModalOpen ? (
                 <div className="eca-admin-leaderboard-modal-backdrop" role="presentation">

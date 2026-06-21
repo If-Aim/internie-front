@@ -257,6 +257,26 @@ export async function api<T = unknown>(
 	return (await res.json()) as T;
 }
 
+
+export function getAccessToken(): string | null {
+    return getStoredAccessToken();
+}
+
+export function buildWebSocketUrl(path = "/ws"): string {
+    const explicitUrl = API_BASE_URL?.trim();
+
+    if (explicitUrl) {
+        return explicitUrl;
+    }
+
+    const baseUrl = API_BASE_URL?.startsWith("http") ? API_BASE_URL : window.location.origin;
+    const url = new URL(path, baseUrl);
+
+    url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+
+    return url.toString();
+}
+
 /* Auth */ 
 // 회원가입 요청
 export type SignupRequest = {

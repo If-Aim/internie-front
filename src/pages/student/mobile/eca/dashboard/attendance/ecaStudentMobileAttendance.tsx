@@ -46,7 +46,7 @@ function getEventSortTime(event: MyAttendanceEventResponse): number {
         return date.getTime();
     }
 
-    return 0;
+    return Number.MAX_SAFE_INTEGER;
 }
 
 function getTypeLabel(type: AttendanceEventType): string {
@@ -76,12 +76,7 @@ function getStatusClass(status: AttendanceStatus): string {
 }
 
 function sortAttendanceEvents(events: MyAttendanceEventResponse[]): MyAttendanceEventResponse[] {
-    return [...events].sort((a, b) => {
-        if (a.progress === "OPEN" && b.progress !== "OPEN") return -1;
-        if (a.progress !== "OPEN" && b.progress === "OPEN") return 1;
-
-        return getEventSortTime(b) - getEventSortTime(a);
-    });
+    return [...events].sort((a, b) => getEventSortTime(a) - getEventSortTime(b));
 }
 
 export default function EcaMobileAttendance(): React.ReactElement {

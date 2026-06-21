@@ -58,9 +58,9 @@
 
 .eca-student-assignment-submit-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.32); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
 .eca-student-assignment-submit-modal { width: 640px; height: 360px; border-radius: 18px; background: #fff; box-shadow: 0 0 16px rgba(0,0,0,.22); display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-student-assignment-submit-modal-icon { width: 66px; height: 66px; margin-bottom: 32px; border-radius: 999px; background: #0166FF; display: flex; align-items: center; justify-content: center; }
-.eca-student-assignment-submit-modal-icon.is-fail { width: 66px; height: 66px; margin-bottom: 32px; border-radius: 999px; background: none; display: flex; align-items: center; justify-content: center; }
-.eca-student-assignment-submit-modal strong { margin-bottom: 54px; color: #000; font-size: 18px; font-weight: 500; }
+.eca-student-assignment-submit-modal-icon { width: 66px; height: 66px; margin-bottom: 30px; border-radius: 999px; background: #0166FF; display: flex; align-items: center; justify-content: center; }
+.eca-student-assignment-submit-modal-icon.is-fail { width: 66px; height: 66px; margin-bottom: 30px; border-radius: 999px; background: none; display: flex; align-items: center; justify-content: center; }
+.eca-student-assignment-submit-modal strong { margin-bottom: 54px; color: #000; font-size: 20px; font-weight: 500; line-height: 28px;}
 .eca-student-assignment-submit-modal button { width: 160px; height: 48px; border: 0; border-radius: 6px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 900; cursor: pointer; }
 
 

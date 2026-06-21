@@ -55,13 +55,38 @@ function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): St
     };
 }
 
-function getAssignmentFormLabel(assignment: StudentAssignmentViewModel): string {
-    if (!assignment.isTeamAssignment) return "개인";
-
-    const teamName = assignment.myTeam?.name?.trim();
-
-    return teamName ? `팀 · ${teamName}` : "팀";
+function isUnsubmittedAssignment(status: AssignmentStatus): boolean {
+    return status === "before" || status === "missing";
 }
+
+function getAssignmentDeadlineSortTime(assignment: StudentAssignmentViewModel): number {
+    if (!assignment.deadlineAt) return Number.MAX_SAFE_INTEGER;
+
+    const deadline = parseServerKstDateTime(assignment.deadlineAt);
+
+    return deadline?.getTime() ?? Number.MAX_SAFE_INTEGER;
+}
+
+function compareStudentAssignments(a: StudentAssignmentViewModel, b: StudentAssignmentViewModel): number {
+    const unsubmittedA = isUnsubmittedAssignment(a.status);
+    const unsubmittedB = isUnsubmittedAssignment(b.status);
+
+    if (unsubmittedA !== unsubmittedB) return unsubmittedA ? -1 : 1;
+
+    const deadlineDiff = getAssignmentDeadlineSortTime(a) - getAssignmentDeadlineSortTime(b);
+
+    if (deadlineDiff !== 0) return deadlineDiff;
+
+    return a.name.localeCompare(b.name, "ko-KR", { numeric: true });
+}
+
+// function getAssignmentFormLabel(assignment: StudentAssignmentViewModel): string {
+//     if (!assignment.isTeamAssignment) return "개인";
+
+//     const teamName = assignment.myTeam?.name?.trim();
+
+//     return teamName ? `팀 · ${teamName}` : "팀";
+// }
 
 function formatMobilePeriod(assignment: StudentAssignmentViewModel): string {
     const start = formatServerKstDateAndTimeCompactForUser(assignment.startDate, assignment.startTime, "00:00:00");
@@ -71,10 +96,10 @@ function formatMobilePeriod(assignment: StudentAssignmentViewModel): string {
 }
 
 function getAssignmentStatusLabel(status: AssignmentStatus): string {
-    if (status === "submitted") return "제출";
-    if (status === "lateSubmitted") return "제출";
-    if (status === "missing") return "미제출";
-    return "제출전";
+    if (status === "submitted") return "submitted";
+    if (status === "lateSubmitted") return "late";
+    if (status === "missing") return "missing";
+    return "assigned";
 }
 
 function getAssignmentStatusClass(status: AssignmentStatus): string {
@@ -129,7 +154,7 @@ export default function EcaMobileAssignment(): React.ReactElement {
                 ]);
 
                 setActivity(activityData);
-                setAssignments(assignmentData.map(toStudentAssignmentViewModel));
+                setAssignments(assignmentData.map(toStudentAssignmentViewModel).sort(compareStudentAssignments));
             } catch (e) {
                 console.error(e);
                 setActivity(null);
@@ -198,7 +223,7 @@ export default function EcaMobileAssignment(): React.ReactElement {
                             <button type="button" className="eca-mobile-student-assignment-card" key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
                                 <span className="eca-mobile-student-assignment-info">
                                     <strong>{assignment.name}</strong>
-                                    <span className="eca-mobile-student-assignment-meta">{getAssignmentFormLabel(assignment)}</span>
+                                    {/* <span className="eca-mobile-student-assignment-meta">{getAssignmentFormLabel(assignment)}</span> */}
                                     <em>{formatMobilePeriod(assignment)}</em>
                                 </span>
 

@@ -8,6 +8,8 @@ import EcaDashboardAssignment from "./dashboard/assignment/assignment";
 import EcaNewAssignmentPage from "./dashboard/assignment/newAssignment";
 import EcaAssignmentDetailPage from "./dashboard/assignment/assignmentDetail";
 import EcaAssignmentEvaluationPage from "./dashboard/assignment/assignmentEvaluation";
+import EcaEvaluationPage from "./dashboard/evaluation/evaluation";
+import EcaEvaluationDetailPage from "./dashboard/evaluation/evaluationDetail";
 import EcaDashboardAttendance from "./dashboard/attendance/attendance";
 import EcaDashboardAttendanceDetail from "./dashboard/attendance/attendanceDetail";
 import EcaDashboardTeamActivity from "./dashboard/teamActivity/teamActivity";
@@ -28,6 +30,8 @@ export default function EcaClientAdminApp(): React.ReactElement {
                 <Route path="activities/:externalActivityId/assignment/new" element={<EcaNewAssignmentPage />} />
                 <Route path="activities/:externalActivityId/assignment/:assignmentId" element={<EcaAssignmentDetailPage />} />
                 <Route path="activities/:externalActivityId/assignment/:assignmentId/evaluation/:participantId" element={<EcaAssignmentEvaluationPage />} />
+                <Route path="activities/:externalActivityId/evaluation" element={<EcaEvaluationPage />} />
+                <Route path="activities/:externalActivityId/evaluation/students/:participantType/:targetId" element={<EcaEvaluationDetailPage />} />
                 <Route path="activities/:externalActivityId/assignment/:assignmentId/edit" element={<EcaNewAssignmentPage />} />
                 <Route path="activities/:externalActivityId/attendance" element={<EcaDashboardAttendance />} />
                 <Route path="activities/:externalActivityId/attendance/:eventId" element={<EcaDashboardAttendanceDetail />} />

@@ -152,11 +152,13 @@ export default function StudentMobileSideMenu({
         { key: "dashboard", label: isKo ? "대시보드" : "Dashboard", path: "dashboard", disabled: false },
         { key: "assignment", label: isKo ? "과제 제출 현황" : "Assignment Status", path: "assignment", disabled: false },
         { key: "attendance", label: isKo ? "출석 현황" : "Attendance", path: "attendance", disabled: false },
-        { key: "team-activity", label: isKo ? "팀 활동" : "Team Activity", path: "team-activity", disabled: true },
+        { key: "leaderboard", label: isKo ? "리더보드" : "Leaderboard", path: "leaderboard", disabled: false },
     ];
 
     function isActivityMenuActive(activityId: number, menuPath: string): boolean {
-        return pathname === `/student/activities/${activityId}/${menuPath}`;
+        const menuBasePath = `/student/activities/${activityId}/${menuPath}`;
+
+        return pathname === menuBasePath || pathname.startsWith(`${menuBasePath}/`);
     }
 
     React.useEffect(() => {

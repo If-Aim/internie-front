@@ -1,6 +1,6 @@
 .eca-admin-attendance-page { position: relative; width: 100%; min-height: 100%; color: #000; background: #EEF4FC; font-family: inherit; }
 .eca-admin-attendance-page-inner { width: min(100%, 1210px); margin: 0 auto; box-sizing: border-box; }
-.eca-admin-attendance-title { margin: 0 0 94px 7px; font-size: 24px; font-weight: 700; line-height: 27px; color: #000; }
+.eca-admin-attendance-title { margin: 0 0 34px; font-size: 24px; font-weight: 700; line-height: 27px; color: #000; }
 
 .eca-admin-attendance-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-bottom: 28px; }
 .eca-admin-attendance-summary-card { display: flex; flex-direction: column; min-height: 140px; padding: 28px 21px 26px; box-sizing: border-box; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF;}

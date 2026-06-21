@@ -12,7 +12,7 @@
 .eca-mobile-student-assignment-submit-field span, .eca-mobile-student-assignment-submit-period > span, .eca-mobile-student-assignment-submit-grid label span { display: block; margin: 0 0 8px 7px; color: #000; font-size: 16px; font-weight: 700; line-height: 1; }
 .eca-mobile-student-assignment-submit-field input, .eca-mobile-student-assignment-submit-period input, .eca-mobile-student-assignment-submit-grid input { width: 100%; height: 48px; padding: 0 9px; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #000; font-size: 14px; font-weight: 500; box-sizing: border-box; }
 .eca-mobile-student-assignment-submit-period { margin-bottom: 20px; }
-.eca-mobile-student-assignment-submit-period div { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); align-items: center; gap: 10px; }
+.eca-mobile-student-assignment-submit-period div { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); align-items: center; gap: 4px; }
 .eca-mobile-student-assignment-submit-period em { color: #808080; font-size: 20px; font-style: normal; font-weight: 500; text-align: center; }
 .eca-mobile-student-assignment-submit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
 
@@ -22,7 +22,7 @@
 .eca-mobile-student-assignment-file-input { display: none; }
 .eca-mobile-student-assignment-link-area { margin-top: 16px; }
 .eca-mobile-student-assignment-link-area.is-only { margin-top: -8px; }
-.eca-mobile-student-assignment-link-area input { width: 100%; height: 36px; padding: 0 20px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #000; font-size: 12px; font-weight: 500; box-sizing: border-box; }
+.eca-mobile-student-assignment-link-area input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #000; font-size: 12px; font-weight: 500; box-sizing: border-box; }
 .eca-mobile-student-assignment-link-area input.is-invalid { border-color: #F00; }
 .eca-mobile-student-assignment-link-area input::placeholder { color: #808080; }
 .eca-mobile-student-assignment-link-area small { display: block; margin-top: 8px; color: #F00; font-size: 12px; font-weight: 700; }
@@ -58,3 +58,17 @@
 .eca-mobile-student-assignment-submit-modal span { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
 .eca-mobile-student-assignment-submit-modal strong { color: #000; font-size: 20px; font-weight: 400; line-height: 27px; margin-bottom: 31px; }
 .eca-mobile-student-assignment-submit-modal button { width: 160px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+
+.eca-mobile-student-assignment-upload-box:disabled { cursor: default; opacity: .65; }
+.eca-mobile-student-assignment-link-area input:disabled { background: #F8F8F8; color: #808080; }
+.eca-mobile-student-assignment-evaluated-bar { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: #F0F6FF; color: #0166FF; font-size: 12px; font-weight: 700; line-height: 18px; }
+.eca-mobile-student-assignment-evaluation-card { padding-bottom: 27px; }
+.eca-mobile-student-assignment-evaluation-card h3 { margin-bottom: 27px; }
+.eca-mobile-student-assignment-evaluation-row { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding: 0 18px 0 9px; box-sizing: border-box; }
+.eca-mobile-student-assignment-evaluation-row span { color: #808080; font-size: 14px; font-weight: 700; line-height: 16px; }
+.eca-mobile-student-assignment-evaluation-row strong { color: #000; font-size: 20px; font-weight: 700; line-height: 24px; }
+.eca-mobile-student-assignment-evaluation-row.is-total { margin-bottom: 8px; }
+.eca-mobile-student-assignment-evaluation-row.is-total strong { color: #0166FF; }
+.eca-mobile-student-assignment-feedback-card { padding-bottom: 22px; }
+.eca-mobile-student-assignment-feedback-card h3 { margin-bottom: 20px; }
+.eca-mobile-student-assignment-feedback-card p { margin: 0 9px 0 7px; color: #808080; font-size: 14px; font-weight: 500; line-height: 24px; }

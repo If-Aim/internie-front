@@ -1,7 +1,7 @@
 import React from "react";
-import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { deleteAssignment, downloadAssignmentSubmissionsZip, getAssignmentSubmissions, getExternalActivity } from "../../../../../../api/ea";
-import type { AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFileResponse } from "../../../../../../api/ea";
+import { useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { deleteAssignment, downloadAssignmentSubmissionsZip, getAssignmentEvaluationOverview, getAssignmentSubmissions, getExternalActivity } from "../../../../../../api/ea";
+import type { AssignmentEvaluationOverviewRow, AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFileResponse } from "../../../../../../api/ea";
 import { formatServerKstDateTimeYYDotForUser } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./assignmentDetail.css";
@@ -9,6 +9,12 @@ import "./assignmentDetail.css";
 type SubmissionStatus = "SUBMITTED" | "LATE_SUBMITTED" | "NOT_SUBMITTED" | "LATE";
 type EvaluatedStatus = "BEFORE" | "DONE";
 type SubmitFilter = "EVALUATED" | "BEFORE_EVALUATION" | "LATE_SUBMITTED";
+type AssignmentProgressStatus = "UPCOMING" | "IN_PROGRESS" | "CLOSED";
+type AssignmentDetailEntryDirection = "forward" | "back";
+
+type AssignmentDetailLocationState = {
+    assignmentDetailEntryDirection?: AssignmentDetailEntryDirection;
+};
 
 const SUBMIT_FILTERS: SubmitFilter[] = ["EVALUATED", "BEFORE_EVALUATION", "LATE_SUBMITTED"];
 
@@ -39,23 +45,6 @@ function isMissingStatus(status: string): boolean {
     return status === "NOT_SUBMITTED" || status === "LATE";
 }
 
-// function formatDate(value: string): string {
-//     return value.replaceAll("-", ".");
-// }
-
-// function formatTime(value?: string | null): string {
-//     if (!value) return "";
-
-//     return value.slice(0, 5);
-// }
-
-// function formatPeriod(assignment: AssignmentResponse): string {
-//     const start = `${formatDate(assignment.startDate)} ${formatTime(assignment.startTime)}`;
-//     const end = `${formatDate(assignment.endDate)} ${formatTime(assignment.endTime)}`;
-
-//     return `${start} - ${end}`;
-// }
-
 function getAssignmentParticipantName(participant: AssignmentParticipantResponse): string {
     if (participant.participantType === "TEAM") {
         return participant.teamName?.trim() || "팀 이름 없음";
@@ -64,10 +53,7 @@ function getAssignmentParticipantName(participant: AssignmentParticipantResponse
     return participant.userName?.trim() || "이름 없음";
 }
 
-function getAssignmentParticipantProfileImage(
-    participant: AssignmentParticipantResponse,
-    activity: ExternalActivityResponse | null
-): string | null {
+function getAssignmentParticipantProfileImage(participant: AssignmentParticipantResponse, activity: ExternalActivityResponse | null): string | null {
     if (participant.participantType !== "USER" || typeof participant.userId !== "number") {
         return null;
     }
@@ -75,11 +61,13 @@ function getAssignmentParticipantProfileImage(
     return (activity?.participants ?? []).find((item) => item.userId === participant.userId)?.profileImage ?? null;
 }
 
-function toSubmissionRow(
-    participant: AssignmentParticipantResponse,
-    activity: ExternalActivityResponse | null,
-    submissions: AssignmentSubmissionResponse[]
-): SubmissionRow {
+function getEvaluationStatus(participant: AssignmentParticipantResponse, evaluationRows: AssignmentEvaluationOverviewRow[]): EvaluatedStatus {
+    const matchedRow = evaluationRows.find((row) => row.participantId === participant.assignmentParticipantId);
+
+    return matchedRow?.evaluatedAt ? "DONE" : "BEFORE";
+}
+
+function toSubmissionRow(participant: AssignmentParticipantResponse, activity: ExternalActivityResponse | null, submissions: AssignmentSubmissionResponse[], evaluationRows: AssignmentEvaluationOverviewRow[]): SubmissionRow {
     const matchedSubmission = submissions.find((submission) => submission.participantId === participant.assignmentParticipantId);
     const files = matchedSubmission?.files ?? [];
 
@@ -93,7 +81,7 @@ function toSubmissionRow(
         fileName: matchedSubmission ? getSubmissionFileName(files) : "-",
         files,
         status: participant.status as SubmissionStatus,
-        evaluationStatus: "BEFORE",
+        evaluationStatus: getEvaluationStatus(participant, evaluationRows),
     };
 }
 
@@ -103,20 +91,6 @@ function getTotalCountLabel(assignment: AssignmentResponse | null): string {
 
 function getMissingCountLabel(assignment: AssignmentResponse | null): string {
     return assignment?.systemForm === "TEAM" ? "미제출 팀" : "미제출자";
-}
-
-function getSubmissionStatusLabel(status: SubmissionStatus): string {
-    if (status === "LATE_SUBMITTED") return "지각 제출";
-    if (status === "SUBMITTED") return "제출 완료";
-    if (status === "LATE") return "미제출";
-    return "미제출";
-}
-
-function getSubmissionStatusClass(status: SubmissionStatus): string {
-    if (status === "LATE_SUBMITTED") return "eca-admin-assignment-detail-submit-badge eca-admin-assignment-detail-submit-badge--late";
-    if (status === "SUBMITTED") return "eca-admin-assignment-detail-submit-badge eca-admin-assignment-detail-submit-badge--submitted";
-
-    return "eca-admin-assignment-detail-submit-badge eca-admin-assignment-detail-submit-badge--missing";
 }
 
 function formatSubmittedAt(value?: string | null): string {
@@ -155,36 +129,97 @@ function getSubmissionDisplayName(files: SubmissionFileResponse[]): string {
 
     return "-";
 }
+
 function getSubmissionFileName(files: SubmissionFileResponse[]): string {
     return getSubmissionDisplayName(files);
 }
 
+function getDateFromDateTimeValue(value?: string | null): Date | null {
+    if (!value) return null;
+
+    const normalizedValue = value.includes("T") ? value : value.replace(" ", "T");
+    const date = new Date(normalizedValue);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getAssignmentDateTime(date?: string | null, time?: string | null, endOfDay = false): Date | null {
+    if (!date) return null;
+
+    const fallbackTime = endOfDay ? "23:59:59" : "00:00:00";
+    const normalizedTime = time ? time.slice(0, 8) : fallbackTime;
+    const dateTime = new Date(`${date}T${normalizedTime}`);
+
+    return Number.isNaN(dateTime.getTime()) ? null : dateTime;
+}
+
+function getAssignmentEndDateTime(assignment: AssignmentResponse): Date | null {
+    const deadlineAt = getDateFromDateTimeValue(assignment.deadlineAt);
+
+    if (deadlineAt) return deadlineAt;
+
+    return getAssignmentDateTime(assignment.endDate, assignment.endTime, true);
+}
+
+function getAssignmentProgressStatus(assignment: AssignmentResponse): AssignmentProgressStatus {
+    const now = new Date();
+    const startAt = getAssignmentDateTime(assignment.startDate, assignment.startTime);
+    const endAt = getAssignmentEndDateTime(assignment);
+
+    if (startAt && now < startAt) return "UPCOMING";
+    if (endAt && now > endAt) return "CLOSED";
+
+    return "IN_PROGRESS";
+}
+
+function getAssignmentProgressLabel(status: AssignmentProgressStatus): string {
+    if (status === "UPCOMING") return "예정";
+    if (status === "CLOSED") return "마감";
+
+    return "진행중";
+}
+
+function getAssignmentProgressClass(status: AssignmentProgressStatus): string {
+    return `eca-admin-assignment-detail-progress-badge is-${status.toLowerCase().replace("_", "-")}`;
+}
+
+function FilterIcon({ hasChanged }: { hasChanged: boolean }): React.ReactElement {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            {hasChanged ? <circle cx="20" cy="6" r="3" fill="#0166FF"/> : null}
+        </svg>
+    );
+}
+
 export default function EcaAssignmentDetailPage(): React.ReactElement {
     const navigate = useNavigate();
+    const location = useLocation();
     const { externalActivityId, assignmentId } = useParams<{ externalActivityId?: string; assignmentId?: string }>();
     const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
     const [activity, setActivity] = React.useState<ExternalActivityResponse | null>(null);
     const [assignment, setAssignment] = React.useState<AssignmentResponse | null>(null);
+    const [evaluationRows, setEvaluationRows] = React.useState<AssignmentEvaluationOverviewRow[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
     const [menuOpen, setMenuOpen] = React.useState(false);
     const [deleting, setDeleting] = React.useState(false);
-
-    const menuRef = React.useRef<HTMLDivElement | null>(null);
-    const submitListRef = React.useRef<HTMLDivElement | null>(null);
-    const missingListRef = React.useRef<HTMLDivElement | null>(null);
-    const submitToolbarRef = React.useRef<HTMLDivElement | null>(null);
-
     const [submitListScrollable, setSubmitListScrollable] = React.useState(false);
     const [missingListScrollable, setMissingListScrollable] = React.useState(false);
     const [submitFilterOpen, setSubmitFilterOpen] = React.useState(false);
     const [submitSearchOpen, setSubmitSearchOpen] = React.useState(false);
     const [submitSearchKeyword, setSubmitSearchKeyword] = React.useState("");
     const [selectedSubmitFilters, setSelectedSubmitFilters] = React.useState<SubmitFilter[]>(SUBMIT_FILTERS);
-
     const [submissions, setSubmissions] = React.useState<AssignmentSubmissionResponse[]>([]);
     const [submissionsLoading, setSubmissionsLoading] = React.useState(false);
+    const [pageLeaving, setPageLeaving] = React.useState(false);
+
+    const menuRef = React.useRef<HTMLDivElement | null>(null);
+    const submitListRef = React.useRef<HTMLDivElement | null>(null);
+    const missingListRef = React.useRef<HTMLDivElement | null>(null);
+    const submitToolbarRef = React.useRef<HTMLDivElement | null>(null);
+    const pageLeaveTimerRef = React.useRef<number | null>(null);
 
     React.useEffect(() => {
         async function fetchAssignment(): Promise<void> {
@@ -197,6 +232,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
             setLoading(true);
             setError("");
+            setEvaluationRows([]);
 
             try {
                 const data = await getExternalActivity(organization.organizationId, externalActivityId);
@@ -207,6 +243,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
                 if (!foundAssignment) {
                     setSubmissions([]);
+                    setEvaluationRows([]);
                     setError("해당 과제를 찾을 수 없습니다.");
                     return;
                 }
@@ -216,6 +253,14 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                 try {
                     const submissionData = await getAssignmentSubmissions(assignmentId);
                     setSubmissions(submissionData);
+
+                    try {
+                        const evaluationOverviewData = await getAssignmentEvaluationOverview(assignmentId);
+                        setEvaluationRows(evaluationOverviewData.rows ?? []);
+                    } catch (evaluationError) {
+                        console.error(evaluationError);
+                        setEvaluationRows([]);
+                    }
                 } finally {
                     setSubmissionsLoading(false);
                 }
@@ -224,6 +269,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                 setActivity(null);
                 setAssignment(null);
                 setSubmissions([]);
+                setEvaluationRows([]);
                 setError("과제 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
@@ -268,11 +314,20 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
         };
     }, [submitFilterOpen, submitSearchOpen]);
 
+
+    React.useEffect(() => {
+        return () => {
+            if (pageLeaveTimerRef.current !== null) {
+                window.clearTimeout(pageLeaveTimerRef.current);
+            }
+        };
+    }, []);
+
     const rows = React.useMemo(() => {
         return assignment
-            ? (assignment.participants ?? []).map((participant) => toSubmissionRow(participant, activity, submissions))
+            ? (assignment.participants ?? []).map((participant) => toSubmissionRow(participant, activity, submissions, evaluationRows))
             : [];
-    }, [activity, assignment, submissions]);
+    }, [activity, assignment, submissions, evaluationRows]);
 
     const submittedRows = rows.filter((row) => isSubmittedStatus(row.status));
     const missingRows = rows.filter((row) => isMissingStatus(row.status));
@@ -280,32 +335,22 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     const totalCount = rows.length;
     const submittedCount = submittedRows.length;
     const missingCount = missingRows.length;
+    const assignmentProgressStatus = assignment ? getAssignmentProgressStatus(assignment) : "IN_PROGRESS";
     const isReadOnly = activity?.manageableByMe === false;
 
+    const entryDirection = (location.state as AssignmentDetailLocationState | null)?.assignmentDetailEntryDirection === "back"
+        ? "back"
+        : "forward";
+
+    const hasSubmitFilterChanged = selectedSubmitFilters.length !== SUBMIT_FILTERS.length;
     const filteredSubmittedRows = submittedRows.filter((row) => {
         const keyword = submitSearchKeyword.trim().toLowerCase();
         const rowFilters = getSubmitRowFilters(row);
         const matchesFilter = rowFilters.some((filter) => selectedSubmitFilters.includes(filter));
-        const matchesKeyword = !keyword || (
-            row.participantName.toLowerCase().includes(keyword) ||
-            row.fileName.toLowerCase().includes(keyword)
-        );
+        const matchesKeyword = !keyword || row.participantName.toLowerCase().includes(keyword) || row.fileName.toLowerCase().includes(keyword);
 
         return matchesFilter && matchesKeyword;
     });
-
-    function updateListScrollableState(): void {
-        const submitList = submitListRef.current;
-        const missingList = missingListRef.current;
-
-        setSubmitListScrollable(
-            submitList ? submitList.scrollHeight > submitList.clientHeight : false
-        );
-
-        setMissingListScrollable(
-            missingList ? missingList.scrollHeight > missingList.clientHeight : false
-        );
-    }
 
     React.useEffect(() => {
         const frameId = window.requestAnimationFrame(() => {
@@ -316,6 +361,14 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
             window.cancelAnimationFrame(frameId);
         };
     }, [filteredSubmittedRows.length, missingRows.length, loading, error, submitSearchKeyword, selectedSubmitFilters.length]);
+
+    function updateListScrollableState(): void {
+        const submitList = submitListRef.current;
+        const missingList = missingListRef.current;
+
+        setSubmitListScrollable(submitList ? submitList.scrollHeight > submitList.clientHeight : false);
+        setMissingListScrollable(missingList ? missingList.scrollHeight > missingList.clientHeight : false);
+    }
 
     function getSubmitRowFilters(row: SubmissionRow): SubmitFilter[] {
         const filters: SubmitFilter[] = [];
@@ -350,7 +403,13 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     }
 
     function moveBack(): void {
-        navigate(`/program-admin/activities/${externalActivityId}/assignment`);
+        if (!externalActivityId || pageLeaving) return;
+
+        setPageLeaving(true);
+
+        pageLeaveTimerRef.current = window.setTimeout(() => {
+            navigate(`/program-admin/activities/${externalActivityId}/assignment`);
+        }, 280);
     }
 
     function moveEvaluation(row: SubmissionRow): void {
@@ -358,7 +417,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
         navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignmentId}/evaluation/${row.participantId}`);
     }
- 
+
     async function handleDownloadAllSubmittedFiles(): Promise<void> {
         if (!assignmentId) return;
 
@@ -375,14 +434,6 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
             console.error(e);
             window.alert("파일 다운로드에 실패했습니다.");
         }
-    }
-
-    if (loading) {
-        return (
-            <div className="eca-admin-assignment-detail-page">
-                <p className="eca-admin-assignment-detail-empty">과제 정보를 불러오는 중입니다.</p>
-            </div>
-        );
     }
 
     async function handleDeleteAssignment(): Promise<void> {
@@ -406,11 +457,18 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
         }
     }
 
-
+    const pageClassName = `eca-admin-assignment-detail-page is-enter-${entryDirection}${pageLeaving ? " is-leaving" : ""}`;
+    if (loading) {
+        return (
+            <div className={pageClassName}>
+                <p className="eca-admin-assignment-detail-empty">과제 정보를 불러오는 중입니다.</p>
+            </div>
+        );
+    }
 
     if (error || !assignment) {
         return (
-            <div className="eca-admin-assignment-detail-page">
+            <div className={pageClassName}>
                 <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -422,14 +480,13 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     }
 
     return (
-        <div className="eca-admin-assignment-detail-page">
+        <div className={pageClassName}>
             <header className="eca-admin-assignment-detail-head">
-                <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} aria-label="뒤로가기">
+                <button type="button" className="eca-admin-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-
                 <h1>{assignment.name}</h1>
 
                 {!isReadOnly ? (
@@ -448,6 +505,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                     </svg>
                                     <span>{deleting ? "삭제 중" : "삭제하기"}</span>
                                 </button>
+
                                 <button
                                     type="button"
                                     disabled={hasSubmittedParticipant}
@@ -471,7 +529,12 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
             <section className="eca-admin-assignment-detail-summary-grid">
                 <article className="eca-admin-assignment-detail-summary-card">
-                    <span>{getTotalCountLabel(assignment)}</span>
+                    <div className="eca-admin-assignment-detail-summary-top">
+                        <span>{getTotalCountLabel(assignment)}</span>
+                        <em className={getAssignmentProgressClass(assignmentProgressStatus)}>
+                            {getAssignmentProgressLabel(assignmentProgressStatus)}
+                        </em>
+                    </div>
                     <strong>{totalCount}</strong>
                 </article>
 
@@ -493,29 +556,14 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
                         <div className="eca-admin-assignment-detail-actions" ref={submitToolbarRef}>
                             <div className="eca-admin-assignment-detail-action-wrap">
-                                <button
-                                    type="button"
-                                    aria-label="필터"
-                                    onClick={() => {
-                                        setSubmitFilterOpen((prev) => !prev);
-                                        setSubmitSearchOpen(false);
-                                    }}
-                                >
-                                    <img
-                                        src={selectedSubmitFilters.length === SUBMIT_FILTERS.length ? "/icons/mynaui_filter_a0.svg" : "/icons/mynaui_filter_dot_a0.svg"}
-                                        alt=""
-                                    />
+                                <button type="button" aria-label="필터" onClick={() => { setSubmitFilterOpen((prev) => !prev); setSubmitSearchOpen(false); }}>
+                                    <FilterIcon hasChanged={hasSubmitFilterChanged} />
                                 </button>
 
                                 {submitFilterOpen ? (
                                     <div className="eca-admin-assignment-detail-filter-popover">
                                         {SUBMIT_FILTERS.map((filter) => (
-                                            <button
-                                                type="button"
-                                                key={filter}
-                                                className="eca-admin-assignment-detail-filter-option"
-                                                onClick={() => toggleSubmitFilter(filter)}
-                                            >
+                                            <button type="button" key={filter} className="eca-admin-assignment-detail-filter-option" onClick={() => toggleSubmitFilter(filter)}>
                                                 <img
                                                     className="eca-admin-assignment-detail-filter-radio"
                                                     src={
@@ -541,14 +589,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                             </button>
 
                             <div className="eca-admin-assignment-detail-action-wrap">
-                                <button
-                                    type="button"
-                                    aria-label="검색"
-                                    onClick={() => {
-                                        setSubmitSearchOpen((prev) => !prev);
-                                        setSubmitFilterOpen(false);
-                                    }}
-                                >
+                                <button type="button" aria-label="검색" onClick={() => { setSubmitSearchOpen((prev) => !prev); setSubmitFilterOpen(false);}}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <path d="M15.5 14.0005H14.71L14.43 13.7305C15.0549 13.0044 15.5117 12.1492 15.7675 11.2261C16.0234 10.3029 16.072 9.33462 15.91 8.39046C15.44 5.61046 13.12 3.39046 10.32 3.05046C9.33559 2.92593 8.33576 3.02823 7.397 3.34955C6.45824 3.67087 5.60542 4.20268 4.90381 4.90429C4.20219 5.60591 3.67038 6.45872 3.34906 7.39749C3.02775 8.33625 2.92544 9.33608 3.04997 10.3205C3.38997 13.1205 5.60998 15.4405 8.38998 15.9105C9.33413 16.0725 10.3024 16.0239 11.2256 15.768C12.1487 15.5122 13.0039 15.0554 13.73 14.4305L14 14.7105V15.5005L18.25 19.7505C18.66 20.1605 19.33 20.1605 19.74 19.7505C20.15 19.3405 20.15 18.6705 19.74 18.2605L15.5 14.0005ZM9.49997 14.0005C7.00997 14.0005 4.99997 11.9905 4.99997 9.50046C4.99997 7.01046 7.00997 5.00046 9.49997 5.00046C11.99 5.00046 14 7.01046 14 9.50046C14 11.9905 11.99 14.0005 9.49997 14.0005Z" fill="#A0A0A0"/>
                                     </svg>
@@ -556,15 +597,10 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
 
                                 {submitSearchOpen ? (
                                     <div className="eca-admin-assignment-detail-search-popover">
-                                        <input
-                                            value={submitSearchKeyword}
-                                            onChange={(e) => setSubmitSearchKeyword(e.target.value)}
-                                            placeholder="이름 또는 파일명 검색"
-                                            autoFocus
-                                        />
+                                        <input value={submitSearchKeyword} onChange={(e) => setSubmitSearchKeyword(e.target.value)} placeholder="이름 또는 파일명 검색" autoFocus />
                                         <button type="button" className="eca-admin-assignment-detail-search-clear" onClick={resetSubmitSearchKeyword}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                <path d="M13.3332 2.66699L2.6665 13.3337M13.3332 13.3337L2.6665 2.66699" stroke="#A0A0A0" stroke-width="2" stroke-linecap="round"/>
+                                                <path d="M13.3337 2.66669L2.66699 13.3334M13.3337 13.3334L2.66699 2.66669" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round"/>
                                             </svg>
                                         </button>
                                     </div>
@@ -573,7 +609,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                         </div>
                     </div>
 
-                    <div className={"eca-admin-assignment-detail-submit-list" + (submitListScrollable ? " is-scrollable" : "")} ref={submitListRef} >
+                    <div className={"eca-admin-assignment-detail-submit-list" + (submitListScrollable ? " is-scrollable" : "")} ref={submitListRef}>
                         {submissionsLoading ? (
                             <p className="eca-admin-assignment-detail-empty">제출 파일 정보를 불러오는 중입니다.</p>
                         ) : submittedRows.length === 0 ? (
@@ -594,38 +630,16 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                                     </span>
 
                                     <strong>{row.participantName}</strong>
-{/* 
-                                    <span className="eca-admin-assignment-detail-submission-result">
-                                        {getSubmissionFiles(row.files).length > 0 ? (
-                                            <em>{getSubmissionFileName(getSubmissionFiles(row.files))}</em>
-                                        ) : null}
-
-                                        {getSubmissionLinks(row.files).map((link) => (
-                                            <a
-                                                key={link.submissionFileId}
-                                                href={link.url ?? "#"}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {link.url}
-                                            </a>
-                                        ))}
-
-                                        {row.files.length === 0 ? "-" : null}
-                                    </span> */}
 
                                     {row.status === "LATE_SUBMITTED" ? (
-                                        <i className={getSubmissionStatusClass(row.status)}>
-                                            {getSubmissionStatusLabel(row.status)}
-                                        </i>
+                                        <span className="eca-admin-assignment-detail-late-badge">지각</span>
                                     ) : (
-                                        <i className="eca-admin-assignment-detail-submit-badge-placeholder" aria-hidden="true" />
+                                        <span className="eca-admin-assignment-detail-late-badge-placeholder" aria-hidden="true" />
                                     )}
 
-                                    <em className={row.evaluationStatus === "DONE" ? "is-done" : ""}>
+                                    <span className={row.evaluationStatus === "DONE" ? "eca-admin-assignment-detail-grade-badge is-graded" : "eca-admin-assignment-detail-grade-badge"}>
                                         {row.evaluationStatus === "DONE" ? "평가 완료" : "평가 전"}
-                                    </em>
+                                    </span>
 
                                     <span className="eca-admin-assignment-detail-row-arrow">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="31" height="36" viewBox="0 0 31 36" fill="none">
@@ -644,7 +658,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                         <button type="button">전체알림</button>
                     </div>
 
-                    <div className={"eca-admin-assignment-detail-missing-list" + (missingListScrollable ? " is-scrollable" : "")} ref={missingListRef} >
+                    <div className={"eca-admin-assignment-detail-missing-list" + (missingListScrollable ? " is-scrollable" : "")} ref={missingListRef}>
                         {missingRows.length === 0 ? (
                             <p className="eca-admin-assignment-detail-empty">미제출자가 없습니다.</p>
                         ) : (
@@ -657,8 +671,6 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
                     </div>
                 </aside>
             </section>
-
-            {/*<p className="eca-admin-assignment-detail-period">기간: {formatPeriod(assignment)}</p>*/}
         </div>
     );
 }

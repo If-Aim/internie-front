@@ -2,6 +2,21 @@ import { api, apiUpload, apiBlob } from "./client";
 
 /* - EA 관련 공통 타입 - */
 export type ExternalActivityProgressStatus = "UPCOMING" | "ONGOING" | "COMPLETED" | "DELAYED";
+export type ExternalActivityNoticeRequest = {
+    title: string;
+    content: string;
+};
+
+export type ExternalActivityNoticeResponse = {
+    noticeId: number;
+    externalActivityId: number;
+    authorId: number;
+    authorName: string;
+    title: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+};
 
 /* - Assignment 공통 타입 - */
 export type AssignmentSystemForm = "INDIVIDUAL" | "TEAM";
@@ -229,6 +244,383 @@ export type InlineTeamCreateRequest = TeamCreateRequest;
 export type TeamMemberMoveRequest = {
     targetTeamId: number;
 };
+
+
+/* - LeaderBoard 관련 공통 타입 - */
+export type LeaderboardScope = "individual" | "team";
+export type LeaderboardSort = "score" | "latest";
+export type LeaderboardApprovalSort = "latest" | "oldest";
+export type LeaderboardApprovalStatus = "pending" | "approved" | "rejected" | "all";
+export type LeaderboardMissionCategory = "ELICIT" | "DISCOVER" | "INSIGHT" | "SYNTHESIZE" | "OWN" | "NURTURE";
+export type LeaderboardEvidenceType = "IMAGE" | "LINK" | "DOCUMENT" | "VIDEO" | "OTHER";
+export type LeaderboardTrendDirection = "UP" | "DOWN" | "SAME";
+
+export const LEADERBOARD_MISSION_CATEGORY_OPTIONS: { value: LeaderboardMissionCategory; label: string }[] = [
+    { value: "ELICIT", label: "E - Elicit" },
+    { value: "DISCOVER", label: "D - Discover" },
+    { value: "INSIGHT", label: "I - Insight" },
+    { value: "SYNTHESIZE", label: "S - Synthesize" },
+    { value: "OWN", label: "O - Own" },
+    { value: "NURTURE", label: "N - Nurture" },
+];
+
+export type ExternalActivityPersonalLeaderboardRanking = {
+    rank: number;
+    userId: number;
+    displayName: string;
+    score: number;
+    lastPointEarnedAt?: string | null;
+};
+
+export type ExternalActivityPersonalLeaderboardResponse = {
+    externalActivityId: number;
+    tieBreakPolicy: string;
+    rankings: ExternalActivityPersonalLeaderboardRanking[];
+};
+
+export type ExternalActivityTeamLeaderboardRanking = {
+    rank: number;
+    teamId: number;
+    teamName: string;
+    score: number;
+    lastPointEarnedAt?: string | null;
+};
+
+export type ExternalActivityTeamLeaderboardResponse = {
+    externalActivityId: number;
+    tieBreakPolicy: string;
+    rankings: ExternalActivityTeamLeaderboardRanking[];
+};
+
+export type LeaderboardApiResponse<T> = {
+    data: T;
+    timestamp: string;
+};
+
+export type LeaderboardRankingResponse = {
+    rank: number;
+    studentId: number;
+    studentName: string;
+    totalScore: number;
+    attendanceScore: number;
+    assignmentScore: number;
+    participationScore: number;
+    lastReviewedAt?: string | null;
+    trendDirection?: LeaderboardTrendDirection | null;
+    trendValue?: number | null;
+};
+
+export type LeaderboardResponse = {
+    externalActivityId: number;
+    scope: LeaderboardScope;
+    sort: LeaderboardSort;
+    page: number;
+    size: number;
+    totalCount: number;
+    rankings: LeaderboardRankingResponse[];
+    lastUpdate?: string | null;
+};
+
+export type LeaderboardSnapshotRebuildResponse = {
+    externalActivityId: number;
+    scope: LeaderboardScope;
+    snapshotId: number;
+    entryCount: number;
+    lastUpdate: string;
+};
+
+export type LeaderboardSubmissionResponse = {
+    submissionId: number;
+    missionId: number;
+    missionName: string;
+    studentId: number;
+    studentName: string;
+    status: LeaderboardApprovalStatus;
+    submittedAt?: string | null;
+    reviewedAt?: string | null;
+    evidenceUrl?: string | null;
+    rejectReason?: string | null;
+};
+
+export type LeaderboardApprovalsResponse = {
+    externalActivityId: number;
+    status: LeaderboardApprovalStatus;
+    sort: LeaderboardApprovalSort;
+    page: number;
+    size: number;
+    totalCount: number;
+    submissions: LeaderboardSubmissionResponse[];
+};
+
+export type LeaderboardStudentDetailResponse = {
+    externalActivityId: number;
+    studentId: number;
+    studentName: string;
+    totalScore: number;
+    attendanceScore: number;
+    assignmentScore: number;
+    participationScore: number;
+    pendingCount: number;
+    approvedCount: number;
+    rejectedCount: number;
+    recentSubmissions: LeaderboardSubmissionResponse[];
+};
+
+export type LeaderboardCompletedMissionResponse = {
+    submissionId: number;
+    missionId: number;
+    missionName: string;
+    category: LeaderboardMissionCategory;
+    score: number;
+    completedAt?: string | null;
+};
+
+export type LeaderboardCompletedMissionsResponse = {
+    externalActivityId: number;
+    studentId: number;
+    page: number;
+    size: number;
+    totalCount: number;
+    missions: LeaderboardCompletedMissionResponse[];
+};
+
+export type LeaderboardSubmissionDetailResponse = {
+    submissionId: number;
+    externalActivityId: number;
+    missionId: number;
+    missionName: string;
+    category: LeaderboardMissionCategory;
+    status: LeaderboardApprovalStatus;
+    studentId: number;
+    studentName: string;
+    submittedAt?: string | null;
+    reviewedAt?: string | null;
+    score?: number | null;
+    evidenceUrl?: string | null;
+    rejectReason?: string | null;
+};
+
+export type LeaderboardReviewRequest = {
+    adjustPoint?: number | null;
+};
+
+export type LeaderboardRejectRequest = {
+    reason: string;
+};
+
+export type LeaderboardReviewResponse = {
+    submissionId: number;
+    status: LeaderboardApprovalStatus;
+    reviewedAt?: string | null;
+    approvedPoint?: number | null;
+    adjustPoint?: number | null;
+    rejectReason?: string | null;
+};
+
+export type LeaderboardMissionResponse = {
+    missionId: number;
+    externalActivityId: number;
+    name: string;
+    description?: string | null;
+    category: LeaderboardMissionCategory;
+    points: number;
+    maximumPerStudent: number;
+    evidenceName?: string | null;
+    evidenceType: LeaderboardEvidenceType;
+    autoReflect: boolean;
+};
+
+export type LeaderboardMissionListResponse = {
+    externalActivityId: number;
+    totalCount: number;
+    missions: LeaderboardMissionResponse[];
+};
+
+export type LeaderboardMissionRequest = {
+    name: string;
+    description?: string | null;
+    category: LeaderboardMissionCategory;
+    points: number;
+    maximumPerStudent: number;
+    evidenceName?: string | null;
+    evidenceType: LeaderboardEvidenceType;
+    autoReflect: boolean;
+};
+
+export type LeaderboardScoringRuleItemResponse = {
+    ruleItemId: number;
+    category: LeaderboardMissionCategory;
+    itemName: string;
+    points: number;
+    active: boolean;
+};
+
+export type LeaderboardScoringRuleResponse = {
+    externalActivityId: number;
+    attendanceWeight: number;
+    assignmentWeight: number;
+    participationWeight: number;
+    items: LeaderboardScoringRuleItemResponse[];
+};
+
+export type LeaderboardScoringRuleItemRequest = {
+    category: LeaderboardMissionCategory;
+    itemName: string;
+    points: number;
+};
+
+export type LeaderboardScoringRuleRequest = {
+    attendanceWeight: number;
+    assignmentWeight: number;
+    participationWeight: number;
+    items: LeaderboardScoringRuleItemRequest[];
+};
+
+export type StudentLeaderboardResponse = {
+    externalActivityId: number;
+    studentId: number;
+    myRank: number;
+    myTotalScore: number;
+    myTrendDirection?: LeaderboardTrendDirection | null;
+    myTrendValue?: number | null;
+    page: number;
+    size: number;
+    totalCount: number;
+    rankings: LeaderboardRankingResponse[];
+};
+
+export type StudentLeaderboardLogResponse = {
+    submissionId: number;
+    missionId: number;
+    missionName: string;
+    category: LeaderboardMissionCategory;
+    status: LeaderboardApprovalStatus;
+    score?: number | null;
+    submittedAt?: string | null;
+    reviewedAt?: string | null;
+};
+
+export type StudentLeaderboardLogsResponse = {
+    externalActivityId: number;
+    studentId: number;
+    page: number;
+    size: number;
+    totalCount: number;
+    logs: StudentLeaderboardLogResponse[];
+};
+
+export type StudentLeaderboardEvidenceResponse = {
+    externalActivityId: number;
+    submissionId: number;
+    studentId: number;
+    evidenceUrl?: string | null;
+    submittedAt: string;
+};
+
+export type StudentLeaderboardSubmitResponse = {
+    submissionId: number;
+    externalActivityId: number;
+    missionId: number;
+    studentId: number;
+    status: LeaderboardApprovalStatus;
+    autoReflected: boolean;
+    submittedAt: string;
+    reviewedAt?: string | null;
+    approvedPoint?: number | null;
+    adjustPoint?: number | null;
+};
+
+function buildLeaderboardQuery(params: Record<string, string | number | boolean | undefined | null>): string {
+    const searchParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value).trim()) {
+            searchParams.set(key, String(value));
+        }
+    });
+
+    const queryString = searchParams.toString();
+
+    return queryString ? `?${queryString}` : "";
+}
+
+function buildLeaderboardEvidenceForm(file?: File | null, evidenceUrl?: string | null): FormData {
+    const formData = new FormData();
+
+    if (file) {
+        formData.append("file", file);
+    }
+
+    if (evidenceUrl?.trim()) {
+        formData.append("evidenceUrl", evidenceUrl.trim());
+    }
+
+    return formData;
+}
+
+
+/* 알림 */
+export type NotificationType = "ASSIGNMENT_CREATED" | "ASSIGNMENT_EVALUATED" | "ATTENDANCE_CHECK_IN_OPENED" | "EXTERNAL_ACTIVITY_NOTICE";
+
+export type NotificationResponse = {
+    notificationId: number;
+    recipientId: number;
+    senderId?: number | null;
+    externalActivityId?: number | null;
+    type: NotificationType;
+    title: string;
+    body: string;
+    targetType: string;
+    targetId?: number | null;
+    read: boolean;
+    readAt?: string | null;
+    createdAt: string;
+};
+
+export type NotificationListResponse = {
+    page: number;
+    size: number;
+    totalCount: number;
+    unreadCount: number;
+    notifications: NotificationResponse[];
+};
+
+export async function getNotifications(query?: { unreadOnly?: boolean; page?: number; size?: number }): Promise<NotificationListResponse> {
+    const queryString = buildLeaderboardQuery({
+        unreadOnly: query?.unreadOnly,
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    return api<NotificationListResponse>(`/notifications${queryString}`, { method: "GET" });
+}
+
+export async function markNotificationRead(notificationId: number | string): Promise<NotificationResponse> {
+    return api<NotificationResponse>(`/notifications/${notificationId}/read`, { method: "PATCH" });
+}
+
+export async function markAllNotificationsRead(): Promise<{ updatedCount: number }> {
+    return api<{ updatedCount: number }>("/notifications/read-all", { method: "PATCH" });
+}
+
+/* - LeaderBoard 관련 (ExternalActivity 공통) - */
+export async function getExternalActivityPersonalLeaderboard(
+    externalActivityId: number | string
+): Promise<ExternalActivityPersonalLeaderboardResponse> {
+    return api<ExternalActivityPersonalLeaderboardResponse>(
+        `/externalActivities/${externalActivityId}/leaderboard/personal`,
+        { method: "GET" }
+    );
+}
+
+export async function getExternalActivityTeamLeaderboard(
+    externalActivityId: number | string
+): Promise<ExternalActivityTeamLeaderboardResponse> {
+    return api<ExternalActivityTeamLeaderboardResponse>(
+        `/externalActivities/${externalActivityId}/leaderboard/teams`,
+        { method: "GET" }
+    );
+}
 
 /* - EA 관련 (Student) - */
 export type StudentExternalActivityResponse = {
@@ -521,6 +913,141 @@ export async function getMyTeam(
         { method: "GET" }
     );
 }
+
+
+/* - LeaderBoard 관련 (Student) - */
+export async function getMyLeaderboard(
+    externalActivityId: number | string,
+    query?: { page?: number; size?: number }
+): Promise<StudentLeaderboardResponse> {
+    const queryString = buildLeaderboardQuery({
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<StudentLeaderboardResponse>>(
+        `/student/externalActivities/${externalActivityId}/leaderboard${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function getMyLeaderboardMissions(
+    externalActivityId: number | string,
+    category?: LeaderboardMissionCategory | null
+): Promise<LeaderboardMissionListResponse> {
+    const queryString = buildLeaderboardQuery({ category });
+
+    const response = await api<LeaderboardApiResponse<LeaderboardMissionListResponse>>(
+        `/student/externalActivities/${externalActivityId}/missions${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function getMyLeaderboardMissionLogs(
+    externalActivityId: number | string,
+    query?: { category?: LeaderboardMissionCategory | null; page?: number; size?: number }
+): Promise<StudentLeaderboardLogsResponse> {
+    const queryString = buildLeaderboardQuery({
+        category: query?.category,
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<StudentLeaderboardLogsResponse>>(
+        `/student/externalActivities/${externalActivityId}/missions/logs${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function updateMyLeaderboardEvidence(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    input: { file?: File | null; evidenceUrl?: string | null }
+): Promise<StudentLeaderboardEvidenceResponse> {
+    return apiUpload<StudentLeaderboardEvidenceResponse>(
+        `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/evidence`,
+        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        { method: "PATCH" }
+    );
+}
+
+export async function getMyLeaderboardSubmissions(
+    externalActivityId: number | string,
+    query?: { status?: LeaderboardApprovalStatus; page?: number; size?: number }
+): Promise<LeaderboardApprovalsResponse> {
+    const queryString = buildLeaderboardQuery({
+        status: query?.status ?? "all",
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    return api<LeaderboardApprovalsResponse>(
+        `/student/externalActivities/${externalActivityId}/submissions${queryString}`,
+        { method: "GET" }
+    );
+}
+
+export async function resubmitMyLeaderboardSubmission(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    input: { file?: File | null; evidenceUrl?: string | null }
+): Promise<StudentLeaderboardEvidenceResponse> {
+    return apiUpload<StudentLeaderboardEvidenceResponse>(
+        `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/resubmit`,
+        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        { method: "PATCH" }
+    );
+}
+
+export async function deleteMyRejectedLeaderboardSubmission(
+    externalActivityId: number | string,
+    submissionId: number | string
+): Promise<void> {
+    await api<void>(
+        `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/rejected`,
+        { method: "DELETE" }
+    );
+}
+
+export async function submitLeaderboardMission(
+    externalActivityId: number | string,
+    missionId: number | string,
+    input: { file?: File | null; evidenceUrl?: string | null }
+): Promise<StudentLeaderboardSubmitResponse> {
+    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardSubmitResponse>>(
+        `/externalActivities/${externalActivityId}/missions/${missionId}/submissions`,
+        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        { method: "POST" }
+    );
+
+    return response.data;
+}
+
+export async function getStudentLeaderboardCompletedMissions(
+    externalActivityId: number | string,
+    studentId: number | string,
+    query?: { category?: LeaderboardMissionCategory | null; page?: number; size?: number }
+): Promise<LeaderboardCompletedMissionsResponse> {
+    const queryString = buildLeaderboardQuery({
+        category: query?.category,
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<LeaderboardCompletedMissionsResponse>>(
+        `/student/externalActivities/${externalActivityId}/students/${studentId}/missions/completed${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
 
 /* - EA 학생 초대코드 관련 - */
 export type ExternalActivityStudentInviteStatus = "ACTIVE" | "DISABLED";
@@ -844,7 +1371,31 @@ export async function getMyManagedExternalActivitiesByStatus( //나의 대외활
     );
 }
 
+export async function createExternalActivityNotice(externalActivityId: number | string, request: ExternalActivityNoticeRequest): Promise<ExternalActivityNoticeResponse> {
+    return api<ExternalActivityNoticeResponse>(`/externalActivities/${externalActivityId}/notices`, {
+        method: "POST",
+        body: JSON.stringify(request),
+    });
+}
+
+export async function getExternalActivityNotices(externalActivityId: number | string): Promise<ExternalActivityNoticeResponse[]> {
+    return api<ExternalActivityNoticeResponse[]>(`/externalActivities/${externalActivityId}/notices`, { method: "GET" });
+}
+
+export async function updateExternalActivityNotice(externalActivityId: number | string, noticeId: number | string, request: ExternalActivityNoticeRequest): Promise<ExternalActivityNoticeResponse> {
+    return api<ExternalActivityNoticeResponse>(`/externalActivities/${externalActivityId}/notices/${noticeId}`, {
+        method: "PATCH",
+        body: JSON.stringify(request),
+    });
+}
+
+export async function deleteExternalActivityNotice(externalActivityId: number | string, noticeId: number | string): Promise<void> {
+    await api<void>(`/externalActivities/${externalActivityId}/notices/${noticeId}`, { method: "DELETE" });
+}
+
 /* - Assignment 관련 (Admin) - */
+export type EvaluationScoreSource = "MANUAL" | "DEFAULT" | "NONE";
+
 export type CreateAssignmentRequest = {
     name: string;
     description?: string | null;
@@ -949,6 +1500,84 @@ export type AssignmentEvaluationOverviewResponse = {
     rows: AssignmentEvaluationOverviewRow[];
 };
 
+export type ExternalActivityEvaluationOverviewSummary = {
+    totalAssignmentCount: number;
+    toGradeAssignmentCount: number;
+    toGradeSubmissionCount: number;
+    participantCount: number;
+    averageStudentTotalScore?: number | null;
+};
+
+export type ExternalActivityEvaluationAssignmentOption = {
+    assignmentId: number;
+    assignmentName: string;
+};
+
+export type ExternalActivityEvaluationOverviewScore = {
+    criterionId: number;
+    criterionName: string;
+    displayOrder: number;
+    maxScore: number;
+    score?: number | null;
+    scoreSource: EvaluationScoreSource;
+};
+
+export type ExternalActivityEvaluationOverviewRow = {
+    participantId: number;
+    participantType: AssignmentParticipantType;
+    userId?: number | null;
+    teamId?: number | null;
+    participantName: string;
+    teamName?: string | null;
+    profileImage?: string | null;
+    submittedAssignmentCount: number;
+    totalAssignmentCount: number;
+    evaluatedAssignmentCount: number;
+    submittedCount: number;
+    totalScore?: number | null;
+    selectedSubmissionId?: number | null;
+    submissionStatus: AssignmentParticipantStatus;
+    lateSubmitted: boolean;
+    scores: ExternalActivityEvaluationOverviewScore[];
+};
+
+export type ExternalActivityEvaluationOverviewResponse = {
+    externalActivityId: number;
+    externalActivityName: string;
+    selectedAssignmentId?: number | null;
+    assignments: ExternalActivityEvaluationAssignmentOption[];
+    criteria: AssignmentEvaluationCriterionResponse[];
+    summary: ExternalActivityEvaluationOverviewSummary;
+    rows: ExternalActivityEvaluationOverviewRow[];
+};
+
+export type EvaluationTargetType = "USER" | "TEAM";
+
+export type ExternalActivityEvaluationTargetAssignmentRow = {
+    assignmentId: number;
+    assignmentName: string;
+    participantId: number;
+    submissionId: number;
+    submissionStatus: AssignmentParticipantStatus;
+    lateSubmitted: boolean;
+    totalScore?: number | null;
+    submittedAt?: string | null;
+    evaluatedAt?: string | null;
+    scores: ExternalActivityEvaluationOverviewScore[];
+};
+
+export type ExternalActivityEvaluationTargetDetailResponse = {
+    externalActivityId: number;
+    externalActivityName: string;
+    targetType: EvaluationTargetType;
+    targetId: number;
+    targetName: string;
+    profileImage?: string | null;
+    studentNumber?: string | null;
+    linkedinUrl?: string | null;
+    rows: ExternalActivityEvaluationTargetAssignmentRow[];
+};
+
 export async function createAssignment( // 과제 생성
     externalActivityId: number | string,
     request: CreateAssignmentRequest
@@ -986,41 +1615,6 @@ export async function getAssignmentEvaluationCriteria(
     return api<AssignmentEvaluationCriterionResponse[]>(
         `/assignments/${assignmentId}/evaluation-criteria`,
         { method: "GET" }
-    );
-}
-
-export async function updateAssignmentEvaluationCriteria(
-    assignmentId: number | string,
-    request: AssignmentEvaluationCriteriaUpdateRequest
-): Promise<AssignmentEvaluationCriterionResponse[]> {
-    return api<AssignmentEvaluationCriterionResponse[]>(
-        `/assignments/${assignmentId}/evaluation-criteria`,
-        {
-            method: "PUT",
-            body: JSON.stringify(request),
-        }
-    );
-}
-
-export async function getSubmissionEvaluation(
-    submissionId: number | string
-): Promise<AssignmentSubmissionEvaluationResponse> {
-    return api<AssignmentSubmissionEvaluationResponse>(
-        `/submissions/${submissionId}/evaluation`,
-        { method: "GET" }
-    );
-}
-
-export async function saveSubmissionEvaluation(
-    submissionId: number | string,
-    request: AssignmentEvaluationSaveRequest
-): Promise<AssignmentSubmissionEvaluationResponse> {
-    return api<AssignmentSubmissionEvaluationResponse>(
-        `/submissions/${submissionId}/evaluation`,
-        {
-            method: "PUT",
-            body: JSON.stringify(request),
-        }
     );
 }
 
@@ -1098,6 +1692,57 @@ export async function deleteAssignment( // 과제 삭제
     await api<void>(
         `/assignments/${assignmentId}`,
         { method: "DELETE" }
+    );
+}
+
+export async function getExternalActivityEvaluationOverview(
+    externalActivityId: number | string,
+    assignmentId?: number | string | null
+): Promise<ExternalActivityEvaluationOverviewResponse> {
+    const params = new URLSearchParams();
+
+    if (assignmentId !== null && assignmentId !== undefined && String(assignmentId).trim()) {
+        params.set("assignmentId", String(assignmentId));
+    }
+
+    const queryString = params.toString();
+
+    return api<ExternalActivityEvaluationOverviewResponse>(
+        `/externalActivities/${externalActivityId}/evaluations/overview${queryString ? `?${queryString}` : ""}`,
+        { method: "GET" }
+    );
+}
+
+export async function getExternalActivityEvaluationTargetDetail(
+    externalActivityId: number | string,
+    targetType: EvaluationTargetType,
+    targetId: number | string
+): Promise<ExternalActivityEvaluationTargetDetailResponse> {
+    return api<ExternalActivityEvaluationTargetDetailResponse>(
+        `/externalActivities/${externalActivityId}/evaluations/targets/${targetType}/${targetId}`,
+        { method: "GET" }
+    );
+}
+
+export async function getSubmissionEvaluation(
+    submissionId: number | string
+): Promise<AssignmentSubmissionEvaluationResponse> {
+    return api<AssignmentSubmissionEvaluationResponse>(
+        `/submissions/${submissionId}/evaluation`,
+        { method: "GET" }
+    );
+}
+
+export async function saveSubmissionEvaluation(
+    submissionId: number | string,
+    request: AssignmentEvaluationSaveRequest
+): Promise<AssignmentSubmissionEvaluationResponse> {
+    return api<AssignmentSubmissionEvaluationResponse>(
+        `/submissions/${submissionId}/evaluation`,
+        {
+            method: "PUT",
+            body: JSON.stringify(request),
+        }
     );
 }
 
@@ -1480,6 +2125,233 @@ export async function deleteTeam( // 팀 삭제
 ): Promise<void> {
     await api<void>(
         `/teams/${teamId}`,
+        { method: "DELETE" }
+    );
+}
+
+
+/* - LeaderBoard 관련 (Admin) - */
+export async function getLeaderboard(
+    externalActivityId: number | string,
+    query?: { scope?: LeaderboardScope; sort?: LeaderboardSort; page?: number; size?: number }
+): Promise<LeaderboardResponse> {
+    const queryString = buildLeaderboardQuery({
+        scope: query?.scope ?? "individual",
+        sort: query?.sort ?? "score",
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<LeaderboardResponse>>(
+        `/externalActivities/${externalActivityId}/leaderboard${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function rebuildLeaderboardSnapshot(
+    externalActivityId: number | string,
+    scope: LeaderboardScope = "individual"
+): Promise<LeaderboardSnapshotRebuildResponse> {
+    const queryString = buildLeaderboardQuery({ scope });
+
+    return api<LeaderboardSnapshotRebuildResponse>(
+        `/externalActivities/${externalActivityId}/leaderboard/snapshots/rebuild${queryString}`,
+        { method: "POST" }
+    );
+}
+
+export async function getLeaderboardApprovals(
+    externalActivityId: number | string,
+    query?: { status?: LeaderboardApprovalStatus; sort?: LeaderboardApprovalSort; page?: number; size?: number }
+): Promise<LeaderboardApprovalsResponse> {
+    const queryString = buildLeaderboardQuery({
+        status: query?.status ?? "pending",
+        sort: query?.sort ?? "latest",
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<LeaderboardApprovalsResponse>>(
+        `/externalActivities/${externalActivityId}/approvals${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function getLeaderboardStudentDetail(
+    externalActivityId: number | string,
+    studentId: number | string
+): Promise<LeaderboardStudentDetailResponse> {
+    return api<LeaderboardStudentDetailResponse>(
+        `/externalActivities/${externalActivityId}/students/${studentId}`,
+        { method: "GET" }
+    );
+}
+
+export async function getLeaderboardStudentCompletedMissions(
+    externalActivityId: number | string,
+    studentId: number | string,
+    query?: { page?: number; size?: number }
+): Promise<LeaderboardCompletedMissionsResponse> {
+    const queryString = buildLeaderboardQuery({
+        page: query?.page ?? 0,
+        size: query?.size ?? 20,
+    });
+
+    const response = await api<LeaderboardApiResponse<LeaderboardCompletedMissionsResponse>>(
+        `/externalActivities/${externalActivityId}/students/${studentId}/missions/completed${queryString}`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function getLeaderboardSubmissionDetail(
+    externalActivityId: number | string,
+    submissionId: number | string
+): Promise<LeaderboardSubmissionDetailResponse> {
+    return api<LeaderboardSubmissionDetailResponse>(
+        `/externalActivities/${externalActivityId}/submissions/${submissionId}`,
+        { method: "GET" }
+    );
+}
+
+export async function deleteLeaderboardCompletedMission(
+    externalActivityId: number | string,
+    studentId: number | string,
+    submissionId: number | string
+): Promise<void> {
+    await api<void>(
+        `/externalActivities/${externalActivityId}/students/${studentId}/missions/completed/${submissionId}`,
+        { method: "DELETE" }
+    );
+}
+
+export async function approveLeaderboardSubmission(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    request: LeaderboardReviewRequest
+): Promise<LeaderboardReviewResponse> {
+    return api<LeaderboardReviewResponse>(
+        `/externalActivities/${externalActivityId}/approvals/${submissionId}/approve`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function rejectLeaderboardSubmission(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    request: LeaderboardRejectRequest
+): Promise<LeaderboardReviewResponse> {
+    return api<LeaderboardReviewResponse>(
+        `/externalActivities/${externalActivityId}/approvals/${submissionId}/reject`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function getLeaderboardMissions(
+    externalActivityId: number | string
+): Promise<LeaderboardMissionListResponse> {
+    const response = await api<LeaderboardApiResponse<LeaderboardMissionListResponse>>(
+        `/externalActivities/${externalActivityId}/missions`,
+        { method: "GET" }
+    );
+
+    return response.data;
+}
+
+export async function createLeaderboardMission(
+    externalActivityId: number | string,
+    request: LeaderboardMissionRequest
+): Promise<LeaderboardMissionResponse> {
+    const response = await api<LeaderboardApiResponse<LeaderboardMissionResponse>>(
+        `/externalActivities/${externalActivityId}/missions`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+
+    return response.data;
+}
+
+export async function updateLeaderboardMission(
+    externalActivityId: number | string,
+    missionId: number | string,
+    request: LeaderboardMissionRequest
+): Promise<LeaderboardMissionResponse> {
+    const response = await api<LeaderboardApiResponse<LeaderboardMissionResponse>>(
+        `/externalActivities/${externalActivityId}/missions/${missionId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+
+    return response.data;
+}
+
+export async function deleteLeaderboardMission(
+    externalActivityId: number | string,
+    missionId: number | string
+): Promise<void> {
+    await api<void>(
+        `/externalActivities/${externalActivityId}/missions/${missionId}`,
+        { method: "DELETE" }
+    );
+}
+
+export async function getLeaderboardScoringRules(
+    externalActivityId: number | string
+): Promise<LeaderboardScoringRuleResponse> {
+    return api<LeaderboardScoringRuleResponse>(
+        `/externalActivities/${externalActivityId}/scoring-rules`,
+        { method: "GET" }
+    );
+}
+
+export async function saveLeaderboardScoringRules(
+    externalActivityId: number | string,
+    request: LeaderboardScoringRuleRequest
+): Promise<LeaderboardScoringRuleResponse> {
+    return api<LeaderboardScoringRuleResponse>(
+        `/externalActivities/${externalActivityId}/scoring-rules`,
+        {
+            method: "POST",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function updateLeaderboardScoringRuleItem(
+    externalActivityId: number | string,
+    ruleItemId: number | string,
+    request: LeaderboardScoringRuleItemRequest
+): Promise<LeaderboardScoringRuleItemResponse> {
+    return api<LeaderboardScoringRuleItemResponse>(
+        `/externalActivities/${externalActivityId}/scoring-rules/items/${ruleItemId}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(request),
+        }
+    );
+}
+
+export async function deleteLeaderboardScoringRuleItem(
+    externalActivityId: number | string,
+    ruleItemId: number | string
+): Promise<void> {
+    await api<void>(
+        `/externalActivities/${externalActivityId}/scoring-rules/items/${ruleItemId}`,
         { method: "DELETE" }
     );
 }

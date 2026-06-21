@@ -1,26 +1,11 @@
 import React from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { downloadSubmissionFile, getAssignmentSubmissions, getExternalActivity, getSubmissionFilePreview } from "../../../../../../api/ea";
-import type { AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
+import { downloadSubmissionFile, getAssignmentSubmissions, getExternalActivity, getSubmissionEvaluation, getSubmissionFilePreview, saveSubmissionEvaluation } from "../../../../../../api/ea";
+import type { AssignmentEvaluationItemResponse, AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionEvaluationResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./assignmentEvaluation.css";
 
-type SubmissionStatus = "SUBMITTED" | "LATE_SUBMITTED" | "NOT_SUBMITTED" | "LATE";
-
-type CriterionKey = "Participation" | "Intent" | "Content";
-
-type Criterion = {
-    key: CriterionKey;
-    label: string;
-};
-
 type PreviewFile = SubmissionFileResponse;
-
-const CRITERIA: Criterion[] = [
-    { key: "Participation", label: "Participation" },
-    { key: "Intent", label: "Intent" },
-    { key: "Content", label: "Content" },
-];
 
 function getParticipantName(participant: AssignmentParticipantResponse): string {
     if (participant.participantType === "TEAM") return participant.teamName?.trim() || "팀 이름 없음";
@@ -70,6 +55,34 @@ function getSubmittedLink(files: SubmissionFileResponse[]): SubmissionFileRespon
     return files.find((file) => file.submitType === "LINK") ?? null;
 }
 
+function getSubmittedLinkUrl(file?: SubmissionFileResponse | null): string {
+    if (!file) return "";
+
+    const linkFile = file as SubmissionFileResponse & {
+        url?: string | null;
+        fileUrl?: string | null;
+    };
+
+    return (linkFile.url ?? linkFile.fileUrl ?? "").trim();
+}
+
+function getExternalLinkHref(url: string): string {
+    if (/^https?:\/\//i.test(url)) return url;
+
+    return `https://${url}`;
+}
+
+function toScoreMap(criteria: AssignmentEvaluationItemResponse[]): Record<number, number> {
+    return criteria.reduce<Record<number, number>>((acc, criterion) => {
+        acc[criterion.criterionId] = criterion.score;
+        return acc;
+     }, {});
+}
+
+function hasSavedEvaluation(evaluation: AssignmentSubmissionEvaluationResponse): boolean {
+    return Boolean((evaluation as AssignmentSubmissionEvaluationResponse & { evaluatedAt?: string | null }).evaluatedAt);
+}
+
 export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId, assignmentId, participantId } = useParams<{ externalActivityId?: string; assignmentId?: string; participantId?: string }>();
@@ -78,28 +91,33 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     const [assignment, setAssignment] = React.useState<AssignmentResponse | null>(null);
     const [participant, setParticipant] = React.useState<AssignmentParticipantResponse | null>(null);
     const [submission, setSubmission] = React.useState<AssignmentSubmissionResponse | null>(null);
+    const [evaluation, setEvaluation] = React.useState<AssignmentSubmissionEvaluationResponse | null>(null);
     const [preview, setPreview] = React.useState<SubmissionFilePreviewResponse | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [previewLoading, setPreviewLoading] = React.useState(false);
+    const [saving, setSaving] = React.useState(false);
     const [error, setError] = React.useState("");
     const [previewError, setPreviewError] = React.useState("");
     const [criterionIndex, setCriterionIndex] = React.useState(0);
-    const [scores, setScores] = React.useState<Record<CriterionKey, number>>({
-        Participation: 0,
-        Intent: 0,
-        Content: 0,
-    });
+    const [scoreByCriterionId, setScoreByCriterionId] = React.useState<Record<number, number | undefined>>({});
     const [feedback, setFeedback] = React.useState("");
+    const [pageLeaving, setPageLeaving] = React.useState(false);
+    const [criterionSlideDirection, setCriterionSlideDirection] = React.useState<"prev" | "next">("next");
+    const [criterionSlideActive, setCriterionSlideActive] = React.useState(false);
+    
+    const pageLeaveTimerRef = React.useRef<number | null>(null);
 
-    const currentCriterion = CRITERIA[criterionIndex];
-    const currentScore = scores[currentCriterion.key];
+    const criteria = evaluation?.criteria ?? [];
+    const currentCriterion = criteria[criterionIndex] ?? null;
+    const currentScore = currentCriterion ? scoreByCriterionId[currentCriterion.criterionId] : undefined;
     const files = submission?.files ?? [];
     const previewFile = getSubmittedFile(files);
     const previewLink = getSubmittedLink(files);
     const previewFileId = previewFile?.submissionFileId ?? null;
     const previewFileName = previewFile?.originalFileName ?? "";
     const previewFileContentType = previewFile?.contentType ?? "";
-    const status = participant?.status as SubmissionStatus | undefined;
+    const lateSubmitted = evaluation?.lateOnSubmission ?? submission?.lateOnSubmission ?? participant?.status === "LATE_SUBMITTED";
+    const teamLabel = participant && assignment ? getTeamLabel(participant, assignment) : "";
 
     React.useEffect(() => {
         async function fetchEvaluationData(): Promise<void> {
@@ -114,6 +132,10 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
             setError("");
             setPreview(null);
             setPreviewError("");
+            setEvaluation(null);
+            setScoreByCriterionId({});
+            setFeedback("");
+            setCriterionSlideActive(false);
 
             try {
                 const activityData: ExternalActivityResponse = await getExternalActivity(organization.organizationId, externalActivityId);
@@ -128,13 +150,31 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
 
                 if (!foundAssignment || !foundParticipant) {
                     setError("평가 대상을 찾을 수 없습니다.");
+                    return;
                 }
+
+                if (!foundSubmission) {
+                    setEvaluation(null);
+                    setScoreByCriterionId({});
+                    setFeedback("");
+                    return;
+                }
+
+                const evaluationData = await getSubmissionEvaluation(foundSubmission.submissionId);
+
+                setEvaluation(evaluationData);
+                setScoreByCriterionId(hasSavedEvaluation(evaluationData) ? toScoreMap(evaluationData.criteria) : {});
+                setFeedback(evaluationData.feedback ?? "");
+                setCriterionIndex(0);
             } catch (e) {
                 console.error(e);
                 setAssignment(null);
                 setParticipant(null);
                 setSubmission(null);
+                setEvaluation(null);
                 setPreview(null);
+                setScoreByCriterionId({});
+                setFeedback("");
                 setError("평가 정보를 불러오지 못했습니다.");
             } finally {
                 setLoading(false);
@@ -184,23 +224,51 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
         };
     }, [previewFileId, previewFileName, previewFileContentType]);
 
+    React.useEffect(() => {
+        return () => {
+            if (pageLeaveTimerRef.current !== null) {
+                window.clearTimeout(pageLeaveTimerRef.current);
+            }
+        };
+    }, []);
+
     function moveBack(): void {
-        navigate(`/program-admin/activities/${externalActivityId}/assignment/${assignmentId}`);
+        if (pageLeaving) return;
+
+        setPageLeaving(true);
+
+        pageLeaveTimerRef.current = window.setTimeout(() => {
+            navigate(-1);
+        }, 280);
     }
 
     function movePrevCriterion(): void {
+        if (criterionIndex <= 0) return;
+
+        setCriterionSlideDirection("prev");
+        setCriterionSlideActive(true);
         setCriterionIndex((prev) => Math.max(prev - 1, 0));
     }
 
     function moveNextCriterion(): void {
-        setCriterionIndex((prev) => Math.min(prev + 1, CRITERIA.length - 1));
+        if (criterionIndex >= criteria.length - 1) return;
+
+        setCriterionSlideDirection("next");
+        setCriterionSlideActive(true);
+        setCriterionIndex((prev) => Math.min(prev + 1, Math.max(criteria.length - 1, 0)));
     }
 
     function updateScore(score: number): void {
-        setScores((prev) => ({
+        if (!currentCriterion) return;
+
+        setScoreByCriterionId((prev) => ({
             ...prev,
-            [currentCriterion.key]: score,
+            [currentCriterion.criterionId]: score,
         }));
+    }
+
+    function hasAllScoresSelected(): boolean {
+        return evaluation?.criteria.every((criterion) => typeof scoreByCriterionId[criterion.criterionId] === "number") ?? false;
     }
 
     async function handleDownloadFile(): Promise<void> {
@@ -214,11 +282,55 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
         }
     }
 
-    function handleSave(): void {
-        window.alert("평가 저장 API가 아직 없어 임시 저장 동작만 처리했습니다.");
+    async function handleSave(): Promise<void> {
+        if (!submission || !evaluation || saving) return;
+
+        if (!hasAllScoresSelected()) {
+            window.alert("모든 평가 기준의 점수를 선택해주세요.");
+            return;
+        }
+
+        setSaving(true);
+
+        try {
+            const saved = await saveSubmissionEvaluation(submission.submissionId, {
+                feedback,
+                scores: evaluation.criteria.map((criterion) => ({
+                    criterionId: criterion.criterionId,
+                    score: scoreByCriterionId[criterion.criterionId] as number,
+                })),
+            });
+
+            setEvaluation(saved);
+            setScoreByCriterionId(toScoreMap(saved.criteria));
+            setFeedback(saved.feedback ?? "");
+            window.alert("평가가 저장되었습니다.");
+        } catch (e) {
+            console.error(e);
+            window.alert("평가 저장에 실패했습니다.");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    function renderSubmittedLink(): React.ReactElement | null {
+        const linkUrl = getSubmittedLinkUrl(previewLink);
+
+        if (!linkUrl) return null;
+
+        return (
+            <div className="eca-admin-assignment-evaluation-link-box">
+                <strong>제출 링크</strong>
+                <a href={getExternalLinkHref(linkUrl)} target="_blank" rel="noreferrer">
+                    {linkUrl}
+                </a>
+            </div>
+        );
     }
 
     function renderPreviewContent(): React.ReactElement {
+        const submittedLinkUrl = getSubmittedLinkUrl(previewLink);
+
         if (previewLoading) {
             return <p className="eca-admin-assignment-evaluation-empty">미리보기를 불러오는 중입니다.</p>;
         }
@@ -241,21 +353,18 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
             );
         }
 
-        if (previewLink?.url) {
-            return (
-                <div className="eca-admin-assignment-evaluation-file-box">
-                    <strong>제출 링크</strong>
-                    <a href={previewLink.url} target="_blank" rel="noreferrer">{previewLink.url}</a>
-                </div>
-            );
+        if (submittedLinkUrl) {
+            return <p className="eca-admin-assignment-evaluation-empty">제출 링크가 아래에 표시됩니다.</p>;
         }
 
         return <p className="eca-admin-assignment-evaluation-empty">표시할 제출 자료가 없습니다.</p>;
     }
 
+    const pageClassName = `eca-admin-assignment-evaluation-page${pageLeaving ? " is-leaving" : ""}`;
+    const criterionSlideClassName = `eca-admin-assignment-evaluation-criterion-slide${criterionSlideActive ? ` is-${criterionSlideDirection}` : ""}`;
     if (loading) {
         return (
-            <div className="eca-admin-assignment-evaluation-page">
+            <div className={pageClassName}>
                 <p className="eca-admin-assignment-evaluation-empty">평가 정보를 불러오는 중입니다.</p>
             </div>
         );
@@ -263,7 +372,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
 
     if (error || !assignment || !participant) {
         return (
-            <div className="eca-admin-assignment-evaluation-page">
+            <div className={pageClassName}>
                 <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -275,7 +384,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     }
 
     return (
-        <div className="eca-admin-assignment-evaluation-page">
+        <div className={pageClassName}>
             <header className="eca-admin-assignment-evaluation-head">
                 <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -284,72 +393,82 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                 </button>
 
                 <h1>{assignment.name}</h1>
-
-                {status === "LATE_SUBMITTED" ? (
-                    <span className="eca-admin-assignment-evaluation-late-badge">지각 제출</span>
-                ) : null}
             </header>
-
-            <div className="eca-admin-assignment-evaluation-meta">
-                <strong>{getParticipantName(participant)}</strong>
-                <span>{getTeamLabel(participant, assignment)}</span>
-                <strong>Evaluation</strong>
-            </div>
-
             <section className="eca-admin-assignment-evaluation-layout">
-                <article className="eca-admin-assignment-evaluation-preview-card">
-                    {renderPreviewContent()}
-                </article>
-
-                <aside className="eca-admin-assignment-evaluation-panel">
-                    <div className="eca-admin-assignment-evaluation-criteria-head">
-                        <h2>Criteria</h2>
-                        <span>{criterionIndex + 1}/{CRITERIA.length}</span>
+                <div className="eca-admin-assignment-evaluation-column">
+                    <div className="eca-admin-assignment-evaluation-preview-title">
+                        <strong>{getParticipantName(participant)}</strong>
+                        {teamLabel ? <span>{teamLabel}</span> : null}
                     </div>
 
-                    <div className="eca-admin-assignment-evaluation-criteria-row">
-                        <strong>{currentCriterion.label}</strong>
+                    <article className="eca-admin-assignment-evaluation-preview-card">
+                        {renderPreviewContent()}
+                    </article>
+                    {renderSubmittedLink()}
+                </div>
 
-                        <div className="eca-admin-assignment-evaluation-step-buttons">
-                            <button type="button" onClick={movePrevCriterion} disabled={criterionIndex === 0} aria-label="이전 기준">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none">
-                                    <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                            <button type="button" onClick={moveNextCriterion} disabled={criterionIndex === CRITERIA.length - 1} aria-label="다음 기준">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none">
-                                    <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
+                <div className="eca-admin-assignment-evaluation-column">
+                    <div className="eca-admin-assignment-evaluation-evaluation-title">
+                        <strong>Evaluation</strong>
+                        {lateSubmitted ? <span className="eca-admin-assignment-evaluation-late-badge">지각 제출</span> : null}
+                    </div>
+
+                    <aside className="eca-admin-assignment-evaluation-panel">
+                        <div className="eca-admin-assignment-evaluation-criteria-head">
+                            <h2>Criteria</h2>
+                            <span>{criteria.length > 0 ? `${criterionIndex + 1}/${criteria.length}` : "0/0"}</span>
                         </div>
-                    </div>
 
-                    <div className="eca-admin-assignment-evaluation-score-list">
-                        {Array.from({ length: 10 }, (_, index) => index + 1).map((score) => (
-                            <button
-                                type="button"
-                                key={score}
-                                className={"eca-admin-assignment-evaluation-score-dot" + (score <= currentScore ? " is-selected" : "")}
-                                onClick={() => updateScore(score)}
-                                aria-label={`${score}점`}
-                            />
-                        ))}
-                    </div>
+                        <div className="eca-admin-assignment-evaluation-criterion-viewport">
+                            <div key={currentCriterion?.criterionId ?? criterionIndex} className={criterionSlideClassName}>
+                                <div className="eca-admin-assignment-evaluation-criteria-row">
+                                    <strong>{currentCriterion?.name ?? "-"}</strong>
+                                    <div className="eca-admin-assignment-evaluation-step-buttons">
+                                        <button type="button" onClick={movePrevCriterion} disabled={criterionIndex === 0} aria-label="이전 기준">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
+                                                <circle cx="18" cy="18" r="18" fill="#F6F6F6"/>
+                                                <path d="M20 23L15 18L20 13" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <button type="button" onClick={moveNextCriterion} disabled={criterionIndex >= criteria.length - 1} aria-label="다음 기준">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
+                                                <circle cx="18" cy="18" r="18" fill="#F6F6F6"/>
+                                                <path d="M16 13L21 18L16 23" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
 
-                    <div className="eca-admin-assignment-evaluation-score-labels">
-                        <span>1</span>
-                        <span>10</span>
-                    </div>
+                                <div className="eca-admin-assignment-evaluation-score-list">
+                                    {Array.from({ length: currentCriterion?.maxScore ?? 10 }, (_, index) => index + 1).map((score) => (
+                                        <button
+                                            type="button"
+                                            key={score}
+                                            className={"eca-admin-assignment-evaluation-score-dot" + (currentScore !== undefined && score <= currentScore ? " is-selected" : "")}
+                                            onClick={() => updateScore(score)}
+                                            disabled={!currentCriterion}
+                                            aria-label={`${score}점`}
+                                        />
+                                    ))}
+                                </div>
 
-                    <label className="eca-admin-assignment-evaluation-feedback">
-                        <strong>Feedback</strong>
-                        <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="텍스트를 입력하세요..." />
-                    </label>
+                                <div className="eca-admin-assignment-evaluation-score-labels">
+                                    <span>1</span>
+                                    <span>{currentCriterion?.maxScore ?? 10}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <button type="button" className="eca-admin-assignment-evaluation-save-button" onClick={handleSave}>
-                        save
-                    </button>
-                </aside>
+                        <label className="eca-admin-assignment-evaluation-feedback">
+                            <strong>Feedback</strong>
+                            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="텍스트를 입력하세요..." disabled={!submission || !evaluation || saving} />
+                        </label>
+
+                        <button type="button" className="eca-admin-assignment-evaluation-save-button" onClick={handleSave} disabled={!submission || !evaluation || saving}>
+                            {saving ? "saving..." : "save"}
+                        </button>
+                    </aside>
+                </div>
             </section>
         </div>
     );
