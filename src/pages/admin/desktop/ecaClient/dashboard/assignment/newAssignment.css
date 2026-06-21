@@ -1,8 +1,10 @@
 .eca-admin-new-assignment-page { width: 100%; max-width: 640px; margin: 0; padding: 30px 0; box-sizing: border-box; animation: eca-slide-in .28s ease both; }
+.eca-admin-new-assignment-page.is-leaving-back { pointer-events: none; animation: eca-new-assignment-slide-out-to-right .28s ease both; }
+
 .eca-admin-new-assignment-top { display: flex; align-items: center; justify-content: space-between; padding: 0 42px 0 0; margin-bottom: 29px; min-width: 640px; box-sizing: border-box; }
 .eca-admin-new-assignment-top-left { display: flex; align-items: center; gap: 16px; }
-.eca-admin-new-assignment-top h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1.5; }
-.eca-admin-new-assignment-temp-button { width: 116px; height: 46px; border: 0; border-radius: 10px; background: #DDD; color: #777; font-size: 16px; font-weight: 700; cursor: not-allowed; }
+.eca-admin-new-assignment-top h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 48px; }
+.eca-admin-new-assignment-temp-button { width: 120px; height: 48px; border: 0; border-radius: 10px; background: #E7E7E7; color: #808080; font-size: 16px; font-weight: 700; cursor: not-allowed; }
 
 .eca-admin-new-assignment-card { position: relative; width: 100%; min-width: 640px; min-height: 640px; padding: 64px 50px 32px 56px; border: 1px solid #DDD; border-radius: 18px; background: #FFF; box-sizing: border-box; }
 .eca-admin-new-assignment-field { position: relative; margin-bottom: 32px; }
@@ -283,3 +285,9 @@
 .eca-team-edit-move-row button { width: 58px; height: 34px; border: 0; border-radius: 4px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; }
 .eca-team-edit-move-row button:first-of-type { background: #BDD8FF; color: #0166FF; }
 .eca-team-edit-move-row button:disabled { background: #E7E7E7; color: #A0A0A0; cursor: not-allowed; }
+
+
+@keyframes eca-new-assignment-slide-out-to-right {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(64px); }
+}

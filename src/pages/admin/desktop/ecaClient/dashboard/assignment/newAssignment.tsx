@@ -730,6 +730,10 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
 
     const [loading, setLoading] = React.useState(false);
     const [saving, setSaving] = React.useState(false);
+
+    const [leavingBack, setLeavingBack] = React.useState(false);
+    const backTimerRef = React.useRef<number | null>(null);
+
     const [error, setError] = React.useState("");
     const [modalError, setModalError] = React.useState("");
 
@@ -851,6 +855,14 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
         document.addEventListener("mousedown", handleMouseDown);
         return () => {
             document.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        return () => {
+            if (backTimerRef.current !== null) {
+                window.clearTimeout(backTimerRef.current);
+            }
         };
     }, []);
 
@@ -1868,14 +1880,28 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
     }
 
     function moveBack(): void {
-        navigate(-1);
+        if (leavingBack) return;
+
+        setOpenDropdown(null);
+        setOpenDatePicker(null);
+        setParticipantModalOpen(false);
+        setTeamModeModalOpen(false);
+        setTeamCreateModalOpen(false);
+        setExistingTeamSelectModalOpen(false);
+        setTeamEditModalOpen(false);
+        setLeavingBack(true);
+
+        backTimerRef.current = window.setTimeout(() => {
+            navigate(-1);
+        }, 280);
     }
+
     return (
         <>
-            <div className={"eca-admin-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode")}>
+            <div className={"eca-admin-new-assignment-page" + (isEditMode ? " is-edit-mode" : " is-create-mode") + (leavingBack ? " is-leaving-back" : "")}>
                 <div className="eca-admin-new-assignment-top">
                     <div className="eca-admin-new-assignment-top-left">
-                        <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} aria-label={t("ecaAdmin.goBack")}>
+                        <button type="button" className="eca-admin-assignment-detail-back-button" onClick={moveBack} disabled={leavingBack} aria-label={t("ecaAdmin.goBack")}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -1884,9 +1910,9 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                         <h1>{isEditMode ? t("ecaAdmin.assignmentPage.editAssignmentTitle") : t("ecaAdmin.assignmentPage.newAssignmentTitle")}</h1>
                     </div>
 
-                    <button type="button" className="eca-admin-new-assignment-temp-button" disabled>
+                    {/* <button type="button" className="eca-admin-new-assignment-temp-button" disabled>
                         {t("ecaAdmin.assignmentPage.tempSave")}
-                    </button>
+                    </button> */}
                 </div>
 
                 <form className="eca-admin-new-assignment-card" onSubmit={handleSubmit} ref={cardRef}>
@@ -1960,7 +1986,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     </div>
 
                     <div className="eca-admin-new-assignment-field">
-                        <label>{t("ecaAdmin.participant")}<span>*</span></label>
+                        <label>{t("ecaAdmin.assignmentPage.participant")}<span>*</span></label>
                         <div className="eca-admin-new-assignment-participant-row">
                             <button type="button" className={ "eca-admin-new-assignment-participant-input" + (selectedUserIds.length === 0 ? " is-placeholder" : "") } onClick={openParticipantModal} > 
                                 {selectedParticipantText}
@@ -1974,7 +2000,7 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     <div className="eca-admin-new-assignment-field">
                         <div className="eca-admin-new-assignment-system-row">
                             <div>
-                                <label>{t("ecaAdmin.assignmentSystemForm")}<span>*</span></label>
+                                <label>{t("ecaAdmin.assignmentPage.assignmentSystemForm")}<span>*</span></label>
                                 <div className="eca-admin-new-assignment-dropdown-wrap">
                                     <button type="button" className="eca-admin-new-assignment-select" onClick={() => toggleDropdown("systemForm")}>
                                         <span>{t(selectedSystemFormLabelKey)}</span>

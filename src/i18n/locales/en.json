@@ -616,6 +616,7 @@
         "ecaClientAdminSubmenuEmpty": "No assigned programs",
         "dashboard": "Dashboard",
         "assignment": "Assignments",
+		"evaluation": "Evaluation",
         "attendance": "Attendance",
         "team": "Team",
 		"leaderboard": "Leaderboard",
@@ -655,7 +656,7 @@
         "assignment": "Assignments",
         "attendance": "Attendance",
         "team": "Team",
-        "ecaClientAdminName": "{{adminName}}",
+        "ecaClientAdminName": "{{studentName}}",
 
 		"status": {
             "upcoming": "Scheduled",
