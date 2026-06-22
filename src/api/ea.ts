@@ -1780,21 +1780,6 @@ function saveBlob(blob: Blob, fileName: string): void {
     }, 1000);
 }
 
-function getFileNameFromUrl(url: string): string {
-    try {
-        const parsedUrl = new URL(url);
-        const pathName = decodeURIComponent(parsedUrl.pathname);
-        const fileName = pathName.split("/").filter(Boolean).pop();
-
-        return fileName || "leaderboard-evidence-file";
-    } catch {
-        const cleanUrl = decodeURIComponent(url.split("?")[0].split("#")[0]);
-        const fileName = cleanUrl.split("/").filter(Boolean).pop();
-
-        return fileName || "leaderboard-evidence-file";
-    }
-}
-
 export async function downloadLeaderboardEvidenceFile(
     externalActivityId: number | string,
     submissionId: number | string,
