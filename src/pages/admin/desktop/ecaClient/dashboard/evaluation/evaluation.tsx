@@ -1,13 +1,28 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { getExternalActivityEvaluationOverview } from "../../../../../../api/ea";
 import type { ExternalActivityEvaluationOverviewResponse, ExternalActivityEvaluationOverviewRow } from "../../../../../../api/ea";
 import "./evaluation.css";
 
-
 type EvaluationLocationState = {
     fromEvaluationDetail?: boolean;
 };
+
+const EVALUATION_T = "ecaAdmin.evaluationPage";
+
+const CRITERION_TRANSLATION_KEY_MAP: Record<string, string> = {
+    participation: "participation",
+    intent: "intent",
+    content: "content",
+};
+
+function getCriterionDisplayName(name: string, t: TFunction): string {
+    const key = CRITERION_TRANSLATION_KEY_MAP[name.trim().toLowerCase()];
+
+    return key ? t(`${EVALUATION_T}.criteria.${key}`) : name;
+}
 
 function formatNumber(value?: number | null): string {
     if (value === null || value === undefined) return "-";
@@ -38,6 +53,7 @@ function getTargetId(row: ExternalActivityEvaluationOverviewRow): number | null 
 export default function EcaEvaluationPage(): React.ReactElement {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const locationState = location.state as EvaluationLocationState | null;
     const enterFromDetail = locationState?.fromEvaluationDetail === true;
@@ -70,7 +86,7 @@ export default function EcaEvaluationPage(): React.ReactElement {
     React.useEffect(() => {
         async function fetchOverview(): Promise<void> {
             if (!externalActivityId) {
-                setError("평가 정보를 찾을 수 없습니다.");
+                setError(t(`${EVALUATION_T}.evaluationNotFound`));
                 return;
             }
 
@@ -84,19 +100,19 @@ export default function EcaEvaluationPage(): React.ReactElement {
             } catch (e) {
                 console.error(e);
                 setOverview(null);
-                setError("평가 정보를 불러오지 못했습니다.");
+                setError(t(`${EVALUATION_T}.evaluationLoadFailed`));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchOverview();
-    }, [externalActivityId, selectedAssignmentId]);
+    }, [externalActivityId, selectedAssignmentId, t, i18n.language]);
 
     function getSelectedAssignmentName(): string {
-        if (!overview || selectedAssignmentId === null) return "All";
+        if (!overview || selectedAssignmentId === null) return t(`${EVALUATION_T}.all`);
 
-        return overview.assignments.find((item) => item.assignmentId === selectedAssignmentId)?.assignmentName ?? "Assignment Name";
+        return overview.assignments.find((item) => item.assignmentId === selectedAssignmentId)?.assignmentName ?? t(`${EVALUATION_T}.assignmentNameFallback`);
     }
 
     function selectAssignment(assignmentId: number | null): void {
@@ -137,28 +153,28 @@ export default function EcaEvaluationPage(): React.ReactElement {
     return (
         <div className={"eca-admin-evaluation-page" + (enterFromDetail ? " is-enter-back" : "")}>
             <header className="eca-admin-evaluation-head">
-                  <h1>Evaluation</h1>
+                  <h1>{t(`${EVALUATION_T}.title`)}</h1>
             </header>
 
             {loading ? (
-                <p className="eca-admin-evaluation-empty">평가 정보를 불러오는 중입니다.</p>
+                <p className="eca-admin-evaluation-empty">{t(`${EVALUATION_T}.evaluationLoading`)}</p>
             ) : error ? (
                 <p className="eca-admin-evaluation-empty">{error}</p>
             ) : overview ? (
                 <>
                     <section className="eca-admin-evaluation-summary-grid">
                         <article className="eca-admin-evaluation-summary-card">
-                            <span>Assignment</span>
+                            <span>{t(`${EVALUATION_T}.totalAssignment`)}</span>
                             <strong>{overview.summary.totalAssignmentCount}</strong>
                         </article>
 
                         <article className="eca-admin-evaluation-summary-card">
-                            <span>To Grade</span>
+                            <span>{t(`${EVALUATION_T}.toGrade`)}</span>
                             <strong>{overview.summary.toGradeSubmissionCount}</strong>
                         </article>
 
                         <article className="eca-admin-evaluation-summary-card">
-                            <span>Average Score</span>
+                            <span>{t(`${EVALUATION_T}.averageScore`)}</span>
                             <strong>{formatNumber(overview.summary.averageStudentTotalScore)}</strong>
                         </article>
                     </section>
@@ -179,7 +195,7 @@ export default function EcaEvaluationPage(): React.ReactElement {
                             {dropdownOpen ? (
                                 <div className="eca-admin-evaluation-dropdown-menu">
                                     <button type="button" className={selectedAssignmentId === null ? "is-active" : ""} onClick={() => selectAssignment(null)}>
-                                        All
+                                        {t(`${EVALUATION_T}.all`)}
                                     </button>
 
                                     {overview.assignments.map((assignment) => (
@@ -193,38 +209,32 @@ export default function EcaEvaluationPage(): React.ReactElement {
 
                         {isAllView ? (
                             <div className="eca-admin-evaluation-table-head eca-admin-evaluation-table-head--all">
-                                <span>Name</span>
-                                <span>Submitted</span>
-                                <span>Graded</span>
-                                <span>Total Score</span>
+                                <span>{t(`${EVALUATION_T}.table.name`)}</span>
+                                <span>{t(`${EVALUATION_T}.table.submitted`)}</span>
+                                <span>{t(`${EVALUATION_T}.table.graded`)}</span>
+                                <span>{t(`${EVALUATION_T}.table.totalScore`)}</span>
                                 <span />
                             </div>
                         ) : (
                             <div className="eca-admin-evaluation-table-head eca-admin-evaluation-table-head--assignment">
-                                <span>Name</span>
+                                <span>{t(`${EVALUATION_T}.table.name`)}</span>
                                 {overview.criteria.map((criterion) => (
-                                    <span key={criterion.criterionId}>{criterion.name}</span>
+                                    <span key={criterion.criterionId}>{getCriterionDisplayName(criterion.name, t)}</span>
                                 ))}
-                                <span>Total Score</span>
+                                <span>{t(`${EVALUATION_T}.table.totalScore`)}</span>
                                 <span />
                             </div>
                         )}
 
                         <div className="eca-admin-evaluation-row-list">
                             {overview.rows.length === 0 ? (
-                                <p className="eca-admin-evaluation-empty is-card">표시할 평가 정보가 없습니다.</p>
+                                <p className="eca-admin-evaluation-empty is-card">{t(`${EVALUATION_T}.noEvaluationData`)}</p>
                             ) : (
                                 overview.rows.map((row) => {
                                     const disabled = !isAllView && !row.selectedSubmissionId;
 
                                     return (
-                                        <button
-                                            type="button"
-                                            key={`${row.participantType}-${row.participantId}-${row.userId ?? row.teamId ?? "none"}`}
-                                            className={isAllView ? "eca-admin-evaluation-row eca-admin-evaluation-row--all" : "eca-admin-evaluation-row eca-admin-evaluation-row--assignment"}
-                                            onClick={() => moveRow(row)}
-                                            disabled={disabled}
-                                        >
+                                        <button type="button" key={`${row.participantType}-${row.participantId}-${row.userId ?? row.teamId ?? "none"}`} className={isAllView ? "eca-admin-evaluation-row eca-admin-evaluation-row--all" : "eca-admin-evaluation-row eca-admin-evaluation-row--assignment"} onClick={() => moveRow(row)} disabled={disabled} >
                                             <span className="eca-admin-evaluation-profile-cell">
                                                 <span className="eca-admin-evaluation-avatar">
                                                     {row.profileImage ? <img src={row.profileImage} alt="" /> : null}

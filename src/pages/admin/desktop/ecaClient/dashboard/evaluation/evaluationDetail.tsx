@@ -1,5 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { getExternalActivityEvaluationTargetDetail } from "../../../../../../api/ea";
 import type { EvaluationTargetType, ExternalActivityEvaluationTargetAssignmentRow, ExternalActivityEvaluationTargetDetailResponse } from "../../../../../../api/ea";
 import "./evaluation.css";
@@ -17,6 +19,19 @@ type EvaluationDetailLocationState = {
 };
 
 const DEFAULT_PROFILE_IMAGE = "/internie-mascot.png";
+const EVALUATION_T = "ecaAdmin.evaluationPage";
+
+// const CRITERION_TRANSLATION_KEY_MAP: Record<string, string> = {
+//     participation: "participation",
+//     intent: "intent",
+//     content: "content",
+// };
+
+// function getCriterionDisplayName(name: string, t: TFunction): string {
+//     const key = CRITERION_TRANSLATION_KEY_MAP[name.trim().toLowerCase()];
+
+//     return key ? t(`${EVALUATION_T}.criteria.${key}`) : name;
+// }
 
 function formatNumber(value?: number | null): string {
     if (value === null || value === undefined) return "-";
@@ -52,16 +67,17 @@ function getSafeExternalUrl(value?: string | null): string {
     }
 }
 
-function getSortLabel(sortType: SortType): string {
-    if (sortType === "scoreDesc") return "점수 높은 순";
-    if (sortType === "scoreAsc") return "점수 낮은 순";
+function getSortLabel(sortType: SortType, t: TFunction): string {
+    if (sortType === "scoreDesc") return t(`${EVALUATION_T}.scoreDesc`);
+    if (sortType === "scoreAsc") return t(`${EVALUATION_T}.scoreAsc`);
 
-    return "과제 내준 순";
+    return t(`${EVALUATION_T}.assignmentOrder`);
 }
 
 export default function EcaEvaluationDetailPage(): React.ReactElement {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
     const navigationType = useNavigationType();
     const locationState = location.state as EvaluationDetailLocationState | null;
     const enterForward = navigationType !== "POP" && locationState?.evaluationDetailEntryDirection === "forward";
@@ -83,7 +99,7 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
     React.useEffect(() => {
         async function fetchDetail(): Promise<void> {
             if (!externalActivityId || !isValidTargetType(participantType) || !targetId) {
-                setError("학생 평가 정보를 찾을 수 없습니다.");
+                setError(t(`${EVALUATION_T}.studentEvaluationNotFound`));
                 return;
             }
 
@@ -97,14 +113,14 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
             } catch (e) {
                 console.error(e);
                 setDetail(null);
-                setError("학생 평가 정보를 불러오지 못했습니다.");
+                setError(t(`${EVALUATION_T}.studentEvaluationLoadFailed`));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchDetail();
-    }, [externalActivityId, participantType, targetId]);
+    }, [externalActivityId, participantType, targetId, t, i18n.language]);
 
     React.useEffect(() => {
         if (!dropdownOpen) return;
@@ -156,11 +172,10 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
         setDropdownOpen(false);
     }
 
-    const profileName = detail?.targetName || locationState?.participantName || "이름 없음";
-    const profileImage = detail?.profileImage ?? locationState?.profileImage ?? null;
+    const profileName = detail?.targetName || locationState?.participantName || t(`${EVALUATION_T}.noName`);
     const studentNumber = detail?.studentNumber ?? locationState?.studentNumber ?? "-";
+    const studentIdentifierLabel = participantType === "TEAM" ? t(`${EVALUATION_T}.teamId`) : t(`${EVALUATION_T}.studentId`);    const profileImage = detail?.profileImage ?? locationState?.profileImage ?? null;
     const linkedinUrl = getSafeExternalUrl(detail?.linkedinUrl ?? locationState?.linkedinUrl);
-    const studentIdentifierLabel = participantType === "TEAM" ? "Team ID" : "Student ID";
     const studentIdentifierValue = participantType === "TEAM" ? targetId ?? "-" : studentNumber;
     const rows = detail?.rows ?? [];
 
@@ -185,16 +200,16 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
     return (
         <div className={pageClassName}>
             <header className="eca-admin-evaluation-head">
-                <button type="button" className="eca-admin-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
+                <button type="button" className="eca-admin-evaluation-back-button" onClick={moveBack} aria-label={t("common.prev")}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <h1>Evaluation</h1>
+                <h1>{t(`${EVALUATION_T}.title`)}</h1>
             </header>
 
             {loading ? (
-                <p className="eca-admin-evaluation-empty">학생 평가 정보를 불러오는 중입니다.</p>
+                <p className="eca-admin-evaluation-empty">{t(`${EVALUATION_T}.studentEvaluationLoading`)}</p>
             ) : error ? (
                 <p className="eca-admin-evaluation-empty">{error}</p>
             ) : (
@@ -218,7 +233,7 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
                         </span>
 
                         <button type="button" className="eca-admin-evaluation-linkedin-button" onClick={openLinkedin} disabled={!linkedinUrl}>
-                            LinkedIn
+                            {t(`${EVALUATION_T}.linkedin`)}
                         </button>
                     </section>
 
@@ -229,7 +244,7 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
 
                         <div className="eca-admin-evaluation-dropdown-wrap" ref={dropdownRef}>
                             <button type="button" className="eca-admin-evaluation-dropdown-button" onClick={() => setDropdownOpen((prev) => !prev)}>
-                                <span>{getSortLabel(sortType)}</span>
+                                <span>{getSortLabel(sortType, t)}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M5 7.5L10 12.5L15 7.5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
@@ -238,38 +253,33 @@ export default function EcaEvaluationDetailPage(): React.ReactElement {
                             {dropdownOpen ? (
                                 <div className="eca-admin-evaluation-dropdown-menu">
                                     <button type="button" className={sortType === "assignmentOrder" ? "is-active" : ""} onClick={() => selectSortType("assignmentOrder")}>
-                                        과제 내준 순
+                                        {t(`${EVALUATION_T}.assignmentOrder`)}
                                     </button>
                                     <button type="button" className={sortType === "scoreDesc" ? "is-active" : ""} onClick={() => selectSortType("scoreDesc")}>
-                                        점수 높은 순
+                                        {t(`${EVALUATION_T}.scoreDesc`)}
                                     </button>
                                     <button type="button" className={sortType === "scoreAsc" ? "is-active" : ""} onClick={() => selectSortType("scoreAsc")}>
-                                        점수 낮은 순
+                                        {t(`${EVALUATION_T}.scoreAsc`)}
                                     </button>
                                 </div>
                             ) : null}
                         </div>
 
                         <div className="eca-admin-evaluation-table-head eca-admin-evaluation-table-head--student">
-                            <span>Assignment</span>
-                            <span>Participation</span>
-                            <span>Intent</span>
-                            <span>Content</span>
-                            <span>Total Score</span>
+                            <span>{t(`${EVALUATION_T}.assignmentTableTitle`)}</span>
+                            <span>{t(`${EVALUATION_T}.criteria.participation`)}</span>
+                            <span>{t(`${EVALUATION_T}.criteria.intent`)}</span>
+                            <span>{t(`${EVALUATION_T}.criteria.content`)}</span>
+                            <span>{t(`${EVALUATION_T}.table.totalScore`)}</span>
                             <span />
                         </div>
 
                         <div className="eca-admin-evaluation-row-list">
                             {rows.length === 0 ? (
-                                <p className="eca-admin-evaluation-empty is-card">제출한 과제 평가 정보가 없습니다.</p>
+                                <p className="eca-admin-evaluation-empty is-card">{t(`${EVALUATION_T}.noSubmittedEvaluationData`)}</p>
                             ) : (
                                 sortedRows.map((row) => (
-                                    <button
-                                        type="button"
-                                        key={`${row.assignmentId}-${row.submissionId}`}
-                                        className="eca-admin-evaluation-row eca-admin-evaluation-row--student"
-                                        onClick={() => moveAssignmentEvaluation(row)}
-                                    >
+                                    <button type="button" key={`${row.assignmentId}-${row.submissionId}`} className="eca-admin-evaluation-row eca-admin-evaluation-row--student" onClick={() => moveAssignmentEvaluation(row)}>
                                         <strong className="eca-admin-evaluation-assignment-name">{row.assignmentName}</strong>
                                         <span>{getCriterionScore(row, "Participation")}</span>
                                         <span>{getCriterionScore(row, "Intent")}</span>

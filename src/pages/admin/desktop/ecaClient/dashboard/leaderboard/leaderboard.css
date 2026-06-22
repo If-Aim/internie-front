@@ -35,7 +35,7 @@
 .eca-admin-leaderboard-search-button--active path { fill: var(--primary); }
 .eca-admin-leaderboard-search-wrap .eca-admin-leaderboard-icon-button:hover path, .eca-admin-leaderboard-search-wrap .eca-admin-leaderboard-missions-search-button:hover path { fill: var(--primary); }
 
-.eca-admin-leaderboard-sort-select { width: 120px; height: 36px; padding: 0 38px 0 14px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #666; font-size: 15px; font-weight: 700; font-family: inherit; outline: none; cursor: pointer; }
+.eca-admin-leaderboard-sort-select { width: 120px; height: 36px; padding: 0 38px 0 14px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #6B6B6B; font-size: 15px; font-weight: 700; font-family: inherit; outline: none; cursor: pointer; }
 .eca-admin-leaderboard-icon-button { position: relative; width: 30px; height: 30px; padding: 0; border: 0; background: transparent; color: #A0A0A0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-admin-leaderboard-icon-button:hover { color: var(--primary); }
 .eca-admin-leaderboard-icon-button--filter.eca-admin-leaderboard-icon-button--active::after {content: ""; position: absolute; top: 3px; right: 2px; width: 6px; height: 6px; border-radius: 999px; background: var(--primary); }
@@ -63,7 +63,8 @@
 .eca-admin-leaderboard-row:hover { background: #FAFCFF; border-color: #CFE2FF; }
 .eca-admin-leaderboard-rank-badge { width: 25px; height: 25px; border-radius: 999px; background: #D5E8FF; color: var(--primary); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .eca-admin-leaderboard-rank-badge--top { background: var(--primary); color: #fff; }
-.eca-admin-leaderboard-user-avatar { width: 38px; height: 38px; border-radius: 999px; background: #F6F6F6; display: block; }
+.eca-admin-leaderboard-user-avatar { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #E9E9E9; }
+.eca-admin-leaderboard-detail-avatar { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #E9E9E9; }
 .eca-admin-leaderboard-user-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #000; font-size: 16px; font-weight: 700; }
 
 .eca-admin-leaderboard-score { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
@@ -72,7 +73,7 @@
 .eca-admin-leaderboard-trend--down { color: var(--primary); }
 
 .eca-admin-leaderboard-empty-panel { height: calc(100% - 86px); color: #808080; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-.eca-admin-leaderboard-empty-panel strong { color: #666; font-size: 18px; font-weight: 700; }
+.eca-admin-leaderboard-empty-panel strong { color: #6B6B6B; font-size: 18px; font-weight: 700; }
 .eca-admin-leaderboard-empty-panel span { color: #999; font-size: 14px; font-weight: 600; }
 
 .eca-admin-leaderboard-list::-webkit-scrollbar { width: 4px; }
@@ -84,65 +85,82 @@
 .eca-admin-leaderboard-confirm-modal h2 { margin: 0 0 24px; color: #000; font-size: 20px; font-weight: 700; line-height: 1.35; text-align: center; }
 .eca-admin-leaderboard-confirm-actions { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .eca-admin-leaderboard-confirm-button { min-width: 96px; height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--primary); color: #fff; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
-.eca-admin-leaderboard-confirm-button--ghost { background: #E9E9E9; color: #666; }
+.eca-admin-leaderboard-confirm-button--ghost { background: #E9E9E9; color: #6B6B6B; }
 
 @keyframes ecaAdminLeaderboardDetailIn {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
 }
 
+@keyframes ecaAdminLeaderboardDetailOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+.eca-admin-leaderboard-detail-backdrop { position: fixed; inset: 0; z-index: 490; background: transparent; }
+.eca-admin-leaderboard-detail-backdrop--approval { z-index: 510; }
+.eca-admin-leaderboard-detail-panel { position: fixed; top: 0; right: 0; z-index: 500; width: min(580px, calc(100vw - 420px)); height: 100dvh; padding: 98px 81px 0 55px; background: #fff; box-shadow: -6px 0 18px rgba(0, 0, 0, .12); box-sizing: border-box; display: flex; flex-direction: column; animation: ecaAdminLeaderboardDetailIn .22s ease-out both; }
+.eca-admin-leaderboard-detail-panel.eca-admin-leaderboard-detail-panel--closing { animation: ecaAdminLeaderboardDetailOut .22s ease-in both; pointer-events: none; }
+
 .eca-admin-leaderboard-row--selected { background: #EDF5FF; border-color: #CFE2FF; }
-.eca-admin-leaderboard-detail-panel { position: fixed; top: 0; right: 0; z-index: 500; width: min(580px, calc(100vw - 320px)); height: 100dvh; padding: 76px 54px 34px 46px; background: #fff; box-shadow: -6px 0 18px rgba(0, 0, 0, .12); box-sizing: border-box; display: flex; flex-direction: column; animation: ecaAdminLeaderboardDetailIn .22s ease-out; }
-.eca-admin-leaderboard-detail-close { position: absolute; top: 34px; right: 34px; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: #000; font-size: 30px; font-weight: 400; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-admin-leaderboard-detail-close { position: absolute; top: 49px; right: 37px; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-admin-leaderboard-detail-profile { display: flex; align-items: center; gap: 28px; margin-bottom: 26px; }
-.eca-admin-leaderboard-detail-avatar { width: 96px; height: 96px; border-radius: 999px; background: #F4F4F4; flex-shrink: 0; }
-.eca-admin-leaderboard-detail-profile-text { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.eca-admin-leaderboard-detail-name { max-width: 330px; color: #333; font-size: 30px; font-weight: 700; line-height: 1.12; overflow: hidden; text-overflow: ellipsis; }
-.eca-admin-leaderboard-detail-nickname { color: #808080; font-size: 20px; font-weight: 700; line-height: 1; }
-.eca-admin-leaderboard-detail-score-card { width: 100%; padding: 28px 32px 22px; margin-bottom: 62px; border: 1px solid #E1E1E1; border-radius: 10px; background: #fff; box-sizing: border-box; }
-.eca-admin-leaderboard-detail-score-label { margin-bottom: 24px; color: #808080; font-size: 20px; font-weight: 700; }
-.eca-admin-leaderboard-detail-score-row { display: flex; align-items: flex-end; gap: 18px; margin-bottom: 12px; }
-.eca-admin-leaderboard-detail-score-row strong { color: #333; font-size: 42px; font-weight: 700; line-height: .95; }
-.eca-admin-leaderboard-detail-score-row span { color: #666; font-size: 18px; font-weight: 700; line-height: 1; }
-.eca-admin-leaderboard-detail-place-row { display: flex; align-items: center; gap: 32px; color: #666; font-size: 20px; font-weight: 700; }
-.eca-admin-leaderboard-detail-trend { display: flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 700; }
-.eca-admin-leaderboard-detail-trend--up { color: var(--primary); }
-.eca-admin-leaderboard-detail-trend--down { color: var(--primary); }
+.eca-admin-leaderboard-detail-avatar { width: 120px; height: 120px; border-radius: 999px; background: #F6F6F6; flex-shrink: 0; }
+.eca-admin-leaderboard-detail-profile-text { min-width: 0; display: flex; flex-direction: column; gap: 0; }
+.eca-admin-leaderboard-detail-name { max-width: 360px; color: #373737; font-size: 36px; font-weight: 700; line-height: 48px; overflow: hidden; text-overflow: ellipsis; white-space: break-spaces;}
+.eca-admin-leaderboard-detail-nickname { color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
+
+.eca-admin-leaderboard-detail-score-card { width: 100%; padding: 31px 39px 32px; margin-bottom: 77px; border: 1px solid #E7E7E7; border-radius: 12px; background: #fff; box-sizing: border-box; }
+.eca-admin-leaderboard-detail-score-label { margin-bottom: 36px; color: #808080; font-size: 24px; font-weight: 700; }
+.eca-admin-leaderboard-detail-score-row { display: flex; align-items: flex-end; gap: 18px; margin: 0 8px 21px; }
+.eca-admin-leaderboard-detail-score-row strong { color: #373737; font-size: 48px; font-weight: 700; line-height: 1;  }
+.eca-admin-leaderboard-detail-score-row span { color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-admin-leaderboard-detail-place-row { display: flex; align-items: center; color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 26px; margin-left: 16px;}
+.eca-admin-leaderboard-detail-place-row-rank { width: 160px; }
+.eca-admin-leaderboard-detail-trend { display: flex; align-items: center; gap: 4px; font-size: 24px; font-weight: 700;  }
+.eca-admin-leaderboard-detail-trend--up { color: #0166FF; }
+.eca-admin-leaderboard-detail-trend--down { color: #F00; }
+
 .eca-admin-leaderboard-detail-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.eca-admin-leaderboard-detail-list-header h2 { margin: 0; color: #666; font-size: 21px; font-weight: 700; line-height: 1; }
+.eca-admin-leaderboard-detail-list-header h2 { margin: 0; color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
 .eca-admin-leaderboard-detail-actions { display: flex; align-items: center; gap: 12px; }
 .eca-admin-leaderboard-detail-mission-list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 92px 0; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
-.eca-admin-leaderboard-detail-mission-card { min-height: 78px; padding: 16px 22px 12px 18px; border: 1px solid #E7E7E7; border-radius: 9px; background: #fff; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; box-sizing: border-box; }
+.eca-admin-leaderboard-detail-mission-card { min-height: 100px; padding: 20px 24px 16px 21px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; box-sizing: border-box; cursor: pointer; }
+.eca-admin-leaderboard-detail-mission-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .eca-admin-leaderboard-detail-mission-main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
-.eca-admin-leaderboard-detail-mission-main strong { max-width: 260px; color: #000; font-size: 14px; font-weight: 700; line-height: 1.2; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.eca-admin-leaderboard-detail-mission-tags { display: flex; align-items: center; gap: 10px; }
-.eca-admin-leaderboard-detail-category-tag { min-width: 74px; height: 24px; padding: 0 12px; border-radius: 999px; background: #FF9BCD; color: #FF007A; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-admin-leaderboard-detail-point-tag { min-width: 50px; height: 24px; padding: 0 12px; border-radius: 999px; background: #BDD8FF; color: var(--primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-admin-leaderboard-detail-mission-side { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 17px; }
-.eca-admin-leaderboard-detail-mission-side span { color: #808080; font-size: 10px; font-weight: 500; white-space: nowrap; }
+.eca-admin-leaderboard-detail-mission-main strong { max-width: 360px; color: #000; font-size: 16px; font-weight: 700; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-admin-leaderboard-detail-mission-tags { display: flex; align-items: center; gap: 12px; }
+.eca-admin-leaderboard-detail-category-tag { min-width: 96px; height: 32px; padding: 0 8px; border-radius: 18px; background: #fff; color: #808080; border: 1px solid #E7E7E7; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-admin-leaderboard-detail-point-tag { min-width: 64px; height: 32px; padding: 0; border-radius: 18px; background: #BDD8FF; color: var(--primary); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-admin-leaderboard-detail-mission-side { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+.eca-admin-leaderboard-detail-mission-side span { color: #808080; font-size: 12px; font-weight: 500; white-space: nowrap; line-height: 20px; }
 .eca-admin-leaderboard-detail-delete-button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: #808080; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.eca-admin-leaderboard-detail-ok-button { position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); width: 210px; height: 52px; border: 0; border-radius: 5px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; }
+.eca-admin-leaderboard-detail-ok-button { position: absolute; left: 50%; bottom: 105px; transform: translateX(-50%); width: 240px; height: 64px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 20px; font-weight: 700; font-family: inherit; cursor: pointer; }
 
 .eca-admin-leaderboard-detail-mission-list::-webkit-scrollbar { width: 4px; }
 .eca-admin-leaderboard-detail-mission-list::-webkit-scrollbar-track { background: transparent; }
 .eca-admin-leaderboard-detail-mission-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #E6E6E6; }
 
-.eca-admin-leaderboard-detail-mission-card { cursor: pointer; }
-.eca-admin-leaderboard-detail-mission-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.eca-admin-leaderboard-mission-modal-backdrop { position: fixed; inset: 0; z-index: 1400; background: rgba(0, 0, 0, .32); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
-.eca-admin-leaderboard-mission-modal { position: relative; width: 650px; min-height: 560px; padding: 112px 72px 72px; border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); box-sizing: border-box; }
-.eca-admin-leaderboard-mission-modal-close { position: absolute; top: 34px; right: 34px; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: #000; font-size: 32px; font-weight: 400; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.eca-admin-leaderboard-mission-modal-evidence-list { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 58px; }
-.eca-admin-leaderboard-mission-modal-evidence-placeholder { width: 204px; height: 204px; border-radius: 10px; background: #F6F6F6; display: block; }
-.eca-admin-leaderboard-mission-modal-evidence-img { width: 204px; height: 204px; border-radius: 10px; object-fit: cover; background: #F6F6F6; display: block; }
-.eca-admin-leaderboard-mission-modal-info { display: flex; flex-direction: column; gap: 30px; }
-.eca-admin-leaderboard-mission-modal-info-row { display: grid; grid-template-columns: 170px 1fr; align-items: center; column-gap: 16px; }
-.eca-admin-leaderboard-mission-modal-info-row > span { color: #666; font-size: 16px; font-weight: 700; line-height: 1; }
-.eca-admin-leaderboard-mission-modal-info-row > strong:not(.eca-admin-leaderboard-detail-category-tag):not(.eca-admin-leaderboard-detail-point-tag) { min-width: 0; color: #000; font-size: 21px; font-weight: 700; line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.eca-admin-leaderboard-mission-modal-category { width: fit-content; min-width: 164px; height: 36px; font-size: 22px; }
-.eca-admin-leaderboard-mission-modal-point { width: fit-content; min-width: 82px; height: 36px; font-size: 22px; }
+.eca-admin-leaderboard-mission-modal-backdrop { position: fixed; inset: 0; z-index: 1400; background: rgba(107, 107, 107, 0.50); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+.eca-admin-leaderboard-mission-modal { position: relative; width: 650px; min-height: 560px; padding: 108px 49px 80px; border-radius: 16px; background: #fff; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25); box-sizing: border-box; }
+.eca-admin-leaderboard-mission-modal-close { position: absolute; top: 35px; right: 34px; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-.eca-admin-leaderboard-mission-delete-backdrop { position: fixed; inset: 0; z-index: 1700; background: rgba(0, 0, 0, .32); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+.eca-admin-leaderboard-mission-modal-info { display: flex; flex-direction: column; gap: 20px; }
+.eca-admin-leaderboard-mission-modal-info-row { display: grid; grid-template-columns: 144px 1fr; align-items: center; column-gap: 36px; }
+.eca-admin-leaderboard-mission-modal-info-row > span { color: #6B6B6B; font-size: 16px; font-weight: 700; line-height: 36px; }
+.eca-admin-leaderboard-mission-modal-info-row > strong:not(.eca-admin-leaderboard-detail-category-tag):not(.eca-admin-leaderboard-detail-point-tag) { min-width: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 36px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-admin-leaderboard-mission-modal-category { width: fit-content; padding: 0 18px; height: 36px; font-size: 20px; }
+.eca-admin-leaderboard-mission-modal-point { width: fit-content; min-width: 64px; padding: 0 8px; height: 36px; font-size: 20px; }
+.eca-admin-leaderboard-mission-modal-evidence-list { display: grid; grid-template-columns: repeat(2, 160px); gap: 12px; justify-content: center; }
+.eca-admin-leaderboard-mission-modal-evidence-img { width: 160px; height: 160px; border-radius: 16px; object-fit: cover; background: #F5F7FA; }
+.eca-admin-leaderboard-mission-modal-evidence-placeholder { width: 160px; height: 160px; border-radius: 16px; background: #F5F7FA; display: block; }
+.eca-admin-leaderboard-mission-modal-evidence-file { width: 160px; height: 160px; min-width: 160px; max-width: 160px; min-height: 160px; max-height: 160px; padding: 0; border: 0; border-radius: 16px; background: #F5F7FA; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; box-sizing: border-box; }
+.eca-admin-leaderboard-mission-modal-evidence-file .eca-student-assignment-file-svg { width: 70px; height: 80px; flex: 0 0 auto; }
+.eca-admin-leaderboard-mission-modal-evidence-link { width: 160px; height: 160px; min-width: 160px; max-width: 160px; min-height: 160px; max-height: 160px; padding: 18px; border: 0; border-radius: 16px; background: #F5F7FA; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; box-sizing: border-box; text-decoration: none; overflow: hidden; }
+.eca-admin-leaderboard-mission-modal-evidence-link span { max-width: 100%; color: #334155; font-size: 13px; font-weight: 700; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+.eca-admin-leaderboard-mission-delete-backdrop { position: fixed; inset: 0; z-index: 1700; background: rgba(107, 107, 107, 0.50); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
 .eca-admin-leaderboard-mission-delete-modal { position: relative; width: 650px; min-height: 360px; padding: 84px 72px 56px; border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
 .eca-admin-leaderboard-mission-delete-close { position: absolute; top: 34px; right: 34px; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: #000; font-size: 32px; font-weight: 400; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-admin-leaderboard-mission-delete-icon { margin-bottom: 20px; color: var(--primary); }
@@ -157,7 +175,7 @@
 .eca-admin-leaderboard-approvals-list { height: calc(100% - 52px); overflow-y: auto; padding: 0 10px 24px 0; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
 .eca-admin-leaderboard-approval-row { width: 100%; min-height: 66px; padding: 0 18px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; color: #000; font-family: inherit; cursor: pointer; display: grid; grid-template-columns: 58px 1fr 170px 118px 96px; align-items: center; text-align: left; box-sizing: border-box; }
 .eca-admin-leaderboard-approval-row:hover { background: #FAFCFF; border-color: #CFE2FF; }
-.eca-admin-leaderboard-approval-avatar { width: 38px; height: 38px; border-radius: 999px; background: #F6F6F6; display: block; }
+.eca-admin-leaderboard-approval-avatar { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #E9E9E9; }
 .eca-admin-leaderboard-approval-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #000; font-size: 16px; font-weight: 700; }
 .eca-admin-leaderboard-approval-date { color: #808080; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .eca-admin-leaderboard-approval-category { width: 102px; height: 32px; border-radius: 999px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
@@ -170,35 +188,38 @@
 .eca-admin-leaderboard-approvals-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #E6E6E6; }
 
 .eca-admin-leaderboard-approval-row--selected { background: #EDF5FF; border-color: #CFE2FF; }
-.eca-admin-leaderboard-detail-panel--approval { z-index: 520; width: min(720px, calc(100vw - 320px)); padding: 100px 58px 58px 58px; }
-.eca-admin-leaderboard-approval-detail-profile { display: flex; align-items: center; gap: 34px; margin-bottom: 54px; }
+.eca-admin-leaderboard-detail-panel--approval { z-index: 520; width: min(720px, calc(100vw - 320px)); padding: 97px 0 0 53px; }
+.eca-admin-leaderboard-approval-detail-profile { display: flex; align-items: center; gap: 34px; margin-bottom: 56px; }
 .eca-admin-leaderboard-approval-detail-name { max-width: 420px; color: #333; font-size: 34px; font-weight: 700; line-height: 1.12; overflow: hidden; text-overflow: ellipsis; }
-.eca-admin-leaderboard-approval-evidence-list { width: 100%; margin-bottom: 34px; display: flex; align-items: center; gap: 14px; overflow-x: auto; padding-bottom: 4px; box-sizing: border-box; }
-.eca-admin-leaderboard-approval-evidence-placeholder { width: 160px; height: 160px; border-radius: 10px; background: #F6F6F6; flex: 0 0 160px; display: block; }
-.eca-admin-leaderboard-approval-evidence-img { width: 160px; height: 160px; border-radius: 10px; object-fit: cover; background: #F6F6F6; flex: 0 0 160px; display: block; }
-.eca-admin-leaderboard-approval-detail-info { display: flex; flex-direction: column; gap: 30px; }
-.eca-admin-leaderboard-approval-detail-info-row { display: grid; grid-template-columns: 170px 1fr; align-items: center; column-gap: 16px; }
-.eca-admin-leaderboard-approval-detail-info-row > span { color: #666; font-size: 16px; font-weight: 700; line-height: 1; }
-.eca-admin-leaderboard-approval-detail-info-row > strong:not(.eca-admin-leaderboard-approval-detail-category):not(.eca-admin-leaderboard-approval-detail-point) { min-width: 0; color: #000; font-size: 21px; font-weight: 700; line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.eca-admin-leaderboard-approval-detail-category { width: fit-content; min-width: 164px; height: 36px; padding: 0 18px; border-radius: 999px; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-admin-leaderboard-approval-detail-category--participation { background: #FFB3D7; color: #FF007A; }
-.eca-admin-leaderboard-approval-detail-category--intent { background: #FFEE9E; color: #E1A800; }
-.eca-admin-leaderboard-approval-detail-category--content { background: #B9FFB4; color: #00B51E; }
-.eca-admin-leaderboard-approval-detail-point { width: fit-content; min-width: 82px; height: 36px; padding: 0 18px; border-radius: 999px; background: #BDD8FF; color: var(--primary); font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-admin-leaderboard-approval-detail-actions { position: absolute; left: 58px; right: 58px; bottom: 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-.eca-admin-leaderboard-approval-detail-button { height: 64px; border: 0; border-radius: 8px; font-size: 21px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.eca-admin-leaderboard-approval-detail-button--approve { background: var(--primary); color: #fff; }
-.eca-admin-leaderboard-approval-detail-button--reject { background: #F5F5F5; color: #666; }
+
+.eca-admin-leaderboard-approval-evidence-list { display: grid; grid-template-columns: repeat(2, 160px); gap: 10px; justify-content: flex-start; margin-bottom: 30px; }
+.eca-admin-leaderboard-approval-evidence-img { width: 160px; height: 160px; border-radius: 16px; object-fit: cover; background: #F5F7FA; }
+.eca-admin-leaderboard-approval-evidence-placeholder { width: 160px; height: 160px; border-radius: 16px; background: #F5F7FA; display: block; }
+.eca-admin-leaderboard-approval-evidence-file { width: 160px; height: 160px; min-width: 160px; max-width: 160px; min-height: 160px; max-height: 160px; padding: 0; border: 0; border-radius: 16px; background: #F5F7FA; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; box-sizing: border-box; }
+.eca-admin-leaderboard-approval-evidence-file .eca-student-assignment-file-svg { width: 70px; height: 80px; flex: 0 0 auto; }
+.eca-admin-leaderboard-approval-evidence-link { width: 160px; height: 160px; min-width: 160px; max-width: 160px; min-height: 160px; max-height: 160px; padding: 18px; border: 0; border-radius: 16px; background: #F5F7FA; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; box-sizing: border-box; text-decoration: none; overflow: hidden; }
+.eca-admin-leaderboard-approval-evidence-link span { max-width: 100%; color: #334155; font-size: 13px; font-weight: 700; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eca-admin-leaderboard-approval-evidence-list::-webkit-scrollbar { height: 7px; }
 .eca-admin-leaderboard-approval-evidence-list::-webkit-scrollbar-track { background: transparent; }
 .eca-admin-leaderboard-approval-evidence-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #D9D9D9; }
 
+.eca-admin-leaderboard-approval-detail-info { display: flex; flex-direction: column; gap: 30px; }
+.eca-admin-leaderboard-approval-detail-info-row { display: grid; grid-template-columns: 144px 1fr; align-items: center; column-gap: 36px; }
+.eca-admin-leaderboard-approval-detail-info-row > span { color: #6B6B6B; font-size: 16px; font-weight: 700; line-height: 36px; }
+.eca-admin-leaderboard-approval-detail-info-row > strong:not(.eca-admin-leaderboard-approval-detail-category):not(.eca-admin-leaderboard-approval-detail-point) { min-width: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 36px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-admin-leaderboard-approval-detail-category { width: fit-content; height: 36px; padding: 0 8px; border: 1px solid #E7E7E7; border-radius: 18px; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-admin-leaderboard-approval-detail-point { width: fit-content; min-width: 80px; height: 36px; padding: 0 8px; border-radius: 18px; background: #BDD8FF; color: var(--primary); font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-admin-leaderboard-approval-detail-actions { position: absolute; left: 83px; right: 83px; bottom: 133px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.eca-admin-leaderboard-approval-detail-button { height: 64px; border: 0; border-radius: 8px; font-size: 21px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-admin-leaderboard-approval-detail-button--approve { background: var(--primary); color: #fff; }
+.eca-admin-leaderboard-approval-detail-button--reject { background: #F5F5F5; color: #6B6B6B; }
+
 .eca-admin-leaderboard-approval-category--assignment { background: #FFEE9E; color: #E1A800; }
 .eca-admin-leaderboard-approval-category--attendance { background: #BDD8FF; color: var(--primary); }
-.eca-admin-leaderboard-approval-category--etc { background: #E7E7E7; color: #666; }
+.eca-admin-leaderboard-approval-category--etc { background: #E7E7E7; color: #6B6B6B; }
 .eca-admin-leaderboard-approval-detail-category--assignment { background: #FFEE9E; color: #E1A800; }
 .eca-admin-leaderboard-approval-detail-category--attendance { background: #BDD8FF; color: var(--primary); }
-.eca-admin-leaderboard-approval-detail-category--etc { background: #E7E7E7; color: #666; }
+.eca-admin-leaderboard-approval-detail-category--etc { background: #E7E7E7; color: #6B6B6B; }
 
 .eca-admin-leaderboard-missions-content { height: 100%; display: flex; flex-direction: column; min-height: 0; }
 .eca-admin-leaderboard-missions-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
@@ -236,7 +257,7 @@
 .eca-admin-leaderboard-add-mission-field--format { width: 360px; }
 .eca-admin-leaderboard-add-mission-field span { margin-left: 1px; color: #808080; font-size: 16px; font-weight: 700; line-height: 24px; }
 .eca-admin-leaderboard-add-mission-field input { width: 100%; height: 48px; padding: 0 18px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #000; font-size: 16px; font-weight: 500; font-family: inherit; outline: none; box-sizing: border-box; }
-.eca-admin-leaderboard-add-mission-field input::placeholder { color: #666; }
+.eca-admin-leaderboard-add-mission-field input::placeholder { color: #6B6B6B; }
 .eca-admin-leaderboard-add-mission-grid { margin-left: 20px; display: flex; align-items: flex-start; gap: 30px; }
 .eca-admin-leaderboard-add-mission-grid .eca-admin-leaderboard-add-mission-field { margin-left: 0; }
 .eca-admin-leaderboard-add-mission-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; }
@@ -249,9 +270,9 @@
 .eca-admin-leaderboard-custom-dropdown--open { z-index: 300; }
 .eca-admin-leaderboard-custom-dropdown--sort { --eca-dropdown-height: 36px; width: 120px; z-index: 120; }
 .eca-admin-leaderboard-custom-dropdown--sort.eca-admin-leaderboard-custom-dropdown--open { z-index: 700; }
-.eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-button { height: 36px; padding: 0 12px 0 14px; border-radius: 8px; color: #666; font-size: 14px; font-weight: 700; }
+.eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-button { height: 36px; padding: 0 12px 0 14px; border-radius: 8px; color: #6B6B6B; font-size: 14px; font-weight: 700; }
 .eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-menu { padding: 36px 0 6px; border-radius: 8px; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.18); }
-.eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-option { min-height: 34px; padding: 0 14px; color: #666; font-size: 13px; font-weight: 700; gap: 0; }
+.eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-option { min-height: 34px; padding: 0 14px; color: #6B6B6B; font-size: 13px; font-weight: 700; gap: 0; }
 .eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-option--selected { background: #F1F6FF; color: var(--primary); }
 .eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-option--selected:hover { background: #F1F6FF; }
 .eca-admin-leaderboard-custom-dropdown--sort .eca-admin-leaderboard-custom-dropdown-arrow { width: 7px; height: 7px; border-right: 2px solid #888; border-bottom: 2px solid #888; }

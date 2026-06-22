@@ -3,18 +3,18 @@
 
 .eca-student-mobile-leaderboard-title { margin: 0 0 64px; padding: 0; }
 .eca-student-mobile-leaderboard-title span { color: #808080; font-size: 16px; font-weight: 700; line-height: 20px; margin-left: 3px; }
-.eca-student-mobile-leaderboard-title h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1.15; letter-spacing: -0.4px; }
+.eca-student-mobile-leaderboard-title h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
 .eca-student-mobile-leaderboard-tab-section { display: flex; justify-content: center; margin-bottom: 21px; }
 .eca-student-mobile-leaderboard-tab-button { width: 40%; padding: 0 0 12px; border: 0; background: transparent; color: #0166FF; font-size: 18px; font-weight: 700; line-height: 22px; border-bottom: 3px solid #0166FF; }
 .eca-student-mobile-leaderboard-ranking-list { display: flex; flex-direction: column; gap: 10px; }
-.eca-student-mobile-leaderboard-ranking-card { display: grid; grid-template-columns: 40px minmax(0, 1fr) 52px 72px; align-items: center; width: 100%; min-height: 84px; padding: 14px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; box-sizing: border-box; text-align: left; cursor: pointer; }
-.eca-student-mobile-leaderboard-rank-badge { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; font-size: 18px; font-weight: 700; line-height: 1; }
+.eca-student-mobile-leaderboard-ranking-card { display: grid; grid-template-columns: 38px minmax(120px, 1fr) 56px 1fr; align-items: center; width: 100%; min-height: 64px; padding: 0 15px; border: 1px solid #E6E6E6; border-radius: 10px; background: #fff; box-sizing: border-box; text-align: left; cursor: pointer; }
+.eca-student-mobile-leaderboard-rank-badge { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 999px; font-size: 14px; font-weight: 700; line-height: 1; }
 .eca-student-mobile-leaderboard-rank-badge.top { background: #0166FF; color: #fff; }
 .eca-student-mobile-leaderboard-rank-badge.normal { background: #BDD8FF; color: #0166FF; }
-.eca-student-mobile-leaderboard-student-name { min-width: 0; padding-left: 10px; color: #000; font-size: 18px; font-weight: 700; line-height: 22px; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-student-mobile-leaderboard-score { color: #000; text-align: right; font-size: 22px; font-weight: 700; line-height: 1; letter-spacing: -0.4px; }
+.eca-student-mobile-leaderboard-student-name { min-width: 0; color: #000; font-size: 16px; font-weight: 700; line-height: 18px; white-space: break-spaces; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-mobile-leaderboard-score { color: #000; text-align: right; font-size: 22px; font-weight: 700; line-height: 1; }
 .eca-student-mobile-leaderboard-trend { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 16px; font-weight: 700; line-height: 1; }
-.eca-student-mobile-leaderboard-trend.empty { min-height: 18px; }
+.eca-student-mobile-leaderboard-trend.empty { min-height: 18px; margin: 0; }
 .eca-student-mobile-leaderboard-trend.up { color: #FF1010; }
 .eca-student-mobile-leaderboard-trend.down { color: #0166FF; }
 .eca-student-mobile-leaderboard-trend-icon { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; }

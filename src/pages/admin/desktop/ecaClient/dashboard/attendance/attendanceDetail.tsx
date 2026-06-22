@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { deleteAttendanceEvent, endAttendanceEventNow, getAttendanceEventDetail, startAttendanceEventNow, updateAttendanceRecordStatus, type AttendanceEventDetailResponse, type AttendanceEventParticipantRecordResponse, type AttendanceStatus, } from "../../../../../../api/ea";
 import { formatServerKstDateTimeDateLabelForUser, formatServerKstDateTimeWithWeekdayForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./attendanceDetail.css";
@@ -7,15 +9,17 @@ import "./attendanceDetail.css";
 type ViewMode = "list" | "gallery";
 type DetailSort = "nameAsc" | "status";
 
-const statusOptions: { label: string; value: AttendanceStatus }[] = [
-    { label: "출석", value: "PRESENT" },
-    { label: "지각", value: "LATE" },
-    { label: "결석", value: "ABSENT" },
+const ATTENDANCE_DETAIL_T = "ecaAdmin.attendanceDetailPage";
+
+const statusOptions: { labelKey: "present" | "late" | "absent"; value: AttendanceStatus }[] = [
+    { labelKey: "present", value: "PRESENT" },
+    { labelKey: "late", value: "LATE" },
+    { labelKey: "absent", value: "ABSENT" },
 ];
 
-const sortOptions: { label: string; value: DetailSort }[] = [
-    { label: "이름순", value: "nameAsc" },
-    { label: "출석 상태순", value: "status" },
+const sortOptions: { labelKey: "nameAsc" | "status"; value: DetailSort }[] = [
+    { labelKey: "nameAsc", value: "nameAsc" },
+    { labelKey: "status", value: "status" },
 ];
 
 function BackIcon(): React.ReactElement {
@@ -141,8 +145,8 @@ function getOriginalEditableStatus(
     return normalizeEditableStatus(record.status);
 }
 
-function getEventTypeLabel(type: AttendanceEventDetailResponse["type"]): string {
-    return type === "CLASS_START" ? "Start" : "End";
+function getEventTypeLabel(type: AttendanceEventDetailResponse["type"], t: TFunction): string {
+    return type === "CLASS_START" ? t(`${ATTENDANCE_DETAIL_T}.eventType.start`) : t(`${ATTENDANCE_DETAIL_T}.eventType.end`);
 }
 
 function getDetailDateLabel(value?: string | null): string {
@@ -186,10 +190,7 @@ function hasSelfie(record: AttendanceEventParticipantRecordResponse): boolean {
     return Boolean(record.selfieUrl?.trim());
 }
 
-function getTimeCardLabel(
-    detail: AttendanceEventDetailResponse | null,
-    now: Date
-): string {
+function getTimeCardLabel(detail: AttendanceEventDetailResponse | null, now: Date, t: TFunction): string {
     if (!detail) {
         return "-";
     }
@@ -202,15 +203,15 @@ function getTimeCardLabel(
     }
 
     if (progress === "SCHEDULED") {
-        return "Not Started";
+        return t(`${ATTENDANCE_DETAIL_T}.notStarted`);
     }
 
     if (progress === "CLOSED") {
-        return "Ended";
+        return t(`${ATTENDANCE_DETAIL_T}.ended`);
     }
 
     if (now.getTime() < reference.getTime()) {
-        return "Not Started";
+        return t(`${ATTENDANCE_DETAIL_T}.notStarted`);
     }
 
     const fullCreditBoundaryTime = getFullCreditBoundaryTime(detail);
@@ -271,10 +272,11 @@ function getTimeCardClassName(
 
 export default function EcaDashboardAttendanceDetail(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { externalActivityId, eventId } = useParams<{ externalActivityId?: string; eventId?: string }>();
     const [detail, setDetail] = React.useState<AttendanceEventDetailResponse | null>(null);
     const [viewMode, setViewMode] = React.useState<ViewMode>("list");
-    const [sort, setSort] = React.useState<DetailSort>("nameAsc");
+    const [sort, /*setSort*/] = React.useState<DetailSort>("nameAsc");
     const [search, setSearch] = React.useState("");
     const [searchDraft, setSearchDraft] = React.useState("");
     const [draftStatuses, setDraftStatuses] = React.useState<Record<number, AttendanceStatus>>({});
@@ -544,7 +546,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             setSuccessOpen(true);
         } catch (error) {
             console.error(error);
-            alert("출석 상태를 저장하지 못했습니다.");
+            alert(t(`${ATTENDANCE_DETAIL_T}.saveStatusFailed`));
         } finally {
             setSaving(false);
         }
@@ -569,7 +571,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             setSuccessOpen(true);
         } catch (error) {
             console.error(error);
-            alert("출석 상태를 저장하지 못했습니다.");
+            alert(t(`${ATTENDANCE_DETAIL_T}.saveStatusFailed`));
         } finally {
             setSaving(false);
         }
@@ -587,7 +589,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             await loadDetail();
         } catch (error) {
             console.error(error);
-            alert("출석 이벤트를 시작하지 못했습니다.");
+            alert(t(`${ATTENDANCE_DETAIL_T}.startEventFailed`));
         } finally {
             setSaving(false);
         }
@@ -605,7 +607,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             await loadDetail();
         } catch (error) {
             console.error(error);
-            alert("출석 이벤트를 종료하지 못했습니다.");
+            alert(t(`${ATTENDANCE_DETAIL_T}.endEventFailed`));
         } finally {
             setSaving(false);
         }
@@ -616,7 +618,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             return;
         }
 
-        const confirmed = window.confirm("이 출석 이벤트를 삭제하시겠습니까? 삭제된 출석 기록과 사진은 복구할 수 없습니다.");
+        const confirmed = window.confirm(t(`${ATTENDANCE_DETAIL_T}.confirmDeleteAttendanceEvent`));
 
         if (!confirmed) {
             return;
@@ -635,7 +637,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             }
         } catch (error) {
             console.error(error);
-            alert("출석 이벤트를 삭제하지 못했습니다.");
+            alert(t(`${ATTENDANCE_DETAIL_T}.deleteAttendanceEventFailed`));
         } finally {
             setSaving(false);
         }
@@ -653,7 +655,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
         <>
             <div className={leaving ? "eca-admin-attendance-detail-page eca-admin-attendance-detail-page--leaving" : "eca-admin-attendance-detail-page"}>
                 <div className="eca-admin-attendance-detail-inner">
-                    <h1 className="eca-admin-attendance-detail-title">Attendance</h1>
+                    <h1 className="eca-admin-attendance-detail-title">{t(`${ATTENDANCE_DETAIL_T}.title`)}</h1>
 
                     <section className="eca-admin-attendance-detail-card">
                         <button type="button" className="eca-admin-attendance-detail-back-button" onClick={handleBack}>
@@ -664,7 +666,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                             <div className="eca-admin-attendance-detail-heading-title-group">
                                 <h2 className="eca-admin-attendance-detail-event-title">
                                     <span>{detail ? getDetailDateLabel(detail.scoreReferenceAt) : "-"}</span>
-                                    <b>{detail ? getEventTypeLabel(detail.type) : ""}</b>
+                                    <b>{detail ? getEventTypeLabel(detail.type, t) : ""}</b>
                                 </h2>
 
                                 <div className="eca-admin-attendance-detail-menu-wrap">
@@ -674,13 +676,13 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
 
                                     {menuOpen ? (
                                         <>
-                                            <button type="button" className="eca-admin-attendance-detail-menu-backdrop" aria-label="close menu" onClick={() => setMenuOpen(false)} />
+                                            <button type="button" className="eca-admin-attendance-detail-menu-backdrop" aria-label={t(`${ATTENDANCE_DETAIL_T}.closeMenu`)} onClick={() => setMenuOpen(false)} />
                                             <div className="eca-admin-attendance-detail-small-menu">
                                                 <button type="button" className="eca-admin-attendance-detail-small-menu-item eca-admin-attendance-detail-small-menu-item--delete" onClick={handleDeleteAttendanceEvent} disabled={saving}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                         <path d="M5 2C5 1.46957 5.21071 0.960859 5.58579 0.585786C5.96086 0.210714 6.46957 0 7 0H13C13.5304 0 14.0391 0.210714 14.4142 0.585786C14.7893 0.960859 15 1.46957 15 2V4H19C19.2652 4 19.5196 4.10536 19.7071 4.29289C19.8946 4.48043 20 4.73478 20 5C20 5.26522 19.8946 5.51957 19.7071 5.70711C19.5196 5.89464 19.2652 6 19 6H17.931L17.064 18.142C17.0281 18.6466 16.8023 19.1188 16.4321 19.4636C16.0619 19.8083 15.5749 20 15.069 20H4.93C4.42414 20 3.93707 19.8083 3.56688 19.4636C3.1967 19.1188 2.97092 18.6466 2.935 18.142L2.07 6H1C0.734784 6 0.48043 5.89464 0.292893 5.70711C0.105357 5.51957 0 5.26522 0 5C0 4.73478 0.105357 4.48043 0.292893 4.29289C0.48043 4.10536 0.734784 4 1 4H5V2ZM7 4H13V2H7V4ZM4.074 6L4.931 18H15.07L15.927 6H4.074ZM8 8C8.26522 8 8.51957 8.10536 8.70711 8.29289C8.89464 8.48043 9 8.73478 9 9V15C9 15.2652 8.89464 15.5196 8.70711 15.7071C8.51957 15.8946 8.26522 16 8 16C7.73478 16 7.48043 15.8946 7.29289 15.7071C7.10536 15.5196 7 15.2652 7 15V9C7 8.73478 7.10536 8.48043 7.29289 8.29289C7.48043 8.10536 7.73478 8 8 8ZM12 8C12.2652 8 12.5196 8.10536 12.7071 8.29289C12.8946 8.48043 13 8.73478 13 9V15C13 15.2652 12.8946 15.5196 12.7071 15.7071C12.5196 15.8946 12.2652 16 12 16C11.7348 16 11.4804 15.8946 11.2929 15.7071C11.1054 15.5196 11 15.2652 11 15V9C11 8.73478 11.1054 8.48043 11.2929 8.29289C11.4804 8.10536 11.7348 8 12 8Z" fill="#EA5345"/>
                                                     </svg>
-                                                    delete
+                                                    {t(`${ATTENDANCE_DETAIL_T}.deleteAction`)}
                                                 </button>
                                             </div>
                                         </>
@@ -689,7 +691,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                             </div>
 
                             <button type="button" className="eca-admin-attendance-detail-view-toggle" onClick={() => setViewMode((prev) => prev === "list" ? "gallery" : "list")}>
-                                {viewMode === "list" ? "View as Gallery" : "View as List"}
+                                {viewMode === "list" ? t(`${ATTENDANCE_DETAIL_T}.viewAsGallery`) : t(`${ATTENDANCE_DETAIL_T}.viewAsList`)}
                             </button>
                         </div>
 
@@ -698,35 +700,35 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                                 <>
                                     <article className="eca-admin-attendance-detail-kpi-card eca-admin-attendance-detail-kpi-card--time">
                                         <div className="eca-admin-attendance-detail-kpi-head">
-                                            <span>{detailProgress === "OPEN" ? "Time Left" : "Time"}</span>
+                                            <span>{detailProgress === "OPEN" ? t(`${ATTENDANCE_DETAIL_T}.timeLeft`) : t(`${ATTENDANCE_DETAIL_T}.time`)}</span>
 
                                             {showManualWindowButtons && detailProgress === "SCHEDULED" && detail ? (
                                                 <button type="button" onClick={handleStartNow} disabled={saving}>
-                                                    Start Now
+                                                    {t(`${ATTENDANCE_DETAIL_T}.startNow`)}
                                                 </button>
                                             ) : null}
 
                                             {showManualWindowButtons && detailProgress === "OPEN" ? (
                                                 <button type="button" onClick={handleEndNow} disabled={saving}>
-                                                    End Now
+                                                    {t(`${ATTENDANCE_DETAIL_T}.endNow`)}
                                                 </button>
                                             ) : null}
                                         </div>
 
                                         <strong className={getTimeCardClassName(detail, detailProgress, now)}>
-                                            {getTimeCardLabel(detail, now)}
+                                            {getTimeCardLabel(detail, now, t)}
                                         </strong>
                                     </article>
 
                                     <article className="eca-admin-attendance-detail-kpi-card">
-                                        <span>Present</span>
+                                        <span>{t(`${ATTENDANCE_DETAIL_T}.status.present`)}</span>
                                         <strong className={isNotStartedKpi ? "eca-admin-attendance-detail-kpi-value--not-started" : ""}>
                                             {isNotStartedKpi ? "Not Started" : counts.present}
                                         </strong>
                                     </article>
 
                                     <article className="eca-admin-attendance-detail-kpi-card">
-                                        <span>Absent</span>
+                                        <span>{t(`${ATTENDANCE_DETAIL_T}.status.absent`)}</span>
                                         <strong className={isNotStartedKpi ? "eca-admin-attendance-detail-kpi-value--not-started" : ""}>
                                             {isNotStartedKpi ? "Not Started" : counts.absent}
                                         </strong>
@@ -735,17 +737,17 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                             ) : (
                                 <>
                                     <article className="eca-admin-attendance-detail-kpi-card">
-                                        <span>Present</span>
+                                        <span>{t(`${ATTENDANCE_DETAIL_T}.status.present`)}</span>
                                         <strong>{counts.present}</strong>
                                     </article>
 
                                     <article className="eca-admin-attendance-detail-kpi-card">
-                                        <span>Late</span>
+                                        <span>{t(`${ATTENDANCE_DETAIL_T}.status.late`)}</span>
                                         <strong>{counts.late}</strong>
                                     </article>
 
                                     <article className="eca-admin-attendance-detail-kpi-card">
-                                        <span>Absent</span>
+                                        <span>{t(`${ATTENDANCE_DETAIL_T}.status.absent`)}</span>
                                         <strong>{counts.absent}</strong>
                                     </article>
                                 </>
@@ -753,7 +755,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                         </section>
 
                         <div className="eca-admin-attendance-detail-participants-header">
-                            <h3>Participants ({records.length})</h3>
+                            <h3>{t(`${ATTENDANCE_DETAIL_T}.participantsTitle`, { count: records.length })}</h3>
 
                             <div className="eca-admin-attendance-detail-participants-actions">
                                 <div className="eca-admin-attendance-detail-sort-wrap">
@@ -766,16 +768,8 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                                             <button type="button" className="eca-admin-attendance-detail-menu-backdrop" aria-label="close sort" onClick={() => setSortOpen(false)} />
                                             <div className="eca-admin-attendance-detail-sort-menu">
                                                 {sortOptions.map((option) => (
-                                                    <button
-                                                        key={option.value}
-                                                        type="button"
-                                                        className={sort === option.value ? "eca-admin-attendance-detail-sort-menu-item eca-admin-attendance-detail-sort-menu-item--active" : "eca-admin-attendance-detail-sort-menu-item"}
-                                                        onClick={() => {
-                                                            setSort(option.value);
-                                                            setSortOpen(false);
-                                                        }}
-                                                    >
-                                                        {option.label}
+                                                    <button type="button" className="eca-admin-attendance-detail-icon-button" onClick={() => setSortOpen((prev) => !prev)} aria-label={t(`${ATTENDANCE_DETAIL_T}.sortAria`)}>
+                                                        {t(`${ATTENDANCE_DETAIL_T}.sort.${option.labelKey}`)}
                                                     </button>
                                                 ))}
                                             </div>
@@ -788,7 +782,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                                 </button>
 
                                 <div className="eca-admin-attendance-detail-search-wrap" ref={searchWrapRef}>
-                                    <button type="button" className="eca-admin-attendance-detail-icon-button" onClick={() => { setSearchDraft(search); setSearchOpen((prev) => !prev); }}>
+                                    <button type="button" className="eca-admin-attendance-detail-icon-button" onClick={() => { setSearchDraft(search); setSearchOpen((prev) => !prev); }} aria-label={t(`${ATTENDANCE_DETAIL_T}.searchAria`)}>
                                         <SearchIcon />
                                     </button>
 
@@ -797,7 +791,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                                             <input
                                                 autoFocus
                                                 value={searchDraft}
-                                                placeholder="참여자 검색"
+                                                placeholder={t(`${ATTENDANCE_DETAIL_T}.searchPlaceholder`)}
                                                 onChange={(event) => {
                                                     const value = event.target.value;
 
@@ -823,13 +817,13 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
 
                         {search ? (
                             <div className="eca-admin-attendance-detail-search-chip">
-                                <span>검색: {search}</span>
-                                <button type="button" onClick={() => setSearch("")}>Clear</button>
+                                <span>{t(`${ATTENDANCE_DETAIL_T}.searchChip`, { keyword: search })}</span>
+                                <button type="button" onClick={() => setSearch("")}>{t(`${ATTENDANCE_DETAIL_T}.clear`)}</button>
                             </div>
                         ) : null}
 
                         {loading ? (
-                            <p className="eca-admin-attendance-detail-empty">Loading...</p>
+                            <p className="eca-admin-attendance-detail-empty">{t(`${ATTENDANCE_DETAIL_T}.loading`)}</p>
                         ) : viewMode === "list" ? (
                             <div className="eca-admin-attendance-detail-list">
                                 {visibleRecords.map((record) => {
@@ -854,12 +848,12 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                                                         className={draftStatus === option.value ? `eca-admin-attendance-detail-status-pill eca-admin-attendance-detail-status-pill--${option.value.toLowerCase()} eca-admin-attendance-detail-status-pill--active` : "eca-admin-attendance-detail-status-pill"}
                                                         onClick={() => handleChangeDraftStatus(record.recordId, option.value)}
                                                     >
-                                                        {option.label}
+                                                        {t(`${ATTENDANCE_DETAIL_T}.status.${option.labelKey}`)}
                                                     </button>
                                                 ))}
                                             </div>
 
-                                            <button type="button" className="eca-admin-attendance-detail-chat-button" title="채팅 기능은 추후 연결 예정입니다." disabled>
+                                            <button type="button" className="eca-admin-attendance-detail-chat-button" title={t(`${ATTENDANCE_DETAIL_T}.chatDisabledTitle`)} disabled>
                                                 <ChatIcon />
                                             </button>
                                         </div>
@@ -869,7 +863,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
                         ) : (
                             <div className="eca-admin-attendance-detail-gallery">
                                 {visibleGalleryRecords.length === 0 ? (
-                                    <p className="eca-admin-attendance-detail-empty">업로드된 출석 사진이 없습니다.</p>
+                                    <p className="eca-admin-attendance-detail-empty">{t(`${ATTENDANCE_DETAIL_T}.noGalleryImages`)}</p>
                                 ) : (
                                     visibleGalleryRecords.map((record) => (
                                         <button key={record.recordId} type="button" className="eca-admin-attendance-detail-gallery-card" onClick={() => handleOpenImageModal(record)}>
@@ -883,7 +877,7 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
 
                         {editMode ? (
                             <button type="button" className={hasChanges ? "eca-admin-attendance-detail-save-button eca-admin-attendance-detail-save-button--active" : "eca-admin-attendance-detail-save-button"} disabled={!hasChanges || saving} onClick={handleSaveListChanges}>
-                                Save
+                                {t(`${ATTENDANCE_DETAIL_T}.save`)}
                             </button>
                         ) : null}
                     </section>
@@ -893,14 +887,14 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             {selectedRecord ? (
                 <div className="eca-admin-attendance-detail-modal-backdrop" onMouseDown={() => setSelectedRecord(null)}>
                     <section className="eca-admin-attendance-detail-photo-modal" onMouseDown={(event) => event.stopPropagation()}>
-                        <button type="button" className="eca-admin-attendance-detail-photo-close" onClick={() => setSelectedRecord(null)}>
+                        <button type="button" className="eca-admin-attendance-detail-photo-close" onClick={() => setSelectedRecord(null)} aria-label={t(`${ATTENDANCE_DETAIL_T}.closePhoto`)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
                             </svg>
                         </button>
 
                         <div className="eca-admin-attendance-detail-photo-preview">
-                            {selectedRecord.selfieUrl ? <img src={selectedRecord.selfieUrl} alt={selectedRecord.name} /> : <span>No Image</span>}
+                            {selectedRecord.selfieUrl ? <img src={selectedRecord.selfieUrl} alt={selectedRecord.name} /> : <span>{t(`${ATTENDANCE_DETAIL_T}.noImage`)}</span>}
                         </div>
 
                         <div className="eca-admin-attendance-detail-photo-info">
@@ -909,20 +903,15 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
 
                             <div className="eca-admin-attendance-detail-photo-status-list">
                                 {statusOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        className={selectedStatus === option.value ? "eca-admin-attendance-detail-photo-status eca-admin-attendance-detail-photo-status--active" : "eca-admin-attendance-detail-photo-status"}
-                                        onClick={() => setSelectedStatus(option.value)}
-                                    >
+                                    <button key={option.value} type="button" className={selectedStatus === option.value ? "eca-admin-attendance-detail-photo-status eca-admin-attendance-detail-photo-status--active" : "eca-admin-attendance-detail-photo-status"} onClick={() => setSelectedStatus(option.value)} >
                                         <span />
-                                        <b>{option.label}</b>
+                                        <b>{t(`${ATTENDANCE_DETAIL_T}.status.${option.labelKey}`)}</b>
                                     </button>
                                 ))}
                             </div>
 
                             <button type="button" className="eca-admin-attendance-detail-photo-save" onClick={handleSaveSelectedRecord} disabled={saving}>
-                                Save
+                                {t(`${ATTENDANCE_DETAIL_T}.save`)}
                             </button>
                         </div>
                     </section>
@@ -932,8 +921,8 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             {successOpen ? (
                 <div className="eca-admin-attendance-detail-modal-backdrop" onMouseDown={() => setSuccessOpen(false)}>
                     <section className="eca-admin-attendance-detail-success-modal" onMouseDown={(event) => event.stopPropagation()}>
-                        <h2>Saved!</h2>
-                        <button type="button" onClick={() => setSuccessOpen(false)}>OK</button>
+                        <h2>{t(`${ATTENDANCE_DETAIL_T}.saved`)}</h2>
+                        <button type="button" onClick={() => setSuccessOpen(false)}>{t(`${ATTENDANCE_DETAIL_T}.ok`)}</button>
                     </section>
                 </div>
             ) : null}
@@ -941,8 +930,8 @@ export default function EcaDashboardAttendanceDetail(): React.ReactElement {
             {closedNoticeOpen ? (
                 <div className="eca-admin-attendance-detail-modal-backdrop" onMouseDown={handleCloseClosedNotice}>
                     <section className="eca-admin-attendance-detail-success-modal" onMouseDown={(event) => event.stopPropagation()}>
-                        <h2>Attendance has closed</h2>
-                        <button type="button" onClick={handleCloseClosedNotice}>OK</button>
+                        <h2>{t(`${ATTENDANCE_DETAIL_T}.attendanceClosed`)}</h2>
+                        <button type="button" onClick={handleCloseClosedNotice}>{t(`${ATTENDANCE_DETAIL_T}.ok`)}</button>
                     </section>
                 </div>
             ) : null}

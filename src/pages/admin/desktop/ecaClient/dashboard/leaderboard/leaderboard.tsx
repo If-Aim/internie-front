@@ -1,8 +1,9 @@
 import React from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { approveLeaderboardSubmission, createLeaderboardMission, deleteLeaderboardCompletedMission, getLeaderboard, getLeaderboardApprovals, getLeaderboardMissions, getLeaderboardStudentCompletedMissions, rejectLeaderboardSubmission, updateLeaderboardMission, } from "../../../../../../api/ea";
+import { approveLeaderboardSubmission, createLeaderboardMission, deleteLeaderboardCompletedMission, downloadLeaderboardEvidenceFile, getLeaderboard, getLeaderboardApprovals, getLeaderboardMissions, getLeaderboardStudentCompletedMissions, rejectLeaderboardSubmission, updateLeaderboardMission, } from "../../../../../../api/ea";
 import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, LeaderboardRankingResponse, LeaderboardSubmissionResponse, } from "../../../../../../api/ea"; 
+import { getFileIconByExtension } from "../../../../../student/desktop/eca/dashboard/assignment/fileIcons";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./leaderboard.css";
 
@@ -15,6 +16,7 @@ type MissionCategory = "Elicit" | "Discover" | "Insight" | "Synthesize" | "Own" 
 type ApprovalCategory = MissionCategory | "Etc";
 type LeaderboardDropdownId = "rankingSort" | "approvalSort" | "missionCategory" | "missionEvidenceType" | null;
 type LeaderboardSearchTarget = "ranking" | "approvals" | "missions" | "completedMissions" | null;
+type ClosingDetailPanel = "ranking" | "approval" | null;
 type ConcreteLeaderboardSearchTarget = Exclude<LeaderboardSearchTarget, null>;
 type ConcreteLeaderboardDropdownId = Exclude<LeaderboardDropdownId, null>;
 type CustomDropdownOption = {
@@ -32,6 +34,8 @@ type RankingRow = {
     id: number;
     studentId: number;
     name: string;
+    nickname?: string | null;
+    profileImage?: string | null;
     totalScore: number;
     trendDirection: TrendDirection;
     trendAmount: number;
@@ -43,6 +47,7 @@ type ApprovalRow = {
     studentId: number;
     name: string;
     nickname: string;
+    profileImage?: string | null;
     submittedAt: string;
     submittedAtTime: number;
     category: ApprovalCategory;
@@ -87,6 +92,7 @@ type MissionForm = {
     evidenceType: MissionEvidenceFormat | "";
 };
 
+const detailPanelAnimationMs = 220;
 const missionCategories: MissionCategory[] = ["Elicit", "Discover", "Insight", "Synthesize", "Own", "Nurture"];
 
 const missionCategoryLabels: Record<MissionCategory, string> = {
@@ -116,7 +122,7 @@ const rankingSortOptions: CustomDropdownOption[] = [
 const approvalSortOptions: CustomDropdownOption[] = [
     { value: "alphabetical", label: "Alphabetical" },
     { value: "oldest", label: "Oldest" },
-    { value: "newest", label: "Newest" },
+    { value: "latest", label: "Newest" },
 ];
 
 const approvalFilterOptions: CustomDropdownOption[] = [
@@ -226,6 +232,8 @@ function mapRankingRow(row: LeaderboardRankingResponse): RankingRow {
         id: row.studentId,
         studentId: row.studentId,
         name: row.studentName,
+        nickname: row.studentNickname ?? null,
+        profileImage: row.profileImage,
         totalScore: row.totalScore,
         trendDirection: toUiTrendDirection(row.trendDirection),
         trendAmount: row.trendValue ?? 0,
@@ -234,6 +242,7 @@ function mapRankingRow(row: LeaderboardRankingResponse): RankingRow {
 
 type LeaderboardSubmissionRow = LeaderboardSubmissionResponse & {
     studentNickname?: string | null;
+    profileImage?: string | null;
     category?: LeaderboardMissionCategory | null;
     score?: number | null;
     approvedPoint?: number | null;
@@ -250,6 +259,7 @@ function mapApprovalRow(row: LeaderboardSubmissionResponse): ApprovalRow {
         studentId: row.studentId,
         name: row.studentName,
         nickname: submission.studentNickname ?? "",
+        profileImage: submission.profileImage ?? null,
         submittedAt: formatDateTime(row.submittedAt),
         submittedAtTime: toDateTimeValue(row.submittedAt),
         category: toUiApprovalCategory(submission.category),
@@ -274,8 +284,199 @@ function mapMissionRule(row: LeaderboardMissionResponse): MissionRule {
     };
 }
 
+const defaultProfileImage = "/internie_mascot_normal.png";
+
+function renderProfileImage(profileImage: string | null | undefined, className: string, name: string): React.ReactElement {
+    const imageUrl = profileImage?.trim() || defaultProfileImage;
+
+    return (
+        <img
+            className={className}
+            src={imageUrl}
+            alt={`${name} profile`}
+            onError={(event) => {
+                if (event.currentTarget.src.includes(defaultProfileImage)) return;
+
+                event.currentTarget.src = defaultProfileImage;
+            }}
+        />
+    );
+}
+
+function getEvidenceFileName(url: string): string {
+    try {
+        const parsedUrl = new URL(url, window.location.origin);
+        const pathName = decodeURIComponent(parsedUrl.pathname);
+        const fileName = pathName.split("/").filter(Boolean).pop();
+
+        return fileName || "evidence-file";
+    } catch {
+        const cleanUrl = decodeURIComponent(url.split("?")[0].split("#")[0]);
+        const fileName = cleanUrl.split("/").filter(Boolean).pop();
+
+        return fileName || "evidence-file";
+    }
+}
+
+function getEvidenceExtension(url: string): string {
+    const fileName = getEvidenceFileName(url);
+    const extension = fileName.split(".").pop();
+
+    return extension && extension !== fileName ? extension.toLowerCase() : "file";
+}
+
+function isImageEvidenceUrl(url: string): boolean {
+    const extension = getEvidenceExtension(url);
+
+    return ["jpg", "jpeg", "png", "gif", "webp", "svg", "tiff"].includes(extension);
+}
+
+function isLinkEvidenceUrl(url: string): boolean {
+    const extension = getEvidenceExtension(url);
+
+    if (extension !== "file") {
+        return false;
+    }
+
+    try {
+        const parsedUrl = new URL(url);
+        const host = parsedUrl.hostname.toLowerCase();
+
+        return (
+            host.includes("youtube.com") ||
+            host.includes("youtu.be") ||
+            host.includes("drive.google.com") ||
+            host.includes("docs.google.com") ||
+            host.includes("notion.site") ||
+            host.includes("figma.com") ||
+            host.includes("github.com") ||
+            host.includes("linkedin.com") ||
+            url.startsWith("http://") ||
+            url.startsWith("https://")
+        );
+    } catch {
+        return url.startsWith("http://") || url.startsWith("https://");
+    }
+}
+
+function getDisplayLinkText(url: string): string {
+    try {
+        const parsedUrl = new URL(url);
+
+        return parsedUrl.hostname.replace(/^www\./, "");
+    } catch {
+        return "Link";
+    }
+}
+
+function renderLinkIcon(): React.ReactElement {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M10 13.5L14 9.5M8.5 10.5L7.25 11.75C5.86929 13.1307 5.86929 15.3693 7.25 16.75C8.63071 18.1307 10.8693 18.1307 12.25 16.75L13.5 15.5M15.5 13.5L16.75 12.25C18.1307 10.8693 18.1307 8.63071 16.75 7.25C15.3693 5.86929 13.1307 5.86929 11.75 7.25L10.5 8.5" stroke="#3873FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+    );
+}
+
+async function downloadEvidenceFile(externalActivityId: number, submissionId: number, url: string): Promise<void> {
+    try {
+        await downloadLeaderboardEvidenceFile(
+            externalActivityId,
+            submissionId,
+            getEvidenceFileName(url)
+        );
+    } catch (error) {
+        console.error("downloadEvidenceFile error", error);
+        window.alert("파일 다운로드에 실패했습니다.");
+    }
+}
+
+function getEvidenceClassName(classPrefix: "approval" | "mission-modal", type: "img" | "placeholder" | "file" | "link"): string {
+    if (classPrefix === "approval") {
+        return `eca-admin-leaderboard-approval-evidence-${type}`;
+    }
+
+    return `eca-admin-leaderboard-mission-modal-evidence-${type}`;
+}
+
+function renderEvidenceSlot(
+    url: string,
+    index: number,
+    classPrefix: "approval" | "mission-modal",
+    externalActivityId: number,
+    submissionId: number
+): React.ReactElement {
+    if (!url) {
+        return (
+            <span
+                className={getEvidenceClassName(classPrefix, "placeholder")}
+                aria-hidden="true"
+                key={`${classPrefix}-placeholder-${index}`}
+            />
+        );
+    }
+
+    if (isImageEvidenceUrl(url)) {
+        return (
+            <img
+                className={getEvidenceClassName(classPrefix, "img")}
+                src={url}
+                alt={`${classPrefix} evidence ${index + 1}`}
+                key={`${url}-${index}`}
+            />
+        );
+    }
+
+    if (isLinkEvidenceUrl(url)) {
+        return (
+            <a
+                className={getEvidenceClassName(classPrefix, "link")}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                key={`${url}-${index}`}
+                title={url}
+            >
+                {renderLinkIcon()}
+                <span>{getDisplayLinkText(url)}</span>
+            </a>
+        );
+    }
+
+    const extension = getEvidenceExtension(url);
+    const fileName = getEvidenceFileName(url);
+
+    return (
+        <button
+            type="button"
+            className={getEvidenceClassName(classPrefix, "file")}
+            key={`${url}-${index}`}
+            onClick={() => void downloadEvidenceFile(externalActivityId, submissionId, url)}
+            title={fileName}
+            aria-label={`download ${fileName}`}
+        >
+            {getFileIconByExtension(extension)}
+        </button>
+    );
+}
+
 function formatScore(score: number): string {
     return String(score);
+}
+
+function formatOrdinalPlace(rank: number): string {
+    if (rank <= 0) return "-";
+
+    const lastTwoDigits = rank % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return `${rank}th Place`;
+
+    const lastDigit = rank % 10;
+
+    if (lastDigit === 1) return `${rank}st Place`;
+    if (lastDigit === 2) return `${rank}nd Place`;
+    if (lastDigit === 3) return `${rank}rd Place`;
+
+    return `${rank}th Place`;
 }
 
 function getTabClassName(current: LeaderboardTab, active: LeaderboardTab): string {
@@ -302,7 +503,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     const [activeTab, setActiveTab] = React.useState<LeaderboardTab>("ranking");
     const [sort, setSort] = React.useState<LeaderboardSort>("highest");
     const [approvalSort, setApprovalSort] = React.useState<ApprovalSort>("alphabetical");
-    const [approvalFilter, setApprovalFilter] = React.useState<ApprovalFilter>("pending");
+    const [approvalFilter, setApprovalFilter] = React.useState<ApprovalFilter>("all");
     const [approvalFilterOpen, setApprovalFilterOpen] = React.useState(false);
     // const [menuOpen, setMenuOpen] = React.useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -327,7 +528,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         evidence: "",
         evidenceType: "",
     });
-    
+    const [closingDetailPanel, setClosingDetailPanel] = React.useState<ClosingDetailPanel>(null);
+    const detailCloseTimerRef = React.useRef<number | null>(null);
+
     const [openSearch, setOpenSearch] = React.useState<LeaderboardSearchTarget>(null);
     const [rankingSearch, setRankingSearch] = React.useState("");
     const [rankingSearchDraft, setRankingSearchDraft] = React.useState("");
@@ -457,16 +660,22 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                 if (!alive) return;
 
-                setCompletedMissions(data.missions.map((mission) => ({
-                    id: mission.submissionId,
-                    submissionId: mission.submissionId,
-                    missionId: mission.missionId,
-                    title: mission.missionName,
-                    category: toUiMissionCategory(mission.category),
-                    points: mission.score,
-                    submittedAt: formatDateTime(mission.completedAt),
-                    evidenceUrls: [],
-                })));
+                setCompletedMissions(data.missions.map((mission) => {
+                    const evidenceUrl = typeof mission.evidenceUrl === "string" && mission.evidenceUrl.trim()
+                        ? mission.evidenceUrl.trim()
+                        : "";
+
+                    return {
+                        id: mission.submissionId,
+                        submissionId: mission.submissionId,
+                        missionId: mission.missionId,
+                        title: mission.missionName,
+                        category: toUiMissionCategory(mission.category),
+                        points: mission.score,
+                        submittedAt: formatDateTime(mission.completedAt),
+                        evidenceUrls: evidenceUrl ? [evidenceUrl] : [],
+                    };
+                }));
             } catch {
                 if (alive) {
                     setCompletedMissions([]);
@@ -480,6 +689,14 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             alive = false;
         };
     }, [activityId, selectedRankingRow]);
+
+    React.useEffect(() => {
+        return () => {
+            if (detailCloseTimerRef.current !== null) {
+                window.clearTimeout(detailCloseTimerRef.current);
+            }
+        };
+    }, []);
 
     React.useEffect(() => {
         if (!openDropdown) return;
@@ -648,6 +865,49 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     //     setMenuOpen(false);
     //     setDeleteModalOpen(true);
     // }
+
+    function clearDetailCloseTimer(): void {
+        if (detailCloseTimerRef.current === null) return;
+
+        window.clearTimeout(detailCloseTimerRef.current);
+        detailCloseTimerRef.current = null;
+    }
+
+    function closeRankingDetailPanel(): void {
+        if (!selectedRankingRow || closingDetailPanel) return;
+
+        clearDetailCloseTimer();
+        setOpenSearch(null);
+        setClosingDetailPanel("ranking");
+
+        detailCloseTimerRef.current = window.setTimeout(() => {
+            setSelectedRankingRow(null);
+            setCompletedMissions([]);
+            setCompletedMissionSearch("");
+            setCompletedMissionSearchDraft("");
+            setClosingDetailPanel(null);
+            detailCloseTimerRef.current = null;
+        }, detailPanelAnimationMs);
+    }
+
+    function closeApprovalDetailPanel(): void {
+        if (!selectedApprovalRow || closingDetailPanel) return;
+
+        clearDetailCloseTimer();
+        setOpenSearch(null);
+        setClosingDetailPanel("approval");
+
+        detailCloseTimerRef.current = window.setTimeout(() => {
+            setSelectedApprovalRow(null);
+            setClosingDetailPanel(null);
+            detailCloseTimerRef.current = null;
+        }, detailPanelAnimationMs);
+    }
+
+    function cancelDetailPanelClosing(): void {
+        clearDetailCloseTimer();
+        setClosingDetailPanel(null);
+    }
 
     function handleConfirmDelete(): void {
         setDeleteModalOpen(false);
@@ -1110,14 +1370,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         const trendClassName = row.trendDirection === "up" ? "eca-admin-leaderboard-trend eca-admin-leaderboard-trend--up" : "eca-admin-leaderboard-trend eca-admin-leaderboard-trend--down";
 
                         return (
-                            <button
-                                type="button"
-                                className={selectedRankingRow?.id === row.id ? "eca-admin-leaderboard-row eca-admin-leaderboard-row--selected" : "eca-admin-leaderboard-row"}
-                                key={row.id}
-                                onClick={() => setSelectedRankingRow(row)}
-                            >
+                            <button type="button" className={selectedRankingRow?.id === row.id ? "eca-admin-leaderboard-row eca-admin-leaderboard-row--selected" : "eca-admin-leaderboard-row"} key={row.id} onClick={() => { cancelDetailPanelClosing(); setSelectedApprovalRow(null); setSelectedRankingRow(row); }}>
                                 <span className={isTopRank ? "eca-admin-leaderboard-rank-badge eca-admin-leaderboard-rank-badge--top" : "eca-admin-leaderboard-rank-badge"}>{rank}</span>
-                                <span className="eca-admin-leaderboard-user-avatar" aria-hidden="true" />
+                                {renderProfileImage(row.profileImage, "eca-admin-leaderboard-user-avatar", row.name)}
                                 <span className="eca-admin-leaderboard-user-name">{row.name}</span>
                                 <span className="eca-admin-leaderboard-score">{formatScore(row.totalScore)}</span>
                                 <span className={trendClassName}>
@@ -1150,9 +1405,13 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                             type="button"
                             className={selectedApprovalRow?.id === row.id ? "eca-admin-leaderboard-approval-row eca-admin-leaderboard-approval-row--selected" : "eca-admin-leaderboard-approval-row"}
                             key={row.id}
-                            onClick={() => {setSelectedRankingRow(null); setSelectedApprovalRow(row);}}
+                            onClick={() => {
+                                cancelDetailPanelClosing();
+                                setSelectedRankingRow(null);
+                                setSelectedApprovalRow(row);
+                            }}
                         >
-                            <span className="eca-admin-leaderboard-approval-avatar" aria-hidden="true" />
+                            {renderProfileImage(row.profileImage, "eca-admin-leaderboard-approval-avatar", row.name)}
                             <span className="eca-admin-leaderboard-approval-name">{row.name}</span>
                             <span className="eca-admin-leaderboard-approval-date">{row.submittedAt}</span>
                             <span className={getApprovalCategoryClassName(row.category)}>{row.category}</span>
@@ -1272,95 +1531,98 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         if (!selectedRankingRow) return null;
 
         const trendClassName = selectedRankingRow.trendDirection === "up" ? "eca-admin-leaderboard-detail-trend eca-admin-leaderboard-detail-trend--up" : "eca-admin-leaderboard-detail-trend eca-admin-leaderboard-detail-trend--down";
+        const panelClassName = closingDetailPanel === "ranking" ? "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--closing" : "eca-admin-leaderboard-detail-panel";
 
         return (
-            <aside className="eca-admin-leaderboard-detail-panel" aria-label="student detail panel">
-                <button type="button" className="eca-admin-leaderboard-detail-close" aria-label="close student detail" onClick={() => setSelectedRankingRow(null)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                </button>
+            <div className="eca-admin-leaderboard-detail-backdrop" role="presentation" onClick={closeRankingDetailPanel}>
+                <aside className={panelClassName} aria-label="student detail panel" onClick={(event) => event.stopPropagation()}>
+                    <button type="button" className="eca-admin-leaderboard-detail-close" aria-label="close student detail" onClick={closeRankingDetailPanel}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                    </button>
 
-                <div className="eca-admin-leaderboard-detail-profile">
-                    <span className="eca-admin-leaderboard-detail-avatar" aria-hidden="true" />
-                    <div className="eca-admin-leaderboard-detail-profile-text">
-                        <strong className="eca-admin-leaderboard-detail-name">{selectedRankingRow.name}</strong>
-                        <span className="eca-admin-leaderboard-detail-nickname">Nickname???</span>
+                    <div className="eca-admin-leaderboard-detail-profile">
+                        {renderProfileImage(selectedRankingRow.profileImage, "eca-admin-leaderboard-detail-avatar", selectedRankingRow.name)}
+                        <div className="eca-admin-leaderboard-detail-profile-text">
+                            <strong className="eca-admin-leaderboard-detail-name">{selectedRankingRow.name}</strong>
+                            <span className="eca-admin-leaderboard-detail-nickname">{selectedRankingRow.nickname || "-"}</span>
+                        </div>
                     </div>
-                </div>
 
-                <section className="eca-admin-leaderboard-detail-score-card">
-                    <div className="eca-admin-leaderboard-detail-score-label">Total Points:</div>
-                    <div className="eca-admin-leaderboard-detail-score-row">
-                        <strong>{selectedRankingRow.totalScore.toLocaleString()}</strong>
-                        <span>pt</span>
-                    </div>
-                    <div className="eca-admin-leaderboard-detail-place-row">
-                        <span>{selectedRank > 0 ? `${selectedRank}th Place` : "-"}</span>
-                        <span className={trendClassName}>
-                            <span aria-hidden="true">{selectedRankingRow.trendDirection === "up" ? "▲" : "▼"}</span>
-                            <span>{selectedRankingRow.trendAmount}</span>
-                        </span>
-                    </div>
-                </section>
+                    <section className="eca-admin-leaderboard-detail-score-card">
+                        <div className="eca-admin-leaderboard-detail-score-label">Total Points:</div>
+                        <div className="eca-admin-leaderboard-detail-score-row">
+                            <strong>{selectedRankingRow.totalScore.toLocaleString()}</strong>
+                            <span>pt</span>
+                        </div>
+                        <div className="eca-admin-leaderboard-detail-place-row">
+                            <span className="eca-admin-leaderboard-detail-place-row-rank">{formatOrdinalPlace(selectedRank)}</span>
+                            <span className={trendClassName}>
+                                <span aria-hidden="true">{selectedRankingRow.trendDirection === "up" ? "▲" : "▼"}</span>
+                                <span>{selectedRankingRow.trendAmount}</span>
+                            </span>
+                        </div>
+                    </section>
 
-                <div className="eca-admin-leaderboard-detail-list-header">
-                    <h2>Completed Missions ({filteredCompletedMissions.length})</h2>
-                    <div className="eca-admin-leaderboard-detail-actions">
-                        <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter completed missions">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
-                        {renderSearchControl({
-                            target: "completedMissions",
-                            searchValue: completedMissionSearch,
-                            draftValue: completedMissionSearchDraft,
-                            placeholder: "Enter mission name",
-                            ariaLabel: "search completed missions",
-                            buttonClassName: "eca-admin-leaderboard-icon-button",
-                        })}
+                    <div className="eca-admin-leaderboard-detail-list-header">
+                        <h2>Completed Missions ({filteredCompletedMissions.length})</h2>
+                        <div className="eca-admin-leaderboard-detail-actions">
+                            <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter completed missions">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                            {renderSearchControl({
+                                target: "completedMissions",
+                                searchValue: completedMissionSearch,
+                                draftValue: completedMissionSearchDraft,
+                                placeholder: "Enter mission name",
+                                ariaLabel: "search completed missions",
+                                buttonClassName: "eca-admin-leaderboard-icon-button",
+                            })}
+                        </div>
                     </div>
-                </div>
 
-                <div className="eca-admin-leaderboard-detail-mission-list">
-                    {filteredCompletedMissions.map((mission) => (
-                        <article
-                            className="eca-admin-leaderboard-detail-mission-card"
-                            key={mission.id}
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => setSelectedMission(mission)}
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter" || event.key === " ") {
-                                    event.preventDefault();
-                                    setSelectedMission(mission);
-                                }
-                            }}
-                        >
-                            <div className="eca-admin-leaderboard-detail-mission-main">
-                                <strong>{mission.title}</strong>
-                                <div className="eca-admin-leaderboard-detail-mission-tags">
-                                    <span className="eca-admin-leaderboard-detail-category-tag">{mission.category}</span>
-                                    <span className="eca-admin-leaderboard-detail-point-tag">+{mission.points}</span>
+                    <div className="eca-admin-leaderboard-detail-mission-list">
+                        {filteredCompletedMissions.map((mission) => (
+                            <article
+                                className="eca-admin-leaderboard-detail-mission-card"
+                                key={mission.id}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setSelectedMission(mission)}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter" || event.key === " ") {
+                                        event.preventDefault();
+                                        setSelectedMission(mission);
+                                    }
+                                }}
+                            >
+                                <div className="eca-admin-leaderboard-detail-mission-main">
+                                    <strong>{mission.title}</strong>
+                                    <div className="eca-admin-leaderboard-detail-mission-tags">
+                                        <span className="eca-admin-leaderboard-detail-category-tag">{mission.category}</span>
+                                        <span className="eca-admin-leaderboard-detail-point-tag">+{mission.points}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="eca-admin-leaderboard-detail-mission-side">
-                                <span>{mission.submittedAt}</span>
-                                <button type="button" className="eca-admin-leaderboard-detail-delete-button" aria-label="delete completed mission" onClick={(event) => { event.stopPropagation(); setDeleteMissionTarget(mission);}}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                        <path d="M5 2C5 1.46957 5.21071 0.960859 5.58579 0.585786C5.96086 0.210714 6.46957 0 7 0H13C13.5304 0 14.0391 0.210714 14.4142 0.585786C14.7893 0.960859 15 1.46957 15 2V4H19C19.2652 4 19.5196 4.10536 19.7071 4.29289C19.8946 4.48043 20 4.73478 20 5C20 5.26522 19.8946 5.51957 19.7071 5.70711C19.5196 5.89464 19.2652 6 19 6H17.931L17.064 18.142C17.0281 18.6466 16.8023 19.1188 16.4321 19.4636C16.0619 19.8083 15.5749 20 15.069 20H4.93C4.42414 20 3.93707 19.8083 3.56688 19.4636C3.1967 19.1188 2.97092 18.6466 2.935 18.142L2.07 6H1C0.734784 6 0.48043 5.89464 0.292893 5.70711C0.105357 5.51957 0 5.26522 0 5C0 4.73478 0.105357 4.48043 0.292893 4.29289C0.48043 4.10536 0.734784 4 1 4H5V2ZM7 4H13V2H7V4ZM4.074 6L4.931 18H15.07L15.927 6H4.074ZM8 8C8.26522 8 8.51957 8.10536 8.70711 8.29289C8.89464 8.48043 9 8.73478 9 9V15C9 15.2652 8.89464 15.5196 8.70711 15.7071C8.51957 15.8946 8.26522 16 8 16C7.73478 16 7.48043 15.8946 7.29289 15.7071C7.10536 15.5196 7 15.2652 7 15V9C7 8.73478 7.10536 8.48043 7.29289 8.29289C7.48043 8.10536 7.73478 8 8 8ZM12 8C12.2652 8 12.5196 8.10536 12.7071 8.29289C12.8946 8.48043 13 8.73478 13 9V15C13 15.2652 12.8946 15.5196 12.7071 15.7071C12.5196 15.8946 12.2652 16 12 16C11.7348 16 11.4804 15.8946 11.2929 15.7071C11.1054 15.5196 11 15.2652 11 15V9C11 8.73478 11.1054 8.48043 11.2929 8.29289C11.4804 8.10536 11.7348 8 12 8Z" fill="#808080"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </article>
-                    ))}
-                </div>
+                                <div className="eca-admin-leaderboard-detail-mission-side">
+                                    <span>{mission.submittedAt}</span>
+                                    <button type="button" className="eca-admin-leaderboard-detail-delete-button" aria-label="delete completed mission" onClick={(event) => { event.stopPropagation(); setDeleteMissionTarget(mission);}}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M5 2C5 1.46957 5.21071 0.960859 5.58579 0.585786C5.96086 0.210714 6.46957 0 7 0H13C13.5304 0 14.0391 0.210714 14.4142 0.585786C14.7893 0.960859 15 1.46957 15 2V4H19C19.2652 4 19.5196 4.10536 19.7071 4.29289C19.8946 4.48043 20 4.73478 20 5C20 5.26522 19.8946 5.51957 19.7071 5.70711C19.5196 5.89464 19.2652 6 19 6H17.931L17.064 18.142C17.0281 18.6466 16.8023 19.1188 16.4321 19.4636C16.0619 19.8083 15.5749 20 15.069 20H4.93C4.42414 20 3.93707 19.8083 3.56688 19.4636C3.1967 19.1188 2.97092 18.6466 2.935 18.142L2.07 6H1C0.734784 6 0.48043 5.89464 0.292893 5.70711C0.105357 5.51957 0 5.26522 0 5C0 4.73478 0.105357 4.48043 0.292893 4.29289C0.48043 4.10536 0.734784 4 1 4H5V2ZM7 4H13V2H7V4ZM4.074 6L4.931 18H15.07L15.927 6H4.074ZM8 8C8.26522 8 8.51957 8.10536 8.70711 8.29289C8.89464 8.48043 9 8.73478 9 9V15C9 15.2652 8.89464 15.5196 8.70711 15.7071C8.51957 15.8946 8.26522 16 8 16C7.73478 16 7.48043 15.8946 7.29289 15.7071C7.10536 15.5196 7 15.2652 7 15V9C7 8.73478 7.10536 8.48043 7.29289 8.29289C7.48043 8.10536 7.73478 8 8 8ZM12 8C12.2652 8 12.5196 8.10536 12.7071 8.29289C12.8946 8.48043 13 8.73478 13 9V15C13 15.2652 12.8946 15.5196 12.7071 15.7071C12.5196 15.8946 12.2652 16 12 16C11.7348 16 11.4804 15.8946 11.2929 15.7071C11.1054 15.5196 11 15.2652 11 15V9C11 8.73478 11.1054 8.48043 11.2929 8.29289C11.4804 8.10536 11.7348 8 12 8Z" fill="#808080"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
 
-                <button type="button" className="eca-admin-leaderboard-detail-ok-button" onClick={() => setSelectedRankingRow(null)}>
-                    OK
-                </button>
-            </aside>
+                    <button type="button" className="eca-admin-leaderboard-detail-ok-button" onClick={() => setSelectedRankingRow(null)}>
+                        OK
+                    </button>
+                </aside>
+            </div>
         );
     }
 
@@ -1368,61 +1630,60 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         if (!selectedApprovalRow) return null;
 
         const evidenceSlots = selectedApprovalRow.evidenceUrls.length > 0 ? selectedApprovalRow.evidenceUrls : ["", "", "", ""];
+        const panelClassName = closingDetailPanel === "approval" ? "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--approval eca-admin-leaderboard-detail-panel--closing" : "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--approval";
 
         return (
-            <aside className="eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--approval" aria-label="approval detail panel">
-                <button type="button" className="eca-admin-leaderboard-detail-close" aria-label="close approval detail" onClick={() => setSelectedApprovalRow(null)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                </button>
-
-                <div className="eca-admin-leaderboard-approval-detail-profile">
-                    <span className="eca-admin-leaderboard-detail-avatar" aria-hidden="true" />
-                    <div className="eca-admin-leaderboard-detail-profile-text">
-                        <strong className="eca-admin-leaderboard-approval-detail-name">{selectedApprovalRow.name}</strong>
-                        <span className="eca-admin-leaderboard-detail-nickname">{selectedApprovalRow.nickname}</span>
-                    </div>
-                </div>
-
-                <div className="eca-admin-leaderboard-approval-evidence-list">
-                    {evidenceSlots.slice(0, 4).map((url, index) => (
-                        url ? (
-                            <img className="eca-admin-leaderboard-approval-evidence-img" src={url} alt={`approval evidence ${index + 1}`} key={`${url}-${index}`} />
-                        ) : (
-                            <span className="eca-admin-leaderboard-approval-evidence-placeholder" aria-hidden="true" key={`approval-placeholder-${index}`} />
-                        )
-                    ))}
-                </div>
-
-                <div className="eca-admin-leaderboard-approval-detail-info">
-                    <div className="eca-admin-leaderboard-approval-detail-info-row">
-                        <span>Category</span>
-                        <strong className={`eca-admin-leaderboard-approval-detail-category eca-admin-leaderboard-approval-detail-category--${selectedApprovalRow.category.toLowerCase()}`}>{selectedApprovalRow.category}</strong>
-                    </div>
-                    <div className="eca-admin-leaderboard-approval-detail-info-row">
-                        <span>Point</span>
-                        <strong className="eca-admin-leaderboard-approval-detail-point">+{selectedApprovalRow.points}</strong>
-                    </div>
-                    <div className="eca-admin-leaderboard-approval-detail-info-row">
-                        <span>Mission</span>
-                        <strong>{selectedApprovalRow.title}</strong>
-                    </div>
-                    <div className="eca-admin-leaderboard-approval-detail-info-row">
-                        <span>Submission Time</span>
-                        <strong>{selectedApprovalRow.submittedAt}</strong>
-                    </div>
-                </div>
-
-                <div className="eca-admin-leaderboard-approval-detail-actions">
-                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--approve" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "approve")}>
-                        Approve
+            <div className="eca-admin-leaderboard-detail-backdrop eca-admin-leaderboard-detail-backdrop--approval" role="presentation" onClick={closeApprovalDetailPanel}>
+                <aside className={panelClassName} aria-label="approval detail panel" onClick={(event) => event.stopPropagation()}>
+                    <button type="button" className="eca-admin-leaderboard-detail-close" aria-label="close approval detail" onClick={() => setSelectedApprovalRow(null)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
                     </button>
-                    <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--reject" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "reject")}>
-                        Reject
-                    </button>
-                </div>
-            </aside>
+
+                    <div className="eca-admin-leaderboard-approval-detail-profile">
+                        {renderProfileImage(selectedApprovalRow.profileImage, "eca-admin-leaderboard-detail-avatar", selectedApprovalRow.name)}
+                        <div className="eca-admin-leaderboard-detail-profile-text">
+                            <strong className="eca-admin-leaderboard-approval-detail-name">{selectedApprovalRow.name}</strong>
+                            <span className="eca-admin-leaderboard-detail-nickname">{selectedApprovalRow.nickname}</span>
+                        </div>
+                    </div>
+
+                    <div className="eca-admin-leaderboard-approval-evidence-list">
+                        {evidenceSlots.slice(0, 4).map((url, index) => (
+                            renderEvidenceSlot(url, index, "approval", activityId, selectedApprovalRow.submissionId)
+                        ))}
+                    </div>
+
+                    <div className="eca-admin-leaderboard-approval-detail-info">
+                        <div className="eca-admin-leaderboard-approval-detail-info-row">
+                            <span>Category</span>
+                            <strong className={`eca-admin-leaderboard-approval-detail-category eca-admin-leaderboard-approval-detail-category--${selectedApprovalRow.category.toLowerCase()}`}>{selectedApprovalRow.category}</strong>
+                        </div>
+                        <div className="eca-admin-leaderboard-approval-detail-info-row">
+                            <span>Point</span>
+                            <strong className="eca-admin-leaderboard-approval-detail-point">+{selectedApprovalRow.points}</strong>
+                        </div>
+                        <div className="eca-admin-leaderboard-approval-detail-info-row">
+                            <span>Mission</span>
+                            <strong>{selectedApprovalRow.title}</strong>
+                        </div>
+                        <div className="eca-admin-leaderboard-approval-detail-info-row">
+                            <span>Submission Time</span>
+                            <strong>{selectedApprovalRow.submittedAt}</strong>
+                        </div>
+                    </div>
+
+                    <div className="eca-admin-leaderboard-approval-detail-actions">
+                        <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--approve" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "approve")}>
+                            Approve
+                        </button>
+                        <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--reject" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "reject")}>
+                            Reject
+                        </button>
+                    </div>
+                </aside>
+            </div>
         );
     }
 
@@ -1442,11 +1703,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                     <div className="eca-admin-leaderboard-mission-modal-evidence-list">
                         {evidenceSlots.slice(0, 2).map((url, index) => (
-                            url ? (
-                                <img className="eca-admin-leaderboard-mission-modal-evidence-img" src={url} alt={`mission evidence ${index + 1}`} key={`${url}-${index}`} />
-                            ) : (
-                                <span className="eca-admin-leaderboard-mission-modal-evidence-placeholder" aria-hidden="true" key={`placeholder-${index}`} />
-                            )
+                            renderEvidenceSlot(url, index, "mission-modal", activityId, selectedMission.submissionId)
                         ))}
                     </div>
 

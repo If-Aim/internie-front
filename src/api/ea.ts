@@ -268,6 +268,7 @@ export type ExternalActivityPersonalLeaderboardRanking = {
     rank: number;
     userId: number;
     displayName: string;
+    profileImage?: string | null;
     score: number;
     lastPointEarnedAt?: string | null;
 };
@@ -301,6 +302,8 @@ export type LeaderboardRankingResponse = {
     rank: number;
     studentId: number;
     studentName: string;
+    studentNickname?: string | null;
+    profileImage?: string | null;
     totalScore: number;
     attendanceScore: number;
     assignmentScore: number;
@@ -333,8 +336,12 @@ export type LeaderboardSubmissionResponse = {
     submissionId: number;
     missionId: number;
     missionName: string;
+    category?: LeaderboardMissionCategory | null;
+    points?: number | null;
     studentId: number;
     studentName: string;
+    studentNickname?: string | null;
+    profileImage?: string | null;
     status: LeaderboardApprovalStatus;
     submittedAt?: string | null;
     reviewedAt?: string | null;
@@ -373,6 +380,7 @@ export type LeaderboardCompletedMissionResponse = {
     category: LeaderboardMissionCategory;
     score: number;
     completedAt?: string | null;
+    evidenceUrl?: string | null;
 };
 
 export type LeaderboardCompletedMissionsResponse = {
@@ -1770,6 +1778,38 @@ function saveBlob(blob: Blob, fileName: string): void {
     window.setTimeout(() => {
         window.URL.revokeObjectURL(objectUrl);
     }, 1000);
+}
+
+function getFileNameFromUrl(url: string): string {
+    try {
+        const parsedUrl = new URL(url);
+        const pathName = decodeURIComponent(parsedUrl.pathname);
+        const fileName = pathName.split("/").filter(Boolean).pop();
+
+        return fileName || "leaderboard-evidence-file";
+    } catch {
+        const cleanUrl = decodeURIComponent(url.split("?")[0].split("#")[0]);
+        const fileName = cleanUrl.split("/").filter(Boolean).pop();
+
+        return fileName || "leaderboard-evidence-file";
+    }
+}
+
+export async function downloadLeaderboardEvidenceFile(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    fileName?: string | null
+): Promise<void> {
+    const blob = await apiBlob(
+        `/externalActivities/${externalActivityId}/submissions/${submissionId}/evidence/download`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fileName?.trim()
+        ? sanitizeDownloadName(fileName)
+        : `leaderboard-evidence-${submissionId}`;
+
+    saveBlob(blob, safeFileName);
 }
 
 export async function downloadExternalActivityPlan( // 활동 계획서 다운
