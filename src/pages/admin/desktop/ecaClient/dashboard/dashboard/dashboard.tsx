@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ApiError } from "../../../../../../api/client";
 import { createExternalActivityStudentInvite, deleteExternalActivity, getAttendanceEventDetail, getAttendanceEvents, getExternalActivity, getExternalActivityAssignments, getExternalActivityStudentInvites, getExternalActivityTeams } from "../../../../../../api/ea";
 import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, ExternalActivityParticipant } from "../../../../../../api/ea";
@@ -13,6 +14,7 @@ import "./dashboard.css";
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
 const ASSIGNMENT_PAGE_SIZE = 3;
 const ATTENDANCE_PAGE_SIZE = 3;
+const DASHBOARD_T = "ecaAdmin.dashboardPage";
 
 interface AssignmentSummary {
     id: number;
@@ -115,11 +117,8 @@ function getCalculatedActivityStatus(activity: ExternalActivityResponse | null):
     return "delayed";
 }
 
-function getActivityStatusLabel(status: ActivityStatus): string {
-    if (status === "upcoming") return "upcoming";
-    if (status === "ongoing") return "ongoing";
-    if (status === "completed") return "completed";
-    return "delayed";
+function getActivityStatusLabel(status: ActivityStatus): ActivityStatus {
+    return status;
 }
 
 function parseAssignmentDate(value?: string | null): Date | null {
@@ -167,10 +166,10 @@ function formatAttendanceEventDate(value?: string | null): string {
     return formatServerKstDateTimeDateLabelForUser(value);
 }
 
-function getAttendanceEventTypeText(type: AttendanceEventResponse["type"]): string {
-    if (type === "CLASS_START") return "Start";
+function getAttendanceEventTypeText(type: AttendanceEventResponse["type"], startText: string, endText: string): string {
+    if (type === "CLASS_START") return startText;
 
-    return "End";
+    return endText;
 }
 
 function getComputedDashboardAttendanceProgress(item: Pick<AttendanceSummary, "progress" | "uploadWindowStart" | "uploadWindowEnd">, now: Date): AttendanceEventResponse["progress"] {
@@ -198,14 +197,16 @@ function getAttendanceSortTime(event: AttendanceEventResponse): number {
 function toAttendanceSummary(
     event: AttendanceEventResponse,
     detail: AttendanceEventDetailResponse | null,
-    totalParticipantCount: number
+    totalParticipantCount: number,
+    startText: string,
+    endText: string
 ): AttendanceSummary {
     const presentCount = detail?.records.filter((record) => record.status === "PRESENT").length ?? 0;
 
     return {
         id: event.eventId,
         date: formatAttendanceEventDate(event.scoreReferenceAt),
-        eventTypeText: getAttendanceEventTypeText(event.type),
+        eventTypeText: getAttendanceEventTypeText(event.type, startText, endText),
         presentCount,
         totalCount: totalParticipantCount,
         progress: event.progress,
@@ -240,7 +241,15 @@ function toAttendanceSummary(
 //     });
 // }
 
-function toTeamSummaries(activity: ExternalActivityResponse, teams: TeamResponse[]): TeamSummary[] {
+function toTeamSummaries(
+    activity: ExternalActivityResponse,
+    teams: TeamResponse[],
+    text: {
+        leaderNotAssigned: string;
+        noTeamMembers: string;
+        andMorePerson: (count: number) => string;
+    }
+): TeamSummary[] {
     const teamAssignmentMap = new Map<number, TeamAssignmentSummary[]>();
 
     (activity.assignments ?? []).forEach((assignment) => {
@@ -269,15 +278,15 @@ function toTeamSummaries(activity: ExternalActivityResponse, teams: TeamResponse
                 .sort((a, b) => a.id - b.id);
 
             const leader = team.members.find((member) => member.role === "LEADER");
-            const leaderName = leader?.userName ?? "팀장 미지정";
+            const leaderName = leader?.userName ?? text.leaderNotAssigned;
             const memberCount = team.members.length;
             const memberNames = team.members.map((member) => member.userName);
 
             const memberText = memberCount === 0
-                ? "팀원 없음"
+                ? text.noTeamMembers
                 : memberCount === 1
                     ? leaderName
-                    : `${leaderName} 외 ${memberCount - 1}명`;
+                    : `${leaderName} ${text.andMorePerson(memberCount - 1)}`;
 
             return {
                 id: team.teamId,
@@ -294,6 +303,7 @@ function toTeamSummaries(activity: ExternalActivityResponse, teams: TeamResponse
 
 export default function EcaDashboardExActivity(): React.ReactElement {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const {
         organization,
@@ -354,10 +364,10 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             if (organizationLoading) return;
 
             if (!organization?.organizationId || !externalActivityId) {
-                setActivityError("대외활동 정보를 찾을 수 없습니다.");
-                setAssignmentError("과제 목록을 불러오지 못했습니다.");
-                setAttendanceError("출석 목록을 불러오지 못했습니다.");
-                setParticipantError("참여자 목록을 불러오지 못했습니다.");
+                setActivityError(t(`${DASHBOARD_T}.programNotFound`));
+                setAssignmentError(t(`${DASHBOARD_T}.assignmentLoadFailed`));
+                setAttendanceError(t(`${DASHBOARD_T}.attendanceLoadFailed`));
+                setParticipantError(t(`${DASHBOARD_T}.participantLoadFailed`));
                 return;
             }
 
@@ -388,8 +398,8 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         return [{
                             id: participant.userId,
-                            name: participant.name?.trim() || "이름 없음",
-                            school: participant.schoolName ?? "-",
+                            name: participant.name?.trim() || t(`${DASHBOARD_T}.noName`),
+                            school: participant.schoolName ?? t(`${DASHBOARD_T}.emptyValue`),
                             nickname: getStudentNickname(profileSource),
                             linkedinUrl: getStudentLinkedinUrl(profileSource),
                             profileImage: participant.profileImage ?? null,
@@ -404,14 +414,28 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                 );
 
                 const nextAttendances = attendanceEventData.map((event, index) => (
-                    toAttendanceSummary(event, attendanceDetailData[index], nextParticipants.length)
+                    toAttendanceSummary(
+                        event,
+                        attendanceDetailData[index],
+                        nextParticipants.length,
+                        t(`${DASHBOARD_T}.attendanceStart`),
+                        t(`${DASHBOARD_T}.attendanceEnd`)
+                    )
                 ));
 
                 setActivity(activityData);
                 setParticipants(nextParticipants);
                 setAssignments(assignmentData.map(toAssignmentSummary));
                 setAttendances(nextAttendances);
-                setDashboardTeams(toTeamSummaries({ ...activityData, assignments: assignmentData }, teamData));
+                setDashboardTeams(toTeamSummaries(
+                    { ...activityData, assignments: assignmentData },
+                    teamData,
+                    {
+                        leaderNotAssigned: t(`${DASHBOARD_T}.leaderNotAssigned`),
+                        noTeamMembers: t(`${DASHBOARD_T}.noTeamMembers`),
+                        andMorePerson: (count) => t(`${DASHBOARD_T}.andMorePerson`, { count }),
+                    }
+                ));
                 setAssignmentPage(0);
                 setAttendancePage(0);
             } catch (e) {
@@ -425,25 +449,25 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                 if (e instanceof ApiError) {
                     if (e.status === 404 || e.code === "EXTERNAL_ACTIVITY_NOT_FOUND") {
-                        window.alert("삭제되었거나 존재하지 않는 대외활동입니다.");
+                        window.alert(t(`${DASHBOARD_T}.activityDeletedOrNotFound`));
                         navigate("/program-admin/home", { replace: true });
                         return;
                     }
 
                     if (e.status === 403 || e.code === "FORBIDDEN") {
-                        window.alert("접근 권한이 없습니다.");
+                        window.alert(t(`${DASHBOARD_T}.accessDenied`));
                         navigate("/program-admin/home", { replace: true });
                         return;
                     }
 
                     if (e.status === 400) {
-                        window.alert(e.message || "정보를 불러올 수 없습니다.");
+                        window.alert(e.message || t(`${DASHBOARD_T}.cannotLoadInfo`));
                         navigate("/program-admin/home", { replace: true });
                         return;
                     }
                 }
 
-                window.alert("정보를 불러오지 못했습니다.");
+                window.alert(t(`${DASHBOARD_T}.infoLoadFailed`));
                 navigate("/program-admin/home", { replace: true });
             } finally {
                 setActivityLoading(false);
@@ -454,7 +478,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         }
 
         fetchActivity();
-    }, [organization?.organizationId, organizationLoading, externalActivityId]);
+    }, [organization?.organizationId, organizationLoading, externalActivityId, navigate, t, i18n.language]);
 
     React.useEffect(() => { // 대시보드 수정 모달 바깥 클릭 감지
         if (!dashboardMenuOpen) return;
@@ -639,7 +663,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         } catch (error) {
             console.error(error);
             setStudentInvites([]);
-            window.alert("참가자 초대코드를 불러오지 못했습니다.");
+            window.alert(t(`${DASHBOARD_T}.inviteLoadFailed`));
         } finally {
             setStudentInviteLoading(false);
         }
@@ -657,19 +681,19 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
             try {
                 await navigator.clipboard.writeText(created.code);
-                window.alert("참가자 초대코드가 생성되었고 클립보드에 복사되었습니다.");
+                window.alert(t(`${DASHBOARD_T}.inviteCreatedAndCopied`));
             } catch {
-                window.alert("참가자 초대코드가 생성되었습니다. 팝업에서 복사할 수 있습니다.");
+                window.alert(t(`${DASHBOARD_T}.inviteCreated`));
             }
         } catch (error) {
             console.error(error);
 
             if (error instanceof ApiError) {
-                window.alert(error.message || "참가자 초대코드 발급에 실패했습니다.");
+                window.alert(error.message || t(`${DASHBOARD_T}.inviteCreateFailed`));
                 return;
             }
 
-            window.alert("참가자 초대코드 발급에 실패했습니다.");
+            window.alert(t(`${DASHBOARD_T}.inviteCreateFailed`));
         } finally {
             setStudentInviteCreating(false);
         }
@@ -678,10 +702,10 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     async function handleCopyStudentInvite(invite: ExternalActivityStudentInviteResponse): Promise<void> {
         try {
             await navigator.clipboard.writeText(invite.code);
-            window.alert("참가자 초대코드를 복사했습니다.");
+            window.alert(t(`${DASHBOARD_T}.inviteCopyDone`));
         } catch (error) {
             console.error(error);
-            window.alert("참가자 초대코드 복사에 실패했습니다.");
+            window.alert(t(`${DASHBOARD_T}.inviteCopyFailed`));
         }
     }
     
@@ -724,7 +748,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             return;
         }
 
-        const confirmed = window.confirm("이 대외활동을 삭제하시겠습니까?");
+        const confirmed = window.confirm(t(`${DASHBOARD_T}.confirmDeleteActivity`));
 
         if (!confirmed) {
             return;
@@ -739,7 +763,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             navigate("/program-admin/home");
         } catch (error) {
             console.error(error);
-            window.alert("대외활동 삭제에 실패했습니다.");
+            window.alert(t(`${DASHBOARD_T}.activityDeleteFailed`));
         } finally {
             setDeletingActivity(false);
         }
@@ -875,10 +899,10 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     return (
         <div className="eca-admin-dashboard-detail-page">
             <div className="eca-admin-dashboard-detail-head">
-                <h1>{activityLoading ? "" : activity?.name ?? "대외활동"}</h1>
+                <h1>{activityLoading ? "" : activity?.name ?? t(`${DASHBOARD_T}.activityFallback`)}</h1>
                 {!isReadOnly ? (
                     <div className="eca-admin-dashboard-menu-wrap" ref={dashboardMenuRef}>
-                        <button type="button" className="eca-admin-dashboard-more-button" aria-label="더보기" onClick={() => setDashboardMenuOpen((prev) => !prev)} >
+                        <button type="button" className="eca-admin-dashboard-more-button" aria-label={t(`${DASHBOARD_T}.more`)} onClick={() => setDashboardMenuOpen((prev) => !prev)} >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                 <path d="M4 12C4 12.2652 4.10536 12.5196 4.29289 12.7071C4.48043 12.8946 4.73478 13 5 13C5.26522 13 5.51957 12.8946 5.70711 12.7071C5.89464 12.5196 6 12.2652 6 12C6 11.7348 5.89464 11.4804 5.70711 11.2929C5.51957 11.1054 5.26522 11 5 11C4.73478 11 4.48043 11.1054 4.29289 11.2929C4.10536 11.4804 4 11.7348 4 12ZM11 12C11 12.2652 11.1054 12.5196 11.2929 12.7071C11.4804 12.8946 11.7348 13 12 13C12.2652 13 12.5196 12.8946 12.7071 12.7071C12.8946 12.5196 13 12.2652 13 12C13 11.7348 12.8946 11.4804 12.7071 11.2929C12.5196 11.1054 12.2652 11 12 11C11.7348 11 11.4804 11.1054 11.2929 11.2929C11.1054 11.4804 11 11.7348 11 12ZM18 12C18 12.2652 18.1054 12.5196 18.2929 12.7071C18.4804 12.8946 18.7348 13 19 13C19.2652 13 19.5196 12.8946 19.7071 12.7071C19.8946 12.5196 20 12.2652 20 12C20 11.7348 19.8946 11.4804 19.7071 11.2929C19.5196 11.1054 19.2652 11 19 11C18.7348 11 18.4804 11.1054 18.2929 11.2929C18.1054 11.4804 18 11.7348 18 12Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
@@ -890,14 +914,14 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M5 2C5 1.46957 5.21071 0.960859 5.58579 0.585786C5.96086 0.210714 6.46957 0 7 0H13C13.5304 0 14.0391 0.210714 14.4142 0.585786C14.7893 0.960859 15 1.46957 15 2V4H19C19.2652 4 19.5196 4.10536 19.7071 4.29289C19.8946 4.48043 20 4.73478 20 5C20 5.26522 19.8946 5.51957 19.7071 5.70711C19.5196 5.89464 19.2652 6 19 6H17.931L17.064 18.142C17.0281 18.6466 16.8023 19.1188 16.4321 19.4636C16.0619 19.8083 15.5749 20 15.069 20H4.93C4.42414 20 3.93707 19.8083 3.56688 19.4636C3.1967 19.1188 2.97092 18.6466 2.935 18.142L2.07 6H1C0.734784 6 0.48043 5.89464 0.292893 5.70711C0.105357 5.51957 0 5.26522 0 5C0 4.73478 0.105357 4.48043 0.292893 4.29289C0.48043 4.10536 0.734784 4 1 4H5V2ZM7 4H13V2H7V4ZM4.074 6L4.931 18H15.07L15.927 6H4.074ZM8 8C8.26522 8 8.51957 8.10536 8.70711 8.29289C8.89464 8.48043 9 8.73478 9 9V15C9 15.2652 8.89464 15.5196 8.70711 15.7071C8.51957 15.8946 8.26522 16 8 16C7.73478 16 7.48043 15.8946 7.29289 15.7071C7.10536 15.5196 7 15.2652 7 15V9C7 8.73478 7.10536 8.48043 7.29289 8.29289C7.48043 8.10536 7.73478 8 8 8ZM12 8C12.2652 8 12.5196 8.10536 12.7071 8.29289C12.8946 8.48043 13 8.73478 13 9V15C13 15.2652 12.8946 15.5196 12.7071 15.7071C12.5196 15.8946 12.2652 16 12 16C11.7348 16 11.4804 15.8946 11.2929 15.7071C11.1054 15.5196 11 15.2652 11 15V9C11 8.73478 11.1054 8.48043 11.2929 8.29289C11.4804 8.10536 11.7348 8 12 8Z" fill="#808080"/>
                                     </svg>
-                                    <span>{deletingActivity ? "삭제 중" : "삭제하기"}</span>
+                                    <span>{deletingActivity ? t(`${DASHBOARD_T}.deleteInProgress`) : t(`${DASHBOARD_T}.deleteAction`)}</span>
                                 </button>
 
                                 <button type="button" onClick={moveToEditActivity}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M10.5 2.82843L14.5 6.82843M1 16.3284H5L15.5 5.82843C15.7626 5.56578 15.971 5.25398 16.1131 4.91082C16.2553 4.56766 16.3284 4.19986 16.3284 3.82843C16.3284 3.45699 16.2553 3.0892 16.1131 2.74604C15.971 2.40287 15.7626 2.09107 15.5 1.82843C15.2374 1.56578 14.9256 1.35744 14.5824 1.2153C14.2392 1.07316 13.8714 1 13.5 1C13.1286 1 12.7608 1.07316 12.4176 1.2153C12.0744 1.35744 11.7626 1.56578 11.5 1.82843L1 12.3284V16.3284Z" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
-                                    <span>수정하기</span>
+                                    <span>{t(`${DASHBOARD_T}.editAction`)}</span>
                                 </button>
                             </div>
                         ) : null}
@@ -908,22 +932,22 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             <section className="eca-admin-dashboard-summary-grid">
                 <article className="eca-admin-dashboard-summary-card">
                     <div className="eca-admin-dashboard-summary-top">
-                        <span>활동 진행률</span>
+                        <span>{t(`${DASHBOARD_T}.classProgress`)}</span>
                         <span className={`eca-admin-dashboard-status-badge eca-admin-dashboard-status--${activityStatus}`}>
-                            {getActivityStatusLabel(activityStatus)}
+                            {t(`${DASHBOARD_T}.status.${getActivityStatusLabel(activityStatus)}`)}
                         </span>
                     </div>
                     <strong>{assignmentProgressRate}%</strong>
                 </article>
 
                 <article className="eca-admin-dashboard-summary-card">
-                    <span>활동 수료율</span>
+                    <span>{t(`${DASHBOARD_T}.assignmentSubmission`)}</span>
                     <strong>{assignmentProgressRate}%</strong>
                 </article>
 
                 <article className="eca-admin-dashboard-summary-card">
-                    <span>전체 참여자 수</span>
-                    <strong>{participants.length}명</strong>
+                    <span>{t(`${DASHBOARD_T}.totalParticipants`)}</span>
+                    <strong>{t(`${DASHBOARD_T}.personCount`, { count: participants.length })}</strong>
                 </article>
             </section>
 
@@ -931,21 +955,21 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                 <div className="eca-admin-dashboard-left-column">
                     <section className="eca-admin-dashboard-panel-left">
                         <div className="eca-admin-dashboard-panel-head">
-                            <h2>과제 현황({completedAssignmentCount}/{assignments.length})</h2>
+                            <h2>{t(`${DASHBOARD_T}.assignmentPanelTitle`, { completed: completedAssignmentCount, total: assignments.length })}</h2>
                             <div className="eca-admin-dashboard-panel-actions">
                                 {!isReadOnly ? (
-                                    <button type="button" aria-label="과제생성" className="eca-admin-dashboard-assignment-create" onClick={createAssignment}>
+                                    <button type="button" aria-label={t(`${DASHBOARD_T}.createAssignmentAria`)} className="eca-admin-dashboard-assignment-create" onClick={createAssignment}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <path d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z" fill="#808080" />
                                         </svg>
                                     </button>
                                 ) : null}
-                                <button type="button" aria-label="이전" className="eca-admin-dashboard-assignment-prev" onClick={movePrevAssignmentPage} disabled={!canMovePrevAssignmentPage} >
+                                <button type="button" aria-label={t(`${DASHBOARD_T}.prev`)} className="eca-admin-dashboard-assignment-prev" onClick={movePrevAssignmentPage} disabled={!canMovePrevAssignmentPage} >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </button>
-                                <button type="button" aria-label="다음" onClick={moveNextAssignmentPage} disabled={!canMoveNextAssignmentPage} >
+                                <button type="button" aria-label={t(`${DASHBOARD_T}.next`)} onClick={moveNextAssignmentPage} disabled={!canMoveNextAssignmentPage} >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
@@ -955,11 +979,11 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         <div className="eca-admin-dashboard-list-left">
                             {assignmentLoading ? (
-                                <p className="eca-admin-dashboard-empty">과제 목록을 불러오는 중입니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.assignmentLoading`)}</p>
                             ) : assignmentError ? (
                                 <p className="eca-admin-dashboard-empty">{assignmentError}</p>
                             ) : assignments.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">등록된 과제가 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noAssignments`)}</p>
                             ) : (
                                 visibleAssignments.map((item) => {
                                     const isCompleted = item.totalCount > 0 && item.submittedCount >= item.totalCount;
@@ -985,14 +1009,14 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                     <section className="eca-admin-dashboard-panel-left">
                         <div className="eca-admin-dashboard-panel-head">
-                            <h2>출석 현황</h2>
+                            <h2>{t(`${DASHBOARD_T}.attendancePanelTitle`)}</h2>
                             <div className="eca-admin-dashboard-panel-actions">
-                                <button type="button" aria-label="이전" className="eca-admin-dashboard-assignment-prev" onClick={movePrevAttendancePage} disabled={!canMovePrevAttendancePage} > 
+                                <button type="button" aria-label={t(`${DASHBOARD_T}.prev`)} className="eca-admin-dashboard-assignment-prev" onClick={movePrevAttendancePage} disabled={!canMovePrevAttendancePage} > 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </button>
-                                <button type="button" aria-label="다음" onClick={moveNextAttendancePage} disabled={!canMoveNextAttendancePage} > 
+                                <button type="button" aria-label={t(`${DASHBOARD_T}.next`)} onClick={moveNextAttendancePage} disabled={!canMoveNextAttendancePage} > 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
@@ -1002,11 +1026,11 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         <div className="eca-admin-dashboard-list-left">
                             {attendanceLoading ? (
-                                <p className="eca-admin-dashboard-empty">출석 목록을 불러오는 중입니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.attendanceLoading`)}</p>
                             ) : attendanceError ? (
                                 <p className="eca-admin-dashboard-empty">{attendanceError}</p>
                             ) : attendances.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">등록된 출석 이벤트가 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noAttendanceEvents`)}</p>
                             ) : (
                                 visibleAttendances.map((item) => (
                                     <button type="button" className="eca-admin-dashboard-attendance-row" key={item.id} onClick={() => openAttendanceDetail(item.id)}>
@@ -1030,11 +1054,11 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                 <aside className="eca-admin-dashboard-right-column">
                     <section className={"eca-admin-dashboard-panel-right eca-admin-dashboard-side-panel"  + (participantListScrollable ? " is-scrollable" : "")}>
                         <div className="eca-admin-dashboard-panel-head">
-                            <h2>참여자({filteredParticipants.length})</h2>
+                            <h2>{t(`${DASHBOARD_T}.participantsTitle`, { count: filteredParticipants.length })}</h2>
 
                             <div className="eca-admin-dashboard-panel-actions">
                                 {!isReadOnly ? (
-                                    <button type="button" aria-label="참가자추가" className="eca-admin-dashboard-participant-add" onClick={() => void openParticipantInviteModal()}>
+                                    <button type="button" aria-label={t(`${DASHBOARD_T}.addParticipantAria`)} className="eca-admin-dashboard-participant-add" onClick={() => void openParticipantInviteModal()}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <path d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z" fill="#808080" />
                                         </svg>
@@ -1042,12 +1066,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                 ) : null}
 
                                 <div className="eca-admin-dashboard-search-wrap" ref={participantSearchWrapRef}>
-                                    <button
-                                        type="button"
-                                        className="eca-admin-dashboard-participant-search"
-                                        aria-label="참여자 검색"
-                                        onClick={() => setParticipantSearchOpen((prev) => !prev)}
-                                    >
+                                    <button type="button" className="eca-admin-dashboard-participant-search" aria-label={t(`${DASHBOARD_T}.searchParticipantAria`)} onClick={() => setParticipantSearchOpen((prev) => !prev)}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
                                         </svg>
@@ -1061,11 +1080,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                                 onChange={(e) => setParticipantSearchKeyword(e.target.value)}
                                                 autoFocus
                                             />
-                                            <button
-                                                type="button"
-                                                className="eca-admin-dashboard-search-reset"
-                                                onClick={() => setParticipantSearchKeyword("")}
-                                            >
+                                            <button type="button" className="eca-admin-dashboard-search-reset" onClick={() => setParticipantSearchKeyword("")} >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                     <path d="M13.3332 2.66699L2.6665 13.3337M13.3332 13.3337L2.6665 2.66699" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round"/>
                                                 </svg>
@@ -1078,11 +1093,11 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         <div className="eca-admin-dashboard-list-right"  ref={participantListRef}>
                             {participantLoading ? (
-                                <p className="eca-admin-dashboard-empty">참여자 목록을 불러오는 중입니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.participantLoading`)}</p>
                             ) : participants.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">참여자가 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noParticipants`)}</p>
                             ) : filteredParticipants.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">검색 결과가 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noSearchResults`)}</p>
                             ) : (
                                 filteredParticipants.map((item) => (
                                     <div
@@ -1124,10 +1139,10 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                     <section className={"eca-admin-dashboard-panel-right eca-admin-dashboard-side-panel" + (teamListScrollable ? " is-scrollable" : "")}>
                         <div className="eca-admin-dashboard-panel-head">
-                            <h2>팀({filteredTeams.length})</h2>
+                            <h2>{t(`${DASHBOARD_T}.teamsTitle`, { count: filteredTeams.length })}</h2>
 
                             <div className="eca-admin-dashboard-search-wrap" ref={teamSearchWrapRef}>
-                                <button type="button" className="eca-admin-dashboard-search-button" aria-label="팀 검색" onClick={() => setTeamSearchOpen((prev) => !prev)} >
+                                <button type="button" className="eca-admin-dashboard-search-button" aria-label={t(`${DASHBOARD_T}.searchTeamAria`)} onClick={() => setTeamSearchOpen((prev) => !prev)} >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
                                     </svg>
@@ -1153,9 +1168,9 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         <div className="eca-admin-dashboard-list-right" ref={teamListRef}>
                             {dashboardTeams.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">팀이 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noTeams`)}</p>
                             ) : filteredTeams.length === 0 ? (
-                                <p className="eca-admin-dashboard-empty">검색 결과가 없습니다.</p>
+                                <p className="eca-admin-dashboard-empty">{t(`${DASHBOARD_T}.noSearchResults`)}</p>
                             ) : (
                                 filteredTeams.map((item) => (
                                     <div className="eca-admin-dashboard-team-row" key={item.id}>
@@ -1201,7 +1216,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                                                 <path d="M3 5C2.45 5 2 5.45 2 6C2 6.55 2.45 7 3 7C3.55 7 4 6.55 4 6C4 5.45 3.55 5 3 5ZM9 5C8.45 5 8 5.45 8 6C8 6.55 8.45 7 9 7C9.55 7 10 6.55 10 6C10 5.45 9.55 5 9 5ZM6 5C5.45 5 5 5.45 5 6C5 6.55 5.45 7 6 7C6.55 7 7 6.55 7 6C7 5.45 6.55 5 6 5Z" fill="black"/>
                                                             </svg>
                                                         </span>
-                                                        <em>더보기</em>
+                                                        <em>{t(`${DASHBOARD_T}.more`)}</em>
                                                     </button>
                                                     {openTeamAssignmentMoreId === item.id && teamAssignmentPopoverPosition ? (
                                                         createPortal(
@@ -1240,26 +1255,26 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                     <div className="eca-admin-dashboard-invite-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                         <div className="eca-admin-dashboard-invite-modal-head">
                             <div className="eca-admin-dashboard-invite-modal-head-text">
-                                <h3>참가자 초대</h3>
-                                <p>인증코드를 입력한 학생은 해당 대외활동의 참가자로 등록됩니다</p>
+                                <h3>{t(`${DASHBOARD_T}.inviteModalTitle`)}</h3>
+                                <p>{t(`${DASHBOARD_T}.inviteModalDesc`)}</p>
                             </div>
-                            <button type="button" className="eca-admin-dashboard-invite-modal-close" onClick={() => setParticipantInviteOpen(false)} aria-label="닫기">
+                            <button type="button" className="eca-admin-dashboard-invite-modal-close" onClick={() => setParticipantInviteOpen(false)} aria-label={t("common.close")}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="eca-admin-dashboard-invite-codebox">
                             {studentInviteLoading ? (
-                                <span className="eca-admin-dashboard-invite-codebox-loading">초대코드를 불러오는 중입니다.</span>
+                                <span className="eca-admin-dashboard-invite-codebox-loading">{t(`${DASHBOARD_T}.inviteCodeLoading`)}</span>
                             ) : studentInvites.length === 0 ? (
                                 <button type="button" className="eca-admin-dashboard-invite-codebox-create" onClick={() => void handleCreateStudentInvite()} disabled={studentInviteCreating}>
-                                    {studentInviteCreating ? "발급 중" : "초대코드 발급"}
+                                    {studentInviteCreating ? t(`${DASHBOARD_T}.inviteCodeCreating`) : t(`${DASHBOARD_T}.inviteCodeCreate`)}
                                 </button>
                             ) : (
                                 <>
                                     <strong>{studentInvites[0].code}</strong>
                                     <button type="button" onClick={() => void handleCopyStudentInvite(studentInvites[0])}>
-                                        복사
+                                        {t(`${DASHBOARD_T}.copy`)}
                                     </button>
                                 </>
                             )}
@@ -1267,7 +1282,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                         <div className="eca-admin-dashboard-invite-modal-footer">
                             <button type="button" className="eca-admin-dashboard-invite-confirm-button" onClick={() => setParticipantInviteOpen(false)}>
-                                확인
+                                {t(`${DASHBOARD_T}.confirm`)}
                             </button>
                         </div>
                     </div>

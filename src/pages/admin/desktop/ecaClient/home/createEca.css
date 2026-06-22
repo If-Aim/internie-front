@@ -82,8 +82,7 @@
 
 .eca-create-file-input { display: none; }
 .eca-create-upload-button { width: 100%; max-width:360px; height: 40px; padding: 0 8px 0 9px; border: 1px solid #DDD; border-radius: 4px; background: #FFF; color: #777; font-size: 13px; font-weight: 500; cursor: pointer; text-align: left; box-sizing: border-box; position: relative; }
-.eca-create-upload-button::after { content: "선택"; position: absolute; top: 50%; right: 7px; width: 64px; height: 24px; border-radius: 4px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; transform: translateY(-50%); }
-.eca-create-upload-button.is-filled::after { content: "편집"; }
+.eca-create-upload-button::after { content: attr(data-action-label); position: absolute; top: 50%; right: 7px; width: 64px; height: 24px; border-radius: 4px; background: #E7E7E7; color: #808080; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; transform: translateY(-50%); }
 
 .eca-create-bottom { display: flex; justify-content: flex-end; margin-top: 78px; }
 .eca-create-save-button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #0166FF; color: #FFF; font-size: 16px; font-weight: 700; cursor: pointer; }

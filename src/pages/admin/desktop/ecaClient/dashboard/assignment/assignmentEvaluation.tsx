@@ -233,8 +233,9 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     }, []);
 
     function moveBack(): void {
-        if (pageLeaving) return;
+        if (!externalActivityId || !assignmentId || pageLeaving) return;
 
+        window.sessionStorage.setItem(`eca-assignment-detail-entry-direction:${externalActivityId}:${assignmentId}`, "back");
         setPageLeaving(true);
 
         pageLeaveTimerRef.current = window.setTimeout(() => {
