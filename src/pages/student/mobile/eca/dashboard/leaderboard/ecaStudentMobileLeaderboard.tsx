@@ -54,7 +54,7 @@ type LeaderboardDetailTarget = {
     type: "me" | "student";
     studentId: number;
     name: string;
-    rank: number;
+    rank: number | null;
     totalScore: number;
 };
 
@@ -79,6 +79,12 @@ function formatOrdinal(value?: number | null): string {
     const suffix = rank % 100 >= 11 && rank % 100 <= 13 ? "th" : rank % 10 === 1 ? "st" : rank % 10 === 2 ? "nd" : rank % 10 === 3 ? "rd" : "th";
 
     return `${rank}${suffix}`;
+}
+
+function formatPlaceLabel(value?: number | null): string {
+    const ordinal = formatOrdinal(value);
+
+    return ordinal === "-" ? "-" : `${ordinal} Place`;
 }
 
 function formatCategory(value?: string | null): string {
@@ -165,7 +171,11 @@ function MissionLogRow({ log }: { log: DetailMissionLog }) {
                 <p>{getCategoryLabel(log.category)} · {getLogStatusLabel(log.status)}</p>
             </div>
             <div className={`eca-student-mobile-leaderboard-log-point ${isApproved ? "active" : "inactive"}`}>+{formatNumber(log.score)}</div>
-            <span className="eca-student-mobile-leaderboard-chevron">›</span>
+            <span className="eca-student-mobile-leaderboard-chevron">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M10 7L15 12L10 17" stroke="#848484" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            </span>
         </article>
     );
 }
@@ -322,7 +332,7 @@ export default function EcaStudentMobileLeaderboard() {
             type: "me",
             studentId: leaderboard.studentId,
             name: displayName,
-            rank: leaderboard.myRank,
+            rank: leaderboard.myRank ?? myRanking?.rank ?? null,
             totalScore: leaderboard.myTotalScore,
         });
     }
@@ -354,15 +364,11 @@ export default function EcaStudentMobileLeaderboard() {
 
         return (
             <div className="eca-student-mobile-leaderboard-log-filter-wrap">
-                <button
-                    type="button"
-                    className={missionLogCategory === "ALL" ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"}
-                    aria-label="Filter"
-                    onClick={() => setIsLogFilterOpen((prev) => !prev)}
-                >
-                    <span />
-                    <span />
-                    <span />
+                <button type="button" className={missionLogCategory === "ALL" ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsLogFilterOpen((prev) => !prev)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        {missionLogCategory !== "ALL" ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
+                    </svg>
                 </button>
 
                 {isLogFilterOpen ? (
@@ -417,15 +423,15 @@ export default function EcaStudentMobileLeaderboard() {
 
                 <div className="eca-student-mobile-leaderboard-main eca-student-mobile-leaderboard-main--detail">
                     <button type="button" className="eca-student-mobile-leaderboard-back-button" onClick={handleBackClick} aria-label="Back">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                            <path d="M14 17L9 12L14 7" stroke="#000" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
 
                     <section className="eca-student-mobile-leaderboard-my-point-card">
                         <h1>{isMyDetail ? "My points" : detailTarget.name}</h1>
                         <strong>{formatNumber(detailTarget.totalScore)}</strong>
-                        <span>{formatOrdinal(detailTarget.rank)} Place</span>
+                        <span>{formatPlaceLabel(detailTarget.rank)}</span>
                     </section>
 
                     <section className="eca-student-mobile-leaderboard-log-section">
@@ -475,7 +481,7 @@ export default function EcaStudentMobileLeaderboard() {
 
             {leaderboard && (
                 <button type="button" className="eca-student-mobile-leaderboard-my-floating-card" onClick={openMyDetail}>
-                    <span className="eca-student-mobile-leaderboard-my-rank">{leaderboard.myRank}</span>
+                    <span className="eca-student-mobile-leaderboard-my-rank">{leaderboard.myRank ?? myRanking?.rank ?? "-"}</span>
                     <span className="eca-student-mobile-leaderboard-my-name">{displayName}</span>
                     <span className="eca-student-mobile-leaderboard-my-score">{formatNumber(leaderboard.myTotalScore)}</span>
                     <span className="eca-student-mobile-leaderboard-my-arrow">

@@ -254,6 +254,7 @@ export type LeaderboardApprovalStatus = "pending" | "approved" | "rejected" | "a
 export type LeaderboardMissionCategory = "ELICIT" | "DISCOVER" | "INSIGHT" | "SYNTHESIZE" | "OWN" | "NURTURE";
 export type LeaderboardEvidenceType = "IMAGE" | "LINK" | "DOCUMENT" | "VIDEO" | "OTHER";
 export type LeaderboardTrendDirection = "UP" | "DOWN" | "SAME";
+export type LeaderboardSubmissionEvidenceSubmitType = "FILE" | "LINK";
 
 export const LEADERBOARD_MISSION_CATEGORY_OPTIONS: { value: LeaderboardMissionCategory; label: string }[] = [
     { value: "ELICIT", label: "E - Elicit" },
@@ -346,6 +347,7 @@ export type LeaderboardSubmissionResponse = {
     submittedAt?: string | null;
     reviewedAt?: string | null;
     evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     rejectReason?: string | null;
 };
 
@@ -381,6 +383,7 @@ export type LeaderboardCompletedMissionResponse = {
     score: number;
     completedAt?: string | null;
     evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
 };
 
 export type LeaderboardCompletedMissionsResponse = {
@@ -405,7 +408,24 @@ export type LeaderboardSubmissionDetailResponse = {
     reviewedAt?: string | null;
     score?: number | null;
     evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     rejectReason?: string | null;
+};
+
+export type LeaderboardSubmissionEvidenceResponse = {
+    evidenceId?: number | null;
+    submitType?: LeaderboardSubmissionEvidenceSubmitType | null;
+    evidenceUrl: string;
+    originalFileName?: string | null;
+    contentType?: string | null;
+    sizeBytes?: number | null;
+};
+
+export type LeaderboardEvidenceInput = {
+    file?: File | null;
+    files?: File[] | null;
+    evidenceUrl?: string | null;
+    evidenceUrls?: string[] | null;
 };
 
 export type LeaderboardReviewRequest = {
@@ -487,7 +507,7 @@ export type LeaderboardScoringRuleRequest = {
 export type StudentLeaderboardResponse = {
     externalActivityId: number;
     studentId: number;
-    myRank: number;
+    myRank?: number | null;
     myTotalScore: number;
     myTrendDirection?: LeaderboardTrendDirection | null;
     myTrendValue?: number | null;
@@ -522,6 +542,7 @@ export type StudentLeaderboardEvidenceResponse = {
     submissionId: number;
     studentId: number;
     evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     submittedAt: string;
 };
 
@@ -536,6 +557,8 @@ export type StudentLeaderboardSubmitResponse = {
     reviewedAt?: string | null;
     approvedPoint?: number | null;
     adjustPoint?: number | null;
+    evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
 };
 
 function buildLeaderboardQuery(params: Record<string, string | number | boolean | undefined | null>): string {
@@ -552,16 +575,29 @@ function buildLeaderboardQuery(params: Record<string, string | number | boolean 
     return queryString ? `?${queryString}` : "";
 }
 
-function buildLeaderboardEvidenceForm(file?: File | null, evidenceUrl?: string | null): FormData {
+function buildLeaderboardEvidenceForm(input: LeaderboardEvidenceInput): FormData {
     const formData = new FormData();
 
-    if (file) {
-        formData.append("file", file);
+    if (input.file && input.file.size > 0) {
+        formData.append("file", input.file);
     }
 
-    if (evidenceUrl?.trim()) {
-        formData.append("evidenceUrl", evidenceUrl.trim());
+    input.files
+        ?.filter((file) => file.size > 0)
+        .forEach((file) => {
+            formData.append("files", file);
+        });
+
+    if (input.evidenceUrl?.trim()) {
+        formData.append("evidenceUrl", input.evidenceUrl.trim());
     }
+
+    input.evidenceUrls
+        ?.map((url) => url.trim())
+        .filter(Boolean)
+        .forEach((url) => {
+            formData.append("evidenceUrls", url);
+        });
 
     return formData;
 }
@@ -976,13 +1012,15 @@ export async function getMyLeaderboardMissionLogs(
 export async function updateMyLeaderboardEvidence(
     externalActivityId: number | string,
     submissionId: number | string,
-    input: { file?: File | null; evidenceUrl?: string | null }
+    input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardEvidenceResponse> {
-    return apiUpload<StudentLeaderboardEvidenceResponse>(
+    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardEvidenceResponse>>(
         `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/evidence`,
-        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        buildLeaderboardEvidenceForm(input),
         { method: "PATCH" }
     );
+
+    return response.data;
 }
 
 export async function getMyLeaderboardSubmissions(
@@ -1004,13 +1042,15 @@ export async function getMyLeaderboardSubmissions(
 export async function resubmitMyLeaderboardSubmission(
     externalActivityId: number | string,
     submissionId: number | string,
-    input: { file?: File | null; evidenceUrl?: string | null }
+    input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardEvidenceResponse> {
-    return apiUpload<StudentLeaderboardEvidenceResponse>(
+    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardEvidenceResponse>>(
         `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/resubmit`,
-        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        buildLeaderboardEvidenceForm(input),
         { method: "PATCH" }
     );
+
+    return response.data;
 }
 
 export async function deleteMyRejectedLeaderboardSubmission(
@@ -1026,11 +1066,11 @@ export async function deleteMyRejectedLeaderboardSubmission(
 export async function submitLeaderboardMission(
     externalActivityId: number | string,
     missionId: number | string,
-    input: { file?: File | null; evidenceUrl?: string | null }
+    input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardSubmitResponse> {
     const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardSubmitResponse>>(
         `/externalActivities/${externalActivityId}/missions/${missionId}/submissions`,
-        buildLeaderboardEvidenceForm(input.file, input.evidenceUrl),
+        buildLeaderboardEvidenceForm(input),
         { method: "POST" }
     );
 
@@ -1793,6 +1833,24 @@ export async function downloadLeaderboardEvidenceFile(
     const safeFileName = fileName?.trim()
         ? sanitizeDownloadName(fileName)
         : `leaderboard-evidence-${submissionId}`;
+
+    saveBlob(blob, safeFileName);
+}
+
+export async function downloadLeaderboardEvidenceFileById(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    evidenceId: number | string,
+    fallbackFileName = "evidence-file"
+): Promise<void> {
+    const blob = await apiBlob(
+        `/externalActivities/${externalActivityId}/submissions/${submissionId}/evidences/${evidenceId}/download`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fallbackFileName.trim()
+        ? sanitizeDownloadName(fallbackFileName)
+        : `leaderboard-evidence-${evidenceId}`;
 
     saveBlob(blob, safeFileName);
 }

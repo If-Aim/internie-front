@@ -1,8 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { approveLeaderboardSubmission, createLeaderboardMission, deleteLeaderboardCompletedMission, downloadLeaderboardEvidenceFile, getLeaderboard, getLeaderboardApprovals, getLeaderboardMissions, getLeaderboardStudentCompletedMissions, rejectLeaderboardSubmission, updateLeaderboardMission, } from "../../../../../../api/ea";
-import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, LeaderboardRankingResponse, LeaderboardSubmissionResponse, } from "../../../../../../api/ea"; 
+import { approveLeaderboardSubmission, createLeaderboardMission, deleteLeaderboardCompletedMission, downloadLeaderboardEvidenceFile, downloadLeaderboardEvidenceFileById, getLeaderboard, getLeaderboardApprovals, getLeaderboardMissions, getLeaderboardStudentCompletedMissions, rejectLeaderboardSubmission, updateLeaderboardMission, } from "../../../../../../api/ea";
+import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, LeaderboardRankingResponse, LeaderboardSubmissionEvidenceResponse, LeaderboardSubmissionResponse, } from "../../../../../../api/ea";
 import { getFileIconByExtension } from "../../../../../student/desktop/eca/dashboard/assignment/fileIcons";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./leaderboard.css";
@@ -32,6 +33,7 @@ type DropdownMenuPosition = {
 
 type RankingRow = {
     id: number;
+    rank: number;
     studentId: number;
     name: string;
     nickname?: string | null;
@@ -53,7 +55,7 @@ type ApprovalRow = {
     category: ApprovalCategory;
     points: number;
     title: string;
-    evidenceUrls: string[];
+    evidences: LeaderboardSubmissionEvidenceResponse[];
 };
 
 type CompletedMission = {
@@ -61,10 +63,10 @@ type CompletedMission = {
     submissionId: number;
     missionId: number;
     title: string;
-    category: string;
+    category: MissionCategory;
     points: number;
     submittedAt: string;
-    evidenceUrls: string[];
+    evidences: LeaderboardSubmissionEvidenceResponse[];
 };
 
 type MissionEvidenceFormat = LeaderboardEvidenceType;
@@ -92,55 +94,11 @@ type MissionForm = {
     evidenceType: MissionEvidenceFormat | "";
 };
 
+const LEADERBOARD_T = "ecaAdmin.leaderboardPage";
+
 const detailPanelAnimationMs = 220;
 const missionCategories: MissionCategory[] = ["Elicit", "Discover", "Insight", "Synthesize", "Own", "Nurture"];
-
-const missionCategoryLabels: Record<MissionCategory, string> = {
-    Elicit: "Elicit",
-    Discover: "Discover",
-    Insight: "Insight",
-    Synthesize: "Synthesize",
-    Own: "Own",
-    Nurture: "Nurture",
-};
-
-const evidenceFormatLabels: Record<MissionEvidenceFormat, string> = {
-    DOCUMENT: "Document (DOCX, PDF, PPT, etc.)",
-    IMAGE: "Image (PNG, JPG, JPEG, etc.)",
-    VIDEO: "Video (MP4, MOV, AVI, etc.)",
-    LINK: "Link (Google Drive, YouTube, etc.)",
-    OTHER: "Others",
-};
-
 const evidenceFormats: MissionEvidenceFormat[] = ["DOCUMENT", "IMAGE", "VIDEO", "LINK", "OTHER"];
-const rankingSortOptions: CustomDropdownOption[] = [
-    { value: "alphabetical", label: "Alphabetical" },
-    { value: "highest", label: "Highest" },
-    { value: "lowest", label: "Lowest" },
-];
-
-const approvalSortOptions: CustomDropdownOption[] = [
-    { value: "alphabetical", label: "Alphabetical" },
-    { value: "oldest", label: "Oldest" },
-    { value: "latest", label: "Newest" },
-];
-
-const approvalFilterOptions: CustomDropdownOption[] = [
-    { value: "all", label: "전체" },
-    { value: "pending", label: "승인 전" },
-    { value: "approved", label: "승인 완료" },
-    { value: "rejected", label: "반려" },
-];
-
-const missionCategoryOptions: CustomDropdownOption[] = missionCategories.map((category) => ({
-    value: category,
-    label: missionCategoryLabels[category],
-}));
-
-const evidenceFormatOptions: CustomDropdownOption[] = evidenceFormats.map((format) => ({
-    value: format,
-    label: evidenceFormatLabels[format],
-}));
 
 function toUiTrendDirection(value?: string | null): TrendDirection {
     if (value === "UP") return "up";
@@ -199,6 +157,43 @@ function formatDateTime(value?: string | null): string {
     });
 }
 
+function formatLeaderboardLastUpdateValue(value?: string | null): string {
+    if (!value) return "-";
+
+    const normalizedValue = value.includes("T") ? value : value.replace(" ", "T");
+    const hasTimeZone = /(?:Z|[+-]\d{2}:\d{2})$/.test(normalizedValue);
+    const date = new Date(hasTimeZone ? normalizedValue : `${normalizedValue}+09:00`);
+
+    if (Number.isNaN(date.getTime())) {
+        return value.replace("T", " ").slice(5, 16);
+    }
+
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return `${month}/${day} ${hour}:${minute}`;
+}
+
+function formatOrdinalPlace(rank: number): string {
+    if (rank <= 0) return "-";
+
+    const lastTwoDigits = rank % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+        return `${rank}th Place`;
+    }
+
+    const lastDigit = rank % 10;
+
+    if (lastDigit === 1) return `${rank}st Place`;
+    if (lastDigit === 2) return `${rank}nd Place`;
+    if (lastDigit === 3) return `${rank}rd Place`;
+
+    return `${rank}th Place`;
+}
+
 function toApiApprovalSort(sortValue: ApprovalSort): "latest" | "oldest" {
     if (sortValue === "oldest") return "oldest";
 
@@ -211,12 +206,12 @@ function toApiApprovalFilter(filter: ApprovalFilter): "pending" | "approved" | "
     return filter;
 }
 
-function getApprovalFilterTitle(filter: ApprovalFilter): string {
-    if (filter === "pending") return "Pending Approval";
-    if (filter === "approved") return "Approved";
-    if (filter === "rejected") return "Rejected";
+function getApprovalFilterTitleKey(filter: ApprovalFilter): string {
+    if (filter === "pending") return "approvalFilterTitle.pending";
+    if (filter === "approved") return "approvalFilterTitle.approved";
+    if (filter === "rejected") return "approvalFilterTitle.rejected";
 
-    return "All Approvals";
+    return "approvalFilterTitle.all";
 }
 
 function toDateTimeValue(value?: string | null): number {
@@ -230,6 +225,7 @@ function toDateTimeValue(value?: string | null): number {
 function mapRankingRow(row: LeaderboardRankingResponse): RankingRow {
     return {
         id: row.studentId,
+        rank: row.rank,
         studentId: row.studentId,
         name: row.studentName,
         nickname: row.studentNickname ?? null,
@@ -249,9 +245,69 @@ type LeaderboardSubmissionRow = LeaderboardSubmissionResponse & {
     points?: number | null;
 };
 
+type EvidenceSource = {
+    evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
+};
+
+type EvidenceImagePreview = {
+    url: string;
+    alt: string;
+};
+
+type EvidenceImageClickHandler = (
+    evidence: LeaderboardSubmissionEvidenceResponse,
+    index: number,
+    classPrefix: "approval" | "mission-modal"
+) => void;
+
+type EvidenceSlotLabels = {
+    openImagePreview: string;
+    downloadFailed: string;
+    downloadFile: (fileName: string) => string;
+};
+
+function normalizeEvidenceItem(evidence: LeaderboardSubmissionEvidenceResponse): LeaderboardSubmissionEvidenceResponse {
+    const url = evidence.evidenceUrl?.trim() ?? "";
+    const submitType = evidence.submitType ?? (isLinkEvidenceUrl(url) ? "LINK" : "FILE");
+
+    return {
+        ...evidence,
+        submitType,
+        evidenceUrl: url,
+        originalFileName: evidence.originalFileName ?? (submitType === "FILE" ? getEvidenceFileName(url) : null),
+    };
+}
+
+function getEvidenceItems(source: EvidenceSource): LeaderboardSubmissionEvidenceResponse[] {
+    const evidences = source.evidences
+        ?.filter((evidence) => evidence.evidenceUrl?.trim())
+        .map(normalizeEvidenceItem) ?? [];
+
+    if (evidences.length > 0) {
+        return evidences;
+    }
+
+    const legacyUrl = source.evidenceUrl?.trim();
+
+    if (!legacyUrl) {
+        return [];
+    }
+
+    return [
+        normalizeEvidenceItem({
+            evidenceId: null,
+            submitType: null,
+            evidenceUrl: legacyUrl,
+            originalFileName: null,
+            contentType: null,
+            sizeBytes: null,
+        }),
+    ];
+}
+
 function mapApprovalRow(row: LeaderboardSubmissionResponse): ApprovalRow {
     const submission = row as LeaderboardSubmissionRow;
-    const evidenceUrl = typeof row.evidenceUrl === "string" && row.evidenceUrl.trim() ? row.evidenceUrl.trim() : "";
 
     return {
         id: row.submissionId,
@@ -265,7 +321,7 @@ function mapApprovalRow(row: LeaderboardSubmissionResponse): ApprovalRow {
         category: toUiApprovalCategory(submission.category),
         points: Number(submission.score ?? submission.approvedPoint ?? submission.points ?? 0),
         title: row.missionName,
-        evidenceUrls: evidenceUrl ? [evidenceUrl] : [],
+        evidences: getEvidenceItems(row),
     };
 }
 
@@ -316,6 +372,16 @@ function getEvidenceFileName(url: string): string {
 
         return fileName || "evidence-file";
     }
+}
+
+function getEvidenceDisplayFileName(evidence: LeaderboardSubmissionEvidenceResponse): string {
+    const rawFileName = evidence.originalFileName?.trim() || getEvidenceFileName(evidence.evidenceUrl);
+    const fileName = rawFileName.split(/[\\/]/).filter(Boolean).pop() || rawFileName;
+
+    return fileName
+        .replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}[-_]/i, "")
+        .replace(/^[0-9a-f]{32}[-_]/i, "")
+        .replace(/^\d{13,}[-_]/, "");
 }
 
 function getEvidenceExtension(url: string): string {
@@ -377,16 +443,33 @@ function renderLinkIcon(): React.ReactElement {
     );
 }
 
-async function downloadEvidenceFile(externalActivityId: number, submissionId: number, url: string): Promise<void> {
+async function downloadEvidenceFile(
+    externalActivityId: number,
+    submissionId: number,
+    evidence: LeaderboardSubmissionEvidenceResponse,
+    failedMessage: string
+): Promise<void> {
     try {
+        const fileName = evidence.originalFileName?.trim() || getEvidenceFileName(evidence.evidenceUrl);
+
+        if (evidence.evidenceId) {
+            await downloadLeaderboardEvidenceFileById(
+                externalActivityId,
+                submissionId,
+                evidence.evidenceId,
+                fileName
+            );
+            return;
+        }
+
         await downloadLeaderboardEvidenceFile(
             externalActivityId,
             submissionId,
-            getEvidenceFileName(url)
+            fileName
         );
     } catch (error) {
         console.error("downloadEvidenceFile error", error);
-        window.alert("파일 다운로드에 실패했습니다.");
+        window.alert(failedMessage);
     }
 }
 
@@ -398,62 +481,51 @@ function getEvidenceClassName(classPrefix: "approval" | "mission-modal", type: "
     return `eca-admin-leaderboard-mission-modal-evidence-${type}`;
 }
 
+function isImageEvidence(evidence: LeaderboardSubmissionEvidenceResponse): boolean {
+    if (evidence.contentType?.startsWith("image/")) {
+        return true;
+    }
+
+    return isImageEvidenceUrl(evidence.evidenceUrl);
+}
+
 function renderEvidenceSlot(
-    url: string,
+    evidence: LeaderboardSubmissionEvidenceResponse,
     index: number,
     classPrefix: "approval" | "mission-modal",
     externalActivityId: number,
-    submissionId: number
+    submissionId: number,
+    labels: EvidenceSlotLabels,
+    onImageClick?: EvidenceImageClickHandler
 ): React.ReactElement {
-    if (!url) {
-        return (
-            <span
-                className={getEvidenceClassName(classPrefix, "placeholder")}
-                aria-hidden="true"
-                key={`${classPrefix}-placeholder-${index}`}
-            />
-        );
-    }
+    const url = evidence.evidenceUrl;
+    const submitType = evidence.submitType ?? (isLinkEvidenceUrl(url) ? "LINK" : "FILE");
 
-    if (isImageEvidenceUrl(url)) {
+    if (submitType === "LINK") {
         return (
-            <img
-                className={getEvidenceClassName(classPrefix, "img")}
-                src={url}
-                alt={`${classPrefix} evidence ${index + 1}`}
-                key={`${url}-${index}`}
-            />
-        );
-    }
-
-    if (isLinkEvidenceUrl(url)) {
-        return (
-            <a
-                className={getEvidenceClassName(classPrefix, "link")}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                key={`${url}-${index}`}
-                title={url}
-            >
+            <a className={getEvidenceClassName(classPrefix, "link")} href={url} target="_blank" rel="noreferrer" key={`${url}-${index}`} title={url}>
                 {renderLinkIcon()}
                 <span>{getDisplayLinkText(url)}</span>
             </a>
         );
     }
 
-    const extension = getEvidenceExtension(url);
-    const fileName = getEvidenceFileName(url);
+    if (isImageEvidence(evidence)) {
+        const imageClassName = getEvidenceClassName(classPrefix, "img");
+        const alt = `${classPrefix} evidence ${index + 1}`;
+
+        return (
+            <button type="button" className={`${imageClassName}-button`} key={`${url}-${index}`} onClick={() => onImageClick?.(evidence, index, classPrefix)} aria-label={labels.openImagePreview}>
+                <img className={imageClassName} src={url} alt={alt} />
+            </button>
+        );
+    }
+
+    const extension = getEvidenceExtension(evidence.originalFileName || url);
+    const displayFileName = getEvidenceDisplayFileName(evidence);
 
     return (
-        <button
-            type="button"
-            className={getEvidenceClassName(classPrefix, "file")}
-            key={`${url}-${index}`}
-            onClick={() => void downloadEvidenceFile(externalActivityId, submissionId, url)}
-            title={fileName}
-            aria-label={`download ${fileName}`}
-        >
+        <button type="button" className={getEvidenceClassName(classPrefix, "file")} key={`${url}-${index}`} onClick={() => void downloadEvidenceFile(externalActivityId, submissionId, evidence, labels.downloadFailed)} title={displayFileName} aria-label={labels.downloadFile(displayFileName)}>
             {getFileIconByExtension(extension)}
         </button>
     );
@@ -463,21 +535,19 @@ function formatScore(score: number): string {
     return String(score);
 }
 
-function formatOrdinalPlace(rank: number): string {
-    if (rank <= 0) return "-";
+function renderLeaderboardTrend(direction: TrendDirection, amount: number, className: string): React.ReactElement {
+    if (direction === "same" || amount <= 0) {
+        return <span className={`${className} ${className}--same`}>-</span>;
+    }
 
-    const lastTwoDigits = rank % 100;
-
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return `${rank}th Place`;
-
-    const lastDigit = rank % 10;
-
-    if (lastDigit === 1) return `${rank}st Place`;
-    if (lastDigit === 2) return `${rank}nd Place`;
-    if (lastDigit === 3) return `${rank}rd Place`;
-
-    return `${rank}th Place`;
+    return (
+        <span className={`${className} ${className}--${direction}`}>
+            <span aria-hidden="true">{direction === "up" ? "▲" : "▼"}</span>
+            <span>{amount}</span>
+        </span>
+    );
 }
+
 
 function getTabClassName(current: LeaderboardTab, active: LeaderboardTab): string {
     return current === active ? "eca-admin-leaderboard-tab eca-admin-leaderboard-tab--active" : "eca-admin-leaderboard-tab";
@@ -496,6 +566,43 @@ function getApprovalCategoryClassName(category: ApprovalCategory): string {
 }
 
 export default function EcaDashboardLeaderboard(): React.ReactElement {
+    const { t } = useTranslation();
+
+    const rankingSortOptions = React.useMemo<CustomDropdownOption[]>(() => [
+        { value: "alphabetical", label: t(`${LEADERBOARD_T}.sort.alphabetical`) },
+        { value: "highest", label: t(`${LEADERBOARD_T}.sort.highest`) },
+        { value: "lowest", label: t(`${LEADERBOARD_T}.sort.lowest`) },
+    ], [t]);
+
+    const approvalSortOptions = React.useMemo<CustomDropdownOption[]>(() => [
+        { value: "alphabetical", label: t(`${LEADERBOARD_T}.sort.alphabetical`) },
+        { value: "oldest", label: t(`${LEADERBOARD_T}.sort.oldest`) },
+        { value: "latest", label: t(`${LEADERBOARD_T}.sort.latest`) },
+    ], [t]);
+
+    const approvalFilterOptions = React.useMemo<CustomDropdownOption[]>(() => [
+        { value: "all", label: t(`${LEADERBOARD_T}.approvalStatus.all`) },
+        { value: "pending", label: t(`${LEADERBOARD_T}.approvalStatus.pending`) },
+        { value: "approved", label: t(`${LEADERBOARD_T}.approvalStatus.approved`) },
+        { value: "rejected", label: t(`${LEADERBOARD_T}.approvalStatus.rejected`) },
+    ], [t]);
+
+    const missionCategoryOptions = React.useMemo<CustomDropdownOption[]>(() => missionCategories.map((category) => ({
+        value: category,
+        label: t(`${LEADERBOARD_T}.category.${category}`),
+    })), [t]);
+
+    const evidenceFormatOptions = React.useMemo<CustomDropdownOption[]>(() => evidenceFormats.map((format) => ({
+        value: format,
+        label: t(`${LEADERBOARD_T}.evidenceFormat.${format}`),
+    })), [t]);
+
+    const evidenceSlotLabels = React.useMemo<EvidenceSlotLabels>(() => ({
+        openImagePreview: t(`${LEADERBOARD_T}.aria.openEvidenceImagePreview`),
+        downloadFailed: t(`${LEADERBOARD_T}.error.downloadFailed`),
+        downloadFile: (fileName) => t(`${LEADERBOARD_T}.aria.downloadEvidenceFile`, { fileName }),
+    }), [t]);
+
     const { externalActivityId } = useParams();
     const { managedActivities } = useOutletContext<EcaClientAdminOutletContext>();
     const activityId = Number(externalActivityId);
@@ -505,13 +612,17 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     const [approvalSort, setApprovalSort] = React.useState<ApprovalSort>("alphabetical");
     const [approvalFilter, setApprovalFilter] = React.useState<ApprovalFilter>("all");
     const [approvalFilterOpen, setApprovalFilterOpen] = React.useState(false);
+    const [completedMissionFilterOpen, setCompletedMissionFilterOpen] = React.useState(false);
+    const [selectedCompletedMissionCategories, setSelectedCompletedMissionCategories] = React.useState<MissionCategory[]>([...missionCategories]);
     // const [menuOpen, setMenuOpen] = React.useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
     const [selectedRankingRow, setSelectedRankingRow] = React.useState<RankingRow | null>(null);
     const [selectedMission, setSelectedMission] = React.useState<CompletedMission | null>(null);
+    const [imagePreview, setImagePreview] = React.useState<EvidenceImagePreview | null>(null);
     const [completedMissions, setCompletedMissions] = React.useState<CompletedMission[]>([]);
     const [deleteMissionTarget, setDeleteMissionTarget] = React.useState<CompletedMission | null>(null);
     const [rankingRows, setRankingRows] = React.useState<RankingRow[]>([]);
+    const [leaderboardLastUpdate, setLeaderboardLastUpdate] = React.useState<string | null>(null);
     const [approvalRows, setApprovalRows] = React.useState<ApprovalRow[]>([]);
     const [selectedApprovalRow, setSelectedApprovalRow] = React.useState<ApprovalRow | null>(null);
     const [missionRules, setMissionRules] = React.useState<MissionRule[]>([]);
@@ -577,9 +688,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
         copied.sort((a, b) => {
             if (sort === "alphabetical") return a.name.localeCompare(b.name);
-            if (sort === "highest") return b.totalScore - a.totalScore;
+            if (sort === "lowest") return b.rank - a.rank;
 
-            return a.totalScore - b.totalScore;
+            return a.rank - b.rank;
         });
 
         return copied;
@@ -601,15 +712,16 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
     const filteredCompletedMissions = React.useMemo(() => {
         const keyword = completedMissionSearch.trim().toLowerCase();
+        const allCategorySelected = selectedCompletedMissionCategories.length === missionCategories.length;
 
-        return completedMissions.filter((mission) => !keyword || mission.title.toLowerCase().includes(keyword));
-    }, [completedMissions, completedMissionSearch]);
+        return completedMissions.filter((mission) => {
+            if (!allCategorySelected && !selectedCompletedMissionCategories.includes(mission.category)) return false;
+            if (!keyword) return true;
 
-    const selectedRank = React.useMemo(() => {
-        if (!selectedRankingRow) return 0;
+            return mission.title.toLowerCase().includes(keyword);
+        });
+    }, [completedMissions, completedMissionSearch, selectedCompletedMissionCategories]);
 
-        return sortedRankingRows.findIndex((row) => row.id === selectedRankingRow.id) + 1;
-    }, [selectedRankingRow, sortedRankingRows]);
 
     const loadLeaderboardData = React.useCallback(async (): Promise<void> => {
         if (!Number.isFinite(activityId)) return;
@@ -630,15 +742,16 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             ]);
 
             setRankingRows(rankingData.rankings.map(mapRankingRow));
+            setLeaderboardLastUpdate(rankingData.lastUpdate ?? null);
             setApprovalRows(approvalsData.submissions.map(mapApprovalRow));
             setMissionRules(missionsData.missions.map(mapMissionRule));
         } catch (error) {
             console.error("loadLeaderboardData error", error);
-            setErrorMessage("리더보드 정보를 불러오지 못했습니다.");
+            setErrorMessage(t(`${LEADERBOARD_T}.error.loadFailed`));
         } finally {
             setLoading(false);
         }
-    }, [activityId, approvalSort, approvalFilter]);
+    }, [activityId, approvalSort, approvalFilter, t]);
 
     React.useEffect(() => {
         loadLeaderboardData();
@@ -661,10 +774,6 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 if (!alive) return;
 
                 setCompletedMissions(data.missions.map((mission) => {
-                    const evidenceUrl = typeof mission.evidenceUrl === "string" && mission.evidenceUrl.trim()
-                        ? mission.evidenceUrl.trim()
-                        : "";
-
                     return {
                         id: mission.submissionId,
                         submissionId: mission.submissionId,
@@ -673,7 +782,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         category: toUiMissionCategory(mission.category),
                         points: mission.score,
                         submittedAt: formatDateTime(mission.completedAt),
-                        evidenceUrls: evidenceUrl ? [evidenceUrl] : [],
+                        evidences: getEvidenceItems(mission),
                     };
                 }));
             } catch {
@@ -779,6 +888,25 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         };
     }, [approvalFilterOpen]);
 
+    React.useEffect(() => {
+        if (!completedMissionFilterOpen) return;
+
+        function handlePointerDown(event: PointerEvent): void {
+            const target = event.target;
+
+            if (!(target instanceof Element)) return;
+            if (target.closest(".eca-admin-leaderboard-completed-filter-wrap")) return;
+
+            setCompletedMissionFilterOpen(false);
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+        };
+    }, [completedMissionFilterOpen]);
+
     React.useLayoutEffect(() => {
         function updateScrollable(): void {
             const list = rankingListRef.current;
@@ -838,6 +966,22 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         };
     }, [activeTab, missionRules.length]);
 
+    React.useEffect(() => {
+        if (!imagePreview) return;
+
+        function handleKeyDown(event: KeyboardEvent): void {
+            if (event.key === "Escape") {
+                setImagePreview(null);
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [imagePreview]);
+
     function updateDropdownMenuPosition(id: ConcreteLeaderboardDropdownId): void {
         const button = dropdownButtonRefs.current[id];
 
@@ -885,6 +1029,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             setCompletedMissions([]);
             setCompletedMissionSearch("");
             setCompletedMissionSearchDraft("");
+            setCompletedMissionFilterOpen(false);
+            setSelectedCompletedMissionCategories([...missionCategories]);
             setClosingDetailPanel(null);
             detailCloseTimerRef.current = null;
         }, detailPanelAnimationMs);
@@ -914,6 +1060,37 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         alert("Delete API 연결 후 삭제 처리하면 됩니다.");
     }
 
+    function handleOpenEvidenceImagePreview(
+        evidence: LeaderboardSubmissionEvidenceResponse,
+        index: number,
+        classPrefix: "approval" | "mission-modal"
+    ): void {
+        const displayName = getEvidenceDisplayFileName(evidence);
+
+        setImagePreview({
+            url: evidence.evidenceUrl,
+            alt: displayName || `${classPrefix} evidence ${index + 1}`,
+        });
+    }
+
+    function renderEvidenceImagePreviewModal(): React.ReactElement | null {
+        if (!imagePreview) return null;
+
+        return createPortal(
+            <div className="eca-admin-leaderboard-evidence-preview-backdrop" role="presentation" onClick={() => setImagePreview(null)}>
+                <div className="eca-admin-leaderboard-evidence-preview-modal" role="dialog" aria-modal="true" aria-label="evidence image preview" onClick={(event) => event.stopPropagation()}>
+                    <button type="button" className="eca-admin-leaderboard-evidence-preview-close" aria-label="close image preview" onClick={() => setImagePreview(null)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                    </button>
+                    <img className="eca-admin-leaderboard-evidence-preview-img" src={imagePreview.url} alt={imagePreview.alt} />
+                </div>
+            </div>,
+            document.body
+        );
+    }
+
     function getRankingListClassName(): string {
         return rankingListScrollable ? "eca-admin-leaderboard-list" : "eca-admin-leaderboard-list eca-admin-leaderboard-list--not-scrollable";
     }
@@ -928,7 +1105,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             setDeleteMissionTarget(null);
             await loadLeaderboardData();
         } catch {
-            alert("완료 미션 삭제에 실패했습니다.");
+            alert(t(`${LEADERBOARD_T}.error.deleteCompletedMissionFailed`));
         }
     }
 
@@ -939,7 +1116,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             if (decision === "approve") {
                 await approveLeaderboardSubmission(activityId, id, { adjustPoint: null });
             } else {
-                const reason = window.prompt("반려 사유를 입력해주세요.")?.trim();
+                const reason = window.prompt(t(`${LEADERBOARD_T}.prompt.rejectReason`))?.trim();
 
                 if (!reason) return;
 
@@ -950,7 +1127,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             setSelectedApprovalRow(null);
             await loadLeaderboardData();
         } catch {
-            alert(decision === "approve" ? "승인 처리에 실패했습니다." : "반려 처리에 실패했습니다.");
+            alert(decision === "approve" ? t(`${LEADERBOARD_T}.error.approveFailed`) : t(`${LEADERBOARD_T}.error.rejectFailed`));
         }
     }
 
@@ -963,7 +1140,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         const maximum = Number(missionForm.maximum);
 
         if (!title || !evidence || !missionForm.evidenceType || !Number.isFinite(points) || !Number.isFinite(maximum) || points <= 0 || maximum <= 0) {
-            alert("필수값을 모두 올바르게 입력해주세요.");
+            alert(t(`${LEADERBOARD_T}.error.invalidMissionForm`));
             return;
         }
 
@@ -993,7 +1170,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             resetMissionForm();
             await loadLeaderboardData();
         } catch {
-            alert(editingMission ? "미션 수정에 실패했습니다." : "미션 생성에 실패했습니다.");
+            alert(editingMission ? t(`${LEADERBOARD_T}.error.editMissionFailed`) : t(`${LEADERBOARD_T}.error.createMissionFailed`));
         }
     }
 
@@ -1099,6 +1276,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
     function handleOpenSearch(target: ConcreteLeaderboardSearchTarget): void {
         setOpenDropdown(null);
+        setCompletedMissionFilterOpen(false);
 
         if (openSearch === target) {
             setOpenSearch(null);
@@ -1111,6 +1289,26 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         if (target === "completedMissions") setCompletedMissionSearchDraft(completedMissionSearch);
 
         setOpenSearch(target);
+    }
+
+    function toggleCompletedMissionCategory(category: MissionCategory): void {
+        setSelectedCompletedMissionCategories((prev) => {
+            if (prev.length === missionCategories.length) return [category];
+
+            const next = prev.includes(category)
+                ? prev.filter((item) => item !== category)
+                : [...prev, category];
+
+            return next.length > 0 ? next : [...missionCategories];
+        });
+    }
+
+    function getCompletedMissionCategoryFilterIcon(category: MissionCategory): string {
+        if (selectedCompletedMissionCategories.length === missionCategories.length) return "/icons/filter_selected_all.svg";
+
+        return selectedCompletedMissionCategories.includes(category)
+            ? "/icons/filter_selected_one.svg"
+            : "/icons/filter_selected_none.svg";
     }
 
     function renderSearchIcon(): React.ReactElement {
@@ -1180,15 +1378,15 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
     function renderApprovalFilterControl(): React.ReactElement {
         //const selectedOption = approvalFilterOptions.find((option) => option.value === approvalFilter);
-        const buttonClassName = [
-            "eca-admin-leaderboard-icon-button",
-            "eca-admin-leaderboard-icon-button--filter",
-            approvalFilter !== "all" ? "eca-admin-leaderboard-icon-button--active" : "",
-        ].filter(Boolean).join(" ");
+        // const buttonClassName = [
+        //     "eca-admin-leaderboard-icon-button",
+        //     "eca-admin-leaderboard-icon-button--filter",
+        //     approvalFilter !== "all" ? "eca-admin-leaderboard-icon-button--active" : "",
+        // ].filter(Boolean).join(" ");
 
         return (
             <div className={approvalFilterOpen ? "eca-admin-leaderboard-filter-wrap eca-admin-leaderboard-filter-wrap--open" : "eca-admin-leaderboard-filter-wrap"}>
-                <button
+                {/* <button
                     type="button"
                     className={buttonClassName}
                     aria-label="filter approvals"
@@ -1201,7 +1399,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                </button>
+                </button> */}
 
                 {approvalFilterOpen ? (
                     <div className="eca-admin-leaderboard-filter-popover">
@@ -1342,11 +1540,11 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                 <div className="eca-admin-leaderboard-toolbar-actions">
                     {filterElement}
-                    <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="export">
+                    {/* <button type="button" className="eca-admin-leaderboard-icon-button" aria-label="export">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M11.625 15.513C11.5083 15.471 11.4 15.4 11.3 15.3L7.7 11.7C7.5 11.5 7.404 11.2667 7.412 11C7.42 10.7333 7.516 10.5 7.7 10.3C7.9 10.1 8.13767 9.996 8.413 9.988C8.68833 9.98 8.92567 10.0757 9.125 10.275L11 12.15V5C11 4.71667 11.096 4.47934 11.288 4.288C11.48 4.09667 11.7173 4.00067 12 4C12.2827 3.99934 12.5203 4.09534 12.713 4.288C12.9057 4.48067 13.0013 4.718 13 5V12.15L14.875 10.275C15.075 10.075 15.3127 9.979 15.588 9.987C15.8633 9.995 16.1007 10.0993 16.3 10.3C16.4833 10.5 16.5793 10.7333 16.588 11C16.5967 11.2667 16.5007 11.5 16.3 11.7L12.7 15.3C12.6 15.4 12.4917 15.471 12.375 15.513C12.2583 15.555 12.1333 15.5757 12 15.575C11.8667 15.5743 11.7417 15.5537 11.625 15.513ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V16C4 15.7167 4.096 15.4793 4.288 15.288C4.48 15.0967 4.71733 15.0007 5 15C5.28267 14.9993 5.52033 15.0953 5.713 15.288C5.90567 15.4807 6.00133 15.718 6 16V18H18V16C18 15.7167 18.096 15.4793 18.288 15.288C18.48 15.0967 18.7173 15.0007 19 15C19.2827 14.9993 19.5203 15.0953 19.713 15.288C19.9057 15.4807 20.0013 15.718 20 16V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="#A0A0A0"/>
                         </svg>
-                    </button>
+                    </button> */}
                     {searchElement}
                 </div>
             </div>
@@ -1356,29 +1554,24 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderRankingContent(): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-ranking-content">
-                <div className="eca-admin-leaderboard-ranking-title">Students Ranking ({sortedRankingRows.length})</div>
+                <div className="eca-admin-leaderboard-ranking-title">{t(`${LEADERBOARD_T}.ranking.title`, { count: sortedRankingRows.length })}</div>
                 <div className="eca-admin-leaderboard-table-header">
-                    <span>Rank</span>
-                    <span>Name</span>
-                    <span>Total Score</span>
+                    <span>{t(`${LEADERBOARD_T}.ranking.rank`)}</span>
+                    <span>{t(`${LEADERBOARD_T}.ranking.name`)}</span>
+                    <span>{t(`${LEADERBOARD_T}.ranking.totalScore`)}</span>
                 </div>
 
                 <div ref={rankingListRef} className={getRankingListClassName()}>
-                    {sortedRankingRows.map((row, index) => {
-                        const rank = index + 1;
-                        const isTopRank = rank <= 3;
-                        const trendClassName = row.trendDirection === "up" ? "eca-admin-leaderboard-trend eca-admin-leaderboard-trend--up" : "eca-admin-leaderboard-trend eca-admin-leaderboard-trend--down";
+                    {sortedRankingRows.map((row) => {
+                        const isTopRank = row.rank <= 3;
 
                         return (
                             <button type="button" className={selectedRankingRow?.id === row.id ? "eca-admin-leaderboard-row eca-admin-leaderboard-row--selected" : "eca-admin-leaderboard-row"} key={row.id} onClick={() => { cancelDetailPanelClosing(); setSelectedApprovalRow(null); setSelectedRankingRow(row); }}>
-                                <span className={isTopRank ? "eca-admin-leaderboard-rank-badge eca-admin-leaderboard-rank-badge--top" : "eca-admin-leaderboard-rank-badge"}>{rank}</span>
+                                <span className={isTopRank ? "eca-admin-leaderboard-rank-badge eca-admin-leaderboard-rank-badge--top" : "eca-admin-leaderboard-rank-badge"}>{row.rank}</span>
                                 {renderProfileImage(row.profileImage, "eca-admin-leaderboard-user-avatar", row.name)}
                                 <span className="eca-admin-leaderboard-user-name">{row.name}</span>
                                 <span className="eca-admin-leaderboard-score">{formatScore(row.totalScore)}</span>
-                                <span className={trendClassName}>
-                                    <span aria-hidden="true">{row.trendDirection === "up" ? "▲" : "▼"}</span>
-                                    <span>{row.trendAmount}</span>
-                                </span>
+                                {renderLeaderboardTrend(row.trendDirection, row.trendAmount, "eca-admin-leaderboard-trend")}
                             </button>
                         );
                     })}
@@ -1390,13 +1583,13 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderApprovalsContent(): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-approvals-content">
-                <div className="eca-admin-leaderboard-approvals-title">{getApprovalFilterTitle(approvalFilter)} ({filteredApprovalRows.length})</div>
+                <div className="eca-admin-leaderboard-approvals-title">{t(`${LEADERBOARD_T}.${getApprovalFilterTitleKey(approvalFilter)}`, { count: filteredApprovalRows.length })}</div>
 
                 <div className="eca-admin-leaderboard-approvals-header">
-                    <span>Name</span>
-                    <span>Submission Date</span>
-                    <span>Category</span>
-                    <span>Points</span>
+                    <span>{t(`${LEADERBOARD_T}.approvals.name`)}</span>
+                    <span>{t(`${LEADERBOARD_T}.approvals.submissionDate`)}</span>
+                    <span>{t(`${LEADERBOARD_T}.approvals.category`)}</span>
+                    <span>{t(`${LEADERBOARD_T}.approvals.points`)}</span>
                 </div>
 
                 <div className="eca-admin-leaderboard-approvals-list">
@@ -1411,8 +1604,10 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                                 setSelectedApprovalRow(row);
                             }}
                         >
-                            {renderProfileImage(row.profileImage, "eca-admin-leaderboard-approval-avatar", row.name)}
-                            <span className="eca-admin-leaderboard-approval-name">{row.name}</span>
+                            <div className="eca-admin-leaderboard-approval-profile-row">
+                                {renderProfileImage(row.profileImage, "eca-admin-leaderboard-approval-avatar", row.name)}
+                                <span className="eca-admin-leaderboard-approval-name">{row.name}</span>
+                            </div>
                             <span className="eca-admin-leaderboard-approval-date">{row.submittedAt}</span>
                             <span className={getApprovalCategoryClassName(row.category)}>{row.category}</span>
                             <span className="eca-admin-leaderboard-approval-point">+{row.points}</span>
@@ -1439,8 +1634,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         target: "ranking",
                         searchValue: rankingSearch,
                         draftValue: rankingSearchDraft,
-                        placeholder: "Enter student name",
-                        ariaLabel: "search ranking",
+                        placeholder: t(`${LEADERBOARD_T}.search.studentName`),
+                        ariaLabel: t(`${LEADERBOARD_T}.aria.searchRanking`),
                         buttonClassName: "eca-admin-leaderboard-icon-button",
                     })
                 )}
@@ -1465,8 +1660,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         target: "approvals",
                         searchValue: approvalSearch,
                         draftValue: approvalSearchDraft,
-                        placeholder: "Enter student name",
-                        ariaLabel: "search approvals",
+                        placeholder: t(`${LEADERBOARD_T}.search.studentName`),
+                        ariaLabel: t(`${LEADERBOARD_T}.aria.searchApprovals`),
                         buttonClassName: "eca-admin-leaderboard-icon-button",
                     }),
                     renderApprovalFilterControl()
@@ -1480,18 +1675,18 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         return (
             <div className="eca-admin-leaderboard-missions-content">
                 <div className="eca-admin-leaderboard-missions-top">
-                    <h2>Mission Mangement</h2>
+                    <h2>{t(`${LEADERBOARD_T}.missions.title`)}</h2>
                     <div className="eca-admin-leaderboard-missions-actions">
                         {renderSearchControl({
                             target: "missions",
                             searchValue: missionSearch,
                             draftValue: missionSearchDraft,
-                            placeholder: "Enter mission name",
-                            ariaLabel: "search missions",
+                            placeholder: t(`${LEADERBOARD_T}.search.studentName`),
+                            ariaLabel: t(`${LEADERBOARD_T}.aria.searchApprovals`),
                             buttonClassName: "eca-admin-leaderboard-missions-search-button",
                         })}
                         <button type="button" className="eca-admin-leaderboard-missions-add-button" onClick={handleOpenMissionModal}>
-                            추가하기
+                            {t(`${LEADERBOARD_T}.missions.addButton`)}
                         </button>
                     </div>
                 </div>
@@ -1502,7 +1697,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                         return (
                             <section className={getMissionColumnClassName(category)} key={category}>
-                                <h3>{missionCategoryLabels[category]} ({categoryMissions.length})</h3>
+                                <h3>{t(`${LEADERBOARD_T}.category.${category}`)} ({categoryMissions.length})</h3>
                                 <div ref={(node) => { missionColumnListRefs.current[category] = node; }} className="eca-admin-leaderboard-mission-column-list">
                                     {categoryMissions.map((mission) => (
                                         <article className="eca-admin-leaderboard-mission-rule-card" key={mission.id}>
@@ -1530,7 +1725,6 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderStudentDetailPanel(): React.ReactElement | null {
         if (!selectedRankingRow) return null;
 
-        const trendClassName = selectedRankingRow.trendDirection === "up" ? "eca-admin-leaderboard-detail-trend eca-admin-leaderboard-detail-trend--up" : "eca-admin-leaderboard-detail-trend eca-admin-leaderboard-detail-trend--down";
         const panelClassName = closingDetailPanel === "ranking" ? "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--closing" : "eca-admin-leaderboard-detail-panel";
 
         return (
@@ -1557,28 +1751,54 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                             <span>pt</span>
                         </div>
                         <div className="eca-admin-leaderboard-detail-place-row">
-                            <span className="eca-admin-leaderboard-detail-place-row-rank">{formatOrdinalPlace(selectedRank)}</span>
-                            <span className={trendClassName}>
-                                <span aria-hidden="true">{selectedRankingRow.trendDirection === "up" ? "▲" : "▼"}</span>
-                                <span>{selectedRankingRow.trendAmount}</span>
+                            <span className="eca-admin-leaderboard-detail-place-row-rank">
+                                {selectedRankingRow.rank > 0
+                                    ? t("ecaAdmin.leaderboardPage.rankPlace", {
+                                        rank: selectedRankingRow.rank,
+                                        ordinal: formatOrdinalPlace(selectedRankingRow.rank),
+                                    } as Record<string, string | number>)
+                                    : "-"}
                             </span>
+                            {renderLeaderboardTrend(selectedRankingRow.trendDirection, selectedRankingRow.trendAmount, "eca-admin-leaderboard-detail-trend")}
                         </div>
                     </section>
 
                     <div className="eca-admin-leaderboard-detail-list-header">
-                        <h2>Completed Missions ({filteredCompletedMissions.length})</h2>
+                        <h2>{t(`${LEADERBOARD_T}.detail.completedMissions`, { count: filteredCompletedMissions.length })}</h2>
                         <div className="eca-admin-leaderboard-detail-actions">
-                            <button type="button" className="eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" aria-label="filter completed missions">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
+                            <div className="eca-admin-leaderboard-completed-filter-wrap">
+                                <button
+                                    type="button"
+                                    className={selectedCompletedMissionCategories.length === missionCategories.length ? "eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter" : "eca-admin-leaderboard-icon-button eca-admin-leaderboard-icon-button--filter eca-admin-leaderboard-icon-button--active"}
+                                    aria-label="filter completed missions by category"
+                                    onClick={() => {
+                                        setOpenSearch(null);
+                                        setCompletedMissionFilterOpen((prev) => !prev);
+                                    }}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                {completedMissionFilterOpen ? (
+                                    <div className="eca-admin-leaderboard-completed-filter-popover">
+                                        {missionCategories.map((category) => (
+                                            <button type="button" key={category} className="eca-admin-leaderboard-completed-filter-option" onClick={() => toggleCompletedMissionCategory(category)}>
+                                                <img className="eca-admin-leaderboard-completed-filter-radio" src={getCompletedMissionCategoryFilterIcon(category)} alt="" />
+                                                <span>{t(`${LEADERBOARD_T}.category.${category}`)}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
+
                             {renderSearchControl({
                                 target: "completedMissions",
                                 searchValue: completedMissionSearch,
                                 draftValue: completedMissionSearchDraft,
-                                placeholder: "Enter mission name",
-                                ariaLabel: "search completed missions",
+                                placeholder: t(`${LEADERBOARD_T}.search.missionName`),
+                                ariaLabel: t(`${LEADERBOARD_T}.aria.searchCompletedMissions`),
                                 buttonClassName: "eca-admin-leaderboard-icon-button",
                             })}
                         </div>
@@ -1618,8 +1838,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         ))}
                     </div>
 
-                    <button type="button" className="eca-admin-leaderboard-detail-ok-button" onClick={() => setSelectedRankingRow(null)}>
-                        OK
+                    <button type="button" className="eca-admin-leaderboard-detail-ok-button" onClick={closeRankingDetailPanel}>
+                        {t(`${LEADERBOARD_T}.common.ok`)}
                     </button>
                 </aside>
             </div>
@@ -1629,7 +1849,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderApprovalDetailPanel(): React.ReactElement | null {
         if (!selectedApprovalRow) return null;
 
-        const evidenceSlots = selectedApprovalRow.evidenceUrls.length > 0 ? selectedApprovalRow.evidenceUrls : ["", "", "", ""];
+        const evidenceSlots = selectedApprovalRow.evidences;
         const panelClassName = closingDetailPanel === "approval" ? "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--approval eca-admin-leaderboard-detail-panel--closing" : "eca-admin-leaderboard-detail-panel eca-admin-leaderboard-detail-panel--approval";
 
         return (
@@ -1650,36 +1870,40 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     </div>
 
                     <div className="eca-admin-leaderboard-approval-evidence-list">
-                        {evidenceSlots.slice(0, 4).map((url, index) => (
-                            renderEvidenceSlot(url, index, "approval", activityId, selectedApprovalRow.submissionId)
-                        ))}
+                        {evidenceSlots.length > 0 ? (
+                            evidenceSlots.map((evidence, index) => (
+                                renderEvidenceSlot(evidence, index, "approval", activityId, selectedApprovalRow.submissionId, evidenceSlotLabels, handleOpenEvidenceImagePreview)
+                            ))
+                        ) : (
+                            <span className="eca-admin-leaderboard-approval-evidence-empty">{t(`${LEADERBOARD_T}.detail.noEvidence`)}</span>
+                        )}
                     </div>
 
                     <div className="eca-admin-leaderboard-approval-detail-info">
                         <div className="eca-admin-leaderboard-approval-detail-info-row">
-                            <span>Category</span>
+                            <span>{t(`${LEADERBOARD_T}.detail.category`)}</span>
                             <strong className={`eca-admin-leaderboard-approval-detail-category eca-admin-leaderboard-approval-detail-category--${selectedApprovalRow.category.toLowerCase()}`}>{selectedApprovalRow.category}</strong>
                         </div>
                         <div className="eca-admin-leaderboard-approval-detail-info-row">
-                            <span>Point</span>
+                            <span>{t(`${LEADERBOARD_T}.detail.point`)}</span>
                             <strong className="eca-admin-leaderboard-approval-detail-point">+{selectedApprovalRow.points}</strong>
                         </div>
                         <div className="eca-admin-leaderboard-approval-detail-info-row">
-                            <span>Mission</span>
+                            <span>{t(`${LEADERBOARD_T}.detail.mission`)}</span>
                             <strong>{selectedApprovalRow.title}</strong>
                         </div>
                         <div className="eca-admin-leaderboard-approval-detail-info-row">
-                            <span>Submission Time</span>
+                            <span>{t(`${LEADERBOARD_T}.detail.submissionTime`)}</span>
                             <strong>{selectedApprovalRow.submittedAt}</strong>
                         </div>
                     </div>
 
                     <div className="eca-admin-leaderboard-approval-detail-actions">
                         <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--approve" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "approve")}>
-                            Approve
+                            {t(`${LEADERBOARD_T}.approvalDetail.approve`)}
                         </button>
                         <button type="button" className="eca-admin-leaderboard-approval-detail-button eca-admin-leaderboard-approval-detail-button--reject" onClick={() => handleApprovalDecision(selectedApprovalRow.submissionId, "reject")}>
-                            Reject
+                            {t(`${LEADERBOARD_T}.approvalDetail.reject`)}
                         </button>
                     </div>
                 </aside>
@@ -1690,7 +1914,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
     function renderMissionDetailModal(): React.ReactElement | null {
         if (!selectedMission) return null;
 
-        const evidenceSlots = selectedMission.evidenceUrls.length > 0 ? selectedMission.evidenceUrls : ["", ""];
+        const evidenceSlots = selectedMission.evidences;
 
         return (
             <div className="eca-admin-leaderboard-mission-modal-backdrop" role="presentation" onClick={() => setSelectedMission(null)}>
@@ -1702,9 +1926,13 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                     </button>
 
                     <div className="eca-admin-leaderboard-mission-modal-evidence-list">
-                        {evidenceSlots.slice(0, 2).map((url, index) => (
-                            renderEvidenceSlot(url, index, "mission-modal", activityId, selectedMission.submissionId)
-                        ))}
+                        {evidenceSlots.length > 0 ? (
+                            evidenceSlots.map((evidence, index) => (
+                                renderEvidenceSlot(evidence, index, "mission-modal", activityId, selectedMission.submissionId, evidenceSlotLabels, handleOpenEvidenceImagePreview)
+                            ))
+                        ) : (
+                            <span className="eca-admin-leaderboard-mission-modal-evidence-placeholder" aria-hidden="true" />
+                        )}
                     </div>
 
                     <div className="eca-admin-leaderboard-mission-modal-info" id="eca-admin-leaderboard-mission-modal-title">
@@ -1746,14 +1974,14 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         <path fillRule="evenodd" clipRule="evenodd" d="M47.6 6.6665C48.9992 6.66687 50.3628 7.10746 51.4977 7.92586C52.6326 8.74427 53.4812 9.899 53.9233 11.2265L55.7333 16.6665H66.6667C67.5507 16.6665 68.3986 17.0177 69.0237 17.6428C69.6488 18.2679 70 19.1158 70 19.9998C70 20.8839 69.6488 21.7317 69.0237 22.3569C68.3986 22.982 67.5507 23.3332 66.6667 23.3332L66.6567 23.5698L63.7667 64.0465C63.5863 66.5685 62.4572 68.9286 60.6068 70.6517C58.7563 72.3748 56.3218 73.3329 53.7933 73.3332H26.2067C23.6782 73.3329 21.2437 72.3748 19.3932 70.6517C17.5428 68.9286 16.4137 66.5685 16.2333 64.0465L13.3433 23.5665L13.3333 23.3332C12.4493 23.3332 11.6014 22.982 10.9763 22.3569C10.3512 21.7317 10 20.8839 10 19.9998C10 19.1158 10.3512 18.2679 10.9763 17.6428C11.6014 17.0177 12.4493 16.6665 13.3333 16.6665H24.2667L26.0767 11.2265C26.519 9.89846 27.3681 8.74334 28.5037 7.92489C29.6392 7.10643 31.0036 6.66617 32.4033 6.6665H47.6ZM30 33.3332C29.1836 33.3333 28.3955 33.633 27.7854 34.1756C27.1753 34.7181 26.7855 35.4657 26.69 36.2765L26.6667 36.6665V56.6665C26.6676 57.5161 26.9929 58.3333 27.5762 58.9511C28.1594 59.5688 28.9565 59.9406 29.8046 59.9904C30.6528 60.0402 31.4879 59.7643 32.1394 59.219C32.791 58.6737 33.2097 57.9002 33.31 57.0565L33.3333 56.6665V36.6665C33.3333 35.7824 32.9821 34.9346 32.357 34.3095C31.7319 33.6844 30.8841 33.3332 30 33.3332ZM50 33.3332C49.1159 33.3332 48.2681 33.6844 47.643 34.3095C47.0179 34.9346 46.6667 35.7824 46.6667 36.6665V56.6665C46.6667 57.5506 47.0179 58.3984 47.643 59.0235C48.2681 59.6486 49.1159 59.9998 50 59.9998C50.8841 59.9998 51.7319 59.6486 52.357 59.0235C52.9821 58.3984 53.3333 57.5506 53.3333 56.6665V36.6665C53.3333 35.7824 52.9821 34.9346 52.357 34.3095C51.7319 33.6844 50.8841 33.3332 50 33.3332ZM47.6 13.3332H32.4L31.29 16.6665H48.71L47.6 13.3332Z" fill="#0166FF"/>
                     </svg>
 
-                    <h2 id="eca-admin-leaderboard-mission-delete-title">Do you really want to delete this?</h2>
+                    <h2 id="eca-admin-leaderboard-mission-delete-title">{t(`${LEADERBOARD_T}.deleteModal.title`)}</h2>
 
                     <div className="eca-admin-leaderboard-mission-delete-actions">
                         <button type="button" className="eca-admin-leaderboard-mission-delete-button" onClick={handleConfirmMissionDelete}>
-                            Yes
+                            {t(`${LEADERBOARD_T}.common.yes`)}
                         </button>
                         <button type="button" className="eca-admin-leaderboard-mission-delete-button" onClick={() => setDeleteMissionTarget(null)}>
-                            No
+                            {t(`${LEADERBOARD_T}.common.no`)}
                         </button>
                     </div>
                 </section>
@@ -1773,20 +2001,20 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         </svg>
                     </button>
 
-                    <h2 id="eca-admin-leaderboard-add-mission-title">{editingMission ? "Edit Mission" : "Add Mission"}</h2>
+                    <h2 id="eca-admin-leaderboard-add-mission-title">{editingMission ? t(`${LEADERBOARD_T}.missionForm.editTitle`) : t(`${LEADERBOARD_T}.missionForm.addTitle`)}</h2>
 
                     <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
-                        <span>Mission Name</span>
-                        <input value={missionForm.title} onChange={(event) => handleMissionFormChange("title", event.target.value)} placeholder="Enter Mission Name" />
+                        <span>{t(`${LEADERBOARD_T}.missionForm.missionName`)}</span>
+                        <input value={missionForm.title} onChange={(event) => handleMissionFormChange("title", event.target.value)} placeholder={t(`${LEADERBOARD_T}.missionForm.missionNamePlaceholder`)} />
                     </label>
 
                     <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
-                        <span>Mission Description</span>
-                        <input value={missionForm.description} onChange={(event) => handleMissionFormChange("description", event.target.value)} placeholder="Describe the Mission" />
+                        <span>{t(`${LEADERBOARD_T}.missionForm.missionDescription`)}</span>
+                        <input value={missionForm.description} onChange={(event) => handleMissionFormChange("description", event.target.value)} placeholder={t(`${LEADERBOARD_T}.missionForm.missionDescriptionPlaceholder`)} />
                     </label>
 
                     <div className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
-                        <span>Category</span>
+                        <span>{t(`${LEADERBOARD_T}.missionForm.category`)}</span>
                         {renderCustomDropdown({
                             id: "missionCategory",
                             value: missionForm.category,
@@ -1799,22 +2027,22 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                     <div className="eca-admin-leaderboard-add-mission-grid">
                         <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
-                            <span>Points</span>
-                            <input value={missionForm.points} onChange={(event) => handleMissionFormChange("points", event.target.value)} placeholder="Number" inputMode="numeric" />
+                            <span>{t(`${LEADERBOARD_T}.missionForm.points`)}</span>
+                            <input value={missionForm.points} onChange={(event) => handleMissionFormChange("points", event.target.value)} placeholder={t(`${LEADERBOARD_T}.missionForm.numberPlaceholder`)} inputMode="numeric" />
                         </label>
                         <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--narrow">
-                            <span>Maximum Missions per Student</span>
-                            <input value={missionForm.maximum} onChange={(event) => handleMissionFormChange("maximum", event.target.value)} placeholder="Number" inputMode="numeric" />
+                            <span>{t(`${LEADERBOARD_T}.missionForm.maximumMissionsPerStudent`)}</span>
+                            <input value={missionForm.maximum} onChange={(event) => handleMissionFormChange("maximum", event.target.value)} placeholder={t(`${LEADERBOARD_T}.missionForm.numberPlaceholder`)} inputMode="numeric" />
                         </label>
                     </div>
 
                     <label className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--wide">
-                        <span>Evidence</span>
-                        <input value={missionForm.evidence} onChange={(event) => handleMissionFormChange("evidence", event.target.value)} placeholder="Explain what students need to submit as evidence" />
+                        <span>{t(`${LEADERBOARD_T}.missionForm.evidence`)}</span>
+                        <input value={missionForm.evidence} onChange={(event) => handleMissionFormChange("evidence", event.target.value)} placeholder={t(`${LEADERBOARD_T}.missionForm.evidencePlaceholder`)} />
                     </label>
 
                     <div className="eca-admin-leaderboard-add-mission-field eca-admin-leaderboard-add-mission-field--format">
-                        <span>Submission Format</span>
+                        <span>{t(`${LEADERBOARD_T}.missionForm.submissionFormat`)}</span>
                         {renderCustomDropdown({
                             id: "missionEvidenceType",
                             value: missionForm.evidenceType,
@@ -1829,10 +2057,10 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
 
                     <div className="eca-admin-leaderboard-add-mission-actions">
                         <button type="button" className="eca-admin-leaderboard-add-mission-button eca-admin-leaderboard-add-mission-button--cancel" onClick={handleCloseMissionModal}>
-                            Cancel
+                            {t(`${LEADERBOARD_T}.common.cancel`)}
                         </button>
                         <button type="button" className="eca-admin-leaderboard-add-mission-button eca-admin-leaderboard-add-mission-button--create" onClick={handleSaveMission}>
-                            {editingMission ? "Save" : "Create"}
+                            {editingMission ? t(`${LEADERBOARD_T}.common.save`) : t(`${LEADERBOARD_T}.common.create`)}
                         </button>
                     </div>
                 </section>
@@ -1844,7 +2072,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         <section className="eca-admin-leaderboard-page">
             <header className="eca-admin-leaderboard-header">
                 <div className="eca-admin-leaderboard-header-row">
-                    <h1 className="eca-admin-leaderboard-title">{activity?.name ?? "Class Name"}</h1>
+                    <h1 className="eca-admin-leaderboard-title">{activity?.name ?? t(`${LEADERBOARD_T}.activityFallback`)}</h1>
 
                     {/* <div className="eca-admin-leaderboard-menu-wrap" ref={actionMenuRef}>
                         <button type="button" className="eca-admin-leaderboard-more-button" aria-label="open menu" onClick={() => setMenuOpen((prev) => !prev)}>
@@ -1873,9 +2101,9 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 </div>
 
                 <nav className={getTabsClassName(activeTab)} aria-label="leaderboard tabs">
-                    <button type="button" className={getTabClassName("ranking", activeTab)} onClick={() => { setActiveTab("ranking"); setSelectedApprovalRow(null); }}>Ranking</button>
-                    <button type="button" className={getTabClassName("approvals", activeTab)} onClick={() => { setActiveTab("approvals"); setSelectedRankingRow(null); }}>Approvals</button>
-                    <button type="button" className={getTabClassName("missions", activeTab)} onClick={() => { setActiveTab("missions"); setSelectedRankingRow(null); setSelectedApprovalRow(null); }}>Missions</button>
+                    <button type="button" className={getTabClassName("ranking", activeTab)} onClick={() => { setActiveTab("ranking"); setSelectedApprovalRow(null); }}>{t(`${LEADERBOARD_T}.tabs.ranking`)}</button>
+                    <button type="button" className={getTabClassName("approvals", activeTab)} onClick={() => { setActiveTab("approvals"); setSelectedRankingRow(null); }}>{t(`${LEADERBOARD_T}.tabs.approvals`)}</button>
+                    <button type="button" className={getTabClassName("missions", activeTab)} onClick={() => { setActiveTab("missions"); setSelectedRankingRow(null); setSelectedApprovalRow(null); }}>{t(`${LEADERBOARD_T}.tabs.missions`)}</button>
                 </nav>
             </header>
 
@@ -1893,6 +2121,12 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 </div>
             </section>
 
+            {activeTab === "ranking" ? (
+                <div className="eca-admin-leaderboard-update-note">
+                    {t(`${LEADERBOARD_T}.lastUpdate`, { value: formatLeaderboardLastUpdateValue(leaderboardLastUpdate) })}
+                </div>
+            ) : null}
+
             {deleteModalOpen ? (
                 <div className="eca-admin-leaderboard-modal-backdrop" role="presentation">
                     <div className="eca-admin-leaderboard-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="eca-admin-leaderboard-delete-title">
@@ -1909,6 +2143,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             {renderMissionDetailModal()}
             {renderMissionDeleteModal()}
             {renderAddMissionModal()}
+            {renderEvidenceImagePreviewModal()}
         </section>
     );
 }

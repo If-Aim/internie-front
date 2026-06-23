@@ -900,6 +900,152 @@
 				"status": "Attendance Status"
 			}
 		},
+		"leaderboardPage": {
+			"activityFallback": "Class Name",
+			"lastUpdate": "Last update {{value}}",
+			"rankPlace": "{{ordinal}}",
+			"tabs": {
+				"ranking": "Ranking",
+				"approvals": "Approvals",
+				"missions": "Missions"
+			},
+			"common": {
+				"ok": "OK",
+				"yes": "Yes",
+				"no": "No",
+				"cancel": "Cancel",
+				"save": "Save",
+				"create": "Create"
+			},
+			"sort": {
+				"alphabetical": "Alphabetical",
+				"highest": "Highest",
+				"lowest": "Lowest",
+				"oldest": "Oldest",
+				"latest": "Newest"
+			},
+			"approvalStatus": {
+				"all": "All",
+				"pending": "Pending",
+				"approved": "Approved",
+				"rejected": "Rejected"
+			},
+			"approvalFilterTitle": {
+				"all": "All Approvals ({{count}})",
+				"pending": "Pending Approval ({{count}})",
+				"approved": "Approved ({{count}})",
+				"rejected": "Rejected ({{count}})"
+			},
+			"category": {
+				"Elicit": "Elicit",
+				"Discover": "Discover",
+				"Insight": "Insight",
+				"Synthesize": "Synthesize",
+				"Own": "Own",
+				"Nurture": "Nurture",
+				"Etc": "Etc"
+			},
+			"evidenceFormat": {
+				"DOCUMENT": "Document (DOCX, PDF, PPT, etc.)",
+				"IMAGE": "Image (PNG, JPG, JPEG, etc.)",
+				"VIDEO": "Video (MP4, MOV, AVI, etc.)",
+				"LINK": "Link (Google Drive, YouTube, etc.)",
+				"OTHER": "Others"
+			},
+			"ranking": {
+				"title": "Students Ranking ({{count}})",
+				"rank": "Rank",
+				"name": "Name",
+				"totalScore": "Total Score"
+			},
+			"approvals": {
+				"name": "Name",
+				"submissionDate": "Submission Date",
+				"category": "Category",
+				"points": "Points"
+			},
+			"missions": {
+				"title": "Mission Management",
+				"addButton": "Add"
+			},
+			"detail": {
+				"totalPoints": "Total Points:",
+				"completedMissions": "Completed Missions ({{count}})",
+				"category": "Category",
+				"point": "Point",
+				"mission": "Mission",
+				"submissionTime": "Submission Time",
+				"noEvidence": "No evidence"
+			},
+			"approvalDetail": {
+				"approve": "Approve",
+				"reject": "Reject"
+			},
+			"missionForm": {
+				"addTitle": "Add Mission",
+				"editTitle": "Edit Mission",
+				"missionName": "Mission Name",
+				"missionNamePlaceholder": "Enter Mission Name",
+				"missionDescription": "Mission Description",
+				"missionDescriptionPlaceholder": "Describe the Mission",
+				"category": "Category",
+				"selectCategory": "Select Category",
+				"points": "Points",
+				"maximumMissionsPerStudent": "Maximum Missions per Student",
+				"numberPlaceholder": "Number",
+				"evidence": "Evidence",
+				"evidencePlaceholder": "Explain what students need to submit as evidence",
+				"submissionFormat": "Submission Format",
+				"selectEvidenceFormat": "Select a format of evidence"
+			},
+			"deleteModal": {
+				"title": "Do you really want to delete this?"
+			},
+			"imagePreview": {
+				"title": "Evidence image preview"
+			},
+			"search": {
+				"studentName": "Enter student name",
+				"missionName": "Enter mission name"
+			},
+			"aria": {
+				"sortRanking": "sort ranking",
+				"sortApprovals": "sort approvals",
+				"filterApprovals": "filter approvals",
+				"filterCompletedMissions": "filter completed missions by category",
+				"searchRanking": "search ranking",
+				"searchApprovals": "search approvals",
+				"searchMissions": "search missions",
+				"searchCompletedMissions": "search completed missions",
+				"export": "export",
+				"closeStudentDetail": "close student detail",
+				"closeApprovalDetail": "close approval detail",
+				"closeMissionDetail": "close mission detail",
+				"closeDeleteModal": "close delete modal",
+				"closeMissionModal": "close mission modal",
+				"closeImagePreview": "close image preview",
+				"editMission": "edit mission",
+				"deleteCompletedMission": "delete completed mission",
+				"openEvidenceImagePreview": "open evidence image preview",
+				"downloadEvidenceFile": "download {{fileName}}"
+			},
+			"prompt": {
+				"rejectReason": "Please enter the rejection reason."
+			},
+			"alert": {
+				"deleteApiPlaceholder": "Connect the delete API and process deletion."
+			},
+			"error": {
+				"loadFailed": "Failed to load leaderboard information.",
+				"downloadFailed": "Failed to download the file.",
+				"deleteCompletedMissionFailed": "Failed to delete the completed mission.",
+				"approveFailed": "Failed to approve the submission.",
+				"rejectFailed": "Failed to reject the submission.",
+				"invalidMissionForm": "Please fill in all required fields correctly.",
+				"editMissionFailed": "Failed to edit the mission.",
+				"createMissionFailed": "Failed to create the mission."
+			}
+		},
 
         "home": "Home",
         "ecaClientAdminSubmenuEmpty": "No assigned programs",

@@ -902,6 +902,153 @@
             }
         },
 
+        "leaderboardPage": {
+            "activityFallback": "대외활동",
+            "lastUpdate": "마지막 업데이트 {{value}}",
+            "rankPlace": "{{rank}}위",
+            "tabs": {
+                "ranking": "랭킹",
+                "approvals": "승인 관리",
+                "missions": "미션"
+            },
+            "common": {
+                "ok": "확인",
+                "yes": "예",
+                "no": "아니오",
+                "cancel": "취소",
+                "save": "저장",
+                "create": "생성"
+            },
+            "sort": {
+                "alphabetical": "가나다순",
+                "highest": "높은순",
+                "lowest": "낮은순",
+                "oldest": "과거순",
+                "latest": "최신순"
+            },
+            "approvalStatus": {
+                "all": "전체",
+                "pending": "승인 전",
+                "approved": "승인 완료",
+                "rejected": "반려"
+            },
+            "approvalFilterTitle": {
+                "all": "전체 승인 목록 ({{count}})",
+                "pending": "승인 전 ({{count}})",
+                "approved": "승인 완료 ({{count}})",
+                "rejected": "반려 ({{count}})"
+            },
+            "category": {
+                "Elicit": "Elicit",
+                "Discover": "Discover",
+                "Insight": "Insight",
+                "Synthesize": "Synthesize",
+                "Own": "Own",
+                "Nurture": "Nurture",
+                "Etc": "기타"
+            },
+            "evidenceFormat": {
+                "DOCUMENT": "문서 (DOCX, PDF, PPT 등)",
+                "IMAGE": "이미지 (PNG, JPG, JPEG 등)",
+                "VIDEO": "영상 (MP4, MOV, AVI 등)",
+                "LINK": "링크 (Google Drive, YouTube 등)",
+                "OTHER": "기타"
+            },
+            "ranking": {
+                "title": "학생 랭킹 ({{count}})",
+                "rank": "순위",
+                "name": "이름",
+                "totalScore": "총점"
+            },
+            "approvals": {
+                "name": "이름",
+                "submissionDate": "제출일",
+                "category": "카테고리",
+                "points": "점수"
+            },
+            "missions": {
+                "title": "미션 관리",
+                "addButton": "추가하기"
+            },
+            "detail": {
+                "totalPoints": "총점:",
+                "completedMissions": "완료한 미션 ({{count}})",
+                "category": "카테고리",
+                "point": "점수",
+                "mission": "미션",
+                "submissionTime": "제출 시간",
+                "noEvidence": "제출 자료 없음"
+            },
+            "approvalDetail": {
+                "approve": "승인",
+                "reject": "반려"
+            },
+            "missionForm": {
+                "addTitle": "미션 추가",
+                "editTitle": "미션 수정",
+                "missionName": "미션명",
+                "missionNamePlaceholder": "미션명을 입력하세요",
+                "missionDescription": "미션 설명",
+                "missionDescriptionPlaceholder": "미션을 설명하세요",
+                "category": "카테고리",
+                "selectCategory": "카테고리 선택",
+                "points": "점수",
+                "maximumMissionsPerStudent": "학생당 최대 수행 횟수",
+                "numberPlaceholder": "숫자",
+                "evidence": "제출 자료",
+                "evidencePlaceholder": "학생이 제출해야 하는 자료를 설명하세요",
+                "submissionFormat": "제출 형식",
+                "selectEvidenceFormat": "제출 자료 형식을 선택하세요"
+            },
+            "deleteModal": {
+                "title": "정말 삭제하시겠습니까?"
+            },
+            "imagePreview": {
+                "title": "제출 이미지 미리보기"
+            },
+            "search": {
+                "studentName": "학생 이름을 입력하세요",
+                "missionName": "미션명을 입력하세요"
+            },
+            "aria": {
+                "sortRanking": "랭킹 정렬",
+                "sortApprovals": "승인 목록 정렬",
+                "filterApprovals": "승인 목록 필터",
+                "filterCompletedMissions": "완료한 미션 카테고리 필터",
+                "searchRanking": "랭킹 검색",
+                "searchApprovals": "승인 목록 검색",
+                "searchMissions": "미션 검색",
+                "searchCompletedMissions": "완료한 미션 검색",
+                "export": "내보내기",
+                "closeStudentDetail": "학생 상세 닫기",
+                "closeApprovalDetail": "승인 상세 닫기",
+                "closeMissionDetail": "미션 상세 닫기",
+                "closeDeleteModal": "삭제 모달 닫기",
+                "closeMissionModal": "미션 모달 닫기",
+                "closeImagePreview": "이미지 미리보기 닫기",
+                "editMission": "미션 수정",
+                "deleteCompletedMission": "완료한 미션 삭제",
+                "openEvidenceImagePreview": "제출 이미지 크게 보기",
+                "downloadEvidenceFile": "{{fileName}} 다운로드"
+            },
+            "prompt": {
+                "rejectReason": "반려 사유를 입력해주세요."
+            },
+            "alert": {
+                "deleteApiPlaceholder": "삭제 API 연결 후 삭제 처리하면 됩니다."
+            },
+            "error": {
+                "loadFailed": "리더보드 정보를 불러오지 못했습니다.",
+                "downloadFailed": "파일 다운로드에 실패했습니다.",
+                "deleteCompletedMissionFailed": "완료 미션 삭제에 실패했습니다.",
+                "approveFailed": "승인 처리에 실패했습니다.",
+                "rejectFailed": "반려 처리에 실패했습니다.",
+                "invalidMissionForm": "필수값을 모두 올바르게 입력해주세요.",
+                "editMissionFailed": "미션 수정에 실패했습니다.",
+                "createMissionFailed": "미션 생성에 실패했습니다."
+            }
+        },
+
         "home": "홈",
         "ecaClientAdminSubmenuEmpty": "담당 대외활동이 없습니다",
         "dashboard": "대시보드",

@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, getMyLeaderboardMissionLogs, getMyLeaderboardMissions, submitLeaderboardMission } from "../../../../../../api/ea";
 import type { LeaderboardMissionCategory, LeaderboardMissionResponse, StudentLeaderboardLogResponse } from "../../../../../../api/ea";
+import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 import "./ecaStudentMobileLeaderboard.css";
 
 type RouteParams = {
@@ -19,8 +20,8 @@ function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
     return (
         <div className="topbar topbar-main">
             <button className="iconbtn" aria-label="Back" onClick={onBackClick}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M15 18L9 12L15 6" stroke="#000" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
             </button>
 
@@ -33,9 +34,22 @@ function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
 
 type MissionStep = "select" | "submit" | "complete";
 type MissionFilter = "ALL" | "AVAILABLE" | "MAXED_OUT";
+type MissionCategoryFilter = "ALL" | LeaderboardMissionCategory;
 
 function formatNumber(value?: number | null): string {
     return Number(value ?? 0).toLocaleString("en-US");
+}
+
+function getFileExtension(fileName: string): string {
+    const extension = fileName.split(".").pop();
+
+    if (!extension || extension === fileName) return "file";
+
+    return extension.toLowerCase();
+}
+
+function getEvidenceFileKey(file: File): string {
+    return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
 function getCategoryLabel(value?: LeaderboardMissionCategory | null): string {
@@ -99,11 +113,14 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
     const [step, setStep] = React.useState<MissionStep>("select");
     const [filter, setFilter] = React.useState<MissionFilter>("ALL");
+    const [missionCategoryFilter, setMissionCategoryFilter] = React.useState<MissionCategoryFilter>("ALL");
+    const [isMissionCategoryFilterOpen, setIsMissionCategoryFilterOpen] = React.useState(false);
+
     const [missions, setMissions] = React.useState<LeaderboardMissionResponse[]>([]);
     const [logs, setLogs] = React.useState<StudentLeaderboardLogResponse[]>([]);
     const [selectedMission, setSelectedMission] = React.useState<LeaderboardMissionResponse | null>(null);
-    const [evidenceFile, setEvidenceFile] = React.useState<File | null>(null);
-    const [evidenceUrl, setEvidenceUrl] = React.useState("");
+    const [evidenceFiles, setEvidenceFiles] = React.useState<File[]>([]);
+    const [evidenceUrlText, setEvidenceUrlText] = React.useState("");
     const [loading, setLoading] = React.useState(true);
     const [submitting, setSubmitting] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
@@ -118,11 +135,22 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     }, [missions, usedCountMap]);
 
     const filteredMissionItems = React.useMemo(() => {
-        if (filter === "AVAILABLE") return missionItems.filter((item) => !item.maxedOut);
-        if (filter === "MAXED_OUT") return missionItems.filter((item) => item.maxedOut);
+        let nextItems = missionItems;
 
-        return missionItems;
-    }, [missionItems, filter]);
+        if (filter === "AVAILABLE") {
+            nextItems = nextItems.filter((item) => !item.maxedOut);
+        }
+
+        if (filter === "MAXED_OUT") {
+            nextItems = nextItems.filter((item) => item.maxedOut);
+        }
+
+        if (missionCategoryFilter !== "ALL") {
+            nextItems = nextItems.filter((item) => item.mission.category === missionCategoryFilter);
+        }
+
+        return nextItems;
+    }, [missionItems, filter, missionCategoryFilter]);
 
     const availableCount = missionItems.filter((item) => !item.maxedOut).length;
     const maxedOutCount = missionItems.filter((item) => item.maxedOut).length;
@@ -166,6 +194,25 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         };
     }, [externalActivityId]);
 
+    React.useEffect(() => {
+        if (!isMissionCategoryFilterOpen) return;
+
+        function handlePointerDown(event: PointerEvent): void {
+            const target = event.target;
+
+            if (!(target instanceof Element)) return;
+            if (target.closest(".eca-student-mobile-leaderboard-mission-category-filter-wrap")) return;
+
+            setIsMissionCategoryFilterOpen(false);
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+        };
+    }, [isMissionCategoryFilterOpen]);
+
     function handleBackClick(): void {
         if (step === "complete") {
             navigate(`/student/activities/${externalActivityId}/leaderboard`);
@@ -183,9 +230,13 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     function handleNextClick(): void {
         if (!selectedMission) return;
 
-        setEvidenceFile(null);
-        setEvidenceUrl("");
+        setEvidenceFiles([]);
+        setEvidenceUrlText("");
         setStep("submit");
+    }
+
+    function removeEvidenceFile(fileKey: string): void {
+        setEvidenceFiles((prev) => prev.filter((file) => getEvidenceFileKey(file) !== fileKey));
     }
 
     async function handleSubmit(): Promise<void> {
@@ -193,19 +244,22 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
         const acceptsLink = selectedMission.evidenceType === "LINK";
         const acceptsFile = selectedMission.evidenceType !== "LINK";
-        const trimmedEvidenceUrl = evidenceUrl.trim();
+        const evidenceUrls = evidenceUrlText
+            .split("\n")
+            .map((url) => url.trim())
+            .filter(Boolean);
 
-        if (acceptsFile && !evidenceFile) {
+        if (acceptsFile && evidenceFiles.length === 0) {
             alert("파일을 제출해주세요.");
             return;
         }
 
-        if (acceptsLink && !trimmedEvidenceUrl) {
+        if (acceptsLink && evidenceUrls.length === 0) {
             alert("링크를 입력해주세요.");
             return;
         }
 
-        if (acceptsLink && !isValidHttpUrl(trimmedEvidenceUrl)) {
+        if (acceptsLink && evidenceUrls.some((url) => !isValidHttpUrl(url))) {
             alert("http 또는 https로 시작하는 링크를 입력해주세요.");
             return;
         }
@@ -214,8 +268,8 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             setSubmitting(true);
 
             await submitLeaderboardMission(externalActivityId, selectedMission.missionId, {
-                file: acceptsFile ? evidenceFile : null,
-                evidenceUrl: acceptsLink ? trimmedEvidenceUrl : null,
+                files: acceptsFile ? evidenceFiles : null,
+                evidenceUrls: acceptsLink ? evidenceUrls : null,
             });
 
             setStep("complete");
@@ -238,11 +292,51 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         );
     }
 
+    function renderMissionCategoryFilter(): React.ReactElement {
+        const options: { value: MissionCategoryFilter; label: string }[] = [
+            { value: "ALL", label: "All" },
+            ...LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label,
+            })),
+        ];
+
+        return (
+            <div className="eca-student-mobile-leaderboard-mission-category-filter-wrap">
+                <button type="button" className={missionCategoryFilter === "ALL" ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsMissionCategoryFilterOpen((prev) => !prev)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        {missionCategoryFilter !== "ALL" ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
+                    </svg>
+                </button>
+
+                {isMissionCategoryFilterOpen ? (
+                    <div className="eca-student-mobile-leaderboard-mission-category-filter-popover">
+                        {options.map((option) => (
+                            <button
+                                type="button"
+                                className={missionCategoryFilter === option.value ? "eca-student-mobile-leaderboard-mission-category-filter-option selected" : "eca-student-mobile-leaderboard-mission-category-filter-option"}
+                                key={option.value}
+                                onClick={() => {
+                                    setMissionCategoryFilter(option.value);
+                                    setIsMissionCategoryFilterOpen(false);
+                                }}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                ) : null}
+            </div>
+        );
+    }
+
     function renderSelectStep(): React.ReactElement {
         return (
             <>
                 <section className="eca-student-mobile-leaderboard-mission-select-header">
                     <h1>Select a Mission</h1>
+                    {renderMissionCategoryFilter()}
                 </section>
 
                 <div className="eca-student-mobile-leaderboard-mission-filter-tabs">
@@ -286,9 +380,12 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
         const acceptsLink = selectedMission.evidenceType === "LINK";
         const acceptsFile = selectedMission.evidenceType !== "LINK";
-        const trimmedEvidenceUrl = evidenceUrl.trim();
-        const hasInvalidLink = acceptsLink && trimmedEvidenceUrl.length > 0 && !isValidHttpUrl(trimmedEvidenceUrl);
-        const submitDisabled = submitting || (acceptsFile && !evidenceFile) || (acceptsLink && (!trimmedEvidenceUrl || hasInvalidLink));
+        const evidenceUrls = evidenceUrlText
+            .split("\n")
+            .map((url) => url.trim())
+            .filter(Boolean);
+        const hasInvalidLink = acceptsLink && evidenceUrls.length > 0 && evidenceUrls.some((url) => !isValidHttpUrl(url));
+        const submitDisabled = submitting || (acceptsFile && evidenceFiles.length === 0) || (acceptsLink && (evidenceUrls.length === 0 || hasInvalidLink));
 
         return (
             <>
@@ -296,68 +393,101 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                     <h1>Upload Evidence</h1>
                 </section>
 
-                <section className="eca-student-mobile-leaderboard-mission-submit-card">
-                    <h2>Mission Information</h2>
-
-                    <div className="eca-student-mobile-leaderboard-mission-info-field">
-                        <span>Mission Name</span>
-                        <input value={selectedMission.name} readOnly />
-                    </div>
-
-                    <div className="eca-student-mobile-leaderboard-mission-info-field">
-                        <span>Evidence</span>
-                        <input value={selectedMission.evidenceName || "-"} readOnly />
-                    </div>
-
-                    <div className="eca-student-mobile-leaderboard-mission-info-grid">
-                        <label>
-                            <span>Submission Format</span>
-                            <input value={getEvidenceTypeLabel(selectedMission.evidenceType)} readOnly />
-                        </label>
-                    </div>
-                </section>
-
-                <section className="eca-student-mobile-leaderboard-mission-submit-card">
-                    <h2>Submission</h2>
-
-                    {acceptsFile ? (
-                        <>
-                            <label className="eca-student-mobile-leaderboard-mission-file-label">File</label>
-
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept={getAcceptByEvidenceType(selectedMission.evidenceType)}
-                                hidden
-                                onChange={(event) => {
-                                    setEvidenceFile(event.target.files?.[0] ?? null);
-                                }}
-                            />
-
-                            <button type="button" className="eca-student-mobile-leaderboard-mission-upload-box" onClick={() => fileInputRef.current?.click()}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path fillRule="evenodd" clipRule="evenodd" d="M16 2.666C14.457 2.666 12.947 3.112 11.651 3.951C10.356 4.79 9.33 5.985 8.699 7.393C8.609 7.595 8.517 7.796 8.423 7.996H8C6.586 7.996 5.229 8.558 4.229 9.558C3.229 10.558 2.667 11.915 2.667 13.329C2.667 14.744 3.229 16.1 4.229 17.1C5.229 18.101 6.586 18.663 8 18.663H8.23L10.896 15.996H8C7.293 15.996 6.615 15.715 6.115 15.215C5.615 14.715 5.334 14.037 5.334 13.329C5.334 12.622 5.615 11.944 6.115 11.444C6.615 10.944 7.293 10.663 8 10.663H8.086C8.363 10.663 8.686 10.664 8.952 10.61C9.284 10.553 9.602 10.431 9.886 10.25C10.207 10.042 10.428 9.783 10.596 9.547C10.699 9.395 10.789 9.234 10.864 9.067C10.935 8.919 11.023 8.728 11.126 8.496C11.546 7.556 12.23 6.758 13.094 6.198C13.958 5.638 14.966 5.34 15.996 5.34C17.026 5.34 18.034 5.638 18.898 6.198C19.762 6.758 20.445 7.556 20.866 8.496C20.978 8.728 21.065 8.919 21.136 9.067C21.198 9.196 21.288 9.384 21.404 9.547C21.572 9.782 21.792 10.042 22.115 10.251C22.438 10.459 22.764 10.554 23.048 10.611C23.315 10.664 23.638 10.664 23.915 10.664H24C24.708 10.664 25.386 10.944 25.886 11.444C26.386 11.944 26.667 12.622 26.667 13.329C26.667 14.037 26.386 14.715 25.886 15.215C25.386 15.715 24.708 15.996 24 15.996H21.104L23.771 18.663H24C25.415 18.663 26.771 18.101 27.772 17.1C28.772 16.1 29.334 14.744 29.334 13.329C29.334 11.915 28.772 10.558 27.772 9.558C26.771 8.558 25.415 7.996 24 7.996H23.578C23.462 7.746 23.381 7.568 23.302 7.393C22.67 5.985 21.645 4.79 20.349 3.951C19.054 3.112 17.543 2.666 16 2.666Z" fill="#808080"/>
-                                    <path d="M16 16L15.057 15.057L16 14.114L16.943 15.057L16 16ZM17.333 28C17.333 28.354 17.193 28.693 16.942 28.943C16.692 29.193 16.353 29.333 16 29.333C15.646 29.333 15.307 29.193 15.057 28.943C14.807 28.693 14.667 28.354 14.667 28H17.333ZM9.724 20.391L15.057 15.057L16.943 16.943L11.609 22.276L9.724 20.391ZM16.943 15.057L22.276 20.391L20.391 22.276L15.057 16.943L16.943 15.057ZM17.333 16V28H14.667V16H17.333Z" fill="#808080"/>
-                                </svg>
-                                <span>{evidenceFile ? evidenceFile.name : "파일을 업로드해주세요"}</span>
-                            </button>
-                        </>
-                    ) : null}
-
-                    {acceptsLink ? (
-                        <div className="eca-student-mobile-leaderboard-mission-link-area">
-                            <label className="eca-student-mobile-leaderboard-mission-link-label">Link</label>
-                            <input className={hasInvalidLink ? "eca-student-mobile-leaderboard-mission-link-input is-invalid" : "eca-student-mobile-leaderboard-mission-link-input"} value={evidenceUrl} placeholder="링크를 붙여주세요" onChange={(event) => setEvidenceUrl(event.target.value)} />
-                            {hasInvalidLink ? <small>http 또는 https로 시작하는 링크를 입력해주세요.</small> : null}
+                <div className="eca-student-mobile-leaderboard-mission-submit-section">
+                    <section className="eca-student-mobile-leaderboard-mission-submit-card">
+                        <h2>{selectedMission.name}</h2>
+                        <div className="eca-student-mobile-leaderboard-mission-info-field">
+                            <span>Evidence</span>
+                            <input value={selectedMission.evidenceName || "-"} readOnly />
                         </div>
-                    ) : null}
-                </section>
 
-                <div className="eca-student-mobile-leaderboard-mission-submit-button-row">
-                    <button type="button" disabled={submitDisabled} onClick={handleSubmit}>
-                        {submitting ? "저장 중" : "제출하기"}
-                    </button>
+                        <div className="eca-student-mobile-leaderboard-mission-info-grid">
+                            <label>
+                                <span>Submission Format</span>
+                                <input value={getEvidenceTypeLabel(selectedMission.evidenceType)} readOnly />
+                            </label>
+                        </div>
+                    </section>
+
+                    <section className="eca-student-mobile-leaderboard-mission-submit-card">
+                        <h2>Submission</h2>
+
+                        {acceptsFile ? (
+                            <>
+                                <label className="eca-student-mobile-leaderboard-mission-file-label">File</label>
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept={getAcceptByEvidenceType(selectedMission.evidenceType)}
+                                    multiple
+                                    hidden
+                                    onChange={(event) => {
+                                        setEvidenceFiles(Array.from(event.target.files ?? []));
+                                    }}
+                                />
+
+                                <button type="button" className="eca-student-mobile-leaderboard-mission-upload-box" onClick={() => fileInputRef.current?.click()}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                        <path fillRule="evenodd" clipRule="evenodd" d="M16 2.666C14.457 2.666 12.947 3.112 11.651 3.951C10.356 4.79 9.33 5.985 8.699 7.393C8.609 7.595 8.517 7.796 8.423 7.996H8C6.586 7.996 5.229 8.558 4.229 9.558C3.229 10.558 2.667 11.915 2.667 13.329C2.667 14.744 3.229 16.1 4.229 17.1C5.229 18.101 6.586 18.663 8 18.663H8.23L10.896 15.996H8C7.293 15.996 6.615 15.715 6.115 15.215C5.615 14.715 5.334 14.037 5.334 13.329C5.334 12.622 5.615 11.944 6.115 11.444C6.615 10.944 7.293 10.663 8 10.663H8.086C8.363 10.663 8.686 10.664 8.952 10.61C9.284 10.553 9.602 10.431 9.886 10.25C10.207 10.042 10.428 9.783 10.596 9.547C10.699 9.395 10.789 9.234 10.864 9.067C10.935 8.919 11.023 8.728 11.126 8.496C11.546 7.556 12.23 6.758 13.094 6.198C13.958 5.638 14.966 5.34 15.996 5.34C17.026 5.34 18.034 5.638 18.898 6.198C19.762 6.758 20.445 7.556 20.866 8.496C20.978 8.728 21.065 8.919 21.136 9.067C21.198 9.196 21.288 9.384 21.404 9.547C21.572 9.782 21.792 10.042 22.115 10.251C22.438 10.459 22.764 10.554 23.048 10.611C23.315 10.664 23.638 10.664 23.915 10.664H24C24.708 10.664 25.386 10.944 25.886 11.444C26.386 11.944 26.667 12.622 26.667 13.329C26.667 14.037 26.386 14.715 25.886 15.215C25.386 15.715 24.708 15.996 24 15.996H21.104L23.771 18.663H24C25.415 18.663 26.771 18.101 27.772 17.1C28.772 16.1 29.334 14.744 29.334 13.329C29.334 11.915 28.772 10.558 27.772 9.558C26.771 8.558 25.415 7.996 24 7.996H23.578C23.462 7.746 23.381 7.568 23.302 7.393C22.67 5.985 21.645 4.79 20.349 3.951C19.054 3.112 17.543 2.666 16 2.666Z" fill="#808080"/>
+                                        <path d="M16 16L15.057 15.057L16 14.114L16.943 15.057L16 16ZM17.333 28C17.333 28.354 17.193 28.693 16.942 28.943C16.692 29.193 16.353 29.333 16 29.333C15.646 29.333 15.307 29.193 15.057 28.943C14.807 28.693 14.667 28.354 14.667 28H17.333ZM9.724 20.391L15.057 15.057L16.943 16.943L11.609 22.276L9.724 20.391ZM16.943 15.057L22.276 20.391L20.391 22.276L15.057 16.943L16.943 15.057ZM17.333 16V28H14.667V16H17.333Z" fill="#808080"/>
+                                    </svg>
+                                    <span>
+                                        {evidenceFiles.length > 0
+                                            ? `${evidenceFiles.length} files selected`
+                                            : "파일을 업로드해주세요"}
+                                    </span>
+                                </button>
+                                {evidenceFiles.length > 0 ? (
+                                    <div className="eca-student-mobile-leaderboard-mission-file-list">
+                                        {evidenceFiles.map((file) => {
+                                            const fileKey = getEvidenceFileKey(file);
+                                            const extension = getFileExtension(file.name);
+
+                                            return (
+                                                <div className="eca-student-mobile-leaderboard-mission-file-item" key={fileKey}>
+                                                    <div className="eca-student-mobile-leaderboard-mission-file-main">
+                                                        <span className="eca-student-mobile-leaderboard-mission-file-icon">
+                                                            {getFileIconByExtension(extension)}
+                                                        </span>
+                                                        <span className="eca-student-mobile-leaderboard-mission-file-name-wrap">
+                                                            <strong>{file.name}</strong>
+                                                        </span>
+                                                    </div>
+
+                                                    <button type="button" className="eca-student-mobile-leaderboard-mission-file-remove" onClick={() => removeEvidenceFile(fileKey)} aria-label="파일 삭제">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                            <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : null}
+                            </>
+                        ) : null}
+
+                        {acceptsLink ? (
+                            <div className="eca-student-mobile-leaderboard-mission-link-area">
+                                <label className="eca-student-mobile-leaderboard-mission-link-label">Link</label>
+                                <textarea
+                                    className={hasInvalidLink ? "eca-student-mobile-leaderboard-mission-link-input is-invalid" : "eca-student-mobile-leaderboard-mission-link-input"}
+                                    value={evidenceUrlText}
+                                    placeholder={"링크를 한 줄에 하나씩 붙여주세요"}
+                                    onChange={(event) => setEvidenceUrlText(event.target.value)}
+                                />
+                                {hasInvalidLink ? <small>http 또는 https로 시작하는 링크를 입력해주세요.</small> : null}
+                            </div>
+                        ) : null}
+                        <div className="eca-student-mobile-leaderboard-mission-submit-button-row">
+                            <button type="button" disabled={submitDisabled} onClick={handleSubmit}>
+                                {submitting ? "저장 중" : "제출하기"}
+                            </button>
+                        </div>
+                    </section>
                 </div>
+                
             </>
         );
     }
@@ -365,12 +495,20 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     function renderCompleteStep(): React.ReactElement {
         return (
             <section className="eca-student-mobile-leaderboard-mission-complete">
-                <div className="eca-student-mobile-leaderboard-mission-complete-icon">✓</div>
+                <div className="eca-student-mobile-leaderboard-mission-complete-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+                        <circle cx="25" cy="25" r="25" fill="#0166FF"/>
+                        <path d="M15 26.1633C16.9613 27.5897 20.884 31.5124 22.4887 34.1869C24.4501 29.9077 29.4426 20.2793 34.7917 16" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </div>
                 <h1>Completed!</h1>
-                <p>Scores will be updated after admin approval</p>
-                <button type="button" onClick={() => navigate(`/student/activities/${externalActivityId}/leaderboard`)}>
-                    Save
-                </button>
+                
+                <div className="eca-student-mobile-leaderboard-mission-complete-bottom">
+                    <p>Scores will be updated after admin approval</p>
+                    <button type="button" onClick={() => navigate(`/student/activities/${externalActivityId}/leaderboard`)}>
+                        Save
+                    </button>
+                </div>
             </section>
         );
     }
