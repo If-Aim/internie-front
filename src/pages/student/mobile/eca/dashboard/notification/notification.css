@@ -1,0 +1,8 @@
+.eca-mobile-student-notification-page { min-height: 100dvh; background: #F0F6FF; color: #000; padding-bottom: 32px; box-sizing: border-box; }
+.eca-mobile-student-notification-content { padding: 36px 20px 0; box-sizing: border-box; }
+.eca-mobile-student-notification-group + .eca-mobile-student-notification-group { margin-top: 36px; }
+.eca-mobile-student-notification-group h2 { margin: 0 0 16px 8px; font-size: 14px; font-weight: 700; line-height: 1.3; }
+.eca-mobile-student-notification-list { display: flex; flex-direction: column; gap: 8px; }
+.eca-mobile-student-notification-item { width: 100%; min-height: 48px; padding: 16px; border: 0; border-radius: 16px; background: #fff; color: #000; font: inherit; font-size: 12px; font-weight: 500; line-height: 20px; text-align: left; cursor: pointer; box-sizing: border-box; }
+.eca-mobile-student-notification-item.is-read { opacity: 0.5; }
+.eca-mobile-student-notification-empty { margin: 80px 0 0; color: #777; font-size: 14px; text-align: center; }
