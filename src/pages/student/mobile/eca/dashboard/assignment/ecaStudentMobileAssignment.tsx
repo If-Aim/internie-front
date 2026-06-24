@@ -7,6 +7,8 @@ import type { AssignmentParticipantStatus, StudentAssignmentResponse, StudentAss
 import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAssignment.css";
 
+const ASSIGNMENT_T = "ecaStudent.assignmentPage";
+
 type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
 
 type StudentAssignmentViewModel = {
@@ -95,11 +97,11 @@ function formatMobilePeriod(assignment: StudentAssignmentViewModel): string {
     return `${start} ~ ${end.slice(5)}`;
 }
 
-function getAssignmentStatusLabel(status: AssignmentStatus): string {
-    if (status === "submitted") return "submitted";
-    if (status === "lateSubmitted") return "late";
-    if (status === "missing") return "missing";
-    return "assigned";
+function getAssignmentStatusLabelKey(status: AssignmentStatus): string {
+    if (status === "submitted") return `${ASSIGNMENT_T}.status.submitted`;
+    if (status === "lateSubmitted") return `${ASSIGNMENT_T}.status.late`;
+    if (status === "missing") return `${ASSIGNMENT_T}.status.missing`;
+    return `${ASSIGNMENT_T}.status.assigned`;
 }
 
 function getAssignmentStatusClass(status: AssignmentStatus): string {
@@ -129,23 +131,24 @@ function Header({ activityName, onMenuClick }: HeaderProps): React.ReactElement 
 
 export default function EcaMobileAssignment(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
 
     const [activity, setActivity] = React.useState<StudentExternalActivityDetailResponse | null>(null);
     const [assignments, setAssignments] = React.useState<StudentAssignmentViewModel[]>([]);
     const [loading, setLoading] = React.useState(false);
-    const [error, setError] = React.useState("");
+    const [errorKey, setErrorKey] = React.useState("");
 
     React.useEffect(() => {
         async function fetchAssignmentPage(): Promise<void> {
             if (!externalActivityId) {
-                window.alert("대외활동 정보를 찾을 수 없습니다.");
+                window.alert(t(`${ASSIGNMENT_T}.error.activityNotFound`));
                 navigate("/student", { replace: true });
                 return;
             }
 
             setLoading(true);
-            setError("");
+            setErrorKey("");
 
             try {
                 const [activityData, assignmentData] = await Promise.all([
@@ -162,33 +165,33 @@ export default function EcaMobileAssignment(): React.ReactElement {
 
                 if (e instanceof ApiError) {
                     if (e.status === 404 || e.code === "EXTERNAL_ACTIVITY_NOT_FOUND") {
-                        window.alert("삭제되었거나 존재하지 않는 대외활동입니다.");
+                        window.alert(t(`${ASSIGNMENT_T}.error.activityDeletedOrNotFound`));
                         navigate("/student", { replace: true });
                         return;
                     }
 
                     if (e.status === 403 || e.code === "FORBIDDEN" || e.code === "SUBMISSION_NOT_ALLOWED") {
-                        window.alert("접근할 수 없는 대외활동입니다.");
+                        window.alert(t(`${ASSIGNMENT_T}.error.accessDenied`));
                         navigate("/student", { replace: true });
                         return;
                     }
                 }
 
-                setError("과제 목록을 불러오지 못했습니다.");
+                setErrorKey(`${ASSIGNMENT_T}.error.assignmentLoadFailed`);
             } finally {
                 setLoading(false);
             }
         }
 
         fetchAssignmentPage();
-    }, [externalActivityId, navigate]);
+    }, [externalActivityId, navigate, t]);
 
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
     }
 
     function handleFilterClick(): void {
-        window.alert("필터 기능은 준비중입니다.");
+        window.alert(t(`${ASSIGNMENT_T}.alert.filterPreparing`));
     }
 
     function moveToAssignmentDetail(assignmentId: number): void {
@@ -202,9 +205,9 @@ export default function EcaMobileAssignment(): React.ReactElement {
             <Header activityName={activity?.name ?? ""} onMenuClick={openMenu} />
             <div className="eca-mobile-student-assignment-main">
                 <section className="eca-mobile-student-assignment-title-row">
-                    <h2>과제 현황</h2>
+                    <h2>{t(`${ASSIGNMENT_T}.title`)}</h2>
 
-                    <button type="button" className="eca-mobile-student-assignment-filter-button" onClick={handleFilterClick} aria-label="필터">
+                    <button type="button" className="eca-mobile-student-assignment-filter-button" onClick={handleFilterClick} aria-label={t(`${ASSIGNMENT_T}.filter`)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M6.46154 12H17.5385M4 7H20M10.1538 17H13.8462" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -213,11 +216,11 @@ export default function EcaMobileAssignment(): React.ReactElement {
 
                 <section className="eca-mobile-student-assignment-list">
                     {loading ? (
-                        <p className="eca-mobile-student-assignment-empty">과제 목록을 불러오는 중입니다.</p>
-                    ) : error ? (
-                        <p className="eca-mobile-student-assignment-empty">{error}</p>
+                        <p className="eca-mobile-student-assignment-empty">{t(`${ASSIGNMENT_T}.loading`)}</p>
+                    ) : errorKey ? (
+                        <p className="eca-mobile-student-assignment-empty">{t(errorKey)}</p>
                     ) : assignments.length === 0 ? (
-                        <p className="eca-mobile-student-assignment-empty">배정된 과제가 없습니다.</p>
+                        <p className="eca-mobile-student-assignment-empty">{t(`${ASSIGNMENT_T}.empty`)}</p>
                     ) : (
                         assignments.map((assignment) => (
                             <button type="button" className="eca-mobile-student-assignment-card" key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
@@ -228,9 +231,8 @@ export default function EcaMobileAssignment(): React.ReactElement {
                                 </span>
 
                                 <span className={getAssignmentStatusClass(assignment.status)}>
-                                    {getAssignmentStatusLabel(assignment.status)}
+                                    {t(getAssignmentStatusLabelKey(assignment.status))}
                                 </span>
-
                                 <i>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M8 5L13 10L8 15" stroke="#808080" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>

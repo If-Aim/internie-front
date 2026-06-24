@@ -573,6 +573,9 @@ export default function EcaActivityCreatePage(): React.ReactElement {
         setManagerDropdownOpen(false);
     }
 
+    function handleBackClick(): void {
+        navigate(-1);
+    }
 
     return (
         <>
@@ -580,8 +583,15 @@ export default function EcaActivityCreatePage(): React.ReactElement {
                 <section className="eca-create-header">
                     <h1>{organization?.organizationName ?? ""}</h1>
                     <div className="eca-create-title-row">
-                        <h2>{isEditMode ? t(`${ACTIVITY_CREATE_T}.editTitle`) : t(`${ACTIVITY_CREATE_T}.createTitle`)}</h2>
-                        <button type="button" className="eca-create-temp-button" disabled>{t(`${ACTIVITY_CREATE_T}.tempSave`)}</button>
+                        <div className="eca-create-title-row-titlebox">
+                            <button type="button" onClick={handleBackClick} aria-label="Back">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                            <h2>{isEditMode ? t(`${ACTIVITY_CREATE_T}.editTitle`) : t(`${ACTIVITY_CREATE_T}.createTitle`)}</h2>
+                        </div>
+                        {/* <button type="button" className="eca-create-temp-button" disabled>{t(`${ACTIVITY_CREATE_T}.tempSave`)}</button> */}
                     </div>
                 </section>
 

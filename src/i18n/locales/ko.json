@@ -197,8 +197,19 @@
         "home": "홈",
         "recent": "최근 활동",
         "settings": "설정 및 개인정보",
-        "language": "언어 변경",
+        "language": "Language",
         "programAdminPage": "대외활동 관리자 페이지"
+    },
+    "clientAdmin": {
+        "defaultAdminName": "관리자",
+        "adminLabel": "관리자 {{name}}님",
+        "dashboard": "대시보드",
+        "analysis": "참가자 관리",
+        "settings": "설정",
+        "comingSoon": "서비스 준비중입니다.",
+        "kakaoClientName": "소셜벤처창업",
+        "jumpClientName": "JUMP",
+        "defaultClientName": "고객사"
     },
     "empty": {
         "title": "아직 일정이 없어요",
@@ -902,6 +913,44 @@
             }
         },
 
+        "assignmentEvaluationPage": {
+            "teamNameFallback": "팀 이름 없음",
+            "userNameFallback": "이름 없음",
+            "teamLabel": "Team",
+            "noSubmissionFile": "제출 파일 없음",
+            "submissionFileFallback": "submission-file-{{id}}",
+            "submittedLink": "제출 링크",
+            "previewLoading": "미리보기를 불러오는 중입니다.",
+            "previewUnsupported": "이 파일은 미리보기를 지원하지 않습니다.",
+            "fileDownload": "파일 다운로드",
+            "submittedLinkDisplayedBelow": "제출 링크가 아래에 표시됩니다.",
+            "noSubmissionMaterial": "표시할 제출 자료가 없습니다.",
+            "loading": "평가 정보를 불러오는 중입니다.",
+            "back": "뒤로가기",
+            "evaluationTitle": "Evaluation",
+            "lateSubmitted": "지각 제출",
+            "criteriaTitle": "Criteria",
+            "prevCriterion": "이전 기준",
+            "nextCriterion": "다음 기준",
+            "scoreAria": "{{score}}점",
+            "feedbackTitle": "Feedback",
+            "feedbackPlaceholder": "텍스트를 입력하세요...",
+            "saving": "saving...",
+            "save": "save",
+            "alert": {
+                "selectAllScores": "모든 평가 기준의 점수를 선택해주세요.",
+                "saveSuccess": "평가가 저장되었습니다."
+            },
+            "error": {
+                "evaluationInfoNotFound": "평가 정보를 찾을 수 없습니다.",
+                "evaluationTargetNotFound": "평가 대상을 찾을 수 없습니다.",
+                "evaluationLoadFailed": "평가 정보를 불러오지 못했습니다.",
+                "previewLoadFailed": "미리보기를 불러오지 못했습니다.",
+                "fileDownloadFailed": "파일 다운로드에 실패했습니다.",
+                "saveFailed": "평가 저장에 실패했습니다."
+            }
+        },
+
         "leaderboardPage": {
             "activityFallback": "대외활동",
             "lastUpdate": "마지막 업데이트 {{value}}",
@@ -1057,6 +1106,7 @@
         "attendance": "출석 현황",
         "team": "팀 활동",
         "leaderboard": "리더보드",
+        "comingSoon": "서비스 준비중입니다.",
         "ecaClientAdminName": "관리자 {{adminName}}님",
 
         "status": {
@@ -1081,7 +1131,92 @@
         "more": "더보기",
         "markCompleted": "완료",
         "markIncomplete": "완료 해제",
-        "updateActivityStatusFailed": "대외활동 상태 변경에 실패했습니다."
+        "updateActivityStatusFailed": "대외활동 상태 변경에 실패했습니다.",
+
+        "studentProfileModal": {
+            "close": "닫기",
+            "noName": "이름 없음",
+            "noNickname": "닉네임 없음",
+            "goToLinkedin": "Go to LinkedIn",
+            "noLinkedin": "LinkedIn 없음"
+        },
+
+        "organizationInvite": {
+            "loginRequired": "기관 관리자 초대를 수락하려면 먼저 로그인해야 합니다.",
+            "close": "닫기",
+            "checkingInvite": "초대 정보를 확인하고 있습니다",
+            "acceptSuccess": "초대를 수락했습니다",
+            "waitAdminApproval": "관리자 승인을 기다려주세요",
+            "goHome": "홈 화면으로",
+            "invitedWithOrganization": "{{organizationName}} 관리자로 초대되었습니다",
+            "invitedWithoutOrganization": "기관 관리자로 초대되었습니다",
+            "requesting": "요청 중",
+            "accept": "수락하기",
+            "reject": "거절하기",
+            "error": {
+                "previewLoadFailed": "초대 정보를 불러오지 못했습니다.",
+                "acceptFailed": "초대 수락에 실패했습니다.",
+                "notFound": "존재하지 않는 초대 링크입니다.",
+                "alreadyProcessed": "이미 처리된 초대 링크입니다.",
+                "expired": "만료된 초대 링크입니다.",
+                "memberAlreadyExists": "이미 해당 기관에 가입되어 있습니다.",
+                "requestAlreadyExists": "이미 승인 요청을 보낸 초대입니다."
+            }
+        },
+
+        "settingsPage": {
+            "title": "설정",
+            "organizationLoading": "기관 정보를 불러오는 중입니다.",
+            "noOrganization": "소속된 기관이 없습니다.",
+            "organizationName": "기관명",
+            "myRole": "나의 권한",
+            "selectOrganization": "기관을 선택하세요",
+            "managerList": "관리자 명단",
+            "creating": "생성 중",
+            "add": "추가하기",
+            "memberNoInvitePermission": "멤버는 초대 권한이 없습니다.",
+            "memberLoading": "멤버 목록을 불러오는 중입니다.",
+            "noMembers": "등록된 멤버가 없습니다.",
+            "name": "이름",
+            "email": "이메일",
+            "roleTitle": "권한",
+            "noName": "이름 없음",
+            "noEmail": "이메일 없음",
+            "deleteMember": "멤버 삭제",
+            "pendingTitle": "승인 대기",
+            "pendingLoading": "승인 대기 목록을 불러오는 중입니다.",
+            "noPendingMembers": "승인 대기 중인 사용자가 없습니다.",
+            "approve": "승인",
+            "reject": "거절",
+            "inviteModalTitle": "담당자 추가",
+            "close": "닫기",
+            "inviteModalGuide": "아래 링크를 새로운 담당자에게 보내주세요",
+            "copy": "복사하기",
+            "ownerTransferTitle": "Owner 권한 이전",
+            "selectedMember": "선택한 멤버",
+            "ownerTransferQuestionSuffix": "님에게 Owner 권한을 넘기시겠습니까?",
+            "ownerTransferDesc": "권한 이전 후 현재 계정은 Member로 변경되며, 기관 초대 및 멤버 관리 권한을 사용할 수 없습니다.",
+            "cancel": "취소",
+            "transferring": "이전 중",
+            "transferOwner": "권한 넘기기",
+            "role": {
+                "owner": "Owner",
+                "member": "Member"
+            },
+            "confirm": {
+                "deleteMember": "{{name}}님을 관리자 명단에서 삭제하시겠습니까?"
+            },
+            "alert": {
+                "inviteCreateFailed": "초대 링크 생성에 실패했습니다.",
+                "inviteCopySuccess": "초대 링크를 복사했습니다.",
+                "inviteCopyFailed": "초대 링크 복사에 실패했습니다.",
+                "approveFailed": "관리자 승인에 실패했습니다.",
+                "rejectFailed": "관리자 거절에 실패했습니다.",
+                "ownerTransferSuccess": "Owner 권한을 이전했습니다.",
+                "ownerTransferFailed": "Owner 권한 이전에 실패했습니다.",
+                "deleteMemberFailed": "멤버 삭제에 실패했습니다."
+            }
+        }
     },
 
     "ECA_student" : "대외활동 학생 관련",
@@ -1100,6 +1235,28 @@
             "ongoing": "진행 중",
             "completed": "완료",
             "delayed": "지연"
+        },
+
+        "assignmentPage": {
+            "title": "과제 현황",
+            "filter": "필터",
+            "loading": "과제 목록을 불러오는 중입니다.",
+            "empty": "배정된 과제가 없습니다.",
+            "status": {
+                "submitted": "submitted",
+                "late": "late",
+                "missing": "missing",
+                "assigned": "assigned"
+            },
+            "alert": {
+                "filterPreparing": "필터 기능은 준비중입니다."
+            },
+            "error": {
+                "activityNotFound": "대외활동 정보를 찾을 수 없습니다.",
+                "activityDeletedOrNotFound": "삭제되었거나 존재하지 않는 대외활동입니다.",
+                "accessDenied": "접근할 수 없는 대외활동입니다.",
+                "assignmentLoadFailed": "과제 목록을 불러오지 못했습니다."
+            }
         },
 
         "organizationDisplayLabel": "기관",

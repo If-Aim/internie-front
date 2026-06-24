@@ -5,7 +5,7 @@
 .eca-admin-dashboard-detail-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
 .eca-admin-dashboard-more-button { width: 36px; height: 36px; border: 0; background: transparent; cursor: pointer; }
 .eca-admin-dashboard-menu-wrap { position: relative; display: flex; align-items: center; }
-.eca-admin-dashboard-menu { position: absolute; top: 36px; z-index: 60; width: 120px; padding: 6px 0 9px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-admin-dashboard-menu { position: absolute; top: 36px; right: 0; z-index: 60; width: 120px; padding: 6px 0 9px; border-radius: 10px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
 .eca-admin-dashboard-menu button { display: flex; align-items: center; gap: 18px; width: 100%; height: 30px; margin: 5px 0; padding: 0 20px; border: 0; background: #fff; color: #808080; font-size: 12px; font-weight: 700; cursor: pointer; box-sizing: border-box; }
 .eca-admin-dashboard-menu svg { flex: 0 0 auto; display: block; }
 .eca-admin-dashboard-menu button:hover { background: #eeeeee; }

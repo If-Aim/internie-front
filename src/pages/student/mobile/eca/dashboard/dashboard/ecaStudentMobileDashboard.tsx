@@ -1,18 +1,36 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { getMyAttendanceEvents, getMyExternalActivityAssignments, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
 import { getUserDateOnly, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileDashboard.css";
 
+type ScheduleTypeFilter = "assignment" | "attendance";
+type ScheduleSortDirection = "asc" | "desc";
+
 type MobileScheduleItem = {
     id: number;
     title: string;
     date: string;
-    type: "activity" | "assignment" | "attendance";
+    sortTime: number;
+    type: ScheduleTypeFilter;
     completed: boolean;
 };
+
+type StudentMobileShellContext = {
+    userName: string;
+    userEmail: string;
+    userProfileImg: string;
+    onRequireAuth: (pathAfterLogin: string, action?: () => void) => void;
+};
+
+const DEFAULT_PROFILE_IMAGE = "/internie_mascot_normal.png";
+
+const SCHEDULE_FILTER_OPTIONS: { value: ScheduleTypeFilter; label: string }[] = [
+    { value: "attendance", label: "Attendance" },
+    { value: "assignment", label: "Assignment" },
+];
 
 function formatDateOnlyDot(date: Date): string {
     const year = date.getFullYear();
@@ -63,27 +81,41 @@ function formatDate(value?: string | null): string {
     return date ? formatDateOnlyDot(date) : value;
 }
 
-function getDateProgressRate(startDate?: string | null, endDate?: string | null): number {
-    const start = parseDateOnlyLocal(startDate);
-    const end = parseDateOnlyLocal(endDate);
+function getScheduleSortTime(value?: string | null): number {
+    if (!value) return Number.MAX_SAFE_INTEGER;
 
-    if (!start || !end) return 0;
+    if (value.includes("T")) {
+        const userDate = serverKstDateTimeToUserDateOnly(value);
 
-    const today = getUserDateOnly();
-    const todayDate = today.getTime();
-    const startDateOnly = start.getTime();
-    const endDateOnly = end.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
+        return userDate ? userDate.getTime() : Number.MAX_SAFE_INTEGER;
+    }
 
-    if (endDateOnly < startDateOnly) return 0;
-    if (todayDate < startDateOnly) return 0;
-    if (todayDate > endDateOnly) return 100;
+    const date = parseDateOnlyLocal(value);
 
-    const totalDays = Math.floor((endDateOnly - startDateOnly) / oneDay) + 1;
-    const elapsedDays = Math.floor((todayDate - startDateOnly) / oneDay) + 1;
-
-    return Math.min(100, Math.round((elapsedDays / totalDays) * 100));
+    return date ? date.getTime() : Number.MAX_SAFE_INTEGER;
 }
+
+// function getDateProgressRate(startDate?: string | null, endDate?: string | null): number {
+//     const start = parseDateOnlyLocal(startDate);
+//     const end = parseDateOnlyLocal(endDate);
+
+//     if (!start || !end) return 0;
+
+//     const today = getUserDateOnly();
+//     const todayDate = today.getTime();
+//     const startDateOnly = start.getTime();
+//     const endDateOnly = end.getTime();
+//     const oneDay = 1000 * 60 * 60 * 24;
+
+//     if (endDateOnly < startDateOnly) return 0;
+//     if (todayDate < startDateOnly) return 0;
+//     if (todayDate > endDateOnly) return 100;
+
+//     const totalDays = Math.floor((endDateOnly - startDateOnly) / oneDay) + 1;
+//     const elapsedDays = Math.floor((todayDate - startDateOnly) / oneDay) + 1;
+
+//     return Math.min(100, Math.round((elapsedDays / totalDays) * 100));
+// }
 
 function isCompletedAssignment(assignment: StudentAssignmentResponse): boolean {
     return assignment.status === "SUBMITTED" || assignment.status === "LATE_SUBMITTED";
@@ -97,17 +129,17 @@ function isCompletedAttendance(event: MyAttendanceEventResponse): boolean {
         || event.status === "VERY_EARLY_LEAVE";
 }
 
-function getAttendanceRate(events: MyAttendanceEventResponse[]): number {
-    const closedEvents = events.filter((event) => event.progress === "CLOSED");
+// function getAttendanceRate(events: MyAttendanceEventResponse[]): number {
+//     const closedEvents = events.filter((event) => event.progress === "CLOSED");
 
-    if (closedEvents.length === 0) {
-        return 0;
-    }
+//     if (closedEvents.length === 0) {
+//         return 0;
+//     }
 
-    const totalScore = closedEvents.reduce((sum, event) => sum + event.score, 0);
+//     const totalScore = closedEvents.reduce((sum, event) => sum + event.score, 0);
 
-    return Math.round((totalScore / closedEvents.length) * 100);
-}
+//     return Math.round((totalScore / closedEvents.length) * 100);
+// }
 
 function formatAttendanceScheduleTitle(event: MyAttendanceEventResponse): string {
     const value = event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
@@ -124,30 +156,42 @@ function formatAttendanceScheduleTitle(event: MyAttendanceEventResponse): string
 }
 
 function toScheduleItems(assignments: StudentAssignmentResponse[], attendanceEvents: MyAttendanceEventResponse[]): MobileScheduleItem[] {
-    const assignmentItems = assignments.map((assignment) => ({
-        id: assignment.assignmentId,
-        title: assignment.name,
-        date: formatDate(assignment.deadlineAt),
-        type: "assignment" as const,
-        completed: isCompletedAssignment(assignment),
-    }));
+    const assignmentItems = assignments.map((assignment) => {
+        const scheduleDate = assignment.deadlineAt;
 
-    const attendanceItems = attendanceEvents.map((event) => ({
-        id: event.eventId,
-        title: formatAttendanceScheduleTitle(event),
-        date: formatDate(event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart),
-        type: "attendance" as const,
-        completed: isCompletedAttendance(event),
-    }));
+        return {
+            id: assignment.assignmentId,
+            title: assignment.name,
+            date: formatDate(scheduleDate),
+            sortTime: getScheduleSortTime(scheduleDate),
+            type: "assignment" as const,
+            completed: isCompletedAssignment(assignment),
+        };
+    });
+
+    const attendanceItems = attendanceEvents.map((event) => {
+        const scheduleDate = event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
+
+        return {
+            id: event.eventId,
+            title: formatAttendanceScheduleTitle(event),
+            date: formatDate(scheduleDate),
+            sortTime: getScheduleSortTime(scheduleDate),
+            type: "attendance" as const,
+            completed: isCompletedAttendance(event),
+        };
+    });
 
     return [...assignmentItems, ...attendanceItems];
 }
 
 type HeaderProps = {
-	onMenuClick: () => void;
+    onMenuClick: () => void;
+    onProfileClick: () => void;
+    userProfileImg: string;
 };
 
-function Header({ onMenuClick }: HeaderProps): React.ReactElement {
+function Header({ onMenuClick, onProfileClick, userProfileImg }: HeaderProps): React.ReactElement {
     const { t } = useTranslation();
 
     return (
@@ -160,13 +204,21 @@ function Header({ onMenuClick }: HeaderProps): React.ReactElement {
 
             <div className="eca-mobile-student-dashboard-top-actions">
                 <button type="button" className="eca-mobile-student-dashboard-icon-button" aria-label="알림">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M9.33333 20.0909C10.041 20.6562 10.9755 21 12 21C13.0245 21 13.959 20.6562 14.6667 20.0909M4.50763 17.1818C4.08602 17.1818 3.85054 16.5194 4.10557 16.1514C4.69736 15.2975 5.26855 14.0451 5.26855 12.537L5.29296 10.3517C5.29296 6.29145 8.29581 3 12 3C15.7588 3 18.8058 6.33993 18.8058 10.4599L18.7814 12.537C18.7814 14.0555 19.3329 15.3147 19.9006 16.169C20.1458 16.5379 19.9097 17.1818 19.4933 17.1818H4.50763Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
 
-                {/* <span className="eca-mobile-student-dashboard-profile" /> */}
+                <button type="button" className="eca-mobile-student-dashboard-profile-button" onClick={onProfileClick} aria-label={t("menu.settings")}>
+                    <img
+                        className="eca-mobile-student-dashboard-profile"
+                        src={userProfileImg || DEFAULT_PROFILE_IMAGE}
+                        alt={t("menu.profile")}
+                        onError={(e) => {
+                            e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                        }}
+                    />
+                </button>
             </div>
         </div>
     );
@@ -175,12 +227,17 @@ function Header({ onMenuClick }: HeaderProps): React.ReactElement {
 export default function EcaMobileDashboard(): React.ReactElement {
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
+    const { userProfileImg, onRequireAuth } = useOutletContext<StudentMobileShellContext>();
 
     const [activity, setActivity] = React.useState<StudentExternalActivityDetailResponse | null>(null);
     const [assignments, setAssignments] = React.useState<StudentAssignmentResponse[]>([]);
     const [attendanceEvents, setAttendanceEvents] = React.useState<MyAttendanceEventResponse[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
+
+    const [selectedScheduleTypes, setSelectedScheduleTypes] = React.useState<ScheduleTypeFilter[]>(["attendance", "assignment"]);
+    const [scheduleSortDirection, setScheduleSortDirection] = React.useState<ScheduleSortDirection>("asc");
+    const [scheduleFilterOpen, setScheduleFilterOpen] = React.useState(false);
 
     React.useEffect(() => {
         async function fetchDashboard(): Promise<void> {
@@ -216,27 +273,36 @@ export default function EcaMobileDashboard(): React.ReactElement {
         fetchDashboard();
     }, [externalActivityId]);
 
-    const progressRate = getDateProgressRate(activity?.startDate, activity?.endDate);
-    const completedAssignmentCount = assignments.filter(isCompletedAssignment).length;
-    const assignmentRate = assignments.length === 0 ? 0 : Math.round((completedAssignmentCount / assignments.length) * 100);
-    const attendanceRate = getAttendanceRate(attendanceEvents);
-    const scheduleItems = toScheduleItems(assignments, attendanceEvents);
-
+    // const progressRate = getDateProgressRate(activity?.startDate, activity?.endDate);
+    // const completedAssignmentCount = assignments.filter(isCompletedAssignment).length;
+    // const assignmentRate = assignments.length === 0 ? 0 : Math.round((completedAssignmentCount / assignments.length) * 100);
+    // const attendanceRate = getAttendanceRate(attendanceEvents);
+    const scheduleItems = React.useMemo(() => {
+        return toScheduleItems(assignments, attendanceEvents)
+            .filter((item) => selectedScheduleTypes.includes(item.type))
+            .sort((a, b) => scheduleSortDirection === "asc" ? a.sortTime - b.sortTime : b.sortTime - a.sortTime);
+    }, [assignments, attendanceEvents, selectedScheduleTypes, scheduleSortDirection]);
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
     }
 
-    function openAssignmentList(): void {
-        if (!externalActivityId) return;
-
-        navigate(`/student/activities/${externalActivityId}/assignment`);
+    function openMyPage(): void {
+        onRequireAuth("/student/mypage", () => {
+            navigate("/student/mypage");
+        });
     }
 
-    function openAttendanceList(): void {
-        if (!externalActivityId) return;
+    // function openAssignmentList(): void {
+    //     if (!externalActivityId) return;
 
-        navigate(`/student/activities/${externalActivityId}/attendance`);
-    }
+    //     navigate(`/student/activities/${externalActivityId}/assignment`);
+    // }
+
+    // function openAttendanceList(): void {
+    //     if (!externalActivityId) return;
+
+    //     navigate(`/student/activities/${externalActivityId}/attendance`);
+    // }
 
     function openAttendanceSubmit(eventId: number): void {
         if (!externalActivityId) return;
@@ -249,10 +315,32 @@ export default function EcaMobileDashboard(): React.ReactElement {
 
         navigate(`/student/activities/${externalActivityId}/assignment/${assignmentId}`);
     }
+    
+    function toggleScheduleTypeFilter(type: ScheduleTypeFilter): void {
+        setSelectedScheduleTypes((prev) =>
+            prev.includes(type)
+                ? prev.filter((item) => item !== type)
+                : [...prev, type]
+        );
+    }
+
+    function toggleScheduleSortDirection(): void {
+        setScheduleSortDirection((prev) => prev === "asc" ? "desc" : "asc");
+    }
+
+    function getScheduleFilterLabel(): string {
+        if (selectedScheduleTypes.length === SCHEDULE_FILTER_OPTIONS.length) return "전체 일정 종류";
+        if (selectedScheduleTypes.length === 0) return "선택된 일정 종류 없음";
+
+        return SCHEDULE_FILTER_OPTIONS
+            .filter((option) => selectedScheduleTypes.includes(option.value))
+            .map((option) => option.label)
+            .join(", ");
+    }
 
     return (
         <main className="eca-mobile-student-dashboard-page">
-            <Header onMenuClick={openMenu} />
+            <Header onMenuClick={openMenu} onProfileClick={openMyPage} userProfileImg={userProfileImg} />
             <div className="eca-mobile-student-dashboard-main">
                 <section className="eca-mobile-student-dashboard-title">
                     <span>{formatToday()}</span>
@@ -265,7 +353,7 @@ export default function EcaMobileDashboard(): React.ReactElement {
                     <p className="eca-mobile-student-dashboard-empty">{error}</p>
                 ) : (
                     <>
-                        <section className="eca-mobile-student-dashboard-progress-card">
+                        {/* <section className="eca-mobile-student-dashboard-progress-card">
                             <span>활동 진행률</span>
                             <strong>{progressRate}%</strong>
                             <div className="eca-mobile-student-dashboard-progress-track">
@@ -297,10 +385,28 @@ export default function EcaMobileDashboard(): React.ReactElement {
                                     <path d="M8 5L13 10L8 15" stroke="#A0A0A0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </i>
-                        </section>
+                        </section> */}
 
                         <section className="eca-mobile-student-dashboard-schedule">
-                            <h2>전체 일정</h2>
+                            <div className="eca-mobile-student-dashboard-schedule-head">
+                                <h2>전체 일정</h2>
+
+                                <div className="eca-mobile-student-dashboard-schedule-actions">
+                                    <div className="eca-mobile-student-dashboard-schedule-filter-wrap">
+                                        <button type="button" className="eca-mobile-student-dashboard-schedule-action-button" onClick={() => setScheduleFilterOpen(true)} aria-label={getScheduleFilterLabel()}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path d="M22.125 7.875H1.875C1.57663 7.875 1.29048 7.75647 1.0795 7.5455C0.868526 7.33452 0.75 7.04837 0.75 6.75C0.75 6.45163 0.868526 6.16548 1.0795 5.9545C1.29048 5.74353 1.57663 5.625 1.875 5.625H22.125C22.4234 5.625 22.7095 5.74353 22.9205 5.9545C23.1315 6.16548 23.25 6.45163 23.25 6.75C23.25 7.04837 23.1315 7.33452 22.9205 7.5455C22.7095 7.75647 22.4234 7.875 22.125 7.875ZM18.375 13.125H5.625C5.32663 13.125 5.04048 13.0065 4.8295 12.7955C4.61853 12.5845 4.5 12.2984 4.5 12C4.5 11.7016 4.61853 11.4155 4.8295 11.2045C5.04048 10.9935 5.32663 10.875 5.625 10.875H18.375C18.6734 10.875 18.9595 10.9935 19.1705 11.2045C19.3815 11.4155 19.5 11.7016 19.5 12C19.5 12.2984 19.3815 12.5845 19.1705 12.7955C18.9595 13.0065 18.6734 13.125 18.375 13.125ZM13.875 18.375H10.125C9.82663 18.375 9.54048 18.2565 9.3295 18.0455C9.11853 17.8345 9 17.5484 9 17.25C9 16.9516 9.11853 16.6655 9.3295 16.4545C9.54048 16.2435 9.82663 16.125 10.125 16.125H13.875C14.1734 16.125 14.4595 16.2435 14.6705 16.4545C14.8815 16.6655 15 16.9516 15 17.25C15 17.5484 14.8815 17.8345 14.6705 18.0455C14.4595 18.2565 14.1734 18.375 13.875 18.375Z" fill="black"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <button type="button" className="eca-mobile-student-dashboard-schedule-action-button" onClick={toggleScheduleSortDirection} aria-label={scheduleSortDirection === "asc" ? "날짜 빠른순" : "날짜 늦은순"}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M21 6.375L17.625 3L14.25 6.375M17.625 3L17.625 21M3 17.625L6.375 21L9.75 17.625M6.375 21L6.375 3" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
 
                             <div className="eca-mobile-student-dashboard-schedule-list">
                                 {scheduleItems.length === 0 ? (
@@ -332,6 +438,21 @@ export default function EcaMobileDashboard(): React.ReactElement {
                     </>
                 )}
             </div>
+            {scheduleFilterOpen ? (
+                <div className="eca-mobile-student-dashboard-filter-modal-backdrop" onClick={() => setScheduleFilterOpen(false)}>
+                    <div className="eca-mobile-student-dashboard-filter-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+                        {SCHEDULE_FILTER_OPTIONS.map((option) => {
+                            const selected = selectedScheduleTypes.includes(option.value);
+
+                            return (
+                                <button type="button" key={option.value} className={selected ? "eca-mobile-student-dashboard-filter-modal-option is-selected" : "eca-mobile-student-dashboard-filter-modal-option"} onClick={() => toggleScheduleTypeFilter(option.value)} aria-pressed={selected}>
+                                    {option.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ) : null}
         </main>
     );
 }

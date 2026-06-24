@@ -201,6 +201,17 @@
 		"language": "Language",
 		"programAdminPage": "Program Admin"
 	},
+	"clientAdmin": {
+		"defaultAdminName": "Admin",
+		"adminLabel": "{{name}}",
+		"dashboard": "Dashboard",
+		"analysis": "Participants",
+		"settings": "Settings",
+		"comingSoon": "Coming Soon",
+		"kakaoClientName": "Kakao Venture",
+		"jumpClientName": "JUMP",
+		"defaultClientName": "Client"
+	},
 	"empty": {
 		"title": "No schedules yet.",
 		"subtitle": "Would you like to add one?",
@@ -900,6 +911,45 @@
 				"status": "Attendance Status"
 			}
 		},
+
+		"assignmentEvaluationPage": {
+			"teamNameFallback": "No team name",
+			"userNameFallback": "No name",
+			"teamLabel": "Team",
+			"noSubmissionFile": "No submitted file",
+			"submissionFileFallback": "submission-file-{{id}}",
+			"submittedLink": "Submitted Link",
+			"previewLoading": "Loading preview.",
+			"previewUnsupported": "This file does not support preview.",
+			"fileDownload": "Download File",
+			"submittedLinkDisplayedBelow": "The submitted link is displayed below.",
+			"noSubmissionMaterial": "No submitted materials to display.",
+			"loading": "Loading evaluation information.",
+			"back": "Back",
+			"evaluationTitle": "Evaluation",
+			"lateSubmitted": "Late submission",
+			"criteriaTitle": "Criteria",
+			"prevCriterion": "Previous criterion",
+			"nextCriterion": "Next criterion",
+			"scoreAria": "{{score}} points",
+			"feedbackTitle": "Feedback",
+			"feedbackPlaceholder": "Enter text...",
+			"saving": "saving...",
+			"save": "save",
+			"alert": {
+				"selectAllScores": "Please select scores for all evaluation criteria.",
+				"saveSuccess": "Evaluation has been saved."
+			},
+			"error": {
+				"evaluationInfoNotFound": "Evaluation information could not be found.",
+				"evaluationTargetNotFound": "Evaluation target could not be found.",
+				"evaluationLoadFailed": "Failed to load evaluation information.",
+				"previewLoadFailed": "Failed to load preview.",
+				"fileDownloadFailed": "Failed to download the file.",
+				"saveFailed": "Failed to save evaluation."
+			}
+		},
+
 		"leaderboardPage": {
 			"activityFallback": "Class Name",
 			"lastUpdate": "Last update {{value}}",
@@ -1055,7 +1105,8 @@
         "attendance": "Attendance",
         "team": "Team",
 		"leaderboard": "Leaderboard",
-        "ecaClientAdminName": "{{adminName}}",
+		"comingSoon": "Coming Soon",
+		"ecaClientAdminName": "{{adminName}}",
 
 		"status": {
             "upcoming": "Scheduled",
@@ -1079,26 +1130,133 @@
         "more": "More",
         "markCompleted": "Mark as completed",
         "markIncomplete": "Mark as incomplete",
-        "updateActivityStatusFailed": "Failed to update the program status."
+        "updateActivityStatusFailed": "Failed to update the program status.",
+
+		"studentProfileModal": {
+			"close": "Close",
+			"noName": "No name",
+			"noNickname": "No nickname",
+			"goToLinkedin": "Go to LinkedIn",
+			"noLinkedin": "No LinkedIn"
+		},
+
+		"organizationInvite": {
+			"loginRequired": "You must log in first to accept the organization admin invitation.",
+			"close": "Close",
+			"checkingInvite": "Checking invitation information",
+			"acceptSuccess": "Invitation accepted",
+			"waitAdminApproval": "Please wait for admin approval",
+			"goHome": "Go to Home",
+			"invitedWithOrganization": "You have been invited as an admin of {{organizationName}}",
+			"invitedWithoutOrganization": "You have been invited as an organization admin",
+			"requesting": "Requesting",
+			"accept": "Accept",
+			"reject": "Reject",
+			"error": {
+				"previewLoadFailed": "Failed to load invitation information.",
+				"acceptFailed": "Failed to accept the invitation.",
+				"notFound": "This invitation link does not exist.",
+				"alreadyProcessed": "This invitation link has already been processed.",
+				"expired": "This invitation link has expired.",
+				"memberAlreadyExists": "You have already joined this organization.",
+				"requestAlreadyExists": "You have already sent an approval request for this invitation."
+			}
+		},
+
+		"settingsPage": {
+			"title": "Settings",
+			"organizationLoading": "Loading organization information.",
+			"noOrganization": "You do not belong to any organization.",
+			"organizationName": "Organization Name",
+			"myRole": "My Role",
+			"selectOrganization": "Select an organization",
+			"managerList": "Admin List",
+			"creating": "Creating",
+			"add": "Add",
+			"memberNoInvitePermission": "Members do not have invitation permission.",
+			"memberLoading": "Loading member list.",
+			"noMembers": "No registered members.",
+			"name": "Name",
+			"email": "Email",
+			"roleTitle": "Role",
+			"noName": "No name",
+			"noEmail": "No email",
+			"deleteMember": "Delete member",
+			"pendingTitle": "Pending Approval",
+			"pendingLoading": "Loading pending approval list.",
+			"noPendingMembers": "No users are pending approval.",
+			"approve": "Approve",
+			"reject": "Reject",
+			"inviteModalTitle": "Add Manager",
+			"close": "Close",
+			"inviteModalGuide": "Send the link below to the new manager",
+			"copy": "Copy",
+			"ownerTransferTitle": "Transfer Owner Permission",
+			"selectedMember": "Selected member",
+			"ownerTransferQuestionSuffix": ", do you want to transfer Owner permission to this member?",
+			"ownerTransferDesc": "After the transfer, the current account will be changed to Member and will no longer be able to invite organizations or manage members.",
+			"cancel": "Cancel",
+			"transferring": "Transferring",
+			"transferOwner": "Transfer Permission",
+			"role": {
+				"owner": "Owner",
+				"member": "Member"
+			},
+			"confirm": {
+				"deleteMember": "Delete {{name}} from the admin list?"
+			},
+			"alert": {
+				"inviteCreateFailed": "Failed to create the invitation link.",
+				"inviteCopySuccess": "Invitation link copied.",
+				"inviteCopyFailed": "Failed to copy the invitation link.",
+				"approveFailed": "Failed to approve the admin.",
+				"rejectFailed": "Failed to reject the admin.",
+				"ownerTransferSuccess": "Owner permission has been transferred.",
+				"ownerTransferFailed": "Failed to transfer Owner permission.",
+				"deleteMemberFailed": "Failed to delete the member."
+			}
+		}
     },
 
 	"ECA_student" : "대외활동 학생 관련",
-    "ecaStudent" : {
-        "home": "Home",
-        "ecaStudentSubmenuEmpty": "No assigned programs",
-        "ecaStudentSubmenuLoading": "Loading...",
-        "dashboard": "Dashboard",
-        "assignment": "Assignments",
-        "attendance": "Attendance",
-        "team": "Team",
-        "ecaClientAdminName": "{{studentName}}",
+	"ecaStudent" : {
+		"home": "Home",
+		"ecaStudentSubmenuEmpty": "No assigned programs",
+		"ecaStudentSubmenuLoading": "Loading...",
+		"dashboard": "Dashboard",
+		"assignment": "Assignments",
+		"attendance": "Attendance",
+		"team": "Team",
+		"ecaClientAdminName": "{{studentName}}",
 
 		"status": {
-            "upcoming": "Scheduled",
-            "ongoing": "In Progress",
-            "completed": "Completed",
-            "delayed": "Delayed"
-        },
+			"upcoming": "Scheduled",
+			"ongoing": "In Progress",
+			"completed": "Completed",
+			"delayed": "Delayed"
+		},
+
+		"assignmentPage": {
+			"title": "Assignments",
+			"filter": "Filter",
+			"loading": "Loading assignments.",
+			"empty": "No assignments have been assigned.",
+			"status": {
+				"submitted": "submitted",
+				"late": "late",
+				"missing": "missing",
+				"assigned": "assigned"
+			},
+			"alert": {
+				"filterPreparing": "The filter feature is being prepared."
+			},
+			"error": {
+				"activityNotFound": "Program information could not be found.",
+				"activityDeletedOrNotFound": "This program has been deleted or does not exist.",
+				"accessDenied": "This program cannot be accessed.",
+				"assignmentLoadFailed": "Failed to load assignments."
+			}
+		},
 
 		"organizationDisplayLabel": "Organization",
         "organizationLoading": "Loading...",

@@ -1,11 +1,14 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { approveOrganizationMember, createOrganizationInvite, getMyOrganizations, getOrganizationMembers, getPendingOrganizationMembers, rejectOrganizationMember, deleteOrganizationMember, transferOrganizationOwner, } from "../../../../../api/organizationClient";
 import type { MyOrganizationResponse, OrganizationMemberResponse, OrganizationMemberRole, } from "../../../../../api/organizationClient"; 
 import "./settings.css";
 
-function getRoleLabel(role: OrganizationMemberRole): string {
-    if (role === "OWNER") return "Owner";
-    return "Member";
+const SETTINGS_T = "ecaAdmin.settingsPage";
+
+function getRoleLabel(role: OrganizationMemberRole, t: (key: string) => string): string {
+    if (role === "OWNER") return t(`${SETTINGS_T}.role.owner`);
+    return t(`${SETTINGS_T}.role.member`);
 }
 
 function buildInviteUrl(token: string): string {
@@ -13,6 +16,8 @@ function buildInviteUrl(token: string): string {
 }
 
 export default function EcaAdminSettingsPage(): React.ReactElement {
+    const { t } = useTranslation();
+
     const [organizations, setOrganizations] = React.useState<MyOrganizationResponse[]>([]);
     const [organizationMenuOpen, setOrganizationMenuOpen] = React.useState(false);
     const [selectedOrganizationId, setSelectedOrganizationId] = React.useState<number | null>(null);
@@ -156,7 +161,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
             setMemberInviteOpen(true);
         } catch (error) {
             console.error(error);
-            window.alert("초대 링크 생성에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.inviteCreateFailed`));
         } finally {
             setInviteCreating(false);
         }
@@ -167,10 +172,10 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
 
         try {
             await navigator.clipboard.writeText(memberInviteUrl);
-            window.alert("초대 링크를 복사했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.inviteCopySuccess`));
         } catch (error) {
             console.error(error);
-            window.alert("초대 링크 복사에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.inviteCopyFailed`));
         }
     }
 
@@ -191,7 +196,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
             await refreshOrganizationManagementData();
         } catch (error) {
             console.error(error);
-            window.alert("관리자 승인에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.approveFailed`));
         } finally {
             setReviewingMemberId(null);
         }
@@ -207,7 +212,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
             await refreshOrganizationManagementData();
         } catch (error) {
             console.error(error);
-            window.alert("관리자 거절에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.rejectFailed`));
         } finally {
             setReviewingMemberId(null);
         }
@@ -233,10 +238,10 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
             setMembers([]);
             setOwnerTransferTarget(null);
 
-            window.alert("Owner 권한을 이전했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.ownerTransferSuccess`));
         } catch (error) {
             console.error(error);
-            window.alert("Owner 권한 이전에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.ownerTransferFailed`));
         } finally {
             setOwnerTransferring(false);
         }
@@ -246,7 +251,9 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
         if (!selectedOrganizationId || deletingMemberId) return;
         if (member.role === "OWNER") return;
 
-        const confirmed = window.confirm(`${member.userName ?? "선택한 멤버"}님을 관리자 명단에서 삭제하시겠습니까?`);
+        const confirmed = window.confirm(t(`${SETTINGS_T}.confirm.deleteMember`, {
+            name: member.userName ?? t(`${SETTINGS_T}.selectedMember`),
+        }));
 
         if (!confirmed) return;
 
@@ -257,7 +264,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
             await refreshOrganizationManagementData();
         } catch (error) {
             console.error(error);
-            window.alert("멤버 삭제에 실패했습니다.");
+            window.alert(t(`${SETTINGS_T}.alert.deleteMemberFailed`));
         } finally {
             setDeletingMemberId(null);
         }
@@ -266,13 +273,13 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
     return (
         <div className="eca-settings-page">
             <header className="eca-settings-header">
-                <h1>설정</h1>
+                <h1>{t(`${SETTINGS_T}.title`)}</h1>
             </header>
 
             {!selectedOrganization ? (
                 <section className="eca-settings-card">
                     <div className="eca-settings-empty">
-                        {organizationLoading ? "기관 정보를 불러오는 중입니다." : "소속된 기관이 없습니다."}
+                        {organizationLoading ? t(`${SETTINGS_T}.organizationLoading`) : t(`${SETTINGS_T}.noOrganization`)}
                     </div>
                 </section>
             ) : (
@@ -280,7 +287,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                     <div className="eca-settings-member-management-head">
                         <div>
                             <label className="eca-settings-form-label">
-                                기관명<span>*</span>
+                                {t(`${SETTINGS_T}.organizationName`)}<span>*</span>
                             </label>
 
                             <div className="eca-settings-organization-dropdown" onMouseDown={(e) => e.stopPropagation()}>
@@ -293,7 +300,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                                     }}
                                     disabled={organizations.length <= 1}
                                 >
-                                    <span>{selectedOrganization?.organizationName ?? "기관을 선택하세요"}</span>
+                                    <span>{selectedOrganization?.organizationName ?? t(`${SETTINGS_T}.selectOrganization`)}</span>
 
                                     {organizations.length > 1 ? (
                                         <span className="eca-settings-organization-trigger-arrow" aria-hidden="true">
@@ -326,47 +333,47 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
 
                         <div>
                             <label className="eca-settings-form-label">
-                                나의 권한<span>*</span>
+                                {t(`${SETTINGS_T}.myRole`)}<span>*</span>
                             </label>
 
                             <div className="eca-settings-role-select-wrap">
-                                <select className="eca-settings-role-select" value={getRoleLabel(selectedOrganization.memberRole)} disabled>
-                                    <option>{getRoleLabel(selectedOrganization.memberRole)}</option>
+                                <select className="eca-settings-role-select" value={getRoleLabel(selectedOrganization.memberRole, t)} disabled>
+                                    <option>{getRoleLabel(selectedOrganization.memberRole, t)}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     <div className="eca-settings-manager-section">
-                        <strong className="eca-settings-manager-title">관리자 명단</strong>
+                        <strong className="eca-settings-manager-title">{t(`${SETTINGS_T}.managerList`)}</strong>
 
                         {canManageOrganization ? (
                             <button type="button" className="eca-settings-add-member-button" onClick={() => void handleCreateInvite()} disabled={inviteCreating}>
-                                {inviteCreating ? "생성 중" : "추가하기"}
+                                {inviteCreating ? t(`${SETTINGS_T}.creating`) : t(`${SETTINGS_T}.add`)}
                             </button>
                         ) : null}
                     </div>
 
                     {!canManageOrganization ? (
                         <div className="eca-settings-empty eca-settings-empty--large">
-                            멤버는 초대 권한이 없습니다.
+                            {t(`${SETTINGS_T}.memberNoInvitePermission`)}
                         </div>
                     ) : managementLoading ? (
-                        <div className="eca-settings-empty">멤버 목록을 불러오는 중입니다.</div>
+                        <div className="eca-settings-empty">{t(`${SETTINGS_T}.memberLoading`)}</div>
                     ) : members.length === 0 ? (
-                        <div className="eca-settings-empty">등록된 멤버가 없습니다.</div>
+                        <div className="eca-settings-empty">{t(`${SETTINGS_T}.noMembers`)}</div>
                     ) : (
                         <div className="eca-settings-member-list">
                             <div className="eca-settings-member-list-head">
-                                <span>이름</span>
-                                <span>이메일</span>
-                                <span>권한</span>
+                                <span>{t(`${SETTINGS_T}.name`)}</span>
+                                <span>{t(`${SETTINGS_T}.email`)}</span>
+                                <span>{t(`${SETTINGS_T}.roleTitle`)}</span>
                                 <span aria-hidden="true" />
                             </div>
                             {members.map((member) => (
                                 <article className="eca-settings-member-row" key={member.organizationMemberId} >
-                                    <span className="eca-settings-member-name">{member.userName ?? "이름 없음"}</span>
-                                    <span className="eca-settings-member-email">{member.email ?? "이메일 없음"}</span>
+                                    <span className="eca-settings-member-name">{member.userName ?? t(`${SETTINGS_T}.noName`)}</span>
+                                    <span className="eca-settings-member-email">{member.email ?? t(`${SETTINGS_T}.noEmail`)}</span>
 
                                     <div className="eca-settings-member-role-dropdown" onMouseDown={(e) => e.stopPropagation()}>
                                         <button
@@ -378,7 +385,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                                             }}
                                             disabled={member.role === "OWNER"}
                                         >
-                                            <span>{getRoleLabel(member.role)}</span>
+                                            <span>{getRoleLabel(member.role, t)}</span>
                                             <span className="eca-settings-member-role-arrow" aria-hidden="true">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                                     <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -389,10 +396,10 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                                         {roleMenuMemberId === member.organizationMemberId ? (
                                             <div className="eca-settings-member-role-menu">
                                                 <button type="button" onClick={() => { setRoleMenuMemberId(null); openOwnerTransferModal(member); }} >
-                                                    Owner
+                                                    {t(`${SETTINGS_T}.role.owner`)}
                                                 </button>
                                                 <button type="button" onClick={() => setRoleMenuMemberId(null)} >
-                                                    Member
+                                                    {t(`${SETTINGS_T}.role.member`)}
                                                 </button>
                                             </div>
                                         ) : null}
@@ -403,7 +410,7 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                                         className="eca-settings-member-delete-button"
                                         onClick={() => void handleDeleteMember(member)}
                                         disabled={member.role === "OWNER" || deletingMemberId === member.organizationMemberId}
-                                        aria-label="멤버 삭제"
+                                        aria-label={t(`${SETTINGS_T}.deleteMember`)}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                             <path d="M5 2C5 1.46957 5.21071 0.960859 5.58579 0.585786C5.96086 0.210714 6.46957 0 7 0H13C13.5304 0 14.0391 0.210714 14.4142 0.585786C14.7893 0.960859 15 1.46957 15 2V4H19C19.2652 4 19.5196 4.10536 19.7071 4.29289C19.8946 4.48043 20 4.73478 20 5C20 5.26522 19.8946 5.51957 19.7071 5.70711C19.5196 5.89464 19.2652 6 19 6H17.931L17.064 18.142C17.0281 18.6466 16.8023 19.1188 16.4321 19.4636C16.0619 19.8083 15.5749 20 15.069 20H4.93C4.42414 20 3.93707 19.8083 3.56688 19.4636C3.1967 19.1188 2.97092 18.6466 2.935 18.142L2.07 6H1C0.734784 6 0.48043 5.89464 0.292893 5.70711C0.105357 5.51957 0 5.26522 0 5C0 4.73478 0.105357 4.48043 0.292893 4.29289C0.48043 4.10536 0.734784 4 1 4H5V2ZM7 4H13V2H7V4ZM4.074 6L4.931 18H15.07L15.927 6H4.074ZM8 8C8.26522 8 8.51957 8.10536 8.70711 8.29289C8.89464 8.48043 9 8.73478 9 9V15C9 15.2652 8.89464 15.5196 8.70711 15.7071C8.51957 15.8946 8.26522 16 8 16C7.73478 16 7.48043 15.8946 7.29289 15.7071C7.10536 15.5196 7 15.2652 7 15V9C7 8.73478 7.10536 8.48043 7.29289 8.29289C7.48043 8.10536 7.73478 8 8 8ZM12 8C12.2652 8 12.5196 8.10536 12.7071 8.29289C12.8946 8.48043 13 8.73478 13 9V15C13 15.2652 12.8946 15.5196 12.7071 15.7071C12.5196 15.8946 12.2652 16 12 16C11.7348 16 11.4804 15.8946 11.2929 15.7071C11.1054 15.5196 11 15.2652 11 15V9C11 8.73478 11.1054 8.48043 11.2929 8.29289C11.4804 8.10536 11.7348 8 12 8Z" fill="#808080"/>
@@ -416,19 +423,17 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
 
                     {canManageOrganization ? (
                         <div className="eca-settings-pending-section">
-                            <strong className="eca-settings-manager-title">승인 대기</strong>
-                            
-                            
+                            <strong className="eca-settings-manager-title">{t(`${SETTINGS_T}.pendingTitle`)}</strong>
                             {managementLoading ? (
-                                <div className="eca-settings-empty">승인 대기 목록을 불러오는 중입니다.</div>
+                                <div className="eca-settings-empty">{t(`${SETTINGS_T}.pendingLoading`)}</div>
                             ) : pendingMembers.length === 0 ? (
-                                <div className="eca-settings-empty">승인 대기 중인 사용자가 없습니다.</div>
+                                <div className="eca-settings-empty">{t(`${SETTINGS_T}.noPendingMembers`)}</div>
                             ) : (
                                 <div className="eca-settings-pending-list">
                                     <div className="eca-settings-pending-list-head">
-                                        <span>이름</span>
-                                        <span>이메일</span>
-                                        <span>권한</span>
+                                        <span>{t(`${SETTINGS_T}.name`)}</span>
+                                        <span>{t(`${SETTINGS_T}.email`)}</span>
+                                        <span>{t(`${SETTINGS_T}.roleTitle`)}</span>
                                         <span aria-hidden="true" />
                                     </div>
                                     {pendingMembers.map((member) => {
@@ -436,26 +441,16 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
 
                                         return (
                                             <article className="eca-settings-pending-row" key={member.organizationMemberId}>
-                                                <span className="eca-settings-member-name">{member.userName ?? "이름 없음"}</span>
-                                                <span className="eca-settings-member-email">{member.email ?? "이메일 없음"}</span>
-                                                <span className="eca-settings-member-role">Member</span>
+                                                <span className="eca-settings-member-name">{member.userName ?? t(`${SETTINGS_T}.noName`)}</span>
+                                                <span className="eca-settings-member-email">{member.email ?? t(`${SETTINGS_T}.noEmail`)}</span>
+                                                <span className="eca-settings-member-role">{t(`${SETTINGS_T}.role.member`)}</span>
 
                                                 <div className="eca-settings-pending-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="eca-settings-pending-approve"
-                                                        onClick={() => void handleApproveMember(member)}
-                                                        disabled={reviewing}
-                                                    >
-                                                        승인
+                                                    <button type="button" className="eca-settings-pending-approve" onClick={() => void handleApproveMember(member)} disabled={reviewing}> 
+                                                        {t(`${SETTINGS_T}.approve`)}
                                                     </button>
-                                                    <button
-                                                        type="button"
-                                                        className="eca-settings-pending-reject"
-                                                        onClick={() => void handleRejectMember(member)}
-                                                        disabled={reviewing}
-                                                    >
-                                                        거절
+                                                    <button type="button" className="eca-settings-pending-reject" onClick={() => void handleRejectMember(member)} disabled={reviewing}>
+                                                        {t(`${SETTINGS_T}.reject`)}
                                                     </button>
                                                 </div>
                                             </article>
@@ -473,20 +468,20 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                 <div className="eca-settings-invite-modal-backdrop" onMouseDown={() => setMemberInviteOpen(false)}>
                     <div className="eca-settings-invite-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                         <div className="eca-settings-invite-modal-head">
-                            <h3>담당자 추가</h3>
-                            <button type="button" className="eca-settings-invite-modal-close" onClick={() => setMemberInviteOpen(false)} aria-label="닫기">
+                            <h3>{t(`${SETTINGS_T}.inviteModalTitle`)}</h3>
+                            <button type="button" className="eca-settings-invite-modal-close" onClick={() => setMemberInviteOpen(false)} aria-label={t(`${SETTINGS_T}.close`)}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <strong className="eca-settings-invite-modal-guide">
-                            아래 링크를 새로운 담당자에게 보내주세요
+                            {t(`${SETTINGS_T}.inviteModalGuide`)}
                         </strong>
 
                         <div className="eca-settings-invite-modal-linkbox">
                             <span>{memberInviteUrl || "http://"}</span>
                             <button type="button" onClick={() => void handleCopyInviteLink()}>
-                                복사하기
+                                {t(`${SETTINGS_T}.copy`)}
                             </button>
                         </div>
                     </div>
@@ -497,26 +492,27 @@ export default function EcaAdminSettingsPage(): React.ReactElement {
                 <div className="eca-settings-owner-transfer-modal-backdrop" onMouseDown={() => setOwnerTransferTarget(null)}>
                     <div className="eca-settings-owner-transfer-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                         <div className="eca-settings-owner-transfer-modal-head">
-                            <h3>Owner 권한 이전</h3>
-                            <button type="button" className="eca-settings-owner-transfer-modal-close" onClick={() => setOwnerTransferTarget(null)} aria-label="닫기">
+                            <h3>{t(`${SETTINGS_T}.ownerTransferTitle`)}</h3>
+                            <button type="button" className="eca-settings-owner-transfer-modal-close" onClick={() => setOwnerTransferTarget(null)} aria-label={t(`${SETTINGS_T}.close`)}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <p className="eca-settings-owner-transfer-message">
-                            <strong>{ownerTransferTarget.userName ?? "선택한 멤버"}</strong>님에게 Owner 권한을 넘기시겠습니까?
+                            <strong>{ownerTransferTarget.userName ?? t(`${SETTINGS_T}.selectedMember`)}</strong>
+                            {t(`${SETTINGS_T}.ownerTransferQuestionSuffix`)}
                         </p>
 
-                        <p className="eca-settings-owner-transfer-desc">
-                            권한 이전 후 현재 계정은 Member로 변경되며, 기관 초대 및 멤버 관리 권한을 사용할 수 없습니다.
+                       <p className="eca-settings-owner-transfer-desc">
+                            {t(`${SETTINGS_T}.ownerTransferDesc`)}
                         </p>
 
                         <div className="eca-settings-owner-transfer-actions">
                             <button type="button" className="eca-settings-owner-transfer-cancel" onClick={() => setOwnerTransferTarget(null)} disabled={ownerTransferring}>
-                                취소
+                                {t(`${SETTINGS_T}.cancel`)}
                             </button>
                             <button type="button" className="eca-settings-owner-transfer-confirm" onClick={() => void handleTransferOwner()} disabled={ownerTransferring}>
-                                {ownerTransferring ? "이전 중" : "권한 넘기기"}
+                                {ownerTransferring ? t(`${SETTINGS_T}.transferring`) : t(`${SETTINGS_T}.transferOwner`)}
                             </button>
                         </div>
                     </div>

@@ -1,8 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ApiError } from "../../../../../api/client";
 import { acceptOrganizationInvite, getOrganizationInvitePreview } from "../../../../../api/organizationClient";
 import "./organizationInvite.css";
+
+const ORGANIZATION_INVITE_T = "ecaAdmin.organizationInvite";
+
+type TFunctionLike = (key: string, options?: Record<string, unknown>) => string;
 
 type OrganizationInviteModalProps = {
     token: string;
@@ -16,6 +21,7 @@ export default function OrganizationInviteModal({
     onClose,
 }: OrganizationInviteModalProps): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [state, setState] = React.useState<InviteModalState>("loading");
     const [organizationName, setOrganizationName] = React.useState("");
@@ -41,7 +47,7 @@ export default function OrganizationInviteModal({
                 if (!mounted) return;
 
                 setState("error");
-                setMessage(getInviteErrorMessage(error, "초대 정보를 불러오지 못했습니다."));
+                setMessage(getInviteErrorMessage(error, t, `${ORGANIZATION_INVITE_T}.error.previewLoadFailed`));
             }
         }
 
@@ -50,7 +56,7 @@ export default function OrganizationInviteModal({
         return () => {
             mounted = false;
         };
-    }, [token]);
+    }, [token, t]);
 
     async function handleAccept(): Promise<void> {
         if (state === "requesting") return;
@@ -61,12 +67,12 @@ export default function OrganizationInviteModal({
             await acceptOrganizationInvite(token);
 
             setState("success");
-            setMessage("초대를 수락했습니다");
+            setMessage(t(`${ORGANIZATION_INVITE_T}.acceptSuccess`));
         } catch (error) {
             console.error(error);
 
             setState("error");
-            setMessage(getInviteErrorMessage(error, "초대 수락에 실패했습니다."));
+            setMessage(getInviteErrorMessage(error, t, `${ORGANIZATION_INVITE_T}.error.acceptFailed`));
         }
     }
 
@@ -78,7 +84,7 @@ export default function OrganizationInviteModal({
     return (
         <div className="organization-invite-modal-backdrop">
             <section className="organization-invite-modal" role="dialog" aria-modal="true">
-                <button type="button" className="organization-invite-modal-close" onClick={onClose} aria-label="닫기">
+                <button type="button" className="organization-invite-modal-close" onClick={onClose} aria-label={t(`${ORGANIZATION_INVITE_T}.close`)}>
                     <img src="/icons/x-01.svg" className="organization-invite-close-icon" alt="" />
                 </button>
                 {state === "loading" ? (
@@ -86,7 +92,7 @@ export default function OrganizationInviteModal({
                         <InviteMailIcon />
 
                         <strong className="organization-invite-message">
-                            초대 정보를 확인하고 있습니다
+                            {t(`${ORGANIZATION_INVITE_T}.checkingInvite`)}
                         </strong>
                     </>
                 ) : state === "success" ? (
@@ -94,13 +100,13 @@ export default function OrganizationInviteModal({
                         <InviteSuccessIcon />
 
                         <strong className="organization-invite-success-message">
-                            초대를 수락했습니다
+                            {t(`${ORGANIZATION_INVITE_T}.acceptSuccess`)}
                             <br />
-                            관리자 승인을 기다려주세요
+                            {t(`${ORGANIZATION_INVITE_T}.waitAdminApproval`)}
                         </strong>
 
                         <button type="button" className="organization-invite-home-button" onClick={handleMoveToHome}>
-                            홈 화면으로
+                            {t(`${ORGANIZATION_INVITE_T}.goHome`)}
                         </button>
                     </>
                 )  : state === "error" ? (
@@ -113,7 +119,7 @@ export default function OrganizationInviteModal({
 
                         <div className="organization-invite-button-row">
                             <button type="button" className="organization-invite-secondary-button" onClick={onClose}>
-                                닫기
+                                {t(`${ORGANIZATION_INVITE_T}.close`)}
                             </button>
                         </div>
                     </>
@@ -122,15 +128,15 @@ export default function OrganizationInviteModal({
                         <InviteMailIcon />
 
                         <strong className="organization-invite-message">
-                            {organizationName ? `${organizationName} 관리자로 초대되었습니다` : "기관 관리자로 초대되었습니다"}
+                            {organizationName ? t(`${ORGANIZATION_INVITE_T}.invitedWithOrganization`, { organizationName }) : t(`${ORGANIZATION_INVITE_T}.invitedWithoutOrganization`)}
                         </strong>
 
                         <div className="organization-invite-button-row">
                             <button type="button" className="organization-invite-primary-button" onClick={() => void handleAccept()} disabled={state === "requesting"}>
-                                {state === "requesting" ? "요청 중" : "수락하기"}
+                                {state === "requesting" ? t(`${ORGANIZATION_INVITE_T}.requesting`) : t(`${ORGANIZATION_INVITE_T}.accept`)}
                             </button>
                             <button type="button" className="organization-invite-secondary-button" onClick={onClose} disabled={state === "requesting"}>
-                                거절하기
+                                {t(`${ORGANIZATION_INVITE_T}.reject`)}
                             </button>
                         </div>
                     </>
@@ -160,28 +166,28 @@ function InviteSuccessIcon(): React.ReactElement {
     );
 }
 
-function getInviteErrorMessage(error: unknown, fallbackMessage: string): string {
+function getInviteErrorMessage(error: unknown, t: TFunctionLike, fallbackKey: string): string {
     if (error instanceof ApiError) {
         if (error.code === "ORGANIZATION_INVITE_NOT_FOUND") {
-            return "존재하지 않는 초대 링크입니다.";
+            return t(`${ORGANIZATION_INVITE_T}.error.notFound`);
         }
 
         if (error.code === "ORGANIZATION_INVITE_ALREADY_PROCESSED") {
-            return "이미 처리된 초대 링크입니다.";
+            return t(`${ORGANIZATION_INVITE_T}.error.alreadyProcessed`);
         }
 
         if (error.code === "ORGANIZATION_INVITE_EXPIRED") {
-            return "만료된 초대 링크입니다.";
+            return t(`${ORGANIZATION_INVITE_T}.error.expired`);
         }
 
         if (error.code === "ORGANIZATION_MEMBER_ALREADY_EXISTS") {
-            return "이미 해당 기관에 가입되어 있습니다.";
+            return t(`${ORGANIZATION_INVITE_T}.error.memberAlreadyExists`);
         }
 
         if (error.code === "ORGANIZATION_INVITE_REQUEST_ALREADY_EXISTS") {
-            return "이미 승인 요청을 보낸 초대입니다.";
+            return t(`${ORGANIZATION_INVITE_T}.error.requestAlreadyExists`);
         }
     }
 
-    return fallbackMessage;
+    return t(fallbackKey);
 }

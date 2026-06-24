@@ -6,9 +6,29 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ClientAdminHome from "./home";
 import ClientAdminUsersPage from "./analysis/users";
 import ClientAdminDashboardPage from "./dashboard/dashboard";
+import MobileClientAdminApp from "../../mobile/client/clientAdminApp";
 
+function useIsDesktop(): boolean {
+    const [isDesktop, setIsDesktop] = React.useState(() => (
+        typeof window !== "undefined" ? window.matchMedia("(min-width: 1024px)").matches : false
+    ));
 
-export default function DesktopAdminApp(): React.ReactElement {
+    React.useEffect(() => {
+        const mql = window.matchMedia("(min-width: 1024px)");
+        const onChange = () => setIsDesktop(mql.matches);
+
+        onChange();
+        mql.addEventListener("change", onChange);
+
+        return () => {
+            mql.removeEventListener("change", onChange);
+        };
+    }, []);
+
+    return isDesktop;
+}
+
+function DesktopClientAdminApp(): React.ReactElement {
 	return (
 		<Routes>
 			<Route element={<ClientAdminHome />}>
@@ -19,4 +39,10 @@ export default function DesktopAdminApp(): React.ReactElement {
 			</Route>
 		</Routes>
 	);
+}
+
+export default function ClientAdminApp(): React.ReactElement {
+    const isDesktop = useIsDesktop();
+
+    return isDesktop ? <DesktopClientAdminApp /> : <MobileClientAdminApp />;
 }

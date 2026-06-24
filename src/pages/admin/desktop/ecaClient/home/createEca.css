@@ -1,8 +1,12 @@
 .eca-create-page { width: 100%; max-width: 640px; margin: 0; padding: 30px 0; box-sizing: border-box; animation: eca-slide-in .28s ease both; }
 .eca-create-header { margin-bottom: 29px; }
 .eca-create-header h1 { display: none; }
-.eca-create-title-row { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 42px; box-sizing: border-box; }
+.eca-create-title-row { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 0; box-sizing: border-box; }
 .eca-create-title-row h2 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 1.5; }
+.eca-create-title-row-titlebox { display: flex; align-items: center; gap: 14px; }
+.eca-create-title-row-titlebox button { width: 28px; height: 28px; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .18s ease; }
+.eca-create-title-row-titlebox button:hover {transform: translateX(-3px);}
+.eca-create-title-row-titlebox button svg { display: block; }
 .eca-create-temp-button { width: 116px; height: 46px; border: 0; border-radius: 10px; background: #DDD; color: #777; font-size: 16px; font-weight: 700; cursor: not-allowed; }
 
 .eca-create-card { width: 100%; min-height: 640px; padding: 64px 38px 52px 56px; border: 1px solid #DDD; border-radius: 18px; background: #FFF; box-sizing: border-box; }

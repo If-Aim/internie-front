@@ -1,0 +1,82 @@
+/* src/pages/admin/mobile/ecaClient/ecaClientAdminMobile.css */
+#root:has(.eca-mobile-admin-page) { overflow-y: auto !important; overflow-x: hidden !important; }
+.eca-mobile-admin-page { min-height: 100vh; background: #F0F6FF; color: #000; display: flex; flex-direction: column; }
+.eca-mobile-admin-page * { box-sizing: border-box; }
+.eca-mobile-admin-topbar { position: sticky; top: 0; z-index: 100; min-height: calc(58px + env(safe-area-inset-top)); padding: max(env(safe-area-inset-top), 0px) 14px 0; background: #FFF; border-bottom: 1px solid #E6E6E6; box-shadow: 0 2px 12px rgba(0,0,0,.08); display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: 10px; }
+.eca-mobile-admin-menu-button, .eca-mobile-admin-profile-link { width: 40px; height: 40px; background: transparent; border: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.eca-mobile-admin-menu-button img { width: 22px; height: 22px; }
+.eca-mobile-admin-profile-link img { width: 32px; height: 32px; border-radius: 999px; object-fit: cover; background: #F6F6F6; border: 1px solid #D9D9D9; }
+.eca-mobile-admin-title { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.eca-mobile-admin-title span { max-width: 100%; color: #808080; font-size: 11px; font-weight: 700; line-height: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-mobile-admin-title strong { max-width: 100%; color: #000; font-size: 16px; font-weight: 700; line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-mobile-admin-body { flex: 1; width: 100%; padding: 18px 16px calc(80px + env(safe-area-inset-bottom)); }
+.eca-mobile-admin-surface { width: 100%; max-width: 760px; margin: 0 auto; }
+.eca-mobile-admin-drawer-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); display: flex; align-items: stretch; justify-content: flex-start; }
+.eca-mobile-admin-drawer { width: min(250px, 92vw); height: 100%; background: #FFF; padding: max(env(safe-area-inset-top), 0px) 16px calc(20px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; box-shadow: 8px 0 24px rgba(0,0,0,.18); }
+.eca-mobile-admin-drawer-head { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid #E8E8E8; }
+.eca-mobile-admin-drawer-head div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.eca-mobile-admin-drawer-head span { color: var(--primary); font-size: 18px; font-weight: 700; line-height: 22px; }
+.eca-mobile-admin-drawer-head strong { color: #808080; font-size: 13px; font-weight: 700; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-mobile-admin-drawer-head button { width: 36px; height: 36px; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: 0 0 auto; }
+.eca-mobile-admin-drawer-head button img { width: 22px; height: 22px; }
+.eca-mobile-admin-drawer-nav { flex: 1; min-height: 0; padding-top: 16px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.eca-mobile-admin-drawer-main, .eca-mobile-admin-drawer-activity { width: 100%; min-height: 46px; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: #808080; font-size: 15px; font-weight: 700; text-decoration: none; display: flex; align-items: center; text-align: left; }
+.eca-mobile-admin-drawer-main.is-active, .eca-mobile-admin-drawer-activity.is-active { background: #BDD8FF; color: var(--primary); }
+.eca-mobile-admin-drawer-activity { gap: 8px; cursor: pointer; }
+.eca-mobile-admin-drawer-activity span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eca-mobile-admin-drawer-chevron { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; transform: rotate(-90deg); transition: transform .2s ease; }
+.eca-mobile-admin-drawer-chevron.is-open { transform: rotate(0deg); }
+.eca-mobile-admin-drawer-chevron img { width: 18px; height: 18px; }
+.eca-mobile-admin-drawer-activity-list { display: flex; flex-direction: column; gap: 4px; }
+.eca-mobile-admin-drawer-group { display: flex; flex-direction: column; gap: 3px; }
+.eca-mobile-admin-drawer-submenu { display: flex; flex-direction: column; gap: 3px; }
+.eca-mobile-admin-drawer-submenu a { min-height: 40px; padding: 0 12px 0 40px; border-radius: 10px; color: #808080; font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; }
+.eca-mobile-admin-drawer-submenu a.is-active { background: #F0F6FF; color: var(--primary); font-weight: 700; }
+.eca-mobile-admin-drawer-empty { min-height: 42px; padding: 0 12px; color: #999; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+.eca-mobile-admin-page .eca-home-page, .eca-mobile-admin-page .eca-admin-dashboard-detail-page, .eca-mobile-admin-page .eca-admin-assignment-page, .eca-mobile-admin-page .eca-settings-page, .eca-mobile-admin-page .eca-admin-leaderboard-page { width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; }
+.eca-mobile-admin-page .eca-home-header { margin-bottom: 20px !important; }
+.eca-mobile-admin-page .eca-home-header h1, .eca-mobile-admin-page .eca-admin-dashboard-detail-head h1, .eca-mobile-admin-page .eca-admin-assignment-head h1, .eca-mobile-admin-page .eca-settings-header h1, .eca-mobile-admin-page .eca-admin-leaderboard-title { font-size: 22px !important; line-height: 30px !important; }
+.eca-mobile-admin-page .eca-home-header p { font-size: 15px !important; line-height: 24px !important; }
+.eca-mobile-admin-page .eca-home-header-bottom, .eca-mobile-admin-page .eca-admin-assignment-head, .eca-mobile-admin-page .eca-admin-dashboard-detail-head { align-items: flex-start !important; gap: 12px !important; }
+.eca-mobile-admin-page .eca-home-add-button { height: 42px !important; padding: 0 14px !important; font-size: 14px !important; }
+.eca-mobile-admin-page .eca-home-organization-select-wrap { max-width: 100% !important; }
+.eca-mobile-admin-page .eca-home-organization-select-button { height: 36px !important; font-size: 22px !important; padding-right: 28px !important; }
+.eca-mobile-admin-page .eca-home-organization-select-button span { max-width: calc(100vw - 92px) !important; }
+.eca-mobile-admin-page .eca-home-mypanel, .eca-mobile-admin-page .eca-home-centerpanel { height: auto !important; min-height: auto !important; max-height: none !important; padding: 18px 14px !important; border-radius: 14px !important; overflow: visible !important; }
+.eca-mobile-admin-page .eca-home-mypanel-head, .eca-mobile-admin-page .eca-home-centerpanel-head { margin-bottom: 18px !important; }
+.eca-mobile-admin-page .eca-home-status-row { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+.eca-mobile-admin-page .eca-home-status-column { display: flex !important; flex-direction: column !important; gap: 8px !important; }
+.eca-mobile-admin-page .eca-home-status { width: 100% !important; }
+.eca-mobile-admin-page .eca-home-my-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; overflow: visible !important; }
+.eca-mobile-admin-page .eca-home-card-column { min-height: 0 !important; gap: 8px !important; }
+.eca-mobile-admin-page .eca-home-my-card { height: 92px !important; padding: 42px 12px 12px !important; }
+.eca-mobile-admin-page .eca-home-center-scroll { gap: 12px !important; padding-bottom: 10px !important; }
+.eca-mobile-admin-page .eca-home-center-card { min-width: 168px !important; height: 150px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-summary-grid, .eca-mobile-admin-page .eca-admin-assignment-summary-grid, .eca-mobile-admin-page .eca-admin-evaluation-summary-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-summary-card, .eca-mobile-admin-page .eca-admin-assignment-summary-card, .eca-mobile-admin-page .eca-admin-evaluation-summary-card { min-height: 110px !important; height: auto !important; padding: 18px !important; border-radius: 14px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-main-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-panel-left, .eca-mobile-admin-page .eca-admin-dashboard-panel-right, .eca-mobile-admin-page .eca-admin-dashboard-right-column { height: auto !important; min-height: 260px !important; border-radius: 14px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-right-column { padding-top: 16px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-side-panel { height: auto !important; min-height: 220px !important; padding: 0 14px 16px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-invite-modal, .eca-mobile-admin-page .eca-settings-invite-modal, .eca-mobile-admin-page .eca-settings-owner-transfer-modal { width: calc(100vw - 32px) !important; min-height: auto !important; padding: 28px 20px !important; border-radius: 16px !important; }
+.eca-mobile-admin-page .eca-admin-dashboard-invite-codebox, .eca-mobile-admin-page .eca-settings-invite-modal-linkbox { width: 100% !important; margin-top: 28px !important; }
+.eca-mobile-admin-page .eca-admin-assignment-list-card { height: auto !important; min-height: 420px !important; padding: 18px 12px !important; border-radius: 14px !important; overflow-x: auto !important; }
+.eca-mobile-admin-page .eca-admin-assignment-list-scroll { height: auto !important; max-height: 520px !important; min-width: 650px !important; }
+.eca-mobile-admin-page .eca-admin-assignment-table-head, .eca-mobile-admin-page .eca-admin-assignment-row { min-width: 650px !important; }
+.eca-mobile-admin-page .eca-settings-card, .eca-mobile-admin-page .eca-settings-member-management-card { width: 100% !important; min-height: auto !important; padding: 20px 14px !important; border-radius: 14px !important; }
+.eca-mobile-admin-page .eca-settings-header h1 { margin-left: 0 !important; }
+.eca-mobile-admin-page .eca-settings-card-head, .eca-mobile-admin-page .eca-settings-card-head--action { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+.eca-mobile-admin-page .eca-settings-organization-dropdown, .eca-mobile-admin-page .eca-settings-role-select-wrap { width: 100% !important; }
+.eca-mobile-admin-page .eca-settings-member-management-head, .eca-mobile-admin-page .eca-settings-manager-section { margin-left: 0 !important; margin-right: 0 !important; }
+.eca-mobile-admin-page .eca-settings-member-list, .eca-mobile-admin-page .eca-settings-pending-list { height: auto !important; max-height: 360px !important; overflow-x: auto !important; }
+.eca-mobile-admin-page .eca-settings-member-list-head, .eca-mobile-admin-page .eca-settings-member-row { min-width: 620px !important; }
+.eca-mobile-admin-page .eca-settings-pending-list-head, .eca-mobile-admin-page .eca-settings-pending-row { min-width: 640px !important; }
+.eca-mobile-admin-page .eca-admin-leaderboard-header-row { margin: 0 0 24px !important; gap: 12px !important; }
+.eca-mobile-admin-page .eca-admin-leaderboard-tabs { margin: 0 0 10px !important; overflow-x: auto !important; }
+.eca-mobile-admin-page .eca-admin-leaderboard-card { width: 100% !important; min-width: 720px !important; height: 620px !important; }
+.eca-mobile-admin-page .eca-admin-leaderboard-page { overflow-x: auto !important; }
+
+@media (max-width: 380px) {
+    .eca-mobile-admin-page .eca-home-status-row, .eca-mobile-admin-page .eca-home-my-grid { grid-template-columns: 1fr !important; }
+    .eca-mobile-admin-title strong { font-size: 15px; }
+}

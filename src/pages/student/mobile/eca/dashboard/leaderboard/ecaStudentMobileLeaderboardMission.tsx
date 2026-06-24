@@ -34,7 +34,7 @@ function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
 
 type MissionStep = "select" | "submit" | "complete";
 type MissionFilter = "ALL" | "AVAILABLE" | "MAXED_OUT";
-type MissionCategoryFilter = "ALL" | LeaderboardMissionCategory;
+type MissionCategoryFilter = LeaderboardMissionCategory;
 
 function formatNumber(value?: number | null): string {
     return Number(value ?? 0).toLocaleString("en-US");
@@ -113,7 +113,9 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
     const [step, setStep] = React.useState<MissionStep>("select");
     const [filter, setFilter] = React.useState<MissionFilter>("ALL");
-    const [missionCategoryFilter, setMissionCategoryFilter] = React.useState<MissionCategoryFilter>("ALL");
+    const [selectedMissionCategories, setSelectedMissionCategories] = React.useState<MissionCategoryFilter[]>(
+        () => LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => option.value)
+    );
     const [isMissionCategoryFilterOpen, setIsMissionCategoryFilterOpen] = React.useState(false);
 
     const [missions, setMissions] = React.useState<LeaderboardMissionResponse[]>([]);
@@ -145,12 +147,14 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             nextItems = nextItems.filter((item) => item.maxedOut);
         }
 
-        if (missionCategoryFilter !== "ALL") {
-            nextItems = nextItems.filter((item) => item.mission.category === missionCategoryFilter);
+        if (selectedMissionCategories.length > 0) {
+            nextItems = nextItems.filter((item) => selectedMissionCategories.includes(item.mission.category));
+        } else {
+            nextItems = [];
         }
 
         return nextItems;
-    }, [missionItems, filter, missionCategoryFilter]);
+    }, [missionItems, filter, selectedMissionCategories]);
 
     const availableCount = missionItems.filter((item) => !item.maxedOut).length;
     const maxedOutCount = missionItems.filter((item) => item.maxedOut).length;
@@ -193,25 +197,6 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             mounted = false;
         };
     }, [externalActivityId]);
-
-    React.useEffect(() => {
-        if (!isMissionCategoryFilterOpen) return;
-
-        function handlePointerDown(event: PointerEvent): void {
-            const target = event.target;
-
-            if (!(target instanceof Element)) return;
-            if (target.closest(".eca-student-mobile-leaderboard-mission-category-filter-wrap")) return;
-
-            setIsMissionCategoryFilterOpen(false);
-        }
-
-        document.addEventListener("pointerdown", handlePointerDown);
-
-        return () => {
-            document.removeEventListener("pointerdown", handlePointerDown);
-        };
-    }, [isMissionCategoryFilterOpen]);
 
     function handleBackClick(): void {
         if (step === "complete") {
@@ -292,41 +277,61 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         );
     }
 
-    function renderMissionCategoryFilter(): React.ReactElement {
-        const options: { value: MissionCategoryFilter; label: string }[] = [
-            { value: "ALL", label: "All" },
-            ...LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => ({
-                value: option.value,
-                label: option.label,
-            })),
-        ];
+    function toggleMissionCategoryFilter(category: MissionCategoryFilter): void {
+        setSelectedMissionCategories((prev) =>
+            prev.includes(category)
+                ? prev.filter((item) => item !== category)
+                : [...prev, category]
+        );
+    }
 
+    function selectAllMissionCategories(): void {
+        setSelectedMissionCategories(LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => option.value));
+    }
+
+    function isAllMissionCategorySelected(): boolean {
+        return selectedMissionCategories.length === LEADERBOARD_MISSION_CATEGORY_OPTIONS.length;
+    }
+
+    function renderMissionCategoryFilter(): React.ReactElement {
         return (
             <div className="eca-student-mobile-leaderboard-mission-category-filter-wrap">
-                <button type="button" className={missionCategoryFilter === "ALL" ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsMissionCategoryFilterOpen((prev) => !prev)}>
+                <button type="button" className={isAllMissionCategorySelected() ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsMissionCategoryFilterOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        {missionCategoryFilter !== "ALL" ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
+                        {!isAllMissionCategorySelected() ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
                     </svg>
                 </button>
+            </div>
+        );
+    }
+        
+    function renderMissionCategoryFilterModal(): React.ReactElement | null {
+        if (!isMissionCategoryFilterOpen) return null;
 
-                {isMissionCategoryFilterOpen ? (
-                    <div className="eca-student-mobile-leaderboard-mission-category-filter-popover">
-                        {options.map((option) => (
+        return (
+            <div className="eca-student-mobile-leaderboard-mission-category-filter-modal-backdrop" onClick={() => setIsMissionCategoryFilterOpen(false)}>
+                <div className="eca-student-mobile-leaderboard-mission-category-filter-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+                    <button type="button" className={isAllMissionCategorySelected() ? "eca-student-mobile-leaderboard-mission-category-filter-modal-option is-selected" : "eca-student-mobile-leaderboard-mission-category-filter-modal-option"} onClick={selectAllMissionCategories} aria-pressed={isAllMissionCategorySelected()}>
+                        All
+                    </button>
+
+                    {LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => {
+                        const selected = selectedMissionCategories.includes(option.value);
+
+                        return (
                             <button
                                 type="button"
-                                className={missionCategoryFilter === option.value ? "eca-student-mobile-leaderboard-mission-category-filter-option selected" : "eca-student-mobile-leaderboard-mission-category-filter-option"}
+                                className={selected ? "eca-student-mobile-leaderboard-mission-category-filter-modal-option is-selected" : "eca-student-mobile-leaderboard-mission-category-filter-modal-option"}
                                 key={option.value}
-                                onClick={() => {
-                                    setMissionCategoryFilter(option.value);
-                                    setIsMissionCategoryFilterOpen(false);
-                                }}
+                                onClick={() => toggleMissionCategoryFilter(option.value)}
+                                aria-pressed={selected}
                             >
                                 {option.label}
                             </button>
-                        ))}
-                    </div>
-                ) : null}
+                        );
+                    })}
+                </div>
             </div>
         );
     }
@@ -540,6 +545,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                 {step === "submit" ? renderSubmitStep() : null}
                 {step === "complete" ? renderCompleteStep() : null}
             </div>
+            {renderMissionCategoryFilterModal()}
         </main>
     );
 }

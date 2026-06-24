@@ -1,30 +1,34 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { downloadSubmissionFile, getAssignmentSubmissions, getExternalActivity, getSubmissionEvaluation, getSubmissionFilePreview, saveSubmissionEvaluation } from "../../../../../../api/ea";
 import type { AssignmentEvaluationItemResponse, AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionEvaluationResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import "./assignmentEvaluation.css";
 
+const ASSIGNMENT_EVALUATION_T = "ecaAdmin.assignmentEvaluationPage";
+
+type TFunctionLike = (key: string, options?: Record<string, unknown>) => string;
 type PreviewFile = SubmissionFileResponse;
 
-function getParticipantName(participant: AssignmentParticipantResponse): string {
-    if (participant.participantType === "TEAM") return participant.teamName?.trim() || "팀 이름 없음";
+function getParticipantName(participant: AssignmentParticipantResponse, t: TFunctionLike): string {
+    if (participant.participantType === "TEAM") return participant.teamName?.trim() || t(`${ASSIGNMENT_EVALUATION_T}.teamNameFallback`);
 
-    return participant.userName?.trim() || "이름 없음";
+    return participant.userName?.trim() || t(`${ASSIGNMENT_EVALUATION_T}.userNameFallback`);
 }
 
-function getTeamLabel(participant: AssignmentParticipantResponse, assignment: AssignmentResponse | null): string {
-    if (participant.participantType === "TEAM") return participant.teamName?.trim() || "Team";
+function getTeamLabel(participant: AssignmentParticipantResponse, assignment: AssignmentResponse | null, t: TFunctionLike): string {
+    if (participant.participantType === "TEAM") return participant.teamName?.trim() || t(`${ASSIGNMENT_EVALUATION_T}.teamLabel`);
 
-    if (assignment?.systemForm === "TEAM") return "Team";
+    if (assignment?.systemForm === "TEAM") return t(`${ASSIGNMENT_EVALUATION_T}.teamLabel`);
 
     return "";
 }
 
-function getFileName(file?: SubmissionFileResponse | null): string {
-    if (!file) return "제출 파일 없음";
+function getFileName(file?: SubmissionFileResponse | null, t?: TFunctionLike): string {
+    if (!file) return t ? t(`${ASSIGNMENT_EVALUATION_T}.noSubmissionFile`) : "제출 파일 없음";
 
-    return file.originalFileName ?? `submission-file-${file.submissionFileId}`;
+    return file.originalFileName ?? (t ? t(`${ASSIGNMENT_EVALUATION_T}.submissionFileFallback`, { id: file.submissionFileId }) : `submission-file-${file.submissionFileId}`);
 }
 
 function isImageContentType(contentType?: string | null): boolean {
@@ -85,6 +89,7 @@ function hasSavedEvaluation(evaluation: AssignmentSubmissionEvaluationResponse):
 
 export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { externalActivityId, assignmentId, participantId } = useParams<{ externalActivityId?: string; assignmentId?: string; participantId?: string }>();
     const { organization, organizationLoading } = useOutletContext<EcaClientAdminOutletContext>();
 
@@ -117,14 +122,14 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     const previewFileName = previewFile?.originalFileName ?? "";
     const previewFileContentType = previewFile?.contentType ?? "";
     const lateSubmitted = evaluation?.lateOnSubmission ?? submission?.lateOnSubmission ?? participant?.status === "LATE_SUBMITTED";
-    const teamLabel = participant && assignment ? getTeamLabel(participant, assignment) : "";
+    const teamLabel = participant && assignment ? getTeamLabel(participant, assignment, t) : "";
 
     React.useEffect(() => {
         async function fetchEvaluationData(): Promise<void> {
             if (organizationLoading) return;
 
             if (!organization?.organizationId || !externalActivityId || !assignmentId || !participantId) {
-                setError("평가 정보를 찾을 수 없습니다.");
+                setError(t(`${ASSIGNMENT_EVALUATION_T}.error.evaluationInfoNotFound`));
                 return;
             }
 
@@ -149,7 +154,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                 setSubmission(foundSubmission);
 
                 if (!foundAssignment || !foundParticipant) {
-                    setError("평가 대상을 찾을 수 없습니다.");
+                    setError(t(`${ASSIGNMENT_EVALUATION_T}.error.evaluationTargetNotFound`));
                     return;
                 }
 
@@ -175,14 +180,14 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                 setPreview(null);
                 setScoreByCriterionId({});
                 setFeedback("");
-                setError("평가 정보를 불러오지 못했습니다.");
+                setError(t(`${ASSIGNMENT_EVALUATION_T}.error.evaluationLoadFailed`));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchEvaluationData();
-    }, [assignmentId, externalActivityId, organization?.organizationId, organizationLoading, participantId]);
+    }, [assignmentId, externalActivityId, organization?.organizationId, organizationLoading, participantId, t]);
 
     React.useEffect(() => {
         let cancelled = false;
@@ -208,7 +213,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
 
                 if (!cancelled) {
                     setPreview(null);
-                    setPreviewError("미리보기를 불러오지 못했습니다.");
+                    setPreviewError(t(`${ASSIGNMENT_EVALUATION_T}.error.previewLoadFailed`));
                 }
             } finally {
                 if (!cancelled) {
@@ -222,7 +227,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
         return () => {
             cancelled = true;
         };
-    }, [previewFileId, previewFileName, previewFileContentType]);
+    }, [previewFileId, previewFileName, previewFileContentType, t]);
 
     React.useEffect(() => {
         return () => {
@@ -279,7 +284,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
             await downloadSubmissionFile(previewFile);
         } catch (e) {
             console.error(e);
-            window.alert("파일 다운로드에 실패했습니다.");
+            window.alert(t(`${ASSIGNMENT_EVALUATION_T}.error.fileDownloadFailed`));
         }
     }
 
@@ -287,7 +292,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
         if (!submission || !evaluation || saving) return;
 
         if (!hasAllScoresSelected()) {
-            window.alert("모든 평가 기준의 점수를 선택해주세요.");
+            window.alert(t(`${ASSIGNMENT_EVALUATION_T}.alert.selectAllScores`));
             return;
         }
 
@@ -305,10 +310,10 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
             setEvaluation(saved);
             setScoreByCriterionId(toScoreMap(saved.criteria));
             setFeedback(saved.feedback ?? "");
-            window.alert("평가가 저장되었습니다.");
+            window.alert(t(`${ASSIGNMENT_EVALUATION_T}.alert.saveSuccess`));
         } catch (e) {
             console.error(e);
-            window.alert("평가 저장에 실패했습니다.");
+            window.alert(t(`${ASSIGNMENT_EVALUATION_T}.error.saveFailed`));
         } finally {
             setSaving(false);
         }
@@ -321,7 +326,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
 
         return (
             <div className="eca-admin-assignment-evaluation-link-box">
-                <strong>제출 링크</strong>
+                <strong>{t(`${ASSIGNMENT_EVALUATION_T}.submittedLink`)}</strong>
                 <a href={getExternalLinkHref(linkUrl)} target="_blank" rel="noreferrer">
                     {linkUrl}
                 </a>
@@ -333,32 +338,32 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
         const submittedLinkUrl = getSubmittedLinkUrl(previewLink);
 
         if (previewLoading) {
-            return <p className="eca-admin-assignment-evaluation-empty">미리보기를 불러오는 중입니다.</p>;
+            return <p className="eca-admin-assignment-evaluation-empty">{t(`${ASSIGNMENT_EVALUATION_T}.previewLoading`)}</p>;
         }
 
         if (preview?.previewUrl && isImageContentType(preview.contentType)) {
-            return <img className="eca-admin-assignment-evaluation-preview-image" src={preview.previewUrl} alt={preview.originalFileName ?? getFileName(previewFile)} />;
+            return <img className="eca-admin-assignment-evaluation-preview-image" src={preview.previewUrl} alt={preview.originalFileName ?? getFileName(previewFile, t)} />;
         }
 
         if (preview?.previewUrl && isPdfContentType(preview.contentType)) {
-            return <iframe className="eca-admin-assignment-evaluation-preview-frame" src={preview.previewUrl} title={preview.originalFileName ?? getFileName(previewFile)} />;
+            return <iframe className="eca-admin-assignment-evaluation-preview-frame" src={preview.previewUrl} title={preview.originalFileName ?? getFileName(previewFile, t)} />;
         }
 
         if (previewFile) {
             return (
                 <div className="eca-admin-assignment-evaluation-file-box">
-                    <strong>{getFileName(previewFile)}</strong>
-                    <span>{previewError || "이 파일은 미리보기를 지원하지 않습니다."}</span>
-                    <button type="button" onClick={handleDownloadFile}>파일 다운로드</button>
+                    <strong>{getFileName(previewFile, t)}</strong>
+                    <span>{previewError || t(`${ASSIGNMENT_EVALUATION_T}.previewUnsupported`)}</span>
+                    <button type="button" onClick={handleDownloadFile}>{t(`${ASSIGNMENT_EVALUATION_T}.fileDownload`)}</button>
                 </div>
             );
         }
 
         if (submittedLinkUrl) {
-            return <p className="eca-admin-assignment-evaluation-empty">제출 링크가 아래에 표시됩니다.</p>;
+            return <p className="eca-admin-assignment-evaluation-empty">{t(`${ASSIGNMENT_EVALUATION_T}.submittedLinkDisplayedBelow`)}</p>;
         }
 
-        return <p className="eca-admin-assignment-evaluation-empty">표시할 제출 자료가 없습니다.</p>;
+        return <p className="eca-admin-assignment-evaluation-empty">{t(`${ASSIGNMENT_EVALUATION_T}.noSubmissionMaterial`)}</p>;
     }
 
     const pageClassName = `eca-admin-assignment-evaluation-page${pageLeaving ? " is-leaving" : ""}`;
@@ -366,7 +371,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     if (loading) {
         return (
             <div className={pageClassName}>
-                <p className="eca-admin-assignment-evaluation-empty">평가 정보를 불러오는 중입니다.</p>
+                <p className="eca-admin-assignment-evaluation-empty">{t(`${ASSIGNMENT_EVALUATION_T}.loading`)}</p>
             </div>
         );
     }
@@ -374,12 +379,12 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     if (error || !assignment || !participant) {
         return (
             <div className={pageClassName}>
-                <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
+                <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label={t(`${ASSIGNMENT_EVALUATION_T}.back`)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
-                <p className="eca-admin-assignment-evaluation-empty">{error || "평가 정보를 찾을 수 없습니다."}</p>
+                <p className="eca-admin-assignment-evaluation-empty">{error || t(`${ASSIGNMENT_EVALUATION_T}.error.evaluationInfoNotFound`)}</p>
             </div>
         );
     }
@@ -387,7 +392,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
     return (
         <div className={pageClassName}>
             <header className="eca-admin-assignment-evaluation-head">
-                <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label="뒤로가기">
+                <button type="button" className="eca-admin-assignment-evaluation-back-button" onClick={moveBack} aria-label={t(`${ASSIGNMENT_EVALUATION_T}.back`)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M12 15L7 10L12 5" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -398,7 +403,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
             <section className="eca-admin-assignment-evaluation-layout">
                 <div className="eca-admin-assignment-evaluation-column">
                     <div className="eca-admin-assignment-evaluation-preview-title">
-                        <strong>{getParticipantName(participant)}</strong>
+                        <strong>{getParticipantName(participant, t)}</strong>
                         {teamLabel ? <span>{teamLabel}</span> : null}
                     </div>
 
@@ -410,13 +415,13 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
 
                 <div className="eca-admin-assignment-evaluation-column">
                     <div className="eca-admin-assignment-evaluation-evaluation-title">
-                        <strong>Evaluation</strong>
-                        {lateSubmitted ? <span className="eca-admin-assignment-evaluation-late-badge">지각 제출</span> : null}
+                        <strong>{t(`${ASSIGNMENT_EVALUATION_T}.evaluationTitle`)}</strong>
+                        {lateSubmitted ? <span className="eca-admin-assignment-evaluation-late-badge">{t(`${ASSIGNMENT_EVALUATION_T}.lateSubmitted`)}</span> : null}
                     </div>
 
                     <aside className="eca-admin-assignment-evaluation-panel">
                         <div className="eca-admin-assignment-evaluation-criteria-head">
-                            <h2>Criteria</h2>
+                            <h2>{t(`${ASSIGNMENT_EVALUATION_T}.criteriaTitle`)}</h2>
                             <span>{criteria.length > 0 ? `${criterionIndex + 1}/${criteria.length}` : "0/0"}</span>
                         </div>
 
@@ -425,13 +430,13 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                                 <div className="eca-admin-assignment-evaluation-criteria-row">
                                     <strong>{currentCriterion?.name ?? "-"}</strong>
                                     <div className="eca-admin-assignment-evaluation-step-buttons">
-                                        <button type="button" onClick={movePrevCriterion} disabled={criterionIndex === 0} aria-label="이전 기준">
+                                        <button type="button" onClick={movePrevCriterion} disabled={criterionIndex === 0} aria-label={t(`${ASSIGNMENT_EVALUATION_T}.prevCriterion`)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
                                                 <circle cx="18" cy="18" r="18" fill="#F6F6F6"/>
                                                 <path d="M20 23L15 18L20 13" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                             </svg>
                                         </button>
-                                        <button type="button" onClick={moveNextCriterion} disabled={criterionIndex >= criteria.length - 1} aria-label="다음 기준">
+                                        <button type="button" onClick={moveNextCriterion} disabled={criterionIndex >= criteria.length - 1} aria-label={t(`${ASSIGNMENT_EVALUATION_T}.nextCriterion`)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
                                                 <circle cx="18" cy="18" r="18" fill="#F6F6F6"/>
                                                 <path d="M16 13L21 18L16 23" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -448,7 +453,7 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                                             className={"eca-admin-assignment-evaluation-score-dot" + (currentScore !== undefined && score <= currentScore ? " is-selected" : "")}
                                             onClick={() => updateScore(score)}
                                             disabled={!currentCriterion}
-                                            aria-label={`${score}점`}
+                                            aria-label={t(`${ASSIGNMENT_EVALUATION_T}.scoreAria`, { score })}
                                         />
                                     ))}
                                 </div>
@@ -461,12 +466,12 @@ export default function EcaAssignmentEvaluationPage(): React.ReactElement {
                         </div>
 
                         <label className="eca-admin-assignment-evaluation-feedback">
-                            <strong>Feedback</strong>
-                            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="텍스트를 입력하세요..." disabled={!submission || !evaluation || saving} />
+                            <strong>{t(`${ASSIGNMENT_EVALUATION_T}.feedbackTitle`)}</strong>
+                            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t(`${ASSIGNMENT_EVALUATION_T}.feedbackPlaceholder`)} disabled={!submission || !evaluation || saving} />
                         </label>
 
                         <button type="button" className="eca-admin-assignment-evaluation-save-button" onClick={handleSave} disabled={!submission || !evaluation || saving}>
-                            {saving ? "saving..." : "save"}
+                            {saving ? t(`${ASSIGNMENT_EVALUATION_T}.saving`) : t(`${ASSIGNMENT_EVALUATION_T}.save`)}
                         </button>
                     </aside>
                 </div>

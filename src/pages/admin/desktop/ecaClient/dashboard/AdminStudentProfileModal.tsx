@@ -1,5 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import "./AdminStudentProfileModal.css";
 
 export type AdminStudentProfile = {
@@ -13,6 +14,8 @@ type AdminStudentProfileModalProps = {
     student: AdminStudentProfile | null;
     onClose: () => void;
 };
+
+const STUDENT_PROFILE_MODAL_T = "ecaAdmin.studentProfileModal";
 
 function getSafeExternalUrl(value?: string | null): string {
     const trimmed = value?.trim() ?? "";
@@ -42,6 +45,8 @@ function getNicknameLabel(student: AdminStudentProfile): string {
 }
 
 export default function AdminStudentProfileModal({ student, onClose }: AdminStudentProfileModalProps): React.ReactElement | null {
+    const { t } = useTranslation();
+
     if (!student) return null;
 
     const nickname = getNicknameLabel(student);
@@ -60,7 +65,7 @@ export default function AdminStudentProfileModal({ student, onClose }: AdminStud
     return createPortal(
         <div className="eca-admin-profile-modal-backdrop" onMouseDown={onClose}>
             <section className="eca-admin-profile-modal" onMouseDown={(event) => event.stopPropagation()}>
-                <button type="button" className="eca-admin-profile-modal-close" onClick={onClose} aria-label="닫기">
+                <button type="button" className="eca-admin-profile-modal-close" onClick={onClose} aria-label={t(`${STUDENT_PROFILE_MODAL_T}.close`)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
@@ -78,16 +83,16 @@ export default function AdminStudentProfileModal({ student, onClose }: AdminStud
                     ) : null}
                 </span>
 
-                <strong>{student.name || "이름 없음"}</strong>
+                <strong>{student.name || t(`${STUDENT_PROFILE_MODAL_T}.noName`)}</strong>
 
                 {nickname ? (
                     <p>{nickname}</p>
                 ) : (
-                    <p className="is-empty">닉네임 없음</p>
+                    <p className="is-empty">{t(`${STUDENT_PROFILE_MODAL_T}.noNickname`)}</p>
                 )}
 
                 <button type="button" className="eca-admin-profile-modal-linkedin" onClick={openLinkedin} disabled={!linkedinUrl}>
-                    {linkedinUrl ? "Go to LinkedIn" : "LinkedIn 없음"}
+                    {linkedinUrl ? t(`${STUDENT_PROFILE_MODAL_T}.goToLinkedin`) : t(`${STUDENT_PROFILE_MODAL_T}.noLinkedin`)}
                 </button>
             </section>
         </div>,

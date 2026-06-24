@@ -150,7 +150,7 @@ function EcaMobileShell(): React.ReactElement {
                 onRequireAuth={(path, action) => requireAuth(path, action)}
             />
             <div className="eca-mobile-shell-body">
-                <Outlet context={{ userName, userEmail, userProfileImg }} />
+                <Outlet context={{ userName, userEmail, userProfileImg, onRequireAuth: requireAuth }} />
             </div>
 
             {hideBottomNav ? null : (

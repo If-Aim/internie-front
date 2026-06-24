@@ -216,7 +216,7 @@ export default function MyPage({ onLogout }: Props) {
 	return (
 		<div className="mypage">
 			<header className="mypage-header">
-				<button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate("/")} >
+				<button type="button" className="mypage-previous" aria-label="previous" onClick={() => navigate(-1)} >
 					<img src="/icons/chevron-left.svg" alt="previous" />
 				</button>
 				<div className="mypage-email"></div>

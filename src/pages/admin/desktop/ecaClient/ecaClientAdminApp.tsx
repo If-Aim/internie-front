@@ -15,8 +15,29 @@ import EcaDashboardAttendanceDetail from "./dashboard/attendance/attendanceDetai
 import EcaDashboardTeamActivity from "./dashboard/teamActivity/teamActivity";
 import EcaDashboardLeaderboard from "./dashboard/leaderboard/leaderboard";
 import EcaSettingsPage from "./settings/settings";
+import EcaClientAdminMobileApp from "../../mobile/ecaClient/ecaClientAdminApp";
 
-export default function EcaClientAdminApp(): React.ReactElement {
+function useIsDesktop(): boolean {
+    const [isDesktop, setIsDesktop] = React.useState(() => (
+        typeof window !== "undefined" ? window.matchMedia("(min-width: 1024px)").matches : false
+    ));
+
+    React.useEffect(() => {
+        const mql = window.matchMedia("(min-width: 1024px)");
+        const onChange = () => setIsDesktop(mql.matches);
+
+        onChange();
+        mql.addEventListener("change", onChange);
+
+        return () => {
+            mql.removeEventListener("change", onChange);
+        };
+    }, []);
+
+    return isDesktop;
+}
+
+function EcaClientAdminDesktopApp(): React.ReactElement {
     return (
         <Routes>
             <Route element={<EcaClientAdminHome />}>
@@ -41,4 +62,10 @@ export default function EcaClientAdminApp(): React.ReactElement {
             </Route>
         </Routes>
     );
+}
+
+export default function EcaClientAdminApp(): React.ReactElement {
+    const isDesktop = useIsDesktop();
+
+    return isDesktop ? <EcaClientAdminDesktopApp /> : <EcaClientAdminMobileApp />;
 }
