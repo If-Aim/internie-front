@@ -1229,11 +1229,70 @@
 		"team": "Team",
 		"ecaClientAdminName": "{{studentName}}",
 
+		"appPage": {
+			"defaultUserName": "User",
+			"bottomNav": {
+				"dashboard": "Dashboard",
+				"assignment": "Assignment",
+				"attendance": "Attendance",
+				"leaderboard": "Leaderboard"
+			}
+		},
+
+		"notificationPage": {
+			"title": "Notification",
+			"loading": "Loading notifications...",
+			"empty": "No notifications.",
+			"loadFailed": "Failed to load notifications."
+		},
+
 		"status": {
 			"upcoming": "Scheduled",
 			"ongoing": "In Progress",
 			"completed": "Completed",
 			"delayed": "Delayed"
+		},
+
+		"dashboardPage": {
+			"activityFallback": "Program",
+			"loading": "Loading dashboard information.",
+			"scheduleTitle": "All Schedules",
+			"emptySchedule": "No schedules have been registered.",
+			"todayFormat": "{{month}}/{{day}}, {{weekday}}",
+			"attendanceScheduleTitle": "{{month}}/{{day}} Attendance {{type}}",
+			"attendanceNameWithType": "{{name}} {{type}}",
+			"weekday": {
+				"0": "Sunday",
+				"1": "Monday",
+				"2": "Tuesday",
+				"3": "Wednesday",
+				"4": "Thursday",
+				"5": "Friday",
+				"6": "Saturday"
+			},
+			"attendanceType": {
+				"CLASS_START": "Start",
+				"CLASS_END": "End"
+			},
+			"scheduleType": {
+				"attendance": "Attendance",
+				"assignment": "Assignment"
+			},
+			"filter": {
+				"allTypes": "All schedule types",
+				"noTypes": "No schedule types selected"
+			},
+			"sort": {
+				"asc": "Oldest date first",
+				"desc": "Latest date first"
+			},
+			"aria": {
+				"notification": "Notifications"
+			},
+			"error": {
+				"activityNotFound": "Program information could not be found.",
+				"dashboardLoadFailed": "Failed to load dashboard information."
+			}
 		},
 
 		"assignmentPage": {
@@ -1255,6 +1314,235 @@
 				"activityDeletedOrNotFound": "This program has been deleted or does not exist.",
 				"accessDenied": "This program cannot be accessed.",
 				"assignmentLoadFailed": "Failed to load assignments."
+			}
+		},
+
+		"assignmentSubmitPage": {
+			"back": "Back",
+			"loading": "Loading assignment information.",
+			"infoTitle": "Assignment Information",
+			"assignmentName": "Assignment Name",
+			"assignmentPeriod": "Assignment Period",
+			"teamOrIndividual": "Team/Individual",
+			"resultFormLabel": "Submission Type",
+			"uploadTitle": "Upload Assignment",
+			"fileUploadGuide": "Upload files",
+			"fileLabel": "File",
+			"linkLabel": "Link",
+			"linkPlaceholder": "Paste a link",
+			"linkNoInfo": "No link information",
+			"linkDelete": "Delete link",
+			"submittedAssignment": "Submitted Assignment",
+			"lastModifiedAt": "Last edited",
+			"evaluatedNotice": "Evaluation is complete, so you cannot edit or resubmit this assignment.",
+			"fileDownload": "Download file",
+			"fileDelete": "Delete file",
+			"submissionFileFallback": "submission-file-{{fileId}}",
+			"fileTypeWarning": "Please check the assignment format.",
+			"evaluationCompletedButton": "Evaluation Complete",
+			"savingButton": "Saving",
+			"editButton": "Edit",
+			"submitButton": "Submit",
+			"evaluationTitle": "Evaluation",
+			"totalScore": "Total Score",
+			"feedbackTitle": "Feedback",
+			"noFeedback": "No feedback has been provided.",
+			"submitSuccessTitle": "Submission Complete",
+			"submitFailTitle": "Submission Failed",
+			"confirmButton": "Confirm",
+			"retryButton": "Try Again",
+			"resultForm": {
+				"WRITING": "Document",
+				"VIDEO": "Video",
+				"IMAGE": "Photo",
+				"LINK": "Link",
+				"ETC": "Other"
+			},
+			"assignmentForm": {
+				"individual": "Individual",
+				"team": "Team",
+				"teamWithName": "Team · {{teamName}}"
+			},
+			"alert": {
+				"emptyFile": "Empty files cannot be submitted.",
+				"fileDownloadFailed": "Failed to download the file.",
+				"linkRequired": "Please enter a link to submit.",
+				"fileOrLinkRequired": "Please upload a file or enter a link to submit.",
+				"invalidLink": "Please enter a link that starts with http or https.",
+				"invalidFileType": "This file type is not allowed for the assignment."
+			},
+			"error": {
+				"assignmentNotFound": "Assignment information could not be found.",
+				"assignmentLoadFailed": "Failed to load assignment information."
+			}
+		},
+
+		"attendancePage": {
+			"fallbackTitle": "Attendance",
+			"loading": "Loading attendance information.",
+			"empty": "No attendance events have been registered.",
+			"type": {
+				"CLASS_START": "Start",
+				"CLASS_END": "End"
+			},
+			"status": {
+				"NOT_CHECKED": "Not Checked",
+				"PRESENT": "Present",
+				"LATE": "Late",
+				"VERY_LATE": "Very Late",
+				"EARLY_LEAVE": "Early Leave",
+				"VERY_EARLY_LEAVE": "Very Early Leave",
+				"ABSENT": "Absent"
+			},
+			"error": {
+				"activityNotFound": "Program information could not be found.",
+				"attendanceLoadFailed": "Failed to load attendance information."
+			}
+		},
+
+		"attendanceSubmitPage": {
+			"fallbackTitle": "Attendance",
+			"type": {
+				"CLASS_START": "Start",
+				"CLASS_END": "End"
+			},
+			"noCheckedStudents": "No students have checked in yet.",
+			"upload": "Upload",
+			"uploading": "Uploading...",
+			"checkIn": "Check-In",
+			"retake": "Retake",
+			"cameraGuide": "Please take a selfie",
+			"checkInComplete": "Check-In Complete!",
+			"alert": {
+				"alreadyChecked": "Check-in has already been completed.",
+				"notAvailableTime": "This is not an available check-in time.",
+				"cameraNotSupported": "This browser does not support the web camera.",
+				"cameraPermissionRequired": "Please allow camera permission.",
+				"cameraNotReady": "The camera is not ready yet.",
+				"photoCaptureFailed": "Failed to capture the photo.",
+				"imageOnly": "Only image files can be selected.",
+				"checkInFailed": "Failed to check in.",
+				"photoRequired": "Please select a photo to upload."
+			},
+			"error": {
+				"attendanceNotFound": "Attendance information could not be found.",
+				"attendanceDetailLoadFailed": "Failed to load attendance detail information."
+			},
+			"aria": {
+				"back": "Back",
+				"close": "Close",
+				"camera": "Camera",
+				"selectedImage": "Selected image",
+				"galleryImage": "Gallery image",
+				"capturedSelfie": "Captured selfie",
+				"closeCamera": "Close camera",
+				"hideGuide": "Hide guide",
+				"showGuide": "Show guide",
+				"takePhoto": "Take photo",
+				"switchCamera": "Switch camera",
+				"closeSuccessMessage": "Close success message"
+			}
+		},
+
+		"leaderboardPage": {
+			"loading": "Loading...",
+			"me": "Me",
+			"activityFallback": "Class",
+			"ranking": "Ranking",
+			"rankingEmpty": "Ranking is empty.",
+			"myPoints": "My points",
+			"missionLog": "Mission Log",
+			"missionLogEmpty": "Mission log is empty.",
+			"getPoint": "Get Point",
+			"categoryFallback": "Category",
+			"filter": {
+				"label": "Filter",
+				"all": "All"
+			},
+			"rank": {
+				"place": "{{rankOrdinal}} Place"
+			},
+			"logStatus": {
+				"pending": "Pending",
+				"approved": "Approved",
+				"rejected": "Rejected",
+				"all": "All"
+			},
+			"category": {
+				"ELICIT": "Elicit",
+				"DISCOVER": "Discover",
+				"INSIGHT": "Insight",
+				"SYNTHESIZE": "Synthesize",
+				"OWN": "Own",
+				"NURTURE": "Nurture"
+			},
+			"aria": {
+				"back": "Back"
+			},
+			"error": {
+				"activityNotFound": "Program information could not be found.",
+				"leaderboardLoadFailed": "Failed to load leaderboard information."
+			}
+		},
+
+		"leaderboardMissionPage": {
+			"title": "Get Point",
+			"loading": "Loading...",
+			"selectMission": "Select a Mission",
+			"next": "Next",
+			"uploadEvidence": "Upload Evidence",
+			"evidence": "Evidence",
+			"submissionFormat": "Submission Format",
+			"submission": "Submission",
+			"file": "File",
+			"fileUploadGuide": "Please upload a file",
+			"filesSelected": "{{fileCount}} files selected",
+			"link": "Link",
+			"linkPlaceholder": "Paste one link per line",
+			"saving": "Saving",
+			"submit": "Submit",
+			"completed": "Completed!",
+			"approvalNotice": "Scores will be updated after admin approval",
+			"save": "Save",
+			"categoryFallback": "Category",
+			"filter": {
+				"label": "Filter",
+				"all": "All"
+			},
+			"missionFilter": {
+				"all": "All ({{missionCount}})",
+				"available": "Available ({{missionCount}})",
+				"maxedOut": "Maxed Out ({{missionCount}})"
+			},
+			"category": {
+				"ELICIT": "Elicit",
+				"DISCOVER": "Discover",
+				"INSIGHT": "Insight",
+				"SYNTHESIZE": "Synthesize",
+				"OWN": "Own",
+				"NURTURE": "Nurture"
+			},
+			"evidenceType": {
+				"IMAGE": "Photo",
+				"DOCUMENT": "Document",
+				"VIDEO": "Video",
+				"LINK": "Link",
+				"TEXT": "Text",
+				"ETC": "Other"
+			},
+			"alert": {
+				"fileRequired": "Please submit a file.",
+				"linkRequired": "Please enter a link.",
+				"invalidLink": "Please enter a link that starts with http or https.",
+				"submitFailed": "Failed to submit the mission."
+			},
+			"aria": {
+				"back": "Back",
+				"removeFile": "Remove file"
+			},
+			"error": {
+				"activityNotFound": "Program information could not be found.",
+				"missionLoadFailed": "Failed to load missions."
 			}
 		},
 

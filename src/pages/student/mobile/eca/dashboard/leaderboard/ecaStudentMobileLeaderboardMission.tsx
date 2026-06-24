@@ -1,10 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, getMyLeaderboardMissionLogs, getMyLeaderboardMissions, submitLeaderboardMission } from "../../../../../../api/ea";
 import type { LeaderboardMissionCategory, LeaderboardMissionResponse, StudentLeaderboardLogResponse } from "../../../../../../api/ea";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 import "./ecaStudentMobileLeaderboard.css";
 
+const LEADERBOARD_MISSION_T = "ecaStudent.leaderboardMissionPage";
 type RouteParams = {
     externalActivityId?: string;
     activityId?: string;
@@ -17,9 +20,10 @@ type HeaderProps = {
 };
 
 function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
+    const { t } = useTranslation();
     return (
         <div className="topbar topbar-main">
-            <button className="iconbtn" aria-label="Back" onClick={onBackClick}>
+            <button className="iconbtn" aria-label={t(`${LEADERBOARD_MISSION_T}.aria.back`)} onClick={onBackClick}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -27,7 +31,7 @@ function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
 
             <div className="app-title">{title}</div>
 
-            <div style={{ display: "block", width: 36, height: 36 }} aria-hidden="true" />
+            <div style={{ display: "block", width: 24, height: 24 }} aria-hidden="true" />
         </div>
     );
 }
@@ -52,19 +56,18 @@ function getEvidenceFileKey(file: File): string {
     return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-function getCategoryLabel(value?: LeaderboardMissionCategory | null): string {
+function getCategoryLabel(value: LeaderboardMissionCategory | null | undefined, t: TFunction): string {
+    if (!value) return t(`${LEADERBOARD_MISSION_T}.categoryFallback`);
+
     const option = LEADERBOARD_MISSION_CATEGORY_OPTIONS.find((item) => item.value === value);
 
-    return option?.label ?? "Category";
+    return t(`${LEADERBOARD_MISSION_T}.category.${value}`, {
+        defaultValue: option?.label ?? t(`${LEADERBOARD_MISSION_T}.categoryFallback`),
+    });
 }
 
-function getEvidenceTypeLabel(value: LeaderboardMissionResponse["evidenceType"]): string {
-    if (value === "IMAGE") return "Photo";
-    if (value === "DOCUMENT") return "Document";
-    if (value === "VIDEO") return "Video";
-    if (value === "LINK") return "Link";
-
-    return "Other";
+function getEvidenceTypeLabel(value: LeaderboardMissionResponse["evidenceType"], t: TFunction): string {
+    return t(`${LEADERBOARD_MISSION_T}.evidenceType.${value}`);
 }
 
 function getAcceptByEvidenceType(value: LeaderboardMissionResponse["evidenceType"]): string | undefined {
@@ -106,6 +109,7 @@ function isMissionMaxedOut(mission: LeaderboardMissionResponse, usedCountMap: Ma
 }
 
 export default function EcaStudentMobileLeaderboardMission(): React.ReactElement {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const params = useParams<RouteParams>();
     const externalActivityId = params.externalActivityId ?? params.activityId ?? params.ecaId;
@@ -164,7 +168,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
         async function loadMissions(): Promise<void> {
             if (!externalActivityId) {
-                setErrorMessage("대외활동 정보를 찾을 수 없습니다.");
+                setErrorMessage(t(`${LEADERBOARD_MISSION_T}.error.activityNotFound`));
                 setLoading(false);
                 return;
             }
@@ -185,7 +189,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             } catch (error) {
                 if (!mounted) return;
 
-                setErrorMessage(error instanceof Error ? error.message : "미션 목록을 불러오지 못했습니다.");
+                setErrorMessage(error instanceof Error ? error.message : t(`${LEADERBOARD_MISSION_T}.error.missionLoadFailed`));
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -196,7 +200,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         return () => {
             mounted = false;
         };
-    }, [externalActivityId]);
+    }, [externalActivityId, t]);
 
     function handleBackClick(): void {
         if (step === "complete") {
@@ -235,17 +239,17 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             .filter(Boolean);
 
         if (acceptsFile && evidenceFiles.length === 0) {
-            alert("파일을 제출해주세요.");
+            alert(t(`${LEADERBOARD_MISSION_T}.alert.fileRequired`));
             return;
         }
 
         if (acceptsLink && evidenceUrls.length === 0) {
-            alert("링크를 입력해주세요.");
+            alert(t(`${LEADERBOARD_MISSION_T}.alert.linkRequired`));
             return;
         }
 
         if (acceptsLink && evidenceUrls.some((url) => !isValidHttpUrl(url))) {
-            alert("http 또는 https로 시작하는 링크를 입력해주세요.");
+            alert(t(`${LEADERBOARD_MISSION_T}.alert.invalidLink`));
             return;
         }
 
@@ -259,7 +263,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
             setStep("complete");
         } catch {
-            alert("미션 제출에 실패했습니다.");
+            alert(t(`${LEADERBOARD_MISSION_T}.alert.submitFailed`));
         } finally {
             setSubmitting(false);
         }
@@ -296,7 +300,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     function renderMissionCategoryFilter(): React.ReactElement {
         return (
             <div className="eca-student-mobile-leaderboard-mission-category-filter-wrap">
-                <button type="button" className={isAllMissionCategorySelected() ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsMissionCategoryFilterOpen(true)}>
+                <button type="button" className={isAllMissionCategorySelected() ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label={t(`${LEADERBOARD_MISSION_T}.filter.label`)} onClick={() => setIsMissionCategoryFilterOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         {!isAllMissionCategorySelected() ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
@@ -313,7 +317,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
             <div className="eca-student-mobile-leaderboard-mission-category-filter-modal-backdrop" onClick={() => setIsMissionCategoryFilterOpen(false)}>
                 <div className="eca-student-mobile-leaderboard-mission-category-filter-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
                     <button type="button" className={isAllMissionCategorySelected() ? "eca-student-mobile-leaderboard-mission-category-filter-modal-option is-selected" : "eca-student-mobile-leaderboard-mission-category-filter-modal-option"} onClick={selectAllMissionCategories} aria-pressed={isAllMissionCategorySelected()}>
-                        All
+                        {t(`${LEADERBOARD_MISSION_T}.filter.all`)}
                     </button>
 
                     {LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => {
@@ -327,7 +331,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                 onClick={() => toggleMissionCategoryFilter(option.value)}
                                 aria-pressed={selected}
                             >
-                                {option.label}
+                                {getCategoryLabel(option.value, t)}
                             </button>
                         );
                     })}
@@ -340,14 +344,20 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         return (
             <>
                 <section className="eca-student-mobile-leaderboard-mission-select-header">
-                    <h1>Select a Mission</h1>
+                    <h1>{t(`${LEADERBOARD_MISSION_T}.selectMission`)}</h1>
                     {renderMissionCategoryFilter()}
                 </section>
 
                 <div className="eca-student-mobile-leaderboard-mission-filter-tabs">
-                    <button type="button" className={filter === "ALL" ? "active" : ""} onClick={() => setFilter("ALL")}>All ({missionItems.length})</button>
-                    <button type="button" className={filter === "AVAILABLE" ? "active" : ""} onClick={() => setFilter("AVAILABLE")}>Available ({availableCount})</button>
-                    <button type="button" className={filter === "MAXED_OUT" ? "active" : ""} onClick={() => setFilter("MAXED_OUT")}>Maxed Out ({maxedOutCount})</button>
+                    <button type="button" className={filter === "ALL" ? "active" : ""} onClick={() => setFilter("ALL")}>
+                        {t(`${LEADERBOARD_MISSION_T}.missionFilter.all`, { missionCount: missionItems.length })}
+                    </button>
+                    <button type="button" className={filter === "AVAILABLE" ? "active" : ""} onClick={() => setFilter("AVAILABLE")}>
+                        {t(`${LEADERBOARD_MISSION_T}.missionFilter.available`, { missionCount: availableCount })}
+                    </button>
+                    <button type="button" className={filter === "MAXED_OUT" ? "active" : ""} onClick={() => setFilter("MAXED_OUT")}>
+                        {t(`${LEADERBOARD_MISSION_T}.missionFilter.maxedOut`, { missionCount: maxedOutCount })}
+                    </button>
                 </div>
 
                 <section className="eca-student-mobile-leaderboard-mission-list">
@@ -365,7 +375,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                 <span className="eca-student-mobile-leaderboard-mission-radio" />
                                 <span className="eca-student-mobile-leaderboard-mission-info">
                                     <strong>{mission.name}</strong>
-                                    <em>{getCategoryLabel(mission.category)}</em>
+                                    <em>{getCategoryLabel(mission.category, t)}</em>
                                 </span>
                                 <span className={maxedOut ? "eca-student-mobile-leaderboard-mission-point disabled" : "eca-student-mobile-leaderboard-mission-point"}>+{formatNumber(mission.points)}</span>
                             </button>
@@ -374,7 +384,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                 </section>
 
                 <button type="button" className="eca-student-mobile-leaderboard-mission-next-button" disabled={!selectedMission} onClick={handleNextClick}>
-                    Next
+                    {t(`${LEADERBOARD_MISSION_T}.next`)}
                 </button>
             </>
         );
@@ -395,27 +405,27 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
         return (
             <>
                 <section className="eca-student-mobile-leaderboard-mission-upload-title">
-                    <h1>Upload Evidence</h1>
+                    <h1>{t(`${LEADERBOARD_MISSION_T}.uploadEvidence`)}</h1>
                 </section>
 
                 <div className="eca-student-mobile-leaderboard-mission-submit-section">
                     <section className="eca-student-mobile-leaderboard-mission-submit-card">
                         <h2>{selectedMission.name}</h2>
                         <div className="eca-student-mobile-leaderboard-mission-info-field">
-                            <span>Evidence</span>
+                            <span>{t(`${LEADERBOARD_MISSION_T}.evidence`)}</span>
                             <input value={selectedMission.evidenceName || "-"} readOnly />
                         </div>
 
                         <div className="eca-student-mobile-leaderboard-mission-info-grid">
                             <label>
-                                <span>Submission Format</span>
-                                <input value={getEvidenceTypeLabel(selectedMission.evidenceType)} readOnly />
+                                <span>{t(`${LEADERBOARD_MISSION_T}.submissionFormat`)}</span>
+                                <input value={getEvidenceTypeLabel(selectedMission.evidenceType, t)} readOnly />
                             </label>
                         </div>
                     </section>
 
                     <section className="eca-student-mobile-leaderboard-mission-submit-card">
-                        <h2>Submission</h2>
+                        <h2>{t(`${LEADERBOARD_MISSION_T}.submission`)}</h2>
 
                         {acceptsFile ? (
                             <>
@@ -439,8 +449,8 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                     </svg>
                                     <span>
                                         {evidenceFiles.length > 0
-                                            ? `${evidenceFiles.length} files selected`
-                                            : "파일을 업로드해주세요"}
+                                            ? t(`${LEADERBOARD_MISSION_T}.filesSelected`, { fileCount: evidenceFiles.length })
+                                            : t(`${LEADERBOARD_MISSION_T}.fileUploadGuide`)}
                                     </span>
                                 </button>
                                 {evidenceFiles.length > 0 ? (
@@ -460,7 +470,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                                         </span>
                                                     </div>
 
-                                                    <button type="button" className="eca-student-mobile-leaderboard-mission-file-remove" onClick={() => removeEvidenceFile(fileKey)} aria-label="파일 삭제">
+                                                    <button type="button" className="eca-student-mobile-leaderboard-mission-file-remove" onClick={() => removeEvidenceFile(fileKey)} aria-label={t(`${LEADERBOARD_MISSION_T}.aria.removeFile`)}>
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                                                             <path d="M9 3L3 9M9 9L3 3" stroke="#808080" strokeWidth="2" strokeLinecap="round" />
                                                         </svg>
@@ -475,19 +485,19 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
                         {acceptsLink ? (
                             <div className="eca-student-mobile-leaderboard-mission-link-area">
-                                <label className="eca-student-mobile-leaderboard-mission-link-label">Link</label>
+                                <label className="eca-student-mobile-leaderboard-mission-link-label">{t(`${LEADERBOARD_MISSION_T}.link`)}</label>
                                 <textarea
                                     className={hasInvalidLink ? "eca-student-mobile-leaderboard-mission-link-input is-invalid" : "eca-student-mobile-leaderboard-mission-link-input"}
                                     value={evidenceUrlText}
-                                    placeholder={"링크를 한 줄에 하나씩 붙여주세요"}
+                                    placeholder={t(`${LEADERBOARD_MISSION_T}.linkPlaceholder`)}
                                     onChange={(event) => setEvidenceUrlText(event.target.value)}
                                 />
-                                {hasInvalidLink ? <small>http 또는 https로 시작하는 링크를 입력해주세요.</small> : null}
+                                {hasInvalidLink ? <small>{t(`${LEADERBOARD_MISSION_T}.alert.invalidLink`)}</small> : null}
                             </div>
                         ) : null}
                         <div className="eca-student-mobile-leaderboard-mission-submit-button-row">
                             <button type="button" disabled={submitDisabled} onClick={handleSubmit}>
-                                {submitting ? "저장 중" : "제출하기"}
+                                {submitting ? t(`${LEADERBOARD_MISSION_T}.saving`) : t(`${LEADERBOARD_MISSION_T}.submit`)}
                             </button>
                         </div>
                     </section>
@@ -506,12 +516,12 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                         <path d="M15 26.1633C16.9613 27.5897 20.884 31.5124 22.4887 34.1869C24.4501 29.9077 29.4426 20.2793 34.7917 16" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </div>
-                <h1>Completed!</h1>
+                <h1>{t(`${LEADERBOARD_MISSION_T}.completed`)}</h1>
                 
                 <div className="eca-student-mobile-leaderboard-mission-complete-bottom">
-                    <p>Scores will be updated after admin approval</p>
+                    <p>{t(`${LEADERBOARD_MISSION_T}.approvalNotice`)}</p>
                     <button type="button" onClick={() => navigate(`/student/activities/${externalActivityId}/leaderboard`)}>
-                        Save
+                        {t(`${LEADERBOARD_MISSION_T}.save`)}
                     </button>
                 </div>
             </section>
@@ -521,7 +531,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     if (loading) {
         return (
             <main className="eca-student-mobile-leaderboard-mission-page">
-                <div className="eca-student-mobile-leaderboard-state">Loading...</div>
+                <div className="eca-student-mobile-leaderboard-state">{t(`${LEADERBOARD_MISSION_T}.loading`)}</div>
             </main>
         );
     }
@@ -536,7 +546,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
 
     return (
         <main className="eca-student-mobile-leaderboard-mission-page">
-            <Header title="Get Point" onBackClick={handleBackClick} />
+            <Header title={t(`${LEADERBOARD_MISSION_T}.title`)} onBackClick={handleBackClick} />
 
             <div className="eca-student-mobile-leaderboard-mission-main">
                 {renderProgress()}

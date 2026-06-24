@@ -1,10 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMyAttendanceEvents, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { AttendanceEventType, AttendanceStatus, MyAttendanceEventResponse, StudentExternalActivityDetailResponse } from "../../../../../../api/ea";
 import { formatServerKstDateTimeDateLabelForUser, formatServerKstDateTimeTimeForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAttendance.css";
+
+const ATTENDANCE_T = "ecaStudent.attendancePage";
 
 type HeaderProps = {
     activityName: string;
@@ -22,7 +25,7 @@ function Header({ activityName, onMenuClick }: HeaderProps): React.ReactElement 
 
             <div className="app-title">{activityName}</div>
 
-            <div style={{display: "block", width: 24, height: 24}} aria-hidden="true" />
+            <div style={{ display: "block", width: 24, height: 24 }} aria-hidden="true" />
         </div>
     );
 }
@@ -49,22 +52,12 @@ function getEventSortTime(event: MyAttendanceEventResponse): number {
     return Number.MAX_SAFE_INTEGER;
 }
 
-function getTypeLabel(type: AttendanceEventType): string {
-    return type === "CLASS_START" ? "Start" : "End";
+function getTypeLabel(type: AttendanceEventType, t: TFunction): string {
+    return t(`${ATTENDANCE_T}.type.${type}`);
 }
 
-function getStatusLabel(status: AttendanceStatus): string {
-    const labels: Record<AttendanceStatus, string> = {
-        NOT_CHECKED: "Not Checked",
-        PRESENT: "Present",
-        LATE: "Late",
-        VERY_LATE: "Very Late",
-        EARLY_LEAVE: "Early Leave",
-        VERY_EARLY_LEAVE: "Very Early Leave",
-        ABSENT: "Absent",
-    };
-
-    return labels[status];
+function getStatusLabel(status: AttendanceStatus, t: TFunction): string {
+    return t(`${ATTENDANCE_T}.status.${status}`);
 }
 
 function getStatusClass(status: AttendanceStatus): string {
@@ -80,6 +73,7 @@ function sortAttendanceEvents(events: MyAttendanceEventResponse[]): MyAttendance
 }
 
 export default function EcaMobileAttendance(): React.ReactElement {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
 
@@ -91,7 +85,7 @@ export default function EcaMobileAttendance(): React.ReactElement {
     React.useEffect(() => {
         async function fetchAttendance(): Promise<void> {
             if (!externalActivityId) {
-                setError("대외활동 정보를 찾을 수 없습니다.");
+                setError(t(`${ATTENDANCE_T}.error.activityNotFound`));
                 return;
             }
 
@@ -110,14 +104,14 @@ export default function EcaMobileAttendance(): React.ReactElement {
                 console.error(e);
                 setActivity(null);
                 setEvents([]);
-                setError("출석 정보를 불러오지 못했습니다.");
+                setError(t(`${ATTENDANCE_T}.error.attendanceLoadFailed`));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchAttendance();
-    }, [externalActivityId]);
+    }, [externalActivityId, t]);
 
     function openMenu(): void {
         window.dispatchEvent(new CustomEvent("openStudentMobileMenu"));
@@ -133,15 +127,15 @@ export default function EcaMobileAttendance(): React.ReactElement {
 
     return (
         <main className="eca-mobile-student-attendance-page">
-            <Header activityName={activity?.name ?? "Attendance"} onMenuClick={openMenu} />
+            <Header activityName={activity?.name ?? t(`${ATTENDANCE_T}.fallbackTitle`)} onMenuClick={openMenu} />
 
             <section className="eca-mobile-student-attendance-list">
                 {loading ? (
-                    <p className="eca-mobile-student-attendance-empty">출석 정보를 불러오는 중입니다.</p>
+                    <p className="eca-mobile-student-attendance-empty">{t(`${ATTENDANCE_T}.loading`)}</p>
                 ) : error ? (
                     <p className="eca-mobile-student-attendance-empty">{error}</p>
                 ) : events.length === 0 ? (
-                    <p className="eca-mobile-student-attendance-empty">등록된 출석 이벤트가 없습니다.</p>
+                    <p className="eca-mobile-student-attendance-empty">{t(`${ATTENDANCE_T}.empty`)}</p>
                 ) : (
                     events.map((event) => {
                         const displayTime = getEventDisplayTime(event);
@@ -151,17 +145,17 @@ export default function EcaMobileAttendance(): React.ReactElement {
                                 <span className="eca-mobile-student-attendance-card-text">
                                     <strong>{formatEventDate(event)}</strong>
                                     <em>
-                                        {getTypeLabel(event.type)}
+                                        {getTypeLabel(event.type, t)}
                                         {displayTime ? <span className="eca-mobile-student-attendance-time">{displayTime}</span> : null}
                                     </em>
                                 </span>
 
                                 <span className={`eca-mobile-student-attendance-status ${getStatusClass(event.status)}`}>
-                                    {getStatusLabel(event.status)}
+                                    {getStatusLabel(event.status, t)}
                                 </span>
 
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M10 7L15 12L10 17" stroke="#848484" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M10 7L15 12L10 17" stroke="#848484" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
                         );

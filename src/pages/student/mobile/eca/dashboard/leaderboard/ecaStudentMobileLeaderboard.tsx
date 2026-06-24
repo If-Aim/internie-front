@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, getStudentLeaderboardCompletedMissions, getMyLeaderboard, getMyLeaderboardMissionLogs, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
 import type { LeaderboardApprovalStatus, LeaderboardCompletedMissionResponse, LeaderboardMissionCategory, LeaderboardRankingResponse, StudentExternalActivityDetailResponse, StudentLeaderboardLogResponse, StudentLeaderboardResponse } from "../../../../../../api/ea";
@@ -17,6 +18,8 @@ type EcaMobileShellContext = {
     userProfileImg: string;
     onRequireAuth: (pathAfterLogin: string, action?: () => void) => void;
 };
+
+const LEADERBOARD_T = "ecaStudent.leaderboardPage";
 const DEFAULT_PROFILE_IMAGE = "/internie_mascot_normal.png";
 
 type HeaderProps = {
@@ -34,7 +37,7 @@ function Header({ mode = "menu", title, userProfileImg, onMenuClick, onBackClick
     return (
         <div className="topbar topbar-main">
             {mode === "back" ? (
-                <button className="iconbtn" aria-label="Back" onClick={onBackClick}>
+                <button className="iconbtn" aria-label={t(`${LEADERBOARD_T}.aria.back`)} onClick={onBackClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M14 17L9 12L14 7" stroke="#000" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -98,30 +101,35 @@ function formatOrdinal(value?: number | null): string {
     return `${rank}${suffix}`;
 }
 
-function formatPlaceLabel(value?: number | null): string {
-    const ordinal = formatOrdinal(value);
+function formatPlaceLabel(value: number | null | undefined, t: TFunction): string {
+    const rank = Number(value ?? 0);
 
-    return ordinal === "-" ? "-" : `${ordinal} Place`;
+    if (!rank) return "-";
+
+    return t(`${LEADERBOARD_T}.rank.place`, {
+        rank: formatNumber(rank),
+        rankOrdinal: formatOrdinal(rank),
+    });
 }
 
-function formatCategory(value?: string | null): string {
-    if (!value) return "Category";
+function formatCategory(value: string | null | undefined, t: TFunction): string {
+    if (!value) return t(`${LEADERBOARD_T}.categoryFallback`);
 
     return value.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function getCategoryLabel(value?: LeaderboardMissionCategory | null): string {
+function getCategoryLabel(value: LeaderboardMissionCategory | null | undefined, t: TFunction): string {
+    if (!value) return t(`${LEADERBOARD_T}.categoryFallback`);
+
     const option = LEADERBOARD_MISSION_CATEGORY_OPTIONS.find((item) => item.value === value);
 
-    return option?.label ?? formatCategory(value);
+    return t(`${LEADERBOARD_T}.category.${value}`, {
+        defaultValue: option?.label ?? formatCategory(value, t),
+    });
 }
 
-function getLogStatusLabel(status: LeaderboardApprovalStatus): string {
-    if (status === "pending") return "Pending";
-    if (status === "approved") return "Approved";
-    if (status === "rejected") return "Rejected";
-
-    return "All";
+function getLogStatusLabel(status: LeaderboardApprovalStatus, t: TFunction): string {
+    return t(`${LEADERBOARD_T}.logStatus.${status}`);
 }
 
 function mapMyLogToDetailLog(log: StudentLeaderboardLogResponse): DetailMissionLog {
@@ -179,13 +187,14 @@ function RankingRow({ ranking, onClick }: { ranking: LeaderboardRankingResponse;
 }
 
 function MissionLogRow({ log }: { log: DetailMissionLog }) {
+    const { t } = useTranslation();
     const isApproved = log.status === "approved";
 
     return (
         <article className="eca-student-mobile-leaderboard-log-card">
             <div className="eca-student-mobile-leaderboard-log-text">
                 <h3>{log.missionName}</h3>
-                <p>{getCategoryLabel(log.category)} · {getLogStatusLabel(log.status)}</p>
+                <p>{getCategoryLabel(log.category, t)} · {getLogStatusLabel(log.status, t)}</p>
             </div>
             <div className={`eca-student-mobile-leaderboard-log-point ${isApproved ? "active" : "inactive"}`}>+{formatNumber(log.score)}</div>
             <span className="eca-student-mobile-leaderboard-chevron">
@@ -198,6 +207,7 @@ function MissionLogRow({ log }: { log: DetailMissionLog }) {
 }
 
 export default function EcaStudentMobileLeaderboard() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const params = useParams<RouteParams>();
     const { userName, userEmail, userProfileImg, onRequireAuth } = useOutletContext<EcaMobileShellContext>();
@@ -213,7 +223,7 @@ export default function EcaStudentMobileLeaderboard() {
     const [errorMessage, setErrorMessage] = React.useState("");
 
     const myRanking = getMyRanking(leaderboard);
-    const displayName = myRanking?.studentName ?? (userName?.trim() || userEmail?.trim() || "Me");
+    const displayName = myRanking?.studentName ?? (userName?.trim() || userEmail?.trim() || t(`${LEADERBOARD_T}.me`));
     const rankings = leaderboard?.rankings ?? [];
     const filteredDetailLogs = React.useMemo(() => {
         if (selectedMissionLogCategories.length === 0) return [];
@@ -227,7 +237,7 @@ export default function EcaStudentMobileLeaderboard() {
 
         async function loadLeaderboard(): Promise<void> {
             if (!externalActivityId) {
-                setErrorMessage("대외활동 정보를 찾을 수 없습니다.");
+                setErrorMessage(t(`${LEADERBOARD_T}.error.activityNotFound`));
                 setIsLoading(false);
                 return;
             }
@@ -247,8 +257,7 @@ export default function EcaStudentMobileLeaderboard() {
                 setLeaderboard(leaderboardResponse);
             } catch (error) {
                 if (!mounted) return;
-
-                setErrorMessage(error instanceof Error ? error.message : "리더보드 정보를 불러오지 못했습니다.");
+                setErrorMessage(error instanceof Error ? error.message : t(`${LEADERBOARD_T}.error.leaderboardLoadFailed`));
             } finally {
                 if (mounted) setIsLoading(false);
             }
@@ -259,7 +268,7 @@ export default function EcaStudentMobileLeaderboard() {
         return () => {
             mounted = false;
         };
-    }, [externalActivityId]);
+    }, [externalActivityId, t]);
 
     React.useEffect(() => {
         let mounted = true;
@@ -377,7 +386,7 @@ export default function EcaStudentMobileLeaderboard() {
     function renderMissionLogFilter(): React.ReactElement {
         return (
             <div className="eca-student-mobile-leaderboard-log-filter-wrap">
-                <button type="button" className={isAllMissionLogCategorySelected() ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label="Filter" onClick={() => setIsLogFilterOpen(true)}>
+                <button type="button" className={isAllMissionLogCategorySelected() ? "eca-student-mobile-leaderboard-filter-button" : "eca-student-mobile-leaderboard-filter-button active"} aria-label={t(`${LEADERBOARD_T}.filter.label`)} onClick={() => setIsLogFilterOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke="#A0A0A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         {!isAllMissionLogCategorySelected() ? <circle cx="20" cy="6" r="3" fill="#0166FF" /> : null}
@@ -394,7 +403,7 @@ export default function EcaStudentMobileLeaderboard() {
             <div className="eca-student-mobile-leaderboard-log-filter-modal-backdrop" onClick={() => setIsLogFilterOpen(false)}>
                 <div className="eca-student-mobile-leaderboard-log-filter-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
                     <button type="button" className={isAllMissionLogCategorySelected() ? "eca-student-mobile-leaderboard-log-filter-modal-option is-selected" : "eca-student-mobile-leaderboard-log-filter-modal-option"} onClick={selectAllMissionLogCategories} aria-pressed={isAllMissionLogCategorySelected()}>
-                        All
+                        {t(`${LEADERBOARD_T}.filter.all`)}
                     </button>
 
                     {LEADERBOARD_MISSION_CATEGORY_OPTIONS.map((option) => {
@@ -408,7 +417,7 @@ export default function EcaStudentMobileLeaderboard() {
                                 onClick={() => toggleMissionLogCategoryFilter(option.value)}
                                 aria-pressed={selected}
                             >
-                                {option.label}
+                                {getCategoryLabel(option.value, t)}
                             </button>
                         );
                     })}
@@ -422,7 +431,7 @@ export default function EcaStudentMobileLeaderboard() {
             <main className="eca-student-mobile-leaderboard-page">
                 <Header onMenuClick={openMenu} onProfileClick={openMyPage} userProfileImg={userProfileImg} />
                 <div className="eca-student-mobile-leaderboard-main">
-                    <div className="eca-student-mobile-leaderboard-state">Loading...</div>
+                    <div className="eca-student-mobile-leaderboard-state">{t(`${LEADERBOARD_T}.loading`)}</div>
                 </div>
             </main>
         );
@@ -447,7 +456,7 @@ export default function EcaStudentMobileLeaderboard() {
                 <Header onMenuClick={openMenu} onProfileClick={openMyPage} userProfileImg={userProfileImg} />
 
                 <div className="eca-student-mobile-leaderboard-main eca-student-mobile-leaderboard-main--detail">
-                    <button type="button" className="eca-student-mobile-leaderboard-back-button" onClick={handleBackClick} aria-label="Back">
+                    <button type="button" className="eca-student-mobile-leaderboard-back-button" onClick={handleBackClick} aria-label={t(`${LEADERBOARD_T}.aria.back`)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -456,29 +465,29 @@ export default function EcaStudentMobileLeaderboard() {
                     <section className="eca-student-mobile-leaderboard-my-point-card">
                         <h1>{isMyDetail ? "My points" : detailTarget.name}</h1>
                         <strong>{formatNumber(detailTarget.totalScore)}</strong>
-                        <span>{formatPlaceLabel(detailTarget.rank)}</span>
+                        <span>{formatPlaceLabel(detailTarget.rank, t)}</span>
                     </section>
 
                     <section className="eca-student-mobile-leaderboard-log-section">
                         <div className="eca-student-mobile-leaderboard-log-title-row">
-                            <h2>Mission Log</h2>
+                            <h2>{t(`${LEADERBOARD_T}.missionLog`)}</h2>
                             {renderMissionLogFilter()}
                         </div>
 
                         <div className="eca-student-mobile-leaderboard-log-list">
                             {isLogLoading ? (
-                                <div className="eca-student-mobile-leaderboard-state small">Loading...</div>
+                                <div className="eca-student-mobile-leaderboard-state small">{t(`${LEADERBOARD_T}.loading`)}</div>
                             ) : filteredDetailLogs.length ? (
                                 filteredDetailLogs.map((log) => <MissionLogRow key={`${log.submissionId}-${log.missionId}`} log={log} />)
                             ) : (
-                                <div className="eca-student-mobile-leaderboard-empty">Mission log is empty.</div>
+                                <div className="eca-student-mobile-leaderboard-empty">{t(`${LEADERBOARD_T}.missionLogEmpty`)}</div>
                             )}
                         </div>
                     </section>
 
                     {isMyDetail ? (
                         <button type="button" className="eca-student-mobile-leaderboard-get-point-button" onClick={() => { if (!externalActivityId) return; navigate(`/student/activities/${externalActivityId}/leaderboard/missions`); }}>
-                            Get Point
+                            {t(`${LEADERBOARD_T}.getPoint`)}
                         </button>
                     ) : null}
                 </div>
@@ -493,15 +502,15 @@ export default function EcaStudentMobileLeaderboard() {
 
             <div className="eca-student-mobile-leaderboard-main">
                 <section className="eca-student-mobile-leaderboard-title">
-                    <h1>{activity?.name ?? "Class"}</h1>
+                    <h1>{activity?.name ?? t(`${LEADERBOARD_T}.activityFallback`)}</h1>
                 </section>
 
                 <section className="eca-student-mobile-leaderboard-tab-section">
-                    <button type="button" className="eca-student-mobile-leaderboard-tab-button">Ranking</button>
+                    <button type="button" className="eca-student-mobile-leaderboard-tab-button">{t(`${LEADERBOARD_T}.ranking`)}</button>
                 </section>
 
                 <section className="eca-student-mobile-leaderboard-ranking-list">
-                    {rankings.length ? rankings.map((ranking) => <RankingRow key={ranking.studentId} ranking={ranking} onClick={() => openRankingDetail(ranking)} />) : <div className="eca-student-mobile-leaderboard-empty">Ranking is empty.</div>}
+                    {rankings.length ? rankings.map((ranking) => <RankingRow key={ranking.studentId} ranking={ranking} onClick={() => openRankingDetail(ranking)} />) : <div className="eca-student-mobile-leaderboard-empty">{t(`${LEADERBOARD_T}.rankingEmpty`)}</div>}
                 </section>
             </div>
             {leaderboard && (

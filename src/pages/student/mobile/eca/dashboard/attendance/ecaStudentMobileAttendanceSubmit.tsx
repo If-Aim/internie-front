@@ -1,9 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkInAttendance, getAttendanceCheckInEligibility, getMyAttendanceEventDetail, getMyAttendanceEvents } from "../../../../../../api/ea";
 import type { MyAttendanceEventDetailResponse, MyAttendanceSelfieResponse, MyAttendanceEventResponse } from "../../../../../../api/ea";
 import { formatServerKstDateTimeDateLabelForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./ecaStudentMobileAttendanceSubmit.css";
+
+const ATTENDANCE_SUBMIT_T = "ecaStudent.attendanceSubmitPage";
 
 type LocationState = {
     event?: MyAttendanceEventResponse;
@@ -23,12 +27,12 @@ function getEventBaseDateTimeValue(event?: MyAttendanceEventResponse | null): st
     return event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
 }
 
-function formatTitleParts(event?: MyAttendanceEventResponse | null): { dateText: string; typeText: string } {
-    if (!event) return { dateText: "Attendance", typeText: "" };
+function formatTitleParts(event: MyAttendanceEventResponse | null | undefined, t: TFunction): { dateText: string; typeText: string } {
+    if (!event) return { dateText: t(`${ATTENDANCE_SUBMIT_T}.fallbackTitle`), typeText: "" };
 
     return {
         dateText: formatServerKstDateTimeDateLabelForUser(getEventBaseDateTimeValue(event), event.eventDate),
-        typeText: event.type === "CLASS_START" ? "Start" : "End",
+        typeText: t(`${ATTENDANCE_SUBMIT_T}.type.${event.type}`),
     };
 }
 
@@ -65,15 +69,16 @@ type HeaderProps = {
     pickerOpen: boolean;
     onBackClick: () => void;
     onPickerClose: () => void;
+    t: TFunction;
 };
 
-function Header({ titleDate, titleType, pickerOpen, onBackClick, onPickerClose }: HeaderProps): React.ReactElement {
+function Header({ titleDate, titleType, pickerOpen, onBackClick, onPickerClose, t }: HeaderProps): React.ReactElement {
     return (
         <div className="topbar topbar-main">
             {pickerOpen ? (
                 <div style={{display: "block", width: 24, height: 24}} aria-hidden="true" />
             ) : (
-                <button type="button" className="iconbtn" aria-label="back" onClick={onBackClick}>
+                <button type="button" className="iconbtn" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.back`)} onClick={onBackClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -86,7 +91,7 @@ function Header({ titleDate, titleType, pickerOpen, onBackClick, onPickerClose }
             </div>
 
             {pickerOpen ? (
-                <button type="button" className="iconbtn" aria-label="close" onClick={onPickerClose}>
+                <button type="button" className="iconbtn" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.close`)} onClick={onPickerClose}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M20 4L4 20M20 20L4 4" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
@@ -99,6 +104,7 @@ function Header({ titleDate, titleType, pickerOpen, onBackClick, onPickerClose }
 }
 
 export default function EcaMobileAttendanceSubmit(): React.ReactElement {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { externalActivityId, eventId } = useParams<{ externalActivityId?: string; eventId?: string }>();
@@ -140,7 +146,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
     React.useEffect(() => {
         async function fetchAttendanceDetail(): Promise<void> {
             if (!externalActivityId || !eventId) {
-                setError("출석 정보를 찾을 수 없습니다.");
+                setError(t(`${ATTENDANCE_SUBMIT_T}.error.attendanceNotFound`));
                 return;
             }
 
@@ -176,14 +182,14 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                 console.error(e);
                 setEvent(null);
                 setDetail(null);
-                setError("출석 상세 정보를 불러오지 못했습니다.");
+                setError(t(`${ATTENDANCE_SUBMIT_T}.error.attendanceDetailLoadFailed`));
             } finally {
                 setLoading(false);
             }
         }
 
         fetchAttendanceDetail();
-    }, [externalActivityId, eventId]);
+    }, [externalActivityId, eventId, initialEvent, t]);
 
     React.useEffect(() => {
         const timerId = window.setInterval(() => {
@@ -260,12 +266,12 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
 
     function openPicker(): void {
         if (alreadyChecked) {
-            alert("이미 출석 체크가 완료되었습니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.alreadyChecked`));
             return;
         }
 
         if (!isNowInUploadWindow(event, now)) {
-            alert("현재 출석 가능한 시간이 아닙니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.notAvailableTime`));
             return;
         }
 
@@ -278,7 +284,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
 
     async function startCameraStream(nextFacing: CameraFacingMode = cameraFacing): Promise<void> {
         if (!navigator.mediaDevices?.getUserMedia) {
-            setCameraError("이 브라우저에서는 웹 카메라를 사용할 수 없습니다.");
+            setCameraError(t(`${ATTENDANCE_SUBMIT_T}.alert.cameraNotSupported`));
             return;
         }
 
@@ -291,7 +297,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
             setCameraStream(stream);
         } catch (e) {
             console.error(e);
-            setCameraError("카메라 권한을 허용해주세요.");
+            setCameraError(t(`${ATTENDANCE_SUBMIT_T}.alert.cameraPermissionRequired`));
         }
     }
 
@@ -343,7 +349,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         const canvas = canvasRef.current;
 
         if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
-            alert("카메라가 아직 준비되지 않았습니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.cameraNotReady`));
             return;
         }
 
@@ -353,7 +359,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         const context = canvas.getContext("2d");
 
         if (!context) {
-            alert("사진을 캡처하지 못했습니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.photoCaptureFailed`));
             return;
         }
 
@@ -368,7 +374,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         const blob = await new Promise<Blob>((resolve, reject) => {
             canvas.toBlob((result) => {
                 if (result) resolve(result);
-                else reject(new Error("Failed to capture photo"));
+                else reject(new Error(t(`${ATTENDANCE_SUBMIT_T}.alert.photoCaptureFailed`)));
             }, "image/jpeg", 0.92);
         });
 
@@ -393,7 +399,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
         if (imageFiles.length === 0) {
-            alert("이미지 파일만 선택할 수 있습니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.imageOnly`));
             return;
         }
 
@@ -415,7 +421,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         if (!eventId || !event || saving) return;
 
         if (alreadyChecked || !isNowInUploadWindow(event, now)) {
-            alert("현재 출석 가능한 시간이 아닙니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.notAvailableTime`));
             return;
         }
 
@@ -441,7 +447,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
             setSuccess(true);
         } catch (e) {
             console.error(e);
-            alert("출석 체크에 실패했습니다.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.checkInFailed`));
         } finally {
             setSaving(false);
         }
@@ -449,7 +455,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
 
     async function handleUpload(): Promise<void> {
         if (!selectedFile) {
-            alert("업로드할 사진을 선택해주세요.");
+            alert(t(`${ATTENDANCE_SUBMIT_T}.alert.photoRequired`));
             return;
         }
 
@@ -472,7 +478,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
         pickerOpen ? "is-picker" : "",
         cameraOpen ? "is-camera-open" : "",
     ].filter(Boolean).join(" ");
-    const titleParts = formatTitleParts(event);
+    const titleParts = formatTitleParts(event, t);
 
     return (
         <main className={pageClassName}>
@@ -483,6 +489,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                     pickerOpen={pickerOpen}
                     onBackClick={goBack}
                     onPickerClose={closePicker}
+                    t={t}
                 />
             ) : null}
 
@@ -502,7 +509,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
 
                             {selectedPreviewUrl && !selectedFileInGallery ? (
                                 <button type="button" className="attendance-submit-photo is-selected">
-                                    <img src={selectedPreviewUrl} alt="selected" />
+                                    <img src={selectedPreviewUrl} alt={t(`${ATTENDANCE_SUBMIT_T}.aria.selectedImage`)} />
                                     <span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <circle cx="12" cy="12" r="12" fill="#0166FF"/>
@@ -512,7 +519,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                             ) : null}
                             {galleryItems.map((item) => (
                                 <button type="button" className={selectedFile === item.file ? "attendance-submit-photo is-selected" : "attendance-submit-photo"} key={item.id} onClick={() => selectGalleryItem(item.file)}>
-                                    <img src={item.url} alt="gallery selected" />
+                                    <img src={item.url} alt={t(`${ATTENDANCE_SUBMIT_T}.aria.galleryImage`)} />
                                     {selectedFile === item.file ? (
                                         <span>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -536,7 +543,7 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                             ))}
                         </section>
                     ) : (
-                        <p className="attendance-submit-empty">아직 출석한 학생이 없습니다.</p>
+                        <p className="attendance-submit-empty">{t(`${ATTENDANCE_SUBMIT_T}.noCheckedStudents`)}</p>
                     )}
 
                     <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="attendance-submit-file-input" onChange={handleFileChange} />
@@ -545,23 +552,23 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                     <div className="attendance-submit-bottom">
                         {pickerOpen ? (
                             <button type="button" className="attendance-submit-primary" disabled={saving} onClick={handleUpload}>
-                                {saving ? "Uploading..." : "Upload"}
+                                {saving ? t(`${ATTENDANCE_SUBMIT_T}.uploading`) : t(`${ATTENDANCE_SUBMIT_T}.upload`)}
                             </button>
                         ) : (
                             <button type="button" className="attendance-submit-primary" disabled={!canCheckIn} onClick={openPicker}>
-                                Check-In
+                                {t(`${ATTENDANCE_SUBMIT_T}.checkIn`)}
                             </button>
                         )}
                     </div>
                     {cameraOpen ? (
-                        <div className="attendance-camera-layer" role="dialog" aria-modal="true" aria-label="camera">
+                        <div className="attendance-camera-layer" role="dialog" aria-modal="true" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.camera`)}>
                             {capturedCameraPreviewUrl ? (
-                                <img className="attendance-camera-review-image" src={capturedCameraPreviewUrl} alt="captured selfie" />
+                                <img className="attendance-camera-review-image" src={capturedCameraPreviewUrl} alt={t(`${ATTENDANCE_SUBMIT_T}.aria.capturedSelfie`)} />
                             ) : (
                                 <video ref={videoRef} className={cameraFacing === "user" ? "attendance-camera-video is-front" : "attendance-camera-video is-back"} autoPlay muted playsInline />
                             )}
 
-                            <button type="button" className="attendance-camera-close" aria-label="close camera" onClick={closeCamera}>
+                            <button type="button" className="attendance-camera-close" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.closeCamera`)} onClick={closeCamera}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M20 4L4 20M20 20L4 4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
@@ -570,10 +577,10 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                             {!capturedCameraPreviewUrl ? (
                                 <>
                                     <div className={cameraGuideOpen ? "attendance-camera-guide is-open" : "attendance-camera-guide is-closed"} aria-hidden={!cameraGuideOpen}>
-                                        Please take a selfie
+                                        {t(`${ATTENDANCE_SUBMIT_T}.cameraGuide`)}
                                     </div>
 
-                                    <button type="button" className={cameraGuideOpen ? "attendance-camera-guide-toggle" : "attendance-camera-guide-toggle is-closed"} aria-label={cameraGuideOpen ? "hide guide" : "show guide"} onClick={toggleCameraGuide}>
+                                    <button type="button" className={cameraGuideOpen ? "attendance-camera-guide-toggle" : "attendance-camera-guide-toggle is-closed"} aria-label={cameraGuideOpen ? t(`${ATTENDANCE_SUBMIT_T}.aria.hideGuide`) : t(`${ATTENDANCE_SUBMIT_T}.aria.showGuide`)} onClick={toggleCameraGuide}>
                                         <svg className="attendance-camera-guide-toggle-bg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                                             <circle cx="16" cy="16" r="16" fill="white" fillOpacity="0.24"/>
                                         </svg>
@@ -584,8 +591,8 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
 
                                     {cameraError ? <p className="attendance-camera-error">{cameraError}</p> : null}
 
-                                    <button type="button" className="attendance-camera-capture" aria-label="take photo" disabled={!cameraStream || Boolean(cameraError)} onClick={() => void captureCameraPhoto()} />
-                                    <button type="button" className="attendance-camera-switch" aria-label="switch camera" disabled={!cameraStream || Boolean(cameraError)} onClick={() => void switchCameraFacing()}>
+                                    <button type="button" className="attendance-camera-capture" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.takePhoto`)} disabled={!cameraStream || Boolean(cameraError)} onClick={() => void captureCameraPhoto()} />
+                                    <button type="button" className="attendance-camera-switch" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.switchCamera`)} disabled={!cameraStream || Boolean(cameraError)} onClick={() => void switchCameraFacing()}>
                                         <svg className="attendance-camera-switch-bg" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
                                             <circle cx="24" cy="24" r="24" fill="white" fillOpacity="0.5" />
                                         </svg>
@@ -597,10 +604,10 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                             ) : (
                                 <div className="attendance-camera-review-actions">
                                     <button type="button" className="attendance-camera-review-button is-retake" disabled={saving} onClick={() => void retakeCameraPhoto()}>
-                                        Retake
+                                        {t(`${ATTENDANCE_SUBMIT_T}.retake`)}
                                     </button>
                                     <button type="button" className="attendance-camera-review-button is-checkin" disabled={saving} onClick={() => void confirmCameraPhoto()}>
-                                        {saving ? "Uploading..." : "Check-In"}
+                                        {saving ? t(`${ATTENDANCE_SUBMIT_T}.uploading`) : t(`${ATTENDANCE_SUBMIT_T}.checkIn`)}
                                     </button>
                                 </div>
                             )}
@@ -609,14 +616,14 @@ export default function EcaMobileAttendanceSubmit(): React.ReactElement {
                         </div>
                     ) : null}
                     {success ? (
-                        <button type="button" className="attendance-submit-success-layer" aria-label="close success message" onClick={finishSuccessOverlay}>
+                        <button type="button" className="attendance-submit-success-layer" aria-label={t(`${ATTENDANCE_SUBMIT_T}.aria.closeSuccessMessage`)} onClick={finishSuccessOverlay}>
                             <span className="attendance-submit-success-icon-wrap">
                                 <svg className="attendance-submit-success-icon" xmlns="http://www.w3.org/2000/svg" width="104" height="104" viewBox="0 0 50 50" fill="none">
                                     <circle className="attendance-submit-success-circle" cx="25" cy="25" r="25" fill="#0166FF"/>
                                     <path className="attendance-submit-success-check" d="M15 26.1633C16.9613 27.5897 20.884 31.5124 22.4887 34.1869C24.4501 29.9077 29.4426 20.2793 34.7917 16" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                             </span>
-                            <strong>Check-In Complete!</strong>
+                            <strong>{t(`${ATTENDANCE_SUBMIT_T}.checkInComplete`)}</strong>
                         </button>
                     ) : null}
                 </>

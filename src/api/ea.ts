@@ -604,7 +604,7 @@ function buildLeaderboardEvidenceForm(input: LeaderboardEvidenceInput): FormData
 
 
 /* 알림 */
-export type NotificationType = "ASSIGNMENT_CREATED" | "ASSIGNMENT_EVALUATED" | "ATTENDANCE_CHECK_IN_OPENED" | "EXTERNAL_ACTIVITY_NOTICE";
+export type NotificationType = "ASSIGNMENT_CREATED" | "ASSIGNMENT_EVALUATED" | "ATTENDANCE_CHECK_IN_OPENED" | "EXTERNAL_ACTIVITY_NOTICE" | "LEADERBOARD_MISSION_APPROVED" | "LEADERBOARD_MISSION_REJECTED";
 
 export type NotificationResponse = {
     notificationId: number;
@@ -614,6 +614,10 @@ export type NotificationResponse = {
     type: NotificationType;
     title: string;
     body: string;
+    titleKo?: string | null;
+    bodyKo?: string | null;
+    titleEn?: string | null;
+    bodyEn?: string | null;
     targetType: string;
     targetId?: number | null;
     read: boolean;

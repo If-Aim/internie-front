@@ -150,7 +150,7 @@ export default function StudentMobileSideMenu({
     
     const activityMenus = [
         { key: "dashboard", label: isKo ? "대시보드" : "Dashboard", path: "dashboard", disabled: false },
-        { key: "assignment", label: isKo ? "과제 제출 현황" : "Assignment Status", path: "assignment", disabled: false },
+        { key: "assignment", label: isKo ? "과제 현황" : "Assignment", path: "assignment", disabled: false },
         { key: "attendance", label: isKo ? "출석 현황" : "Attendance", path: "attendance", disabled: false },
         { key: "leaderboard", label: isKo ? "리더보드" : "Leaderboard", path: "leaderboard", disabled: false },
     ];

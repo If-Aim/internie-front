@@ -2,7 +2,7 @@
 .eca-mobile-shell-body { min-height: 100vh; padding-bottom: 104px; box-sizing: border-box; }
 .eca-mobile-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; height: 96px; padding: 14px 46px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid #E6E6E6; background: #fff; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
 .eca-mobile-bottom-nav-item { width: 48px; flex: 0 0 48px; color: #808080; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; }
-.eca-mobile-bottom-nav-item strong { color: currentColor; font-size: 12px; font-weight: 700; line-height: 16px; white-space: nowrap; }
+.eca-mobile-bottom-nav-item strong { color: currentColor; font-size: 10px; font-weight: 700; line-height: 12px; white-space: nowrap; }
 .eca-mobile-bottom-nav-icon { width: 48px; height: 48px; border-radius: 12px; color: #808080; display: flex; align-items: center; justify-content: center; }
 .eca-mobile-bottom-nav-item.is-active { color: #0166FF; }
 .eca-mobile-bottom-nav-item.is-active .eca-mobile-bottom-nav-icon { background: #BDD8FF; color: #0166FF; }

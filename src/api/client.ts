@@ -263,13 +263,7 @@ export function getAccessToken(): string | null {
 }
 
 export function buildWebSocketUrl(path = "/ws"): string {
-    const explicitUrl = API_BASE_URL?.trim();
-
-    if (explicitUrl) {
-        return explicitUrl;
-    }
-
-    const baseUrl = API_BASE_URL?.startsWith("http") ? API_BASE_URL : window.location.origin;
+    const baseUrl = API_BASE_URL?.trim() || window.location.origin;
     const url = new URL(path, baseUrl);
 
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
