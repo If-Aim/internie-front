@@ -301,6 +301,76 @@
         "needName": "Please enter your name.",
         "edit": "Edit",
 		"delete": "Delete",
+
+		"profileEdit": {
+			"nickname": "Nickname",
+			"nicknamePlaceholder": "Nickname",
+			"linkedin": "LinkedIn",
+			"email": "Email",
+			"studentId": "Student ID",
+			"studentIdPlaceholder": "Student ID",
+			"major": "Major",
+			"majorPlaceholder": "Major",
+			"campus": "Campus",
+			"campusPlaceholder": "Campus",
+			"invalidLinkedinUrl": "Please enter a valid LinkedIn URL.",
+			"updateFailed": "Failed to update profile",
+			"emailChangeTitle": "Change Email",
+			"emailChangeConfirmDesc": "Email verification is required to change your email. Do you want to continue?",
+			"emailVerifyTitle": "Email Verification",
+			"emailVerifyDesc": "Please verify your email to change it.",
+			"emailPlaceholder": "Please enter your email",
+			"codePlaceholder": "Please enter the verification code",
+			"sendCode": "Get Code",
+			"sending": "Sending",
+			"later": "Later",
+			"verify": "Verify",
+			"verifying": "Verifying",
+			"cancel": "Cancel",
+			"continue": "Continue",
+			"emailRequired": "Please enter your email.",
+			"codeRequired": "Please enter the verification code.",
+			"sameEmail": "This is the same as your current email. Please enter a different email.",
+			"existingAccount": "An account already exists with this email. Please log in with that account.",
+			"codeSent": "A verification code has been sent to {{email}}.",
+			"sendCodeFailed": "Failed to send the verification code.",
+			"emailSendError": "An error occurred while sending the email.",
+			"emailVerifyFailed": "Email verification failed.",
+			"sameEmailNotChanged": "The email was not changed because it is the same as your current email.",
+			"emailChangeComplete": "Your email has been changed.",
+			"codeInvalidOrExpired": "The verification code is invalid or has expired.",
+			"emailVerifyError": "An error occurred during email verification."
+		},
+
+		"verifyCodePage": {
+			"codeRequired": "Please enter the verification code.",
+			"verifyComplete": "Verification has been completed.",
+			"invalidCode": "The verification code is incorrect.",
+			"alreadyJoinedActivity": "You have already joined this activity.",
+			"disabledInviteCode": "This invitation code is disabled.",
+			"verifyFailed": "Verification failed.",
+			"centerLoadFailed": "Failed to load the center list.",
+			"centerSaveComplete": "Your center has been saved.",
+			"centerSaveFailed": "Failed to save your center.",
+			"studentNumberRequired": "Please enter your student ID.",
+			"studentNumberSaveComplete": "Your student ID has been saved.",
+			"studentNumberSaveFailed": "Failed to save your student ID.",
+			"selectCenterTitle": "Select Center",
+			"selectCenterDesc": "Please select your JUMP center.",
+			"selectCenterPlaceholder": "Select Center",
+			"centerListLabel": "Center List",
+			"loading": "Loading...",
+			"close": "Close",
+			"saving": "Saving...",
+			"save": "Save",
+			"studentNumberTitle": "Enter Student ID",
+			"studentNumberDesc": "Kakao-verified users need to enter their student ID.",
+			"studentNumberPlaceholder": "Enter Student ID",
+			"selectJumpCenter": "Select JUMP Center",
+			"editStudentNumber": "Edit Student ID",
+			"checking": "Checking..."
+		},
+		
 		"Withdraw": "Delete Account",
 		"WithdrawTitle": "Are you leaving us, {{name}}?",
 		"WithdrawTitle2": "We’re really sorry to see you go",
@@ -764,7 +834,20 @@
 				"upcoming": "Scheduled",
 				"inProgress": "In Progress",
 				"closed": "Closed"
-			}
+			},
+
+			"missingNoticeModalTitle": "Send Missing Assignment Reminder",
+			"closeMissingNoticeModal": "Close missing assignment reminder",
+			"noticeTitleLabel": "Enter notification title",
+			"noticeContentLabel": "Enter notification content",
+			"noticeSend": "Send",
+			"noticeSending": "Sending",
+			"noMissingNoticeTargets": "There are no missing participants to notify.",
+			"missingNoticeDefaultTitle": "Missing Assignment Reminder",
+			"missingNoticeDefaultContent": "{{assignmentName}} has not been submitted.\nPlease submit it by the deadline.",
+			"noticeTitleContentRequired": "Please enter both the notification title and content.",
+			"noticeSendSuccess": "Notification has been sent.",
+			"noticeSendFailed": "Failed to send notification."
 		},
 
 		"evaluationPage": {
@@ -832,8 +915,8 @@
 			"autoAttendanceName": "{{month}}/{{day}} Attendance",
 			"attendanceTitleByDate": "{{date}} Attendance",
 			"sort": {
-				"newest": "Newest",
-				"oldest": "Oldest",
+				"newest": "Ascending",
+				"oldest": "Descending",
 				"highest": "Highest",
 				"lowest": "Lowest",
 				"alphabetical": "Alphabetical"
@@ -927,7 +1010,7 @@
 			"loading": "Loading evaluation information.",
 			"back": "Back",
 			"evaluationTitle": "Evaluation",
-			"lateSubmitted": "Late submission",
+			"lateSubmitted": "Late",
 			"criteriaTitle": "Criteria",
 			"prevCriterion": "Previous criterion",
 			"nextCriterion": "Next criterion",
@@ -1227,7 +1310,8 @@
 		"assignment": "Assignments",
 		"attendance": "Attendance",
 		"team": "Team",
-		"ecaClientAdminName": "{{studentName}}",
+		"leaderboard": "Leaderboard",
+		"ecaStudentName": "{{studentName}}",
 
 		"appPage": {
 			"defaultUserName": "User",
@@ -1243,7 +1327,10 @@
 			"title": "Notification",
 			"loading": "Loading notifications...",
 			"empty": "No notifications.",
-			"loadFailed": "Failed to load notifications."
+			"loadFailed": "Failed to load notifications.",
+			"deleteAll": "Delete all",
+			"deleteAllConfirm": "Delete all received notifications?",
+			"deleteAllFailed": "Failed to delete notifications."
 		},
 
 		"status": {
@@ -1292,7 +1379,32 @@
 			"error": {
 				"activityNotFound": "Program information could not be found.",
 				"dashboardLoadFailed": "Failed to load dashboard information."
-			}
+			},
+			"programProgress": "Program Progress",
+			"attendanceRate": "Attendance Rate",
+			"remainingAssignments": "Remaining Assignments",
+			"assignmentCount": "{{count}}",
+			"myAssignments": "My Assignments",
+			"myAttendance": "My Attendance",
+			"managers": "Managers ({{count}})",
+			"myTeam": "My Team ({{count}})",
+			"managerLoading": "Loading managers.",
+			"teamLoading": "Loading team information.",
+			"noManagers": "No managers.",
+			"noTeams": "No teams assigned.",
+			"noTeamMembers": "No team members.",
+			"managerSearchAria": "Search managers",
+			"teamSearchAria": "Search team",
+			"messageAria": "Send message",
+			"attendanceProgress": {
+				"OPEN": "open",
+				"SCHEDULED": "scheduled"
+			},
+			"teamRole": {
+				"LEADER": "Leader",
+				"MEMBER": "Member"
+			},
+			"teamMemberDescription": "{{teamName}} · {{role}}"
 		},
 
 		"assignmentPage": {
@@ -1300,14 +1412,34 @@
 			"filter": "Filter",
 			"loading": "Loading assignments.",
 			"empty": "No assignments have been assigned.",
+			"assignmentName": "Assignment",
+			"assignmentPeriod": "Available",
+			"teamOrIndividual": "Type",
 			"status": {
-				"submitted": "submitted",
+				"evaluated": "graded",
+				"submitted": "completed",
 				"late": "late",
 				"missing": "missing",
 				"assigned": "assigned"
 			},
+			"listTitle": "List ({{count}})",
+			"searchPlaceholder": "Search by assignment name",
+			"noSearchResults": "No results found.",
+			"deadlineOver": "Past due",
+			"tableStatus": "Status",
+			"summary": {
+				"completed": "Completed",
+				"before": "Assigned",
+				"missing": "Missing"
+			},
+			"assignmentForm": {
+				"individual": "Indiv.",
+				"team": "Team",
+				"teamWithName": "Team · {{teamName}}"
+			},
+
 			"alert": {
-				"filterPreparing": "The filter feature is being prepared."
+				"filterPreparing": "The filter is being prepared."
 			},
 			"error": {
 				"activityNotFound": "Program information could not be found.",
@@ -1320,16 +1452,16 @@
 		"assignmentSubmitPage": {
 			"back": "Back",
 			"loading": "Loading assignment information.",
-			"infoTitle": "Assignment Information",
-			"assignmentName": "Assignment Name",
-			"assignmentPeriod": "Assignment Period",
-			"teamOrIndividual": "Team/Individual",
+			"infoTitle": "Details",
+			"assignmentName": "Title",
+			"assignmentPeriod": "Available",
+			"teamOrIndividual": "Assignment Type",
 			"resultFormLabel": "Submission Type",
-			"uploadTitle": "Upload Assignment",
+			"uploadTitle": "Submission",
 			"fileUploadGuide": "Upload files",
 			"fileLabel": "File",
 			"linkLabel": "Link",
-			"linkPlaceholder": "Paste a link",
+			"linkPlaceholder": "Paste your link here",
 			"linkNoInfo": "No link information",
 			"linkDelete": "Delete link",
 			"submittedAssignment": "Submitted Assignment",
@@ -1351,6 +1483,17 @@
 			"submitFailTitle": "Submission Failed",
 			"confirmButton": "Confirm",
 			"retryButton": "Try Again",
+			"assignmentFallback": "Assignment",
+			"fileTypeWarningWithFormats": "Recommended file types for this assignment: {{formats}}",
+			"previewOpen": "Preview",
+			"previewClose": "Close preview",
+			"previewPdfLoading": "Loading PDF.",
+			"previewPdfLoadFailed": "Failed to load the PDF preview.",
+			"previewUnsupported": "Preview is not supported for this file.",
+			"previewImageAlt": "Submitted image",
+			"updateSuccessTitle": "Edit Complete",
+			"updateFailTitle": "Edit Failed",
+			
 			"resultForm": {
 				"WRITING": "Document",
 				"VIDEO": "Video",
@@ -1369,7 +1512,9 @@
 				"linkRequired": "Please enter a link to submit.",
 				"fileOrLinkRequired": "Please upload a file or enter a link to submit.",
 				"invalidLink": "Please enter a link that starts with http or https.",
-				"invalidFileType": "This file type is not allowed for the assignment."
+				"invalidFileType": "This file type is not allowed for the assignment.",
+				"previewUnsupported": "Preview is not supported for this file. Please download it to view.",
+        		"previewLoadFailed": "Failed to load the preview."
 			},
 			"error": {
 				"assignmentNotFound": "Assignment information could not be found.",
@@ -1582,5 +1727,403 @@
 
 		"cannotLoadSchedule": "Unable to load the schedule. Please select it again from the list.",
 		"invalidAccessMissingEventId": "Invalid access. The event ID is missing."
-	}
+	},
+
+	"privacyPolicy": {
+        "title": "Privacy Policy",
+        "intro": [
+            "aim (hereinafter referred to as the “Company”) processes personal information lawfully and manages it securely in accordance with the Personal Information Protection Act and other applicable laws to protect the rights and freedoms of data subjects.",
+            "In accordance with Article 30 of the Personal Information Protection Act, the Company establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for personal information processing and to handle related grievances promptly and smoothly."
+        ],
+        "section1": {
+            "title": "1. Purposes of Processing Personal Information, Collected Items, and Retention and Use Periods",
+            "description": "The Company collects and uses personal information for the following purposes during membership registration or service use.",
+            "common": {
+                "title": "1) Common Items",
+                "table": {
+                    "headers": [
+                        "Legal Basis",
+                        "Category",
+                        "Purpose of Processing",
+                        "Collected Items",
+                        "Retention and Use Period"
+                    ],
+                    "rows": [
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Membership registration and login",
+                            "User identification, member management, authorization, and service provision",
+                            "Email, password, social login member identifier, name, email, profile photo, mobile phone number, etc.",
+                            "Destroyed without delay upon membership withdrawal"
+                        ],
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Program operation and participant management",
+                            "Institution/program operation, participant registration, team assignment, and activity management",
+                            "Name, affiliation, role, team information, program participation information",
+                            "Until membership withdrawal"
+                        ],
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Attendance management",
+                            "Attendance verification, participation rate calculation, and activity history management",
+                            "Name, attendance status, attendance time, participation rate, attendance correction history",
+                            "Until membership withdrawal"
+                        ],
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Assignment submission and evaluation",
+                            "Submission receipt, submission status management, evaluation, and feedback provision",
+                            "Submitted files, file names, submission date and time, version history, evaluation scores, feedback, peer evaluation scores and comments",
+                            "Until membership withdrawal"
+                        ],
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Team collaboration and communication",
+                            "Team chat, material sharing, role management, and notification delivery",
+                            "Chat content, uploaded files, role records, delivery logs",
+                            "Until membership withdrawal"
+                        ],
+                        [
+                            "Article 15(1)4 of the Personal Information Protection Act (Performance of Contract)",
+                            "Inquiries and grievance handling",
+                            "Inquiry receipt, identity verification, response, and dispute handling",
+                            "Name, email, contact information, inquiry details, consultation history",
+                            "3 years after inquiry handling is completed or the retention period required by applicable laws"
+                        ]
+                    ]
+                }
+            },
+            "voice": {
+                "title": "2) Use of Voice Recording Feature",
+                "table": {
+                    "headers": [
+                        "Legal Basis",
+                        "Category",
+                        "Purpose of Processing",
+                        "Collected Items",
+                        "Retention and Use Period"
+                    ],
+                    "rows": [
+                        [
+                            "Article 15(1)1 of the Personal Information Protection Act (Consent of Data Subject)",
+                            "Voice recording",
+                            "Storage of voice reflection records, speech-to-text conversion, record organization, summary generation, and report draft creation",
+                            "Voice files, text extracted from voice (transcripts), recording time, record title",
+                            "Original voice files, transcripts, and generated records: until membership withdrawal or deletion request"
+                        ]
+                    ]
+                }
+            },
+            "optional": {
+                "title": "3) Optional Information and Marketing",
+                "table": {
+                    "headers": [
+                        "Legal Basis",
+                        "Category",
+                        "Purpose of Processing",
+                        "Collected Items",
+                        "Retention and Use Period"
+                    ],
+                    "rows": [
+                        [
+                            "Article 15(1)1 of the Personal Information Protection Act (Consent of Data Subject)",
+                            "Optional profile information",
+                            "Profile configuration and improved user convenience",
+                            "Profile photo, self-introduction, interests, and other optional input information",
+                            "Until membership withdrawal or withdrawal of consent"
+                        ]
+                    ]
+                }
+            },
+            "ai": {
+                "title": "4) Improvement of AI Features",
+                "table": {
+                    "headers": [
+                        "Legal Basis",
+                        "Category",
+                        "Purpose of Processing",
+                        "Collected Items",
+                        "Retention and Use Period"
+                    ],
+                    "rows": [
+                        [
+                            "Separate consent of the data subject or legal basis for processing pseudonymized information",
+                            "AI analysis and improvement",
+                            "Improvement of summary, recommendation, and evaluation support features, and service quality improvement",
+                            "Pseudonymized records, transcripts, usage logs, evaluation data",
+                            "Until withdrawal of consent or achievement of purpose"
+                        ]
+                    ]
+                }
+            },
+            "legalRetention": {
+                "title": "5) Retention Under Applicable Laws",
+                "table": {
+                    "headers": [
+                        "Retained Information",
+                        "Retention Period",
+                        "Legal Basis"
+                    ],
+                    "rows": [
+                        [
+                            "Records on contracts or withdrawal of offers",
+                            "5 years",
+                            "Act on Consumer Protection in Electronic Commerce"
+                        ],
+                        [
+                            "Records on payment and supply of goods or services",
+                            "5 years",
+                            "Act on Consumer Protection in Electronic Commerce"
+                        ],
+                        [
+                            "Records on consumer complaints or dispute handling",
+                            "3 years",
+                            "Act on Consumer Protection in Electronic Commerce"
+                        ],
+                        [
+                            "Website visit records",
+                            "3 months",
+                            "Protection of Communications Secrets Act"
+                        ]
+                    ]
+                }
+            }
+        },
+        "section2": {
+            "title": "2. Processing of Personal Information of Children Under 14",
+            "paragraph": [
+                "As a rule, the Company does not target children under the age of 14 and does not collect or use personal information of children under the age of 14.",
+                "The Company verifies users’ age requirements during membership registration and service use, and membership registration or service use may be restricted if a user is under the age of 14.",
+                "If the Company confirms that it has unknowingly collected personal information of a child under the age of 14, it will take necessary measures, such as deleting the personal information without delay or restricting its use."
+            ]
+        },
+        "section3": {
+            "title": "3. Provision of Personal Information to Third Parties",
+            "paragraph": [
+                "The Company may provide personal information of data subjects to third parties as follows when necessary for service operation.",
+                "When providing personal information, the Company takes necessary measures, such as providing required notices or obtaining consent, in accordance with the Personal Information Protection Act and other applicable laws."
+            ],
+            "institution": {
+                "title": "1) Provision to Institutions Participated in by Users",
+                "table": {
+                    "headers": [
+                        "Recipient",
+                        "Purpose of Provision",
+                        "Provided Items",
+                        "Retention and Use Period"
+                    ],
+                    "rows": [
+                        [
+                            "Operating institutions, host institutions, or responsible institutions of programs in which the user participates or to which the user belongs",
+                            "Participant verification, program operation, attendance management, assignment operation, evaluation and feedback provision, activity history management, and completion, selection, and performance verification",
+                            "Name, affiliation, team information, role, attendance information, assignment submission status and submissions, evaluation results, feedback, peer evaluation results, voice transcripts",
+                            "Until the end of the relevant institution’s program operation period or until the retention period under applicable laws and the institution’s operational policies"
+                        ]
+                    ]
+                }
+            },
+            "legalProvision": {
+                "title": "2) Provision Under Laws",
+                "description": "The Company may provide personal information in accordance with applicable laws in any of the following cases.",
+                "list": [
+                    "Where the data subject has given separate prior consent",
+                    "Where there are special provisions in laws or it is necessary to comply with legal obligations",
+                    "Where it is necessary for the urgent interests of the life, body, or property of the data subject or a third party",
+                    "Where there is a lawful request from an investigative agency or other authority under applicable laws"
+                ]
+            },
+            "permissionNotice": {
+                "title": "3) Notice on Permission-Based Access Within the Service",
+                "paragraph": [
+                    "For program operation, the Company may grant the responsible staff or operators of an institution in which the user participates permission to access the participant’s personal information and activity information.",
+                    "In such cases, the scope of accessible information is limited to the minimum necessary for program operation purposes."
+                ]
+            }
+        },
+        "section4": {
+            "title": "4. Outsourcing of Personal Information Processing",
+            "description": "The Company may outsource personal information processing tasks as follows to ensure smooth handling of personal information-related work.",
+            "table": {
+                "headers": [
+                    "Processor",
+                    "Outsourced Task"
+                ],
+                "rows": [
+                    [
+                        "Amazon Web Services, Inc.",
+                        "Provision of system development and operating environment for service provision"
+                    ],
+                    [
+                        "OpenAI, L.L.C.",
+                        "Speech-to-text conversion, summaries, or AI feature provision"
+                    ]
+                ]
+            },
+            "footer": "When entering into outsourcing contracts, the Company reflects necessary matters in the contracts and supervises processors so that personal information is processed securely in accordance with applicable personal information protection laws."
+        },
+        "section5": {
+            "title": "5. Overseas Transfer of Personal Information",
+            "description": "The Company may transfer some personal information collected during service use overseas as follows.",
+            "table": {
+                "headers": [
+                    "Recipient",
+                    "Country of Transfer",
+                    "Transferred Items",
+                    "Purpose of Transfer",
+                    "Retention Period"
+                ],
+                "rows": [
+                    [
+                        "OpenAI, L.L.C.",
+                        "The United States and other overseas infrastructure regions operated or processed by OpenAI",
+                        "Voice files, text extracted from voice (transcripts), prompts entered by users, and response results",
+                        "Speech-to-text conversion (STT), text summarization, and AI feature provision",
+                        "During processing for OpenAI service provision and for the period under OpenAI’s relevant policies or contracts"
+                    ]
+                ]
+            },
+            "paragraph1": [
+                "When overseas transfer is necessary, the Company provides required notices in accordance with applicable laws and takes necessary protective measures so that personal information is processed securely.",
+                "According to OpenAI’s official documentation, API data residency requires separate configuration, and even when data residency is configured, system data may be processed and stored outside the selected region."
+            ],
+            "paragraph2": [
+                "※ If the Company applies OpenAI API data residency separately in the future, this section may change depending on the actual applied region and processing scope.",
+                "According to OpenAI’s official documentation, API data residency is configured at the project level and may not apply to some system data that is not customer content."
+            ]
+        },
+        "section6": {
+            "title": "6. Procedures and Methods for Destroying Personal Information",
+            "description": "When personal information becomes unnecessary due to expiration of the retention period, achievement of the processing purpose, or other reasons, the Company destroys the personal information without delay.",
+            "list": [
+                {
+                    "title": "Destruction procedure",
+                    "paragraph": "The Company selects personal information for which a reason for destruction has occurred and destroys it according to internal procedures."
+                },
+                {
+                    "title": "Destruction method",
+                    "children": [
+                        "Information in electronic file format is deleted by a method that prevents recovery or reproduction.",
+                        "Information recorded in paper documents is shredded or incinerated."
+                    ]
+                }
+            ]
+        },
+        "section7": {
+            "title": "7. Rights and Obligations of Data Subjects and Legal Representatives and How to Exercise Them",
+            "description": "Data subjects may exercise the following rights related to personal information protection against the Company at any time.",
+            "rights": [
+                "Request to access personal information",
+                "Request to correct or delete personal information",
+                "Request to suspend processing of personal information",
+                "Request to withdraw consent",
+                "Request for explanation, objection, and review regarding automated decisions"
+            ],
+            "paragraph1": "Data subjects may exercise the above rights through in-service features, email, or the customer center. When a data subject makes a request, the Company will take necessary measures without delay in accordance with applicable laws.",
+            "paragraph2": "Through features provided within the service, data subjects may directly handle the following matters.",
+            "selfService": [
+                "Edit my information",
+                "Withdraw membership"
+            ],
+            "paragraph3": [
+                "For rights that are not directly provided within the service, data subjects may submit requests by email or through the customer center.",
+                "However, requests for access, correction, deletion, or suspension of processing may be restricted under applicable laws, or where such requests may infringe on another person’s personal information or rights."
+            ]
+        },
+        "section8": {
+            "title": "8. Measures to Ensure the Security of Personal Information",
+            "description1": "The Company takes the following measures to ensure the security of personal information.",
+            "measures": [
+                "Administrative measures: Establishment and implementation of internal management plans, employee training, management of access rights to personal information, and separate operation of administrator privileges",
+                "Technical measures: Secure storage of passwords and authentication information (hashing), access control, operation of security programs, creation and management of access records for personal information processing systems, and encryption during transmission",
+                "Physical measures: Access control for personal information processing systems and data storage spaces"
+            ],
+            "description2": "The Company applies encryption measures to the following sections to ensure secure processing during personal information transmission.",
+            "encryptionScopes": [
+                "All data transmission sections of web and app services",
+                "Interface sections between internal and external systems",
+                "Database backup transmission sections and administrator page access sections"
+            ]
+        },
+        "section9": {
+            "title": "9. Installation, Operation, and Refusal of Automatic Personal Information Collection Devices",
+            "paragraph": [
+                "The Company may use cookies or similar technologies to maintain login status and authenticate members within the scope necessary to provide the service.",
+                "The Company may also use related SDKs to provide Kakao Login and Google Login features."
+            ],
+            "list": [
+                {
+                    "title": "Collected items",
+                    "body": "Cookies or session information for maintaining login status"
+                },
+                {
+                    "title": "Purpose of use",
+                    "body": "Provision of essential features such as login maintenance, member authentication, and account linking"
+                },
+                {
+                    "title": "How to refuse",
+                    "body": "Users may refuse cookie storage through browser settings. However, if cookie storage is refused, use of some services may be restricted."
+                }
+            ],
+            "footer": "The Company does not operate advertising cookies or third-party behavioral information collection features."
+        },
+        "section10": {
+            "title": "10. Criteria for Additional Use and Provision",
+            "paragraph": [
+                "As a rule, the Company uses and provides personal information only within the scope consented to by the data subject.",
+                "However, where personal information may be additionally used or provided without consent under Article 15(3) or Article 17(4) of the Personal Information Protection Act, the Company comprehensively considers the following matters."
+            ],
+            "criteria": [
+                "Whether it is related to the original purpose of collection",
+                "Whether additional use or provision is foreseeable in light of the circumstances of personal information collection or processing practices",
+                "Whether it unfairly infringes on the interests of the data subject",
+                "Whether security measures such as pseudonymization or encryption have been taken"
+            ]
+        },
+        "section11": {
+            "title": "11. Processing of Pseudonymized Information",
+            "paragraph1": "The Company may pseudonymize and use personal information so that a specific individual cannot be identified when necessary for statistical compilation, scientific research, service quality improvement, and similar purposes.",
+            "paragraph2": "In such cases, the Company pseudonymizes only the minimum necessary items and takes necessary protective measures such as separate storage and access control to prevent re-identification of pseudonymized information."
+        },
+        "section12": {
+            "title": "12. Matters Concerning Automated Decisions",
+            "paragraph1": "The Company may perform automated or semi-automated processing during service operation. Examples may include participation rate calculation, late submission determination, comprehensive score generation, recommendation of excellent participant candidates, and generation of summary drafts.",
+            "paragraph2": "The Company uses these results as reference information and operates the service so that final decisions that significantly affect data subjects are made after human review."
+        },
+        "section13": {
+            "title": "13. Personal Information Protection Officer and Requests to Access Personal Information",
+            "table": {
+                "headers": [
+                    "Category",
+                    "Details"
+                ],
+                "rows": [
+                    [
+                        "Personal Information Protection Officer",
+                        "Yujin Kim\npurieu@ewha.ac.kr"
+                    ],
+                    [
+                        "Department in Charge of Personal Information Protection",
+                        "aim\naim2a.kor@gmail.com"
+                    ]
+                ]
+            },
+            "paragraph": "Data subjects may contact the above contacts regarding all personal information protection-related inquiries, complaint handling, and remedies arising while using the Company’s services."
+        },
+        "section14": {
+            "title": "14. Remedies for Infringement of Data Subject Rights",
+            "paragraph": "Data subjects may contact the following institutions for reporting, consultation, or dispute mediation regarding personal information infringement.",
+            "agencies": [
+                "Personal Information Dispute Mediation Committee",
+                "Personal Information Infringement Report Center",
+                "Supreme Prosecutors’ Office",
+                "National Police Agency"
+            ]
+        },
+        "section15": {
+            "title": "15. Addendum",
+            "effectiveDate": "This Privacy Policy is effective from April 27, 2026.",
+            "paragraph": "If the Company changes this Privacy Policy, it will disclose the details before and after the change through notices within the service or separate guidance so that data subjects can easily review them."
+        }
+    }
 }

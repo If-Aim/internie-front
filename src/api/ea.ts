@@ -515,6 +515,7 @@ export type StudentLeaderboardResponse = {
     size: number;
     totalCount: number;
     rankings: LeaderboardRankingResponse[];
+    lastUpdate?: string | null;
 };
 
 export type StudentLeaderboardLogResponse = {
@@ -633,6 +634,10 @@ export type NotificationListResponse = {
     notifications: NotificationResponse[];
 };
 
+export type NotificationDeleteAllResponse = {
+    deletedCount: number;
+};
+
 export async function getNotifications(query?: { unreadOnly?: boolean; page?: number; size?: number }): Promise<NotificationListResponse> {
     const queryString = buildLeaderboardQuery({
         unreadOnly: query?.unreadOnly,
@@ -649,6 +654,10 @@ export async function markNotificationRead(notificationId: number | string): Pro
 
 export async function markAllNotificationsRead(): Promise<{ updatedCount: number }> {
     return api<{ updatedCount: number }>("/notifications/read-all", { method: "PATCH" });
+}
+
+export async function deleteAllNotifications(): Promise<NotificationDeleteAllResponse> {
+    return api<NotificationDeleteAllResponse>("/notifications", { method: "DELETE" });
 }
 
 /* - LeaderBoard 관련 (ExternalActivity 공통) - */
@@ -721,6 +730,7 @@ export type StudentAssignmentResponse = {
     isTeamAssignment: boolean;
     myTeam?: StudentAssignmentTeam | null;
     status: AssignmentParticipantStatus;
+    evaluationCompleted: boolean;
 };
 
 export type SubmissionFileSubmitType = "FILE" | "LINK";

@@ -40,12 +40,17 @@
 .eca-student-dashboard-assignment-row em.is-late-submitted { background: #FFD6D2; color: #F00; }
 .eca-student-dashboard-assignment-row em.is-missing { background: #FFD6D2; color: #F00; }
 
-.eca-student-dashboard-attendance-row strong { width: 100px; color: #000; font-size: 14px; font-weight: 900; text-align: left; }
-.eca-student-dashboard-attendance-row span { flex: 1; color: #6B6B6B; font-size: 11px; font-weight: 600; text-align: center; }
-.eca-student-dashboard-attendance-row em { min-width: 64px; height: 24px; padding: 0 12px; border-radius: 12px; font-size: 11px; font-style: normal; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
-.eca-student-dashboard-attendance-row em.is-present { background: #BDD8FF; color: #0166FF; }
-.eca-student-dashboard-attendance-row em.is-late { background: #FFE7A8; color: #F5A000; }
-.eca-student-dashboard-attendance-row em.is-absent { background: #FFD6D2; color: #F00; }
+.eca-student-dashboard-attendance-row strong { width: 96px; flex: 0 1 96px; min-width: 0; color: #000; font-size: 14px; font-weight: 700; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-student-dashboard-attendance-row > span:not(.eca-student-dashboard-attendance-action) { width: 64px; flex: 0 0 64px; margin-left: 14px; color: #777; font-size: 11px; font-weight: 700; text-align: center; }
+.eca-student-dashboard-attendance-action { margin-left: auto; display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.eca-student-dashboard-attendance-action em { width: 64px; flex: 0 0 64px; height: 24px; padding: 0; border-radius: 12px; font-size: 11px; font-style: normal; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-student-dashboard-attendance-action i { width: 28px; height: 28px; border: none; background: none; display: flex; align-items: center; justify-content: center; padding: 0; font-style: normal; }
+.eca-student-dashboard-attendance-action em.is-present { background: #BDD8FF; color: #0166FF; }
+.eca-student-dashboard-attendance-action em.is-open { background: #BDD8FF; color: #0166FF; }
+.eca-student-dashboard-attendance-action em.is-late { background: #FFE7A8; color: #F5A000; }
+.eca-student-dashboard-attendance-action em.is-absent { background: #FFD6D2; color: #F00; }
+.eca-student-dashboard-attendance-action em.is-scheduled { background: #F6F6F6; color: #808080; }
+.eca-student-dashboard-attendance-action em.is-not-checked { background: #F6F6F6; color: #808080; }
 
 .eca-student-dashboard-person-row { width: 100%; min-height: 64px; padding: 0 14px; gap: 14px; border: 1px solid #e2e2e2; border-radius: 10px; background: #fff; color: #000; display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }
 .eca-student-dashboard-avatar-wrap { position: relative; width: 38px; height: 38px; flex-shrink: 0; }

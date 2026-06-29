@@ -578,7 +578,7 @@ function EmptyState({}: EmptyStateProps): React.ReactElement {
 				<br />
 				{t("empty.subtitle")}
 			</p>
-			<button type="button" className="empty-sync" onClick={() => alert("서비스 준비중입니다.")}>
+			<button type="button" className="empty-sync" onClick={() => alert("Coming soon")}>
 				{t("empty.sync")}
 			</button>
 		</div>

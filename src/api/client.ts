@@ -803,16 +803,18 @@ export type UserBase = {
     name?: string | null;
     kakaoName?: string | null;
     nickname: string | null;
-
     linkedinUrl?: string | null;
+    
     profileImage: string | null;
     verificationImage: string | null;
     roleSet: string[];
     status: string;
     rejectionReason?: string | null;
+
     school: UserSchool | null;
-    
     studentNumber?: string | null;
+    major?: string | null;
+    campus?: string | null;
     interestJob?: string | null;
     interestCompany?: string | null;
     companyName?: string | null;
@@ -981,8 +983,9 @@ export type UpdateMyProfileJsonInput = {
     name?: string | null;
     nickname?: string | null;
     linkedinUrl?: string | null;
-    interestJob?: string | null;
-    interestCompany?: string | null;
+    studentNumber?: string | null;
+    major?: string | null;
+    campus?: string | null;
 };
 
 export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<UserMe> {
@@ -992,8 +995,9 @@ export async function updateMyProfile(input: UpdateMyProfileJsonInput): Promise<
             name: input.name ?? null,
             nickname: input.nickname ?? null,
             linkedinUrl: input.linkedinUrl ?? null,
-            interestJob: input.interestJob ?? null,
-            interestCompany: input.interestCompany ?? null,
+            studentNumber: input.studentNumber ?? null,
+            major: input.major ?? null,
+            campus: input.campus ?? null,
         }),
     });
 }

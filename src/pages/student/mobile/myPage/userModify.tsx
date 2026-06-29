@@ -8,12 +8,20 @@ import "./userModify.css";
 type ProfileForm = {
     name: string;
     email: string;
-    // nickname: string;        // TODO: 추후 활성화
-    // birth: string;           // TODO
+    nickname: string;
+    linkedinUrl: string;
+    studentNumber: string;
+    major: string;
+    campus: string;
 };
 
 function normalizeText(v: string) {
     return v.trim();
+}
+
+function normalizeOptionalText(v: string): string | null {
+    const trimmed = v.trim();
+    return trimmed ? trimmed : null;
 }
 
 export default function EditProfilePage(): React.ReactElement {
@@ -24,7 +32,15 @@ export default function EditProfilePage(): React.ReactElement {
 
     const [me, setMe] = React.useState<UserMe | null>(null);
 
-    const [form, setForm] = React.useState<ProfileForm>({ name: "", email: "", });
+    const [form, setForm] = React.useState<ProfileForm>({
+        name: "",
+        email: "",
+        nickname: "",
+        linkedinUrl: "",
+        studentNumber: "",
+        major: "",
+        campus: "",
+    });
     const [initialForm, setInitialForm] = React.useState<ProfileForm | null>(null);
 
     const [selectedImageFile, setSelectedImageFile] = React.useState<File | null>(null);
@@ -53,10 +69,13 @@ export default function EditProfilePage(): React.ReactElement {
                 setMe(data);
 
                 const loaded: ProfileForm = {
-                name: data.name ?? "",
-                email: (data as any).email ?? "",
-                // nickname: data.nickname ?? "",
-                // birth: (data as any).birth ?? "",
+                    name: data.name ?? "",
+                    email: data.email ?? "",
+                    nickname: data.nickname ?? "",
+                    linkedinUrl: data.linkedinUrl ?? "",
+                    studentNumber: data.studentNumber ?? "",
+                    major: data.major ?? "",
+                    campus: data.campus ?? "",
                 };
 
                 setForm(loaded);
@@ -97,8 +116,7 @@ export default function EditProfilePage(): React.ReactElement {
 
     // 임시
     const displayEmail = form.email.trim() || "";
-    const birth = (me as any)?.birth ?? t("mypage.birth");
-    const schoolMajor = me?.status === "APPROVED" ? (me.school?.name ?? t("mypage.noSchool")) : t("mypage.needStudentVerification");
+    const isStudentUser = (me?.roleSet ?? []).some((role) => role === "ROLE_STUDENT" || role.endsWith("_STUDENT"));
 
     // 변경 여부
     const isDirty = React.useMemo(() => {
@@ -106,15 +124,15 @@ export default function EditProfilePage(): React.ReactElement {
 
         if (normalizeText(form.name) !== normalizeText(initialForm.name)) return true;
         if (normalizeText(form.email) !== normalizeText(initialForm.email)) return true;
-        
-        // TODO: 추후 필드 활성화 시 아래 주석 해제
-        // if (normalizeText(form.nickname) !== normalizeText(initialForm.nickname)) return true;
-        // if (normalizeText(form.birth) !== normalizeText(initialForm.birth)) return true;
+        if (normalizeText(form.nickname) !== normalizeText(initialForm.nickname)) return true;
+        if (normalizeText(form.linkedinUrl) !== normalizeText(initialForm.linkedinUrl)) return true;
+        if (normalizeText(form.studentNumber) !== normalizeText(initialForm.studentNumber)) return true;
+        if (normalizeText(form.major) !== normalizeText(initialForm.major)) return true;
+        if (normalizeText(form.campus) !== normalizeText(initialForm.campus)) return true;
 
         if (selectedImageFile) return true;
         if (removeProfileImage) return true;
         return false;
-
     }, [form, initialForm, selectedImageFile, removeProfileImage]);
 
     async function onPickProfileImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -139,17 +157,33 @@ export default function EditProfilePage(): React.ReactElement {
 
     async function onSave() {
         const trimmedName = normalizeText(form.name);
+        const trimmedNickname = normalizeText(form.nickname);
+        const trimmedLinkedinUrl = normalizeText(form.linkedinUrl);
+        const trimmedStudentNumber = normalizeText(form.studentNumber);
+        const trimmedMajor = normalizeText(form.major);
+        const trimmedCampus = normalizeText(form.campus);
 
         if (!trimmedName) {
             alert(t("mypage.needName"));
             return;
         }
+
+        if (trimmedLinkedinUrl && !/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/.+/i.test(trimmedLinkedinUrl)) {
+            alert(t("mypage.profileEdit.invalidLinkedinUrl"));
+            return;
+        }
+
         try {
             setSaving(true);
 
             let updatedMe: UserMe | null = null;
             updatedMe = await updateMyProfile({
                 name: trimmedName,
+                nickname: normalizeOptionalText(trimmedNickname),
+                linkedinUrl: normalizeOptionalText(trimmedLinkedinUrl),
+                studentNumber: normalizeOptionalText(trimmedStudentNumber),
+                major: normalizeOptionalText(trimmedMajor),
+                campus: normalizeOptionalText(trimmedCampus),
             });
 
             if (removeProfileImage) {
@@ -167,12 +201,17 @@ export default function EditProfilePage(): React.ReactElement {
             }
 
             const nextInitial: ProfileForm = {
-                ...form,
                 name: trimmedName,
+                email: form.email,
+                nickname: trimmedNickname,
+                linkedinUrl: trimmedLinkedinUrl,
+                studentNumber: trimmedStudentNumber,
+                major: trimmedMajor,
+                campus: trimmedCampus,
             };
+
             setInitialForm(nextInitial);
             setForm(nextInitial);
-
             setSelectedImageFile(null);
             setRemoveProfileImage(false);
         } catch (e) {
@@ -181,8 +220,8 @@ export default function EditProfilePage(): React.ReactElement {
 
             alert(
                 status != null
-                    ? `수정 실패 (status=${String(status)})\n${String(bodyText ?? "")}`
-                    : `수정 실패\n${String(e ?? "")}`
+                    ? `${t("mypage.profileEdit.updateFailed")} (status=${String(status)})\n${String(bodyText ?? "")}`
+                    : `${t("mypage.profileEdit.updateFailed")}\n${String(e ?? "")}`
             );
             console.error("[onSave] error:", e);
         } finally {
@@ -203,19 +242,19 @@ export default function EditProfilePage(): React.ReactElement {
         const nextEmail = emailForm.email.trim().toLowerCase();
 
         if (!nextEmail) {
-            setEmailError("이메일을 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.emailRequired"));
             return;
         }
 
         if (nextEmail === currentEmail) {
-            setEmailError("현재 사용 중인 이메일과 동일합니다. 다른 이메일을 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.sameEmail"));
             return;
         }
         
         const email = emailForm.email.trim();
 
         if (!email) {
-            setEmailError("이메일을 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.emailRequired"));
             return;
         }
 
@@ -228,26 +267,26 @@ export default function EditProfilePage(): React.ReactElement {
             const res = await sendMyEmailCode(email, lang);
 
             if (res.status === "EXISTING_ACCOUNT_FOUND") {
-                alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+                alert(t("mypage.profileEdit.existingAccount"));
                 localStorage.removeItem("accessToken");
                 navigate("/login", { replace: true });
                 return;
             }
 
-            setEmailSentMessage(`${res.maskedEmail}로 인증코드를 발송했습니다.`);
+            setEmailSentMessage(t("mypage.profileEdit.codeSent", { email: res.maskedEmail }));
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.code === "AUTH_EXISTING_ACCOUNT") {
-                    alert("이미 존재하는 계정입니다. 해당 계정으로 로그인해주세요.");
+                    alert(t("mypage.profileEdit.existingAccount"));
                     localStorage.removeItem("accessToken");
                     navigate("/login", { replace: true });
                     return;
                 }
-                setEmailError("인증코드 발송에 실패했습니다.");
+                setEmailError(t("mypage.profileEdit.sendCodeFailed"));
                 return;
             }
 
-            setEmailError("이메일 전송 중 오류가 발생했습니다.");
+            setEmailError(t("mypage.profileEdit.emailSendError"));
         } finally {
             setEmailSending(false);
         }
@@ -259,17 +298,17 @@ export default function EditProfilePage(): React.ReactElement {
         const beforeEmail = (me?.email ?? "").trim().toLowerCase();
 
         if (!email) {
-            setEmailError("이메일을 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.emailRequired"));
             return;
         }
 
         if (!code) {
-            setEmailError("인증코드를 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.codeRequired"));
             return;
         }
 
         if (email.toLowerCase() === beforeEmail) {
-            setEmailError("현재 사용 중인 이메일과 동일합니다. 다른 이메일을 입력해주세요.");
+            setEmailError(t("mypage.profileEdit.sameEmail"));
             return;
         }
 
@@ -280,7 +319,7 @@ export default function EditProfilePage(): React.ReactElement {
             const res = await verifyMyEmailCode(email, code);
 
             if (!res.verified) {
-                setEmailError("이메일 인증에 실패했습니다.");
+                setEmailError(t("mypage.profileEdit.emailVerifyFailed"));
                 return;
             }
 
@@ -288,7 +327,7 @@ export default function EditProfilePage(): React.ReactElement {
             const afterEmail = (nextMe.email ?? "").trim().toLowerCase();
 
             if (afterEmail === beforeEmail) {
-                setEmailError("현재 이메일과 동일하여 변경되지 않았습니다.");
+                setEmailError(t("mypage.profileEdit.sameEmailNotChanged"));
                 return;
             }
 
@@ -302,20 +341,17 @@ export default function EditProfilePage(): React.ReactElement {
             setEmailSentMessage(null);
             setEmailError(null);
             window.dispatchEvent(new Event("profile-updated"));
-            alert("이메일 변경이 완료되었습니다.");
+            alert(t("mypage.profileEdit.emailChangeComplete"));
         } catch (e) {
             if (e instanceof ApiError) {
-                setEmailError("인증코드가 올바르지 않거나 만료되었습니다.");
+                setEmailError(t("mypage.profileEdit.codeInvalidOrExpired"));
                 return;
             }
-            setEmailError("이메일 인증 중 오류가 발생했습니다.");
+
+            setEmailError(t("mypage.profileEdit.emailVerifyError"));
         } finally {
             setEmailVerifying(false);
         }
-    }
-
-    function handleServicePreparing() {
-        alert("서비스 준비중입니다.");
     }
     
     if (!me || !initialForm) return <div />;
@@ -325,7 +361,7 @@ export default function EditProfilePage(): React.ReactElement {
             <div className="mypage user-modify">
                 <header className="mypage-header">
                     <div className="mypage-email">{t("mypage.editProfile")}</div>
-                    <button type="button" className="mypage-close" aria-label="닫기" onClick={() => navigate(-1)}>
+                    <button type="button" className="mypage-close" aria-label={t("common.close")} onClick={() => navigate(-1)}>
                         <img src="/icons/x-01.svg" alt="" />
                     </button>
                 </header>
@@ -353,7 +389,17 @@ export default function EditProfilePage(): React.ReactElement {
                         </div>
 
                         <div className="profile-edit-field">
-                            <div className="profile-edit-label">E-mail</div>
+                            <div className="profile-edit-label">{t("mypage.profileEdit.nickname")}</div>
+                            <input className="profile-edit-input" value={form.nickname} onChange={(e) => setForm((prev) => ({ ...prev, nickname: e.target.value }))} disabled={saving} placeholder={t("mypage.profileEdit.nicknamePlaceholder")} />
+                        </div>
+
+                        <div className="profile-edit-field">
+                            <div className="profile-edit-label">{t("mypage.profileEdit.linkedin")}</div>
+                            <input className="profile-edit-input" value={form.linkedinUrl} onChange={(e) => setForm((prev) => ({ ...prev, linkedinUrl: e.target.value }))} disabled={saving} placeholder="https://www.linkedin.com/in/..." />
+                        </div>
+
+                        <div className="profile-edit-field">
+                            <div className="profile-edit-label">{t("mypage.profileEdit.email")}</div>
                             <input className="profile-edit-input is-readonly" value={displayEmail} readOnly 
                                 onClick={() => {
                                     if (saving) return;
@@ -362,15 +408,24 @@ export default function EditProfilePage(): React.ReactElement {
                             />
                         </div>
 
-                        <div className="profile-edit-field">
-                            <div className="profile-edit-label">{t("mypage.birth")}</div>
-                            <input className="profile-edit-input is-readonly" value={birth} readOnly onClick={handleServicePreparing} />
-                        </div>
+                        {isStudentUser && (
+                            <>
+                                <div className="profile-edit-field">
+                                    <div className="profile-edit-label">{t("mypage.profileEdit.studentId")}</div>
+                                    <input className="profile-edit-input" value={form.studentNumber} onChange={(e) => setForm((prev) => ({ ...prev, studentNumber: e.target.value }))} disabled={saving} placeholder={t("mypage.profileEdit.studentIdPlaceholder")} />
+                                </div>
 
-                        <div className="profile-edit-field">
-                            <div className="profile-edit-label">{t("mypage.schoolMajor")}</div>
-                            <input className="profile-edit-input is-readonly" value={schoolMajor} disabled />
-                        </div>
+                                <div className="profile-edit-field">
+                                    <div className="profile-edit-label">{t("mypage.profileEdit.major")}</div>
+                                    <input className="profile-edit-input" value={form.major} onChange={(e) => setForm((prev) => ({ ...prev, major: e.target.value }))} disabled={saving} placeholder={t("mypage.profileEdit.majorPlaceholder")} />
+                                </div>
+
+                                <div className="profile-edit-field">
+                                    <div className="profile-edit-label">{t("mypage.profileEdit.campus")}</div>
+                                    <input className="profile-edit-input" value={form.campus} onChange={(e) => setForm((prev) => ({ ...prev, campus: e.target.value }))} disabled={saving} placeholder={t("mypage.profileEdit.campusPlaceholder")} />
+                                </div>
+                            </>
+                        )}
                     </section>
                 </div>
 
@@ -385,19 +440,19 @@ export default function EditProfilePage(): React.ReactElement {
                 <div className="client-verify-popup-backdrop" onClick={() => setEmailConfirmOpen(false)} role="presentation">
                     <div className="client-verify-popup" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                         <div className="client-verify-popup-header">
-                            <div className="client-verify-popup-title">이메일 변경</div>
+                            <div className="client-verify-popup-title">{t("mypage.profileEdit.emailChangeTitle")}</div>
                             <button type="button" className="client-verify-popup-close" onClick={() => setEmailConfirmOpen(false)}>
                                 <img src="/icons/x-01.svg" alt="" />
                             </button>
                         </div>
 
                         <div className="client-verify-popup-desc">
-                            이메일을 변경을 위해 이메일 인증을 진행해야 합니다. 계속하시겠습니까?
+                            {t("mypage.profileEdit.emailChangeConfirmDesc")}
                         </div>
 
                         <div className="client-verify-popup-footer">
                             <button type="button" className="client-verify-popup-secondary" onClick={() => setEmailConfirmOpen(false)}>
-                                취소
+                                {t("mypage.profileEdit.cancel")}
                             </button>
                             <button
                                 type="button"
@@ -410,7 +465,7 @@ export default function EditProfilePage(): React.ReactElement {
                                     setEmailVerifyPopupOpen(true);
                                 }}
                             >
-                                계속
+                                {t("mypage.profileEdit.continue")}
                             </button>
                         </div>
                     </div>
@@ -422,14 +477,14 @@ export default function EditProfilePage(): React.ReactElement {
 				<div className="email-popup-backdrop" onClick={handleEmailPopupBackdropClick} role="presentation">
 					<div className="email-popup" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 						<div className="email-popup-header">
-							<div className="email-popup-title">이메일 인증</div>
+							<div className="email-popup-title">{t("mypage.profileEdit.emailVerifyTitle")}</div>
 							<button type="button" className="email-popup-close" aria-label={t("common.close")} onClick={handleCloseEmailVerifyPopup}>
 								<img className="icon" src="/icons/x-01.svg" alt="" />
 							</button>
 						</div>
 
 						<div className="email-popup-desc">
-							이메일 변경을 위해 인증을 진행해주세요.
+                            {t("mypage.profileEdit.emailVerifyDesc")}
 						</div>
 
 						<div className="email-popup-body">
@@ -437,7 +492,7 @@ export default function EditProfilePage(): React.ReactElement {
 								className="email-popup-input"
 								value={emailForm.email}
 								onChange={(e) => setEmailForm((prev) => ({ ...prev, email: e.target.value }))}
-								placeholder="이메일을 입력해주세요"
+								placeholder={t("mypage.profileEdit.emailPlaceholder")}
 								autoComplete="email"
 							/>
 
@@ -446,15 +501,10 @@ export default function EditProfilePage(): React.ReactElement {
 									className="email-popup-input"
 									value={emailForm.code}
 									onChange={(e) => setEmailForm((prev) => ({ ...prev, code: e.target.value }))}
-									placeholder="인증코드를 입력해주세요"
+									placeholder={t("mypage.profileEdit.codePlaceholder")}
 								/>
-								<button
-									type="button"
-									className="email-popup-send-btn"
-									onClick={handleSendEmailCode}
-									disabled={emailSending}
-								>
-									{emailSending ? "전송중" : "코드 받기"}
+								<button type="button" className="email-popup-send-btn" onClick={handleSendEmailCode} disabled={emailSending}>
+									{emailSending ? t("mypage.profileEdit.sending") : t("mypage.profileEdit.sendCode")}
 								</button>
 							</div>
 
@@ -464,15 +514,10 @@ export default function EditProfilePage(): React.ReactElement {
 
 						<div className="email-popup-footer">
 							<button type="button" className="email-popup-secondary" onClick={handleCloseEmailVerifyPopup}>
-								나중에
+                                {t("mypage.profileEdit.later")}
 							</button>
-							<button
-								type="button"
-								className="email-popup-primary"
-								onClick={handleVerifyEmailCode}
-								disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}
-							>
-								{emailVerifying ? "인증 중" : "인증하기"}
+							<button type="button" className="email-popup-primary" onClick={handleVerifyEmailCode} disabled={emailVerifying || !emailForm.email.trim() || !emailForm.code.trim()}>
+								{emailVerifying ? t("mypage.profileEdit.verifying") : t("mypage.profileEdit.verify")}
 							</button>
 						</div>
 					</div>

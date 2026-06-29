@@ -90,7 +90,7 @@ function TimeSheet({
 											onClose();
 										}}
 										>
-										~ {displayTimeLabel(opt, locale)}
+										- {displayTimeLabel(opt, locale)}
 										</button>
 									);
 								})}

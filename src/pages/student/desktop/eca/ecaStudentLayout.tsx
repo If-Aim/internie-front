@@ -20,7 +20,7 @@ function getDisplayStudentName(me: UserMe | null): string {
     const nick = (me.nickname ?? "").trim();
     const name = (me.name ?? "").trim();
 
-    return nick || name || "";
+    return name || nick || "";
 }
 
 function isDefaultProfileImage(url?: string | null): boolean {
@@ -148,9 +148,9 @@ export default function EcaStudentLayout(): React.ReactElement {
 
                     <div className="eca-student-activity-list">
                         {activitiesLoading ? (
-                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuLoading")}대외활동을 불러오는 중입니다</span>
+                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuLoading", { defaultValue: "대외활동을 불러오는 중입니다" })}</span>
                         ) : activities.length === 0 ? (
-                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuEmpty")}</span>
+                            <span className="eca-student-submenu-empty">{t("ecaStudent.ecaStudentSubmenuEmpty", { defaultValue: "참여 중인 대외활동이 없습니다" })}</span>
                         ) : (
                             activities.map((activity) => {
                                 const activityId = activity.externalActivityId;
@@ -179,12 +179,16 @@ export default function EcaStudentLayout(): React.ReactElement {
                                                     {t("ecaStudent.assignment")}
                                                 </NavLink>
 
-                                                <NavLink to={`${basePath}/attendance`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
+                                                <NavLink to={`${basePath}/attendance`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
                                                     {t("ecaStudent.attendance")}
                                                 </NavLink>
 
                                                 <NavLink to={`${basePath}/team-activity`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
                                                     {t("ecaStudent.team")}
+                                                </NavLink>
+
+                                                <NavLink to={`${basePath}/leaderboard`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
+                                                    {t("ecaStudent.leaderboard")}
                                                 </NavLink>
                                             </div>
                                         ) : null}

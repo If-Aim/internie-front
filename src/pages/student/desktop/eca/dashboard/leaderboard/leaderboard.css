@@ -1,0 +1,101 @@
+.eca-student-leaderboard-page { width: 100%; max-width: 760px; margin: 0 auto; color: #000; }
+.eca-student-leaderboard-title { margin: 0 0 58px; color: #000; font-size: 28px; font-weight: 800; line-height: 34px; }
+.eca-student-leaderboard-tabs { height: 44px; display: flex; align-items: flex-end; gap: 0; margin-bottom: 12px; }
+.eca-student-leaderboard-tabs button { min-width: 128px; height: 44px; padding: 0 20px 13px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #666; font-size: 16px; font-weight: 800; cursor: pointer; }
+.eca-student-leaderboard-tabs button:hover { color: #0166FF; }
+.eca-student-leaderboard-tabs button.is-active { border-bottom-color: #0166FF; color: #0166FF; }
+.eca-student-leaderboard-card { height: 755px; padding: 31px 42px 0; border: 1px solid #D9D9D9; border-radius: 10px; background: #fff; box-sizing: border-box; overflow: hidden; }
+.eca-student-leaderboard-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+.eca-student-leaderboard-select-button { min-width: 127px; height: 40px; padding: 0 15px; border: 1px solid #D9D9D9; border-radius: 8px; background: #fff; color: #666; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.eca-student-leaderboard-select-button span { margin-left: 18px; color: #808080; font-size: 20px; line-height: 1; }
+.eca-student-leaderboard-tool-actions { display: flex; align-items: center; gap: 18px; color: #999; }
+.eca-student-leaderboard-tool-actions button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-tool-actions button:hover { color: #0166FF; }
+.eca-student-leaderboard-search-input { width: 100%; height: 42px; margin: -18px 0 26px; padding: 0 14px; border: 1px solid #D9D9D9; border-radius: 8px; box-sizing: border-box; color: #000; font-size: 14px; outline: none; }
+.eca-student-leaderboard-search-input:focus { border-color: #0166FF; }
+.eca-student-leaderboard-list-title { margin: 0 0 14px 18px; color: #777; font-size: 18px; font-weight: 800; line-height: 22px; }
+.eca-student-leaderboard-head { display: grid; grid-template-columns: 210px 1fr 180px; padding: 0 36px 14px 34px; box-sizing: border-box; }
+.eca-student-leaderboard-head span { color: #777; font-size: 13px; font-weight: 500; line-height: 16px; }
+.eca-student-leaderboard-ranking-list { height: 560px; padding-right: 10px; overflow-y: auto; }
+.eca-student-leaderboard-ranking-row { width: 100%; min-height: 74px; margin-bottom: 12px; padding: 0 34px 0 28px; border: 1px solid #E2E2E2; border-radius: 10px; background: #fff; box-sizing: border-box; display: grid; grid-template-columns: 34px 48px 1fr 120px 80px; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-ranking-row:hover, .eca-student-leaderboard-ranking-row.is-selected { background: #EEF5FF; }
+.eca-student-leaderboard-rank-badge { width: 28px; height: 28px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 15px; font-weight: 800; line-height: 28px; text-align: center; }
+.eca-student-leaderboard-rank-badge.is-top { background: #0166FF; color: #fff; }
+.eca-student-leaderboard-profile { width: 40px; height: 40px; border-radius: 999px; overflow: hidden; background: #F5F5F5; display: block; }
+.eca-student-leaderboard-profile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eca-student-leaderboard-name { min-width: 0; color: #000; font-size: 16px; font-weight: 800; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-name em { display: block; margin-top: 4px; color: #000; font-size: 14px; font-style: normal; font-weight: 800; }
+.eca-student-leaderboard-score { color: #000; font-size: 24px; font-weight: 800; line-height: 30px; text-align: right; }
+.eca-student-leaderboard-trend { min-width: 54px; color: #0166FF; font-size: 16px; font-weight: 800; line-height: 20px; white-space: nowrap; }
+.eca-student-leaderboard-trend.is-up { color: #FF0000; }
+.eca-student-leaderboard-trend.is-down { color: #0166FF; }
+.eca-student-leaderboard-trend.is-empty { display: block; }
+.eca-student-leaderboard-update-text { margin-top: 26px; color: #666; font-size: 13px; font-weight: 500; }
+.eca-student-leaderboard-state { min-height: 300px; margin: 0; color: #808080; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-empty { min-height: 100px; margin: 0; color: #808080; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-detail-panel { position: fixed; top: 0; right: 0; z-index: 30; width: 610px; max-width: calc(100vw - 280px); height: 100vh; padding: 52px 70px 60px; background: #fff; box-shadow: -4px 0 14px rgba(0, 0, 0, .16); box-sizing: border-box; overflow-y: auto; }
+.eca-student-leaderboard-detail-close { position: absolute; top: 42px; right: 38px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; color: #000; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-detail-profile { display: flex; align-items: center; gap: 28px; margin-bottom: 32px; }
+.eca-student-leaderboard-detail-profile img { width: 104px; height: 104px; border-radius: 999px; object-fit: cover; background: #F5F5F5; }
+.eca-student-leaderboard-detail-profile h2 { max-width: 300px; margin: 0 0 6px; color: #333; font-size: 30px; font-weight: 800; line-height: 34px; }
+.eca-student-leaderboard-detail-profile p { margin: 0; color: #666; font-size: 19px; font-weight: 800; line-height: 24px; }
+.eca-student-leaderboard-total-card { min-height: 164px; margin-bottom: 60px; padding: 27px 32px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; }
+.eca-student-leaderboard-total-card > span { display: block; margin-bottom: 24px; color: #666; font-size: 18px; font-weight: 800; line-height: 22px; }
+.eca-student-leaderboard-total-card strong { display: flex; align-items: flex-end; gap: 18px; margin-bottom: 12px; color: #333; font-size: 40px; font-weight: 800; line-height: 44px; }
+.eca-student-leaderboard-total-card strong em { color: #666; font-size: 18px; font-style: normal; font-weight: 800; line-height: 24px; }
+.eca-student-leaderboard-total-card div { display: flex; align-items: center; gap: 28px; }
+.eca-student-leaderboard-total-card b { color: #666; font-size: 19px; font-weight: 800; line-height: 24px; }
+.eca-student-leaderboard-detail-missions-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.eca-student-leaderboard-detail-missions-top h3 { margin: 0; color: #666; font-size: 20px; font-weight: 800; line-height: 26px; }
+.eca-student-leaderboard-detail-missions-top div { display: flex; align-items: center; gap: 12px; color: #999; }
+.eca-student-leaderboard-detail-missions-top button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-mission-list { display: flex; flex-direction: column; gap: 10px; }
+.eca-student-leaderboard-mission-row { min-height: 82px; padding: 17px 18px; border: 1px solid #E2E2E2; border-radius: 10px; background: #fff; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.eca-student-leaderboard-mission-main { min-width: 0; }
+.eca-student-leaderboard-mission-main strong { display: block; margin-bottom: 12px; color: #000; font-size: 15px; font-weight: 800; line-height: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-mission-main div { display: flex; align-items: center; gap: 8px; }
+.eca-student-leaderboard-mission-main span { height: 24px; padding: 0 14px; border: 1px solid #D9D9D9; border-radius: 999px; color: #666; font-size: 12px; font-weight: 700; line-height: 22px; }
+.eca-student-leaderboard-mission-main em { height: 24px; padding: 0 12px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-style: normal; font-weight: 800; line-height: 24px; }
+.eca-student-leaderboard-mission-row time { flex-shrink: 0; color: #777; font-size: 11px; font-weight: 500; line-height: 16px; }
+
+.eca-student-leaderboard-my-quests-card { padding: 34px 42px 0; }
+.eca-student-leaderboard-my-points-card { min-height: 230px; margin-bottom: 40px; padding: 32px 38px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; }
+.eca-student-leaderboard-my-points-card h2 { margin: 0 0 34px; color: #777; font-size: 26px; font-weight: 800; }
+.eca-student-leaderboard-my-points-card strong { display: flex; align-items: flex-end; gap: 24px; color: #333; font-size: 48px; font-weight: 800; line-height: 54px; }
+.eca-student-leaderboard-my-points-card strong em { color: #666; font-size: 23px; font-style: normal; font-weight: 800; line-height: 32px; }
+.eca-student-leaderboard-my-points-card p { margin: 18px 0 0; display: flex; align-items: center; gap: 34px; }
+.eca-student-leaderboard-my-points-card p b { color: #666; font-size: 23px; font-weight: 800; }
+.eca-student-leaderboard-my-points-card > button { width: 255px; height: 68px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 20px; font-weight: 800; cursor: pointer; }
+.eca-student-leaderboard-my-quests-list-section h3 { margin: 0 0 16px; color: #777; font-size: 18px; font-weight: 800; }
+.eca-student-leaderboard-my-quests-head { display: grid; grid-template-columns: 1fr 150px 100px; padding: 0 20px 14px; color: #666; font-size: 13px; font-weight: 500; }
+.eca-student-leaderboard-my-quests-list { height: 370px; padding-right: 8px; overflow-y: auto; }
+.eca-student-leaderboard-my-quest-row { min-height: 68px; margin-bottom: 12px; padding: 0 20px; border: 1px solid #E2E2E2; border-radius: 10px; display: grid; grid-template-columns: 1fr 150px 100px; align-items: center; box-sizing: border-box; }
+.eca-student-leaderboard-my-quest-row strong { min-width: 0; color: #000; font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-my-quest-row span { width: fit-content; height: 34px; padding: 0 18px; border: 1px solid #D9D9D9; border-radius: 999px; color: #666; font-size: 13px; font-weight: 700; line-height: 32px; }
+.eca-student-leaderboard-my-quest-row em { width: fit-content; min-width: 68px; height: 34px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 16px; font-style: normal; font-weight: 800; line-height: 34px; text-align: center; }
+.eca-student-leaderboard-quest-modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, .35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-quest-modal { position: relative; width: 680px; min-height: 690px; padding: 78px 30px 64px; border-radius: 14px; background: #fff; box-shadow: 0 8px 22px rgba(0, 0, 0, .24); box-sizing: border-box; }
+.eca-student-leaderboard-quest-modal-close { position: absolute; top: 34px; right: 34px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; color: #000; font-size: 34px; line-height: 24px; cursor: pointer; }
+.eca-student-leaderboard-quest-progress { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 18px; padding: 0 4px; }
+.eca-student-leaderboard-quest-progress span { height: 12px; border-radius: 999px; background: #BDD8FF; }
+.eca-student-leaderboard-quest-progress span.is-active { background: #0166FF; }
+.eca-student-leaderboard-quest-step-label { margin: 0 0 42px; color: #777; font-size: 16px; font-weight: 700; }
+.eca-student-leaderboard-quest-modal-title { margin: 0 0 36px 6px; color: #000; font-size: 26px; font-weight: 800; }
+.eca-student-leaderboard-quest-select-box { height: 322px; padding: 20px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; overflow: hidden; }
+.eca-student-leaderboard-quest-filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.eca-student-leaderboard-quest-filter-row button { height: 38px; padding: 0 18px; border: 1px solid #D9D9D9; border-radius: 999px; background: #fff; color: #777; font-size: 14px; font-weight: 700; cursor: pointer; }
+.eca-student-leaderboard-quest-filter-row button.is-active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
+.eca-student-leaderboard-quest-search { margin-left: auto; }
+.eca-student-leaderboard-quest-search input { width: 110px; height: 36px; border: 0; border-bottom: 1px solid transparent; outline: none; color: #000; font-size: 14px; }
+.eca-student-leaderboard-quest-list { height: 238px; padding-right: 8px; overflow-y: auto; }
+.eca-student-leaderboard-quest-option { width: 100%; min-height: 70px; padding: 0 10px 0 18px; border: 0; background: transparent; display: grid; grid-template-columns: 40px 1fr 130px 100px; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-quest-option:disabled { opacity: .45; cursor: not-allowed; }
+.eca-student-leaderboard-quest-radio { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 999px; box-sizing: border-box; }
+.eca-student-leaderboard-quest-option.is-selected .eca-student-leaderboard-quest-radio { border: 8px solid #0166FF; }
+.eca-student-leaderboard-quest-option strong { color: #000; font-size: 15px; font-weight: 800; }
+.eca-student-leaderboard-quest-option em { color: #666; font-size: 13px; font-style: normal; font-weight: 700; }
+.eca-student-leaderboard-quest-option b { width: 84px; height: 40px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 800; line-height: 40px; text-align: center; }
+.eca-student-leaderboard-quest-modal-actions { display: flex; align-items: center; gap: 12px; margin-top: 66px; }
+.eca-student-leaderboard-quest-modal-actions button { width: 128px; height: 50px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 20px; font-weight: 800; cursor: pointer; }
+.eca-student-leaderboard-quest-modal-actions button:disabled { opacity: .4; cursor: not-allowed; }
+.eca-student-leaderboard-quest-modal-actions button.is-secondary { border: 1px solid #D9D9D9; background: #fff; color: #777; }

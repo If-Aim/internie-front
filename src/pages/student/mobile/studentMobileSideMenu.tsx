@@ -228,7 +228,7 @@ export default function StudentMobileSideMenu({
                                     <section className="drawer-activity-section" key={activity.externalActivityId}>
                                         <button type="button" className="drawer-activity-title" onClick={() => setOpenedActivityId((prev) => prev === activity.externalActivityId ? null : activity.externalActivityId)}>  
                                             <div className={isOpen ? "drawer-activity-arrow open" : "drawer-activity-arrow"}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none">
                                                     <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
                                             </div>

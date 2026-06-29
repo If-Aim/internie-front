@@ -90,7 +90,7 @@ export default function VerifyCodePage() {
     async function submit() {
         const trimmed = code.trim();
         if (!trimmed) {
-            setError("인증코드를 입력해주세요.");
+            setError(t("mypage.verifyCodePage.codeRequired"));
             return;
         }
 
@@ -104,7 +104,7 @@ export default function VerifyCodePage() {
             setMe(refreshed);
             setCode("");
             setError(null);
-            triggerVerifiedMessage("인증이 완료되었습니다.");
+            triggerVerifiedMessage(t("mypage.verifyCodePage.verifyComplete"));
 
             const hasJumpRole = nextRoleSet.includes("ROLE_JUMP_STUDENT");
 
@@ -116,16 +116,16 @@ export default function VerifyCodePage() {
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e.status === 400 || e.status === 401 || e.code === "AUTH_TOKEN_INVALID") {
-                    setError("인증 코드가 올바르지 않습니다.");
+                    setError(t("mypage.verifyCodePage.invalidCode"));
                 } else if (e.code === "EXTERNAL_ACTIVITY_PARTICIPANT_ALREADY_EXISTS") {
-                    setError("이미 참가 등록된 대외활동입니다.");
+                    setError(t("mypage.verifyCodePage.alreadyJoinedActivity"));
                 } else if (e.code === "EXTERNAL_ACTIVITY_STUDENT_INVITE_DISABLED") {
-                    setError("비활성화된 초대코드입니다.");
+                    setError(t("mypage.verifyCodePage.disabledInviteCode"));
                 } else {
-                    setError("인증에 실패했습니다.");
+                    setError(t("mypage.verifyCodePage.verifyFailed"));
                 }
             } else {
-                setError("인증에 실패했습니다.");
+                setError(t("mypage.verifyCodePage.verifyFailed"));
             }
         } finally {
             setVerifyingCode(false);
@@ -157,7 +157,7 @@ export default function VerifyCodePage() {
             }
         } catch {
             setInstitutions([]);
-            setOrgLoadError("센터 목록을 불러오지 못했습니다.");
+            setOrgLoadError(t("mypage.verifyCodePage.centerLoadFailed"));
         } finally {
             setOrgLoading(false);
         }
@@ -187,13 +187,13 @@ export default function VerifyCodePage() {
             setJumpOrganizationId(updated.jumpOrganization?.id ?? null);
             setJumpOrganizationName(updated.jumpOrganization?.name ?? "");
             setOrgSaveError(null);
-            setOrgSaveMessage("센터 저장이 완료되었습니다.");
+            setOrgSaveMessage(t("mypage.verifyCodePage.centerSaveComplete"));
             syncClientPopups(updated);
         } catch (e) {
             if (e instanceof ApiError) {
-                setOrgSaveError("센터 저장에 실패했습니다.");
+                setOrgSaveError(t("mypage.verifyCodePage.centerSaveFailed"));
             } else {
-                setOrgSaveError("센터 저장에 실패했습니다.");
+                setOrgSaveError(t("mypage.verifyCodePage.centerSaveFailed"));
             }
         } finally {
             setSavingJumpCenter(false);
@@ -204,7 +204,7 @@ export default function VerifyCodePage() {
         const trimmedStudentNumber = studentNumber.trim();
 
         if (!trimmedStudentNumber) {
-            setStudentNumberError("학번을 입력해주세요.");
+            setStudentNumberError(t("mypage.verifyCodePage.studentNumberRequired"));
             return;
         }
 
@@ -220,13 +220,13 @@ export default function VerifyCodePage() {
             setMe(updated);
             setStudentNumber((updated.studentNumber ?? "").trim());
             setStudentNumberError(null);
-            setStudentNumberMessage("학번 저장이 완료되었습니다.");
+            setStudentNumberMessage(t("mypage.verifyCodePage.studentNumberSaveComplete"));
             syncClientPopups(updated);
         } catch (e) {
             if (e instanceof ApiError) {
-                setStudentNumberError("학번 저장에 실패했습니다.");
+                setStudentNumberError(t("mypage.verifyCodePage.studentNumberSaveFailed"));
             } else {
-                setStudentNumberError("학번 저장에 실패했습니다.");
+                setStudentNumberError(t("mypage.verifyCodePage.studentNumberSaveFailed"));
             }
         } finally {
             setSavingStudentNumber(false);
@@ -308,23 +308,19 @@ export default function VerifyCodePage() {
                 <div className="client-verify-popup-backdrop" onClick={() => setShowJumpPopup(false)}>
                     <div className="client-verify-popup" onClick={(e) => e.stopPropagation()}>
                         <div className="client-verify-popup-header">
-                            <div className="client-verify-popup-title">센터 선택</div>
-                            <button
-                                type="button"
-                                className="client-verify-popup-close"
-                                onClick={() => setShowJumpPopup(false)}
-                            >
-                                <img src="/icons/x-01.svg" alt="닫기" />
+                            <div className="client-verify-popup-title">{t("mypage.verifyCodePage.selectCenterTitle")}</div>
+                            <button type="button" className="client-verify-popup-close" onClick={() => setShowJumpPopup(false)} >
+                                <img src="/icons/x-01.svg" alt={t("mypage.verifyCodePage.close")} />
                             </button>
                         </div>
 
                         <div className="client-verify-popup-desc">
-                            소속된 점프 센터를 선택해주세요.
+                            {t("mypage.verifyCodePage.selectCenterDesc")}
                         </div>
 
                         <div className="client-verify-popup-body">
                             {orgLoading ? (
-                                <div className="client-verify-popup-info">불러오는 중...</div>
+                                <div className="client-verify-popup-info">{t("mypage.verifyCodePage.loading")}</div>
                             ) : orgLoadError ? (
                                 <div className="client-verify-popup-error">{orgLoadError}</div>
                             ) : (
@@ -338,7 +334,7 @@ export default function VerifyCodePage() {
                                         disabled={savingJumpCenter}
                                     >
                                         <span className={"vcjp-dd-value" + (jumpOrganizationName ? "" : " vcjp-dd-value--placeholder")}>
-                                            {jumpOrganizationName || "센터 선택"}
+                                            {jumpOrganizationName || t("mypage.verifyCodePage.selectCenterPlaceholder")}
                                         </span>
                                         <span className="vcjp-dd-caret" aria-hidden="true">
                                             <img src="/icons/chevron-left.svg" alt="" />
@@ -346,7 +342,7 @@ export default function VerifyCodePage() {
                                     </button>
 
                                     {instOpen && (
-                                        <div className="vcjp-dd-menu" role="listbox" aria-label="센터 목록">
+                                        <div className="vcjp-dd-menu" role="listbox" aria-label={t("mypage.verifyCodePage.centerListLabel")}>
                                             {institutions.map((org) => (
                                                 <button
                                                     key={org.id}
@@ -369,21 +365,11 @@ export default function VerifyCodePage() {
                         </div>
 
                         <div className="client-verify-popup-footer">
-                            <button
-                                type="button"
-                                className="client-verify-popup-secondary"
-                                onClick={() => setShowJumpPopup(false)}
-                                disabled={savingJumpCenter}
-                            >
-                                닫기
+                            <button type="button" className="client-verify-popup-secondary" onClick={() => setShowJumpPopup(false)} disabled={savingJumpCenter}>
+                                {t("mypage.verifyCodePage.close")}
                             </button>
-                            <button
-                                type="button"
-                                className="client-verify-popup-primary"
-                                onClick={() => { void finishInstitution(); }}
-                                disabled={savingJumpCenter || !jumpOrganizationId}
-                            >
-                                {savingJumpCenter ? "저장 중..." : "저장"}
+                            <button type="button" className="client-verify-popup-primary" onClick={() => { void finishInstitution(); }} disabled={savingJumpCenter || !jumpOrganizationId}>
+                                {savingJumpCenter ? t("mypage.verifyCodePage.saving") : t("mypage.verifyCodePage.save")}
                             </button>
                         </div>
                     </div>
@@ -394,18 +380,14 @@ export default function VerifyCodePage() {
                 <div className="client-verify-popup-backdrop" onClick={() => setShowKakaoPopup(false)}>
                     <div className="client-verify-popup" onClick={(e) => e.stopPropagation()}>
                         <div className="client-verify-popup-header">
-                            <div className="client-verify-popup-title">학번 입력</div>
-                            <button
-                                type="button"
-                                className="client-verify-popup-close"
-                                onClick={() => setShowKakaoPopup(false)}
-                            >
-                                <img src="/icons/x-01.svg" alt="닫기" />
+                            <div className="client-verify-popup-title">{t("mypage.verifyCodePage.studentNumberTitle")}</div>
+                            <button type="button" className="client-verify-popup-close" onClick={() => setShowKakaoPopup(false)}>
+                                <img src="/icons/x-01.svg" alt={t("mypage.verifyCodePage.close")} />
                             </button>
                         </div>
 
                         <div className="client-verify-popup-desc">
-                            카카오 인증 사용자는 학번을 입력해주세요.
+                            {t("mypage.verifyCodePage.studentNumberDesc")}
                         </div>
 
                         <div className="client-verify-popup-body">
@@ -417,7 +399,7 @@ export default function VerifyCodePage() {
                                     setStudentNumberError(null);
                                     setStudentNumberMessage(null);
                                 }}
-                                placeholder="학번 입력"
+                                placeholder={t("mypage.verifyCodePage.studentNumberPlaceholder")}
                                 disabled={savingStudentNumber}
                             />
 
@@ -426,21 +408,11 @@ export default function VerifyCodePage() {
                         </div>
 
                         <div className="client-verify-popup-footer">
-                            <button
-                                type="button"
-                                className="client-verify-popup-secondary"
-                                onClick={() => setShowKakaoPopup(false)}
-                                disabled={savingStudentNumber}
-                            >
-                                닫기
+                            <button type="button" className="client-verify-popup-secondary" onClick={() => setShowKakaoPopup(false)} disabled={savingStudentNumber}>
+                                {t("mypage.verifyCodePage.close")}
                             </button>
-                            <button
-                                type="button"
-                                className="client-verify-popup-primary"
-                                onClick={() => { void finishStudentNumber(); }}
-                                disabled={savingStudentNumber || !studentNumber.trim()}
-                            >
-                                {savingStudentNumber ? "저장 중..." : "저장"}
+                            <button type="button" className="client-verify-popup-primary" onClick={() => { void finishStudentNumber(); }} disabled={savingStudentNumber || !studentNumber.trim()}>
+                                {savingStudentNumber ? t("mypage.verifyCodePage.saving") : t("mypage.verifyCodePage.save")}
                             </button>
                         </div>
                     </div>
@@ -464,7 +436,7 @@ export default function VerifyCodePage() {
                             setShowKakaoPopup(false);
                         }}
                     >
-                        점프 센터 선택
+                        {t("mypage.verifyCodePage.selectJumpCenter")}
                     </button>
                 )}
 
@@ -479,13 +451,13 @@ export default function VerifyCodePage() {
                             setShowJumpPopup(false);
                         }}
                     >
-                        학번 수정
+                        {t("mypage.verifyCodePage.editStudentNumber")}
                     </button>
                 )}
             </div>
             <div className="verify-code-actions">
                 <button className="submit-code" onClick={handleSubmitCode} disabled={verifyingCode} >
-                    {verifyingCode ? "확인 중..." : t("common.done")}
+                    {verifyingCode ? t("mypage.verifyCodePage.checking") : t("common.done")}
                 </button>
             </div>
         </div>

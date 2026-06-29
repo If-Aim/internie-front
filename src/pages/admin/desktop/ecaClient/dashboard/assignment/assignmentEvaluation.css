@@ -9,7 +9,7 @@
 .eca-admin-assignment-evaluation-late-badge { display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 36px; border-radius: 18px; background: #FFD6D2; color: #F00; font-size: 14px; font-weight: 600; }
 
 .eca-admin-assignment-evaluation-column { min-width: 0; }
-.eca-admin-assignment-evaluation-preview-title, .eca-admin-assignment-evaluation-evaluation-title { min-height: 36px; margin: 0 0 20px 8px; display: flex; align-items: center; gap: 12px; box-sizing: border-box; justify-content: space-between; }
+.eca-admin-assignment-evaluation-preview-title, .eca-admin-assignment-evaluation-evaluation-title { min-height: 36px; max-width: 472px; margin: 0 0 20px 8px; display: flex; align-items: center; gap: 12px; box-sizing: border-box; justify-content: space-between; }
 .eca-admin-assignment-evaluation-preview-title strong, .eca-admin-assignment-evaluation-evaluation-title strong { color: #000; font-size: 20px; font-weight: 700; line-height: 36px; }
 .eca-admin-assignment-evaluation-preview-title span { color: #808080; font-size: 16px; font-weight: 700; }
 .eca-admin-assignment-evaluation-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }

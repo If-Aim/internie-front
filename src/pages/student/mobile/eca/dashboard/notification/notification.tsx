@@ -1,9 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { getNotifications, markNotificationRead } from "../../../../../../api/ea";
+import { deleteAllNotifications, getNotifications, markNotificationRead } from "../../../../../../api/ea";
 import type { NotificationResponse } from "../../../../../../api/ea";
 import { connectNotificationSocket } from "../../../../../../api/notificationSocket";
+import { getUserTimeZone, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import "./notification.css";
 
 type NotificationGroup = {
@@ -12,12 +13,12 @@ type NotificationGroup = {
     notifications: NotificationResponse[];
 };
 
+function getDatePart(parts: Intl.DateTimeFormatPart[], type: Intl.DateTimeFormatPartTypes): string {
+    return parts.find((part) => part.type === type)?.value ?? "00";
+}
+
 function getSafeDate(value?: string | null): Date | null {
-    if (!value) return null;
-
-    const date = new Date(value);
-
-    return Number.isNaN(date.getTime()) ? null : date;
+    return parseServerKstDateTime(value);
 }
 
 function getDateKey(value: string): string {
@@ -25,9 +26,16 @@ function getDateKey(value: string): string {
 
     if (!date) return "unknown";
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(date);
+
+    const year = getDatePart(parts, "year");
+    const month = getDatePart(parts, "month");
+    const day = getDatePart(parts, "day");
 
     return `${year}-${month}-${day}`;
 }
@@ -39,6 +47,7 @@ function formatNotificationDate(value: string, language: string): string {
 
     if (isEnglishLanguage(language)) {
         return new Intl.DateTimeFormat("en-US", {
+            timeZone: getUserTimeZone(),
             weekday: "short",
             month: "short",
             day: "numeric",
@@ -46,11 +55,13 @@ function formatNotificationDate(value: string, language: string): string {
     }
 
     return new Intl.DateTimeFormat("ko-KR", {
+        timeZone: getUserTimeZone(),
         month: "long",
         day: "numeric",
         weekday: "short",
     }).format(date);
 }
+
 function sortNotifications(a: NotificationResponse, b: NotificationResponse): number {
     return (getSafeDate(b.createdAt)?.getTime() ?? 0) - (getSafeDate(a.createdAt)?.getTime() ?? 0);
 }
@@ -144,10 +155,14 @@ function getNotificationTargetPath(notification: NotificationResponse, externalA
 
 type HeaderProps = {
     title: string;
+    deleting: boolean;
+    canDelete: boolean;
     onBackClick: () => void;
+    onDeleteAllClick: () => void;
 };
 
-function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
+function Header({ title, deleting, canDelete, onBackClick, onDeleteAllClick }: HeaderProps): React.ReactElement {
+    const { t } = useTranslation();
     return (
         <div className="topbar topbar-main">
             <button className="iconbtn" aria-label="back" onClick={onBackClick}>
@@ -155,14 +170,13 @@ function Header({ title, onBackClick }: HeaderProps): React.ReactElement {
                     <path d="M14 17L9 12L14 7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
             </button>
-
             <div className="app-title">{title}</div>
-
-            <div style={{ display: "block", width: 24, height: 24 }} aria-hidden="true" />
+            <button type="button" className="iconbtn" aria-label={t("ecaStudent.notificationPage.deleteAll")} onClick={onDeleteAllClick} disabled={!canDelete || deleting}>
+                <img className="icon" src="/icons/trash-02.svg" alt={t("ecaStudent.notificationPage.deleteAll")} />
+            </button>
         </div>
     );
 }
-
 
 export default function EcaStudentMobileNotification(): React.ReactElement {
     const { t, i18n } = useTranslation();
@@ -170,6 +184,7 @@ export default function EcaStudentMobileNotification(): React.ReactElement {
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
 
     const [notifications, setNotifications] = React.useState<NotificationResponse[]>([]);
+    const [deleting, setDeleting] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
 
@@ -247,9 +262,30 @@ export default function EcaStudentMobileNotification(): React.ReactElement {
         }
     }
 
+    async function handleDeleteAllClick(): Promise<void> {
+        if (notifications.length === 0 || deleting) return;
+
+        const confirmed = window.confirm(t("ecaStudent.notificationPage.deleteAllConfirm"));
+
+        if (!confirmed) return;
+
+        setDeleting(true);
+        setError("");
+
+        try {
+            await deleteAllNotifications();
+            setNotifications([]);
+        } catch (e) {
+            console.error(e);
+            setError(t("ecaStudent.notificationPage.deleteAllFailed"));
+        } finally {
+            setDeleting(false);
+        }
+    }
+
     return (
         <main className="eca-mobile-student-notification-page">
-            <Header title={t("ecaStudent.notificationPage.title")} onBackClick={handleBackClick} />
+            <Header title={t("ecaStudent.notificationPage.title")} deleting={deleting} canDelete={notifications.length > 0} onBackClick={handleBackClick} onDeleteAllClick={handleDeleteAllClick} />
 
             <section className="eca-mobile-student-notification-content">
                 {loading ? (

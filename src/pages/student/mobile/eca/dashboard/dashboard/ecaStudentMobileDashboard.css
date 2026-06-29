@@ -3,7 +3,7 @@
 .eca-mobile-student-dashboard-top-actions { display: flex; align-items: center; gap: 6px; }
 .eca-mobile-student-dashboard-icon-button { width: 36px; height: 36px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .eca-mobile-student-dashboard-profile-button { width: 44px; height: 44px; padding: 0; border: 0; border-radius: 999px; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
-.eca-mobile-student-dashboard-profile { width: 32px; height: 32px; border-radius: 999px; background: #d9d9d9; display: block; object-fit: cover; }
+.eca-mobile-student-dashboard-profile { width: 32px; height: 32px; border-radius: 999px; background: #fff; border: 1px solid #d9d9d9; display: block; object-fit: cover; }
 
 .eca-mobile-student-dashboard-title { margin-bottom: 24px; padding: 0 4px; }
 .eca-mobile-student-dashboard-title span { color: #808080; font-size: 16px; font-weight: 700; line-height: 20px; margin-left:3px; }

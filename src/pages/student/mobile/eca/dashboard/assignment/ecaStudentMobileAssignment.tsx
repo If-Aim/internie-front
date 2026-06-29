@@ -9,7 +9,7 @@ import "./ecaStudentMobileAssignment.css";
 
 const ASSIGNMENT_T = "ecaStudent.assignmentPage";
 
-type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
+type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing" | "evaluated";
 
 type StudentAssignmentViewModel = {
     id: number;
@@ -24,21 +24,17 @@ type StudentAssignmentViewModel = {
     status: AssignmentStatus;
 };
 
-function getAssignmentStatus(status: AssignmentParticipantStatus, deadlineAt?: string | null): AssignmentStatus {
+function getAssignmentStatus(status: AssignmentParticipantStatus, deadlineAt?: string | null, evaluationCompleted = false): AssignmentStatus {
+    if (evaluationCompleted) return "evaluated";
     if (status === "SUBMITTED") return "submitted";
     if (status === "LATE_SUBMITTED") return "lateSubmitted";
     if (status === "LATE") return "missing";
-
     if (status === "NOT_SUBMITTED") {
         if (!deadlineAt) return "before";
-
         const deadline = parseServerKstDateTime(deadlineAt);
-
         if (!deadline) return "before";
-
         return Date.now() > deadline.getTime() ? "missing" : "before";
     }
-
     return "before";
 }
 
@@ -53,7 +49,7 @@ function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): St
         startTime: assignment.startTime,
         endTime: assignment.endTime,
         deadlineAt: assignment.deadlineAt,
-        status: getAssignmentStatus(assignment.status, assignment.deadlineAt),
+        status: getAssignmentStatus(assignment.status, assignment.deadlineAt, assignment.evaluationCompleted),
     };
 }
 
@@ -98,6 +94,7 @@ function formatMobilePeriod(assignment: StudentAssignmentViewModel): string {
 }
 
 function getAssignmentStatusLabelKey(status: AssignmentStatus): string {
+    if (status === "evaluated") return `${ASSIGNMENT_T}.status.evaluated`;
     if (status === "submitted") return `${ASSIGNMENT_T}.status.submitted`;
     if (status === "lateSubmitted") return `${ASSIGNMENT_T}.status.late`;
     if (status === "missing") return `${ASSIGNMENT_T}.status.missing`;

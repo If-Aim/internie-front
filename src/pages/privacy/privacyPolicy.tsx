@@ -1,498 +1,235 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./privacyPolicy.css";
 
+const PRIVACY_T = "privacyPolicy";
+
+type PrivacyTable = {
+    headers: string[];
+    rows: string[][];
+};
+
+type ProcedureItem = {
+    title: string;
+    paragraph?: string;
+    children?: string[];
+};
+
+type DefinitionItem = {
+    title: string;
+    body: string;
+};
+
+function renderLines(lines: string[]): React.ReactElement {
+    return (
+        <>
+            {lines.map((line, index) => (
+                <React.Fragment key={`${line}-${index}`}>
+                    {index > 0 && <br/>}
+                    {line}
+                </React.Fragment>
+            ))}
+        </>
+    );
+}
+
+function renderCell(value: string): React.ReactElement {
+    return <>{renderLines(value.split("\n"))}</>;
+}
+
+function renderTable(table: PrivacyTable, keyPrefix: string): React.ReactElement {
+    return (
+        <div className="privacy-table-wrap">
+            <table className="privacy-table">
+                <thead>
+                    <tr>
+                        {table.headers.map((header, index) => <th key={`${keyPrefix}-header-${index}`}>{header}</th>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {table.rows.map((row, rowIndex) => (
+                        <tr key={`${keyPrefix}-row-${rowIndex}`}>
+                            {row.map((cell, cellIndex) => <td key={`${keyPrefix}-cell-${rowIndex}-${cellIndex}`}>{renderCell(cell)}</td>)}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function renderOrderedList(items: string[], keyPrefix: string): React.ReactElement {
+    return (
+        <ol className="privacy-ol">
+            {items.map((item, index) => <li key={`${keyPrefix}-${index}`}>{item}</li>)}
+        </ol>
+    );
+}
+
+function renderUnorderedList(items: string[], keyPrefix: string): React.ReactElement {
+    return (
+        <ul className="privacy-ul">
+            {items.map((item, index) => <li key={`${keyPrefix}-${index}`}>{item}</li>)}
+        </ul>
+    );
+}
+
+function renderProcedureList(items: ProcedureItem[], keyPrefix: string): React.ReactElement {
+    return (
+        <ol className="privacy-ol">
+            {items.map((item, index) => (
+                <li key={`${keyPrefix}-${index}`}>
+                    {item.title}
+                    {item.paragraph && <p>{item.paragraph}</p>}
+                    {item.children && (
+                        <ul>
+                            {item.children.map((child, childIndex) => <li key={`${keyPrefix}-${index}-${childIndex}`}>{child}</li>)}
+                        </ul>
+                    )}
+                </li>
+            ))}
+        </ol>
+    );
+}
+
+function renderDefinitionList(items: DefinitionItem[], keyPrefix: string): React.ReactElement {
+    return (
+        <ol className="privacy-ol">
+            {items.map((item, index) => (
+                <li key={`${keyPrefix}-${index}`}>
+                    <strong>{item.title}</strong><br/>{item.body}
+                </li>
+            ))}
+        </ol>
+    );
+}
+
 export default function PrivacyPolicy(): React.ReactElement {
+    const { t } = useTranslation();
+    const getLines = (key: string) => t(`${PRIVACY_T}.${key}`, { returnObjects: true }) as unknown as string[];
+    const getList = (key: string) => t(`${PRIVACY_T}.${key}`, { returnObjects: true }) as unknown as string[];
+    const getTable = (key: string) => t(`${PRIVACY_T}.${key}`, { returnObjects: true }) as unknown as PrivacyTable;
+    const getProcedureList = (key: string) => t(`${PRIVACY_T}.${key}`, { returnObjects: true }) as unknown as ProcedureItem[];
+    const getDefinitionList = (key: string) => t(`${PRIVACY_T}.${key}`, { returnObjects: true }) as unknown as DefinitionItem[];
+
     return (
         <div className="privacy-page">
             <main className="privacy-content">
+                <h1 className="privacy-title">{t(`${PRIVACY_T}.title`)}</h1>
+                <p className="privacy-intro">{renderLines(getLines("intro"))}</p>
 
-                <h1 className="privacy-title">개인정보 처리방침</h1>
-
-                <p className="privacy-intro">
-                    aim(이하 “회사”)은 정보주체의 자유와 권리 보호를 위해 「개인정보 보호법」 및 관계 법령이 정한 바를 준수하여, 적법하게 개인정보를 처리하고 안전하게 관리하고 있습니다.
-                    <br/>
-                    회사는 「개인정보 보호법」 제30조에 따라 정보주체에게 개인정보 처리에 관한 절차 및 기준을 안내하고, 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.
-                </p>
-
-                {/* 1 */}
                 <section>
-                    <h2>1. 개인정보의 처리목적, 수집 항목, 보유 및 이용기간</h2>
-                    <p>회사는 회원가입 시 또는 서비스 이용 과정에서 아래와 같은 목적으로 개인정보를 수집·이용합니다.</p>
-
-                    <h3>1) 공통</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>법적 근거</th>
-                                    <th>구분</th>
-                                    <th>처리 목적</th>
-                                    <th>수집 항목</th>
-                                    <th>보유 및 이용기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>회원가입 및 로그인</td>
-                                    <td>이용자 식별, 회원관리, 권한 부여, 서비스 제공</td>
-                                    <td>이메일, 비밀번호, 소셜로그인 회원식별자, 이름, 이메일, 프로필 사진, 휴대폰번호 등</td>
-                                    <td>회원 탈퇴 시 지체 없이 파기</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>프로그램 운영 및 참여자 관리</td>
-                                    <td>기관/프로그램 운영, 참여자 등록, 팀 배정, 활동 관리</td>
-                                    <td>이름, 소속, 역할, 팀 정보, 프로그램 참여 정보</td>
-                                    <td>회원 탈퇴 시까지</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>출석 관리</td>
-                                    <td>출석 확인, 참여율 산정, 활동 이력 관리</td>
-                                    <td>이름, 출석 여부, 출석 시각, 참여율, 출석 수정 이력</td>
-                                    <td>회원 탈퇴 시까지</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>과제 제출 및 평가</td>
-                                    <td>제출 접수, 제출 현황 관리, 평가 및 피드백 제공</td>
-                                    <td>제출 파일, 파일명, 제출일시, 버전 이력, 평가 점수, 피드백, 상호평가 점수 및 의견</td>
-                                    <td>회원 탈퇴 시까지</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>팀 협업 및 커뮤니케이션</td>
-                                    <td>팀 채팅, 자료 공유, 역할 관리, 알림 발송</td>
-                                    <td>채팅 내용, 업로드 파일, 역할 기록, 발송 로그</td>
-                                    <td>회원 탈퇴 시까지</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제4호 (계약의 이행)</td>
-                                    <td>문의 및 고충처리</td>
-                                    <td>문의 접수, 본인 확인, 답변 회신, 분쟁 대응</td>
-                                    <td>이름, 이메일, 연락처, 문의 내용, 상담 이력</td>
-                                    <td>문의 처리 완료 후 3년 또는 관계 법령상 보존기간</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h3>2) 음성기록 기능 이용</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>법적 근거</th>
-                                    <th>구분</th>
-                                    <th>처리 목적</th>
-                                    <th>수집 항목</th>
-                                    <th>보유 및 이용기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제1호 (정보주체의 동의)</td>
-                                    <td>음성기록</td>
-                                    <td>음성 회고 기록 저장, 음성의 텍스트 변환, 기록 정리, 요약 생성, 리포트 초안 작성</td>
-                                    <td>음성파일, 음성에서 추출된 텍스트(전사문), 녹음 시각, 기록명</td>
-                                    <td>음성 원본/ 전사문 및 생성 기록: 회원 탈퇴 또는 삭제 요청 시까지</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h3>3) 선택 정보 및 마케팅</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>법적 근거</th>
-                                    <th>구분</th>
-                                    <th>처리 목적</th>
-                                    <th>수집 항목</th>
-                                    <th>보유 및 이용기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>개인정보 보호법 제15조 제1항 제1호 (정보주체의 동의)</td>
-                                    <td>선택 프로필 정보</td>
-                                    <td>프로필 구성, 이용 편의 향상</td>
-                                    <td>프로필 사진, 자기소개, 관심분야, 기타 선택 입력 정보</td>
-                                    <td>회원 탈퇴 또는 동의 철회 시까지</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h3>4) AI 기능 고도화</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>법적 근거</th>
-                                    <th>구분</th>
-                                    <th>처리 목적</th>
-                                    <th>수집 항목</th>
-                                    <th>보유 및 이용기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>정보주체의 별도 동의 또는 가명정보 처리 근거</td>
-                                    <td>AI 분석 및 고도화</td>
-                                    <td>요약·추천·평가 보조 기능 개선, 서비스 품질 향상</td>
-                                    <td>가명처리된 기록, 전사문, 이용 로그, 평가 데이터</td>
-                                    <td>동의 철회 시 또는 목적 달성 시까지</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h3>5) 관계 법령에 따른 보관</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>보유정보</th>
-                                    <th>보유기간</th>
-                                    <th>관련 근거</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>계약 또는 청약철회 등에 관한 기록</td>
-                                    <td>5년</td>
-                                    <td>전자상거래법</td>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <tr>
-                                    <td>대금결제 및 재화 등의 공급에 관한 기록</td>
-                                    <td>5년</td>
-                                    <td>전자상거래법</td>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <tr>
-                                    <td>소비자의 불만 또는 분쟁처리에 관한 기록</td>
-                                    <td>3년</td>
-                                    <td>전자상거래법</td>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <tr>
-                                    <td>웹사이트 방문기록</td>
-                                    <td>3개월</td>
-                                    <td>통신비밀보호법</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <h2>{t(`${PRIVACY_T}.section1.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section1.description`)}</p>
+                    <h3>{t(`${PRIVACY_T}.section1.common.title`)}</h3>
+                    {renderTable(getTable("section1.common.table"), "section1-common")}
+                    <h3>{t(`${PRIVACY_T}.section1.voice.title`)}</h3>
+                    {renderTable(getTable("section1.voice.table"), "section1-voice")}
+                    <h3>{t(`${PRIVACY_T}.section1.optional.title`)}</h3>
+                    {renderTable(getTable("section1.optional.table"), "section1-optional")}
+                    <h3>{t(`${PRIVACY_T}.section1.ai.title`)}</h3>
+                    {renderTable(getTable("section1.ai.table"), "section1-ai")}
+                    <h3>{t(`${PRIVACY_T}.section1.legalRetention.title`)}</h3>
+                    {renderTable(getTable("section1.legalRetention.table"), "section1-legal-retention")}
                 </section>
 
-                {/* 2 */}
                 <section>
-                    <h2>2. 만 14세 미만 아동의 개인정보 처리</h2>
-                    <p>
-                        회사는 원칙적으로 만 14세 미만 아동을 대상으로 하지 않으며, 만 14세 미만 아동의 개인정보를 수집·이용하지 않습니다.
-                        <br/>회사는 회원가입 및 서비스 이용 과정에서 이용자의 연령 요건을 확인하며, 만 14세 미만에 해당하는 경우 회원가입 및 서비스 이용이 제한될 수 있습니다.
-                        <br/>회사가 만 14세 미만 아동의 개인정보를 인지 없이 수집한 사실이 확인되는 경우에는, 해당 개인정보를 지체 없이 삭제하거나 이용을 제한하는 등 필요한 조치를 취합니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section2.title`)}</h2>
+                    <p>{renderLines(getLines("section2.paragraph"))}</p>
                 </section>
 
-                {/* 3 */}
                 <section>
-                    <h2>3. 개인정보의 제3자 제공</h2>
-                    <p>
-                        회사는 서비스 운영을 위하여 필요한 경우, 정보주체의 개인정보를 아래와 같이 제3자에게 제공할 수 있습니다. 
-                        <br/>회사는 개인정보를 제공하는 경우 「개인정보 보호법」 등 관계 법령에 따라 필요한 사항을 안내하거나 동의를 받는 등 필요한 조치를 이행합니다.
-                    </p>
-                    <h3>1) 사용자가 참여하는 기관에 대한 제공</h3>
-
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>제공받는 자</th>
-                                    <th>제공 목적</th>
-                                    <th>제공 항목</th>
-                                    <th>보유 및 이용기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>사용자가 참여하거나 소속된 프로그램의 운영기관, 주관기관 또는 담당 기관</td>
-                                    <td>참여자 확인, 프로그램 운영, 출석 관리, 과제 운영, 평가 및 피드백 제공, 활동 이력 관리, 수료·선발·성과 확인</td>
-                                    <td>이름, 소속, 팀 정보, 역할, 출석 정보, 과제 제출 여부 및 제출물, 평가 결과, 피드백, 상호평가 결과, 음성 전사문</td>
-                                    <td>해당 기관의 프로그램 운영 기간 종료 시까지 또는 관련 법령 및 기관 운영정책에 따른 보유기간까지</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <h3>2) 법령에 따른 제공</h3>
-                    <p>
-                        회사는 다음 각 호의 어느 하나에 해당하는 경우에는 관계 법령에 따라 개인정보를 제공할 수 있습니다.
-                    </p>
-                    <ol className="privacy-ol">
-                        <li>정보주체가 사전에 별도로 동의한 경우</li>
-                        <li>법률에 특별한 규정이 있거나 법령상 의무를 준수하기 위하여 필요한 경우</li>
-                        <li>정보주체 또는 제3자의 급박한 생명, 신체, 재산의 이익을 위하여 필요한 경우</li>
-                        <li>수사기관 등 관계 법령에 따른 적법한 요청이 있는 경우</li>
-                    </ol>
-
-                    <h3>3) 서비스 내 권한 기반 열람에 관한 안내</h3>
-                    <p>
-                        회사는 프로그램 운영을 위해 사용자가 참여하는 기관의 담당자 또는 운영진에게 해당 참가자의 개인정보 및 활동 정보를 열람할 수 있는 권한을 부여할 수 있습니다. 
-                        <br/>이 경우 열람 가능한 정보의 범위는 프로그램 운영 목적에 필요한 최소한으로 제한됩니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section3.title`)}</h2>
+                    <p>{renderLines(getLines("section3.paragraph"))}</p>
+                    <h3>{t(`${PRIVACY_T}.section3.institution.title`)}</h3>
+                    {renderTable(getTable("section3.institution.table"), "section3-institution")}
+                    <h3>{t(`${PRIVACY_T}.section3.legalProvision.title`)}</h3>
+                    <p>{t(`${PRIVACY_T}.section3.legalProvision.description`)}</p>
+                    {renderOrderedList(getList("section3.legalProvision.list"), "section3-legal-provision")}
+                    <h3>{t(`${PRIVACY_T}.section3.permissionNotice.title`)}</h3>
+                    <p>{renderLines(getLines("section3.permissionNotice.paragraph"))}</p>
                 </section>
 
-                {/* 4 */}
                 <section>
-                    <h2>4. 개인정보 처리 위탁</h2>
-                    <p>회사는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리업무를 위탁할 수 있습니다.</p>
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>수탁자</th>
-                                    <th>위탁업무</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Amazon Web Services, Inc.</td>
-                                    <td>서비스 제공을 위한 시스템 개발 및 운영 환경 제공</td>
-                                </tr>
-                                <tr>
-                                    <td>OpenAI, L.L.C.</td>
-                                    <td>음성의 텍스트 변환, 요약 또는 AI 기능 제공</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>회사는 위탁계약 체결 시 개인정보 보호 관련 법령에 따라 개인정보가 안전하게 처리될 수 있도록 필요한 사항을 계약에 반영하고, 수탁자를 감독하고 있습니다.</p>
+                    <h2>{t(`${PRIVACY_T}.section4.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section4.description`)}</p>
+                    {renderTable(getTable("section4.table"), "section4")}
+                    <p>{t(`${PRIVACY_T}.section4.footer`)}</p>
                 </section>
 
-                {/* 5 */}
                 <section>
-                    <h2>5. 개인정보 국외 이전</h2>
-                    <p>회사는 서비스 이용 과정에서 수집한 개인정보 중 일부를 아래와 같이 국외에 이전할 수 있습니다.</p>
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>이전받는 자</th>
-                                    <th>이전 국가</th>
-                                    <th>이전 항목</th>
-                                    <th>이전 목적</th>
-                                    <th>보유기간</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>OpenAI, L.L.C.</td>
-                                    <td>미국 등 OpenAI가 운영하거나 처리하는 해외 인프라 지역</td>
-                                    <td>음성파일, 음성에서 추출된 텍스트(전사문), 이용자가 입력한 프롬프트 및 이에 대한 응답 결과</td>
-                                    <td>음성의 텍스트 변환(STT), 텍스트 요약, AI 기능 제공</td>
-                                    <td>OpenAI의 서비스 제공 과정에서 처리되는 동안 및 OpenAI의 관련 정책 또는 계약에 따른 기간</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>
-                        회사는 국외 이전이 필요한 경우 관계 법령에 따라 필요한 사항을 안내하고, 개인정보가 안전하게 처리될 수 있도록 필요한 보호조치를 취합니다. 
-                        <br/>OpenAI 공식 문서에 따르면 API 데이터 레지던시는 별도 설정이 필요한 기능이며, 데이터 레지던시가 설정된 경우에도 시스템 데이터는 선택 지역 밖에서 처리·저장될 수 있습니다.
-                    </p>
-                    <p>
-                        ※ 회사가 향후 OpenAI API 데이터 레지던시를 별도로 적용하는 경우, 실제 적용 지역 및 처리 범위에 따라 본 항목은 변경될 수 있습니다. 
-                        <br/>OpenAI 공식 문서에 따르면 API 데이터 레지던시는 프로젝트 단위로 구성되며, 일부 비고객 콘텐츠 성격의 시스템 데이터에는 적용되지 않을 수 있습니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section5.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section5.description`)}</p>
+                    {renderTable(getTable("section5.table"), "section5")}
+                    <p>{renderLines(getLines("section5.paragraph1"))}</p>
+                    <p>{renderLines(getLines("section5.paragraph2"))}</p>
                 </section>
 
-                {/* 6 */}
                 <section>
-                    <h2>6. 개인정보의 파기 절차 및 방법</h2>
-                    <p>
-                        회사는 개인정보 보유기간의 경과, 처리 목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다.
-                    </p>
-                    <ol className="privacy-ol">
-                        <li>
-                            파기 절차
-                            <p>회사는 파기 사유가 발생한 개인정보를 선정하고, 내부 절차에 따라 파기합니다.</p>
-                        </li>
-                        <li>
-                            파기 방법
-                            <ul>
-                                <li>전자적 파일 형태의 정보는 복구 또는 재생할 수 없는 방법으로 삭제합니다.</li>
-                                <li>종이 문서에 기록된 정보는 분쇄하거나 소각하여 파기합니다.</li>
-                            </ul>
-                        </li>
-                    </ol>
+                    <h2>{t(`${PRIVACY_T}.section6.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section6.description`)}</p>
+                    {renderProcedureList(getProcedureList("section6.list"), "section6")}
                 </section>
 
-                {/* 7 */}
                 <section>
-                    <h2>7. 정보주체와 법정대리인의 권리·의무 및 행사방법</h2>
-                    <p>정보주체는 회사에 대하여 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.</p>
-                    <ol className="privacy-ol">
-                        <li>개인정보 열람 요구</li>
-                        <li>개인정보 정정·삭제 요구</li>
-                        <li>개인정보 처리정지 요구</li>
-                        <li>동의 철회 요구</li>
-                        <li>자동화된 결정에 대한 설명 요구, 이의제기 및 재검토 요구</li>
-                    </ol>
-                    <p>정보주체는 서비스 내 기능 또는 전자우편, 고객센터를 통하여 위 권리를 행사할 수 있습니다. 회사는 정보주체의 요청이 있는 경우 관계 법령에 따라 지체 없이 필요한 조치를 하겠습니다.</p>
-                    <p>회사가 제공하는 서비스 내 기능을 통해 정보주체는 다음 사항을 직접 처리할 수 있습니다.</p>
-                    <ul className="privacy-ul">
-                        <li>내 정보 수정</li>
-                        <li>회원 탈퇴</li>
-                    </ul>
-                    <p>서비스 내에서 직접 제공되지 않는 권리 행사의 경우, 정보주체는 전자우편 또는 고객센터를 통해 요청할 수 있습니다. 
-                        <br/>다만, 관계 법령에 따라 열람·정정·삭제·처리정지 요청이 제한되거나, 다른 사람의 개인정보 또는 권리를 침해할 우려가 있는 경우에는 해당 요청이 제한될 수 있습니다.</p>
+                    <h2>{t(`${PRIVACY_T}.section7.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section7.description`)}</p>
+                    {renderOrderedList(getList("section7.rights"), "section7-rights")}
+                    <p>{t(`${PRIVACY_T}.section7.paragraph1`)}</p>
+                    <p>{t(`${PRIVACY_T}.section7.paragraph2`)}</p>
+                    {renderUnorderedList(getList("section7.selfService"), "section7-self-service")}
+                    <p>{renderLines(getLines("section7.paragraph3"))}</p>
                 </section>
 
-                {/* 8 */}
                 <section>
-                    <h2>8. 개인정보의 안전성 확보조치</h2>
-
-                    <p>회사는 개인정보의 안전성 확보를 위하여 다음과 같은 조치를 취하고 있습니다.</p>
-
-                    <ol className="privacy-ol">
-                        <li>
-                            관리적 조치: 내부관리계획 수립·시행, 임직원 교육, 개인정보 접근권한 관리, 관리자 권한 분리 운영
-                        </li>
-                        <li>
-                            기술적 조치: 비밀번호 및 인증정보의 안전한 저장(해시 처리), 접근통제, 보안프로그램 운영, 개인정보 처리시스템 접근기록의 생성·관리, 전송구간 암호화
-                        </li>
-                        <li>
-                            물리적 조치: 개인정보 처리시스템 및 자료보관공간에 대한 접근통제
-                        </li>
-                    </ol>
-
-                    <p>회사는 개인정보 전송 시 안전한 처리를 위하여 다음과 같은 구간에 암호화 조치를 적용하고 있습니다.</p>
-
-                    <ul className="privacy-ul">
-                        <li>웹 및 앱 서비스의 모든 데이터 전송 구간</li>
-                        <li>내외부 시스템 간 인터페이스 구간</li>
-                        <li>데이터베이스 백업 전송 구간 및 관리자 페이지 접속 구간</li>
-                    </ul>
+                    <h2>{t(`${PRIVACY_T}.section8.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section8.description1`)}</p>
+                    {renderOrderedList(getList("section8.measures"), "section8-measures")}
+                    <p>{t(`${PRIVACY_T}.section8.description2`)}</p>
+                    {renderUnorderedList(getList("section8.encryptionScopes"), "section8-encryption-scopes")}
                 </section>
 
-                {/* 9 */}
                 <section>
-                    <h2>9. 개인정보 자동 수집 장치의 설치·운영 및 거부에 관한 사항</h2>
-                    <p>
-                        회사는 서비스 제공에 필요한 범위에서 로그인 상태 유지 및 회원 인증을 위하여 쿠키 또는 이와 유사한 기술을 사용할 수 있습니다. 
-                        <br/>또한 카카오 로그인 및 구글 로그인 기능 제공을 위해 관련 SDK를 사용할 수 있습니다.
-                    </p>
-                    <ol className="privacy-ol">
-                        <li>
-                            <strong>수집 항목</strong><br/>로그인 상태 유지를 위한 쿠키 또는 세션 정보
-                        </li>
-                        <li>
-                            <strong>이용 목적</strong><br/>로그인 유지, 회원 인증, 계정 연동 등 필수 기능 제공
-                        </li>
-                        <li>
-                            <strong>거부 방법</strong><br/>이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있습니다. 다만 쿠키 저장을 거부할 경우 일부 서비스 이용이 제한될 수 있습니다.
-                        </li>
-                    </ol>
-                    <p>
-                        회사는 광고성 쿠키 또는 제3자 행태정보 수집 기능을 운영하지 않습니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section9.title`)}</h2>
+                    <p>{renderLines(getLines("section9.paragraph"))}</p>
+                    {renderDefinitionList(getDefinitionList("section9.list"), "section9")}
+                    <p>{t(`${PRIVACY_T}.section9.footer`)}</p>
                 </section>
 
-                {/* 10 */}
                 <section>
-                    <h2>10. 추가적인 이용·제공 관련 판단 기준</h2>
-                    <p>
-                        회사는 원칙적으로 정보주체에게 동의 받은 범위 내에서만 개인정보를 이용 및 제공합니다. 
-                        <br/>다만 「개인정보 보호법」 제15조 제3항 또는 제17조 제4항에 따라 동의 없이 개인정보를 추가적으로 이용·제공할 수 있는 경우에는 다음 사항을 종합적으로 고려합니다.
-                    </p>
-                    <ol className="privacy-ol">
-                        <li>당초 수집 목적과 관련성이 있는지</li>
-                        <li>개인정보를 수집한 정황 또는 처리 관행에 비추어 추가 이용·제공에 대한 예측 가능성이 있는지</li>
-                        <li>정보주체의 이익을 부당하게 침해하는지</li>
-                        <li>가명처리 또는 암호화 등 안전성 확보조치를 하였는지</li>
-                    </ol>
+                    <h2>{t(`${PRIVACY_T}.section10.title`)}</h2>
+                    <p>{renderLines(getLines("section10.paragraph"))}</p>
+                    {renderOrderedList(getList("section10.criteria"), "section10-criteria")}
                 </section>
 
-                {/* 11 */}
                 <section>
-                    <h2>11. 가명정보의 처리</h2>
-                    <p>
-                        회사는 통계작성, 과학적 연구, 서비스 품질 개선 등을 위하여 필요한 경우 개인정보를 특정 개인을 알아볼 수 없도록 가명처리하여 이용할 수 있습니다.
-                    </p>
-                    <p>
-                        이 경우 회사는 최소한의 항목만 가명처리하고, 가명정보가 재식별되지 않도록 분리보관, 접근통제 등 필요한 보호조치를 취합니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section11.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section11.paragraph1`)}</p>
+                    <p>{t(`${PRIVACY_T}.section11.paragraph2`)}</p>
                 </section>
 
-                {/* 12 */}
                 <section>
-                    <h2>12. 자동화된 결정에 관한 사항</h2>
-                    <p>
-                        회사는 서비스 운영 과정에서 자동화 또는 반자동화된 처리를 수행할 수 있습니다. 예를 들어 참여율 계산, 지각 제출 판정, 종합 점수 생성, 우수자 후보 추천, 요약 초안 생성 등이 이에 해당할 수 있습니다.
-                    </p>
-                    <p>
-                        회사는 이러한 결과를 참고 정보로 활용하며, 정보주체에게 중대한 영향을 미치는 최종 판단은 사람의 검토를 거쳐 이루어지도록 운영합니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section12.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section12.paragraph1`)}</p>
+                    <p>{t(`${PRIVACY_T}.section12.paragraph2`)}</p>
                 </section>
 
-                {/* 13 */}
                 <section>
-                    <h2>13. 개인정보 보호책임자 및 개인정보 열람청구</h2>
-                    <div className="privacy-table-wrap">
-                        <table className="privacy-table">
-                            <thead>
-                                <tr>
-                                    <th>구분</th>
-                                    <th>내용</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>개인정보 보호책임자</td>
-                                    <td>김유진<br/>purieu@ewha.ac.kr</td>
-                                </tr>
-                                <tr>
-                                    <td>개인정보보호 담당부서</td>
-                                    <td>aim<br/>aim2a.kor@gmail.com</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>
-                        정보주체는 회사의 서비스를 이용하면서 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에 관한 사항을 위 연락처로 문의할 수 있습니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section13.title`)}</h2>
+                    {renderTable(getTable("section13.table"), "section13")}
+                    <p>{t(`${PRIVACY_T}.section13.paragraph`)}</p>
                 </section>
 
-                {/* 14 */}
                 <section>
-                    <h2>14. 정보주체의 권익침해에 대한 구제방법</h2>
-                    <p>
-                        정보주체는 개인정보 침해에 대한 신고, 상담 또는 분쟁조정을 아래 기관에 문의할 수 있습니다.
-                    </p>
-                    <ol className="privacy-ol">
-                        <li>개인정보분쟁조정위원회</li>
-                        <li>개인정보침해신고센터</li>
-                        <li>대검찰청</li>
-                        <li>경찰청</li>
-                    </ol>    
+                    <h2>{t(`${PRIVACY_T}.section14.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section14.paragraph`)}</p>
+                    {renderOrderedList(getList("section14.agencies"), "section14-agencies")}
                 </section>
 
-                {/* 15 */}
                 <section>
-                    <h2>15. 부칙</h2>
-                    <p>
-                        본 개인정보 처리방침은 2026년 4월 27일부터 적용됩니다.
-                    </p>
-                    <p>
-                        회사가 개인정보 처리방침을 변경하는 경우에는 변경 전후 내용을 서비스 내 공지사항 또는 별도 안내를 통해 정보주체가 쉽게 확인할 수 있도록 공개합니다.
-                    </p>
+                    <h2>{t(`${PRIVACY_T}.section15.title`)}</h2>
+                    <p>{t(`${PRIVACY_T}.section15.effectiveDate`)}</p>
+                    <p>{t(`${PRIVACY_T}.section15.paragraph`)}</p>
                 </section>
             </main>
         </div>

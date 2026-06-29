@@ -270,7 +270,7 @@ export function formatServerKstDateTimeYYDotForUser(value?: string | null, fallb
         hourCycle: "h23",
     }).formatToParts(date);
 
-    const year = getDatePart(parts, "year").slice(2);
+    const year = getDatePart(parts, "year");
     const month = getDatePart(parts, "month");
     const day = getDatePart(parts, "day");
     const hour = getDatePart(parts, "hour");
