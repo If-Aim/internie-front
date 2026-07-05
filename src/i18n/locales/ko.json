@@ -212,9 +212,10 @@
         "defaultClientName": "고객사"
     },
     "empty": {
-        "title": "아직 일정이 없어요",
-        "subtitle": "일정을 추가해 볼까요?",
-        "sync": "캘린더 연동하기"
+        "title": "현재 기록 기능을 준비 중입니다",
+        "subtitle": "참여 중인 대외활동을 먼저 확인해 주세요",
+        "sync": "캘린더 연동하기",
+        "programCta": "대외활동 확인하기"
     },
     "modal": {
         "desc1": "오늘의 경험을 기록하고",

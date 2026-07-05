@@ -1,11 +1,13 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { getMyAttendanceEvents, getMyExternalActivityAssignments, getMyExternalActivityTeams, getMyParticipatingExternalActivity } from "../../../../../../api/ea";
-import type { AttendanceEventProgress, AttendanceEventType, AttendanceStatus, MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, TeamResponse } from "../../../../../../api/ea";
+import { downloadExternalActivityNoticeFile, getMyExternalActivityNotices, getMyAttendanceEvents, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, /*getMyExternalActivityTeams*/} from "../../../../../../api/ea";
+import type { AttendanceEventProgress, AttendanceEventType, AttendanceStatus, ExternalActivityNoticeResponse, MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, /*TeamResponse*/ } from "../../../../../../api/ea";
 import { getUserDateOnly, getUserTimeZone, parseServerKstDateTime, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
+import { getFileIconByExtension } from "../assignment/fileIcons";
 import "./dashboard.css";
 
 const ASSIGNMENT_PAGE_SIZE = 3;
@@ -287,13 +289,13 @@ function getSafeProfileImage(profileImage?: string | null): string {
     return profileImage;
 }
 
-function findMyTeams(teams: TeamResponse[], myUserId?: number | null): TeamResponse[] {
-    if (!myUserId) return [];
+// function findMyTeams(teams: TeamResponse[], myUserId?: number | null): TeamResponse[] {
+//     if (!myUserId) return [];
 
-    return teams.filter((team) => (
-        team.members.some((member) => member.userId === myUserId)
-    ));
-}
+//     return teams.filter((team) => (
+//         team.members.some((member) => member.userId === myUserId)
+//     ));
+// }
 
 function toManagerSummary(activity: StudentExternalActivityDetailResponse | null): PersonSummary[] {
     return activity?.managers.map((manager) => ({
@@ -304,45 +306,130 @@ function toManagerSummary(activity: StudentExternalActivityDetailResponse | null
     })) ?? [];
 }
 
-function toTeamMemberSummaries(teams: TeamResponse[], myUserId: number | null | undefined, t: TFunction): PersonSummary[] {
-    return teams.flatMap((team) => (
-        team.members
-            .filter((member) => member.userId !== myUserId)
-            .map((member) => {
-                const roleLabel = t(`${DASHBOARD_T}.teamRole.${member.role}`);
+function parseNoticeDate(value: string): Date | null {
+    const serverDate = parseServerKstDateTime(value);
 
-                return {
-                    id: member.userId,
-                    name: member.userName,
-                    description: t(`${DASHBOARD_T}.teamMemberDescription`, {
-                        teamName: team.name,
-                        role: roleLabel,
-                    }),
-                    profileImage: member.profileImage,
-                    teamId: team.teamId,
-                };
-            })
-    ));
+    if (serverDate) return serverDate;
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
 }
+
+function formatNoticeDate(value: string): string {
+    const date = parseNoticeDate(value);
+
+    if (!date) return "-";
+
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).format(date);
+}
+
+function sortNotices(notices: ExternalActivityNoticeResponse[]): ExternalActivityNoticeResponse[] {
+    return [...notices].sort((a, b) => {
+        const aDate = parseNoticeDate(a.createdAt);
+        const bDate = parseNoticeDate(b.createdAt);
+
+        return (bDate?.getTime() ?? 0) - (aDate?.getTime() ?? 0);
+    });
+}
+
+function formatFileSizeNumber(value: number): string {
+    if (value >= 100) {
+        return Math.round(value).toString();
+    }
+
+    return value.toFixed(1);
+}
+
+function formatNoticeFileSize(sizeBytes?: number | null): string {
+    if (sizeBytes === null || sizeBytes === undefined) {
+        return "";
+    }
+
+    if (sizeBytes < 1024) {
+        return `${sizeBytes} B`;
+    }
+
+    const sizeKb = sizeBytes / 1024;
+
+    if (sizeKb < 1024) {
+        return `${formatFileSizeNumber(sizeKb)} KB`;
+    }
+
+    const sizeMb = sizeKb / 1024;
+
+    if (sizeMb < 1024) {
+        return `${formatFileSizeNumber(sizeMb)} MB`;
+    }
+
+    const sizeGb = sizeMb / 1024;
+
+    return `${formatFileSizeNumber(sizeGb)} GB`;
+}
+
+function getFileExtension(fileName?: string | null): string {
+    if (!fileName) return "";
+
+    const lastDotIndex = fileName.lastIndexOf(".");
+
+    if (
+        lastDotIndex === -1 ||
+        lastDotIndex === fileName.length - 1
+    ) {
+        return "";
+    }
+
+    return fileName.slice(lastDotIndex + 1);
+}
+
+// function toTeamMemberSummaries(teams: TeamResponse[], myUserId: number | null | undefined, t: TFunction): PersonSummary[] {
+//     return teams.flatMap((team) => (
+//         team.members
+//             .filter((member) => member.userId !== myUserId)
+//             .map((member) => {
+//                 const roleLabel = t(`${DASHBOARD_T}.teamRole.${member.role}`);
+
+//                 return {
+//                     id: member.userId,
+//                     name: member.userName,
+//                     description: t(`${DASHBOARD_T}.teamMemberDescription`, {
+//                         teamName: team.name,
+//                         role: roleLabel,
+//                     }),
+//                     profileImage: member.profileImage,
+//                     teamId: team.teamId,
+//                 };
+//             })
+//     ));
+// }
 
 export default function EcaStudentDashboard(): React.ReactElement {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
-    const { me, activities } = useOutletContext<EcaStudentOutletContext>();
+    const { /*me,*/ activities } = useOutletContext<EcaStudentOutletContext>();
 
     const [assignments, setAssignments] = React.useState<StudentAssignmentSummary[]>([]);
     const [assignmentLoading, setAssignmentLoading] = React.useState(false);
     const [assignmentError, setAssignmentError] = React.useState("");
     const [assignmentPage, setAssignmentPage] = React.useState(0);
     const [activityDetail, setActivityDetail] = React.useState<StudentExternalActivityDetailResponse | null>(null);
-    const [myTeams, setMyTeams] = React.useState<TeamResponse[]>([]);
+    // const [myTeams, setMyTeams] = React.useState<TeamResponse[]>([]);
     const [dashboardLoading, setDashboardLoading] = React.useState(false);
     const [dashboardError, setDashboardError] = React.useState("");
     const [attendances, setAttendances] = React.useState<StudentAttendanceSummary[]>([]);
     const [attendanceLoading, setAttendanceLoading] = React.useState(false);
     const [attendanceError, setAttendanceError] = React.useState("");
     const [attendancePage, setAttendancePage] = React.useState(0);
+
+    const [notices, setNotices] = React.useState<ExternalActivityNoticeResponse[]>([]);
+    const [noticeLoading, setNoticeLoading] = React.useState(false);
+    const [noticeError, setNoticeError] = React.useState("");
+    const [selectedNotice, setSelectedNotice] = React.useState<ExternalActivityNoticeResponse | null>(null);
 
     React.useEffect(() => {
         async function fetchAssignments(): Promise<void> {
@@ -411,17 +498,17 @@ export default function EcaStudentDashboard(): React.ReactElement {
             setDashboardError("");
 
             try {
-                const [activityData, teamData] = await Promise.all([
+                const [activityData, /*teamData*/] = await Promise.all([
                     getMyParticipatingExternalActivity(externalActivityId),
-                    getMyExternalActivityTeams(externalActivityId),
+                    // getMyExternalActivityTeams(externalActivityId),
                 ]);
 
                 setActivityDetail(activityData);
-                setMyTeams(findMyTeams(teamData, me?.userId));
+                // setMyTeams(findMyTeams(teamData, me?.userId));
             } catch (e) {
                 console.error(e);
                 setActivityDetail(null);
-                setMyTeams([]);
+                // setMyTeams([]);
                 setDashboardError(t(`${DASHBOARD_T}.error.dashboardLoadFailed`));
             } finally {
                 setDashboardLoading(false);
@@ -429,7 +516,35 @@ export default function EcaStudentDashboard(): React.ReactElement {
         }
 
         fetchDashboardData();
-    }, [externalActivityId, me?.userId, t]);
+    }, [externalActivityId, /*me?.userId,*/ t]);
+
+    React.useEffect(() => {
+        async function fetchNotices(): Promise<void> {
+            if (!externalActivityId) {
+                setNoticeError(t(`${DASHBOARD_T}.error.activityNotFound`));
+                return;
+            }
+
+            setNoticeLoading(true);
+            setNoticeError("");
+
+            try {
+                const data = await getMyExternalActivityNotices(externalActivityId);
+
+                setNotices(sortNotices(data));
+            } catch (e) {
+                console.error(e);
+                setNotices([]);
+                setNoticeError(t(`${DASHBOARD_T}.noticeLoadFailed`, {
+                    defaultValue: "공지사항을 불러오지 못했습니다.",
+                }));
+            } finally {
+                setNoticeLoading(false);
+            }
+        }
+
+        void fetchNotices();
+    }, [externalActivityId, t]);
 
     const completedAssignmentCount = assignments.filter((assignment) => (
         assignment.status === "SUBMITTED" || assignment.status === "LATE_SUBMITTED"
@@ -466,7 +581,7 @@ export default function EcaStudentDashboard(): React.ReactElement {
         activityDetail?.endDate ?? fallbackActivity?.endDate
     );
     const managers = toManagerSummary(activityDetail);
-    const teamMembers = toTeamMemberSummaries(myTeams, me?.userId, t);
+    // const teamMembers = toTeamMemberSummaries(myTeams, me?.userId, t);
 
     function movePrevAssignmentPage(): void {
         setAssignmentPage((prev) => Math.max(0, prev - 1));
@@ -494,6 +609,14 @@ export default function EcaStudentDashboard(): React.ReactElement {
         if (!externalActivityId) return;
 
         navigate(`/student/activities/${externalActivityId}/attendance`);
+    }
+
+    function openNoticeDetail(notice: ExternalActivityNoticeResponse): void {
+        setSelectedNotice(notice);
+    }
+
+    function closeNoticeDetail(): void {
+        setSelectedNotice(null);
     }
 
     return (
@@ -670,7 +793,7 @@ export default function EcaStudentDashboard(): React.ReactElement {
                         </div>
                     </section>
 
-                    <section className="eca-student-dashboard-side-panel">
+                    {/* <section className="eca-student-dashboard-side-panel">
                         <div className="eca-student-dashboard-panel-head">
                             <h2>{t(`${DASHBOARD_T}.myTeam`, { count: teamMembers.length })}</h2>
                             <button type="button" className="eca-student-dashboard-search-button" aria-label={t(`${DASHBOARD_T}.teamSearchAria`)}>
@@ -715,8 +838,128 @@ export default function EcaStudentDashboard(): React.ReactElement {
                                 ))
                             )}
                         </div>
+                    </section> */}
+                    <section className="eca-student-dashboard-side-panel eca-student-dashboard-notice-panel">
+                        <div className="eca-student-dashboard-panel-head">
+                            <h2>Notice ({notices.length})</h2>
+                        </div>
+
+                        <div className="eca-student-dashboard-notice-list">
+                            {noticeLoading ? (
+                                <p className="eca-student-dashboard-empty">
+                                    {t(`${DASHBOARD_T}.noticeLoading`, {
+                                        defaultValue: "공지사항을 불러오는 중입니다.",
+                                    })}
+                                </p>
+                            ) : noticeError ? (
+                                <p className="eca-student-dashboard-empty">{noticeError}</p>
+                            ) : notices.length === 0 ? (
+                                <p className="eca-student-dashboard-empty">
+                                    {t(`${DASHBOARD_T}.noNotices`, {
+                                        defaultValue: "등록된 공지사항이 없습니다.",
+                                    })}
+                                </p>
+                            ) : (
+                                notices.map((notice) => (
+                                    <button
+                                        type="button"
+                                        className="eca-student-dashboard-notice-row"
+                                        key={notice.noticeId}
+                                        onClick={() => openNoticeDetail(notice)}
+                                    >
+                                        <span>
+                                            <strong>{notice.title}</strong>
+                                            <small>{formatNoticeDate(notice.createdAt)}</small>
+                                        </span>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M8 5L13 10L8 15" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                ))
+                            )}
+                        </div>
                     </section>
                 </aside>
+                
+                {selectedNotice ? (
+                    createPortal(
+                        <div className="eca-student-dashboard-notice-modal-backdrop" onMouseDown={closeNoticeDetail}>
+                            <div
+                                className="eca-student-dashboard-notice-detail-modal"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                role="dialog"
+                                aria-modal="true"
+                            >
+                                <div className="eca-student-dashboard-notice-modal-head">
+                                    <h3>Notice</h3>
+
+                                    <button
+                                        type="button"
+                                        onClick={closeNoticeDetail}
+                                        aria-label={t(`${COMMON_T}.close`, {
+                                            defaultValue: "Close",
+                                        })}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                            <path d="M18 6L6 18M6 6L18 18" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div className="eca-student-dashboard-notice-detail-scroll">
+                                    <div className="eca-student-dashboard-notice-detail-content">
+                                        <h4>{selectedNotice.title}</h4>
+                                        <time>{formatNoticeDate(selectedNotice.createdAt)}</time>
+                                        <p>{selectedNotice.content}</p>
+                                    </div>
+
+                                    {selectedNotice.files?.length > 0 ? (
+                                        <div className="eca-student-dashboard-notice-files">
+                                            {selectedNotice.files.map((file) => (
+                                                <div className="eca-student-dashboard-notice-file-card" key={file.fileId}>
+                                                    <div className="eca-student-dashboard-notice-file-wrap">
+                                                        <span className="eca-student-dashboard-notice-file-icon">
+                                                            {getFileIconByExtension(
+                                                                getFileExtension(file.originalFileName)
+                                                            )}
+                                                        </span>
+
+                                                        <span className="eca-student-dashboard-notice-file-info">
+                                                            <strong>
+                                                                {file.originalFileName ?? `file-${file.fileId}`}
+                                                            </strong>
+                                                            <small>{formatNoticeFileSize(file.sizeBytes)}</small>
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Download"
+                                                        onClick={() => {
+                                                            if (!externalActivityId) return;
+
+                                                            void downloadExternalActivityNoticeFile(
+                                                                externalActivityId,
+                                                                selectedNotice.noticeId,
+                                                                file.fileId,
+                                                                file.originalFileName
+                                                            );
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M12 3V15M12 15L7 10M12 15L17 10M5 19H19" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </div>
+                        </div>,
+                        document.body
+                    )
+                ) : null}
             </div>
         </div>
     );

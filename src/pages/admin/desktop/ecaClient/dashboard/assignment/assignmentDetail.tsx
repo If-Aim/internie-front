@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { createExternalActivityNotice, deleteAssignment, downloadAssignmentSubmissionsZip, getAssignmentEvaluationOverview, getAssignmentSubmissions, getExternalActivity } from "../../../../../../api/ea";
+import { createAssignmentNonSubmissionNotice, deleteAssignment, downloadAssignmentSubmissionsZip, getAssignmentEvaluationOverview,  getAssignmentSubmissions, getExternalActivity, } from "../../../../../../api/ea";
 import type { AssignmentEvaluationOverviewRow, AssignmentParticipantResponse, AssignmentResponse, AssignmentSubmissionResponse, ExternalActivityResponse, SubmissionFileResponse } from "../../../../../../api/ea";
 import { formatServerKstDateTimeYYDotForUser } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
@@ -499,7 +499,7 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
     }
 
     async function handleSendMissingNotice(): Promise<void> {
-        if (!externalActivityId || noticeSending) return;
+        if (!externalActivityId || !assignmentId || noticeSending) return;
 
         const title = noticeTitle.trim();
         const content = noticeContent.trim();
@@ -512,7 +512,15 @@ export default function EcaAssignmentDetailPage(): React.ReactElement {
         setNoticeSending(true);
 
         try {
-            await createExternalActivityNotice(externalActivityId, { title, content });
+            await createAssignmentNonSubmissionNotice(
+                externalActivityId,
+                assignmentId,
+                {
+                    title,
+                    content,
+                }
+            );
+
             setNoticeModalOpen(false);
             window.alert(t(`${ASSIGNMENT_T}.noticeSendSuccess`));
         } catch (e) {

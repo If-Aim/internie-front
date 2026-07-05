@@ -44,6 +44,7 @@ body {background: var(--bg);color: var(--ink);}
 .spacer-50 {height: 30px;width: 100%;flex-shrink: 0;background: transparent;}
 .topbar {display: flex;align-items: center;justify-content: space-between;padding: 0;}
 .iconbtn {background: transparent;border: 0;cursor: pointer;padding: 0;}
+.iconbtn:disabled,.iconbtn--disabled {cursor: default;pointer-events: none;}
 .icon {width: 24px;height: 24px;display: block;}
 .topbar-spacer-icon { display: block; flex: 0 0 24px; width: 24px !important; min-width: 24px; max-width: 24px; height: 24px !important; min-height: 24px; max-height: 24px; pointer-events: none; }
 
@@ -108,4 +109,4 @@ width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid 
 .empty { margin-top: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .empty-illust { width: 119px; height: auto; margin-bottom: 9px; }
 .empty-sub { font-size: 16px; color: #979797; margin: 25px 0; font-weight:500;}
-.empty-sync { width: 160px; padding: 12px 20px; border-radius: 5px; border: none; background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; }
+.empty-sync { width: 190px; padding: 12px 20px; border-radius: 5px; border: none; background: #E3E3E3; color: #707070; font-size: 16px; font-weight: 700; }

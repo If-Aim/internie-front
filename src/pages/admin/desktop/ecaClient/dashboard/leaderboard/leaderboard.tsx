@@ -80,7 +80,7 @@ type MissionRule = {
     points: number;
     maximum: number;
     evidence: string;
-    evidenceType: MissionEvidenceFormat;
+    evidenceTypes: MissionEvidenceFormat[];
     description: string;
 };
 
@@ -91,7 +91,7 @@ type MissionForm = {
     points: string;
     maximum: string;
     evidence: string;
-    evidenceType: MissionEvidenceFormat | "";
+    evidenceTypes: MissionEvidenceFormat[];
 };
 
 const LEADERBOARD_T = "ecaAdmin.leaderboardPage";
@@ -335,7 +335,7 @@ function mapMissionRule(row: LeaderboardMissionResponse): MissionRule {
         points: row.points,
         maximum: row.maximumPerStudent,
         evidence: row.evidenceName ?? "",
-        evidenceType: row.evidenceType,
+        evidenceTypes: getMissionEvidenceTypes(row),
         description: row.description ?? "",
     };
 }
@@ -471,6 +471,12 @@ async function downloadEvidenceFile(
         console.error("downloadEvidenceFile error", error);
         window.alert(failedMessage);
     }
+}
+
+function getMissionEvidenceTypes(mission: Pick<LeaderboardMissionResponse, "evidenceTypes" | "evidenceType">): LeaderboardEvidenceType[] {
+    if (mission.evidenceTypes?.length) return mission.evidenceTypes;
+
+    return mission.evidenceType ? [mission.evidenceType] : [];
 }
 
 function getEvidenceClassName(classPrefix: "approval" | "mission-modal", type: "img" | "placeholder" | "file" | "link"): string {
@@ -637,7 +643,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         points: "",
         maximum: "",
         evidence: "",
-        evidenceType: "",
+        evidenceTypes: [],
     });
     const [closingDetailPanel, setClosingDetailPanel] = React.useState<ClosingDetailPanel>(null);
     const detailCloseTimerRef = React.useRef<number | null>(null);
@@ -1139,7 +1145,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         const points = Number(missionForm.points);
         const maximum = Number(missionForm.maximum);
 
-        if (!title || !evidence || !missionForm.evidenceType || !Number.isFinite(points) || !Number.isFinite(maximum) || points <= 0 || maximum <= 0) {
+        if (!title || !evidence || missionForm.evidenceTypes.length === 0 || !Number.isFinite(points) || !Number.isFinite(maximum) || points <= 0 || maximum <= 0) {
             alert(t(`${LEADERBOARD_T}.error.invalidMissionForm`));
             return;
         }
@@ -1151,7 +1157,8 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             points,
             maximumPerStudent: maximum,
             evidenceName: evidence,
-            evidenceType: missionForm.evidenceType,
+            evidenceTypes: missionForm.evidenceTypes,
+            evidenceType: missionForm.evidenceTypes[0],
             autoReflect: false,
         };
 
@@ -1174,13 +1181,24 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
         }
     }
 
+    function toggleMissionEvidenceType(value: MissionEvidenceFormat): void {
+        setMissionForm((prev) => {
+            const exists = prev.evidenceTypes.includes(value);
+
+            return {
+                ...prev,
+                evidenceTypes: exists ? prev.evidenceTypes.filter((type) => type !== value) : [...prev.evidenceTypes, value],
+            };
+        });
+    }
+
     function handleMissionFormChange<K extends keyof MissionForm>(key: K, value: MissionForm[K]): void {
         setMissionForm((prev) => ({
             ...prev,
             [key]: value,
         }));
     }
-
+    
     function resetMissionForm(): void {
         setMissionForm({
             title: "",
@@ -1189,7 +1207,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             points: "",
             maximum: "",
             evidence: "",
-            evidenceType: "",
+            evidenceTypes: [],
         });
     }
 
@@ -1210,7 +1228,7 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             points: String(mission.points),
             maximum: String(mission.maximum),
             evidence: mission.evidence,
-            evidenceType: mission.evidenceType,
+            evidenceTypes: mission.evidenceTypes,
         });
         setMissionModalOpen(true);
     }
@@ -1426,39 +1444,40 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             </div>
         );
     }
+
     function renderCustomDropdown({
         id,
         value,
+        values = [],
         options,
         onChange,
+        onToggle,
         ariaLabel,
         className = "",
         placeholder = "Select",
         showCheckbox = false,
+        multiple = false,
     }: {
         id: ConcreteLeaderboardDropdownId;
         value: string;
+        values?: string[];
         options: CustomDropdownOption[];
         onChange: (value: string) => void;
+        onToggle?: (value: string) => void;
         ariaLabel: string;
         className?: string;
         placeholder?: string;
         showCheckbox?: boolean;
+        multiple?: boolean;
     }): React.ReactElement {
         const isOpen = openDropdown === id;
         const isSubmissionFormatDropdown = id === "missionEvidenceType";
         const selectedOption = options.find((option) => option.value === value);
+        const selectedOptions = options.filter((option) => values.includes(option.value));
+        const buttonLabel = multiple ? selectedOptions.map((option) => option.label).join(" + ") : selectedOption?.label;
         const shouldPortal = missionModalOpen && (id === "missionCategory" || id === "missionEvidenceType");
-        const dropdownClassName = [
-            "eca-admin-leaderboard-custom-dropdown",
-            isOpen ? "eca-admin-leaderboard-custom-dropdown--open" : "",
-            className,
-        ].filter(Boolean).join(" ");
-        const menuClassName = [
-            "eca-admin-leaderboard-custom-dropdown-menu",
-            shouldPortal ? "eca-admin-leaderboard-custom-dropdown-menu--portal" : "",
-            isSubmissionFormatDropdown ? "eca-admin-leaderboard-custom-dropdown-menu--submission-format" : "",
-        ].filter(Boolean).join(" ");
+        const dropdownClassName = ["eca-admin-leaderboard-custom-dropdown", isOpen ? "eca-admin-leaderboard-custom-dropdown--open" : "", className].filter(Boolean).join(" ");
+        const menuClassName = ["eca-admin-leaderboard-custom-dropdown-menu", shouldPortal ? "eca-admin-leaderboard-custom-dropdown-menu--portal" : "", isSubmissionFormatDropdown ? "eca-admin-leaderboard-custom-dropdown-menu--submission-format" : ""].filter(Boolean).join(" ");
         const expectedOptionHeight = 48;
         const expectedMenuHeight = dropdownMenuPosition ? dropdownMenuPosition.height + options.length * expectedOptionHeight + 8 : 0;
         const availableMenuHeight = dropdownMenuPosition ? window.innerHeight - dropdownMenuPosition.top - 20 : 0;
@@ -1470,13 +1489,29 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
             "--eca-dropdown-height": `${dropdownMenuPosition.height}px`,
             "--eca-dropdown-menu-max-height": `${portalMenuMaxHeight}px`,
         } as React.CSSProperties) : undefined;
+
         const menuElement = (
             <div className={menuClassName} role="listbox" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
                 {options.map((option) => {
-                    const selected = option.value === value;
+                    const selected = multiple ? values.includes(option.value) : option.value === value;
 
                     return (
-                        <button type="button" className={selected ? "eca-admin-leaderboard-custom-dropdown-option eca-admin-leaderboard-custom-dropdown-option--selected" : "eca-admin-leaderboard-custom-dropdown-option"} role="option" aria-selected={selected} key={option.value} onClick={() => { onChange(option.value); setOpenDropdown(null); }}>
+                        <button
+                            type="button"
+                            className={selected ? "eca-admin-leaderboard-custom-dropdown-option eca-admin-leaderboard-custom-dropdown-option--selected" : "eca-admin-leaderboard-custom-dropdown-option"}
+                            role="option"
+                            aria-selected={selected}
+                            key={option.value}
+                            onClick={() => {
+                                if (multiple) {
+                                    onToggle?.(option.value);
+                                    return;
+                                }
+
+                                onChange(option.value);
+                                setOpenDropdown(null);
+                            }}
+                        >
                             {showCheckbox ? (
                                 <span className={selected ? "eca-admin-leaderboard-custom-dropdown-check eca-admin-leaderboard-custom-dropdown-check--selected" : "eca-admin-leaderboard-custom-dropdown-check"} aria-hidden="true" />
                             ) : null}
@@ -1486,10 +1521,11 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                 })}
             </div>
         );
+
         const portalElement = shouldPortal && portalLayerStyle ? (
             <div className="eca-admin-leaderboard-custom-dropdown-portal-layer" style={portalLayerStyle} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
                 <button type="button" className="eca-admin-leaderboard-custom-dropdown-button eca-admin-leaderboard-custom-dropdown-button--portal" aria-label={ariaLabel} aria-expanded={isOpen} onClick={() => setOpenDropdown(null)}>
-                    <span>{selectedOption?.label ?? placeholder}</span>
+                    <span>{buttonLabel || placeholder}</span>
                     <svg className="eca-admin-leaderboard-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -1518,16 +1554,14 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         setOpenDropdown(id);
                     }}
                 >
-                    <div>{selectedOption?.label ?? placeholder}</div>
+                    <div>{buttonLabel || placeholder}</div>
                     <svg className="eca-admin-leaderboard-dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M15 8L10 13L5 8" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 </button>
 
                 {isOpen ? (
-                    shouldPortal && portalElement
-                        ? createPortal(portalElement, missionModalBackdropRef.current ?? document.body)
-                        : menuElement
+                    shouldPortal && portalElement ? createPortal(portalElement, missionModalBackdropRef.current ?? document.body) : menuElement
                 ) : null}
             </div>
         );
@@ -2045,13 +2079,16 @@ export default function EcaDashboardLeaderboard(): React.ReactElement {
                         <span>{t(`${LEADERBOARD_T}.missionForm.submissionFormat`)}</span>
                         {renderCustomDropdown({
                             id: "missionEvidenceType",
-                            value: missionForm.evidenceType,
+                            value: "",
+                            values: missionForm.evidenceTypes,
                             options: evidenceFormatOptions,
-                            onChange: (value) => handleMissionFormChange("evidenceType", value as MissionEvidenceFormat),
+                            onChange: () => undefined,
+                            onToggle: (value) => toggleMissionEvidenceType(value as MissionEvidenceFormat),
                             ariaLabel: "select submission format",
                             placeholder: "Select a format of evidence",
                             className: "eca-admin-leaderboard-custom-dropdown--submission-format",
                             showCheckbox: true,
+                            multiple: true,
                         })}
                     </div>
 

@@ -113,6 +113,57 @@
 .eca-admin-dashboard-team-assignment-popover { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 12px; border-radius: 16px; background: #FFF; box-shadow: 0 6px 24px rgba(0, 0, 0, .16); white-space: nowrap; box-sizing: border-box; }
 .eca-admin-dashboard-team-assignment-popover-badge { display: inline-flex; align-items: center; justify-content: center; max-width: 112px; height: 24px; padding: 0 6px; overflow: hidden; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-weight: 700; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
 
+.eca-admin-dashboard-notice-create-button, .eca-admin-dashboard-notice-search-button { background: none !important; border-radius: 0 !important; }
+.eca-admin-dashboard-notice-list { display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; }
+.eca-admin-dashboard-notice-row { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 64px; padding: 0 15px; border: 1px solid #E7E7E7; border-radius: 10px; background: #FFF; cursor: pointer; box-sizing: border-box; }
+.eca-admin-dashboard-notice-row-text { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: flex-start; gap: 0; }
+.eca-admin-dashboard-notice-row-text strong { display: block; max-width: 100%; overflow: hidden; color: #000; font-size: 14px; font-weight: 700; line-height: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.eca-admin-dashboard-notice-row-text small { color: #808080; font-size: 12px; font-weight: 500; line-height: 16px; }
+.eca-admin-dashboard-notice-row em { display: flex; align-items: center; justify-content: center; width: 64px; height: 24px; margin-left: 12px; border-radius: 12px; background: #BDD8FF; color: #0166FF; font-size: 12px; font-style: normal; font-weight: 700; flex: 0 0 auto; }
+
+.eca-admin-dashboard-notice-modal-backdrop { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; background: rgba(107,107,107,.5); backdrop-filter: blur(5px); }
+.eca-admin-dashboard-notice-form-modal { width: 640px; min-height: 640px; padding: 33px 80px 40px; border-radius: 20px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-admin-dashboard-notice-detail-modal { width: 960px; height: 640px; padding: 45px 60px 39px; border-radius: 20px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; display: flex; flex-direction: column; }
+.eca-admin-dashboard-notice-modal-head { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 32px; }
+.eca-admin-dashboard-notice-modal-head h3 { margin: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 24px; }
+.eca-admin-dashboard-notice-modal-head button { position: absolute; top: 0; right: -45px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-admin-dashboard-notice-modal-head > button img { display: block; width: 24px; height: 24px; }
+
+.eca-admin-dashboard-notice-form { display: flex; flex-direction: column; margin-top: 40px; }
+.eca-admin-dashboard-notice-form label { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.eca-admin-dashboard-notice-form label > strong { color: #000; font-size: 16px; font-weight: 700; line-height: 20px; margin-left: 7px;}
+.eca-admin-dashboard-notice-form input { width: 100%; height: 48px; padding: 0 18px; border: 1px solid #E7E7E7; border-radius: 8px; outline: none; color: #000; font-size: 16px; font-weight: 500; box-sizing: border-box; }
+.eca-admin-dashboard-notice-textarea-wrap { position: relative; display: block; width: 100%; height: 160px; }
+.eca-admin-dashboard-notice-textarea-wrap textarea { width: 100%; height: 100%; padding: 21px 20px 43px; border: 1px solid #E7E7E7; border-radius: 8px; outline: none; resize: none; color: #000; font-family: inherit; font-size: 16px; font-weight: 500; line-height: 20px; box-sizing: border-box; }
+.eca-admin-dashboard-notice-textarea-wrap small { position: absolute; right: 21px; bottom: 13px; color: #808080; font-size: 12px; font-weight: 500; }
+.eca-admin-dashboard-notice-form-footer { display: flex; justify-content: center; margin-top: 74px; }
+.eca-admin-dashboard-notice-form-footer button { width: 120px; height: 48px; border: 0; border-radius: 8px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-dashboard-notice-form-footer button:disabled { background: #E7E7E7; color: #808080; cursor: default; }
+
+.eca-admin-dashboard-notice-file-editor { display: flex; align-items: center; gap: 10px; width: 100%; overflow-x: auto; padding: 0 10px 11px 0; }
+.eca-admin-dashboard-notice-add-file { flex: 0 0 auto; min-width: 120px; height: 48px; padding: 0; border: 1px solid #E7E7E7; border-radius: 24px; background: #FFF; color: #808080; font-size: 16px; font-weight: 500; cursor: pointer; }
+.eca-admin-dashboard-notice-file-chip { display: flex; align-items: center; gap: 10px; max-width: 200px; height: 48px; padding: 0 14px 0 20px; border-radius: 999px; background: #E7E7E7; color: #808080; flex: 0 0 auto; box-sizing: border-box; }
+.eca-admin-dashboard-notice-file-chip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 500; }
+.eca-admin-dashboard-notice-file-chip button { width: 20px; height: 20px; padding: 0; border: 0; background: transparent; color: #808080; font-size: 20px; line-height: 20px; cursor: pointer; flex: 0 0 auto; }
+
+.eca-admin-dashboard-notice-detail-body { flex: 1; min-height: 0; margin-top: 40px; padding-right: 14px; overflow-y: auto; }
+.eca-admin-dashboard-notice-detail-body h4 { margin: 0; color: #000; font-size: 32px; font-weight: 700; line-height: 1; }
+.eca-admin-dashboard-notice-detail-body time { display: block; margin-top: 16px; color: #808080; font-size: 20px; font-weight: 700; line-height: 1; }
+.eca-admin-dashboard-notice-detail-body p { margin: 30px 0 0; color: #808080; font-size: 20px; font-weight: 500; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.eca-admin-dashboard-notice-detail-footer { display: flex; justify-content: center; gap: 8px; padding-top: 12px; }
+.eca-admin-dashboard-notice-detail-footer button { width: 120px; height: 48px; border: 0; border-radius: 10px; background: #E7E7E7; color: #808080; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-admin-dashboard-notice-detail-footer button:disabled { opacity: .5; cursor: default; }
+
+.eca-admin-dashboard-notice-detail-files { display: flex; flex-direction: column; gap: 10px; width: 480px; margin-top: 30px; }
+.eca-admin-dashboard-notice-detail-file { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 96px; padding: 0 25px 0 28px; border: 1px solid #E6E6E6; border-radius: 16px; background: #FFF; box-sizing: border-box; }
+.eca-admin-dashboard-notice-detail-file-wrap { display: flex; align-items: center; min-width: 0; flex: 1; }
+.eca-admin-dashboard-notice-detail-file-icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: 19px; flex: 0 0 44px; }
+.eca-admin-dashboard-notice-detail-file-icon .eca-student-assignment-file-svg { width: 36px; height: 41px; display: block; }
+.eca-admin-dashboard-notice-detail-file-info { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+.eca-admin-dashboard-notice-detail-file-info strong { display: block; max-width: 330px; overflow: hidden; color: #808080; font-size: 20px; font-weight: 700; line-height: 24px; text-overflow: ellipsis; white-space: nowrap; } 
+.eca-admin-dashboard-notice-detail-file-info small { color: #808080; font-size: 16px; font-weight: 500; line-height: 20px; }
+.eca-admin-dashboard-notice-detail-file > button { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: 16px; padding: 0; border: 0; background: transparent; cursor: pointer; flex: 0 0 40px; }
+
 ::-webkit-scrollbar {width: 4px; height:4px; color:#D9D9D9;}
 ::-webkit-scrollbar-track {background: transparent;}
 ::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}

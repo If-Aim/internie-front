@@ -183,9 +183,9 @@ export default function EcaStudentLayout(): React.ReactElement {
                                                     {t("ecaStudent.attendance")}
                                                 </NavLink>
 
-                                                <NavLink to={`${basePath}/team-activity`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
+                                                {/* <NavLink to={`${basePath}/team-activity`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"} onClick={handleServicePreparing}>
                                                     {t("ecaStudent.team")}
-                                                </NavLink>
+                                                </NavLink> */}
 
                                                 <NavLink to={`${basePath}/leaderboard`} className={({ isActive }) => isActive ? "eca-student-submenu-item eca-student-submenu-item--active" : "eca-student-submenu-item"}>
                                                     {t("ecaStudent.leaderboard")}

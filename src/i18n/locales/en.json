@@ -213,9 +213,10 @@
 		"defaultClientName": "Client"
 	},
 	"empty": {
-		"title": "No schedules yet.",
-		"subtitle": "Would you like to add one?",
-		"sync": "Sync Calendar"
+		"title": "Recording is being prepared.",
+		"subtitle": "Check your participating programs first.",
+		"sync": "Sync Calendar",
+		"programCta": "View Programs"
 	},
 	"modal": {
 		"desc1": "Record today's experience",

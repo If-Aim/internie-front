@@ -3,12 +3,13 @@ import { createPortal } from "react-dom";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../../../../../api/client";
-import { createExternalActivityStudentInvite, deleteExternalActivity, getAttendanceEventDetail, getAttendanceEvents, getExternalActivity, getExternalActivityAssignments, getExternalActivityStudentInvites, getExternalActivityTeams } from "../../../../../../api/ea";
-import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, ExternalActivityParticipant } from "../../../../../../api/ea";
+import { createExternalActivityNotice, createExternalActivityStudentInvite, deleteExternalActivity, deleteExternalActivityNotice, getAttendanceEventDetail, getAttendanceEvents, getExternalActivity, getExternalActivityAssignments, getExternalActivityNotices, getExternalActivityStudentInvites, getExternalActivityTeams, updateExternalActivityNotice, downloadExternalActivityNoticeFile} from "../../../../../../api/ea";
+import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityNoticeResponse, ExternalActivityParticipant, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, } from "../../../../../../api/ea"; 
 import { formatServerKstDateTimeDateLabelForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import AdminStudentProfileModal from "../AdminStudentProfileModal";
 import type { AdminStudentProfile } from "../AdminStudentProfileModal";
+import { getFileIconByExtension } from "../../../../../student/desktop/eca/dashboard/assignment/fileIcons";
 import "./dashboard.css";
 
 type ActivityStatus = "upcoming" | "ongoing" | "completed" | "delayed";
@@ -81,6 +82,99 @@ interface TeamSummary {
     memberNames: string[];
     primaryAssignment: TeamAssignmentSummary | null;
     extraAssignments: TeamAssignmentSummary[];
+}
+
+type NoticeModalMode = "create" | "detail" | "edit";
+
+const NEW_NOTICE_PERIOD_MS = 10 * 60 * 1000;
+
+function parseNoticeDateTime(value: string): Date | null {
+    const serverDate = parseServerKstDateTime(value);
+
+    if (serverDate) return serverDate;
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getNoticeTime(value: string): number {
+    return parseNoticeDateTime(value)?.getTime() ?? 0;
+}
+
+function sortNotices(notices: ExternalActivityNoticeResponse[]): ExternalActivityNoticeResponse[] {
+    return [...notices].sort((a, b) => getNoticeTime(b.createdAt) - getNoticeTime(a.createdAt));
+}
+
+function formatNoticeDate(value: string, locale: string): string {
+    const date = parseNoticeDateTime(value);
+
+    if (!date) return "-";
+
+    return new Intl.DateTimeFormat(locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    }).format(date);
+}
+
+function getFileExtension(fileName?: string | null): string {
+    if (!fileName) return "";
+
+    const lastDotIndex = fileName.lastIndexOf(".");
+
+    if (
+        lastDotIndex === -1 ||
+        lastDotIndex === fileName.length - 1
+    ) {
+        return "";
+    }
+
+    return fileName.slice(lastDotIndex + 1);
+}
+
+function formatFileSize(sizeBytes?: number | null): string {
+    if (sizeBytes === null || sizeBytes === undefined) {
+        return "";
+    }
+
+    if (sizeBytes < 1024) {
+        return `${sizeBytes} B`;
+    }
+
+    const sizeKb = sizeBytes / 1024;
+
+    if (sizeKb < 1024) {
+        return `${formatFileSizeNumber(sizeKb)} KB`;
+    }
+
+    const sizeMb = sizeKb / 1024;
+
+    if (sizeMb < 1024) {
+        return `${formatFileSizeNumber(sizeMb)} MB`;
+    }
+
+    const sizeGb = sizeMb / 1024;
+
+    return `${formatFileSizeNumber(sizeGb)} GB`;
+}
+
+function formatFileSizeNumber(value: number): string {
+    if (value >= 100) {
+        return Math.round(value).toString();
+    }
+
+    return value.toFixed(1);
+}
+
+function isNoticeNew(value: string, now: Date): boolean {
+    const date = parseNoticeDateTime(value);
+
+    if (!date) return false;
+
+    const elapsed = now.getTime() - date.getTime();
+
+    return elapsed >= 0 && elapsed <= NEW_NOTICE_PERIOD_MS;
 }
 
 function parseApiDate(value: string): Date {
@@ -345,16 +439,32 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     const participantSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
 
     const [teamSearchOpen, setTeamSearchOpen] = React.useState(false);
-    const [teamSearchKeyword, setTeamSearchKeyword] = React.useState("");
+    const [teamSearchKeyword, /*setTeamSearchKeyword*/] = React.useState("");
     const teamSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
+
+    const [notices, setNotices] = React.useState<ExternalActivityNoticeResponse[]>([]);
+    const [noticeLoading, setNoticeLoading] = React.useState(false);
+    const [noticeError, setNoticeError] = React.useState("");
+    const [noticeModalMode, setNoticeModalMode] = React.useState<NoticeModalMode | null>(null);
+    const [selectedNotice, setSelectedNotice] = React.useState<ExternalActivityNoticeResponse | null>(null);
+    const [noticeTitle, setNoticeTitle] = React.useState("");
+    const [noticeContent, setNoticeContent] = React.useState("");
+    const [noticeNewFiles, setNoticeNewFiles] = React.useState<File[]>([]);
+    const [noticeKeepFileIds, setNoticeKeepFileIds] = React.useState<string[]>([]);
+    const noticeFileInputRef = React.useRef<HTMLInputElement | null>(null);
+    const [noticeSaving, setNoticeSaving] = React.useState(false);
+    const [noticeDeleting, setNoticeDeleting] = React.useState(false);
+    const [noticeSearchOpen, setNoticeSearchOpen] = React.useState(false);
+    const [noticeSearchKeyword, setNoticeSearchKeyword] = React.useState("");
+    const noticeSearchWrapRef = React.useRef<HTMLDivElement | null>(null);
 
     const participantListRef = React.useRef<HTMLDivElement | null>(null);
     const teamListRef = React.useRef<HTMLDivElement | null>(null);
     const teamAssignmentMoreButtonRefs = React.useRef<Map<number, HTMLButtonElement>>(new Map());
     const [participantListScrollable, setParticipantListScrollable] = React.useState(false);
-    const [teamListScrollable, setTeamListScrollable] = React.useState(false);
+    const [/*teamListScrollable*/, setTeamListScrollable] = React.useState(false);
     const [openTeamAssignmentMoreId, setOpenTeamAssignmentMoreId] = React.useState<number | null>(null);
-    const [teamAssignmentPopoverPosition, setTeamAssignmentPopoverPosition] = React.useState<{
+    const [/*teamAssignmentPopoverPosition*/, setTeamAssignmentPopoverPosition] = React.useState<{
         top: number;
         left: number;
     } | null>(null);
@@ -480,6 +590,31 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         fetchActivity();
     }, [organization?.organizationId, organizationLoading, externalActivityId, navigate, t, i18n.language]);
 
+    const loadNotices = React.useCallback(async (): Promise<void> => {
+        if (!externalActivityId) return;
+
+        setNoticeLoading(true);
+        setNoticeError("");
+
+        try {
+            const data = await getExternalActivityNotices(externalActivityId);
+
+            setNotices(sortNotices(data));
+        } catch (error) {
+            console.error(error);
+            setNotices([]);
+            setNoticeError(t(`${DASHBOARD_T}.noticeLoadFailed`, {
+                defaultValue: "공지사항을 불러오지 못했습니다.",
+            }));
+        } finally {
+            setNoticeLoading(false);
+        }
+    }, [externalActivityId, t]);
+
+    React.useEffect(() => {
+        void loadNotices();
+    }, [loadNotices]);
+
     React.useEffect(() => { // 대시보드 수정 모달 바깥 클릭 감지
         if (!dashboardMenuOpen) return;
 
@@ -540,6 +675,23 @@ export default function EcaDashboardExActivity(): React.ReactElement {
             document.removeEventListener("mousedown", handleMouseDown);
         };
     }, [teamSearchOpen]);
+
+    React.useEffect(() => { // 곰지 검색 모달 바깥 클릭 감지
+        if (!noticeSearchOpen) return;
+
+        function handleMouseDown(e: MouseEvent): void {
+            if (!noticeSearchWrapRef.current) return;
+            if (noticeSearchWrapRef.current.contains(e.target as Node)) return;
+
+            setNoticeSearchOpen(false);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, [noticeSearchOpen]);
 
     React.useEffect(() => {
         if (openTeamAssignmentMoreId === null) return;
@@ -743,6 +895,174 @@ export default function EcaDashboardExActivity(): React.ReactElement {
     //     }
     // }
 
+    function closeNoticeModal(): void {
+        if (noticeSaving || noticeDeleting) return;
+
+        setNoticeModalMode(null);
+        setSelectedNotice(null);
+        setNoticeTitle("");
+        setNoticeContent("");
+        setNoticeNewFiles([]);
+        setNoticeKeepFileIds([]);
+    }
+
+    function openCreateNoticeModal(): void {
+        setSelectedNotice(null);
+        setNoticeTitle("");
+        setNoticeContent("");
+        setNoticeNewFiles([]);
+        setNoticeKeepFileIds([]);
+        setNoticeModalMode("create");
+    }
+
+    function openNoticeDetail(notice: ExternalActivityNoticeResponse): void {
+        setSelectedNotice(notice);
+        setNoticeModalMode("detail");
+    }
+
+    function openNoticeEdit(): void {
+        if (!selectedNotice) return;
+
+        setNoticeTitle(selectedNotice.title);
+        setNoticeContent(selectedNotice.content);
+        setNoticeNewFiles([]);
+        setNoticeKeepFileIds(
+            (selectedNotice.files ?? []).map((file) => file.fileId)
+        );
+        setNoticeModalMode("edit");
+    }
+
+    function handleNoticeFileChange(
+        e: React.ChangeEvent<HTMLInputElement>
+    ): void {
+        const selectedFiles = Array.from(e.target.files ?? []);
+
+        if (selectedFiles.length === 0) return;
+
+        setNoticeNewFiles((prev) => {
+            const fileMap = new Map<string, File>();
+
+            [...prev, ...selectedFiles].forEach((file) => {
+                const key = `${file.name}-${file.size}-${file.lastModified}`;
+
+                fileMap.set(key, file);
+            });
+
+            return Array.from(fileMap.values());
+        });
+
+        e.target.value = "";
+    }
+
+    function removeNoticeNewFile(targetFile: File): void {
+        setNoticeNewFiles((prev) => prev.filter((file) => (
+            file !== targetFile
+        )));
+    }
+
+    function removeNoticeExistingFile(fileId: string): void {
+        setNoticeKeepFileIds((prev) => prev.filter((keepFileId) => (
+            keepFileId !== fileId
+        )));
+    }
+
+    async function handleSaveNotice(): Promise<void> {
+        if (!externalActivityId || noticeSaving) return;
+
+        const title = noticeTitle.trim();
+        const content = noticeContent.trim();
+
+        if (!title) {
+            window.alert(t(`${DASHBOARD_T}.noticeTitleRequired`, {
+                defaultValue: "공지 제목을 입력해주세요.",
+            }));
+            return;
+        }
+
+        if (!content) {
+            window.alert(t(`${DASHBOARD_T}.noticeContentRequired`, {
+                defaultValue: "공지 내용을 입력해주세요.",
+            }));
+            return;
+        }
+
+        setNoticeSaving(true);
+
+        try {
+            if (noticeModalMode === "edit" && selectedNotice) {
+                const updatedNotice = await updateExternalActivityNotice(
+                    externalActivityId,
+                    selectedNotice.noticeId,
+                    {
+                        title,
+                        content,
+                        files: noticeNewFiles,
+                        keepFileIds: noticeKeepFileIds,
+                    }
+                );
+
+                setNotices((prev) => prev.map((notice) => (
+                    notice.noticeId === updatedNotice.noticeId
+                        ? updatedNotice
+                        : notice
+                )));
+
+                setSelectedNotice(updatedNotice);
+            } else {
+                const createdNotice = await createExternalActivityNotice(externalActivityId, {
+                    title,
+                    content,
+                    files: noticeNewFiles,
+                });
+
+                setNotices((prev) => sortNotices([createdNotice, ...prev]));
+            }
+
+            setNoticeModalMode(null);
+            setSelectedNotice(null);
+            setNoticeTitle("");
+            setNoticeContent("");
+            setNoticeNewFiles([]);
+            setNoticeKeepFileIds([]);
+        } catch (error) {
+            console.error(error);
+            window.alert(t(`${DASHBOARD_T}.noticeSaveFailed`, {
+                defaultValue: "공지사항 저장에 실패했습니다.",
+            }));
+        } finally {
+            setNoticeSaving(false);
+        }
+    }
+
+    async function handleDeleteNotice(): Promise<void> {
+        if (!externalActivityId || !selectedNotice || noticeDeleting) return;
+
+        const confirmed = window.confirm(t(`${DASHBOARD_T}.confirmDeleteNotice`, {
+            defaultValue: "이 공지사항을 삭제하시겠습니까?",
+        }));
+
+        if (!confirmed) return;
+
+        setNoticeDeleting(true);
+
+        try {
+            await deleteExternalActivityNotice(externalActivityId, selectedNotice.noticeId);
+
+            setNotices((prev) => prev.filter((notice) => (
+                notice.noticeId !== selectedNotice.noticeId
+            )));
+            setNoticeModalMode(null);
+            setSelectedNotice(null);
+        } catch (error) {
+            console.error(error);
+            window.alert(t(`${DASHBOARD_T}.noticeDeleteFailed`, {
+                defaultValue: "공지사항 삭제에 실패했습니다.",
+            }));
+        } finally {
+            setNoticeDeleting(false);
+        }
+    }
+
     async function handleDeleteActivity(): Promise<void> {
         if (!organization?.organizationId || !externalActivityId || deletingActivity) {
             return;
@@ -836,6 +1156,21 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         );
     });
 
+    const filteredNotices = notices.filter((notice) => {
+        const keyword = noticeSearchKeyword.trim().toLowerCase();
+
+        if (!keyword) return true;
+
+        return (
+            notice.title.toLowerCase().includes(keyword) ||
+            notice.content.toLowerCase().includes(keyword)
+        );
+    });
+
+    const noticeLocale = i18n.resolvedLanguage?.startsWith("ko")
+        ? "ko-KR"
+        : "en-US";
+        
     function updateRightListScrollableState(): void {
         const participantList = participantListRef.current;
         const teamList = teamListRef.current;
@@ -875,16 +1210,16 @@ export default function EcaDashboardExActivity(): React.ReactElement {
         });
     }
  
-    function toggleTeamAssignmentPopover(teamId: number): void {
-        if (openTeamAssignmentMoreId === teamId) {
-            setOpenTeamAssignmentMoreId(null);
-            setTeamAssignmentPopoverPosition(null);
-            return;
-        }
+    // function toggleTeamAssignmentPopover(teamId: number): void {
+    //     if (openTeamAssignmentMoreId === teamId) {
+    //         setOpenTeamAssignmentMoreId(null);
+    //         setTeamAssignmentPopoverPosition(null);
+    //         return;
+    //     }
 
-        setOpenTeamAssignmentMoreId(teamId);
-        updateTeamAssignmentPopoverPosition(teamId);
-    }
+    //     setOpenTeamAssignmentMoreId(teamId);
+    //     updateTeamAssignmentPopoverPosition(teamId);
+    // }
 
     React.useEffect(() => {
         const frameId = window.requestAnimationFrame(() => {
@@ -1137,7 +1472,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                         </div>
                     </section>
 
-                    <section className={"eca-admin-dashboard-panel-right eca-admin-dashboard-side-panel" + (teamListScrollable ? " is-scrollable" : "")}>
+                    {/* <section className={"eca-admin-dashboard-panel-right eca-admin-dashboard-side-panel" + (teamListScrollable ? " is-scrollable" : "")}>
                         <div className="eca-admin-dashboard-panel-head">
                             <h2>{t(`${DASHBOARD_T}.teamsTitle`, { count: filteredTeams.length })}</h2>
 
@@ -1246,9 +1581,269 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                 ))
                             )}
                         </div>
+                    </section> */}
+                    <section className="eca-admin-dashboard-panel-right eca-admin-dashboard-side-panel eca-admin-dashboard-notice-panel">
+                        <div className="eca-admin-dashboard-panel-head">
+                            <h2>
+                                {t(`${DASHBOARD_T}.noticeTitle`, {
+                                    defaultValue: "Notice",
+                                })} ({notices.length})
+                            </h2>
+
+                            <div className="eca-admin-dashboard-search-wrap" ref={noticeSearchWrapRef}>
+                                <div className="eca-admin-dashboard-panel-actions">
+                                    {!isReadOnly ? (
+                                        <button type="button" className="eca-admin-dashboard-notice-create-button" aria-label={t(`${DASHBOARD_T}.createNoticeAria`, { defaultValue: "공지 작성" })} onClick={openCreateNoticeModal}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                <path d="M11 13H6C5.71667 13 5.47934 12.904 5.288 12.712C5.09667 12.52 5.00067 12.2827 5 12C4.99934 11.7173 5.09534 11.48 5.288 11.288C5.48067 11.096 5.718 11 6 11H11V6C11 5.71667 11.096 5.47934 11.288 5.288C11.48 5.09667 11.7173 5.00067 12 5C12.2827 4.99934 12.5203 5.09534 12.713 5.288C12.9057 5.48067 13.0013 5.718 13 6V11H18C18.2833 11 18.521 11.096 18.713 11.288C18.905 11.48 19.0007 11.7173 19 12C18.9993 12.2827 18.9033 12.5203 18.712 12.713C18.5207 12.9057 18.2833 13.0013 18 13H13V18C13 18.2833 12.904 18.521 12.712 18.713C12.52 18.905 12.2827 19.0007 12 19C11.7173 18.9993 11.48 18.9033 11.288 18.712C11.096 18.5207 11 18.2833 11 18V13Z" fill="#808080" />
+                                            </svg>
+                                        </button>
+                                    ) : null}
+
+                                    <button type="button" className="eca-admin-dashboard-notice-search-button" aria-label={t(`${DASHBOARD_T}.searchNoticeAria`, { defaultValue: "공지 검색" })} onClick={() => setNoticeSearchOpen((prev) => !prev)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+                                            <path d="M11.9767 10.5397H11.2199L10.9516 10.281C11.5503 9.58544 11.9879 8.76614 12.233 7.88173C12.4781 6.99732 12.5247 6.06966 12.3695 5.16514C11.9192 2.50183 9.69661 0.37501 7.01413 0.0492806C6.07107 -0.0700265 5.1132 0.0279852 4.21385 0.335816C3.31449 0.643646 2.49746 1.15314 1.8253 1.8253C1.15314 2.49746 0.643646 3.31449 0.335816 4.21385C0.0279852 5.1132 -0.0700265 6.07107 0.0492806 7.01413C0.37501 9.69661 2.50183 11.9192 5.16514 12.3695C6.06966 12.5247 6.99732 12.4781 7.88173 12.233C8.76614 11.9879 9.58544 11.5503 10.281 10.9516L10.5397 11.2199V11.9767L14.6113 16.0483C15.0041 16.4411 15.6459 16.4411 16.0387 16.0483C16.4315 15.6555 16.4315 15.0137 16.0387 14.6209L11.9767 10.5397ZM6.22855 10.5397C3.84306 10.5397 1.91743 8.61404 1.91743 6.22855C1.91743 3.84306 3.84306 1.91743 6.22855 1.91743C8.61404 1.91743 10.5397 3.84306 10.5397 6.22855C10.5397 8.61404 8.61404 10.5397 6.22855 10.5397Z" fill="#A0A0A0"/>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {noticeSearchOpen ? (
+                                    <div className="eca-admin-dashboard-search-popover">
+                                        <input
+                                            className="eca-admin-dashboard-search-input"
+                                            value={noticeSearchKeyword}
+                                            onChange={(e) => setNoticeSearchKeyword(e.target.value)}
+                                            autoFocus
+                                        />
+
+                                        <button type="button" className="eca-admin-dashboard-search-reset" onClick={() => setNoticeSearchKeyword("")}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+
+                        <div className="eca-admin-dashboard-notice-list">
+                            {noticeLoading ? (
+                                <p className="eca-admin-dashboard-empty">
+                                    {t(`${DASHBOARD_T}.noticeLoading`, {
+                                        defaultValue: "공지사항을 불러오는 중입니다.",
+                                    })}
+                                </p>
+                            ) : noticeError ? (
+                                <p className="eca-admin-dashboard-empty">{noticeError}</p>
+                            ) : notices.length === 0 ? (
+                                <p className="eca-admin-dashboard-empty">
+                                    {t(`${DASHBOARD_T}.noNotices`, {
+                                        defaultValue: "등록된 공지사항이 없습니다.",
+                                    })}
+                                </p>
+                            ) : filteredNotices.length === 0 ? (
+                                <p className="eca-admin-dashboard-empty">
+                                    {t(`${DASHBOARD_T}.noSearchResults`)}
+                                </p>
+                            ) : (
+                                filteredNotices.map((notice) => (
+                                    <button type="button" className="eca-admin-dashboard-notice-row" key={notice.noticeId} onClick={() => openNoticeDetail(notice)}>
+                                        <span className="eca-admin-dashboard-notice-row-text">
+                                            <strong>{notice.title}</strong>
+                                            <small>{formatNoticeDate(notice.createdAt, noticeLocale)}</small>
+                                        </span>
+
+                                        {isNoticeNew(notice.createdAt, now) ? (
+                                            <em>New</em>
+                                        ) : null}
+                                    </button>
+                                ))
+                            )}
+                        </div>
                     </section>
                 </aside>
             </div>
+
+            {noticeModalMode === "create" || noticeModalMode === "edit" ? (
+                createPortal(
+                    <div className="eca-admin-dashboard-notice-modal-backdrop" onMouseDown={closeNoticeModal}>
+                        <div className="eca-admin-dashboard-notice-form-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+                            <div className="eca-admin-dashboard-notice-modal-head">
+                                <h3>Notice</h3>
+
+                                <button type="button" onClick={closeNoticeModal} aria-label={t("common.close")} disabled={noticeSaving}>
+                                    <img src="/icons/x-01.svg" alt=""/>
+                                </button>
+                            </div>
+
+                            <form className="eca-admin-dashboard-notice-form" onSubmit={(e) => {
+                                e.preventDefault();
+                                void handleSaveNotice();
+                            }}>
+                                <label>
+                                    <strong>Title</strong>
+                                    <input
+                                        type="text"
+                                        value={noticeTitle}
+                                        onChange={(e) => setNoticeTitle(e.target.value)}
+                                        maxLength={200}
+                                        placeholder={t(`${DASHBOARD_T}.noticeTitlePlaceholder`, {
+                                            defaultValue: "공지 제목을 입력해주세요.",
+                                        })}
+                                    />
+                                </label>
+
+                                <label>
+                                    <strong>Content</strong>
+
+                                    <span className="eca-admin-dashboard-notice-textarea-wrap">
+                                        <textarea
+                                            value={noticeContent}
+                                            onChange={(e) => setNoticeContent(e.target.value)}
+                                            maxLength={3000}
+                                            placeholder={t(`${DASHBOARD_T}.noticeContentPlaceholder`, {
+                                                defaultValue: "공지 내용을 입력해주세요.",
+                                            })}
+                                        />
+
+                                        <small>{noticeContent.length}/3000</small>
+                                    </span>
+                                </label>
+
+                                <input ref={noticeFileInputRef} type="file" multiple hidden onChange={handleNoticeFileChange}/>
+                                <div className="eca-admin-dashboard-notice-file-editor">
+                                    <button type="button" className="eca-admin-dashboard-notice-add-file" onClick={() => noticeFileInputRef.current?.click()}>
+                                        Add files
+                                    </button>
+
+                                    {selectedNotice?.files
+                                        ?.filter((file) => noticeKeepFileIds.includes(file.fileId))
+                                        .map((file) => (
+                                            <span className="eca-admin-dashboard-notice-file-chip" key={file.fileId}>
+                                                <span>{file.originalFileName ?? `file-${file.fileId}`}</span>
+                                                <button type="button" onClick={() => removeNoticeExistingFile(file.fileId)}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                        <path d="M12 4L4 12M12 12L4 4" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        ))}
+
+                                    {noticeNewFiles.map((file) => (
+                                        <span className="eca-admin-dashboard-notice-file-chip" key={`${file.name}-${file.size}-${file.lastModified}`}>
+                                            <span>{file.name}</span>
+
+                                            <button type="button" onClick={() => removeNoticeNewFile(file)}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                    <path d="M12 4L4 12M12 12L4 4" stroke="#808080" strokeWidth="2" strokeLinecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="eca-admin-dashboard-notice-form-footer">
+                                    <button type="submit" disabled={noticeSaving}>
+                                        {noticeSaving
+                                            ? t(`${DASHBOARD_T}.noticeSaving`, {
+                                                defaultValue: "저장 중",
+                                            })
+                                            : t(`${DASHBOARD_T}.save`, {
+                                                defaultValue: "저장",
+                                            })}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>,
+                    document.body
+                )
+            ) : null}
+
+            {noticeModalMode === "detail" && selectedNotice ? (
+                createPortal(
+                    <div className="eca-admin-dashboard-notice-modal-backdrop" onMouseDown={closeNoticeModal}>
+                        <div className="eca-admin-dashboard-notice-detail-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+                            <div className="eca-admin-dashboard-notice-modal-head">
+                                <h3>Notice</h3>
+
+                                <button type="button" onClick={closeNoticeModal} aria-label={t("common.close")}>
+                                    <img src="/icons/x-01.svg" alt=""/>
+                                </button>
+                            </div>
+
+                            <div className="eca-admin-dashboard-notice-detail-body">
+                                <h4>{selectedNotice.title}</h4>
+                                <time>{formatNoticeDate(selectedNotice.createdAt, noticeLocale)}</time>
+                                <p>{selectedNotice.content}</p>
+                                {selectedNotice.files?.length > 0 ? (
+                                    <div className="eca-admin-dashboard-notice-detail-files">
+                                        {selectedNotice.files.map((file) => (
+                                            <div className="eca-admin-dashboard-notice-detail-file" key={file.fileId}>
+                                                <div className="eca-admin-dashboard-notice-detail-file-wrap"> 
+                                                    <span className="eca-admin-dashboard-notice-detail-file-icon">
+                                                        {getFileIconByExtension(
+                                                            getFileExtension(file.originalFileName)
+                                                        )}
+                                                    </span>
+
+                                                    <span className="eca-admin-dashboard-notice-detail-file-info">
+                                                        <strong>
+                                                            {file.originalFileName ?? `file-${file.fileId}`}
+                                                        </strong>
+
+                                                        <small>
+                                                            {formatFileSize(file.sizeBytes)}
+                                                        </small>
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (!externalActivityId) return;
+
+                                                        void downloadExternalActivityNoticeFile(
+                                                            externalActivityId,
+                                                            selectedNotice.noticeId,
+                                                            file.fileId,
+                                                            file.originalFileName
+                                                        );
+                                                    }}
+                                                    aria-label="Download"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                        <path d="M12 3V15M12 15L7 10M12 15L17 10M5 19H19" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
+
+                            {!isReadOnly ? (
+                                <div className="eca-admin-dashboard-notice-detail-footer">
+                                    <button type="button" onClick={openNoticeEdit}>
+                                        {t(`${DASHBOARD_T}.editAction`, {
+                                            defaultValue: "수정",
+                                        })}
+                                    </button>
+
+                                    <button type="button" onClick={() => void handleDeleteNotice()} disabled={noticeDeleting}>
+                                        {noticeDeleting
+                                            ? t(`${DASHBOARD_T}.noticeDeleting`, {
+                                                defaultValue: "삭제 중",
+                                            })
+                                            : t(`${DASHBOARD_T}.deleteAction`, {
+                                                defaultValue: "삭제",
+                                            })}
+                                    </button>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>,
+                    document.body
+                )
+            ) : null}
 
             {participantInviteOpen ? (
                 <div className="eca-admin-dashboard-invite-modal-backdrop" onMouseDown={() => setParticipantInviteOpen(false)}>

@@ -36,8 +36,7 @@ function isDefaultProfileImage(url?: string | null): boolean {
 }
 
 export default function EcaClientAdminHome(): React.ReactElement{
-    const { t, i18n } = useTranslation();
-    const isKo = (i18n.resolvedLanguage ?? i18n.language).startsWith("ko");
+    const { t } = useTranslation();
     const [me, setMe] = React.useState<UserMe | null>(null);
     const [organizations, setOrganizations] = React.useState<MyOrganizationResponse[]>([]);
     const [selectedOrganizationId, setSelectedOrganizationId] = React.useState<number | null>(() => {
@@ -158,10 +157,10 @@ export default function EcaClientAdminHome(): React.ReactElement{
         void refreshManagedActivities();
     }, [refreshManagedActivities]);
 
-    function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
-        e.preventDefault();
-        alert(isKo ? "서비스 준비중입니다." : "Coming Soon");
-    }
+    // function handleServicePreparing(e: React.MouseEvent<HTMLAnchorElement>): void {
+    //     e.preventDefault();
+    //     alert(isKo ? "서비스 준비중입니다." : "Coming Soon");
+    // }
 
     return (
         <div className="eca-client-admin-page">
@@ -235,13 +234,13 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                             >
                                                 {t("ecaAdmin.attendance")}
                                             </NavLink>
-                                            <NavLink
+                                            {/* <NavLink
                                                 to={`/program-admin/activities/${activityId}/team-activity`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                                 onClick={handleServicePreparing}
                                             >
                                                 {t("ecaAdmin.team")}
-                                            </NavLink>
+                                            </NavLink> */}
                                             <NavLink
                                                 to={`/program-admin/activities/${activityId}/leaderboard`}
                                                 className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}

@@ -1,101 +1,238 @@
-.eca-student-leaderboard-page { width: 100%; max-width: 760px; margin: 0 auto; color: #000; }
-.eca-student-leaderboard-title { margin: 0 0 58px; color: #000; font-size: 28px; font-weight: 800; line-height: 34px; }
-.eca-student-leaderboard-tabs { height: 44px; display: flex; align-items: flex-end; gap: 0; margin-bottom: 12px; }
-.eca-student-leaderboard-tabs button { min-width: 128px; height: 44px; padding: 0 20px 13px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #666; font-size: 16px; font-weight: 800; cursor: pointer; }
+.eca-student-leaderboard-page { width: 100%; min-width: 760px; color: #000; }
+.eca-student-leaderboard-page.is-evidence-downloading { cursor: progress; }
+.eca-student-leaderboard-page.is-evidence-downloading * { cursor: progress !important; }
+
+.eca-student-leaderboard-title { margin: 0 26px 64px; color: #000; font-size: 28px; font-weight: 700; line-height: 34px; }
+.eca-student-leaderboard-tabs { height: 32px; display: flex; align-items: flex-end; gap: 0; margin: 0 25px 8px; }
+.eca-student-leaderboard-tabs button { min-width: 120px; height: 32px; padding: 0 12px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #6B6B6B; font-size: 16px; font-weight: 700; cursor: pointer; }
 .eca-student-leaderboard-tabs button:hover { color: #0166FF; }
 .eca-student-leaderboard-tabs button.is-active { border-bottom-color: #0166FF; color: #0166FF; }
-.eca-student-leaderboard-card { height: 755px; padding: 31px 42px 0; border: 1px solid #D9D9D9; border-radius: 10px; background: #fff; box-sizing: border-box; overflow: hidden; }
-.eca-student-leaderboard-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
-.eca-student-leaderboard-select-button { min-width: 127px; height: 40px; padding: 0 15px; border: 1px solid #D9D9D9; border-radius: 8px; background: #fff; color: #666; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.eca-student-leaderboard-select-button span { margin-left: 18px; color: #808080; font-size: 20px; line-height: 1; }
+.eca-student-leaderboard-card { height: 720px; padding: 29px 28px 0 40px; border: 1px solid #E6E6E6; border-radius: 12px; background: #fff; box-sizing: border-box; overflow: hidden; }
+.eca-student-leaderboard-card--ranking-not-scrollable { padding: 29px 40px 0; }
+.eca-student-leaderboard-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 47px; }
+
+.eca-student-leaderboard-custom-dropdown { --eca-student-dropdown-height: 36px; position: relative; z-index: 20; width: 120px; height: var(--eca-student-dropdown-height); }
+.eca-student-leaderboard-custom-dropdown--open { z-index: 300; }
+.eca-student-leaderboard-select-button { position: relative; z-index: 5; width: 100%; height: var(--eca-student-dropdown-height); padding: 0 11px 0 14px; border: 1px solid #E7E7E7; border-radius: 8px; background: #fff; color: #6B6B6B; font-size: 14px; font-weight: 700; font-family: inherit; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; }
+.eca-student-leaderboard-select-button > span { min-width: 0; margin: 0; overflow: hidden; color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 1; white-space: nowrap; text-overflow: ellipsis; }
+.eca-student-leaderboard-dropdown-arrow { flex-shrink: 0; transition: transform .18s ease; }
+.eca-student-leaderboard-custom-dropdown--open .eca-student-leaderboard-dropdown-arrow { transform: rotate(180deg); }
+.eca-student-leaderboard-custom-dropdown-menu { position: absolute; top: 0; left: 0; z-index: 4; width: 100%; padding: var(--eca-student-dropdown-height) 0 0; border: 1px solid #D9D9D9; border-radius: 8px; background: #fff; box-shadow: 0 0 10px 0 rgba(0, 0, 0, .25); overflow: hidden; box-sizing: border-box; }
+.eca-student-leaderboard-custom-dropdown-option { width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: #fff; color: #6B6B6B; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; text-align: left; box-sizing: border-box; }
+.eca-student-leaderboard-custom-dropdown-option:hover { background: #F6F6F6; }
+.eca-student-leaderboard-custom-dropdown-option--selected { background: #BDD8FF; color: #0166FF; }
+.eca-student-leaderboard-custom-dropdown-option--selected:hover { background: #BDD8FF; }
+
 .eca-student-leaderboard-tool-actions { display: flex; align-items: center; gap: 18px; color: #999; }
 .eca-student-leaderboard-tool-actions button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .eca-student-leaderboard-tool-actions button:hover { color: #0166FF; }
-.eca-student-leaderboard-search-input { width: 100%; height: 42px; margin: -18px 0 26px; padding: 0 14px; border: 1px solid #D9D9D9; border-radius: 8px; box-sizing: border-box; color: #000; font-size: 14px; outline: none; }
-.eca-student-leaderboard-search-input:focus { border-color: #0166FF; }
-.eca-student-leaderboard-list-title { margin: 0 0 14px 18px; color: #777; font-size: 18px; font-weight: 800; line-height: 22px; }
-.eca-student-leaderboard-head { display: grid; grid-template-columns: 210px 1fr 180px; padding: 0 36px 14px 34px; box-sizing: border-box; }
-.eca-student-leaderboard-head span { color: #777; font-size: 13px; font-weight: 500; line-height: 16px; }
+.eca-student-leaderboard-search-wrap { position: relative; display: flex; align-items: center; }
+.eca-student-leaderboard-search-button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-search-button:hover path, .eca-student-leaderboard-search-button.is-active path { fill: #0166FF; }
+.eca-student-leaderboard-search-popover { position: absolute; top: 34px; right: -6px; z-index: 30; width: 240px; height: 48px; padding: 0 18px; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); display: flex; align-items: center; gap: 10px; box-sizing: border-box; }
+.eca-student-leaderboard-search-popover-input { flex: 1; min-width: 0; height: 28px; padding: 0; border: 0; outline: none; color: #000; font-size: 14px; font-weight: 700; box-sizing: border-box; }
+.eca-student-leaderboard-search-popover-input::placeholder { color: #A0A0A0; font-size: 14px; font-weight: 600; }
+.eca-student-leaderboard-search-reset { width: 24px !important; height: 24px !important; padding: 0 !important; border: 0; border-radius: 10px; background: none !important; cursor: pointer; display: flex !important; align-items: center; justify-content: center; flex: 0 0 24px; }
+
+.eca-student-leaderboard-list-title { margin: 0 0 8px 13px; color: #808080; font-size: 18px; font-weight: 700; line-height: 22px; }
+.eca-student-leaderboard-head { display: grid; grid-template-columns: 50px 1fr 168px; gap: 9px; padding: 0 57px 10px 13px; box-sizing: border-box; }
+.eca-student-leaderboard-head span { color: #6B6B6B; font-size: 12px; font-weight: 500; line-height: 16px; text-align: center; }
 .eca-student-leaderboard-ranking-list { height: 560px; padding-right: 10px; overflow-y: auto; }
-.eca-student-leaderboard-ranking-row { width: 100%; min-height: 74px; margin-bottom: 12px; padding: 0 34px 0 28px; border: 1px solid #E2E2E2; border-radius: 10px; background: #fff; box-sizing: border-box; display: grid; grid-template-columns: 34px 48px 1fr 120px 80px; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-ranking-list::-webkit-scrollbar { width: 4px; }
+.eca-student-leaderboard-ranking-row { width: 100%; min-height: 64px; margin-bottom: 10px; padding: 0 45px 0 26px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; box-sizing: border-box; display: grid; grid-template-columns: 24px 43px 1fr 105px 56px; align-items: center; gap: 7px; text-align: left; cursor: pointer; }
 .eca-student-leaderboard-ranking-row:hover, .eca-student-leaderboard-ranking-row.is-selected { background: #EEF5FF; }
-.eca-student-leaderboard-rank-badge { width: 28px; height: 28px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 15px; font-weight: 800; line-height: 28px; text-align: center; }
+.eca-student-leaderboard-rank-badge { width: 24px; height: 24px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 16px; font-weight: 700; line-height: 24px; display: flex; justify-content: center; text-align: center; }
 .eca-student-leaderboard-rank-badge.is-top { background: #0166FF; color: #fff; }
-.eca-student-leaderboard-profile { width: 40px; height: 40px; border-radius: 999px; overflow: hidden; background: #F5F5F5; display: block; }
+
+.eca-student-leaderboard-profile { width: 36px; height: 36px; border-radius: 999px; overflow: hidden; border: 1px solid #E7E7E7; background: #fff; display: block; box-sizing: border-box;}
 .eca-student-leaderboard-profile img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.eca-student-leaderboard-name { min-width: 0; color: #000; font-size: 16px; font-weight: 800; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-student-leaderboard-name em { display: block; margin-top: 4px; color: #000; font-size: 14px; font-style: normal; font-weight: 800; }
-.eca-student-leaderboard-score { color: #000; font-size: 24px; font-weight: 800; line-height: 30px; text-align: right; }
-.eca-student-leaderboard-trend { min-width: 54px; color: #0166FF; font-size: 16px; font-weight: 800; line-height: 20px; white-space: nowrap; }
+.eca-student-leaderboard-name { min-width: 0; color: #000; font-size: 16px; font-weight: 700; line-height: 20px; white-space: break-spaces; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-name em { margin-top: 4px; color: #000; font-size: 12px; font-style: normal; font-weight: 700; }
+.eca-student-leaderboard-score { color: #000; font-size: 24px; font-weight: 700; line-height: 24px; text-align: center; }
+.eca-student-leaderboard-trend { min-width: 56px; color: #0166FF; font-size: 16px; font-weight: 700; line-height: 24px; white-space: nowrap; }
 .eca-student-leaderboard-trend.is-up { color: #FF0000; }
 .eca-student-leaderboard-trend.is-down { color: #0166FF; }
 .eca-student-leaderboard-trend.is-empty { display: block; }
-.eca-student-leaderboard-update-text { margin-top: 26px; color: #666; font-size: 13px; font-weight: 500; }
+.eca-student-leaderboard-update-text { margin-top: 26px; color: #6B6B6B; font-size: 13px; font-weight: 500; }
 .eca-student-leaderboard-state { min-height: 300px; margin: 0; color: #808080; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .eca-student-leaderboard-empty { min-height: 100px; margin: 0; color: #808080; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.eca-student-leaderboard-detail-panel { position: fixed; top: 0; right: 0; z-index: 30; width: 610px; max-width: calc(100vw - 280px); height: 100vh; padding: 52px 70px 60px; background: #fff; box-shadow: -4px 0 14px rgba(0, 0, 0, .16); box-sizing: border-box; overflow-y: auto; }
-.eca-student-leaderboard-detail-close { position: absolute; top: 42px; right: 38px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; color: #000; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.eca-student-leaderboard-detail-profile { display: flex; align-items: center; gap: 28px; margin-bottom: 32px; }
-.eca-student-leaderboard-detail-profile img { width: 104px; height: 104px; border-radius: 999px; object-fit: cover; background: #F5F5F5; }
-.eca-student-leaderboard-detail-profile h2 { max-width: 300px; margin: 0 0 6px; color: #333; font-size: 30px; font-weight: 800; line-height: 34px; }
-.eca-student-leaderboard-detail-profile p { margin: 0; color: #666; font-size: 19px; font-weight: 800; line-height: 24px; }
-.eca-student-leaderboard-total-card { min-height: 164px; margin-bottom: 60px; padding: 27px 32px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; }
-.eca-student-leaderboard-total-card > span { display: block; margin-bottom: 24px; color: #666; font-size: 18px; font-weight: 800; line-height: 22px; }
-.eca-student-leaderboard-total-card strong { display: flex; align-items: flex-end; gap: 18px; margin-bottom: 12px; color: #333; font-size: 40px; font-weight: 800; line-height: 44px; }
-.eca-student-leaderboard-total-card strong em { color: #666; font-size: 18px; font-style: normal; font-weight: 800; line-height: 24px; }
-.eca-student-leaderboard-total-card div { display: flex; align-items: center; gap: 28px; }
-.eca-student-leaderboard-total-card b { color: #666; font-size: 19px; font-weight: 800; line-height: 24px; }
-.eca-student-leaderboard-detail-missions-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-.eca-student-leaderboard-detail-missions-top h3 { margin: 0; color: #666; font-size: 20px; font-weight: 800; line-height: 26px; }
-.eca-student-leaderboard-detail-missions-top div { display: flex; align-items: center; gap: 12px; color: #999; }
-.eca-student-leaderboard-detail-missions-top button { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.eca-student-leaderboard-mission-list { display: flex; flex-direction: column; gap: 10px; }
-.eca-student-leaderboard-mission-row { min-height: 82px; padding: 17px 18px; border: 1px solid #E2E2E2; border-radius: 10px; background: #fff; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.eca-student-leaderboard-mission-main { min-width: 0; }
-.eca-student-leaderboard-mission-main strong { display: block; margin-bottom: 12px; color: #000; font-size: 15px; font-weight: 800; line-height: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-student-leaderboard-mission-main div { display: flex; align-items: center; gap: 8px; }
-.eca-student-leaderboard-mission-main span { height: 24px; padding: 0 14px; border: 1px solid #D9D9D9; border-radius: 999px; color: #666; font-size: 12px; font-weight: 700; line-height: 22px; }
-.eca-student-leaderboard-mission-main em { height: 24px; padding: 0 12px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 13px; font-style: normal; font-weight: 800; line-height: 24px; }
-.eca-student-leaderboard-mission-row time { flex-shrink: 0; color: #777; font-size: 11px; font-weight: 500; line-height: 16px; }
 
-.eca-student-leaderboard-my-quests-card { padding: 34px 42px 0; }
-.eca-student-leaderboard-my-points-card { min-height: 230px; margin-bottom: 40px; padding: 32px 38px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; }
-.eca-student-leaderboard-my-points-card h2 { margin: 0 0 34px; color: #777; font-size: 26px; font-weight: 800; }
-.eca-student-leaderboard-my-points-card strong { display: flex; align-items: flex-end; gap: 24px; color: #333; font-size: 48px; font-weight: 800; line-height: 54px; }
-.eca-student-leaderboard-my-points-card strong em { color: #666; font-size: 23px; font-style: normal; font-weight: 800; line-height: 32px; }
-.eca-student-leaderboard-my-points-card p { margin: 18px 0 0; display: flex; align-items: center; gap: 34px; }
-.eca-student-leaderboard-my-points-card p b { color: #666; font-size: 23px; font-weight: 800; }
-.eca-student-leaderboard-my-points-card > button { width: 255px; height: 68px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 20px; font-weight: 800; cursor: pointer; }
-.eca-student-leaderboard-my-quests-list-section h3 { margin: 0 0 16px; color: #777; font-size: 18px; font-weight: 800; }
-.eca-student-leaderboard-my-quests-head { display: grid; grid-template-columns: 1fr 150px 100px; padding: 0 20px 14px; color: #666; font-size: 13px; font-weight: 500; }
-.eca-student-leaderboard-my-quests-list { height: 370px; padding-right: 8px; overflow-y: auto; }
-.eca-student-leaderboard-my-quest-row { min-height: 68px; margin-bottom: 12px; padding: 0 20px; border: 1px solid #E2E2E2; border-radius: 10px; display: grid; grid-template-columns: 1fr 150px 100px; align-items: center; box-sizing: border-box; }
-.eca-student-leaderboard-my-quest-row strong { min-width: 0; color: #000; font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.eca-student-leaderboard-my-quest-row span { width: fit-content; height: 34px; padding: 0 18px; border: 1px solid #D9D9D9; border-radius: 999px; color: #666; font-size: 13px; font-weight: 700; line-height: 32px; }
-.eca-student-leaderboard-my-quest-row em { width: fit-content; min-width: 68px; height: 34px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 16px; font-style: normal; font-weight: 800; line-height: 34px; text-align: center; }
+@keyframes ecaStudentLeaderboardDetailIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes ecaStudentLeaderboardDetailOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
+
+.eca-student-leaderboard-detail-backdrop { position: fixed; inset: 0; z-index: 490; background: transparent; }
+.eca-student-leaderboard-detail-panel { position: fixed; top: 0; right: 0; z-index: 500; width: min(600px, calc(100vw - 320px)); height: 100dvh; padding: 98px 81px 0 55px; background: #fff; box-shadow: -6px 0 18px rgba(0, 0, 0, .12); box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; animation: ecaStudentLeaderboardDetailIn .22s ease-out both; }
+.eca-student-leaderboard-detail-close { position: absolute; top: 49px; right: 37px; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-detail-profile { display: flex; align-items: center; gap: 28px; margin-bottom: 26px; }
+.eca-student-leaderboard-detail-avatar { width: 120px !important; height: 120px !important; border-radius: 999px; object-fit: cover; background: #F6F6F6; flex-shrink: 0; }
+.eca-student-leaderboard-detail-profile-text { min-width: 0; display: flex; flex-direction: column; gap: 0; }
+.eca-student-leaderboard-detail-name { max-width: 360px; margin: 0; color: #373737; font-size: 36px; font-weight: 700; line-height: 48px; overflow: hidden; text-overflow: ellipsis; white-space: break-spaces; }
+.eca-student-leaderboard-detail-nickname { margin: 0; color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
+
+.eca-student-leaderboard-total-card { width: 100%; padding: 31px 39px 32px; margin-bottom: 77px; border: 1px solid #E7E7E7; border-radius: 12px; background: #fff; box-sizing: border-box; }
+.eca-student-leaderboard-detail-score-label { margin-bottom: 36px; color: #808080; font-size: 24px; font-weight: 700; }
+.eca-student-leaderboard-detail-score-row { display: flex; align-items: flex-end; gap: 18px; margin: 0 8px 21px; }
+.eca-student-leaderboard-detail-score-row strong { color: #373737; font-size: 48px; font-weight: 700; line-height: 1; }
+.eca-student-leaderboard-detail-score-row span { color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-student-leaderboard-detail-place-row { display: flex; align-items: center; color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 26px; margin-left: 16px; }
+.eca-student-leaderboard-detail-place-row-rank { width: 160px; }
+.eca-student-leaderboard-detail-trend { display: flex; align-items: center; gap: 4px; font-size: 24px; font-weight: 700; }
+.eca-student-leaderboard-detail-trend.is-up { color: #0166FF; }
+.eca-student-leaderboard-detail-trend.is-down { color: #F00; }
+.eca-student-leaderboard-detail-trend.is-empty { color: #000; }
+
+.eca-student-leaderboard-detail-missions { min-height: 0; display: flex; flex: 1; flex-direction: column; }
+.eca-student-leaderboard-detail-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.eca-student-leaderboard-detail-list-header h3 { margin: 0; color: #6B6B6B; font-size: 24px; font-weight: 700; line-height: 1; }
+.eca-student-leaderboard-detail-actions { display: flex; align-items: center; gap: 12px; }
+.eca-student-leaderboard-icon-button { position: relative; width: 30px; height: 30px; padding: 0; border: 0; background: transparent; color: #A0A0A0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-icon-button:hover path, .eca-student-leaderboard-search-button--active path { fill: #0166FF; }
+.eca-student-leaderboard-icon-button--filter.eca-student-leaderboard-icon-button--active::after { content: ""; position: absolute; top: 3px; right: 2px; width: 6px; height: 6px; border-radius: 999px; background: #0166FF; }
+.eca-student-leaderboard-icon-button--active svg path { stroke: #0166FF; }
+
+.eca-student-leaderboard-completed-filter-wrap { position: relative; display: flex; align-items: center; }
+.eca-student-leaderboard-completed-filter-popover { position: absolute; top: 34px; right: -10px; z-index: 90; width: 178px; padding: 15px 15px 13px; border-radius: 10px; background: #FFF; box-shadow: 0 0 10px rgba(0,0,0,.25); box-sizing: border-box; }
+.eca-student-leaderboard-completed-filter-option { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-student-leaderboard-completed-filter-radio { width: 12px; height: 12px; display: block; }
+.eca-student-leaderboard-completed-filter-option span { color: #000; font-size: 13px; font-weight: 700; }
+
+.eca-student-leaderboard-detail-search-wrap { position: relative; z-index: 80; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-detail-search-wrap--open { z-index: 500; }
+.eca-student-leaderboard-detail-search-popover { position: absolute; top: calc(100% + 8px); right: 0; z-index: 510; width: 260px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); box-sizing: border-box; }
+.eca-student-leaderboard-detail-search-popover input { width: 100%; height: 48px; padding: 0 16px; border: 0; border-radius: 8px; outline: none; background: #FFF; color: #000; font-size: 16px; font-weight: 700; font-family: inherit; box-sizing: border-box; }
+.eca-student-leaderboard-detail-search-popover input::placeholder { color: #A0A0A0; font-size: 15px; font-weight: 600; }
+
+.eca-student-leaderboard-detail-mission-list { flex: 1; min-height: 480px; overflow-y: auto; padding: 0 8px 60px 0; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+.eca-student-leaderboard-detail-mission-list::-webkit-scrollbar { width: 4px; }
+.eca-student-leaderboard-detail-mission-list::-webkit-scrollbar-track { background: transparent; }
+.eca-student-leaderboard-detail-mission-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #E6E6E6; }
+.eca-student-leaderboard-detail-mission-card { width: 100%; min-height: 100px; padding: 20px 24px 16px 21px; border: 1px solid #E7E7E7; border-radius: 10px; background: #fff; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; box-sizing: border-box; cursor: pointer; font-family: inherit; text-align: left; }
+.eca-student-leaderboard-detail-mission-card:focus-visible { outline: 2px solid #0166FF; outline-offset: 2px; }
+.eca-student-leaderboard-detail-mission-main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.eca-student-leaderboard-detail-mission-main strong { max-width: 360px; color: #000; font-size: 16px; font-weight: 700; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-student-leaderboard-detail-mission-tags { display: flex; align-items: center; gap: 12px; }
+.eca-student-leaderboard-detail-category-tag { min-width: 96px; height: 32px; padding: 0 8px; border-radius: 18px; background: #fff; color: #808080; border: 1px solid #E7E7E7; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-student-leaderboard-detail-point-tag { min-width: 64px; height: 32px; padding: 0; border-radius: 18px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.eca-student-leaderboard-detail-mission-side { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+.eca-student-leaderboard-detail-mission-side span { color: #808080; font-size: 12px; font-weight: 500; white-space: nowrap; line-height: 20px; }
+
+.eca-student-leaderboard-my-quests-card { padding: 32px 34px 0; }
+.eca-student-leaderboard-my-points-card { min-height: 230px; margin: 0 6px 36px; padding: 31px 26px 32px 39px; border: 1px solid #E7E7E7; border-radius: 12px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; }
+.eca-student-leaderboard-my-points-card h2 { margin: 0 0 36px; color: #808080; font-size: 24px; font-weight: 700; }
+.eca-student-leaderboard-my-points-card strong { display: flex; align-items: flex-end; gap: 24px; color: #373737; font-size: 48px; font-weight: 700; line-height: 1; }
+.eca-student-leaderboard-my-points-card strong em { color: #6B6B6B; font-size: 24px; font-style: normal; font-weight: 700; line-height: 1; }
+.eca-student-leaderboard-my-points-card p { margin: 19px 0 0; display: flex; align-items: center; gap: 36px; }
+.eca-student-leaderboard-my-points-card p b { color: #6B6B6B; font-size: 24px; font-weight: 700; }
+.eca-student-leaderboard-my-points-card > button { width: 240px; height: 64px; border: 0; border-radius: 8px; margin-top: auto; background: #0166FF; color: #fff; font-size: 20px; font-weight: 700; cursor: pointer; }
+.eca-student-leaderboard-my-quests-list-section h3 { margin: 0 13px 8px; color: #808080; font-size: 16px; font-weight: 700; line-height: 24px; }
+.eca-student-leaderboard-my-quests-head { display: grid; grid-template-columns: 1fr 96px 64px; gap: 40px; padding: 0 32px 10px 20px; color: #6B6B6B; font-size: 12px; font-weight: 500; line-height: 20px; text-align: center;}
+.eca-student-leaderboard-my-quests-head-name { text-align: left; }
+.eca-student-leaderboard-my-quests-list { height: 370px; padding: 0 8px 24px 0; overflow-y: auto; }
+.eca-student-leaderboard-my-quests-list::-webkit-scrollbar { width: 4px; }
+.eca-student-leaderboard-my-quest-row { min-height: 64px; margin-bottom: 10px; padding: 0 20px; border: 1px solid #E7E7E7; border-radius: 10px; display: grid; grid-template-columns: 1fr 96px 64px; gap: 40px; align-items: center; box-sizing: border-box; }
+.eca-student-leaderboard-my-quest-row strong { min-width: 0; color: #000; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-my-quest-row span { display: inline-flex; align-items: center; justify-content: center; min-width: 96px; height: 32px; padding: 0 8px; border: 1px solid #E7E7E7; border-radius: 999px; color: #808080; font-size: 12px; font-weight: 700; line-height: 1; text-align: center; box-sizing: border-box; }
+.eca-student-leaderboard-my-quest-row em { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 32px; border-radius: 18px; background: #BDD8FF; color: #0166FF; font-size: 14px; font-style: normal; font-weight: 700; line-height: 1; text-align: center; box-sizing: border-box; }
+
 .eca-student-leaderboard-quest-modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(0, 0, 0, .35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
-.eca-student-leaderboard-quest-modal { position: relative; width: 680px; min-height: 690px; padding: 78px 30px 64px; border-radius: 14px; background: #fff; box-shadow: 0 8px 22px rgba(0, 0, 0, .24); box-sizing: border-box; }
-.eca-student-leaderboard-quest-modal-close { position: absolute; top: 34px; right: 34px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; color: #000; font-size: 34px; line-height: 24px; cursor: pointer; }
-.eca-student-leaderboard-quest-progress { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 18px; padding: 0 4px; }
-.eca-student-leaderboard-quest-progress span { height: 12px; border-radius: 999px; background: #BDD8FF; }
+.eca-student-leaderboard-quest-modal { position: relative; width: 640px; min-height: 700px; padding: 80px 21px 60px 27px; border-radius: 16px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-student-leaderboard-quest-modal-close { position: absolute; top: 32px; right: 33px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.eca-student-leaderboard-quest-modal-title { margin: 0 0 24px 9px; color: #000; font-size: 24px; font-weight: 700; }
+.eca-student-leaderboard-quest-modal.is-complete { padding: 0; }
+.eca-student-leaderboard-quest-progress { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; }
+.eca-student-leaderboard-quest-progress span { height: 10px; border-radius: 999px; background: #BDD8FF; }
 .eca-student-leaderboard-quest-progress span.is-active { background: #0166FF; }
-.eca-student-leaderboard-quest-step-label { margin: 0 0 42px; color: #777; font-size: 16px; font-weight: 700; }
-.eca-student-leaderboard-quest-modal-title { margin: 0 0 36px 6px; color: #000; font-size: 26px; font-weight: 800; }
-.eca-student-leaderboard-quest-select-box { height: 322px; padding: 20px; border: 1px solid #D9D9D9; border-radius: 10px; box-sizing: border-box; overflow: hidden; }
-.eca-student-leaderboard-quest-filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.eca-student-leaderboard-quest-filter-row button { height: 38px; padding: 0 18px; border: 1px solid #D9D9D9; border-radius: 999px; background: #fff; color: #777; font-size: 14px; font-weight: 700; cursor: pointer; }
+.eca-student-leaderboard-quest-step-label { margin: 0 0 40px; color: #777; font-size: 14px; font-weight: 700; line-height: 20px; }
+.eca-student-leaderboard-quest-select-box { height: 305px; padding: 20px 33px 100px 20px; border: 1px solid #E7E7E7; border-radius: 10px; box-sizing: border-box; overflow: hidden; }
+.eca-student-leaderboard-quest-filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.eca-student-leaderboard-quest-filter-row button { min-width: 112px; height: 38px; padding: 0 6px; border: 1px solid #E7E7E7; border-radius: 999px; background: #fff; color: #808080; font-size: 14px; font-weight: 500; cursor: pointer; }
 .eca-student-leaderboard-quest-filter-row button.is-active { border-color: #BDD8FF; background: #BDD8FF; color: #0166FF; }
-.eca-student-leaderboard-quest-search { margin-left: auto; }
-.eca-student-leaderboard-quest-search input { width: 110px; height: 36px; border: 0; border-bottom: 1px solid transparent; outline: none; color: #000; font-size: 14px; }
-.eca-student-leaderboard-quest-list { height: 238px; padding-right: 8px; overflow-y: auto; }
-.eca-student-leaderboard-quest-option { width: 100%; min-height: 70px; padding: 0 10px 0 18px; border: 0; background: transparent; display: grid; grid-template-columns: 40px 1fr 130px 100px; align-items: center; gap: 12px; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-quest-list { height: 230px; padding-right: 12px; overflow-y: auto; }
+.eca-student-leaderboard-quest-list::-webkit-scrollbar { width: 4px; }
+.eca-student-leaderboard-quest-search-wrap { position: relative; z-index: 80; display: flex; align-items: center; justify-content: center; margin-left: auto; }
+.eca-student-leaderboard-quest-search-wrap--open { z-index: 500; }
+.eca-student-leaderboard-quest-search-button { min-width: 30px !important; height: 30px; padding: 0 !important; border: 0 !important;  cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-quest-search-button.is-active { background: none !important;}
+.eca-student-leaderboard-quest-search-button:hover path, .eca-student-leaderboard-quest-search-button.is-active path { background: none !important; fill: #0166FF; }
+.eca-student-leaderboard-quest-search-popover { position: absolute; top: calc(100% + 8px); right: 0; z-index: 510; width: 260px; border-radius: 8px; background: #FFF; box-shadow: 0 0 10px rgba(0, 0, 0, 0.25); box-sizing: border-box; }
+.eca-student-leaderboard-quest-search-popover input { width: 100%; height: 48px; padding: 0 16px; border: 0; border-radius: 8px; outline: none; background: #FFF; color: #000; font-size: 16px; font-weight: 700; font-family: inherit; box-sizing: border-box; }
+.eca-student-leaderboard-quest-search-popover input::placeholder { color: #A0A0A0; font-size: 15px; font-weight: 600; }
+.eca-student-leaderboard-quest-complete { min-height: 700px; padding: 258px 140px 97px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+.eca-student-leaderboard-quest-complete-icon { width: 54px; height: 54px; border-radius: 999px; background: #0166FF; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-quest-complete h2 { margin: 11px 0 0; color: #0166FF; font-size: 20px; font-weight: 700; line-height: 24px; }
+.eca-student-leaderboard-quest-complete p { margin: 160px 0 20px; color: rgba(0, 0, 0, 0.50); font-size: 14px; font-weight: 500; line-height: 20px; text-align: center; }
+.eca-student-leaderboard-quest-complete button { width: 353px; height: 60px; border: 0; border-radius: 10px; background: #0166FF; color: #fff; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; }
+
+.eca-student-leaderboard-quest-option { width: 100%; min-height: 56px; margin-bottom: 10px; padding: 0 12px 0 16px; border: 0; background: transparent; display: grid; grid-template-columns: 24px 1fr 60px 1fr; align-items: center; gap: 20px; text-align: left; cursor: pointer; }
 .eca-student-leaderboard-quest-option:disabled { opacity: .45; cursor: not-allowed; }
-.eca-student-leaderboard-quest-radio { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 999px; box-sizing: border-box; }
-.eca-student-leaderboard-quest-option.is-selected .eca-student-leaderboard-quest-radio { border: 8px solid #0166FF; }
-.eca-student-leaderboard-quest-option strong { color: #000; font-size: 15px; font-weight: 800; }
-.eca-student-leaderboard-quest-option em { color: #666; font-size: 13px; font-style: normal; font-weight: 700; }
-.eca-student-leaderboard-quest-option b { width: 84px; height: 40px; border-radius: 999px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 800; line-height: 40px; text-align: center; }
-.eca-student-leaderboard-quest-modal-actions { display: flex; align-items: center; gap: 12px; margin-top: 66px; }
-.eca-student-leaderboard-quest-modal-actions button { width: 128px; height: 50px; border: 0; border-radius: 8px; background: #0166FF; color: #fff; font-size: 20px; font-weight: 800; cursor: pointer; }
+.eca-student-leaderboard-quest-radio { width: 24px; height: 24px; border: 1px solid #D9D9D9; border-radius: 999px; box-sizing: border-box; }
+.eca-student-leaderboard-quest-option.is-selected .eca-student-leaderboard-quest-radio { border: 7px solid #0166FF; }
+.eca-student-leaderboard-quest-option strong { color: #000; font-size: 14px; font-weight: 600; }
+.eca-student-leaderboard-quest-option em { color: #808080; font-size: 12px; font-style: normal; font-weight: 700; text-align: center; }
+.eca-student-leaderboard-quest-option b { min-width: 80px; height: 36px; border-radius: 18px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 700; display:flex; justify-content: center; align-items: center; text-align: center; justify-self: end; }
+
+.eca-student-leaderboard-quest-modal-actions { display: flex; align-items: center; gap: 12px; margin: 63px 3px 0; }
+.eca-student-leaderboard-quest-modal-actions button { width: 128px; height: 48px; border: 0; border-radius: 10px; background: #0166FF; color: #fff; font-size: 20px; font-weight: 700; cursor: pointer; }
 .eca-student-leaderboard-quest-modal-actions button:disabled { opacity: .4; cursor: not-allowed; }
-.eca-student-leaderboard-quest-modal-actions button.is-secondary { border: 1px solid #D9D9D9; background: #fff; color: #777; }
+.eca-student-leaderboard-quest-modal-actions button.is-secondary { border: 1px solid #E7E7E7; background: #fff; color: #808080; }
+
+.eca-student-leaderboard-quest-submit-wrap { width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.eca-student-leaderboard-quest-submit-card { width: 100%; padding: 20px 30px; border: 1px solid #E7E7E7; border-radius: 18px; background: #FFF; box-sizing: border-box; }
+.eca-student-leaderboard-quest-submit-card h3 { margin: 0 11px 16px; color: #000; font-size: 16px; font-weight: 700; line-height: 20px; }
+.eca-student-leaderboard-quest-info-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.eca-student-leaderboard-quest-info-field span { color: #000; font-size: 14px; font-weight: 700; line-height: 16px; margin-left: 19px; }
+.eca-student-leaderboard-quest-info-field input { width: 368px; height: 42px; padding: 0 16px; margin-left: 12px; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; color: #000; font-size: 14px; font-weight: 500; font-family: inherit; box-sizing: border-box; outline: none; }
+.eca-student-leaderboard-quest-info-field.is-short input { width: 200px; }
+.eca-student-leaderboard-quest-file-label { display: block; margin: 4px 0 10px 19px; color: #808080; font-size: 14px; font-weight: 700; line-height: 16px; }
+.eca-student-leaderboard-quest-upload-box { width: 100%; height: 100px; margin-bottom: 20px; border: 1px dashed #E7E7E7; border-radius: 4px; background: #FFF; color: #808080; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit; box-sizing: border-box; }
+.eca-student-leaderboard-quest-upload-box:hover { border-color: #0166FF; background: #F7FBFF; }
+.eca-student-leaderboard-quest-upload-box span { color: #808080; font-size: 12px; font-weight: 500; line-height: 16px; }
+.eca-student-leaderboard-quest-file-list { margin: -6px 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.eca-student-leaderboard-quest-file-item { min-height: 40px; padding: 0; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; }
+.eca-student-leaderboard-quest-file-main { min-width: 0; display: flex; align-items: center; gap: 16px; }
+.eca-student-leaderboard-quest-file-icon { width: 24px; height: 24px; flex: 0 0 24px; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-quest-file-main strong { min-width: 0; color: #000; font-size: 13px; font-weight: 600; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eca-student-leaderboard-quest-file-remove { width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.eca-student-leaderboard-quest-link-area { margin-top: 8px; }
+.eca-student-leaderboard-quest-link-area small { display: block; margin-top: 6px; color: #F00; font-size: 12px; font-weight: 500; }
+.eca-student-leaderboard-quest-link-input { width: 100%; height: 36px; padding: 0 14px; border: 1px solid #E7E7E7; border-radius: 4px; background: #FFF; color: #000; font-size: 12px; font-weight: 500; font-family: inherit; line-height: 36px; outline: none; box-sizing: border-box; }
+.eca-student-leaderboard-quest-link-input::placeholder { color: #808080; }
+.eca-student-leaderboard-quest-link-input.is-invalid { border-color: #F00; }
+.eca-student-leaderboard-quest-modal-actions button:disabled { background: #F1F1F1; color: #A2A2A2; cursor: not-allowed; opacity: 1; }
+
+button.eca-student-leaderboard-mission-row { width: 100%; border: 1px solid #E2E2E2; background: #fff; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-mission-row.is-clickable:hover { background: #EEF5FF; }
+button.eca-student-leaderboard-my-quest-row { width: 100%; background: #fff; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.eca-student-leaderboard-my-quest-row.is-clickable:hover { background: #EEF5FF; }
+
+.eca-student-leaderboard-mission-modal-backdrop { position: fixed; inset: 0; z-index: 1400; background: rgba(107, 107, 107, 0.50); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-mission-modal { position: relative; width: 650px; min-height: 560px; padding: 108px 49px 80px; border-radius: 16px; background: #fff; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25); box-sizing: border-box; }
+.eca-student-leaderboard-mission-modal-close { position: absolute; top: 35px; right: 34px; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-mission-modal-evidence-list { width: 100%; max-width: 552px; display: flex; align-items: center; gap: 10px; justify-content: flex-start; overflow-x: auto; overflow-y: hidden; padding: 0 0 8px; margin-bottom: 22px; box-sizing: border-box; scroll-snap-type: x mandatory; }
+.eca-student-leaderboard-mission-modal-evidence-list::-webkit-scrollbar { height: 7px; }
+.eca-student-leaderboard-mission-modal-evidence-list::-webkit-scrollbar-track { background: transparent; }
+.eca-student-leaderboard-mission-modal-evidence-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #D9D9D9; }
+.eca-student-leaderboard-mission-modal-evidence-img-button, .eca-student-leaderboard-mission-modal-evidence-placeholder, .eca-student-leaderboard-mission-modal-evidence-file, .eca-student-leaderboard-mission-modal-evidence-link { flex: 0 0 160px; width: 160px; height: 160px; min-width: 160px; max-width: 160px; min-height: 160px; max-height: 160px; border-radius: 16px; scroll-snap-align: start; box-sizing: border-box; }
+.eca-student-leaderboard-mission-modal-evidence-img-button { padding: 0; border: 0; background: transparent; cursor: pointer; overflow: hidden; }
+.eca-student-leaderboard-mission-modal-evidence-img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; background: #F5F7FA; display: block; }
+.eca-student-leaderboard-mission-modal-evidence-placeholder { background: #F5F7FA; display: block; }
+.eca-student-leaderboard-mission-modal-evidence-file { padding: 0; border: 0; background: #F5F7FA; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+.eca-student-leaderboard-mission-modal-evidence-file .eca-student-assignment-file-svg { width: 70px; height: 80px; flex: 0 0 auto; }
+.eca-student-leaderboard-mission-modal-evidence-file.is-downloading { cursor: progress; opacity: .65; pointer-events: none; }
+.eca-student-leaderboard-mission-modal-evidence-file:disabled { cursor: progress; opacity: .65; }
+.eca-student-leaderboard-mission-modal-evidence-link { padding: 18px; border: 0; background: #F5F7FA; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-decoration: none; overflow: hidden; }
+.eca-student-leaderboard-mission-modal-evidence-link span { max-width: 100%; color: #334155; font-size: 13px; font-weight: 700; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.eca-student-leaderboard-mission-modal-message { margin: -8px 0 18px; color: #808080; font-size: 14px; font-weight: 700; }
+.eca-student-leaderboard-mission-modal-error { margin: -8px 0 18px; color: #D33; font-size: 14px; font-weight: 700; }
+.eca-student-leaderboard-mission-modal-info { display: flex; flex-direction: column; gap: 20px; }
+.eca-student-leaderboard-mission-modal-info-row { display: grid; grid-template-columns: 144px 1fr; align-items: center; column-gap: 36px; }
+.eca-student-leaderboard-mission-modal-info-row > span { color: #6B6B6B; font-size: 16px; font-weight: 700; line-height: 36px; }
+.eca-student-leaderboard-mission-modal-info-row > strong:not(.eca-student-leaderboard-mission-modal-category):not(.eca-student-leaderboard-mission-modal-point) { min-width: 0; color: #000; font-size: 20px; font-weight: 700; line-height: 36px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.eca-student-leaderboard-mission-modal-category { width: fit-content; height: 36px; padding: 0 18px; border: 1px solid #D9D9D9; border-radius: 18px; background: #fff; color: #6B6B6B; font-size: 20px; font-weight: 700; line-height: 34px; box-sizing: border-box; }
+.eca-student-leaderboard-mission-modal-point { width: fit-content; min-width: 64px; height: 36px; padding: 0 8px; border-radius: 18px; background: #BDD8FF; color: #0166FF; font-size: 20px; font-weight: 700; line-height: 36px; text-align: center; box-sizing: border-box; }
+
+.eca-student-leaderboard-evidence-preview-backdrop { position: fixed; inset: 0; z-index: 1500; background: rgba(0, 0, 0, .45); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 32px; box-sizing: border-box; }
+.eca-student-leaderboard-evidence-preview-modal { position: relative; max-width: min(920px, 100%); max-height: min(760px, 100%); padding: 48px; border-radius: 16px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, .25); box-sizing: border-box; }
+.eca-student-leaderboard-evidence-preview-close { position: absolute; top: 18px; right: 18px; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.eca-student-leaderboard-evidence-preview-img { max-width: 100%; max-height: 660px; object-fit: contain; display: block; }

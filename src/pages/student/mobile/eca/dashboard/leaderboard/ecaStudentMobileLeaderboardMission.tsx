@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, getMyLeaderboardMissionLogs, getMyLeaderboardMissions, submitLeaderboardMission } from "../../../../../../api/ea";
-import type { LeaderboardMissionCategory, LeaderboardMissionResponse, StudentLeaderboardLogResponse } from "../../../../../../api/ea";
+import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, StudentLeaderboardLogResponse } from "../../../../../../api/ea";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 import "./ecaStudentMobileLeaderboard.css";
 
@@ -66,16 +66,41 @@ function getCategoryLabel(value: LeaderboardMissionCategory | null | undefined, 
     });
 }
 
-function getEvidenceTypeLabel(value: LeaderboardMissionResponse["evidenceType"], t: TFunction): string {
-    return t(`${LEADERBOARD_MISSION_T}.evidenceType.${value}`);
+function getMissionEvidenceTypes(mission: Pick<LeaderboardMissionResponse, "evidenceTypes" | "evidenceType">): LeaderboardEvidenceType[] {
+    if (mission.evidenceTypes?.length) return mission.evidenceTypes;
+
+    return mission.evidenceType ? [mission.evidenceType] : [];
 }
 
-function getAcceptByEvidenceType(value: LeaderboardMissionResponse["evidenceType"]): string | undefined {
-    if (value === "IMAGE") return "image/*";
-    if (value === "VIDEO") return "video/*";
-    if (value === "DOCUMENT") return ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx";
+function getEvidenceTypesLabel(types: LeaderboardEvidenceType[], t: TFunction): string {
+    if (types.length === 0) return "-";
 
-    return undefined;
+    return types.map((type) => t(`${LEADERBOARD_MISSION_T}.evidenceType.${type}`, { defaultValue: type })).join(" + ");
+}
+
+function missionAcceptsLink(mission: LeaderboardMissionResponse): boolean {
+    return getMissionEvidenceTypes(mission).includes("LINK");
+}
+
+function missionAcceptsFile(mission: LeaderboardMissionResponse): boolean {
+    return getMissionEvidenceTypes(mission).some((type) => type !== "LINK");
+}
+
+function getAcceptByEvidenceTypes(types: LeaderboardEvidenceType[]): string | undefined {
+    const fileTypes = types.filter((type) => type !== "LINK");
+
+    if (fileTypes.length === 0) return undefined;
+    if (fileTypes.includes("OTHER")) return undefined;
+
+    const accepts = new Set<string>();
+
+    fileTypes.forEach((type) => {
+        if (type === "IMAGE") accepts.add("image/*");
+        if (type === "VIDEO") accepts.add("video/*");
+        if (type === "DOCUMENT") [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx"].forEach((value) => accepts.add(value));
+    });
+
+    return Array.from(accepts).join(",");
 }
 
 function isValidHttpUrl(value: string): boolean {
@@ -231,8 +256,8 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     async function handleSubmit(): Promise<void> {
         if (!externalActivityId || !selectedMission || submitting) return;
 
-        const acceptsLink = selectedMission.evidenceType === "LINK";
-        const acceptsFile = selectedMission.evidenceType !== "LINK";
+        const acceptsLink = missionAcceptsLink(selectedMission);
+        const acceptsFile = missionAcceptsFile(selectedMission);
         const evidenceUrls = evidenceUrlText
             .split("\n")
             .map((url) => url.trim())
@@ -393,8 +418,9 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     function renderSubmitStep(): React.ReactElement | null {
         if (!selectedMission) return null;
 
-        const acceptsLink = selectedMission.evidenceType === "LINK";
-        const acceptsFile = selectedMission.evidenceType !== "LINK";
+        const evidenceTypes = getMissionEvidenceTypes(selectedMission);
+        const acceptsLink = evidenceTypes.includes("LINK");
+        const acceptsFile = evidenceTypes.some((type) => type !== "LINK");
         const evidenceUrls = evidenceUrlText
             .split("\n")
             .map((url) => url.trim())
@@ -419,7 +445,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                         <div className="eca-student-mobile-leaderboard-mission-info-grid">
                             <label>
                                 <span>{t(`${LEADERBOARD_MISSION_T}.submissionFormat`)}</span>
-                                <input value={getEvidenceTypeLabel(selectedMission.evidenceType, t)} readOnly />
+                                <input value={getEvidenceTypesLabel(evidenceTypes, t)} readOnly />
                             </label>
                         </div>
                     </section>
@@ -434,7 +460,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                 <input
                                     ref={fileInputRef}
                                     type="file"
-                                    accept={getAcceptByEvidenceType(selectedMission.evidenceType)}
+                                    accept={getAcceptByEvidenceTypes(evidenceTypes)}
                                     multiple
                                     hidden
                                     onChange={(event) => {

@@ -7,6 +7,17 @@ export type ExternalActivityNoticeRequest = {
     content: string;
 };
 
+export type ExternalActivityNoticeFileResponse = {
+    fileId: string;
+    originalFileName?: string | null;
+    contentType?: string | null;
+    sizeBytes?: number | null;
+};
+
+export type ExternalActivityNoticeType =
+    | "GENERAL"
+    | "ASSIGNMENT_NON_SUBMISSION";
+
 export type ExternalActivityNoticeResponse = {
     noticeId: number;
     externalActivityId: number;
@@ -14,8 +25,19 @@ export type ExternalActivityNoticeResponse = {
     authorName: string;
     title: string;
     content: string;
+    noticeType: ExternalActivityNoticeType;
+    files: ExternalActivityNoticeFileResponse[];
     createdAt: string;
     updatedAt: string;
+};
+
+export type CreateExternalActivityNoticeInput = ExternalActivityNoticeRequest & {
+    files?: File[];
+};
+
+export type UpdateExternalActivityNoticeInput = ExternalActivityNoticeRequest & {
+    files?: File[];
+    keepFileIds?: string[];
 };
 
 /* - Assignment 공통 타입 - */
@@ -454,7 +476,8 @@ export type LeaderboardMissionResponse = {
     points: number;
     maximumPerStudent: number;
     evidenceName?: string | null;
-    evidenceType: LeaderboardEvidenceType;
+    evidenceTypes: LeaderboardEvidenceType[];
+    evidenceType?: LeaderboardEvidenceType | null;
     autoReflect: boolean;
 };
 
@@ -471,7 +494,8 @@ export type LeaderboardMissionRequest = {
     points: number;
     maximumPerStudent: number;
     evidenceName?: string | null;
-    evidenceType: LeaderboardEvidenceType;
+    evidenceTypes: LeaderboardEvidenceType[];
+    evidenceType?: LeaderboardEvidenceType | null;
     autoReflect: boolean;
 };
 
@@ -637,6 +661,36 @@ export type NotificationListResponse = {
 export type NotificationDeleteAllResponse = {
     deletedCount: number;
 };
+
+function buildExternalActivityNoticeForm(
+    input: CreateExternalActivityNoticeInput | UpdateExternalActivityNoticeInput
+): FormData {
+    const formData = new FormData();
+
+    formData.append(
+        "meta",
+        new Blob([
+            JSON.stringify({
+                title: input.title,
+                content: input.content,
+            }),
+        ], { type: "application/json" })
+    );
+
+    input.files
+        ?.filter((file) => file.size > 0)
+        .forEach((file) => {
+            formData.append("files", file);
+        });
+
+    if ("keepFileIds" in input) {
+        input.keepFileIds?.forEach((fileId) => {
+            formData.append("keepFileIds", String(fileId));
+        });
+    }
+
+    return formData;
+}
 
 export async function getNotifications(query?: { unreadOnly?: boolean; page?: number; size?: number }): Promise<NotificationListResponse> {
     const queryString = buildLeaderboardQuery({
@@ -1047,10 +1101,12 @@ export async function getMyLeaderboardSubmissions(
         size: query?.size ?? 20,
     });
 
-    return api<LeaderboardApprovalsResponse>(
+    const response = await api<LeaderboardApiResponse<LeaderboardApprovalsResponse>>(
         `/student/externalActivities/${externalActivityId}/submissions${queryString}`,
         { method: "GET" }
     );
+
+    return response.data;
 }
 
 export async function resubmitMyLeaderboardSubmission(
@@ -1108,6 +1164,52 @@ export async function getStudentLeaderboardCompletedMissions(
     );
 
     return response.data;
+}
+
+export async function downloadMyLeaderboardEvidenceFile(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    fileName?: string | null
+): Promise<void> {
+    const blob = await apiBlob(
+        `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/evidence/download`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fileName?.trim()
+        ? sanitizeDownloadName(fileName)
+        : `leaderboard-evidence-${submissionId}`;
+
+    saveBlob(blob, safeFileName);
+}
+
+export async function downloadMyLeaderboardEvidenceFileById(
+    externalActivityId: number | string,
+    submissionId: number | string,
+    evidenceId: number | string,
+    fallbackFileName = "evidence-file"
+): Promise<void> {
+    const blob = await apiBlob(
+        `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/evidences/${evidenceId}/download`,
+        { method: "GET" }
+    );
+
+    const safeFileName = fallbackFileName.trim()
+        ? sanitizeDownloadName(fallbackFileName)
+        : `leaderboard-evidence-${evidenceId}`;
+
+    saveBlob(blob, safeFileName);
+}
+
+
+/* - 공지 관련 (Student) - */
+export async function getMyExternalActivityNotices(
+    externalActivityId: number | string
+): Promise<ExternalActivityNoticeResponse[]> {
+    return api<ExternalActivityNoticeResponse[]>(
+        `/externalActivities/${externalActivityId}/notices/me`,
+        { method: "GET" }
+    );
 }
 
 
@@ -1433,26 +1535,89 @@ export async function getMyManagedExternalActivitiesByStatus( //나의 대외활
     );
 }
 
-export async function createExternalActivityNotice(externalActivityId: number | string, request: ExternalActivityNoticeRequest): Promise<ExternalActivityNoticeResponse> {
-    return api<ExternalActivityNoticeResponse>(`/externalActivities/${externalActivityId}/notices`, {
-        method: "POST",
-        body: JSON.stringify(request),
-    });
+export async function createExternalActivityNotice(
+    externalActivityId: number | string,
+    input: CreateExternalActivityNoticeInput
+): Promise<ExternalActivityNoticeResponse> {
+    return apiUpload<ExternalActivityNoticeResponse>(
+        `/externalActivities/${externalActivityId}/notices`,
+        buildExternalActivityNoticeForm(input),
+        { method: "POST" }
+    );
 }
 
-export async function getExternalActivityNotices(externalActivityId: number | string): Promise<ExternalActivityNoticeResponse[]> {
-    return api<ExternalActivityNoticeResponse[]>(`/externalActivities/${externalActivityId}/notices`, { method: "GET" });
+export async function createAssignmentNonSubmissionNotice(
+    externalActivityId: number | string,
+    assignmentId: number | string,
+    body: ExternalActivityNoticeRequest
+): Promise<ExternalActivityNoticeResponse> {
+    return api<ExternalActivityNoticeResponse>(
+        `/externalActivities/${externalActivityId}/assignments/${assignmentId}/non-submission-notices`,
+        {
+            method: "POST",
+            body: JSON.stringify(body),
+        }
+    );
 }
 
-export async function updateExternalActivityNotice(externalActivityId: number | string, noticeId: number | string, request: ExternalActivityNoticeRequest): Promise<ExternalActivityNoticeResponse> {
-    return api<ExternalActivityNoticeResponse>(`/externalActivities/${externalActivityId}/notices/${noticeId}`, {
-        method: "PATCH",
-        body: JSON.stringify(request),
-    });
+export async function getExternalActivityNotices(
+    externalActivityId: number | string
+): Promise<ExternalActivityNoticeResponse[]> {
+    return api<ExternalActivityNoticeResponse[]>(
+        `/externalActivities/${externalActivityId}/notices`,
+        { method: "GET" }
+    );
 }
 
-export async function deleteExternalActivityNotice(externalActivityId: number | string, noticeId: number | string): Promise<void> {
-    await api<void>(`/externalActivities/${externalActivityId}/notices/${noticeId}`, { method: "DELETE" });
+export async function getExternalActivityNotice(
+    externalActivityId: number | string,
+    noticeId: number | string
+): Promise<ExternalActivityNoticeResponse> {
+    return api<ExternalActivityNoticeResponse>(
+        `/externalActivities/${externalActivityId}/notices/${noticeId}`,
+        { method: "GET" }
+    );
+}
+
+export async function updateExternalActivityNotice(
+    externalActivityId: number | string,
+    noticeId: number | string,
+    input: UpdateExternalActivityNoticeInput
+): Promise<ExternalActivityNoticeResponse> {
+    return apiUpload<ExternalActivityNoticeResponse>(
+        `/externalActivities/${externalActivityId}/notices/${noticeId}`,
+        buildExternalActivityNoticeForm(input),
+        { method: "PATCH" }
+    );
+}
+
+export async function deleteExternalActivityNotice(
+    externalActivityId: number | string,
+    noticeId: number | string
+): Promise<void> {
+    await api<void>(
+        `/externalActivities/${externalActivityId}/notices/${noticeId}`,
+        { method: "DELETE" }
+    );
+}
+
+export async function downloadExternalActivityNoticeFile(
+    externalActivityId: number | string,
+    noticeId: number | string,
+    fileId: string,
+    fileName?: string | null
+): Promise<void> {
+    const blob = await apiBlob(
+        `/externalActivities/${externalActivityId}/notices/${noticeId}/files/${encodeURIComponent(fileId)}/download`,
+        { method: "GET" }
+    );
+
+    saveBlob(
+        blob,
+        fileName?.trim()
+            ? sanitizeDownloadName(fileName)
+            : `notice-file-${fileId}`
+    );
 }
 
 /* - Assignment 관련 (Admin) - */

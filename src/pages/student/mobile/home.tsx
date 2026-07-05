@@ -190,10 +190,9 @@ function timeRangeText(
 
 type HeaderProps = {
 	onMenuClick: () => void;
-	onAddClick: () => void;
 };
 
-function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
+function Header({ onMenuClick }: HeaderProps): React.ReactElement {
 	const { t } = useTranslation();
 
 	return (
@@ -204,8 +203,8 @@ function Header({ onMenuClick, onAddClick }: HeaderProps): React.ReactElement {
 
 			<div className="app-title">internie</div>
 
-			<button className="iconbtn" aria-label={t("common.add")} onClick={onAddClick}>
-				<img className="icon" src="/icons/plus-01.svg" alt={t("common.add")} />
+			<button className="iconbtn iconbtn--disabled" aria-label={t("common.add")} disabled>
+				<img className="icon" src="/icons/plus-01-a0.svg" alt={t("common.add")} />
 			</button>
 		</div>
 	);
@@ -567,8 +566,8 @@ function MonthHeader({ value, onOpen }: MonthHeaderProps) {
 	);
 }
 
-type EmptyStateProps = { onAddClick: () => void };
-function EmptyState({}: EmptyStateProps): React.ReactElement {
+type EmptyStateProps = { onProgramClick: () => void };
+function EmptyState({ onProgramClick }: EmptyStateProps): React.ReactElement {
 	const { t } = useTranslation();
 	return (
 		<div className="empty">
@@ -578,8 +577,8 @@ function EmptyState({}: EmptyStateProps): React.ReactElement {
 				<br />
 				{t("empty.subtitle")}
 			</p>
-			<button type="button" className="empty-sync" onClick={() => alert("Coming soon")}>
-				{t("empty.sync")}
+			<button type="button" className="empty-sync" onClick={onProgramClick}>
+				{t("empty.programCta")}
 			</button>
 		</div>
 	);
@@ -1249,7 +1248,7 @@ function Home(): React.ReactElement {
 					</div>
 				</div>
 			)}
-			<Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} onAddClick={() => requireAuth("/student/schedule/new", () => navigate("/student/schedule/new"))} />
+			<Header onMenuClick={() => requireAuth("/student", () => setMenuOpen(true))} />
 			<div className={`wrap ${isMenuOpen ? "lock-scroll" : ""}`}>
 				<StudentMobileSideMenu
 					isOpen={isMenuOpen}
@@ -1317,7 +1316,18 @@ function Home(): React.ReactElement {
 						</section>
 					))
 				) : (
-					<EmptyState onAddClick={() => navigate("/student/schedule/new")} />
+					<EmptyState
+						onProgramClick={() => {
+							const firstActivity = myActivities[0];
+
+							if (firstActivity) {
+								requireAuth(`/student/activities/${firstActivity.externalActivityId}/dashboard`, () => navigate(`/student/activities/${firstActivity.externalActivityId}/dashboard`));
+								return;
+							}
+
+							requireAuth("/student", () => setMenuOpen(true));
+						}}
+					/>
 				)}
 
 				<div className="bottom-spacer" />
