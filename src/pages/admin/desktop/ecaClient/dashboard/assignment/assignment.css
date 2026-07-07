@@ -3,6 +3,7 @@
 .eca-admin-assignment-head h1 { margin: 0; color: #000; font-size: 24px; font-weight: 700; line-height: 36px; }
 
 .eca-admin-assignment-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+.eca-admin-assignment-summary-label { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .eca-admin-assignment-summary-card { height: 140px; padding: 26px 24px; border: 1px solid #E6E6E6; border-radius: 10px; background: #FFF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
 .eca-admin-assignment-summary-card span { color: #6B6B6B; font-size: 14px; font-weight: 700; line-height: 20px; }
 .eca-admin-assignment-summary-card strong { color: #000; font-size: 24px; font-weight: 700; line-height: 1; }
@@ -40,7 +41,7 @@
 .eca-admin-assignment-name { text-align: left;}
 
 .eca-admin-assignment-status-dot { display: inline-flex; width: 20px; height: 20px; border-radius: 999px; }
-.eca-admin-assignment-status-dot--upcoming { background: #F6F6F6; }
+.eca-admin-assignment-status-dot--upcoming { background: #E7E7E7; }
 .eca-admin-assignment-status-dot--ongoing { background: #CAFFBF; }
 .eca-admin-assignment-status-dot--completed { background: #BDD8FF; }
 

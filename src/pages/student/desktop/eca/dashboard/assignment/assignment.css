@@ -11,7 +11,7 @@
 .eca-student-assignment-summary-dot { display: inline-flex; width: 20px; height: 20px; border-radius: 999px; }
 .eca-student-assignment-summary-dot--submitted { background: #BDD8FF; }
 .eca-student-assignment-summary-dot--before { background: #E5E5E5; }
-.eca-student-assignment-summary-dot--missing { background: #F3C7C7; }
+.eca-student-assignment-summary-dot--missing { background: #FFF5AD; }
 .eca-student-assignment-summary-card strong { color: #6F6F6F; font-size: 15px; font-weight: 600; line-height: 1.4; }
 .eca-student-assignment-summary-card span { color: #111111; font-size: 28px; font-weight: 700; line-height: 1; }
 

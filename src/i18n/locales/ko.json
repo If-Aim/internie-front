@@ -490,7 +490,7 @@
             "selectParticipant": "참여자를 선택하세요",
             "select": "선택",
             "edit": "편집",
-            "uploadActionPlan": "업로드 하기",
+            "uploadActionPlan": "계획서 업로드",
             "download": "다운로드",
             "existingFileMeta": "기존 파일 · {{size}}KB",
             "save": "저장",
@@ -541,7 +541,7 @@
             "deleteAction": "삭제하기",
             "editAction": "수정하기",
             "classProgress": "활동 진행률",
-            "assignmentSubmission": "활동 수료율",
+            "assignmentSubmission": "과제 완료율",
             "totalParticipants": "전체 참여자 수",
             "personCount": "{{count}}명",
             "assignmentPanelTitle": "과제 현황({{completed}}/{{total}})",
@@ -561,6 +561,7 @@
             "participantLoading": "참여자 목록을 불러오는 중입니다.",
             "noParticipants": "참여자가 없습니다.",
             "noTeams": "팀이 없습니다.",
+
             "noSearchResults": "검색 결과가 없습니다.",
             "noName": "이름 없음",
             "emptyValue": "-",
@@ -569,6 +570,26 @@
             "andMorePerson": "외 {{count}}명",
             "attendanceStart": "Start",
             "attendanceEnd": "End",
+
+            "noticeTitle":"공지",
+            "noticeModalTitle":"공지",
+            "createNoticeAria":"공지 작성",
+            "searchNoticeAria":"공지 검색",
+            "noticeLoadFailed":"공지사항을 불러오지 못했습니다.",
+            "noticeTitleRequired":"공지 제목을 입력해주세요.",
+            "noticeContentRequired":"공지 내용을 입력해주세요.",
+            "noticeSaveFailed":"공지사항 저장에 실패했습니다.",
+            "confirmDeleteNotice":"이 공지사항을 삭제하시겠습니까?",
+            "noticeDeleteFailed":"공지사항 삭제에 실패했습니다.",
+            "noticeLoading":"공지사항을 불러오는 중입니다.",
+            "noNotices":"등록된 공지사항이 없습니다.",
+            "noticeTitlePlaceholder":"공지 제목을 입력해주세요",
+            "noticeContentPlaceholder":"공지 내용을 입력해주세요",
+            "noticeAddFiles":"파일추가",
+            "noticeSaving":"저장 중",
+            "save":"저장",
+            "noticeDeleting":"삭제 중",
+
             "inviteLoadFailed": "참가자 초대코드를 불러오지 못했습니다.",
             "inviteCreatedAndCopied": "참가자 초대코드가 생성되었고 클립보드에 복사되었습니다.",
             "inviteCreated": "참가자 초대코드가 생성되었습니다. 팝업에서 복사할 수 있습니다.",
@@ -807,7 +828,7 @@
 
             "assignmentSummary": {
                 "completed": "완료된 과제",
-                "ongoing": "진행 중인 과제",
+                "inProgress": "진행 중인 과제",
                 "upcoming": "진행 예정 과제"
             },
 
@@ -834,7 +855,7 @@
             "assignmentProgress": {
                 "upcoming": "예정",
                 "inProgress": "진행중",
-                "closed": "마감"
+                "completed": "완료"
             },
 
             "missingNoticeModalTitle": "과제 미제출자 알림 전송",
@@ -1011,16 +1032,16 @@
             "noSubmissionMaterial": "표시할 제출 자료가 없습니다.",
             "loading": "평가 정보를 불러오는 중입니다.",
             "back": "뒤로가기",
-            "evaluationTitle": "Evaluation",
+            "evaluationTitle": "평가",
             "lateSubmitted": "지각 제출",
-            "criteriaTitle": "Criteria",
+            "criteriaTitle": "기준",
             "prevCriterion": "이전 기준",
             "nextCriterion": "다음 기준",
             "scoreAria": "{{score}}점",
-            "feedbackTitle": "Feedback",
+            "feedbackTitle": "피드백",
             "feedbackPlaceholder": "텍스트를 입력하세요...",
-            "saving": "saving...",
-            "save": "save",
+            "saving": "저장 중",
+            "save": "저장",
             "alert": {
                 "selectAllScores": "모든 평가 기준의 점수를 선택해주세요.",
                 "saveSuccess": "평가가 저장되었습니다."
@@ -1399,6 +1420,13 @@
             "managerSearchAria": "담당자 검색",
             "teamSearchAria": "팀 검색",
             "messageAria": "메시지 보내기",
+
+            "noticeTitle":"공지",
+            "noticeModalTitle":"공지",
+            "noticeLoading":"공지사항을 불러오는 중입니다.",
+            "noticeLoadFailed":"공지사항을 불러오지 못했습니다.",
+            "noNotices":"등록된 공지사항이 없습니다.",
+
             "attendanceProgress": {
                 "OPEN": "출석 가능",
                 "SCHEDULED": "예정"
@@ -1416,14 +1444,16 @@
             "loading": "과제 목록을 불러오는 중입니다.",
             "empty": "배정된 과제가 없습니다.",
             "assignmentName": "과제명",
-			"assignmentPeriod": "기간",
-			"teamOrIndividual": "팀/개인",
+            "assignmentPeriod": "기간",
+            "teamOrIndividual": "팀/개인",
             "status": {
-                "evaluated": "평가 완료",
+                "notSubmitted": "미제출",
                 "submitted": "제출 완료",
+                "lateSubmitted": "지각 제출",
+                "evaluated": "평가 완료",
                 "late": "지각 제출",
                 "missing": "미제출",
-                "assigned": "assigned"
+                "assigned": "배정됨"
             },
             "listTitle": "List ({{count}})",
             "searchPlaceholder": "과제명 검색",
@@ -1431,9 +1461,14 @@
             "deadlineOver": "기한 초과",
             "tableStatus": "상태",
             "summary": {
-                "completed": "완료된 과제",
-                "before": "제출 전 과제",
-                "missing": "미제출 과제"
+                "notSubmitted": "미제출 과제",
+                "submitted": "제출 완료 과제",
+                "lateSubmitted": "지각 제출 과제"
+            },
+            "assignmentForm": {
+                "individual": "개인",
+                "teamWithName": "Team · {{teamName}}",
+                "team": "팀"
             },
             "alert": {
                 "filterPreparing": "필터 기능은 준비중입니다."
@@ -1519,12 +1554,20 @@
         },
 
         "attendancePage": {
+            "title": "출석",
+            "score": "점수",
+            "progress": "진행률",
             "fallbackTitle": "출석 현황",
             "loading": "출석 정보를 불러오는 중입니다.",
             "empty": "등록된 출석 이벤트가 없습니다.",
             "type": {
-                "CLASS_START": "시작",
-                "CLASS_END": "종료"
+                "CLASS_START": "Start",
+                "CLASS_END": "End"
+            },
+            "column": {
+                "date": "날짜",
+                "type": "Type",
+                "status": "상태"
             },
             "status": {
                 "NOT_CHECKED": "미체크",
@@ -1544,16 +1587,28 @@
         "attendanceSubmitPage": {
             "fallbackTitle": "출석 현황",
             "type": {
-                "CLASS_START": "시작",
-                "CLASS_END": "종료"
+                "CLASS_START": "Start",
+                "CLASS_END": "End"
             },
             "noCheckedStudents": "아직 출석한 학생이 없습니다.",
             "upload": "업로드",
             "uploading": "업로드 중...",
             "checkIn": "출석 체크",
             "retake": "다시 촬영",
+            "statusTitle":"Status",
+            "myStatusTitle":"내 출석상태",
             "cameraGuide": "셀카를 촬영해주세요",
             "checkInComplete": "출석 체크 완료!",
+            "checkInCompleted": "출석 완료",
+            "searchPlaceholder": "이름 검색",
+            "noSearchResults": "검색 결과가 없습니다.",
+            "participants": "참석자",
+            "camera": {
+                "title": "출석 인증 사진을 촬영해주세요.",
+                "capture": "촬영하기",
+                "mobileGuide": "모바일에서 출석 인증을 해주세요."
+            },
+            "confirm": "확인",
             "alert": {
                 "alreadyChecked": "이미 출석 체크가 완료되었습니다.",
                 "notAvailableTime": "현재 출석 가능한 시간이 아닙니다.",
@@ -1563,7 +1618,10 @@
                 "photoCaptureFailed": "사진을 캡처하지 못했습니다.",
                 "imageOnly": "이미지 파일만 선택할 수 있습니다.",
                 "checkInFailed": "출석 체크에 실패했습니다.",
-                "photoRequired": "업로드할 사진을 선택해주세요."
+                "photoRequired": "업로드할 사진을 선택해주세요.",
+                "cameraPermissionDenied": "카메라 사용 권한을 허용해주세요.",
+                "cameraUnavailable": "카메라를 사용할 수 없습니다. 다른 프로그램에서 카메라를 사용 중인지 확인해주세요.",
+                "captureFailed": "사진 촬영에 실패했습니다."
             },
             "error": {
                 "attendanceNotFound": "출석 정보를 찾을 수 없습니다.",
@@ -1585,11 +1643,84 @@
             }
         },
 
+        "leaderboardPage": {
+            "studentsRanking": "랭킹",
+            "searchPlaceholder": "이름 검색",
+            "searchMissionPlaceholder": "미션 검색",
+            "lastUpdated": "마지막 업데이트",
+            "totalPoints": "총 포인트",
+            "completedMissions": "완료한 미션",
+            "loading": "로딩 중...",
+            "me": "나",
+            "activityFallback": "클래스",
+            "ranking": "랭킹",
+            "rankingEmpty": "랭킹이 없습니다.",
+            "myPoints": "나의 포인트",
+            "missionLog": "미션 기록",
+            "missionLogEmpty": "미션 기록이 없습니다.",
+            "getPoint": "포인트 받기",
+            "categoryFallback": "카테고리",
+            
+            "filter": {
+                "label": "필터",
+                "all": "전체"
+            },
+            "rank": {
+                "place": "{{rank}}위",
+                "rank": "순위",
+                "name": "이름",
+                "totalScore": "총점"
+            },
+            "logStatus": {
+                "pending": "대기",
+                "approved": "승인",
+                "rejected": "반려",
+                "all": "전체"
+            },
+            "category": {
+                "ELICIT": "Elicit",
+                "DISCOVER": "Discover",
+                "INSIGHT": "Insight",
+                "SYNTHESIZE": "Synthesize",
+                "OWN": "Own",
+                "NURTURE": "Nurture"
+            },
+            "column": {
+                "missionName": "미션명",
+                "category": "카테고리",
+                "score": "점수"
+            },
+            "sort": {
+                "alphabetical": "이름순",
+                "highest": "높은 순위순",
+                "lowest": "낮은 순위순"
+            },
+            "missionDetail": {
+                "category": "카테고리",
+                "point": "포인트",
+                "mission": "미션",
+                "submissionTime": "제출 시간"
+            },
+            "aria": {
+                "back": "뒤로가기"
+            },
+            "error": {
+                "activityNotFound": "대외활동 정보를 찾을 수 없습니다.",
+                "leaderboardLoadFailed": "리더보드 정보를 불러오지 못했습니다."
+            }
+        },
+
         "leaderboardMissionPage": {
             "title": "포인트 받기",
             "loading": "로딩 중...",
             "selectMission": "미션 선택",
             "next": "다음",
+            "back": "뒤로",
+            "step": "{{current}}/{{total}} 단계",
+            "searchPlaceholder": "미션 검색",
+            "missionEmpty": "미션이 없습니다.",
+            "dropFilesHere": "여기에 파일을 놓아주세요",
+            "linkInputPlaceholder": "링크를 붙여넣어주세요",
             "uploadEvidence": "인증 자료 업로드",
             "evidence": "인증 항목",
             "submissionFormat": "제출 형식",
@@ -1628,13 +1759,16 @@
                 "VIDEO": "영상",
                 "LINK": "링크",
                 "TEXT": "텍스트",
-                "ETC": "기타"
+                "ETC": "기타",
+                "OTHER": "기타"
             },
             "alert": {
                 "fileRequired": "파일을 제출해주세요.",
                 "linkRequired": "링크를 입력해주세요.",
                 "invalidLink": "http 또는 https로 시작하는 링크를 입력해주세요.",
-                "submitFailed": "미션 제출에 실패했습니다."
+                "submitFailed": "미션 제출에 실패했습니다.",
+                "unsupportedFileType": "지원하지 않는 파일 형식입니다.",
+                "someFilesExcluded": "일부 파일은 지원하지 않는 형식이라 제외되었습니다."
             },
             "aria": {
                 "back": "뒤로가기",
@@ -1646,46 +1780,6 @@
             }
         },
 
-        "leaderboardPage": {
-            "loading": "로딩 중...",
-            "me": "나",
-            "activityFallback": "클래스",
-            "ranking": "랭킹",
-            "rankingEmpty": "랭킹이 없습니다.",
-            "myPoints": "나의 포인트",
-            "missionLog": "미션 기록",
-            "missionLogEmpty": "미션 기록이 없습니다.",
-            "getPoint": "포인트 받기",
-            "categoryFallback": "카테고리",
-            "filter": {
-                "label": "필터",
-                "all": "전체"
-            },
-            "rank": {
-                "place": "{{rank}}위"
-            },
-            "logStatus": {
-                "pending": "대기",
-                "approved": "승인",
-                "rejected": "반려",
-                "all": "전체"
-            },
-            "category": {
-                "ELICIT": "도출",
-                "DISCOVER": "탐색",
-                "INSIGHT": "인사이트",
-                "SYNTHESIZE": "종합",
-                "OWN": "주도",
-                "NURTURE": "육성"
-            },
-            "aria": {
-                "back": "뒤로가기"
-            },
-            "error": {
-                "activityNotFound": "대외활동 정보를 찾을 수 없습니다.",
-                "leaderboardLoadFailed": "리더보드 정보를 불러오지 못했습니다."
-            }
-        },
 
         "organizationDisplayLabel": "기관",
         "organizationLoading": "로딩 중...",

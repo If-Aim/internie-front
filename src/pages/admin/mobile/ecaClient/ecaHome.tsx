@@ -32,7 +32,16 @@ function getActivityIdFromPath(pathname: string): number | null {
     return Number.isFinite(activityId) ? activityId : null;
 }
 
+function isAssignmentEvaluationRoute(pathname: string, activityId: number): boolean {
+    return new RegExp(`^/program-admin/activities/${activityId}/assignment/[^/]+/evaluation/[^/]+/?$`).test(pathname);
+}
+
 function isActivityRouteActive(pathname: string, activityId: number, menuPath: string): boolean {
+    const isAssignmentEvaluationActive = isAssignmentEvaluationRoute(pathname, activityId);
+
+    if (menuPath === "assignment" && isAssignmentEvaluationActive) return false;
+    if (menuPath === "evaluation" && isAssignmentEvaluationActive) return true;
+
     const basePath = `/program-admin/activities/${activityId}/${menuPath}`;
     return pathname === basePath || pathname.startsWith(`${basePath}/`);
 }

@@ -35,6 +35,10 @@ function isDefaultProfileImage(url?: string | null): boolean {
     return url.toLowerCase().includes("default");
 }
 
+function isAssignmentEvaluationRoute(pathname: string, activityId: number): boolean {
+    return new RegExp(`^/program-admin/activities/${activityId}/assignment/[^/]+/evaluation/[^/]+/?$`).test(pathname);
+}
+
 export default function EcaClientAdminHome(): React.ReactElement{
     const { t } = useTranslation();
     const [me, setMe] = React.useState<UserMe | null>(null);
@@ -182,6 +186,7 @@ export default function EcaClientAdminHome(): React.ReactElement{
                         managedActivities.map((activity) => {
                             const activityId = activity.externalActivityId;
                             const isOpen = openedActivityIds.includes(activityId);
+                            const isAssignmentEvaluationActive = isAssignmentEvaluationRoute(pathname, activityId);
                             const isActivityActive = pathname.startsWith(`/program-admin/activities/${activityId}/dashboard`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/assignment`)
                                 || pathname.startsWith(`/program-admin/activities/${activityId}/evaluation`)
@@ -218,13 +223,13 @@ export default function EcaClientAdminHome(): React.ReactElement{
                                             </NavLink>
                                             <NavLink
                                                 to={`/program-admin/activities/${activityId}/assignment`}
-                                                className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
+                                                className={({ isActive }) => isActive && !isAssignmentEvaluationActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
                                                 {t("ecaAdmin.assignment")}
                                             </NavLink>
                                             <NavLink
                                                 to={`/program-admin/activities/${activityId}/evaluation`}
-                                                className={({ isActive }) => isActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
+                                                className={({ isActive }) => isActive || isAssignmentEvaluationActive ? "eca-client-admin-submenu-item eca-client-admin-submenu-item--active" : "eca-client-admin-submenu-item"}
                                             >
                                                 {t("ecaAdmin.evaluation")}
                                             </NavLink>

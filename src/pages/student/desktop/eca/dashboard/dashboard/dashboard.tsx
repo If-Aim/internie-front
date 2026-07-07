@@ -5,7 +5,8 @@ import type { TFunction } from "i18next";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { downloadExternalActivityNoticeFile, getMyExternalActivityNotices, getMyAttendanceEvents, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, /*getMyExternalActivityTeams*/} from "../../../../../../api/ea";
 import type { AttendanceEventProgress, AttendanceEventType, AttendanceStatus, ExternalActivityNoticeResponse, MyAttendanceEventResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, /*TeamResponse*/ } from "../../../../../../api/ea";
-import { getUserDateOnly, getUserTimeZone, parseServerKstDateTime, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
+import { formatServerKstDateTimeDateLabelForUser, getUserDateOnly, parseServerKstDateTime, serverKstDateTimeToUserDateOnly } from "../../../../../../utils/dateTime";
+import { getFileExtension } from "../../../../../../utils/file";
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import { getFileIconByExtension } from "../assignment/fileIcons";
 import "./dashboard.css";
@@ -179,27 +180,6 @@ function getAttendanceBaseDateTime(event: MyAttendanceEventResponse): string | n
     return event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
 }
 
-function formatAttendanceDateLabel(value?: string | null): string {
-    if (!value) return "-";
-
-    const date = parseServerKstDateTime(value);
-
-    if (!date) return "-";
-
-    const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: getUserTimeZone(),
-        month: "short",
-        day: "numeric",
-        weekday: "short",
-    }).formatToParts(date);
-
-    const month = parts.find((part) => part.type === "month")?.value ?? "";
-    const day = parts.find((part) => part.type === "day")?.value ?? "";
-    const weekday = parts.find((part) => part.type === "weekday")?.value ?? "";
-
-    return `${month} ${day}, ${weekday}`;
-}
-
 function getAttendanceStatusLabel(status: AttendanceStatus, progress: AttendanceEventProgress, t: TFunction): string {
     if (status !== "NOT_CHECKED") {
         return t(`${ATTENDANCE_T}.status.${status}`);
@@ -371,21 +351,6 @@ function formatNoticeFileSize(sizeBytes?: number | null): string {
     return `${formatFileSizeNumber(sizeGb)} GB`;
 }
 
-function getFileExtension(fileName?: string | null): string {
-    if (!fileName) return "";
-
-    const lastDotIndex = fileName.lastIndexOf(".");
-
-    if (
-        lastDotIndex === -1 ||
-        lastDotIndex === fileName.length - 1
-    ) {
-        return "";
-    }
-
-    return fileName.slice(lastDotIndex + 1);
-}
-
 // function toTeamMemberSummaries(teams: TeamResponse[], myUserId: number | null | undefined, t: TFunction): PersonSummary[] {
 //     return teams.flatMap((team) => (
 //         team.members
@@ -408,7 +373,7 @@ function getFileExtension(fileName?: string | null): string {
 // }
 
 export default function EcaStudentDashboard(): React.ReactElement {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
     const { /*me,*/ activities } = useOutletContext<EcaStudentOutletContext>();
@@ -727,7 +692,7 @@ export default function EcaStudentDashboard(): React.ReactElement {
                             ) : (
                                 visibleAttendances.map((attendance) => (
                                     <button type="button" className="eca-student-dashboard-attendance-row" key={attendance.eventId} onClick={openAttendancePage}>
-                                        <strong>{formatAttendanceDateLabel(attendance.baseAt)}</strong>
+                                        <strong>{formatServerKstDateTimeDateLabelForUser(attendance.baseAt, "-", i18n.resolvedLanguage ?? i18n.language)}</strong>
 
                                         <span>{getAttendanceTypeLabel(attendance.type, t)}</span>
 
@@ -841,7 +806,7 @@ export default function EcaStudentDashboard(): React.ReactElement {
                     </section> */}
                     <section className="eca-student-dashboard-side-panel eca-student-dashboard-notice-panel">
                         <div className="eca-student-dashboard-panel-head">
-                            <h2>Notice ({notices.length})</h2>
+                            <h2>{t(`${DASHBOARD_T}.noticeTitle`)}({notices.length})</h2>
                         </div>
 
                         <div className="eca-student-dashboard-notice-list">
@@ -861,12 +826,7 @@ export default function EcaStudentDashboard(): React.ReactElement {
                                 </p>
                             ) : (
                                 notices.map((notice) => (
-                                    <button
-                                        type="button"
-                                        className="eca-student-dashboard-notice-row"
-                                        key={notice.noticeId}
-                                        onClick={() => openNoticeDetail(notice)}
-                                    >
+                                    <button type="button" className="eca-student-dashboard-notice-row" key={notice.noticeId} onClick={() => openNoticeDetail(notice)}>
                                         <span>
                                             <strong>{notice.title}</strong>
                                             <small>{formatNoticeDate(notice.createdAt)}</small>
@@ -885,22 +845,11 @@ export default function EcaStudentDashboard(): React.ReactElement {
                 {selectedNotice ? (
                     createPortal(
                         <div className="eca-student-dashboard-notice-modal-backdrop" onMouseDown={closeNoticeDetail}>
-                            <div
-                                className="eca-student-dashboard-notice-detail-modal"
-                                onMouseDown={(e) => e.stopPropagation()}
-                                role="dialog"
-                                aria-modal="true"
-                            >
+                            <div className="eca-student-dashboard-notice-detail-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                                 <div className="eca-student-dashboard-notice-modal-head">
-                                    <h3>Notice</h3>
+                                    <h3>{t(`${DASHBOARD_T}.noticeModalTitle`)}</h3>
 
-                                    <button
-                                        type="button"
-                                        onClick={closeNoticeDetail}
-                                        aria-label={t(`${COMMON_T}.close`, {
-                                            defaultValue: "Close",
-                                        })}
-                                    >
+                                    <button type="button" onClick={closeNoticeDetail} aria-label={t(`${COMMON_T}.close`, { defaultValue: "Close",})}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
                                             <path d="M18 6L6 18M6 6L18 18" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
                                         </svg>
@@ -919,16 +868,9 @@ export default function EcaStudentDashboard(): React.ReactElement {
                                             {selectedNotice.files.map((file) => (
                                                 <div className="eca-student-dashboard-notice-file-card" key={file.fileId}>
                                                     <div className="eca-student-dashboard-notice-file-wrap">
-                                                        <span className="eca-student-dashboard-notice-file-icon">
-                                                            {getFileIconByExtension(
-                                                                getFileExtension(file.originalFileName)
-                                                            )}
-                                                        </span>
-
+                                                        <span className="eca-student-dashboard-notice-file-icon">{getFileIconByExtension(getFileExtension(file.originalFileName, ""))}</span>
                                                         <span className="eca-student-dashboard-notice-file-info">
-                                                            <strong>
-                                                                {file.originalFileName ?? `file-${file.fileId}`}
-                                                            </strong>
+                                                            <strong>{file.originalFileName ?? `file-${file.fileId}`}</strong>
                                                             <small>{formatNoticeFileSize(file.sizeBytes)}</small>
                                                         </span>
                                                     </div>

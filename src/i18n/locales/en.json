@@ -540,8 +540,8 @@
 			"deleteInProgress": "Deleting",
 			"deleteAction": "Delete",
 			"editAction": "Edit",
-			"classProgress": "Class Progress",
-			"assignmentSubmission": "Assignment Submission",
+			"classProgress": "Program Progress",
+			"assignmentSubmission": "Assignment Submission Rate",
 			"totalParticipants": "Total Participants",
 			"personCount": "{{count}}",
 			"assignmentPanelTitle": "Assignments",
@@ -569,6 +569,26 @@
 			"andMorePerson": "and {{count}} others",
 			"attendanceStart": "Start",
 			"attendanceEnd": "End",
+
+			"noticeTitle": "Notices",
+			"noticeModalTitle": "Notice",
+			"createNoticeAria": "Create a notice",
+			"searchNoticeAria": "Search notices",
+			"noticeLoadFailed": "Failed to load notices.",
+			"noticeTitleRequired": "Please enter a notice title.",
+			"noticeContentRequired": "Please enter notice details.",
+			"noticeSaveFailed": "Failed to save the notice.",
+			"confirmDeleteNotice": "Are you sure you want to delete this notice?",
+			"noticeDeleteFailed": "Failed to delete the notice.",
+			"noticeLoading": "Loading notices...",
+			"noNotices": "No notices have been posted.",
+			"noticeTitlePlaceholder": "Enter a notice title",
+			"noticeContentPlaceholder": "Enter notice details",
+			"noticeAddFiles": "Add Files",
+			"noticeSaving": "Saving...",
+			"save": "Save",
+			"noticeDeleting": "Deleting...",
+
 			"inviteLoadFailed": "Failed to load the participant invite code.",
 			"inviteCreatedAndCopied": "The participant invite code has been created and copied to the clipboard.",
 			"inviteCreated": "The participant invite code has been created. You can copy it from the popup.",
@@ -661,7 +681,7 @@
 			"newAssignmentTitle": "Create New Assignment",
 			"tempSave": "Save Draft",
 			"assignmentName": "Assignment Name",
-			"enterContent": "Enter content",
+			"enterContent": "Enter title",
 			"assignmentPeriod": "Available",
 
 			"assignmentSaveFailed": "Failed to save the assignment.",
@@ -807,7 +827,7 @@
 			"assignmentLoadFailed": "Failed to load the assignment list.",
 			"assignmentSummary": {
 				"completed": "Completed",
-				"ongoing": "Ongoing",
+				"inProgress": "In Progress",
 				"upcoming": "Scheduled"
 			},
 			
@@ -834,7 +854,7 @@
 			"assignmentProgress": {
 				"upcoming": "Scheduled",
 				"inProgress": "In Progress",
-				"closed": "Closed"
+				"completed": "Completed"
 			},
 
 			"missingNoticeModalTitle": "Send Missing Assignment Reminder",
@@ -1019,7 +1039,7 @@
 			"feedbackTitle": "Feedback",
 			"feedbackPlaceholder": "Enter text...",
 			"saving": "saving...",
-			"save": "save",
+			"save": "Save",
 			"alert": {
 				"selectAllScores": "Please select scores for all evaluation criteria.",
 				"saveSuccess": "Evaluation has been saved."
@@ -1397,6 +1417,13 @@
 			"managerSearchAria": "Search managers",
 			"teamSearchAria": "Search team",
 			"messageAria": "Send message",
+
+			"noticeTitle":"Notices",
+            "noticeModalTitle":"Notice",
+            "noticeLoading":"Loading notices...",
+            "noticeLoadFailed":"Failed to load notices.",
+            "noNotices":"No notices have been posted.",
+
 			"attendanceProgress": {
 				"OPEN": "open",
 				"SCHEDULED": "scheduled"
@@ -1407,7 +1434,7 @@
 			},
 			"teamMemberDescription": "{{teamName}} · {{role}}"
 		},
-
+			
 		"assignmentPage": {
 			"title": "Assignments",
 			"filter": "Filter",
@@ -1417,28 +1444,29 @@
 			"assignmentPeriod": "Available",
 			"teamOrIndividual": "Type",
 			"status": {
-				"evaluated": "graded",
-				"submitted": "completed",
-				"late": "late",
-				"missing": "missing",
-				"assigned": "assigned"
+				"notSubmitted": "Not Submitted",
+				"submitted": "Submitted",
+				"lateSubmitted": "Late Submitted",
+				"evaluated": "Graded",
+				"late": "Late Submitted",
+				"missing": "Not Submitted",
+				"assigned": "Assigned"
 			},
 			"listTitle": "List ({{count}})",
 			"searchPlaceholder": "Search by assignment name",
 			"noSearchResults": "No results found.",
-			"deadlineOver": "Past due",
+			"deadlineOver": "Past Due",
 			"tableStatus": "Status",
 			"summary": {
-				"completed": "Completed",
-				"before": "Assigned",
-				"missing": "Missing"
+				"notSubmitted": "Not Submitted",
+				"submitted": "Submitted",
+				"lateSubmitted": "Late Submitted"
 			},
 			"assignmentForm": {
 				"individual": "Indiv.",
 				"team": "Team",
 				"teamWithName": "Team · {{teamName}}"
 			},
-
 			"alert": {
 				"filterPreparing": "The filter is being prepared."
 			},
@@ -1524,6 +1552,9 @@
 		},
 
 		"attendancePage": {
+			"title": "My attendance",
+            "score": "Score",
+            "progress": "Progress",
 			"fallbackTitle": "Attendance",
 			"loading": "Loading attendance information.",
 			"empty": "No attendance events have been registered.",
@@ -1531,6 +1562,11 @@
 				"CLASS_START": "Start",
 				"CLASS_END": "End"
 			},
+			"column": {
+                "date": "Date",
+                "type": "Type",
+                "status": "Status"
+            },
 			"status": {
 				"NOT_CHECKED": "Not Checked",
 				"PRESENT": "Present",
@@ -1557,8 +1593,20 @@
 			"uploading": "Uploading...",
 			"checkIn": "Check-In",
 			"retake": "Retake",
+			"statusTitle":"Status",
+			"myStatusTitle":"My Status",
 			"cameraGuide": "Please take a selfie",
 			"checkInComplete": "Check-In Complete!",
+			"checkInCompleted": "Submitted",
+			"searchPlaceholder": "Search by name",
+			"noSearchResults": "No results found.",
+			"participants": "Participants",
+			"camera": {
+				"title": "Take a photo for attendance verification.",
+				"capture": "Capture",
+				"mobileGuide": "Please complete attendance verification on mobile."
+			},
+			"confirm": "Confirm",
 			"alert": {
 				"alreadyChecked": "Check-in has already been completed.",
 				"notAvailableTime": "This is not an available check-in time.",
@@ -1568,7 +1616,10 @@
 				"photoCaptureFailed": "Failed to capture the photo.",
 				"imageOnly": "Only image files can be selected.",
 				"checkInFailed": "Failed to check in.",
-				"photoRequired": "Please select a photo to upload."
+				"photoRequired": "Please select a photo to upload.",
+				"cameraPermissionDenied": "Please allow camera access.",
+				"cameraUnavailable": "The camera is unavailable. Check whether another application is using it.",
+				"captureFailed": "Failed to capture photo."	
 			},
 			"error": {
 				"attendanceNotFound": "Attendance information could not be found.",
@@ -1591,6 +1642,12 @@
 		},
 
 		"leaderboardPage": {
+			"studentsRanking": "Students Ranking",
+			"searchPlaceholder": "Search student",
+			"searchMissionPlaceholder": "Search mission",
+			"lastUpdated": "Last updated",
+			"totalPoints": "Total Points",
+			"completedMissions": "Completed Missions",
 			"loading": "Loading...",
 			"me": "Me",
 			"activityFallback": "Class",
@@ -1601,12 +1658,16 @@
 			"missionLogEmpty": "Mission log is empty.",
 			"getPoint": "Get Point",
 			"categoryFallback": "Category",
+		
 			"filter": {
 				"label": "Filter",
 				"all": "All"
 			},
 			"rank": {
-				"place": "{{rankOrdinal}} Place"
+				"place": "{{rankOrdinal}} Place",
+				"rank": "Rank",
+				"name": "Name",
+				"totalScore": "Total Score"
 			},
 			"logStatus": {
 				"pending": "Pending",
@@ -1622,6 +1683,22 @@
 				"OWN": "Own",
 				"NURTURE": "Nurture"
 			},
+			"column": {
+				"missionName": "Mission Name",
+				"category": "Category",
+				"score": "Score"
+			},
+			"sort": {
+				"alphabetical": "Alphabetical",
+				"highest": "Highest",
+				"lowest": "Lowest"
+			},
+			"missionDetail": {
+				"category": "Category",
+				"point": "Point",
+				"mission": "Mission",
+				"submissionTime": "Submission Time"
+			},
 			"aria": {
 				"back": "Back"
 			},
@@ -1636,6 +1713,12 @@
 			"loading": "Loading...",
 			"selectMission": "Select a Mission",
 			"next": "Next",
+			"back": "Back",
+			"step": "Step {{current}} of {{total}}",
+			"searchPlaceholder": "Search mission",
+			"missionEmpty": "No missions.",
+			"dropFilesHere": "Drop files here",
+			"linkInputPlaceholder": "Paste your link here",
 			"uploadEvidence": "Upload Evidence",
 			"evidence": "Evidence",
 			"submissionFormat": "Submission Format",
@@ -1674,13 +1757,16 @@
 				"VIDEO": "Video",
 				"LINK": "Link",
 				"TEXT": "Text",
-				"ETC": "Other"
+				"ETC": "Other",
+				"OTHER": "Other"
 			},
 			"alert": {
 				"fileRequired": "Please submit a file.",
 				"linkRequired": "Please enter a link.",
 				"invalidLink": "Please enter a link that starts with http or https.",
-				"submitFailed": "Failed to submit the mission."
+				"submitFailed": "Failed to submit the mission.",
+				"unsupportedFileType": "This file type is not supported.",
+				"someFilesExcluded": "Some unsupported files were excluded."
 			},
 			"aria": {
 				"back": "Back",

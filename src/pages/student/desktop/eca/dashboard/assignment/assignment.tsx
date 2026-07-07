@@ -8,7 +8,7 @@ import { formatServerKstDateAndTimeCompactForUser, parseServerKstDateTime } from
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import "./assignment.css";
 
-type AssignmentStatus = "before" | "submitted" | "lateSubmitted" | "missing";
+type AssignmentStatus = "notSubmitted" | "submitted" | "lateSubmitted";
 type AssignmentFilterStatus = AssignmentStatus;
 
 type StudentAssignmentViewModel = {
@@ -22,34 +22,34 @@ type StudentAssignmentViewModel = {
     endTime?: string | null;
     deadlineAt?: string | null;
     status: AssignmentStatus;
+    isOverdue: boolean;
 };
 
-const assignmentStatuses: AssignmentFilterStatus[] = ["before", "submitted", "lateSubmitted", "missing"];
+const assignmentStatuses: AssignmentFilterStatus[] = ["notSubmitted", "submitted", "lateSubmitted"];
 
 const ASSIGNMENT_T = "ecaStudent.assignmentPage";
 const ASSIGNMENT_STATUS_KEYS: Record<AssignmentFilterStatus, string> = {
-    before: "assigned",
+    notSubmitted: "notSubmitted",
     submitted: "submitted",
-    lateSubmitted: "late",
-    missing: "missing",
+    lateSubmitted: "lateSubmitted",
 };
 
-function getAssignmentStatus(status: AssignmentParticipantStatus, deadlineAt?: string | null): AssignmentStatus {
+function getAssignmentStatus(status: AssignmentParticipantStatus): AssignmentStatus {
     if (status === "SUBMITTED") return "submitted";
     if (status === "LATE_SUBMITTED") return "lateSubmitted";
-    if (status === "LATE") return "missing";
 
-    if (status === "NOT_SUBMITTED") {
-        if (!deadlineAt) return "before";
+    return "notSubmitted";
+}
 
-        const deadline = parseServerKstDateTime(deadlineAt);
+function isOverdueNotSubmitted(status: AssignmentParticipantStatus, deadlineAt?: string | null): boolean {
+    if (status === "SUBMITTED" || status === "LATE_SUBMITTED") return false;
+    if (!deadlineAt) return false;
 
-        if (!deadline) return "before";
+    const deadline = parseServerKstDateTime(deadlineAt);
 
-        return Date.now() > deadline.getTime() ? "missing" : "before";
-    }
+    if (!deadline) return false;
 
-    return "before";
+    return Date.now() > deadline.getTime();
 }
 
 function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): StudentAssignmentViewModel {
@@ -63,7 +63,8 @@ function toStudentAssignmentViewModel(assignment: StudentAssignmentResponse): St
         startTime: assignment.startTime,
         endTime: assignment.endTime,
         deadlineAt: assignment.deadlineAt,
-        status: getAssignmentStatus(assignment.status, assignment.deadlineAt),
+        status: getAssignmentStatus(assignment.status),
+        isOverdue: isOverdueNotSubmitted(assignment.status, assignment.deadlineAt),
     };
 }
 
@@ -167,18 +168,19 @@ export default function EcaStudentAssignment(): React.ReactElement {
 
     const summaryCounts = React.useMemo(() => {
         return {
-            completed: assignments.filter((assignment) => assignment.status === "submitted" || assignment.status === "lateSubmitted").length,
-            before: assignments.filter((assignment) => assignment.status === "before").length,
-            missing: assignments.filter((assignment) => assignment.status === "missing").length,
+            notSubmitted: assignments.filter((assignment) => assignment.status === "notSubmitted").length,
+            submitted: assignments.filter((assignment) => assignment.status === "submitted").length,
+            lateSubmitted: assignments.filter((assignment) => assignment.status === "lateSubmitted").length,
+            overdue: assignments.filter((assignment) => assignment.isOverdue).length,
         };
     }, [assignments]);
 
-    function getAssignmentRowClass(status: AssignmentStatus): string {
-        return "eca-student-assignment-row" + (status === "missing" ? " is-missing" : "");
+    function getAssignmentRowClass(isOverdue: boolean): string {
+        return "eca-student-assignment-row" + (isOverdue ? " is-missing" : "");
     }
 
-    function getAssignmentPeriodClass(status: AssignmentStatus): string {
-        return "eca-student-assignment-period" + (status === "missing" ? " is-missing" : "");
+    function getAssignmentPeriodClass(isOverdue: boolean): string {
+        return "eca-student-assignment-period" + (isOverdue ? " is-missing" : "");
     }
 
     const filteredAssignments = assignments.filter((assignment) => {
@@ -248,18 +250,18 @@ export default function EcaStudentAssignment(): React.ReactElement {
             <div className="eca-student-assignment-summary">
                 <article className="eca-student-assignment-summary-card">
                     <i className="eca-student-assignment-summary-dot eca-student-assignment-summary-dot--before" />
-                    <strong>{t(`${ASSIGNMENT_T}.summary.before`)}</strong>
-                    <span>{summaryCounts.before}</span>
+                    <strong>{t(`${ASSIGNMENT_T}.summary.notSubmitted`)}</strong>
+                    <span>{summaryCounts.notSubmitted}</span>
                 </article>
                 <article className="eca-student-assignment-summary-card">
                     <i className="eca-student-assignment-summary-dot eca-student-assignment-summary-dot--submitted" />
-                    <strong>{t(`${ASSIGNMENT_T}.summary.completed`)}</strong>
-                    <span>{summaryCounts.completed}</span>
+                    <strong>{t(`${ASSIGNMENT_T}.summary.submitted`)}</strong>
+                    <span>{summaryCounts.submitted}</span>
                 </article>
                 <article className="eca-student-assignment-summary-card">
                     <i className="eca-student-assignment-summary-dot eca-student-assignment-summary-dot--missing" />
-                    <strong>{t(`${ASSIGNMENT_T}.summary.missing`)}</strong>
-                    <span>{summaryCounts.missing}</span>
+                    <strong>{t(`${ASSIGNMENT_T}.summary.lateSubmitted`)}</strong>
+                    <span>{summaryCounts.lateSubmitted}</span>
                 </article>
             </div>
 
@@ -330,10 +332,10 @@ export default function EcaStudentAssignment(): React.ReactElement {
                         <p className="eca-student-assignment-empty">{t(`${ASSIGNMENT_T}.noSearchResults`)}</p>
                     ) : (
                         filteredAssignments.map((assignment) => (
-                            <button type="button" className={getAssignmentRowClass(assignment.status)} key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
+                            <button type="button" className={getAssignmentRowClass(assignment.isOverdue)} key={assignment.id} onClick={() => moveToAssignmentDetail(assignment.id)}>
                                 <span className="eca-student-assignment-name">{assignment.name}</span>
                                 <span>{getAssignmentFormLabel(assignment)}</span>
-                                <span className={getAssignmentPeriodClass(assignment.status)}>{formatPeriod(assignment)}</span>
+                                <span className={getAssignmentPeriodClass(assignment.isOverdue)}>{formatPeriod(assignment)}</span>
                                 <span className="eca-student-assignment-state-cell">
                                     <span className={getStatusDotClass(assignment.status)}>
                                         {t(`${ASSIGNMENT_T}.status.${ASSIGNMENT_STATUS_KEYS[assignment.status]}`)}

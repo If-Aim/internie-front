@@ -10,9 +10,16 @@ import "./attendance.css";
 const ATTENDANCE_T = "ecaStudent.attendancePage";
 
 type SortDirection = "asc" | "desc";
-type StatusFilter = "ALL" | AttendanceStatus;
 
-const STATUS_FILTERS: StatusFilter[] = ["ALL", "NOT_CHECKED", "PRESENT", "LATE", "VERY_LATE", "EARLY_LEAVE", "VERY_EARLY_LEAVE", "ABSENT"];
+const STATUS_FILTERS: AttendanceStatus[] = [
+    "NOT_CHECKED",
+    "PRESENT",
+    "LATE",
+    "VERY_LATE",
+    "EARLY_LEAVE",
+    "VERY_EARLY_LEAVE",
+    "ABSENT",
+];
 
 const TYPE_FALLBACK_LABELS: Record<AttendanceEventType, string> = {
     CLASS_START: "Start",
@@ -37,8 +44,12 @@ function getEventBaseDateTimeValue(event: MyAttendanceEventResponse): string | n
     return event.type === "CLASS_END" ? event.scoreReferenceAt : event.uploadWindowStart;
 }
 
-function formatEventDate(event: MyAttendanceEventResponse): string {
-    return formatServerKstDateTimeDateLabelForUser(getEventBaseDateTimeValue(event), event.eventDate);
+function formatEventDate(event: MyAttendanceEventResponse, language: string): string {
+    return formatServerKstDateTimeDateLabelForUser(
+        getEventBaseDateTimeValue(event),
+        event.eventDate,
+        language
+    );
 }
 
 function getEventSortTime(event: MyAttendanceEventResponse): number {
@@ -74,17 +85,16 @@ function formatScore(score: number): string {
     return score.toFixed(1).replace(/\.0$/, "");
 }
 
-function getNextStatusFilter(current: StatusFilter): StatusFilter {
-    const currentIndex = STATUS_FILTERS.indexOf(current);
-    const nextIndex = currentIndex < 0 || currentIndex === STATUS_FILTERS.length - 1 ? 0 : currentIndex + 1;
+function getFilterLabel(filters: AttendanceStatus[], t: TFunction): string {
+    if (filters.length === STATUS_FILTERS.length) {
+        return translateText(t, `${ATTENDANCE_T}.filter.all`, "All");
+    }
 
-    return STATUS_FILTERS[nextIndex];
-}
+    if (filters.length === 0) {
+        return translateText(t, `${ATTENDANCE_T}.filter.none`, "None");
+    }
 
-function getFilterLabel(filter: StatusFilter, t: TFunction): string {
-    if (filter === "ALL") return translateText(t, `${ATTENDANCE_T}.filter.all`, "All");
-
-    return getStatusLabel(filter, t);
+    return filters.map((filter) => getStatusLabel(filter, t)).join(", ");
 }
 
 function sortEvents(events: MyAttendanceEventResponse[], sortDirection: SortDirection): MyAttendanceEventResponse[] {
@@ -98,7 +108,7 @@ function sortEvents(events: MyAttendanceEventResponse[], sortDirection: SortDire
 }
 
 export default function EcaStudentAttendance(): React.ReactElement {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { externalActivityId } = useParams<{ externalActivityId?: string }>();
 
@@ -106,7 +116,9 @@ export default function EcaStudentAttendance(): React.ReactElement {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
     const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
-    const [statusFilter, setStatusFilter] = React.useState<StatusFilter>("ALL");
+    const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<AttendanceStatus[]>(() => [...STATUS_FILTERS]);
+    const [filterPopoverOpen, setFilterPopoverOpen] = React.useState(false);
+    const filterPopoverRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
         let mounted = true;
@@ -147,17 +159,45 @@ export default function EcaStudentAttendance(): React.ReactElement {
         };
     }, [externalActivityId, t]);
 
+    React.useEffect(() => {
+        if (!filterPopoverOpen) return;
+
+        function handleMouseDown(event: MouseEvent): void {
+            if (!filterPopoverRef.current) return;
+            if (filterPopoverRef.current.contains(event.target as Node)) return;
+
+            setFilterPopoverOpen(false);
+        }
+
+        document.addEventListener("mousedown", handleMouseDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, [filterPopoverOpen]);
+
     const progressedEvents = events.filter(isProgressedEvent);
     const totalEventCount = events.length;
     const progressedEventCount = progressedEvents.length;
     const currentScore = progressedEvents.reduce((sum, event) => sum + (Number.isFinite(event.score) ? event.score : 0), 0);
     const progressPercent = totalEventCount === 0 ? 0 : Math.round((progressedEventCount / totalEventCount) * 100);
 
+    const isFilterChanged = selectedStatusFilters.length !== STATUS_FILTERS.length;
     const visibleEvents = React.useMemo(() => {
-        const filteredEvents = statusFilter === "ALL" ? events : events.filter((event) => event.status === statusFilter);
+        const filteredEvents = events.filter((event) => selectedStatusFilters.includes(event.status));
 
         return sortEvents(filteredEvents, sortDirection);
-    }, [events, sortDirection, statusFilter]);
+    }, [events, sortDirection, selectedStatusFilters]);
+
+    function toggleStatusFilter(status: AttendanceStatus): void {
+        setSelectedStatusFilters((prev) => {
+            if (prev.includes(status)) {
+                return prev.filter((item) => item !== status);
+            }
+
+            return [...prev, status];
+        });
+    }
 
     function openAttendanceSubmit(event: MyAttendanceEventResponse): void {
         if (!externalActivityId) return;
@@ -188,25 +228,48 @@ export default function EcaStudentAttendance(): React.ReactElement {
 
             <section className="eca-student-attendance-list-card">
                 <div className="eca-student-attendance-list-top">
-                    <strong>{translateText(t, `${ATTENDANCE_T}.list`, "List")} ({visibleEvents.length})</strong>
+                    <strong>List ({visibleEvents.length})</strong>
 
                     <div className="eca-student-attendance-actions">
-                        <button type="button" className="eca-student-attendance-icon-button" title={getFilterLabel(statusFilter, t)} aria-label={getFilterLabel(statusFilter, t)} onClick={() => setStatusFilter((prev) => getNextStatusFilter(prev))}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <path d="M4 5H16M6.5 10H13.5M8.5 15H11.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                            </svg>
-                        </button>
+                        <div className="eca-student-attendance-filter-wrap" ref={filterPopoverRef}>
+                            <button type="button" className="eca-student-attendance-icon-button" title={getFilterLabel(selectedStatusFilters, t)} aria-label={getFilterLabel(selectedStatusFilters, t)} aria-expanded={filterPopoverOpen} onClick={() => setFilterPopoverOpen((prev) => !prev)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4.5 7H19.5M7 12H17M10 17H14" stroke={isFilterChanged ? "#0166FF" : "#A0A0A0"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    {isFilterChanged ? <circle cx="20" cy="6" r="3" fill="#0166FF"/> : null}
+                                </svg>
+                            </button>
 
+                            {filterPopoverOpen ? (
+                                <div className="eca-student-attendance-filter-popover">
+                                    {STATUS_FILTERS.map((status) => (
+                                        <button type="button" key={status} className="eca-student-attendance-filter-option" onClick={() => toggleStatusFilter(status)}>
+                                            <img
+                                                className="eca-student-attendance-filter-radio"
+                                                src={
+                                                    selectedStatusFilters.length === STATUS_FILTERS.length
+                                                        ? "/icons/filter_selected_all.svg"
+                                                        : selectedStatusFilters.includes(status)
+                                                            ? "/icons/filter_selected_one.svg"
+                                                            : "/icons/filter_selected_none.svg"
+                                                }
+                                                alt=""
+                                            />
+                                            <span>{getStatusLabel(status, t)}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
                         <button type="button" className="eca-student-attendance-icon-button" title={sortDirection === "asc" ? "Oldest" : "Newest"} aria-label={sortDirection === "asc" ? "Oldest" : "Newest"} onClick={() => setSortDirection((prev) => prev === "asc" ? "desc" : "asc")}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none">
-                                <path d="M10 5V22M10 22L6.5 18.5M10 22L13.5 18.5M18 23V6M18 6L14.5 9.5M18 6L21.5 9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M21 6.375L17.625 3L14.25 6.375M17.625 3L17.625 21M3 17.625L6.375 21L9.75 17.625M6.375 21L6.375 3" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
                     </div>
                 </div>
 
                 <div className="eca-student-attendance-table-head">
-                    <span>{translateText(t, `${ATTENDANCE_T}.column.assignment`, "Assignment")}</span>
+                    <span>{translateText(t, `${ATTENDANCE_T}.column.date`, "Assignment")}</span>
                     <span>{translateText(t, `${ATTENDANCE_T}.column.type`, "Type")}</span>
                     <span>{translateText(t, `${ATTENDANCE_T}.column.status`, "Status")}</span>
                     <span />
@@ -222,12 +285,12 @@ export default function EcaStudentAttendance(): React.ReactElement {
                     ) : (
                         visibleEvents.map((event) => (
                             <button type="button" className="eca-student-attendance-row" key={event.eventId} onClick={() => openAttendanceSubmit(event)}>
-                                <span className="eca-student-attendance-date">{formatEventDate(event)}</span>
+                                <span className="eca-student-attendance-date">{formatEventDate(event, i18n.resolvedLanguage ?? i18n.language)}</span>
                                 <span className="eca-student-attendance-type">{getTypeLabel(event.type, t)}</span>
                                 <span className={`eca-student-attendance-status ${getStatusClass(event.status)}`}>{getStatusLabel(event.status, t)}</span>
                                 <span className="eca-student-attendance-arrow" aria-hidden="true">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M10 7L15 12L10 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M9 7L14 12L9 17" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </span>
                             </button>

@@ -4,10 +4,12 @@ import type { TFunction } from "i18next";
 import { useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, downloadMyLeaderboardEvidenceFile, downloadMyLeaderboardEvidenceFileById, getMyLeaderboard, getMyLeaderboardMissionLogs, getMyLeaderboardMissions, getMyLeaderboardSubmissions, getMyParticipatingExternalActivity, getStudentLeaderboardCompletedMissions, submitLeaderboardMission } from "../../../../../../api/ea";
 import type { LeaderboardApprovalStatus, LeaderboardCompletedMissionResponse, LeaderboardMissionCategory, LeaderboardMissionResponse, LeaderboardRankingResponse, LeaderboardSubmissionEvidenceResponse, LeaderboardEvidenceType, LeaderboardSubmissionResponse, StudentExternalActivityDetailResponse, StudentLeaderboardLogResponse, StudentLeaderboardResponse } from "../../../../../../api/ea";
+import { getFileExtension, getFileKey, isValidHttpUrl } from "../../../../../../utils/file";
 import { getFileIconByExtension } from "../assignment/fileIcons";
 import "./leaderboard.css";
 
 const LEADERBOARD_T = "ecaStudent.leaderboardPage";
+const LEADERBOARD_MISSION_T = "ecaStudent.leaderboardMissionPage";
 const DEFAULT_PROFILE_IMAGE = "/internie_mascot_normal.png";
 const DETAIL_MISSION_CATEGORIES: LeaderboardMissionCategory[] = ["ELICIT", "DISCOVER", "INSIGHT", "SYNTHESIZE", "OWN", "NURTURE"];
 const MISSION_CATEGORY_ORDER: Record<LeaderboardMissionCategory, number> = {
@@ -85,6 +87,18 @@ function formatOrdinal(value?: number | null): string {
     return `${rank}${suffix}`;
 }
 
+function formatRankPlace(value: number | null | undefined, t: TFunction, language: string): string {
+    const rank = Number(value ?? 0);
+
+    if (!rank) return "-";
+
+    return String(t(`${LEADERBOARD_T}.rank.place`, {
+        rank,
+        rankOrdinal: formatOrdinal(rank),
+        defaultValue: isEnglishLanguage(language) ? `${formatOrdinal(rank)} Place` : `${rank}위`,
+    }));
+}
+
 function getText(t: TFunction, key: string, defaultValue: string): string {
     return String(t(key, { defaultValue }));
 }
@@ -121,12 +135,27 @@ function compareMissionItems(
     return a.mission.name.localeCompare(b.mission.name);
 }
 
-function formatLastUpdated(value?: string | null): string {
+function isEnglishLanguage(language: string): boolean {
+    return language.toLowerCase().startsWith("en");
+}
+
+function formatKoreanDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}.${month}.${day}. ${hour}:${minute}`;
+}
+
+function formatLastUpdated(value: string | null | undefined, language: string): string {
     if (!value) return "-";
 
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) return "-";
+    if (!isEnglishLanguage(language)) return formatKoreanDateTime(date);
 
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -136,14 +165,21 @@ function formatLastUpdated(value?: string | null): string {
     return `${month}/${day} ${hour}:${minute}`;
 }
 
-function formatSubmissionDetailDate(value?: string | null): string {
+function formatSubmissionDetailDate(value: string | null | undefined, language: string): string {
     if (!value) return "-";
 
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) return "-";
+    if (!isEnglishLanguage(language)) return formatKoreanDateTime(date);
 
-    return date.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
+    return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
 }
 
 function getEvidenceFileName(url: string): string {
@@ -351,7 +387,17 @@ function RankingRow({ ranking, selected, isMe, onClick }: { ranking: Leaderboard
     );
 }
 
-function MissionLogRow({ log, t, onClick }: { log: DetailMissionLog; t: TFunction; onClick?: () => void }): React.ReactElement {
+function MissionLogRow({
+    log,
+    t,
+    language,
+    onClick,
+}: {
+    log: DetailMissionLog;
+    t: TFunction;
+    language: string;
+    onClick?: () => void;
+}): React.ReactElement {
     const content = (
         <>
             <div className="eca-student-leaderboard-detail-mission-main">
@@ -362,7 +408,7 @@ function MissionLogRow({ log, t, onClick }: { log: DetailMissionLog; t: TFunctio
                 </div>
             </div>
             <div className="eca-student-leaderboard-detail-mission-side">
-                <span>{formatSubmissionDetailDate(log.reviewedAt ?? log.submittedAt)}</span>
+                <span>{formatSubmissionDetailDate(log.reviewedAt ?? log.submittedAt, language)}</span>
             </div>
         </>
     );
@@ -374,32 +420,6 @@ function MissionLogRow({ log, t, onClick }: { log: DetailMissionLog; t: TFunctio
     return <article className="eca-student-leaderboard-detail-mission-card">{content}</article>;
 }
 
-function getFileExtension(fileName: string): string {
-    const extension = fileName.split(".").pop();
-
-    if (!extension || extension === fileName) return "file";
-
-    return extension.toLowerCase();
-}
-
-function getEvidenceFileKey(file: File): string {
-    return `${file.name}-${file.size}-${file.lastModified}`;
-}
-
-function isValidHttpUrl(value: string): boolean {
-    const trimmedValue = value.trim();
-
-    if (!trimmedValue) return false;
-
-    try {
-        const url = new URL(trimmedValue);
-
-        return url.protocol === "http:" || url.protocol === "https:";
-    } catch {
-        return false;
-    }
-}
-
 function getMissionEvidenceTypes(mission: Pick<LeaderboardMissionResponse, "evidenceTypes" | "evidenceType">): LeaderboardEvidenceType[] {
     if (mission.evidenceTypes?.length) return mission.evidenceTypes;
 
@@ -409,7 +429,7 @@ function getMissionEvidenceTypes(mission: Pick<LeaderboardMissionResponse, "evid
 function getEvidenceTypesLabel(types: LeaderboardEvidenceType[], t: TFunction): string {
     if (types.length === 0) return "-";
 
-    return types.map((type) => t(`${LEADERBOARD_T}.evidenceType.${type}`, { defaultValue: type })).join(" + ");
+    return types.map((type) => t(`${LEADERBOARD_MISSION_T}.evidenceType.${type}`, { defaultValue: type })).join(" + ");
 }
 
 function missionAcceptsLink(mission: LeaderboardMissionResponse): boolean {
@@ -463,7 +483,8 @@ function getEvidenceDownloadKey(submissionId: number, evidence: LeaderboardSubmi
 }
 
 export default function EcaStudentLeaderboard(): React.ReactElement {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.resolvedLanguage ?? i18n.language;
     const { externalActivityId } = useParams<RouteParams>();
 
     const [activity, setActivity] = React.useState<StudentExternalActivityDetailResponse | null>(null);
@@ -1066,8 +1087,8 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
         }
 
         setEvidenceFiles((prev) => {
-            const prevKeys = new Set(prev.map((file) => getEvidenceFileKey(file)));
-            const nextFiles = validFiles.filter((file) => !prevKeys.has(getEvidenceFileKey(file)));
+            const prevKeys = new Set(prev.map((file) => getFileKey(file)));
+            const nextFiles = validFiles.filter((file) => !prevKeys.has(getFileKey(file)));
 
             return [...prev, ...nextFiles];
         });
@@ -1119,7 +1140,7 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
     }
 
     function removeEvidenceFile(fileKey: string): void {
-        setEvidenceFiles((prev) => prev.filter((file) => getEvidenceFileKey(file) !== fileKey));
+        setEvidenceFiles((prev) => prev.filter((file) => getFileKey(file) !== fileKey));
     }
 
     async function handleQuestEvidenceSubmit(): Promise<void> {
@@ -1130,17 +1151,17 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
         const evidenceUrls = evidenceUrlText.trim() ? [evidenceUrlText.trim()] : [];
 
         if (acceptsFile && evidenceFiles.length === 0) {
-            window.alert("Please upload a file.");
+            window.alert(getText(t, `${LEADERBOARD_MISSION_T}.alert.fileRequired`, "Please submit a file."));
             return;
         }
 
         if (acceptsLink && evidenceUrls.length === 0) {
-            window.alert("Please enter a link.");
+            window.alert(getText(t, `${LEADERBOARD_MISSION_T}.alert.linkRequired`, "Please enter a link."));
             return;
         }
 
         if (acceptsLink && evidenceUrls.some((url) => !isValidHttpUrl(url))) {
-            window.alert("Please enter a valid link.");
+            window.alert(getText(t, `${LEADERBOARD_MISSION_T}.alert.invalidLink`, "Please enter a valid link."));
             return;
         }
 
@@ -1168,7 +1189,7 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
             }
         } catch (error) {
             console.error("handleQuestEvidenceSubmit error", error);
-            window.alert("Failed to submit evidence.");
+            window.alert(getText(t, `${LEADERBOARD_MISSION_T}.alert.submitFailed`, "Failed to submit the mission."));
         } finally {
             setQuestSubmitting(false);
         }
@@ -1216,20 +1237,20 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
 
                     <div className="eca-student-leaderboard-mission-modal-info" id="eca-student-leaderboard-mission-modal-title">
                         <div className="eca-student-leaderboard-mission-modal-info-row">
-                            <span>Category</span>
+                            <span>{getText(t, `${LEADERBOARD_T}.missionDetail.category`, "Category")}</span>
                             <strong className="eca-student-leaderboard-mission-modal-category">{getCategoryLabel(category, t)}</strong>
                         </div>
                         <div className="eca-student-leaderboard-mission-modal-info-row">
-                            <span>Point</span>
+                            <span>{getText(t, `${LEADERBOARD_T}.missionDetail.point`, "Point")}</span>
                             <strong className="eca-student-leaderboard-mission-modal-point">+{formatNumber(point)}</strong>
                         </div>
                         <div className="eca-student-leaderboard-mission-modal-info-row">
-                            <span>Mission</span>
+                            <span>{getText(t, `${LEADERBOARD_T}.missionDetail.mission`, "Mission")}</span>
                             <strong>{missionName}</strong>
                         </div>
                         <div className="eca-student-leaderboard-mission-modal-info-row">
-                            <span>Submission Time</span>
-                            <strong>{formatSubmissionDetailDate(submittedAt)}</strong>
+                            <span>{getText(t, `${LEADERBOARD_T}.missionDetail.submissionTime`, "Submission Time")}</span>
+                            <strong>{formatSubmissionDetailDate(submittedAt, language)}</strong>
                         </div>
                     </div>
                 </section>
@@ -1282,7 +1303,7 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                     {getText(t, `${LEADERBOARD_T}.ranking`, "Ranking")}
                 </button>
                 <button type="button" className={activeTab === "myQuests" ? "is-active" : ""} onClick={openMyQuests}>
-                    {getText(t, `${LEADERBOARD_T}.myQuests`, "My Quests")}
+                    {getText(t, `${LEADERBOARD_T}.missionLog`, "Mission Log")}
                 </button>
             </nav>
 
@@ -1361,15 +1382,17 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                 <section className="eca-student-leaderboard-card eca-student-leaderboard-my-quests-card">
                     <section className="eca-student-leaderboard-my-points-card">
                         <div>
-                            <h2>My Points</h2>
+                            <h2>{getText(t, `${LEADERBOARD_T}.myPoints`, "My Points")}</h2>
                             <strong>{formatNumber(myPointTarget.totalScore)}<em>pt</em></strong>
                             <p>
-                                <b>{formatOrdinal(myPointTarget.rank)} Place</b>
+                                <b>{formatRankPlace(myPointTarget.rank, t, language)}</b>
                                 <TrendBadge direction={myPointTarget.trendDirection} value={myPointTarget.trendValue} />
                             </p>
                         </div>
 
-                        <button type="button" onClick={openQuestModal}>Get Points</button>
+                        <button type="button" onClick={openQuestModal}>
+                            {getText(t, `${LEADERBOARD_T}.getPoint`, "Get Point")}
+                        </button>
                     </section>
 
                     <section className="eca-student-leaderboard-my-quests-list-section">
@@ -1400,7 +1423,9 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                 </section>
             )}
 
-            <div className="eca-student-leaderboard-update-text">Last updated {formatLastUpdated(leaderboard?.lastUpdate)}</div>
+            <div className="eca-student-leaderboard-update-text">
+                {getText(t, `${LEADERBOARD_T}.lastUpdated`, "Last updated")} {formatLastUpdated(leaderboard?.lastUpdate, language)}
+            </div>
 
             {selectedTarget ? (
                 <div className="eca-student-leaderboard-detail-backdrop" role="presentation" onClick={closeDetailPanel}>
@@ -1426,7 +1451,9 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                                 <span>pt</span>
                             </div>
                             <div className="eca-student-leaderboard-detail-place-row">
-                                <span className="eca-student-leaderboard-detail-place-row-rank">{selectedTarget.rank ? `${formatOrdinal(selectedTarget.rank)} Place` : "-"}</span>
+                                <span className="eca-student-leaderboard-detail-place-row-rank">
+                                    {formatRankPlace(selectedTarget.rank, t, language)}
+                                </span>
                                 <TrendBadge direction={selectedTarget.trendDirection} value={selectedTarget.trendValue} className="eca-student-leaderboard-detail-trend" emptyText="-" />
                             </div>
                         </section>
@@ -1471,7 +1498,13 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                                     <p className="eca-student-leaderboard-empty">{getText(t, `${LEADERBOARD_T}.loading`, "Loading...")}</p>
                                 ) : filteredDetailLogs.length > 0 ? (
                                     filteredDetailLogs.map((log) => (
-                                        <MissionLogRow key={`${log.submissionId}-${log.missionId}`} log={log} t={t} onClick={selectedTarget.type === "me" ? () => void openMyMissionDetail(log) : undefined} />
+                                        <MissionLogRow
+                                            key={`${log.submissionId}-${log.missionId}`}
+                                            log={log}
+                                            t={t}
+                                            language={language}
+                                            onClick={selectedTarget.type === "me" ? () => void openMyMissionDetail(log) : undefined}
+                                        />
                                     ))
                                 ) : (
                                     <p className="eca-student-leaderboard-empty">{getText(t, `${LEADERBOARD_T}.missionLogEmpty`, "No completed missions.")}</p>
@@ -1513,25 +1546,24 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                                     </svg>
                                 </span>
 
-                                <h2>Completed!</h2>
-                                <p>Scores will be updated after admin approval</p>
-
-                                <button type="button" onClick={closeQuestModal}>Save</button>
+                                <h2>{getText(t, `${LEADERBOARD_MISSION_T}.completed`, "Completed!")}</h2>
+                                <p>{getText(t, `${LEADERBOARD_MISSION_T}.approvalNotice`, "Scores will be updated after admin approval")}</p>
+                                <button type="button" onClick={closeQuestModal}>{getText(t, `${LEADERBOARD_MISSION_T}.save`, "Save")}</button>
                             </section>
                         ) : questModalStep === "select" ? (
                             <>
-                                <h2 className="eca-student-leaderboard-quest-modal-title">Select a Quest</h2>
+                                <h2 className="eca-student-leaderboard-quest-modal-title">{getText(t, `${LEADERBOARD_MISSION_T}.selectMission`, "Select a Mission")}</h2>
 
                                 <section className="eca-student-leaderboard-quest-select-box">
                                     <div className="eca-student-leaderboard-quest-filter-row">
                                         <button type="button" className={missionFilter === "ALL" ? "is-active" : ""} onClick={() => setMissionFilter("ALL")}>
-                                            All ({missionItems.length})
+                                            {t(`${LEADERBOARD_MISSION_T}.missionFilter.all`, { missionCount: missionItems.length })}
                                         </button>
                                         <button type="button" className={missionFilter === "AVAILABLE" ? "is-active" : ""} onClick={() => setMissionFilter("AVAILABLE")}>
-                                            Available ({availableMissionCount})
+                                            {t(`${LEADERBOARD_MISSION_T}.missionFilter.available`, { missionCount: availableMissionCount })}
                                         </button>
                                         <button type="button" className={missionFilter === "MAXED_OUT" ? "is-active" : ""} onClick={() => setMissionFilter("MAXED_OUT")}>
-                                            Maxed Out ({maxedOutMissionCount})
+                                            {t(`${LEADERBOARD_MISSION_T}.missionFilter.maxedOut`, { missionCount: maxedOutMissionCount })}
                                         </button>
 
                                         <div className={questSearchOpen ? "eca-student-leaderboard-quest-search-wrap eca-student-leaderboard-quest-search-wrap--open" : "eca-student-leaderboard-quest-search-wrap"} ref={questSearchWrapRef}>
@@ -1592,8 +1624,12 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                                 </section>
 
                                 <div className="eca-student-leaderboard-quest-modal-actions">
-                                    <button type="button" className="is-secondary" onClick={closeQuestModal}>Back</button>
-                                    <button type="button" disabled={!selectedMission} onClick={() => { setEvidenceFiles([]); setEvidenceUrlText(""); setQuestModalStep("submit"); }}>Next</button>
+                                    <button type="button" className="is-secondary" onClick={closeQuestModal}>
+                                        {getText(t, `${LEADERBOARD_MISSION_T}.back`, "Back")}
+                                    </button>
+                                    <button type="button" disabled={!selectedMission} onClick={() => { setEvidenceFiles([]); setEvidenceUrlText(""); setQuestModalStep("submit"); }}>
+                                        {getText(t, `${LEADERBOARD_MISSION_T}.next`, "Next")}
+                                    </button>
                                 </div>
                             </>
                         ) : selectedMission ? (() => {
@@ -1606,29 +1642,29 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
 
                             return (
                                 <>
-                                    <h2 className="eca-student-leaderboard-quest-modal-title">Upload Evidence</h2>
+                                    <h2 className="eca-student-leaderboard-quest-modal-title">{getText(t, `${LEADERBOARD_MISSION_T}.uploadEvidence`, "Upload Evidence")}</h2>
 
                                     <section className="eca-student-leaderboard-quest-submit-wrap">
                                         <section className="eca-student-leaderboard-quest-submit-card">
                                             <h3>{selectedMission.name}</h3>
 
                                             <label className="eca-student-leaderboard-quest-info-field">
-                                                <span>Evidence</span>
+                                                <span>{getText(t, `${LEADERBOARD_MISSION_T}.evidence`, "Evidence")}</span>
                                                 <input value={selectedMission.evidenceName || "-"} readOnly />
                                             </label>
 
                                             <label className="eca-student-leaderboard-quest-info-field is-short">
-                                                <span>Submission Format</span>
+                                                <span>{getText(t, `${LEADERBOARD_MISSION_T}.submissionFormat`, "Submission Format")}</span>
                                                 <input value={getEvidenceTypesLabel(evidenceTypes, t)} readOnly />
                                             </label>
                                         </section>
 
                                         <section className="eca-student-leaderboard-quest-submit-card">
-                                            <h3>Submission</h3>
+                                            <h3>{getText(t, `${LEADERBOARD_MISSION_T}.submission`, "Submission")}</h3>
 
                                             {acceptsFile ? (
                                                 <>
-                                                    <label className="eca-student-leaderboard-quest-file-label">File</label>
+                                                    <label className="eca-student-leaderboard-quest-file-label">{getText(t, `${LEADERBOARD_MISSION_T}.file`, "File")}</label>
 
                                                     <input
                                                         ref={fileInputRef}
@@ -1653,13 +1689,19 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
                                                             <path fillRule="evenodd" clipRule="evenodd" d="M16 2.666C14.457 2.666 12.947 3.112 11.651 3.951C10.356 4.79 9.33 5.985 8.699 7.393C8.609 7.595 8.517 7.796 8.423 7.996H8C6.586 7.996 5.229 8.558 4.229 9.558C3.229 10.558 2.667 11.915 2.667 13.329C2.667 14.744 3.229 16.1 4.229 17.1C5.229 18.101 6.586 18.663 8 18.663H8.23L10.896 15.996H8C7.293 15.996 6.615 15.715 6.115 15.215C5.615 14.715 5.334 14.037 5.334 13.329C5.334 12.622 5.615 11.944 6.115 11.444C6.615 10.944 7.293 10.663 8 10.663H8.086C8.363 10.663 8.686 10.664 8.952 10.61C9.284 10.553 9.602 10.431 9.886 10.25C10.207 10.042 10.428 9.783 10.596 9.547C10.699 9.395 10.789 9.234 10.864 9.067C10.935 8.919 11.023 8.728 11.126 8.496C11.546 7.556 12.23 6.758 13.094 6.198C13.958 5.638 14.966 5.34 15.996 5.34C17.026 5.34 18.034 5.638 18.898 6.198C19.762 6.758 20.445 7.556 20.866 8.496C20.978 8.728 21.065 8.919 21.136 9.067C21.198 9.196 21.288 9.384 21.404 9.547C21.572 9.782 21.792 10.042 22.115 10.251C22.438 10.459 22.764 10.554 23.048 10.611C23.315 10.664 23.638 10.664 23.915 10.664H24C24.708 10.664 25.386 10.944 25.886 11.444C26.386 11.944 26.667 12.622 26.667 13.329C26.667 14.037 26.386 14.715 25.886 15.215C25.386 15.715 24.708 15.996 24 15.996H21.104L23.771 18.663H24C25.415 18.663 26.771 18.101 27.772 17.1C28.772 16.1 29.334 14.744 29.334 13.329C29.334 11.915 28.772 10.558 27.772 9.558C26.771 8.558 25.415 7.996 24 7.996H23.578C23.462 7.746 23.381 7.568 23.302 7.393C22.67 5.985 21.645 4.79 20.349 3.951C19.054 3.112 17.543 2.666 16 2.666Z" fill="#808080"/>
                                                             <path d="M16 16L15.057 15.057L16 14.114L16.943 15.057L16 16ZM17.333 28C17.333 28.354 17.193 28.693 16.942 28.943C16.692 29.193 16.353 29.333 16 29.333C15.646 29.333 15.307 29.193 15.057 28.943C14.807 28.693 14.667 28.354 14.667 28H17.333ZM9.724 20.391L15.057 15.057L16.943 16.943L11.609 22.276L9.724 20.391ZM16.943 15.057L22.276 20.391L20.391 22.276L15.057 16.943L16.943 15.057ZM17.333 16V28H14.667V16H17.333Z" fill="#808080"/>
                                                         </svg>
-                                                        <span>{evidenceDragging ? "Drop files here" : evidenceFiles.length > 0 ? `${evidenceFiles.length} file(s) selected` : "Upload files"}</span>
+                                                        <span>
+                                                            {evidenceDragging
+                                                                ? getText(t, `${LEADERBOARD_MISSION_T}.dropFilesHere`, "Drop files here")
+                                                                : evidenceFiles.length > 0
+                                                                    ? t(`${LEADERBOARD_MISSION_T}.filesSelected`, { fileCount: evidenceFiles.length })
+                                                                    : getText(t, `${LEADERBOARD_MISSION_T}.fileUploadGuide`, "Please upload a file")}
+                                                        </span>
                                                     </button>
 
                                                     {evidenceFiles.length > 0 ? (
                                                         <div className="eca-student-leaderboard-quest-file-list">
                                                             {evidenceFiles.map((file) => {
-                                                                const fileKey = getEvidenceFileKey(file);
+                                                                const fileKey = getFileKey(file);
                                                                 const extension = getFileExtension(file.name);
 
                                                                 return (
@@ -1684,7 +1726,7 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
 
                                             {acceptsLink ? (
                                                 <div className="eca-student-leaderboard-quest-link-area">
-                                                    <label className="eca-student-leaderboard-quest-file-label">Link</label>
+                                                    <label className="eca-student-leaderboard-quest-file-label">{getText(t, `${LEADERBOARD_MISSION_T}.link`, "Link")}</label>
                                                     <input
                                                         type="url"
                                                         inputMode="url"
@@ -1701,7 +1743,11 @@ export default function EcaStudentLeaderboard(): React.ReactElement {
 
                                     <div className="eca-student-leaderboard-quest-modal-actions">
                                         <button type="button" className="is-secondary" onClick={() => setQuestModalStep("select")}>Back</button>
-                                        <button type="button" disabled={submitDisabled} onClick={() => void handleQuestEvidenceSubmit()}>{questSubmitting ? "Submitting..." : "Submit"}</button>
+                                        <button type="button" disabled={submitDisabled} onClick={() => void handleQuestEvidenceSubmit()}>
+                                            {questSubmitting
+                                                ? getText(t, `${LEADERBOARD_MISSION_T}.saving`, "Saving")
+                                                : getText(t, `${LEADERBOARD_MISSION_T}.submit`, "Submit")}
+                                        </button>
                                     </div>
                                 </>
                             );

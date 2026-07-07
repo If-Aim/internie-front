@@ -1,10 +1,32 @@
 // src/api/client.ts
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+type QueryValue = string | number | boolean | null | undefined;
+type ParsedErrorBody = {
+    message?: string;
+    code?: string;
+    path?: string;
+    status?: number;
+};
+
 function buildUrl(path: string) {
     return path.startsWith("http")
 		? path
 		: `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+export function buildQueryString(params: Record<string, QueryValue>): string {
+    const searchParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value).trim()) {
+            searchParams.set(key, String(value));
+        }
+    });
+
+    const queryString = searchParams.toString();
+
+    return queryString ? `?${queryString}` : "";
 }
 
 function getStoredAccessToken(): string | null {
@@ -19,6 +41,21 @@ function getStoredAccessToken(): string | null {
 
 function toAuthorizationHeader(token: string): string {
     return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+}
+
+function getAuthorizationHeader(res: Response): string | null {
+    return res.headers.get("authorization") || res.headers.get("Authorization");
+}
+
+async function storeAuthorizationHeader(res: Response, source: string): Promise<void> {
+    const auth = getAuthorizationHeader(res);
+
+    if (!auth) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, `No Authorization header in ${source} response`, bodyText);
+    }
+
+    localStorage.setItem("accessToken", toAuthorizationHeader(auth));
 }
 
 function getBareAccessToken(token: string): string {
@@ -69,6 +106,47 @@ function isAccessTokenExpiringSoon(token: string, bufferSeconds = 30): boolean {
     return exp * 1000 <= Date.now() + bufferSeconds * 1000;
 }
 
+async function throwApiError(res: Response): Promise<never> {
+    const bodyText = await res.text().catch(() => "");
+    const parsed = parseErrorBody(bodyText);
+
+    throw new ApiError(
+        res.status,
+        parsed.message ?? `HTTP ${res.status}`,
+        bodyText,
+        parsed.code,
+        parsed.path
+    );
+}
+
+async function parseJsonResponse<T>(res: Response, emptyValue: T): Promise<T> {
+    if (res.status === 204) return emptyValue;
+    if (!res.ok) await throwApiError(res);
+
+    const ct = res.headers.get("content-type") ?? "";
+
+    if (!ct.includes("application/json")) {
+        const bodyText = await res.text().catch(() => "");
+        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
+    }
+
+    return (await res.json()) as T;
+}
+
+async function loginWithAuthorization(path: string, body: unknown): Promise<LoginResponse> {
+    const res = await apiPublic(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+
+    if (!res.ok) await throwApiError(res);
+
+    await storeAuthorizationHeader(res, path);
+
+    return parseJsonResponse<LoginResponse>(res, undefined as unknown as LoginResponse);
+}
+
 async function ensureAccessTokenBeforeRequest(skipAuthRefresh: boolean): Promise<void> {
     if (skipAuthRefresh) {
         return;
@@ -97,7 +175,7 @@ export async function refreshAccessToken(): Promise<string> {
             throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
         }
 
-        const newAuth = res.headers.get("authorization") || res.headers.get("Authorization");
+        const newAuth = getAuthorizationHeader(res);
 
         if (!newAuth) {
             const bodyText = await res.text().catch(() => "");
@@ -201,26 +279,7 @@ export async function apiPublicJson<T = unknown>(
         credentials: "include",
     });
 
-    if (res.status === 204) return undefined as T;
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-    const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("application/json")) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
-    }
-
-    return (await res.json()) as T;
+    return parseJsonResponse<T>(res, undefined as T);
 }
 
 export async function api<T = unknown>(
@@ -233,28 +292,7 @@ export async function api<T = unknown>(
         skipAuthRefresh: opts?.skipAuthRefresh ?? false,
     });
 
-	if (res.status === 204) {
-        return null as T;
-    }
-
-	if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-	const ct = res.headers.get("content-type") ?? "";
-	if (!ct.includes("application/json")) {
-		const bodyText = await res.text().catch(() => "");
-		throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
-	}
-
-	return (await res.json()) as T;
+	return parseJsonResponse<T>(res, null as T);
 }
 
 
@@ -300,10 +338,9 @@ export type LoginResponse = {
 
 // 로컬 회원가입
 export async function signup(input: SignupRequest): Promise<void> {
-    const res = await fetch(buildUrl("/auth/signup"), {
+    const res = await apiPublic("/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
             loginId: input.loginId,
             password: input.password,
@@ -311,63 +348,24 @@ export async function signup(input: SignupRequest): Promise<void> {
         }),
     });
 
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
+    if (!res.ok) await throwApiError(res);
 }
 
 // 로컬 아이디 중복 확인
 export async function checkLoginIdAvailability(
     loginId: string
 ): Promise<LoginIdAvailabilityResponse> {
-    const qs = new URLSearchParams({
-        loginId: loginId.trim(),
-    }).toString();
-
-    return apiPublicJson<LoginIdAvailabilityResponse>(`/auth/login-id/check?${qs}`, {
+    return apiPublicJson<LoginIdAvailabilityResponse>(`/auth/login-id/check${buildQueryString({ loginId: loginId.trim() })}`, {
         method: "GET",
     });
 }
 
 // 로컬 로그인 
 export async function loginWithLocal(input: LoginRequest): Promise<LoginResponse> {
-    const res = await fetch(buildUrl("/auth/login"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-            loginId: input.loginId,
-            password: input.password,
-        }),
+    return loginWithAuthorization("/auth/login", {
+        loginId: input.loginId,
+        password: input.password,
     });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!auth) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/login response", bodyText);
-    }
-
-    localStorage.setItem("accessToken", auth);
-
-    return (await res.json()) as LoginResponse;
 }
 
 export type FindLoginIdCodeRequest = {
@@ -422,30 +420,11 @@ export async function sendFindLoginIdCode(
     email: string,
     language?: string
 ): Promise<FindLoginIdResponse> {
-    const res = await apiPublic("/auth/login-id/send-code", {
+    return apiPublicJson<FindLoginIdResponse>("/auth/login-id/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, language }),
     });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-    const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("application/json")) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
-    }
-
-    return (await res.json()) as FindLoginIdResponse;
 }
 
 export async function verifyFindLoginIdCode(
@@ -453,30 +432,11 @@ export async function verifyFindLoginIdCode(
     code: string,
     language?: string
 ): Promise<FindLoginIdResponse> {
-    const res = await apiPublic("/auth/login-id/verify", {
+    return apiPublicJson<FindLoginIdResponse>("/auth/login-id/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code, language }),
     });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-    const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("application/json")) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, `Expected JSON, got ${ct}`, bodyText);
-    }
-
-    return (await res.json()) as FindLoginIdResponse;
 }
 
 // 비밀번호 재설정
@@ -527,70 +487,26 @@ export async function resetPasswordWithToken(
 
 // 카카오 로그인
 export async function loginWithKakao(code: string, redirectUri?: string): Promise<LoginResponse> {
-    const body: any = redirectUri ? { code, redirectUri } : { code };
-
-    const res = await fetch(buildUrl("/auth/kakao"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(res.status, `HTTP ${res.status}`, bodyText);
-    }
-
-    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!auth) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/kakao response", bodyText);
-    }
-    localStorage.setItem("accessToken", auth);
-
-    return (await res.json()) as LoginResponse;
+    return loginWithAuthorization(
+        "/auth/kakao",
+        redirectUri ? { code, redirectUri } : { code }
+    );
 }
 
 // 구글 로그인
 export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
-    const res = await fetch(buildUrl("/auth/google"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ idToken }),
-    });
-
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
-
-    const auth = res.headers.get("authorization") || res.headers.get("Authorization");
-    if (!auth) {
-        const bodyText = await res.text().catch(() => "");
-        throw new ApiError(200, "No Authorization header in /auth/google response", bodyText);
-    }
-
-    localStorage.setItem("accessToken", auth);
-
-    return (await res.json()) as LoginResponse;
+    return loginWithAuthorization("/auth/google", { idToken });
 }
 
 // 로그아웃
 export async function logout(): Promise<void> {
-	const token = localStorage.getItem("accessToken");
+	const token = getStoredAccessToken();
 	if (!token) return;
 
 	await apiPublic("/auth/logout", {
 		method: "POST",
 		headers: {
-			Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+			Authorization: toAuthorizationHeader(token),
 		},
 	});
 }
@@ -686,17 +602,7 @@ export async function apiUpload<T = unknown>(
 
     if (res.status === 204) return undefined as T;
 
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
+    if (!res.ok) await throwApiError(res);
 
     const ct = res.headers.get("content-type") ?? "";
 
@@ -718,17 +624,7 @@ export async function apiBlob(
         skipAuthRefresh: opts?.skipAuthRefresh ?? false,
     });
 
-    if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        const parsed = parseErrorBody(bodyText);
-
-        throw new ApiError(
-            res.status,
-            parsed.message ?? `HTTP ${res.status}`,
-            bodyText,
-            parsed.code
-        );
-    }
+    if (!res.ok) await throwApiError(res);
 
     return await res.blob();
 }
@@ -840,33 +736,18 @@ export type VerifyEmailCodeResponse = {
 };
 
 export function getUserIdFromAccessToken(): string | null {
-	const token = localStorage.getItem("accessToken");
+	const token = getStoredAccessToken();
 	if (!token) return null;
 
-	const raw = token.startsWith("Bearer ") ? token.slice(7) : token;
-	const parts = raw.split(".");
-	if (parts.length < 2) return null;
+	const payload = getJwtPayload(token);
+	if (!payload) return null;
 
-	try {
-		const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-		const json = decodeURIComponent(
-		atob(base64)
-			.split("")
-			.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-			.join("")
-		);
-
-		const payload = JSON.parse(json) as any;
-
-		return (
-			(payload.userId != null ? String(payload.userId) : null) ||
-			(payload.id != null ? String(payload.id) : null) ||
-			(payload.sub != null ? String(payload.sub) : null) ||
-			null
-		);
-	} catch {
-		return null;
-	}
+	return (
+		(payload.userId != null ? String(payload.userId) : null) ||
+		(payload.id != null ? String(payload.id) : null) ||
+		(payload.sub != null ? String(payload.sub) : null) ||
+		null
+	);
 }
 
 export async function getUserMe(): Promise<UserMe> {
@@ -877,24 +758,34 @@ export async function getUserMe(): Promise<UserMe> {
 function normalizeNullableText(v: unknown): string {
     const s = String(v ?? "").trim();
     if (!s) return "";
-    const lower = s.toLowerCase();
-    if (lower === "null") return "";
-    if (lower === "undefined") return "";
-    return s;
+
+    return ["null", "undefined"].includes(s.toLowerCase()) ? "" : s;
+}
+
+function hasAnyRole(roleSet: string[] | undefined | null, roles: readonly string[]): boolean {
+    return Array.isArray(roleSet) && roles.some((role) => roleSet.includes(role));
+}
+
+async function checkCurrentUserRoles(roles: readonly string[]): Promise<boolean> {
+    try {
+        const me = await getUserMe();
+
+        return hasAnyRole(me.roleSet, roles);
+    } catch (e) {
+        if (e instanceof ApiError && e.status === 401) return false;
+        throw e;
+    }
 }
 
 export function getUserDisplayName(me: Partial<UserBase> | null | undefined): string {
     if (!me) return "";
-    return normalizeNullableText((me as any).name) || normalizeNullableText((me as any).kakaoName);
+    return normalizeNullableText(me.name) || normalizeNullableText(me.kakaoName);
 }
 
 export function isOnboardingDone(me: Partial<UserBase> | null | undefined): boolean {
     if (!me) return false;
 
-    const name = normalizeNullableText((me as any).name);
-    if (name.toUpperCase() === "NULL") return false;
-
-    return name.length > 0;
+    return normalizeNullableText(me.name).length > 0;
 }
 
 export function routeAfterLoginFromLogin(
@@ -909,8 +800,7 @@ export async function searchSchools(keyword: string): Promise<UserSchool[]> {
 	const q = keyword.trim();
 	if (!q) return [];
 
-	const qs = new URLSearchParams({ keyword: q }).toString();
-	return api<UserSchool[]>(`/schools?${qs}`, { method: "GET" });
+	return api<UserSchool[]>(`/schools${buildQueryString({ keyword: q })}`, { method: "GET" });
 }
 
 // 학교 선택
@@ -1057,6 +947,10 @@ export async function submitMyOnboarding(
 }
 
 // 수료증 관련 타입
+type UrlResponse = {
+    url: string;
+};
+
 export type AdminUserFile = {
 	fileId: number;
 	url: string;
@@ -1072,7 +966,7 @@ export async function getMyAdminFiles(): Promise<AdminUserFile[]> {
 export async function getMyAdminFileDownloadUrl(
 	fileId: number | string
 ): Promise<string> {
-	const res = await api<{ url: string }>(`/users/me/admin-files/${fileId}`, {
+	const res = await api<UrlResponse>(`/users/me/admin-files/${fileId}`, {
 		method: "GET",
 	});
 
@@ -1080,45 +974,22 @@ export async function getMyAdminFileDownloadUrl(
 }
 
 /* - admin 관련 - */
-export type AdminUser = UserBase;
-export type AdminDailyStatus = {
-    date: string;
-    eventDayIds: number[];
-};
-export type AdminUserCalendarResponse = {
-    year: number;
-    month: number;
-    totalRecordedDays: number;
-    dailyStatuses: AdminDailyStatus[];
-};
-export type AdminEventDayDetailResponse = {
-    eventDayId: number;
-    eventDayTitle: string;
-    eventTitle: string;
-    startTime?: string | null;
-    endTime?: string | null;
-    transcriptions: ClientAdminTranscription[];
-    question?: ClientAdminEventDayQuestions | null;
-};
-export type AdminUserRecordCountResponse = {
-    studentId: number;
+type RecordCountResponse<IdKey extends "studentId" | "userId"> = Record<IdKey, number> & {
     totalRecordCount: number;
 };
 
+export type AdminUser = UserBase;
+export type AdminDailyStatus = ClientAdminDailyStatus;
+export type AdminUserCalendarResponse = ClientAdminStudentCalendarResponse;
+export type AdminEventDayDetailResponse = ClientAdminEventDayDetailResponse;
+export type AdminUserRecordCountResponse = RecordCountResponse<"studentId">;
+
 export async function checkIsCaptain(): Promise<boolean> { // Captain인지 확인
-    try {
-        const me = await getUserMe();
-        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_CAPTAIN");
-    } catch (e) {
-        if (e instanceof ApiError && e.status == 401) return false;
-        throw e;
-    }
+    return checkCurrentUserRoles(["ROLE_CAPTAIN"]);
 }
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
-	const res = await requestWithAutoRefresh("/admin/users", { method: "GET" }, { expectJson: true });
-	const text = await res.clone().text();
-	return JSON.parse(text) as AdminUser[];
+	return api<AdminUser[]>("/admin/users", { method: "GET" });
 }
 
 /**
@@ -1130,9 +1001,7 @@ export async function getAdminPendingUsers(): Promise<AdminUser[]> {
 }
 
 // 학생증 사진 조회
-export type VerificationImageResponse = {
-    url: string;
-};
+export type VerificationImageResponse = UrlResponse;
 export async function getStudentIdImg(
     userId: number | string
 ): Promise<VerificationImageResponse> {
@@ -1163,6 +1032,19 @@ export async function rejectAdminUser(
  *  관리자 파일 (수료증)
 */
 // 관리자 파일 업로드
+function normalizeAdminUserFile(value: unknown): AdminUserFile | null {
+    if (!value || typeof value !== "object") return null;
+
+    const item = value as Record<string, unknown>;
+    if (typeof item.url !== "string") return null;
+
+    return {
+        fileId: Number(item.fileId ?? 0),
+        url: item.url,
+        filename: String(item.filename ?? ""),
+    };
+}
+
 export async function uploadAdminUserFile(
 	userId: number,
 	file: File
@@ -1170,26 +1052,18 @@ export async function uploadAdminUserFile(
 	const form = new FormData();
 	form.append("file", file);
 
-	const res = await apiUpload(`/admin/users/${userId}/files`, form, { method: "POST" });
+	const res = await apiUpload<unknown>(`/admin/users/${userId}/files`, form, { method: "POST" });
 
 	if (Array.isArray(res)) {
 		return res
-		.filter((it: any) => it && typeof it.url === "string")
-		.map((it: any) => ({
-			fileId: Number(it.fileId),
-			url: String(it.url),
-			filename: String(it.filename ?? ""),
-		}));
+            .map(normalizeAdminUserFile)
+            .filter((item): item is AdminUserFile => item !== null);
 	}
 
-	if (res && typeof res === "object" && typeof (res as any).url === "string") {
-		return [
-			{
-				fileId: Number((res as any).fileId ?? 0),
-				url: String((res as any).url),
-				filename: String((res as any).filename ?? ""),
-			},
-		];
+    const singleFile = normalizeAdminUserFile(res);
+
+	if (singleFile) {
+		return [singleFile];
 	}
 
 	throw new Error(`Unexpected upload response: ${JSON.stringify(res)}`);
@@ -1285,6 +1159,12 @@ export async function revokeAdminRole(
 /* - client admin 관련 - */
 // client 학생 목록
 export type ClientType = "jump" | "kakao" | "esg";
+const CLIENT_ADMIN_ROLE_BY_TYPE: Record<ClientType, GrantableAdminRole> = {
+    jump: "ROLE_JUMP_ADMIN",
+    kakao: "ROLE_KAKAO_ADMIN",
+    esg: "ROLE_ESG_ADMIN",
+};
+
 export type ClientAdminStudent = UserBase;
 
 export async function getClientAdminStudents(clientType: ClientType): Promise<ClientAdminStudent[]> {
@@ -1338,10 +1218,7 @@ export type ClientAdminEventDayDetailResponse = {
 	question?: ClientAdminEventDayQuestions | null;
 };
 
-export type ClientAdminStudentRecordCountResponse = {
-    userId: number;
-    totalRecordCount: number;
-}
+export type ClientAdminStudentRecordCountResponse = RecordCountResponse<"userId">;
 
 export async function getClientAdminEventDayDetail(
 	clientType: ClientType,
@@ -1377,47 +1254,21 @@ export async function deleteClientAdminStudent(
  * 관리자 여부 확인
  */
 export async function checkIsAdmin(): Promise<boolean> {
-    try {
-        const me = await getUserMe();
-        return Array.isArray(me.roleSet) && (me.roleSet.includes("ROLE_ADMIN") || me.roleSet.includes("ROLE_CAPTAIN"));
-    } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return false;
-        throw e;
-    }
+    return checkCurrentUserRoles(["ROLE_ADMIN", "ROLE_CAPTAIN"]);
 }
 
 export async function checkIsClientAdmin(clientType: ClientType): Promise<boolean> {
-    try {
-        const me = await getUserMe();
-        if (!Array.isArray(me.roleSet)) return false;
-        if (clientType === "jump") return me.roleSet.includes("ROLE_JUMP_ADMIN");
-        if (clientType === "kakao") return me.roleSet.includes("ROLE_KAKAO_ADMIN");
-        if (clientType === "esg") return me.roleSet.includes("ROLE_ESG_ADMIN");
-        return false;
-    } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return false;
-        throw e;
-    }
+    return checkCurrentUserRoles([CLIENT_ADMIN_ROLE_BY_TYPE[clientType]]);
 }
 
 export async function checkIsEsgAdmin(): Promise<boolean> { // 우선 용산만, 추후 수정
-    try {
-        const me = await getUserMe();
-
-        return Array.isArray(me.roleSet) && me.roleSet.includes("ROLE_ESG_ADMIN");
-    } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return false;
-        throw e;
-    }
+    return checkCurrentUserRoles(["ROLE_ESG_ADMIN"]);
 }
 
 export function getClientAdminTypes(roleSet: string[] | undefined | null): ClientType[] { // roleSet 로 clientType뽑기
-    if (!Array.isArray(roleSet)) return [];
-    const result: ClientType[] = [];
-    if (roleSet.includes("ROLE_JUMP_ADMIN")) result.push("jump");
-    if (roleSet.includes("ROLE_KAKAO_ADMIN")) result.push("kakao");
-    if (roleSet.includes("ROLE_ESG_ADMIN")) result.push("esg");
-    return result;
+    return (Object.entries(CLIENT_ADMIN_ROLE_BY_TYPE) as Array<[ClientType, GrantableAdminRole]>)
+        .filter(([, role]) => hasAnyRole(roleSet, [role]))
+        .map(([clientType]) => clientType);
 }
 
 // 최근 기록한 일정 관련
@@ -1442,7 +1293,7 @@ export async function getEventDaysByMonth(y: string, m: string): Promise<EventDa
 }
 
 // 에러 처리
-function parseErrorBody(bodyText: string): { message?: string; code?: string; path?: string; status?: number } {
+function parseErrorBody(bodyText: string): ParsedErrorBody {
     if (!bodyText) return {};
     try {
         const parsed = JSON.parse(bodyText);

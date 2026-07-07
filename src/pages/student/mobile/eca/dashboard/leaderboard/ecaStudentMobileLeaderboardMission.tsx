@@ -4,6 +4,7 @@ import type { TFunction } from "i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { LEADERBOARD_MISSION_CATEGORY_OPTIONS, getMyLeaderboardMissionLogs, getMyLeaderboardMissions, submitLeaderboardMission } from "../../../../../../api/ea";
 import type { LeaderboardEvidenceType, LeaderboardMissionCategory, LeaderboardMissionResponse, StudentLeaderboardLogResponse } from "../../../../../../api/ea";
+import { getFileExtension, getFileKey, isValidHttpUrl } from "../../../../../../utils/file";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 import "./ecaStudentMobileLeaderboard.css";
 
@@ -42,18 +43,6 @@ type MissionCategoryFilter = LeaderboardMissionCategory;
 
 function formatNumber(value?: number | null): string {
     return Number(value ?? 0).toLocaleString("en-US");
-}
-
-function getFileExtension(fileName: string): string {
-    const extension = fileName.split(".").pop();
-
-    if (!extension || extension === fileName) return "file";
-
-    return extension.toLowerCase();
-}
-
-function getEvidenceFileKey(file: File): string {
-    return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
 function getCategoryLabel(value: LeaderboardMissionCategory | null | undefined, t: TFunction): string {
@@ -101,20 +90,6 @@ function getAcceptByEvidenceTypes(types: LeaderboardEvidenceType[]): string | un
     });
 
     return Array.from(accepts).join(",");
-}
-
-function isValidHttpUrl(value: string): boolean {
-    const trimmedValue = value.trim();
-
-    if (!trimmedValue) return false;
-
-    try {
-        const url = new URL(trimmedValue);
-
-        return url.protocol === "http:" || url.protocol === "https:";
-    } catch {
-        return false;
-    }
 }
 
 function buildMissionUsedCount(logs: StudentLeaderboardLogResponse[]): Map<number, number> {
@@ -250,7 +225,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
     }
 
     function removeEvidenceFile(fileKey: string): void {
-        setEvidenceFiles((prev) => prev.filter((file) => getEvidenceFileKey(file) !== fileKey));
+        setEvidenceFiles((prev) => prev.filter((file) => getFileKey(file) !== fileKey));
     }
 
     async function handleSubmit(): Promise<void> {
@@ -482,7 +457,7 @@ export default function EcaStudentMobileLeaderboardMission(): React.ReactElement
                                 {evidenceFiles.length > 0 ? (
                                     <div className="eca-student-mobile-leaderboard-mission-file-list">
                                         {evidenceFiles.map((file) => {
-                                            const fileKey = getEvidenceFileKey(file);
+                                            const fileKey = getFileKey(file);
                                             const extension = getFileExtension(file.name);
 
                                             return (

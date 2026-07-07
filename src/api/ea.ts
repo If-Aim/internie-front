@@ -1,4 +1,4 @@
-import { api, apiUpload, apiBlob } from "./client";
+import { api, apiUpload, apiBlob, buildQueryString } from "./client";
 
 /* - EA 관련 공통 타입 - */
 export type ExternalActivityProgressStatus = "UPCOMING" | "ONGOING" | "COMPLETED" | "DELAYED";
@@ -98,7 +98,7 @@ export type AttendanceEventCreateRequest = {
     halfCreditThresholdMinutes?: number | null;
 };
 
-export type AttendanceEventResponse = {
+export type AttendanceEventCore = {
     eventId: number;
     name: string;
     roundNumber: number;
@@ -112,23 +112,13 @@ export type AttendanceEventResponse = {
     partialCreditThresholdMinutes: number;
     halfCreditThresholdMinutes: number;
     progress: AttendanceEventProgress;
+};
+
+export type AttendanceEventResponse = AttendanceEventCore & {
     attendanceRatePercent: number;
 };
 
-export type MyAttendanceEventResponse = {
-    eventId: number;
-    name: string;
-    roundNumber: number;
-    type: AttendanceEventType;
-    eventDate: string;
-    uploadWindowStart: string;
-    uploadWindowEnd: string;
-    scoreReferenceAt: string;
-    durationMinutes: number;
-    fullCreditThresholdMinutes: number;
-    partialCreditThresholdMinutes: number;
-    halfCreditThresholdMinutes: number;
-    progress: AttendanceEventProgress;
+export type MyAttendanceEventResponse = AttendanceEventCore & {
     status: AttendanceStatus;
     score: number;
     checkedAt?: string | null;
@@ -148,33 +138,23 @@ export type AttendanceSummaryResponse = {
     belowThresholdCount: number;
 };
 
-export type AttendanceEventParticipantRecordResponse = {
-    recordId: number;
+export type ParticipantProfile = {
     userId: number;
     name: string;
     nickname?: string | null;
     profileImage?: string | null;
     linkedinUrl?: string | null;
+};
+
+export type AttendanceEventParticipantRecordResponse = ParticipantProfile & {
+    recordId: number;
     status: AttendanceStatus;
     score: number;
     checkedAt?: string | null;
     selfieUrl?: string | null;
 };
 
-export type AttendanceEventDetailResponse = {
-    eventId: number;
-    name: string;
-    roundNumber: number;
-    type: AttendanceEventType;
-    eventDate: string;
-    uploadWindowStart: string;
-    uploadWindowEnd: string;
-    scoreReferenceAt: string;
-    durationMinutes: number;
-    fullCreditThresholdMinutes: number;
-    partialCreditThresholdMinutes: number;
-    halfCreditThresholdMinutes: number;
-    progress: AttendanceEventProgress;
+export type AttendanceEventDetailResponse = AttendanceEventCore & {
     records: AttendanceEventParticipantRecordResponse[];
 };
 
@@ -184,24 +164,14 @@ export type MyAttendanceSelfieResponse = {
     selfieUrl?: string | null;
 };
 
-export type MyAttendanceEventDetailResponse = {
-    eventId: number;
-    name: string;
-    roundNumber: number;
-    type: AttendanceEventType;
-    eventDate: string;
-    uploadWindowStart: string;
-    uploadWindowEnd: string;
-    progress: AttendanceEventProgress;
+export type MyAttendanceEventDetailResponse = Pick<
+    AttendanceEventCore,
+    "eventId" | "name" | "roundNumber" | "type" | "eventDate" | "uploadWindowStart" | "uploadWindowEnd" | "progress"
+> & {
     records: MyAttendanceSelfieResponse[];
 };
 
-export type AttendanceParticipantRateResponse = {
-    userId: number;
-    name: string;
-    nickname?: string | null;
-    profileImage?: string | null;
-    linkedinUrl?: string | null;
+export type AttendanceParticipantRateResponse = ParticipantProfile & {
     cumulativeRate: number;
     thresholdMet: boolean;
 };
@@ -296,10 +266,10 @@ export type ExternalActivityPersonalLeaderboardRanking = {
     lastPointEarnedAt?: string | null;
 };
 
-export type ExternalActivityPersonalLeaderboardResponse = {
+export type ExternalActivityLeaderboardResponse<T> = {
     externalActivityId: number;
     tieBreakPolicy: string;
-    rankings: ExternalActivityPersonalLeaderboardRanking[];
+    rankings: T[];
 };
 
 export type ExternalActivityTeamLeaderboardRanking = {
@@ -310,39 +280,50 @@ export type ExternalActivityTeamLeaderboardRanking = {
     lastPointEarnedAt?: string | null;
 };
 
-export type ExternalActivityTeamLeaderboardResponse = {
-    externalActivityId: number;
-    tieBreakPolicy: string;
-    rankings: ExternalActivityTeamLeaderboardRanking[];
-};
+export type ExternalActivityPersonalLeaderboardResponse = ExternalActivityLeaderboardResponse<ExternalActivityPersonalLeaderboardRanking>;
+export type ExternalActivityTeamLeaderboardResponse = ExternalActivityLeaderboardResponse<ExternalActivityTeamLeaderboardRanking>;
 
 export type LeaderboardApiResponse<T> = {
     data: T;
     timestamp: string;
 };
 
-export type LeaderboardRankingResponse = {
-    rank: number;
+export type LeaderboardPage = {
+    page: number;
+    size: number;
+    totalCount: number;
+};
+
+export type LeaderboardStudentSummary = {
     studentId: number;
     studentName: string;
     studentNickname?: string | null;
     profileImage?: string | null;
+};
+
+export type LeaderboardScoreBreakdown = {
     totalScore: number;
     attendanceScore: number;
     assignmentScore: number;
     participationScore: number;
+};
+
+export type LeaderboardEvidenceFields = {
+    evidenceUrl?: string | null;
+    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
+};
+
+export type LeaderboardRankingResponse = LeaderboardStudentSummary & LeaderboardScoreBreakdown & {
+    rank: number;
     lastReviewedAt?: string | null;
     trendDirection?: LeaderboardTrendDirection | null;
     trendValue?: number | null;
 };
 
-export type LeaderboardResponse = {
+export type LeaderboardResponse = LeaderboardPage & {
     externalActivityId: number;
     scope: LeaderboardScope;
     sort: LeaderboardSort;
-    page: number;
-    size: number;
-    totalCount: number;
     rankings: LeaderboardRankingResponse[];
     lastUpdate?: string | null;
 };
@@ -355,82 +336,58 @@ export type LeaderboardSnapshotRebuildResponse = {
     lastUpdate: string;
 };
 
-export type LeaderboardSubmissionResponse = {
+export type LeaderboardSubmissionResponse = LeaderboardStudentSummary & LeaderboardEvidenceFields & {
     submissionId: number;
     missionId: number;
     missionName: string;
     category?: LeaderboardMissionCategory | null;
     points?: number | null;
-    studentId: number;
-    studentName: string;
-    studentNickname?: string | null;
-    profileImage?: string | null;
     status: LeaderboardApprovalStatus;
     submittedAt?: string | null;
     reviewedAt?: string | null;
-    evidenceUrl?: string | null;
-    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     rejectReason?: string | null;
 };
 
-export type LeaderboardApprovalsResponse = {
+export type LeaderboardApprovalsResponse = LeaderboardPage & {
     externalActivityId: number;
     status: LeaderboardApprovalStatus;
     sort: LeaderboardApprovalSort;
-    page: number;
-    size: number;
-    totalCount: number;
     submissions: LeaderboardSubmissionResponse[];
 };
 
-export type LeaderboardStudentDetailResponse = {
+export type LeaderboardStudentDetailResponse = LeaderboardScoreBreakdown & Pick<LeaderboardStudentSummary, "studentId" | "studentName"> & {
     externalActivityId: number;
-    studentId: number;
-    studentName: string;
-    totalScore: number;
-    attendanceScore: number;
-    assignmentScore: number;
-    participationScore: number;
     pendingCount: number;
     approvedCount: number;
     rejectedCount: number;
     recentSubmissions: LeaderboardSubmissionResponse[];
 };
 
-export type LeaderboardCompletedMissionResponse = {
+export type LeaderboardCompletedMissionResponse = LeaderboardEvidenceFields & {
     submissionId: number;
     missionId: number;
     missionName: string;
     category: LeaderboardMissionCategory;
     score: number;
     completedAt?: string | null;
-    evidenceUrl?: string | null;
-    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
 };
 
-export type LeaderboardCompletedMissionsResponse = {
+export type LeaderboardCompletedMissionsResponse = LeaderboardPage & {
     externalActivityId: number;
     studentId: number;
-    page: number;
-    size: number;
-    totalCount: number;
     missions: LeaderboardCompletedMissionResponse[];
 };
 
-export type LeaderboardSubmissionDetailResponse = {
+export type LeaderboardSubmissionDetailResponse = LeaderboardEvidenceFields & Pick<LeaderboardStudentSummary, "studentId" | "studentName"> & {
     submissionId: number;
     externalActivityId: number;
     missionId: number;
     missionName: string;
     category: LeaderboardMissionCategory;
     status: LeaderboardApprovalStatus;
-    studentId: number;
-    studentName: string;
     submittedAt?: string | null;
     reviewedAt?: string | null;
     score?: number | null;
-    evidenceUrl?: string | null;
-    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     rejectReason?: string | null;
 };
 
@@ -487,17 +444,7 @@ export type LeaderboardMissionListResponse = {
     missions: LeaderboardMissionResponse[];
 };
 
-export type LeaderboardMissionRequest = {
-    name: string;
-    description?: string | null;
-    category: LeaderboardMissionCategory;
-    points: number;
-    maximumPerStudent: number;
-    evidenceName?: string | null;
-    evidenceTypes: LeaderboardEvidenceType[];
-    evidenceType?: LeaderboardEvidenceType | null;
-    autoReflect: boolean;
-};
+export type LeaderboardMissionRequest = Omit<LeaderboardMissionResponse, "missionId" | "externalActivityId">;
 
 export type LeaderboardScoringRuleItemResponse = {
     ruleItemId: number;
@@ -515,89 +462,64 @@ export type LeaderboardScoringRuleResponse = {
     items: LeaderboardScoringRuleItemResponse[];
 };
 
-export type LeaderboardScoringRuleItemRequest = {
-    category: LeaderboardMissionCategory;
-    itemName: string;
-    points: number;
-};
+export type LeaderboardScoringRuleItemRequest = Pick<LeaderboardScoringRuleItemResponse, "category" | "itemName" | "points">;
 
-export type LeaderboardScoringRuleRequest = {
-    attendanceWeight: number;
-    assignmentWeight: number;
-    participationWeight: number;
+export type LeaderboardScoringRuleRequest = Omit<LeaderboardScoringRuleResponse, "externalActivityId" | "items"> & {
     items: LeaderboardScoringRuleItemRequest[];
 };
 
-export type StudentLeaderboardResponse = {
-    externalActivityId: number;
+export type StudentLeaderboardResponse = Omit<LeaderboardResponse, "scope" | "sort"> & {
     studentId: number;
     myRank?: number | null;
     myTotalScore: number;
     myTrendDirection?: LeaderboardTrendDirection | null;
     myTrendValue?: number | null;
-    page: number;
-    size: number;
-    totalCount: number;
-    rankings: LeaderboardRankingResponse[];
-    lastUpdate?: string | null;
 };
 
-export type StudentLeaderboardLogResponse = {
-    submissionId: number;
-    missionId: number;
-    missionName: string;
-    category: LeaderboardMissionCategory;
-    status: LeaderboardApprovalStatus;
-    score?: number | null;
-    submittedAt?: string | null;
-    reviewedAt?: string | null;
-};
+export type StudentLeaderboardLogResponse = Pick<
+    LeaderboardSubmissionDetailResponse,
+    "submissionId" | "missionId" | "missionName" | "category" | "status" | "score" | "submittedAt" | "reviewedAt"
+>;
 
-export type StudentLeaderboardLogsResponse = {
+export type StudentLeaderboardLogsResponse = LeaderboardPage & {
     externalActivityId: number;
     studentId: number;
-    page: number;
-    size: number;
-    totalCount: number;
     logs: StudentLeaderboardLogResponse[];
 };
 
-export type StudentLeaderboardEvidenceResponse = {
+export type StudentLeaderboardEvidenceResponse = LeaderboardEvidenceFields & {
     externalActivityId: number;
     submissionId: number;
     studentId: number;
-    evidenceUrl?: string | null;
-    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
     submittedAt: string;
 };
 
-export type StudentLeaderboardSubmitResponse = {
-    submissionId: number;
-    externalActivityId: number;
-    missionId: number;
-    studentId: number;
-    status: LeaderboardApprovalStatus;
+export type StudentLeaderboardSubmitResponse = LeaderboardEvidenceFields & Pick<
+    LeaderboardSubmissionDetailResponse,
+    "submissionId" | "externalActivityId" | "missionId" | "studentId" | "status" | "submittedAt" | "reviewedAt"
+> & Pick<LeaderboardReviewResponse, "approvedPoint" | "adjustPoint"> & {
     autoReflected: boolean;
-    submittedAt: string;
-    reviewedAt?: string | null;
-    approvedPoint?: number | null;
-    adjustPoint?: number | null;
-    evidenceUrl?: string | null;
-    evidences?: LeaderboardSubmissionEvidenceResponse[] | null;
 };
 
-function buildLeaderboardQuery(params: Record<string, string | number | boolean | undefined | null>): string {
-    const searchParams = new URLSearchParams();
+function appendJsonBlob(formData: FormData, key: string, value: unknown): void {
+    formData.append(key, new Blob([JSON.stringify(value)], { type: "application/json" }));
+}
 
-    Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && String(value).trim()) {
-            searchParams.set(key, String(value));
-        }
-    });
+function appendFiles(formData: FormData, key: string, files?: File[] | null): void {
+    files
+        ?.filter((file) => file.size > 0)
+        .forEach((file) => {
+            formData.append(key, file);
+        });
+}
 
-    const queryString = searchParams.toString();
-
-    return queryString ? `?${queryString}` : "";
+function appendTrimmedValues(formData: FormData, key: string, values?: Array<string | number> | null): void {
+    values
+        ?.map((value) => String(value).trim())
+        .filter(Boolean)
+        .forEach((value) => {
+            formData.append(key, value);
+        });
 }
 
 function buildLeaderboardEvidenceForm(input: LeaderboardEvidenceInput): FormData {
@@ -607,22 +529,13 @@ function buildLeaderboardEvidenceForm(input: LeaderboardEvidenceInput): FormData
         formData.append("file", input.file);
     }
 
-    input.files
-        ?.filter((file) => file.size > 0)
-        .forEach((file) => {
-            formData.append("files", file);
-        });
+    appendFiles(formData, "files", input.files);
 
     if (input.evidenceUrl?.trim()) {
         formData.append("evidenceUrl", input.evidenceUrl.trim());
     }
 
-    input.evidenceUrls
-        ?.map((url) => url.trim())
-        .filter(Boolean)
-        .forEach((url) => {
-            formData.append("evidenceUrls", url);
-        });
+    appendTrimmedValues(formData, "evidenceUrls", input.evidenceUrls);
 
     return formData;
 }
@@ -667,33 +580,34 @@ function buildExternalActivityNoticeForm(
 ): FormData {
     const formData = new FormData();
 
-    formData.append(
-        "meta",
-        new Blob([
-            JSON.stringify({
-                title: input.title,
-                content: input.content,
-            }),
-        ], { type: "application/json" })
-    );
+    appendJsonBlob(formData, "meta", {
+        title: input.title,
+        content: input.content,
+    });
 
-    input.files
-        ?.filter((file) => file.size > 0)
-        .forEach((file) => {
-            formData.append("files", file);
-        });
+    appendFiles(formData, "files", input.files);
 
     if ("keepFileIds" in input) {
-        input.keepFileIds?.forEach((fileId) => {
-            formData.append("keepFileIds", String(fileId));
-        });
+        appendTrimmedValues(formData, "keepFileIds", input.keepFileIds);
     }
 
     return formData;
 }
 
+async function apiWrappedData<T>(path: string, init: RequestInit = {}): Promise<T> {
+    const response = await api<LeaderboardApiResponse<T>>(path, init);
+
+    return response.data;
+}
+
+async function apiUploadWrappedData<T>(path: string, formData: FormData, init: RequestInit = {}): Promise<T> {
+    const response = await apiUpload<LeaderboardApiResponse<T>>(path, formData, init);
+
+    return response.data;
+}
+
 export async function getNotifications(query?: { unreadOnly?: boolean; page?: number; size?: number }): Promise<NotificationListResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         unreadOnly: query?.unreadOnly,
         page: query?.page ?? 0,
         size: query?.size ?? 20,
@@ -844,24 +758,9 @@ export async function submitAssignment( // 과제 제출
         participantId: input.participantId ?? null,
     };
 
-    formData.append(
-        "meta",
-        new Blob([JSON.stringify(meta)], { type: "application/json" })
-    );
-
-    input.files
-        ?.filter((file) => file.size > 0)
-        .forEach((file) => {
-            formData.append("files", file);
-        });
-
-    input.urls?.forEach((url) => {
-        const trimmedUrl = url.trim();
-
-        if (trimmedUrl) {
-            formData.append("urls", trimmedUrl);
-        }
-    });
+    appendJsonBlob(formData, "meta", meta);
+    appendFiles(formData, "files", input.files);
+    appendTrimmedValues(formData, "urls", input.urls);
 
     return apiUpload<AssignmentSubmissionResponse>(
         `/assignments/${assignmentId}/submissions`,
@@ -887,28 +786,10 @@ export async function updateAssignmentSubmission( // 제출한 과제 수정
         description: input.description ?? "",
     };
 
-    formData.append(
-        "meta",
-        new Blob([JSON.stringify(meta)], { type: "application/json" })
-    );
-
-    input.keepFileIds?.forEach((fileId) => {
-        formData.append("keepFileIds", String(fileId));
-    });
-
-    input.files
-        ?.filter((file) => file.size > 0)
-        .forEach((file) => {
-            formData.append("files", file);
-        });
-
-    input.urls?.forEach((url) => {
-        const trimmedUrl = url.trim();
-
-        if (trimmedUrl) {
-            formData.append("urls", trimmedUrl);
-        }
-    });
+    appendJsonBlob(formData, "meta", meta);
+    appendTrimmedValues(formData, "keepFileIds", input.keepFileIds);
+    appendFiles(formData, "files", input.files);
+    appendTrimmedValues(formData, "urls", input.urls);
 
     return apiUpload<AssignmentSubmissionResponse>(
         `/submissions/${submissionId}`,
@@ -1032,49 +913,43 @@ export async function getMyLeaderboard(
     externalActivityId: number | string,
     query?: { page?: number; size?: number }
 ): Promise<StudentLeaderboardResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<StudentLeaderboardResponse>>(
+    return apiWrappedData<StudentLeaderboardResponse>(
         `/student/externalActivities/${externalActivityId}/leaderboard${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function getMyLeaderboardMissions(
     externalActivityId: number | string,
     category?: LeaderboardMissionCategory | null
 ): Promise<LeaderboardMissionListResponse> {
-    const queryString = buildLeaderboardQuery({ category });
+    const queryString = buildQueryString({ category });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardMissionListResponse>>(
+    return apiWrappedData<LeaderboardMissionListResponse>(
         `/student/externalActivities/${externalActivityId}/missions${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function getMyLeaderboardMissionLogs(
     externalActivityId: number | string,
     query?: { category?: LeaderboardMissionCategory | null; page?: number; size?: number }
 ): Promise<StudentLeaderboardLogsResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         category: query?.category,
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<StudentLeaderboardLogsResponse>>(
+    return apiWrappedData<StudentLeaderboardLogsResponse>(
         `/student/externalActivities/${externalActivityId}/missions/logs${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function updateMyLeaderboardEvidence(
@@ -1082,31 +957,27 @@ export async function updateMyLeaderboardEvidence(
     submissionId: number | string,
     input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardEvidenceResponse> {
-    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardEvidenceResponse>>(
+    return apiUploadWrappedData<StudentLeaderboardEvidenceResponse>(
         `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/evidence`,
         buildLeaderboardEvidenceForm(input),
         { method: "PATCH" }
     );
-
-    return response.data;
 }
 
 export async function getMyLeaderboardSubmissions(
     externalActivityId: number | string,
     query?: { status?: LeaderboardApprovalStatus; page?: number; size?: number }
 ): Promise<LeaderboardApprovalsResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         status: query?.status ?? "all",
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardApprovalsResponse>>(
+    return apiWrappedData<LeaderboardApprovalsResponse>(
         `/student/externalActivities/${externalActivityId}/submissions${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function resubmitMyLeaderboardSubmission(
@@ -1114,13 +985,11 @@ export async function resubmitMyLeaderboardSubmission(
     submissionId: number | string,
     input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardEvidenceResponse> {
-    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardEvidenceResponse>>(
+    return apiUploadWrappedData<StudentLeaderboardEvidenceResponse>(
         `/student/externalActivities/${externalActivityId}/submissions/${submissionId}/resubmit`,
         buildLeaderboardEvidenceForm(input),
         { method: "PATCH" }
     );
-
-    return response.data;
 }
 
 export async function deleteMyRejectedLeaderboardSubmission(
@@ -1138,13 +1007,11 @@ export async function submitLeaderboardMission(
     missionId: number | string,
     input: LeaderboardEvidenceInput
 ): Promise<StudentLeaderboardSubmitResponse> {
-    const response = await apiUpload<LeaderboardApiResponse<StudentLeaderboardSubmitResponse>>(
+    return apiUploadWrappedData<StudentLeaderboardSubmitResponse>(
         `/externalActivities/${externalActivityId}/missions/${missionId}/submissions`,
         buildLeaderboardEvidenceForm(input),
         { method: "POST" }
     );
-
-    return response.data;
 }
 
 export async function getStudentLeaderboardCompletedMissions(
@@ -1152,18 +1019,16 @@ export async function getStudentLeaderboardCompletedMissions(
     studentId: number | string,
     query?: { category?: LeaderboardMissionCategory | null; page?: number; size?: number }
 ): Promise<LeaderboardCompletedMissionsResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         category: query?.category,
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardCompletedMissionsResponse>>(
+    return apiWrappedData<LeaderboardCompletedMissionsResponse>(
         `/student/externalActivities/${externalActivityId}/students/${studentId}/missions/completed${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function downloadMyLeaderboardEvidenceFile(
@@ -1361,10 +1226,7 @@ export async function createExternalActivity( // 대외활동 생성
 ): Promise<ExternalActivityResponse> {
     const formData = new FormData();
 
-    formData.append(
-        "meta",
-        new Blob([JSON.stringify(request)], { type: "application/json" })
-    );
+    appendJsonBlob(formData, "meta", request);
 
     if (planFile) {
         formData.append("planFile", planFile);
@@ -1385,10 +1247,7 @@ export async function updateExternalActivity( // 대외활동 수정
 ): Promise<ExternalActivityResponse> {
     const formData = new FormData();
 
-    formData.append(
-        "meta",
-        new Blob([JSON.stringify(request)], { type: "application/json" })
-    );
+    appendJsonBlob(formData, "meta", request);
 
     if (planFile) {
         formData.append("planFile", planFile);
@@ -1445,24 +1304,14 @@ export async function getExternalActivitiesByOrganization( // 기관별 대외�
     organizationId: number | string,
     query?: ExternalActivityListQuery
 ): Promise<ExternalActivityResponse[]> {
-    const params = new URLSearchParams();
-
-    if (query?.status) {
-        params.set("status", query.status);
-    }
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({
+        status: query?.status,
+        year: query?.year,
+        name: query?.name?.trim(),
+    });
 
     return api<ExternalActivityResponse[]>(
-        `/organizations/${organizationId}/externalActivities${queryString ? `?${queryString}` : ""}`,
+        `/organizations/${organizationId}/externalActivities${queryString}`,
         { method: "GET" }
     );
 }
@@ -1471,20 +1320,13 @@ export async function getExternalActivitiesByStatus( // 기관 대외활동 진�
     organizationId: number | string,
     query?: ExternalActivitiesByStatusQuery
 ): Promise<ExternalActivitiesByStatusResponse> {
-    const params = new URLSearchParams();
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({
+        year: query?.year,
+        name: query?.name?.trim(),
+    });
 
     return api<ExternalActivitiesByStatusResponse>(
-        `/organizations/${organizationId}/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        `/organizations/${organizationId}/externalActivities/by-status${queryString}`,
         { method: "GET" }
     );
 }
@@ -1492,24 +1334,14 @@ export async function getExternalActivitiesByStatus( // 기관 대외활동 진�
 export async function getMyManagedExternalActivities( // 나의 대외활동 조회(관리자)
     query?: MyManagedExternalActivitiesQuery
 ): Promise<ExternalActivityResponse[]> {
-    const params = new URLSearchParams();
-
-    if (query?.status) {
-        params.set("status", query.status);
-    }
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({
+        status: query?.status,
+        year: query?.year,
+        name: query?.name?.trim(),
+    });
 
     return api<ExternalActivityResponse[]>(
-        `/users/me/externalActivities${queryString ? `?${queryString}` : ""}`,
+        `/users/me/externalActivities${queryString}`,
         { method: "GET" }
     );
 }
@@ -1517,20 +1349,13 @@ export async function getMyManagedExternalActivities( // 나의 대외활동 조
 export async function getMyManagedExternalActivitiesByStatus( //나의 대외활동 진행상태별 조회
     query?: ExternalActivitiesByStatusQuery
 ): Promise<ExternalActivitiesByStatusResponse> {
-    const params = new URLSearchParams();
-
-    if (query?.year) {
-        params.set("year", String(query.year));
-    }
-
-    if (query?.name?.trim()) {
-        params.set("name", query.name.trim());
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({
+        year: query?.year,
+        name: query?.name?.trim(),
+    });
 
     return api<ExternalActivitiesByStatusResponse>(
-        `/users/me/externalActivities/by-status${queryString ? `?${queryString}` : ""}`,
+        `/users/me/externalActivities/by-status${queryString}`,
         { method: "GET" }
     );
 }
@@ -1631,7 +1456,6 @@ export type CreateAssignmentRequest = {
     startTime?: string | null;
     endTime?: string | null;
     deadlineAt?: string | null;
-    progressStatus: ExternalActivityProgressStatus;
     resultForms: AssignmentResultForm[];
     systemForm: AssignmentSystemForm;
     maxAutoTeams?: number | null;
@@ -1857,7 +1681,6 @@ export async function getAssignmentEvaluationOverview(
 export type UpdateAssignmentMetaRequest = {
     name?: string | null;
     description?: string | null;
-    progressStatus?: ExternalActivityProgressStatus | null;
     resultForms?: AssignmentResultForm[] | null;
     maxAutoTeams?: number | null;
 };
@@ -1926,16 +1749,10 @@ export async function getExternalActivityEvaluationOverview(
     externalActivityId: number | string,
     assignmentId?: number | string | null
 ): Promise<ExternalActivityEvaluationOverviewResponse> {
-    const params = new URLSearchParams();
-
-    if (assignmentId !== null && assignmentId !== undefined && String(assignmentId).trim()) {
-        params.set("assignmentId", String(assignmentId));
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({ assignmentId });
 
     return api<ExternalActivityEvaluationOverviewResponse>(
-        `/externalActivities/${externalActivityId}/evaluations/overview${queryString ? `?${queryString}` : ""}`,
+        `/externalActivities/${externalActivityId}/evaluations/overview${queryString}`,
         { method: "GET" }
     );
 }
@@ -2141,11 +1958,8 @@ export async function getAttendanceEvents(
     externalActivityId: number | string,
     sort: AttendanceEventSort = "latest"
 ): Promise<AttendanceEventResponse[]> {
-    const params = new URLSearchParams();
-    params.set("sort", sort);
-
     return api<AttendanceEventResponse[]>(
-        `/externalActivities/${externalActivityId}/attendance-events?${params.toString()}`,
+        `/externalActivities/${externalActivityId}/attendance-events${buildQueryString({ sort })}`,
         { method: "GET" }
     );
 }
@@ -2181,20 +1995,13 @@ export async function getAttendanceParticipants(
     externalActivityId: number | string,
     query?: { search?: string; sort?: AttendanceParticipantSort }
 ): Promise<AttendanceParticipantRateResponse[]> {
-    const params = new URLSearchParams();
-
-    if (query?.search?.trim()) {
-        params.set("search", query.search.trim());
-    }
-
-    if (query?.sort) {
-        params.set("sort", query.sort);
-    }
-
-    const queryString = params.toString();
+    const queryString = buildQueryString({
+        search: query?.search?.trim(),
+        sort: query?.sort,
+    });
 
     return api<AttendanceParticipantRateResponse[]>(
-        `/externalActivities/${externalActivityId}/attendance/participants${queryString ? `?${queryString}` : ""}`,
+        `/externalActivities/${externalActivityId}/attendance/participants${queryString}`,
         { method: "GET" }
     );
 }
@@ -2397,26 +2204,24 @@ export async function getLeaderboard(
     externalActivityId: number | string,
     query?: { scope?: LeaderboardScope; sort?: LeaderboardSort; page?: number; size?: number }
 ): Promise<LeaderboardResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         scope: query?.scope ?? "individual",
         sort: query?.sort ?? "score",
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardResponse>>(
+    return apiWrappedData<LeaderboardResponse>(
         `/externalActivities/${externalActivityId}/leaderboard${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function rebuildLeaderboardSnapshot(
     externalActivityId: number | string,
     scope: LeaderboardScope = "individual"
 ): Promise<LeaderboardSnapshotRebuildResponse> {
-    const queryString = buildLeaderboardQuery({ scope });
+    const queryString = buildQueryString({ scope });
 
     return api<LeaderboardSnapshotRebuildResponse>(
         `/externalActivities/${externalActivityId}/leaderboard/snapshots/rebuild${queryString}`,
@@ -2428,19 +2233,17 @@ export async function getLeaderboardApprovals(
     externalActivityId: number | string,
     query?: { status?: LeaderboardApprovalStatus; sort?: LeaderboardApprovalSort; page?: number; size?: number }
 ): Promise<LeaderboardApprovalsResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         status: query?.status ?? "pending",
         sort: query?.sort ?? "latest",
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardApprovalsResponse>>(
+    return apiWrappedData<LeaderboardApprovalsResponse>(
         `/externalActivities/${externalActivityId}/approvals${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function getLeaderboardStudentDetail(
@@ -2458,17 +2261,15 @@ export async function getLeaderboardStudentCompletedMissions(
     studentId: number | string,
     query?: { page?: number; size?: number }
 ): Promise<LeaderboardCompletedMissionsResponse> {
-    const queryString = buildLeaderboardQuery({
+    const queryString = buildQueryString({
         page: query?.page ?? 0,
         size: query?.size ?? 20,
     });
 
-    const response = await api<LeaderboardApiResponse<LeaderboardCompletedMissionsResponse>>(
+    return apiWrappedData<LeaderboardCompletedMissionsResponse>(
         `/externalActivities/${externalActivityId}/students/${studentId}/missions/completed${queryString}`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function getLeaderboardSubmissionDetail(
@@ -2523,27 +2324,23 @@ export async function rejectLeaderboardSubmission(
 export async function getLeaderboardMissions(
     externalActivityId: number | string
 ): Promise<LeaderboardMissionListResponse> {
-    const response = await api<LeaderboardApiResponse<LeaderboardMissionListResponse>>(
+    return apiWrappedData<LeaderboardMissionListResponse>(
         `/externalActivities/${externalActivityId}/missions`,
         { method: "GET" }
     );
-
-    return response.data;
 }
 
 export async function createLeaderboardMission(
     externalActivityId: number | string,
     request: LeaderboardMissionRequest
 ): Promise<LeaderboardMissionResponse> {
-    const response = await api<LeaderboardApiResponse<LeaderboardMissionResponse>>(
+    return apiWrappedData<LeaderboardMissionResponse>(
         `/externalActivities/${externalActivityId}/missions`,
         {
             method: "POST",
             body: JSON.stringify(request),
         }
     );
-
-    return response.data;
 }
 
 export async function updateLeaderboardMission(
@@ -2551,15 +2348,13 @@ export async function updateLeaderboardMission(
     missionId: number | string,
     request: LeaderboardMissionRequest
 ): Promise<LeaderboardMissionResponse> {
-    const response = await api<LeaderboardApiResponse<LeaderboardMissionResponse>>(
+    return apiWrappedData<LeaderboardMissionResponse>(
         `/externalActivities/${externalActivityId}/missions/${missionId}`,
         {
             method: "PATCH",
             body: JSON.stringify(request),
         }
     );
-
-    return response.data;
 }
 
 export async function deleteLeaderboardMission(

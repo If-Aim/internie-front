@@ -4,7 +4,8 @@ import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getMyParticipatingExternalActivity, getSubmissionEvaluation, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionEvaluationResponse, AssignmentSubmissionResponse, StudentAssignmentResponse, StudentExternalActivityDetailResponse, SubmissionFileResponse } from "../../../../../../api/ea";
-import { formatServerKstDateAndTimeCompactForUser, formatServerKstDateTimeDotForUser } from "../../../../../../utils/dateTime";
+import { formatServerKstDateAndTimeForLanguage, formatServerKstDateTimeDotForUser } from "../../../../../../utils/dateTime";
+import { getFileExtension, isSameNumberArray, isValidHttpUrl, normalizeFileExtension } from "../../../../../../utils/file";
 import "./ecaStudentMobileAssignmentSubmit.css";
 import { getFileIconByExtension } from "../../../../desktop/eca/dashboard/assignment/fileIcons";
 
@@ -18,25 +19,12 @@ const ASSIGNMENT_SUBMIT_T = "ecaStudent.assignmentSubmitPage";
 
 type TranslationFunction = ReturnType<typeof useTranslation>["t"];
 
-function formatDateTime(date?: string | null, time?: string | null, fallbackTime: string = "00:00:00"): string {
-    return formatServerKstDateAndTimeCompactForUser(date, time, fallbackTime).slice(2);
-}
-
 function formatSubmittedAt(value?: string | null): string {
     return formatServerKstDateTimeDotForUser(value);
 }
 
 function getLatestSubmittedAt(submission: AssignmentSubmissionResponse): string {
     return submission.updatedAt ?? submission.submittedAt;
-}
-
-function isSameNumberArray(a: number[], b: number[]): boolean {
-    if (a.length !== b.length) return false;
-
-    const sortedA = [...a].sort((prev, next) => prev - next);
-    const sortedB = [...b].sort((prev, next) => prev - next);
-
-    return sortedA.every((value, index) => value === sortedB[index]);
 }
 
 function getResultFormLabel(value: AssignmentResultForm | null | undefined, t: TranslationFunction): string {
@@ -68,29 +56,10 @@ function getResultFormsLabel(values: AssignmentResultForm[] | null | undefined, 
     return values.map((value) => getResultFormLabel(value, t)).join(", ");
 }
 
-function getFileExtension(fileName: string): string {
-    const extension = fileName.split(".").pop();
-
-    if (!extension || extension === fileName) return "file";
-
-    return extension.toLowerCase();
-}
-
-function normalizeExtension(extension: string): string {
-    const lower = extension.toLowerCase();
-
-    if (lower === "jpeg") return "jpg";
-    if (lower === "pptx") return "ppt";
-    if (lower === "docx") return "doc";
-    if (lower === "xlsx") return "xls";
-
-    return lower;
-}
-
 function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, extension?: string | null): boolean {
     if (!resultForms || resultForms.length === 0 || !extension) return true;
 
-    const normalizedExtension = normalizeExtension(extension);
+    const normalizedExtension = normalizeFileExtension(extension);
 
     const allowedExtensionsByResultForm: Record<Exclude<AssignmentResultForm, "LINK">, string[]> = {
         WRITING: ["txt", "doc", "pdf", "hwp"],
@@ -114,20 +83,6 @@ function getAssignmentFileWarning(resultForms: AssignmentResultForm[] | null | u
     if (isAllowedAssignmentFile(resultForms, extension)) return "";
 
     return t(`${ASSIGNMENT_SUBMIT_T}.fileTypeWarning`);
-}
-
-function isValidHttpUrl(value: string): boolean {
-    const trimmedValue = value.trim();
-
-    if (!trimmedValue) return false;
-
-    try {
-        const url = new URL(trimmedValue);
-
-        return url.protocol === "http:" || url.protocol === "https:";
-    } catch {
-        return false;
-    }
 }
 
 function getEvaluationTotalScore(evaluation?: AssignmentSubmissionEvaluationResponse | null): number {
@@ -452,9 +407,9 @@ export default function EcaMobileAssignmentSubmit(): React.ReactElement {
                                     <span>{t(`${ASSIGNMENT_SUBMIT_T}.assignmentPeriod`)}</span>
 
                                     <div>
-                                        <input value={formatDateTime(assignment?.startDate, assignment?.startTime)} readOnly />
+                                        <input value={formatServerKstDateAndTimeForLanguage(assignment?.startDate, assignment?.startTime)} readOnly />
                                         <em>-</em>
-                                        <input value={formatDateTime(assignment?.endDate, assignment?.endTime, "23:59:59")} readOnly />
+                                        <input value={formatServerKstDateAndTimeForLanguage(assignment?.endDate, assignment?.endTime, "23:59:59")} readOnly />
                                     </div>
                                 </div>
 

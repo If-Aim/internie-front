@@ -1765,7 +1765,6 @@ export default function EcaNewAssignmentPage(): React.ReactElement {
                     startTime: startParts.time,
                     endTime: endParts.time,
                     deadlineAt: endParts.dateTime,
-                    progressStatus: "UPCOMING" as const,
                     resultForms,
                     systemForm,
                     maxAutoTeams: systemForm === "TEAM" ? Number(teamCount) : null,

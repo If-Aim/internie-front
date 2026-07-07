@@ -4,8 +4,9 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../../../../../api/client";
 import { createExternalActivityNotice, createExternalActivityStudentInvite, deleteExternalActivity, deleteExternalActivityNotice, getAttendanceEventDetail, getAttendanceEvents, getExternalActivity, getExternalActivityAssignments, getExternalActivityNotices, getExternalActivityStudentInvites, getExternalActivityTeams, updateExternalActivityNotice, downloadExternalActivityNoticeFile} from "../../../../../../api/ea";
-import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityNoticeResponse, ExternalActivityParticipant, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, } from "../../../../../../api/ea"; 
+import type { AssignmentResponse, AttendanceEventDetailResponse, AttendanceEventResponse, ExternalActivityNoticeResponse, ExternalActivityParticipant, ExternalActivityResponse, ExternalActivityStudentInviteResponse, TeamResponse, } from "../../../../../../api/ea";
 import { formatServerKstDateTimeDateLabelForUser, parseServerKstDateTime } from "../../../../../../utils/dateTime";
+import { getFileExtension } from "../../../../../../utils/file";
 import type { EcaClientAdminOutletContext } from "../../ecaHome";
 import AdminStudentProfileModal from "../AdminStudentProfileModal";
 import type { AdminStudentProfile } from "../AdminStudentProfileModal";
@@ -116,21 +117,6 @@ function formatNoticeDate(value: string, locale: string): string {
         month: "short",
         day: "numeric",
     }).format(date);
-}
-
-function getFileExtension(fileName?: string | null): string {
-    if (!fileName) return "";
-
-    const lastDotIndex = fileName.lastIndexOf(".");
-
-    if (
-        lastDotIndex === -1 ||
-        lastDotIndex === fileName.length - 1
-    ) {
-        return "";
-    }
-
-    return fileName.slice(lastDotIndex + 1);
 }
 
 function formatFileSize(sizeBytes?: number | null): string {
@@ -256,8 +242,8 @@ function toAssignmentSummary(assignment: AssignmentResponse): AssignmentSummary 
     };
 }
 
-function formatAttendanceEventDate(value?: string | null): string {
-    return formatServerKstDateTimeDateLabelForUser(value);
+function formatAttendanceEventDate(value: string | null | undefined, language: string): string {
+    return formatServerKstDateTimeDateLabelForUser(value, "-", language);
 }
 
 function getAttendanceEventTypeText(type: AttendanceEventResponse["type"], startText: string, endText: string): string {
@@ -293,13 +279,14 @@ function toAttendanceSummary(
     detail: AttendanceEventDetailResponse | null,
     totalParticipantCount: number,
     startText: string,
-    endText: string
+    endText: string,
+    language: string
 ): AttendanceSummary {
     const presentCount = detail?.records.filter((record) => record.status === "PRESENT").length ?? 0;
 
     return {
         id: event.eventId,
-        date: formatAttendanceEventDate(event.scoreReferenceAt),
+        date: formatAttendanceEventDate(event.scoreReferenceAt, language),
         eventTypeText: getAttendanceEventTypeText(event.type, startText, endText),
         presentCount,
         totalCount: totalParticipantCount,
@@ -529,7 +516,8 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                         attendanceDetailData[index],
                         nextParticipants.length,
                         t(`${DASHBOARD_T}.attendanceStart`),
-                        t(`${DASHBOARD_T}.attendanceEnd`)
+                        t(`${DASHBOARD_T}.attendanceEnd`),
+                        i18n.resolvedLanguage ?? i18n.language
                     )
                 ));
 
@@ -1618,7 +1606,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
 
                                         <button type="button" className="eca-admin-dashboard-search-reset" onClick={() => setNoticeSearchKeyword("")}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                <path d="M11.7323 10.3185H10.9909L10.7281 10.0653C11.3146 9.38432 11.7433 8.58221 11.9834 7.71636C12.2235 6.8505 12.2691 5.94231 12.1171 5.05676C11.676 2.44933 9.49872 0.367141 6.87099 0.0482465C5.94717 -0.0685572 5.00885 0.027398 4.12785 0.328769C3.24684 0.630141 2.4465 1.12894 1.78805 1.787C1.1296 2.44506 0.630511 3.24494 0.328962 4.12543C0.0274141 5.00592 -0.0685974 5.94368 0.0482748 6.86696C0.367356 9.49315 2.45077 11.6691 5.05973 12.11C5.94579 12.2619 6.85452 12.2163 7.72088 11.9764C8.58724 11.7364 9.38982 11.308 10.0712 10.7218L10.3246 10.9844V11.7254L14.3131 15.7116C14.6979 16.0961 15.3266 16.0961 15.7114 15.7116C16.0962 15.327 16.0962 14.6986 15.7114 14.3141L11.7323 10.3185ZM6.10144 10.3185C3.76464 10.3185 1.8783 8.43329 1.8783 6.09786C1.8783 3.76243 3.76464 1.8772 6.10144 1.8772C8.43824 1.8772 10.3246 3.76243 10.3246 6.09786C10.3246 8.43329 8.43824 10.3185 6.10144 10.3185Z" fill="#A0A0A0"/>
+                                                <path d="M13.3332 2.66699L2.6665 13.3337M13.3332 13.3337L2.6665 2.66699" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round"/>
                                             </svg>
                                         </button>
                                     </div>
@@ -1669,7 +1657,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                     <div className="eca-admin-dashboard-notice-modal-backdrop" onMouseDown={closeNoticeModal}>
                         <div className="eca-admin-dashboard-notice-form-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
                             <div className="eca-admin-dashboard-notice-modal-head">
-                                <h3>Notice</h3>
+                                <h3>{t(`${DASHBOARD_T}.noticeModalTitle`)}</h3>
 
                                 <button type="button" onClick={closeNoticeModal} aria-label={t("common.close")} disabled={noticeSaving}>
                                     <img src="/icons/x-01.svg" alt=""/>
@@ -1713,7 +1701,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                 <input ref={noticeFileInputRef} type="file" multiple hidden onChange={handleNoticeFileChange}/>
                                 <div className="eca-admin-dashboard-notice-file-editor">
                                     <button type="button" className="eca-admin-dashboard-notice-add-file" onClick={() => noticeFileInputRef.current?.click()}>
-                                        Add files
+                                        {t(`${DASHBOARD_T}.noticeAddFiles`)}
                                     </button>
 
                                     {selectedNotice?.files
@@ -1782,7 +1770,7 @@ export default function EcaDashboardExActivity(): React.ReactElement {
                                                 <div className="eca-admin-dashboard-notice-detail-file-wrap"> 
                                                     <span className="eca-admin-dashboard-notice-detail-file-icon">
                                                         {getFileIconByExtension(
-                                                            getFileExtension(file.originalFileName)
+                                                            getFileExtension(file.originalFileName, "")
                                                         )}
                                                     </span>
 

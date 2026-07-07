@@ -182,6 +182,34 @@ export function formatServerKstDateAndTimeCompactForUser(date?: string | null, t
     return `${year}.${month}.${day} ${hour}:${minute}`;
 }
 
+export function formatServerKstDateAndTimeForLanguage(date?: string | null, time?: string | null, fallbackTime: string = "00:00:00", language?: string): string {
+    const isEnglish = (language ?? "").toLowerCase().startsWith("en");
+
+    if (!isEnglish) return formatServerKstDateAndTimeCompactForUser(date, time, fallbackTime).slice(2);
+
+    const parsed = parseServerKstDateAndTime(date, time, fallbackTime);
+
+    if (!parsed) return "-";
+
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: getUserTimeZone(),
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+    }).formatToParts(parsed);
+
+    const month = getDatePart(parts, "month");
+    const day = getDatePart(parts, "day");
+    const year = getDatePart(parts, "year");
+    const hour = getDatePart(parts, "hour");
+    const minute = getDatePart(parts, "minute");
+
+    return `${month} ${day}, ${year} ${hour}:${minute}`;
+}
+
 export function formatServerKstDateTimeTimeForUser(value?: string | null, fallback: string = "--:--"): string {
     const date = parseServerKstDateTime(value);
 
@@ -200,14 +228,16 @@ export function formatServerKstDateTimeTimeForUser(value?: string | null, fallba
     return `${hour}:${minute}`;
 }
 
-export function formatServerKstDateTimeDateLabelForUser(value?: string | null, fallback: string = "-"): string {
+export function formatServerKstDateTimeDateLabelForUser(value?: string | null, fallback: string = "-", language?: string): string {
     const date = parseServerKstDateTime(value);
 
     if (!date) return fallback;
 
-    return new Intl.DateTimeFormat("en-US", {
+    const isEnglish = (language ?? "").toLowerCase().startsWith("en");
+
+    return new Intl.DateTimeFormat(isEnglish ? "en-US" : "ko-KR", {
         timeZone: getUserTimeZone(),
-        month: "short",
+        month: isEnglish ? "short" : "long",
         day: "numeric",
         weekday: "short",
     }).format(date);

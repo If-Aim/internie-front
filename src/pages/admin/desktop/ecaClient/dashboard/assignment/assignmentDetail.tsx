@@ -203,7 +203,7 @@ function getAssignmentProgressStatus(assignment: AssignmentResponse): Assignment
 
 function getAssignmentProgressLabel(status: AssignmentProgressStatus, t: TFunction): string {
     if (status === "UPCOMING") return t(`${ASSIGNMENT_T}.assignmentProgress.upcoming`);
-    if (status === "CLOSED") return t(`${ASSIGNMENT_T}.assignmentProgress.closed`);
+    if (status === "CLOSED") return t(`${ASSIGNMENT_T}.assignmentProgress.completed`);
 
     return t(`${ASSIGNMENT_T}.assignmentProgress.inProgress`);
 }

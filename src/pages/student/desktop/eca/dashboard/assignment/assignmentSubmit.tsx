@@ -7,7 +7,8 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { downloadSubmissionFile, getAssignment, getMyAssignmentSubmissions, getMyExternalActivityAssignments, getSubmissionFilePreview, getSubmissionFilePreviewBlob, submitAssignment, updateAssignmentSubmission } from "../../../../../../api/ea";
 import type { AssignmentResponse, AssignmentResultForm, AssignmentSubmissionResponse, StudentAssignmentResponse, SubmissionFilePreviewResponse, SubmissionFileResponse } from "../../../../../../api/ea";
-import { formatServerKstDateAndTimeCompactForUser, formatServerKstDateTimeYYDotForUser, getUserTimeZone, parseServerKstDateAndTime } from "../../../../../../utils/dateTime";
+import { formatServerKstDateAndTimeForLanguage, formatServerKstDateTimeYYDotForUser } from "../../../../../../utils/dateTime";
+import { getFileExtension, isSameNumberArray, isValidHttpUrl, normalizeFileExtension } from "../../../../../../utils/file";
 import type { EcaStudentOutletContext } from "../../ecaStudentLayout";
 import { getFileIconByExtension } from "./fileIcons";
 import "./assignmentSubmit.css";
@@ -31,38 +32,6 @@ type PreviewModalState = {
     orientation: PreviewModalOrientation;
 };
 
-function getDatePart(parts: Intl.DateTimeFormatPart[], type: Intl.DateTimeFormatPartTypes): string {
-    return parts.find((part) => part.type === type)?.value ?? "";
-}
-
-function formatDateTime(date?: string | null, time?: string | null, fallbackTime: string = "00:00:00", language?: string): string {
-    const isEnglish = (language ?? "").toLowerCase().startsWith("en");
-
-    if (!isEnglish) return formatServerKstDateAndTimeCompactForUser(date, time, fallbackTime).slice(2);
-
-    const parsed = parseServerKstDateAndTime(date, time, fallbackTime);
-
-    if (!parsed) return "-";
-
-    const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: getUserTimeZone(),
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-    }).formatToParts(parsed);
-
-    const month = getDatePart(parts, "month");
-    const day = getDatePart(parts, "day");
-    const year = getDatePart(parts, "year");
-    const hour = getDatePart(parts, "hour");
-    const minute = getDatePart(parts, "minute");
-
-    return `${month} ${day}, ${year} ${hour}:${minute}`;
-}
-
 function formatSubmittedAt(value?: string | null): string {
     return formatServerKstDateTimeYYDotForUser(value);
 }
@@ -83,19 +52,11 @@ function getResultFormsLabel(t: TFunction, values?: AssignmentResultForm[] | nul
     return values.map((value) => getResultFormLabel(t, value)).join(", ");
 }
 
-function getFileExtension(fileName: string): string {
-    const extension = fileName.split(".").pop();
-
-    if (!extension || extension === fileName) return "file";
-
-    return extension.toLowerCase();
-}
-
 function isPreviewableSubmittedFile(file?: SubmissionFileResponse | null): boolean {
     if (!file || file.submitType === "LINK") return false;
 
     const fileName = file.originalFileName ?? "";
-    const extension = normalizeExtension(getFileExtension(fileName));
+    const extension = normalizeFileExtension(getFileExtension(fileName));
     const contentType = (file.contentType ?? "").toLowerCase();
 
     return contentType === "application/pdf" || contentType.startsWith("image/") || ["pdf", "jpg", "png", "gif", "webp"].includes(extension);
@@ -109,21 +70,10 @@ function isImagePreview(preview?: SubmissionFilePreviewResponse | null): boolean
     return (preview?.contentType ?? "").toLowerCase().startsWith("image/");
 }
 
-function normalizeExtension(extension: string): string {
-    const lower = extension.toLowerCase();
-
-    if (lower === "jpeg") return "jpg";
-    if (lower === "pptx") return "ppt";
-    if (lower === "docx") return "doc";
-    if (lower === "xlsx") return "xls";
-
-    return lower;
-}
-
 function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, extension?: string | null): boolean {
     if (!resultForms || resultForms.length === 0 || !extension) return true;
 
-    const normalizedExtension = normalizeExtension(extension);
+    const normalizedExtension = normalizeFileExtension(extension);
 
     const allowedExtensionsByResultForm: Record<Exclude<AssignmentResultForm, "LINK">, string[]> = {
         WRITING: ["txt", "doc", "pdf", "hwp"],
@@ -141,15 +91,6 @@ function isAllowedAssignmentFile(resultForms?: AssignmentResultForm[] | null, ex
 
             return allowedExtensions.includes(normalizedExtension);
         });
-}
-
-function isSameNumberArray(a: number[], b: number[]): boolean {
-    if (a.length !== b.length) return false;
-
-    const sortedA = [...a].sort((prev, next) => prev - next);
-    const sortedB = [...b].sort((prev, next) => prev - next);
-
-    return sortedA.every((value, index) => value === sortedB[index]);
 }
 
 function getAssignmentFileWarning(t: TFunction, resultForms?: AssignmentResultForm[] | null, extension?: string | null): string {
@@ -434,20 +375,6 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
         setExistingLinks((prev) => prev.filter((file) => file.submissionFileId !== fileId));
     }
 
-    function isValidHttpUrl(value: string): boolean {
-        const trimmedValue = value.trim();
-
-        if (!trimmedValue) return false;
-
-        try {
-            const url = new URL(trimmedValue);
-
-            return url.protocol === "http:" || url.protocol === "https:";
-        } catch {
-            return false;
-        }
-    }
-
     async function handleDownloadExistingFile(file: SubmissionFileResponse): Promise<void> {
         try {
             await downloadSubmissionFile(file);
@@ -613,14 +540,14 @@ export default function EcaStudentAssignmentSubmit(): React.ReactElement {
                                 <div className="eca-student-assignment-submit-period">
                                     <label>
                                         <span>{t(`${ASSIGNMENT_SUBMIT_T}.assignmentPeriod`)}</span>
-                                        <input value={formatDateTime(assignment?.startDate, assignment?.startTime, "00:00:00", i18n.resolvedLanguage ?? i18n.language)} readOnly />
+                                        <input value={formatServerKstDateAndTimeForLanguage(assignment?.startDate, assignment?.startTime, "00:00:00", i18n.resolvedLanguage ?? i18n.language)} readOnly />
                                     </label>
 
                                     <em>~</em>
 
                                     <label>
                                         <span>&nbsp;</span>
-                                        <input value={formatDateTime(assignment?.endDate, assignment?.endTime, "23:59:59", i18n.resolvedLanguage ?? i18n.language)} readOnly />
+                                        <input value={formatServerKstDateAndTimeForLanguage(assignment?.endDate, assignment?.endTime, "23:59:59", i18n.resolvedLanguage ?? i18n.language)} readOnly />
                                     </label>
                                 </div>
 

@@ -176,7 +176,7 @@ export default function EcaDashboardAssignment(): React.ReactElement {
     }
 
     const upcomingCount = assignments.filter((assignment) => assignment.status === "upcoming").length;
-    const ongoingCount = assignments.filter((assignment) => assignment.status === "ongoing").length;
+    const inProgressCount = assignments.filter((assignment) => assignment.status === "ongoing").length;
     const completedCount = assignments.filter((assignment) => assignment.status === "completed").length;
     
     const isReadOnly = activity?.manageableByMe === false;
@@ -236,17 +236,26 @@ export default function EcaDashboardAssignment(): React.ReactElement {
 
             <section className="eca-admin-assignment-summary-grid">
                 <article className="eca-admin-assignment-summary-card">
-                    <span>{t(`${ASSIGNMENT_T}.assignmentSummary.completed`)}</span>
+                    <div className="eca-admin-assignment-summary-label">
+                        <i className={getStatusDotClass("completed")} />
+                        <span>{t(`${ASSIGNMENT_T}.assignmentSummary.completed`)}</span>
+                    </div>
                     <strong>{completedCount}</strong>
                 </article>
 
                 <article className="eca-admin-assignment-summary-card">
-                    <span>{t(`${ASSIGNMENT_T}.assignmentSummary.ongoing`)}</span>
-                    <strong>{ongoingCount}</strong>
+                    <div className="eca-admin-assignment-summary-label">
+                        <i className={getStatusDotClass("ongoing")} />
+                        <span>{t(`${ASSIGNMENT_T}.assignmentSummary.inProgress`)}</span>
+                    </div>
+                    <strong>{inProgressCount}</strong>
                 </article>
 
                 <article className="eca-admin-assignment-summary-card">
-                    <span>{t(`${ASSIGNMENT_T}.assignmentSummary.upcoming`)}</span>
+                    <div className="eca-admin-assignment-summary-label">
+                        <i className={getStatusDotClass("upcoming")} />
+                        <span>{t(`${ASSIGNMENT_T}.assignmentSummary.upcoming`)}</span>
+                    </div>
                     <strong>{upcomingCount}</strong>
                 </article>
             </section>
