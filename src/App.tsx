@@ -7,6 +7,8 @@ import AdminClientRoute from "./clientAdminRoute";
 import EcaAdminRoute from "./ecaAdminRoute";
 import GlobalModalHost from "./globalModalHost"
 
+const Landing = lazy(() => import("./pages/landing/landing"));
+
 const Auth = lazy(() => import("./pages/auth/auth"));
 const Signup = lazy(() => import("./pages/auth/signup"));
 const FindId = lazy(() => import("./pages/auth/findId"));
@@ -26,6 +28,8 @@ export default function App(): React.ReactElement {
     return (
         <Suspense fallback={<div />}>
             <Routes>
+                <Route path="/" element={<Landing />} />
+
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Auth />} />
                 <Route path="/find-id" element={<FindId />} />
@@ -40,24 +44,20 @@ export default function App(): React.ReactElement {
                 </Route>
 
                 <Route path="/student/*" element={<StudentApp />} />
-                <Route path="/" element={<Navigate to="/student" replace />} />
 
-                {/* 관리자용 라우트 */}
                 <Route element={<AdminRoute />}>
                     <Route path="/system-admin/*" element={<AdminApp />} />
                 </Route>
 
-                {/* client 관리자용 라우트 */}
                 <Route path="/admin/:clientType/*" element={<AdminClientRoute />}>
                     <Route path="*" element={<ClientAdminApp />} />
                 </Route>
 
-                {/* 대외활동 관리자용 라우트 */}
                 <Route element={<EcaAdminRoute />}>
                     <Route path="/program-admin/*" element={<EcaClientAdminApp />} />
                 </Route>
 
-                <Route path="*" element={<Navigate to="/student" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <GlobalModalHost />
         </Suspense>

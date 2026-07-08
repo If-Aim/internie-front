@@ -1,0 +1,520 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import heroImage from "../../assets/landing/hero.png";
+import missionImage from "../../assets/landing/mission.png";
+import projectMainImage from "../../assets/landing/project-main.png";
+import projectTrackingImage from "../../assets/landing/project-tracking.png";
+import projectMonitoringImage from "../../assets/landing/project-monitoring.png";
+import projectReviewImage from "../../assets/landing/project-review.png";
+import projectInsightImage from "../../assets/landing/project-insight.png";
+import evaluationMainImage from "../../assets/landing/evaluation-main.png";
+import evaluationRow1Image from "../../assets/landing/evaluation-row-1.png";
+import evaluationRow2Image from "../../assets/landing/evaluation-row-2.png";
+import evaluationRow3Image from "../../assets/landing/evaluation-row-3.png";
+
+import "./landing.css";
+
+type LandingFooterLink = {
+    label: string;
+    path: string | null;
+    sectionId: string | null;
+};
+
+function FaqArrow(): React.ReactElement {
+    return (
+        <svg className="internie-landing-faq-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M44 26L32 38L20 26" stroke="#808080" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+const LANDING_FOOTER_LINKS: LandingFooterLink[] = [
+    { label: "홈", path: null, sectionId: "internie-landing-top" },
+    { label: "서비스 소개", path: null, sectionId: null },
+    { label: "소식 소개", path: null, sectionId: null },
+    { label: "FAQ", path: null, sectionId: "internie-landing-faq" }
+];
+
+export default function Landing(): React.ReactElement {
+    const navigate = useNavigate();
+
+    const landingRef = useRef<HTMLDivElement | null>(null);
+    const finalCtaButtonRef = useRef<HTMLDivElement | null>(null);
+    const inquiryPopoverRef = useRef<HTMLDivElement | null>(null);
+    const floatingButtonRef = useRef<HTMLButtonElement | null>(null);
+
+    const [inquiryOpen, setInquiryOpen] = useState(false);
+    const [inquiryDocked, setInquiryDocked] = useState(false);
+    const [inquiryDockPosition, setInquiryDockPosition] = useState({
+        top: 0,
+        left: 0
+    });
+
+    const handleFooterLinkClick = (link: LandingFooterLink) => {
+        if (link.path) {
+            navigate(link.path);
+            return;
+        }
+
+        if (link.sectionId) {
+            document.getElementById(link.sectionId)?.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    };
+
+    useEffect(() => {
+        const elements = document.querySelectorAll<HTMLElement>(".internie-landing-reveal, .internie-landing-sequence");
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    entry.target.classList.toggle("is-visible", entry.isIntersecting);
+                });
+            },
+            {
+                threshold: 0.15,
+                rootMargin: "-60px 0px -80px 0px"
+            }
+        );
+
+        elements.forEach((element) => observer.observe(element));
+
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const scrollRoot = document.getElementById("root");
+        const floatingBottom = 50;
+
+        let frameId = 0;
+
+        const updateInquiryPosition = () => {
+            cancelAnimationFrame(frameId);
+
+            frameId = requestAnimationFrame(() => {
+                const landing = landingRef.current;
+                const slot = finalCtaButtonRef.current;
+                const button = floatingButtonRef.current;
+
+                if (!landing || !slot || !button) return;
+
+                const landingRect = landing.getBoundingClientRect();
+                const slotRect = slot.getBoundingClientRect();
+                const buttonHeight = button.offsetHeight;
+
+                const floatingButtonTop = window.innerHeight - floatingBottom - buttonHeight;
+                const shouldDock = slotRect.top <= floatingButtonTop;
+
+                setInquiryDocked((prev) => {
+                    return prev === shouldDock ? prev : shouldDock;
+                });
+
+                if (!shouldDock) return;
+
+                const nextTop = slotRect.top - landingRect.top;
+                const nextLeft = slotRect.left - landingRect.left;
+
+                setInquiryDockPosition((prev) => {
+                    if (Math.abs(prev.top - nextTop) < 0.5 && Math.abs(prev.left - nextLeft) < 0.5) {
+                        return prev;
+                    }
+
+                    return {
+                        top: nextTop,
+                        left: nextLeft
+                    };
+                });
+            });
+        };
+
+        const resizeObserver = new ResizeObserver(updateInquiryPosition);
+
+        if (landingRef.current) {
+            resizeObserver.observe(landingRef.current);
+        }
+
+        if (finalCtaButtonRef.current) {
+            resizeObserver.observe(finalCtaButtonRef.current);
+        }
+
+        updateInquiryPosition();
+
+        scrollRoot?.addEventListener("scroll", updateInquiryPosition, { passive: true });
+        window.addEventListener("scroll", updateInquiryPosition, { passive: true });
+        window.addEventListener("resize", updateInquiryPosition);
+
+        return () => {
+            cancelAnimationFrame(frameId);
+            resizeObserver.disconnect();
+
+            scrollRoot?.removeEventListener("scroll", updateInquiryPosition);
+            window.removeEventListener("scroll", updateInquiryPosition);
+            window.removeEventListener("resize", updateInquiryPosition);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!inquiryOpen) return;
+
+        const handlePointerDown = (event: PointerEvent) => {
+            const target = event.target as Node;
+
+            if (inquiryPopoverRef.current?.contains(target)) return;
+
+            setInquiryOpen(false);
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setInquiryOpen(false);
+            }
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [inquiryOpen]);
+
+    return (
+        <div ref={landingRef} className="internie-landing">
+            <header className="internie-landing-header">
+                <button type="button" className="internie-landing-logo" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                    internie
+                </button>
+
+                <button type="button" className="internie-landing-login" onClick={() => navigate("/login")}>
+                    로그인
+                </button>
+            </header>
+
+            <main>
+                <section id="internie-landing-top" className="internie-landing-hero">
+                    <div>
+                        <h1><strong>인터니</strong>로 채용 성과를 높이세요</h1>
+                        <p>실무 미션을 등록하고 지원자의 결과를 확인하세요<br/>결과물과 수행 과정 데이터로 누가 <strong>“우리 팀의 일”</strong>을 잘하는 지 확인하세요</p>
+                    </div>
+
+                    <img className="internie-landing-hero-image internie-landing-reveal" src={heroImage} alt="인터니 채용 프로세스" />
+
+                    <button type="button" className="internie-landing-primary-button internie-landing-reveal" onClick={() => setInquiryOpen(true)}>
+                        문의하기
+                    </button>
+                </section>
+
+                <section className="internie-landing-section internie-landing-section-white">
+                    <div className="internie-landing-section-heading">
+                        <span>이런 스타트업이라면</span>
+                        <h2>채용 전에,<br />함께 일해보세요</h2>
+                    </div>
+
+                    <div className="internie-landing-problem-cards">
+                        <article className="internie-landing-problem-card internie-landing-reveal">
+                            <strong>01</strong>
+                            <h3>업무 이해도를 확인해요</h3>
+                            <p>지원자가 실제 업무를 얼마나 이해하고 있는지 확인할 수 있어요.</p>
+                        </article>
+
+                        <article className="internie-landing-problem-card internie-landing-reveal">
+                            <strong>02</strong>
+                            <h3>직무 역량을 직접 확인해요</h3>
+                            <p>서류만으로 알기 어려운 업무 수행 능력을 직접 확인해요.</p>
+                        </article>
+
+                        <article className="internie-landing-problem-card internie-landing-reveal">
+                            <strong>03</strong>
+                            <h3>업무 방식을 확인해요</h3>
+                            <p>미션 하나면 충분합니다. 지금 바로 상담을 신청하세요.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section className="internie-landing-section internie-landing-section-blue">
+                    <div className="internie-landing-section-heading">
+                        <span>어떻게 사용하나요?</span>
+                        <h2>채용 담당자님은 실무 과제만 주세요.<br />나머지는 인터니가 할게요!</h2>
+                    </div>
+
+                    <img className="internie-landing-content-image internie-landing-reveal" src={missionImage} alt="인터니 미션 관리 화면" />
+                    <div className="internie-landing-section-paragraph">                    
+                        <span>지원자 모집부터 운영·관리까지,<br />담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
+                    </div>
+                </section>
+
+                <section className="internie-landing-section internie-landing-section-white">
+                    <div className="internie-landing-section-heading">
+                        <span className="internie-landing-section-heading-badge">과제 생성</span>
+                        <h2>우리 팀의 프로젝트가<br />학생에게 제공돼요</h2>
+                    </div>
+                    
+                    <div className="internie-landing-project-visual internie-landing-sequence">
+                        <img className="internie-landing-project-main" src={projectMainImage} alt="인터니 과제 관리 화면" />
+
+                        <div className="internie-landing-project-card-group">
+                            <img className="internie-landing-project-card internie-project-card-1" src={projectTrackingImage} alt="트래킹 인프라 구축 과제" />
+                            <img className="internie-landing-project-card internie-project-card-2" src={projectMonitoringImage} alt="모니터링 주기 설정 과제" />
+                            <img className="internie-landing-project-card internie-project-card-3" src={projectReviewImage} alt="성과 리뷰 과제" />
+                            <img className="internie-landing-project-card internie-project-card-4" src={projectInsightImage} alt="인사이트 도출 과제" />
+                        </div>
+                    </div>
+                </section>
+
+                <section className="internie-landing-section internie-landing-section-white">
+                    <div className="internie-landing-section-heading">
+                        <span className="internie-landing-section-heading-badge">과제 평가</span>
+                        <h2>단계별 산출물을 통해<br />학생들이 일하는 방식을 확인해요</h2>
+                    </div>
+
+                    <div className="internie-landing-evaluation-visual internie-landing-sequence">
+                        <img className="internie-landing-evaluation-main" src={evaluationMainImage} alt="인터니 과제 평가 화면" />
+
+                        <div className="internie-landing-evaluation-card-group">
+                            <img className="internie-landing-evaluation-card internie-evaluation-card-1" src={evaluationRow1Image} alt="과제 평가 카드 1" />
+                            <img className="internie-landing-evaluation-card internie-evaluation-card-2" src={evaluationRow2Image} alt="과제 평가 카드 2" />
+                            <img className="internie-landing-evaluation-card internie-evaluation-card-3" src={evaluationRow3Image} alt="과제 평가 카드 3" />
+                        </div>
+                    </div>
+                </section>
+
+                <section id="internie-landing-faq" className="internie-landing-faq">
+                    <div className="internie-landing-faq-inner">
+                        <div className="internie-landing-faq-heading">
+                            <span>FAQ</span>
+                            <h2>자주 묻는 질문</h2>
+                        </div>
+
+                        <div className="internie-landing-faq-list">
+                            <details>
+                                <summary>
+                                    <span>어떤 미션을 등록할 수 있나요?</span>
+                                    <FaqArrow />
+                                </summary>
+
+                                <div className="internie-landing-faq-answer">
+                                    <p>실제 업무와 관련된 프로젝트, 리서치, 기획, 콘텐츠 제작 등 다양한 실무형 미션을 등록할 수 있습니다. 기업의 실제 업무와 가까운 미션일수록 지원자의 업무 이해도와 수행 방식을 더욱 구체적으로 확인할 수 있습니다.</p>
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span>미션 설계는 누가 하나요?</span>
+                                    <FaqArrow />
+                                </summary>
+
+                                <div className="internie-landing-faq-answer">
+                                    <p>기업이 확인하고 싶은 직무 역량과 실제 업무를 기준으로 미션을 구성할 수 있습니다. 필요한 경우 인터니의 미션 설계 지원을 통해 과제 구조와 평가 기준을 구체화할 수 있습니다.</p>
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span>수행 품질과 평가는 어떻게 관리되나요?</span>
+                                    <FaqArrow />
+                                </summary>
+
+                                <div className="internie-landing-faq-answer">
+                                    <p>단계별 산출물과 최종 결과물을 함께 확인하고, 기업이 설정한 평가 기준에 따라 참여자의 수행 과정과 결과를 관리할 수 있습니다.</p>
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span>비용은 어떻게 되나요?</span>
+                                    <FaqArrow />
+                                </summary>
+
+                                <div className="internie-landing-faq-answer">
+                                    <p>진행하는 프로그램의 규모와 운영 방식에 따라 달라질 수 있습니다. 문의 내용을 확인한 뒤 필요한 운영 범위에 맞춰 안내해 드립니다.</p>
+                                </div>
+                            </details>
+
+                            <details>
+                                <summary>
+                                    <span>채용까지 연결되나요?</span>
+                                    <FaqArrow />
+                                </summary>
+
+                                <div className="internie-landing-faq-answer">
+                                    <p>미션 결과와 수행 데이터를 바탕으로 기업이 적합한 참여자를 확인하고 이후 인터뷰나 채용 절차로 연결할 수 있도록 설계할 수 있습니다.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="internie-landing-final-cta">
+                    <div className="internie-landing-final-cta-inner internie-landing-reveal">
+                        <div>
+                            <h2>이력서 말고, 일하는 걸 보세요.</h2>
+                            <p>미션 수행 과정과 결과를 통해 더 정확한 채용을 시작하세요.</p>
+                        </div>
+
+                        <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot" aria-hidden="true" />
+                    </div>
+                </section>
+
+                <footer className="internie-landing-footer">
+                    <div className="internie-landing-footer-inner">
+                        <div className="internie-landing-footer-brand">
+                            <div className="internie-landing-footer-logo">
+                                <strong>인터니</strong>
+                                <small>Internie</small>
+                            </div>
+
+                            <p>
+                                이력서로는 알 수 없는 능력을,<br />
+                                미션 수행 과정과 결과로 확인합니다. by aim
+                            </p>
+
+                            {/* <div className="internie-landing-footer-company">
+                                <span>[법인명]</span>
+                                <span>대표 [대표자명]</span>
+                                <span>사업자등록번호 [000-00-00000]</span>
+                            </div> */}
+                        </div>
+
+                        <div className="internie-landing-footer-column">
+                            <strong>바로가기</strong>
+
+                            <nav className="internie-landing-footer-links" aria-label="푸터 바로가기">
+                                {LANDING_FOOTER_LINKS.map((link) => {
+                                    const pending = !link.path && !link.sectionId;
+
+                                    return (
+                                        <button
+                                            key={link.label}
+                                            type="button"
+                                            aria-disabled={pending}
+                                            onClick={() => {
+                                                if (!pending) handleFooterLinkClick(link);
+                                            }}
+                                        >
+                                            {link.label}
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+
+                        <div className="internie-landing-footer-column internie-landing-footer-contact">
+                            <strong>고객 문의</strong>
+
+                            <div>
+                                <p>대표 문의</p>
+                                <span>aim2a.kor@gmail.com</span>
+                                {/* <span>[대표 연락처]</span> */}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="internie-landing-footer-copyright">
+                        <span>© 2026 aim. All rights reserved.</span>
+                    </div>
+                </footer>
+            </main>
+
+            <div
+                ref={inquiryPopoverRef}
+                className={`internie-landing-inquiry-anchor${inquiryDocked ? " is-docked" : ""}`}
+                style={
+                    inquiryDocked
+                        ? {
+                            top: `${inquiryDockPosition.top}px`,
+                            left: `${inquiryDockPosition.left}px`
+                        }
+                        : undefined
+                }
+            >
+                <div className={`internie-landing-inquiry-popover${inquiryOpen ? " is-open" : ""}`} aria-hidden={!inquiryOpen}>
+                    <div className="internie-landing-inquiry-header">
+                        <h2>문의하기</h2>
+
+                        <button type="button" className="internie-landing-inquiry-close" aria-label="문의창 닫기" onClick={() => setInquiryOpen(false)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form className="internie-landing-inquiry-form">
+                        <div className="internie-landing-inquiry-row">
+                            <label>
+                                <span>
+                                    기업명<em>*</em>
+                                </span>
+
+                                <input type="text" placeholder="예) AIM" />
+                            </label>
+
+                            <label>
+                                <span>
+                                    담당자명<em>*</em>
+                                </span>
+
+                                <input type="text" placeholder="예) 김유진"/>
+                            </label>
+                        </div>
+
+                        <label>
+                            <span>
+                                직책<em>*</em>
+                            </span>
+
+                            <input type="text" placeholder="예) 인사팀장"/>
+                        </label>
+
+                        <label>
+                            <span>
+                                회사 이메일<em>*</em>
+                            </span>
+
+                            <input type="email" placeholder="example@company.com"/>
+                        </label>
+
+                        <label>
+                            <span>
+                                연락처<em>*</em>
+                            </span>
+
+                            <input type="tel" placeholder="010-0000-0000"/>
+                        </label>
+
+                        <label>
+                            <span>
+                                어떤 점이 궁금하신가요? (선택)
+                            </span>
+
+                            <textarea rows={4} />
+                        </label>
+
+                        <label className="internie-landing-inquiry-agree">
+                            <input type="checkbox" />
+
+                            <span>개인정보 수집 및 이용에 동의합니다.</span>
+                        </label>
+
+                        <button type="submit" className="internie-landing-inquiry-submit">
+                            문의 보내기
+                        </button>
+                    </form>
+                </div>
+
+                <button
+                    ref={floatingButtonRef}
+                    type="button"
+                    className={`internie-landing-consult-button internie-landing-floating-button${inquiryOpen ? " is-active" : ""}`}
+                    aria-expanded={inquiryOpen}
+                    onClick={() => setInquiryOpen((prev) => !prev)}
+                >
+                    도입 문의
+                </button>
+            </div>
+        </div>
+    );
+}
