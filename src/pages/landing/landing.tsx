@@ -36,6 +36,29 @@ const LANDING_FOOTER_LINKS: LandingFooterLink[] = [
     { label: "FAQ", path: null, sectionId: "internie-landing-faq" }
 ];
 
+const LANDING_FAQ_ITEMS = [
+    {
+        question: "세팅에 시간이 얼마나 걸리고, 우리는 뭘 해야 하나요?",
+        answer: "담당자는 JD나 실무 과제만 전달해 주시면 됩니다. 미션 설계부터 지원자 운영, 제출물 관리, 평가 지원까지 인터니가 진행합니다. 담당자는 최종 결과를 확인하고 지원자를 검토하면 됩니다."
+    },
+    {
+        question: "어떤 직무·규모에 맞나요? 개발직만 되나요?",
+        answer: "아닙니다. 개발뿐 아니라 마케팅, 기획, 운영, CS, 디자인 등 결과물을 만드는 대부분의 직무에 적용할 수 있습니다. 채용하려는 직무의 JD나 과제를 공유해 주시면, 그에 맞는 미션으로 설계해드립니다. 특히 신입·인턴처럼 이력서만으로 판단하기 어려운 채용에서 활용도가 높습니다."
+    },
+    {
+        question: "지원자에게 보상을 제공해야 하나요?",
+        answer: "필수는 아닙니다. 기본적으로는 무료 참여이며, 완료자에게는 참여 인증 뱃지를 제공합니다. 필요하다면 소정의 참여 보상이나 인증서 발급도 함께 운영할 수 있습니다."
+    },
+    {
+        question: "우리 회사 실무를 외부에 공개해야 하는데, 보안·기밀은 괜찮나요?",
+        answer: "원본 업무를 그대로 공개하지 않습니다. 회사명, 고객 정보, 민감한 데이터는 제거하거나 익명화하고, 실무 맥락만 살려 미션을 구성합니다. 어떤 내용을 공개할지는 기업이 직접 결정하며, 필요하면 NDA 절차도 함께 적용할 수 있습니다."
+    },
+    {
+        question: "부정행위나 AI 대필은 어떻게 걸러내나요?",
+        answer: "인터니는 결과물만 평가하지 않습니다. 과제를 수행하는 과정과 단계별 산출물을 함께 보기 때문에, 대필이나 단순 복붙은 과정에서 드러날 가능성이 높습니다. AI 역시 사용 여부보다 어떻게 활용했는지를 하나의 평가 요소로 활용합니다."
+    }
+];
+
 export default function Landing(): React.ReactElement {
     const navigate = useNavigate();
 
@@ -43,13 +66,28 @@ export default function Landing(): React.ReactElement {
     const finalCtaButtonRef = useRef<HTMLDivElement | null>(null);
     const inquiryPopoverRef = useRef<HTMLDivElement | null>(null);
     const floatingButtonRef = useRef<HTMLButtonElement | null>(null);
-
+    
+    const [openFaqIndexes, setOpenFaqIndexes] = useState<Set<number>>(() => new Set());
     const [inquiryOpen, setInquiryOpen] = useState(false);
     const [inquiryDocked, setInquiryDocked] = useState(false);
     const [inquiryDockPosition, setInquiryDockPosition] = useState({
         top: 0,
         left: 0
     });
+
+    const handleFaqToggle = (index: number) => {
+        setOpenFaqIndexes((prev) => {
+            const next = new Set(prev);
+
+            if (next.has(index)) {
+                next.delete(index);
+            } else {
+                next.add(index);
+            }
+
+            return next;
+        });
+    };
 
     const handleFooterLinkClick = (link: LandingFooterLink) => {
         if (link.path) {
@@ -290,60 +328,24 @@ export default function Landing(): React.ReactElement {
                         </div>
 
                         <div className="internie-landing-faq-list">
-                            <details>
-                                <summary>
-                                    <span>어떤 미션을 등록할 수 있나요?</span>
-                                    <FaqArrow />
-                                </summary>
+                            {LANDING_FAQ_ITEMS.map((item, index) => {
+                                const isOpen = openFaqIndexes.has(index);
 
-                                <div className="internie-landing-faq-answer">
-                                    <p>실제 업무와 관련된 프로젝트, 리서치, 기획, 콘텐츠 제작 등 다양한 실무형 미션을 등록할 수 있습니다. 기업의 실제 업무와 가까운 미션일수록 지원자의 업무 이해도와 수행 방식을 더욱 구체적으로 확인할 수 있습니다.</p>
-                                </div>
-                            </details>
+                                return (
+                                    <div key={item.question} className={`internie-landing-faq-item${isOpen ? " is-open" : ""}`}>
+                                        <button type="button" className="internie-landing-faq-question" aria-expanded={isOpen} aria-controls={`internie-faq-answer-${index}`} onClick={() => handleFaqToggle(index)}>
+                                            <span>{item.question}</span>
+                                            <FaqArrow />
+                                        </button>
 
-                            <details>
-                                <summary>
-                                    <span>미션 설계는 누가 하나요?</span>
-                                    <FaqArrow />
-                                </summary>
-
-                                <div className="internie-landing-faq-answer">
-                                    <p>기업이 확인하고 싶은 직무 역량과 실제 업무를 기준으로 미션을 구성할 수 있습니다. 필요한 경우 인터니의 미션 설계 지원을 통해 과제 구조와 평가 기준을 구체화할 수 있습니다.</p>
-                                </div>
-                            </details>
-
-                            <details>
-                                <summary>
-                                    <span>수행 품질과 평가는 어떻게 관리되나요?</span>
-                                    <FaqArrow />
-                                </summary>
-
-                                <div className="internie-landing-faq-answer">
-                                    <p>단계별 산출물과 최종 결과물을 함께 확인하고, 기업이 설정한 평가 기준에 따라 참여자의 수행 과정과 결과를 관리할 수 있습니다.</p>
-                                </div>
-                            </details>
-
-                            <details>
-                                <summary>
-                                    <span>비용은 어떻게 되나요?</span>
-                                    <FaqArrow />
-                                </summary>
-
-                                <div className="internie-landing-faq-answer">
-                                    <p>진행하는 프로그램의 규모와 운영 방식에 따라 달라질 수 있습니다. 문의 내용을 확인한 뒤 필요한 운영 범위에 맞춰 안내해 드립니다.</p>
-                                </div>
-                            </details>
-
-                            <details>
-                                <summary>
-                                    <span>채용까지 연결되나요?</span>
-                                    <FaqArrow />
-                                </summary>
-
-                                <div className="internie-landing-faq-answer">
-                                    <p>미션 결과와 수행 데이터를 바탕으로 기업이 적합한 참여자를 확인하고 이후 인터뷰나 채용 절차로 연결할 수 있도록 설계할 수 있습니다.</p>
-                                </div>
-                            </details>
+                                        <div id={`internie-faq-answer-${index}`} className="internie-landing-faq-answer" aria-hidden={!isOpen}>
+                                            <div className="internie-landing-faq-answer-inner">
+                                                <p>{item.answer}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
