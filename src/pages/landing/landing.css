@@ -48,9 +48,9 @@
 .internie-landing-sequence.is-visible .internie-project-card-4 { opacity: 1; transform: translate3d(0, 0, 0); transition-delay: 0.96s; }
 
 .internie-landing-problem-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: min(100%, 900px); margin: 0 auto; }
-.internie-landing-problem-card { min-height: 240px; padding: 28px; border: 1px solid #EAEFF6; border-radius: 16px; background: #F7F9FC; text-align: left; transition: background-color 2.5s ease-in-out, border-color 2.5s ease-in-out, transform 0.8s ease, box-shadow 1.5s ease; }
+.internie-landing-problem-card { min-height: 200px; padding: 28px; border: 1px solid #EAEFF6; border-radius: 16px; background: #F7F9FC; text-align: left; transition: background-color 2.5s ease-in-out, border-color 2.5s ease-in-out, transform 0.8s ease, box-shadow 1.5s ease; }
 .internie-landing-problem-card:hover { border-color: #D3E3FF; background-color: #EEF5FF; transform: translateY(-4px); box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07); }
-.internie-landing-problem-card strong { display: block; margin-bottom: 24px; color: #0166FF; font-size: 14px; font-weight: 800; }
+.internie-landing-problem-card strong { display: block; margin-bottom: 16px; width: 32px; height: 32px; border-radius: 8px; background: #EAF2FF; display: flex; text-align: center; justify-content: center; align-items: center; color: #0166FF; font-size: 14px; font-weight: 800; }
 .internie-landing-problem-card h3 { margin: 0; color: #000; font-size: 18px; font-weight: 750; line-height: 1.45; word-break: keep-all; }
 .internie-landing-problem-card p { margin: 12px 0 0; color: #718096; font-size: 14px; font-weight: 500; line-height: 1.7; word-break: keep-all; }
 

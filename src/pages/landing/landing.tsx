@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import heroImage from "../../assets/landing/hero.png";
-import missionImage from "../../assets/landing/mission.png";
+import heroImage from "../../assets/landing/hero.svg";
+import missionImage from "../../assets/landing/mission.svg";
 import projectMainImage from "../../assets/landing/project-main.png";
 import projectTrackingImage from "../../assets/landing/project-tracking.png";
 import projectMonitoringImage from "../../assets/landing/project-monitoring.png";
@@ -238,12 +238,10 @@ export default function Landing(): React.ReactElement {
                         <h1><strong>인터니</strong>로 채용 성과를 높이세요</h1>
                         <p>실무 미션을 등록하고 지원자의 결과를 확인하세요<br/>결과물과 수행 과정 데이터로 누가 <strong>“우리 팀의 일”</strong>을 잘하는 지 확인하세요</p>
                     </div>
-
-                    <img className="internie-landing-hero-image internie-landing-reveal" src={heroImage} alt="인터니 채용 프로세스" />
-
                     <button type="button" className="internie-landing-primary-button internie-landing-reveal" onClick={() => setInquiryOpen(true)}>
                         문의하기
                     </button>
+                    <img className="internie-landing-hero-image internie-landing-reveal" src={heroImage} alt="인터니 채용 프로세스" />
                 </section>
 
                 <section className="internie-landing-section internie-landing-section-white">
@@ -255,20 +253,20 @@ export default function Landing(): React.ReactElement {
                     <div className="internie-landing-problem-cards">
                         <article className="internie-landing-problem-card internie-landing-reveal">
                             <strong>01</strong>
-                            <h3>업무 이해도를 확인해요</h3>
-                            <p>지원자가 실제 업무를 얼마나 이해하고 있는지 확인할 수 있어요.</p>
+                            <h3>이력서만으로<br/>지원자를 알지 못합니다</h3>
+                            <p>지원자가 실제로 어떻게 문제를<br/>해결하는지 파악하기 어렵습니다</p>
                         </article>
 
                         <article className="internie-landing-problem-card internie-landing-reveal">
                             <strong>02</strong>
-                            <h3>직무 역량을 직접 확인해요</h3>
-                            <p>서류만으로 알기 어려운 업무 수행 능력을 직접 확인해요.</p>
+                            <h3>면접 시간이 늘어나도,<br/>결과는 똑같습니다</h3>
+                            <p>커뮤니케이션, 실행력, 피드백 수용 방식은<br/>실제 업무 과정에서 드러납니다</p>
                         </article>
 
                         <article className="internie-landing-problem-card internie-landing-reveal">
                             <strong>03</strong>
-                            <h3>업무 방식을 확인해요</h3>
-                            <p>미션 하나면 충분합니다. 지금 바로 상담을 신청하세요.</p>
+                            <h3>결국,<br/>다시 감에 의존합니다</h3>
+                            <p>과제 전형을 진행해도,<br/>채용 근거는 남지 않습니다</p>
                         </article>
                     </div>
                 </section>
