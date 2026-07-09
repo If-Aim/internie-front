@@ -1,4 +1,15 @@
 {
+	"seo": {
+        "home": {
+            "title": "Internie | Education and Activity Program Management Platform",
+            "description": "Run education, extracurricular, and project-based programs in one place. Manage notices, attendance, assignments, missions, submissions, and participant performance with Internie."
+        },
+        "login": {
+            "title": "Login | Internie",
+            "description": "Sign in to Internie."
+        }
+    },
+
 	"comment_login": "로그인 관련",
 	"login": {
         "title": "Log In",

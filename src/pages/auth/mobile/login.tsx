@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ApiError, loginWithGoogle, loginWithLocal } from "../../../api/client";
 import "./login.css";
 
+import SeoMeta from "../../../utils/SeoMetadata";
+
 declare global {
     interface Window {
         google?: any;
@@ -248,94 +250,102 @@ export default function Login() {
     }, [navigate, t]);
 
     return (
-        <div className="mobile-login-page">
-            <div className="mobile-login-safe" aria-hidden="true" />
-            <main className="mobile-login-main">
-                <section className="mobile-login-logo-section">
-                    <h1 className="mobile-login-logo">internie</h1>
-                </section>
+        <>
+            <SeoMeta
+                title={isEnglish ? "Login | Internie" : "로그인 | 인터니"}
+                description={isEnglish ? "Sign in to Internie." : "인터니 서비스에 로그인합니다."}
+                lang={isEnglish ? "en" : "ko"}
+                noindex
+            />
+            <div className="mobile-login-page">
+                <div className="mobile-login-safe" aria-hidden="true" />
+                <main className="mobile-login-main">
+                    <section className="mobile-login-logo-section">
+                        <h1 className="mobile-login-logo">internie</h1>
+                    </section>
 
-                <section className="mobile-login-form-section">
-                    <div className="mobile-login-input-wrap">
-                        <input
-                            className="mobile-login-input"
-                            value={loginId}
-                            onChange={(e) => setLoginId(e.target.value)}
-                            placeholder={t("login.idPlaceholder")}
-                            autoComplete="username"
-                        />
-                    </div>
-
-                    <div className="mobile-login-input-wrap mobile-login-password-wrap">
-                        <input
-                            className={`mobile-login-input mobile-login-password-input ${loginError ? "is-error" : ""}`}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder={t("login.passwordPlaceholder")}
-                            type={showPassword ? "text" : "password"}
-                            autoComplete="current-password"
-                        />
-                        <button type="button" className="mobile-login-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.pw")}>
-                            <img src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
-                        </button>
-                    </div>
-                    {loginError && (
-                        <div className="mobile-login-error-text">
-                            {loginError}
+                    <section className="mobile-login-form-section">
+                        <div className="mobile-login-input-wrap">
+                            <input
+                                className="mobile-login-input"
+                                value={loginId}
+                                onChange={(e) => setLoginId(e.target.value)}
+                                placeholder={t("login.idPlaceholder")}
+                                autoComplete="username"
+                            />
                         </div>
-                    )}
 
-                    <div className="mobile-login-find-auth">
-                        <button type="button" className="mobile-login-find-auth-btn" onClick={() => navigate("/find-id")}>
-                            {t("login.findId")}
-                        </button>
-                        <span className="mobile-login-find-auth-divider" aria-hidden="true"></span>
-                        <button type="button" className="mobile-login-find-auth-btn" onClick={() => navigate("/reset-password")}>
-                            {t("login.findPassword")}
-                        </button>
-                    </div>
-                    <button type="button" className="mobile-login-submit-btn" onClick={handleLocalLogin} disabled={submitting}>
-                        {submitting ? t("login.loginLoading") : t("login.loginButton")}
-                    </button>
-                </section>
-
-                <section className="mobile-login-social-section">
-                    {!isEnglish && (
-                        <button type="button" className="mobile-login-social-btn mobile-login-kakao-btn" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
-                            <span className="mobile-login-social-icon" aria-hidden="true">
-                                <img src="/logos/kakao_Logo.svg" alt="" />
-                            </span>
-                            <span className="mobile-login-social-text">{t("login.startWithKakao")}</span>
-                        </button>
-                    )}
-
-                    <button type="button" className="mobile-login-social-btn mobile-login-google-btn" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
-                        <span className="mobile-login-social-icon" aria-hidden="true">
-                            <img src="/logos/google_Logo.svg" alt="" />
-                        </span>
-                        {googleLoading ? (
-                            <span className="google-login-spinner" aria-hidden="true"></span>
-                        ) : (
-                            <span className="mobile-login-social-text">{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.startWithGoogle")}</span>
+                        <div className="mobile-login-input-wrap mobile-login-password-wrap">
+                            <input
+                                className={`mobile-login-input mobile-login-password-input ${loginError ? "is-error" : ""}`}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder={t("login.passwordPlaceholder")}
+                                type={showPassword ? "text" : "password"}
+                                autoComplete="current-password"
+                            />
+                            <button type="button" className="mobile-login-password-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={t("login.pw")}>
+                                <img src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                            </button>
+                        </div>
+                        {loginError && (
+                            <div className="mobile-login-error-text">
+                                {loginError}
+                            </div>
                         )}
-                    </button>
-                </section>
 
-                <section className="mobile-login-signup-section">
-                    <span className="mobile-login-signup-text">{t("login.signupPrompt")}</span>
-                    <button type="button" className="mobile-login-signup-link" onClick={() => navigate("/signup")}>
-                        {t("login.signupLink")}
-                    </button>
-                </section>
+                        <div className="mobile-login-find-auth">
+                            <button type="button" className="mobile-login-find-auth-btn" onClick={() => navigate("/find-id")}>
+                                {t("login.findId")}
+                            </button>
+                            <span className="mobile-login-find-auth-divider" aria-hidden="true"></span>
+                            <button type="button" className="mobile-login-find-auth-btn" onClick={() => navigate("/reset-password")}>
+                                {t("login.findPassword")}
+                            </button>
+                        </div>
+                        <button type="button" className="mobile-login-submit-btn" onClick={handleLocalLogin} disabled={submitting}>
+                            {submitting ? t("login.loginLoading") : t("login.loginButton")}
+                        </button>
+                    </section>
 
-                <section className="mobile-login-policy-section">
-                    <button type="button" className="mobile-login-policy-link" onClick={() => navigate("/privacy-policy")}>
-                        {t("login.privacy")}
-                    </button>
-                </section>
-                
-                <div className="bottom-spacer"></div>
-            </main>
-        </div>
+                    <section className="mobile-login-social-section">
+                        {!isEnglish && (
+                            <button type="button" className="mobile-login-social-btn mobile-login-kakao-btn" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
+                                <span className="mobile-login-social-icon" aria-hidden="true">
+                                    <img src="/logos/kakao_Logo.svg" alt="" />
+                                </span>
+                                <span className="mobile-login-social-text">{t("login.startWithKakao")}</span>
+                            </button>
+                        )}
+
+                        <button type="button" className="mobile-login-social-btn mobile-login-google-btn" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
+                            <span className="mobile-login-social-icon" aria-hidden="true">
+                                <img src="/logos/google_Logo.svg" alt="" />
+                            </span>
+                            {googleLoading ? (
+                                <span className="google-login-spinner" aria-hidden="true"></span>
+                            ) : (
+                                <span className="mobile-login-social-text">{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.startWithGoogle")}</span>
+                            )}
+                        </button>
+                    </section>
+
+                    <section className="mobile-login-signup-section">
+                        <span className="mobile-login-signup-text">{t("login.signupPrompt")}</span>
+                        <button type="button" className="mobile-login-signup-link" onClick={() => navigate("/signup")}>
+                            {t("login.signupLink")}
+                        </button>
+                    </section>
+
+                    <section className="mobile-login-policy-section">
+                        <button type="button" className="mobile-login-policy-link" onClick={() => navigate("/privacy-policy")}>
+                            {t("login.privacy")}
+                        </button>
+                    </section>
+                    
+                    <div className="bottom-spacer"></div>
+                </main>
+            </div>
+        </>
     );
 }

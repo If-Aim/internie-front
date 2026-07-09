@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ApiError, loginWithGoogle, loginWithLocal } from "../../../api/client";
 import "./login.css";
 
+import SeoMeta from "../../../utils/SeoMetadata";
+
 declare global {
     interface Window {
         google?: any;
@@ -347,123 +349,131 @@ export default function Login(): React.ReactElement {
     }, []);
 
     return (
-        <div className="login-desktop-page">
-            {toastMessage && (
-                <div className={`login-desktop-toast ${toastClosing ? "is-closing" : ""} ${toastGuide ? "is-guide" : ""}`} role="alert">
-                    <span className="login-desktop-toast-icon" aria-hidden="true">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="10" cy="10" r="10" fill="#FF0000" />
-                            <path d="M10 5.2V10.8" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            <circle cx="10" cy="14.5" r="1.1" fill="white" />
-                        </svg>
-                    </span>
-                    <span className="login-desktop-toast-text">{toastMessage}</span>
-                </div>
-            )}
-            <header className="login-desktop-header">
-                <div className="login-desktop-header-inner">
-                    <span className="login-desktop-header-logo">internie</span>
-                </div>
-            </header>
+        <>
+            <SeoMeta
+                title={isEnglish ? "Login | Internie" : "로그인 | 인터니"}
+                description={isEnglish ? "Sign in to Internie." : "인터니 서비스에 로그인합니다."}
+                lang={isEnglish ? "en" : "ko"}
+                noindex
+            />
+            <div className="login-desktop-page">
+                {toastMessage && (
+                    <div className={`login-desktop-toast ${toastClosing ? "is-closing" : ""} ${toastGuide ? "is-guide" : ""}`} role="alert">
+                        <span className="login-desktop-toast-icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="10" cy="10" r="10" fill="#FF0000" />
+                                <path d="M10 5.2V10.8" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                                <circle cx="10" cy="14.5" r="1.1" fill="white" />
+                            </svg>
+                        </span>
+                        <span className="login-desktop-toast-text">{toastMessage}</span>
+                    </div>
+                )}
+                <header className="login-desktop-header">
+                    <div className="login-desktop-header-inner">
+                        <span className="login-desktop-header-logo">internie</span>
+                    </div>
+                </header>
 
-            <main className="login-desktop-main">
-                <div className="login-desktop-container">
-                    <h1 className="login-desktop-title">{t("login.desktopTitle")}</h1>
-                    <p className="login-desktop-subtitle">{t("login.desktopSubtitle")}</p>
+                <main className="login-desktop-main">
+                    <div className="login-desktop-container">
+                        <h1 className="login-desktop-title">{t("login.desktopTitle")}</h1>
+                        <p className="login-desktop-subtitle">{t("login.desktopSubtitle")}</p>
 
-                    {/* <div className="login-desktop-tabs">
-                        <button type="button" className="login-desktop-tab is-active" disabled>학생 회원</button>
-                        <button type="button" className="login-desktop-tab" disabled>기업 회원</button>
-                    </div> */}
+                        {/* <div className="login-desktop-tabs">
+                            <button type="button" className="login-desktop-tab is-active" disabled>학생 회원</button>
+                            <button type="button" className="login-desktop-tab" disabled>기업 회원</button>
+                        </div> */}
 
-                    <section className="login-desktop-card">
-                        <div className="login-desktop-ac">
-                            <div className="login-desktop-title-row">
-                                <span className="login-desktop-input-title">{t("login.id")}</span>
-                                <button type="button" className="login-desktop-input-findac" onClick={() => navigate("/find-id")} >
-                                    {t("login.findId")}
-                                </button>
-                            </div>
-                            <input
-                                className="login-desktop-input"
-                                value={loginId}
-                                onChange={(e) => { setLoginId(e.target.value); clearLoginError(); }}
-                                placeholder={t("login.idPlaceholder")}
-                                autoComplete="username"
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && canLogin && !submitting) {
-                                        handleLocalLogin();
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        <div className="login-desktop-ac">
-                            <div className="login-desktop-title-row">
-                                <span className="login-desktop-input-title">{t("login.pw")}</span>
-                                <button type="button" className="login-desktop-input-findac" onClick={() => navigate("/reset-password")} >
-                                    {t("login.findPassword")}
-                                </button>
-                            </div>
-
-                            <div className="login-desktop-input-wrap">
+                        <section className="login-desktop-card">
+                            <div className="login-desktop-ac">
+                                <div className="login-desktop-title-row">
+                                    <span className="login-desktop-input-title">{t("login.id")}</span>
+                                    <button type="button" className="login-desktop-input-findac" onClick={() => navigate("/find-id")} >
+                                        {t("login.findId")}
+                                    </button>
+                                </div>
                                 <input
-                                    className={`login-desktop-input is-password ${loginError ? "is-error" : ""}`}
-                                    value={password}
-                                    onChange={(e) => { setPassword(e.target.value); clearLoginError(); }}
-                                    placeholder={t("login.passwordPlaceholder")}
-                                    type={showPassword ? "text" : "password"}
-                                    autoComplete="current-password"
+                                    className="login-desktop-input"
+                                    value={loginId}
+                                    onChange={(e) => { setLoginId(e.target.value); clearLoginError(); }}
+                                    placeholder={t("login.idPlaceholder")}
+                                    autoComplete="username"
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter" && canLogin && !submitting) {
                                             handleLocalLogin();
                                         }
                                     }}
                                 />
-                                <button type="button" className="login-desktop-pw-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"} >
-                                    <img className="login-desktop-pw-blind" src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                            </div>
+
+                            <div className="login-desktop-ac">
+                                <div className="login-desktop-title-row">
+                                    <span className="login-desktop-input-title">{t("login.pw")}</span>
+                                    <button type="button" className="login-desktop-input-findac" onClick={() => navigate("/reset-password")} >
+                                        {t("login.findPassword")}
+                                    </button>
+                                </div>
+
+                                <div className="login-desktop-input-wrap">
+                                    <input
+                                        className={`login-desktop-input is-password ${loginError ? "is-error" : ""}`}
+                                        value={password}
+                                        onChange={(e) => { setPassword(e.target.value); clearLoginError(); }}
+                                        placeholder={t("login.passwordPlaceholder")}
+                                        type={showPassword ? "text" : "password"}
+                                        autoComplete="current-password"
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" && canLogin && !submitting) {
+                                                handleLocalLogin();
+                                            }
+                                        }}
+                                    />
+                                    <button type="button" className="login-desktop-pw-toggle" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"} >
+                                        <img className="login-desktop-pw-blind" src={showPassword ? "/icons/carbon_view-6b.svg" : "/icons/carbon_view-6b-blind.svg"} alt="" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="button" className="login-desktop-btn primary" onClick={handleLocalLogin} disabled={!canLogin || submitting} >
+                                {submitting ? t("login.loginLoading") : t("login.loginButton")}
+                            </button>
+
+                            <div className="login-desktop-social-divider">
+                                <span>{t("login.socialLogin")}</span>
+                            </div>
+
+                            <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
+                                <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
+                                    <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
+                                    {googleLoading ? (
+                                        <span className="google-login-spinner" aria-hidden="true"></span>
+                                    ) : (
+                                        <span>{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.loginWithGoogle")}</span>
+                                    )}
+                                </button>
+
+                                {!isEnglish && (
+                                    <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
+                                        <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
+                                        <span>{t("login.loginWithKakao")}</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="login-desktop-join">
+                                <span>{t("login.signupPrompt")}</span>
+                                <button type="button" onClick={() => navigate("/signup")}>{t("login.signupLink")}</button>
+                            </div>
+                            <div className="login-desktop-policy">
+                                <button type="button" onClick={() => navigate("/privacy-policy")}>
+                                    {t("login.privacy")}
                                 </button>
                             </div>
-                        </div>
-
-                        <button type="button" className="login-desktop-btn primary" onClick={handleLocalLogin} disabled={!canLogin || submitting} >
-                            {submitting ? t("login.loginLoading") : t("login.loginButton")}
-                        </button>
-
-                        <div className="login-desktop-social-divider">
-                            <span>{t("login.socialLogin")}</span>
-                        </div>
-
-                        <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
-                            <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
-                                <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
-                                {googleLoading ? (
-                                    <span className="google-login-spinner" aria-hidden="true"></span>
-                                ) : (
-                                    <span>{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.loginWithGoogle")}</span>
-                                )}
-                            </button>
-
-                            {!isEnglish && (
-                                <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
-                                    <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
-                                    <span>{t("login.loginWithKakao")}</span>
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="login-desktop-join">
-                            <span>{t("login.signupPrompt")}</span>
-                            <button type="button" onClick={() => navigate("/signup")}>{t("login.signupLink")}</button>
-                        </div>
-                        <div className="login-desktop-policy">
-                            <button type="button" onClick={() => navigate("/privacy-policy")}>
-                                {t("login.privacy")}
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            </main>
-        </div>
+                        </section>
+                    </div>
+                </main>
+            </div>
+        </>
     );
 }
