@@ -1,8 +1,8 @@
 #root{ overflow: auto !important;}
 .internie-landing { position: relative; width: 100%; min-width: 1180px; min-height: 100vh; background: #FFFFFF; color: #000; }
-::-webkit-scrollbar {width: 7px;color:#D9D9D9;}
-::-webkit-scrollbar-track {background: transparent;}
-::-webkit-scrollbar-thumb {background-color: #D9D9D9;border-radius: 999px;border: none;background-clip: content-box;}
+::-webkit-scrollbar {width: 4px;color:#D9D9D9;}
+::-webkit-scrollbar-track {background: none;}
+::-webkit-scrollbar-thumb { border-radius: 999px;border: none;background-clip: content-box;}
 
 .internie-landing * { box-sizing: border-box; }
 .internie-landing button { cursor: pointer; }
@@ -17,7 +17,9 @@
 .internie-landing-hero h1 { margin: 0; color: #000; font-size: clamp(36px, 4vw, 58px); font-weight: 800; line-height: 1.2; word-break: keep-all; }
 .internie-landing-hero h1 strong { color: #0166FF; font-weight: 800; }
 .internie-landing-hero p { margin: 48px 0 0; color: #64748B; font-size: 16px; font-weight: 500; line-height: 1.7; word-break: keep-all; }
-.internie-landing-hero-image { display: block; width: min(100%, 716px); height: auto; margin-top: 79px; object-fit: contain; }
+.internie-landing-hero-picture { display: block; width: min(100%, 716px); margin-top: 79px; }
+.internie-landing-hero-image { display: block; width: 100%; height: auto; object-fit: contain; }
+
 .internie-landing-primary-button { min-width: 160px; height: 64px; margin-top: 79px; padding: 0 22px; border: 0; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 24px; font-weight: 700; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
 .internie-landing-primary-button:hover { background: #0166FF; transform: translateY(-2px); box-shadow: 0 14px 30px rgba(8, 108, 255, 0.3); }
 
@@ -180,7 +182,105 @@
 .internie-landing-problem-card:nth-child(2) { transition-delay: 0.12s; }
 .internie-landing-problem-card:nth-child(3) { transition-delay: 0.24s; }
 
+
+.internie-landing-mobile-final-button { display: none; }
 @media (prefers-reduced-motion: reduce) {
     .internie-landing-reveal { opacity: 1; transform: none; filter: none; transition: none; }
     .internie-landing-primary-button, .internie-landing-problem-card, .internie-landing-final-cta button, .internie-landing-floating-button { transition: none; }
+}
+
+@media (max-width: 768px) {
+    #root { overflow-x: hidden !important; }
+    .internie-landing { width: 100%; min-width: 0; overflow-x: hidden; }
+    .internie-landing-header { display: flex; width: 100%; min-width: 0; height: 56px; padding: 0 20px; }
+    .internie-landing-logo { font-size: 14px; }
+    .internie-landing-login { padding: 6px 8px; font-size: 14px; }
+    .internie-landing main { padding-top: 56px; }
+
+    .internie-landing-hero { justify-content: flex-start; min-height: 760px; padding: 100px 24px 96px; background: linear-gradient(180deg, #F0F6FF 89.91%, rgba(255, 255, 255, 0.00) 100%); }
+    .internie-landing-hero h1 { font-size: 24px; line-height: 36px; }
+    .internie-landing-hero p { margin-top: 30px; font-size: 12px; line-height: 16px; }
+    .internie-landing-primary-button { min-width: 120px; height: 42px; margin-top: 30px; padding: 0 18px; border-radius: 8px; font-size: 16px; }
+    .internie-landing-hero-picture { width: min(92%, 360px); margin-top: 72px; }
+    .internie-landing-hero-image { width: 100%; }
+
+    .internie-landing-section { padding: 112px 20px; }
+    .internie-landing-section-white { min-height: 0; }
+
+    .internie-landing-section-heading { width: 100%; margin-bottom: 44px; }
+    .internie-landing-section-heading span { margin-bottom: 10px; font-size: 12px; }
+    .internie-landing-section-heading h2 { font-size: 23px; line-height: 1.4; }
+    .internie-landing-section-heading-badge { width: auto; height: 32px; padding: 0 15px; border-radius: 18px; font-size: 13px !important; line-height: 32px !important; }
+
+    .internie-landing-problem-cards { display: flex; flex-direction: column; width: min(100%, 230px); margin: 0 auto; gap: 12px; }
+    .internie-landing-problem-card { width: 200px; min-height: 91px; padding: 14px 14px 28px; border-radius: 14px; }
+    .internie-landing-problem-card:nth-child(1) { align-self: flex-start; }
+    .internie-landing-problem-card:nth-child(2) { align-self: flex-end; }
+    .internie-landing-problem-card:nth-child(3) { align-self: flex-start; margin-left: 14px; }
+    .internie-landing-problem-card strong { width: 28px; height: 28px; margin-bottom: 14px; font-size: 10px; }
+    .internie-landing-problem-card h3 { font-size: 12px; line-height: 1.45; }
+    .internie-landing-problem-card p { margin-top: 8px; font-size: 8px; line-height: 1.6; font-weight: 400; }
+
+    .internie-landing-section-blue { padding-top: 110px; padding-bottom: 90px; }
+    .internie-landing-content-image { width: min(92%, 320px); }
+    .internie-landing-section-paragraph { margin-top: 30px; font-size: 12px; line-height: 1.7; }
+
+    .internie-landing-project-visual { width: 100%; max-width: 390px; min-height: 330px; margin-top: 56px; }
+    .internie-landing-project-main { width: 78%; max-width: 300px; height: auto; }
+    .internie-landing-project-card-group { top: 45%; left: 65%; gap: 6px; }
+    .internie-landing-project-card { width: min(42vw, 120px); height: auto; border-radius: 10px; box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.1); }
+
+    .internie-landing-evaluation-visual { width: 100%; max-width: 390px; min-height: 320px; margin-top: 56px; }
+    .internie-landing-evaluation-main { width: 78%; max-width: 300px; height: auto; }
+    .internie-landing-evaluation-card-group { top: 30%; left: 45%; width: 96%; gap: 4px; }
+    .internie-landing-evaluation-card { width: min(86vw, 200px); height: auto; border-radius: 7px; box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.1); }
+    .internie-evaluation-card-1 { left: 20px; }
+    .internie-evaluation-card-2 { left: 5px; }
+    .internie-evaluation-card-3 { left: 28px; }
+
+    .internie-landing-faq { padding: 80px 24px 56px; background: #EEF5FF; scroll-margin-top: 0; }
+    .internie-landing-faq-inner { width: 100%; }
+    .internie-landing-faq-heading { margin-bottom: 30px; }
+    .internie-landing-faq-heading span { margin-bottom: 5px; font-size: 18px; line-height: 1.4; }
+    .internie-landing-faq-heading h2 { font-size: 24px; line-height: 1.4; }
+
+    .internie-landing-faq-question { min-height: 48px; margin-bottom: 4px; font-size: 15px; line-height: 1.45; }
+    .internie-landing-faq-arrow { width: 28px; height: 28px; }
+    .internie-landing-faq-answer-inner p { font-size: 13px; line-height: 1.75; }
+    .internie-landing-faq-item.is-open .internie-landing-faq-answer-inner p { padding: 8px 0 28px; }
+
+    .internie-landing-final-cta { min-height: 0; padding: 48px 24px; }
+    .internie-landing-final-cta-inner { flex-direction: column; gap: 24px; text-align: center; }
+    .internie-landing-final-cta h2 { font-size: 24px; }
+    .internie-landing-final-cta p { margin-top: 8px; font-size: 10px; }
+    .internie-landing-final-button-slot { width: auto; height: auto; }
+
+    .internie-landing-mobile-final-button { display: flex; align-items: center; justify-content: center; min-width: 120px; height: 42px; padding: 0 20px; border: 0; border-radius: 7px; background: #FFFFFF; color: #0166FF; font-size: 13px; font-weight: 700; }
+
+    .internie-landing-footer { padding: 36px 24px 24px; }
+    .internie-landing-footer-inner { display: flex; flex-direction: column; width: 100%; gap: 32px; }
+    .internie-landing-footer-contact { display: none; }
+    .internie-landing-footer-logo strong { font-size: 16px; }
+    .internie-landing-footer-brand > p { margin-top: 12px; font-size: 10px; line-height: 1.8; }
+    .internie-landing-footer-column > strong { margin-bottom: 14px; font-size: 11px; }
+    .internie-landing-footer-links { gap: 9px; }
+    .internie-landing-footer-links button { font-size: 11px; }
+    .internie-landing-footer-copyright { width: 100%; margin-top: 24px; }
+    .internie-landing-footer-copyright span { font-size: 9px; }
+
+    .internie-landing-inquiry-anchor, .internie-landing-inquiry-anchor.is-docked { position: fixed !important; inset: 0 !important; z-index: 2000; width: 100%; height: 100%; align-items: stretch; background: transparent; pointer-events: none; transition: background 0.25s ease; }
+    .internie-landing-inquiry-anchor.is-open { background: rgba(11, 25, 51, 0.32); pointer-events: auto; }
+    .internie-landing-floating-button { display: none; }
+
+    .internie-landing-inquiry-popover { top: auto; right: 16px; bottom: 60px; left: 16px; width: auto; max-height: calc(100dvh - 120px); padding: 28px 20px 20px; border-radius: 20px; overflow-y: auto; transform: translate3d(0, 30px, 0); transform-origin: center bottom; }
+    .internie-landing-inquiry-popover::after { display: none; }
+    .internie-landing-inquiry-popover.is-open { transform: translate3d(0, 0, 0); }
+    .internie-landing-inquiry-header { margin-bottom: 22px; }
+    .internie-landing-inquiry-header h2 { font-size: 20px; }
+    .internie-landing-inquiry-close { top: 24px; right: 18px; }
+    .internie-landing-inquiry-row { grid-template-columns: 1fr; }
+    .internie-landing-inquiry-form label { gap: 8px; }
+    .internie-landing-inquiry-form label > span { font-size: 14px; }
+    .internie-landing-inquiry-form input:not([type="checkbox"]) { height: 44px; font-size: 14px; }
+    .internie-landing-inquiry-form textarea { font-size: 14px; }
 }

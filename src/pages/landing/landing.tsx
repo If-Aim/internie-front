@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SeoMeta from "../../utils/SeoMetadata";
 
 import heroImage from "../../assets/landing/hero.svg";
+import heroMobileImage from "../../assets/landing/hero-mobile.svg";
 import missionImage from "../../assets/landing/mission.svg";
 import projectMainImage from "../../assets/landing/project-main.png";
 import projectTrackingImage from "../../assets/landing/project-tracking.png";
@@ -250,7 +251,10 @@ export default function Landing(): React.ReactElement {
                         <button type="button" className="internie-landing-primary-button internie-landing-reveal" onClick={() => setInquiryOpen(true)}>
                             문의하기
                         </button>
-                        <img className="internie-landing-hero-image internie-landing-reveal" src={heroImage} alt="인터니 채용 프로세스" />
+                        <picture className="internie-landing-hero-picture internie-landing-reveal">
+                            <source media="(max-width: 768px)" srcSet={heroMobileImage} />
+                            <img className="internie-landing-hero-image" src={heroImage} alt="인터니 채용 프로세스" />
+                        </picture>
                     </section>
 
                     <section className="internie-landing-section internie-landing-section-white">
@@ -364,7 +368,11 @@ export default function Landing(): React.ReactElement {
                                 <p>미션 수행 과정과 결과를 통해 더 정확한 채용을 시작하세요.</p>
                             </div>
 
-                            <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot" aria-hidden="true" />
+                            <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot">
+                                <button type="button" className="internie-landing-mobile-final-button" onClick={() => setInquiryOpen(true)}>
+                                    도입 문의
+                                </button>
+                            </div>
                         </div>
                     </section>
 
@@ -430,7 +438,7 @@ export default function Landing(): React.ReactElement {
 
                 <div
                     ref={inquiryPopoverRef}
-                    className={`internie-landing-inquiry-anchor${inquiryDocked ? " is-docked" : ""}`}
+                    className={`internie-landing-inquiry-anchor${inquiryDocked ? " is-docked" : ""}${inquiryOpen ? " is-open" : ""}`}
                     style={
                         inquiryDocked
                             ? {
