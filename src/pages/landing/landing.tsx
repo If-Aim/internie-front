@@ -484,7 +484,7 @@ export default function Landing(): React.ReactElement {
                 title="인터니 | 실무 미션 기반 채용 플랫폼"
                 description="이력서만으로 알 수 없는 지원자의 실무 역량을 확인하세요. 인터니는 실무 미션의 수행 과정과 결과를 통해 기업의 채용 판단을 돕습니다."
                 lang="ko"
-                canonical="https://internie.com/"
+                canonical="https://www.internie.com/"
             />
             <div ref={landingRef} className={`internie-landing${inquiryOpen ? " is-inquiry-open" : ""}`}>
                 <div className={`internie-landing-default-view${inquiryOpen ? " is-inquiry-open" : ""}`}>
