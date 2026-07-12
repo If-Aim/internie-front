@@ -708,7 +708,6 @@ export default function Landing(): React.ReactElement {
 
                             <div className="internie-landing-mobile-inquiry-heading">
                                 <h1>문의하기</h1>
-                                <p>아래와 같이 궁금한 점을 모두 질문해 주세요. 자세히 알려드립니다.</p>
                             </div>
 
                             <InquiryForm
