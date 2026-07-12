@@ -5,8 +5,9 @@ import { ApiError, createInquiry } from "../../api/client";
 import SeoMeta from "../../utils/SeoMetadata";
 
 import heroImage from "../../assets/landing/hero.svg";
-import heroMobileImage from "../../assets/landing/hero-mobile.svg";
+import heroMobileImage from "../../assets/landing/hero-mobile.png";
 import missionImage from "../../assets/landing/mission.svg";
+import missionMobileImage from "../../assets/landing/mission-mobile.png";
 import projectMainImage from "../../assets/landing/project-main.png";
 import projectTrackingImage from "../../assets/landing/project-tracking.png";
 import projectMonitoringImage from "../../assets/landing/project-monitoring.png";
@@ -547,7 +548,10 @@ export default function Landing(): React.ReactElement {
                             </div>
 
                             <div className="internie-landing-content-image-reveal internie-landing-reveal">
-                                <img className="internie-landing-content-image" src={missionImage} alt="인터니 미션 관리 화면" />
+                                <picture className="internie-landing-content-picture">
+                                    <source media="(max-width: 768px)" srcSet={missionMobileImage} />
+                                    <img className="internie-landing-content-image" src={missionImage} alt="인터니 미션 관리 화면" />
+                                </picture>
                             </div>
                             <div className="internie-landing-section-paragraph">                    
                                 <span>지원자 모집부터 운영·관리까지,<br />담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
