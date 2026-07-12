@@ -502,8 +502,8 @@ export default function Landing(): React.ReactElement {
                     <main>
                         <section id="internie-landing-top" className="internie-landing-hero">
                             <div>
-                                <h1><strong>인터니</strong>로 채용 성과를 높이세요</h1>
-                                <p>실무 미션을 등록하고 지원자의 결과를 확인하세요<br/>결과물과 수행 과정 데이터로 누가 <strong>“우리 팀의 일”</strong>을 잘하는 지 확인하세요</p>
+                                <h1>일하는 방식을 직접 보고<br/>채용 성과를 높이세요</h1>
+                                <p>인터니에서 누가 우리 팀의 일을<br/>잘하는지 결과물과 수행 데이터로 확인하세요</p>
                             </div>
                             <button type="button" className="internie-landing-primary-button internie-landing-reveal" onClick={handleInquiryOpen}>
                                 문의하기
