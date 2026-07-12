@@ -185,6 +185,8 @@
 .internie-landing-problem-card:nth-child(2) { transition-delay: 0.12s; }
 .internie-landing-problem-card:nth-child(3) { transition-delay: 0.24s; }
 
+.internie-landing-default-view { width: 100%; }
+.internie-landing-mobile-inquiry-page { display: none; }
 
 .internie-landing-mobile-final-button { display: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -271,19 +273,30 @@
     .internie-landing-footer-copyright { width: 100%; margin-top: 24px; }
     .internie-landing-footer-copyright span { font-size: 9px; }
 
-    .internie-landing-inquiry-anchor, .internie-landing-inquiry-anchor.is-docked { position: fixed !important; inset: 0 !important; z-index: 2000; width: 100%; height: 100%; align-items: stretch; background: transparent; pointer-events: none; transition: background 0.25s ease; }
-    .internie-landing-inquiry-anchor.is-open { background: rgba(11, 25, 51, 0.32); pointer-events: auto; }
-    .internie-landing-floating-button { display: none; }
+    .internie-landing-default-view.is-inquiry-open { display: none; }
+    .internie-landing-inquiry-anchor, .internie-landing-inquiry-anchor.is-docked { display: none !important; }
 
-    .internie-landing-inquiry-popover { top: auto; right: 16px; bottom: 60px; left: 16px; width: auto; max-height: calc(100dvh - 120px); padding: 28px 20px 20px; border-radius: 20px; overflow-y: auto; transform: translate3d(0, 30px, 0); transform-origin: center bottom; }
-    .internie-landing-inquiry-popover::after { display: none; }
-    .internie-landing-inquiry-popover.is-open { transform: translate3d(0, 0, 0); }
-    .internie-landing-inquiry-header { margin-bottom: 22px; }
-    .internie-landing-inquiry-header h2 { font-size: 20px; }
-    .internie-landing-inquiry-close { top: 24px; right: 18px; }
-    .internie-landing-inquiry-row { grid-template-columns: 1fr; }
-    .internie-landing-inquiry-form label { gap: 8px; }
-    .internie-landing-inquiry-form label > span { font-size: 14px; }
-    .internie-landing-inquiry-form input:not([type="checkbox"]) { height: 44px; font-size: 14px; }
-    .internie-landing-inquiry-form textarea { font-size: 14px; }
+    .internie-landing-mobile-inquiry-page.is-open { display: block; width: 100%; min-height: 100dvh; padding: clamp(72px, 12vw, 110px) 16px 100px; background: #FFFFFF; }
+    .internie-landing-mobile-inquiry-card { position: relative; width: 100%; max-width: 690px; margin: 0 auto; padding: 38px 28px 32px; border: 1px solid #E4E9F0; border-radius: 20px; background: #FFFFFF; box-shadow: 0 6px 24px rgba(15, 23, 42, 0.14); }
+    .internie-landing-mobile-inquiry-close { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #0B1220; }
+    .internie-landing-mobile-inquiry-close:hover { background: #F3F6FA; }
+
+    .internie-landing-mobile-inquiry-heading { padding-right: 40px; margin-bottom: 34px; }
+    .internie-landing-mobile-inquiry-heading h1 { margin: 0; color: #0B1220; font-size: 26px; font-weight: 800; line-height: 1.3; }
+    .internie-landing-mobile-inquiry-heading p { margin: 8px 0 0; color: #808080; font-size: 14px; font-weight: 500; line-height: 1.6; word-break: keep-all; }
+
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form { gap: 18px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label { gap: 9px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label > span { font-size: 14px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input:not([type="checkbox"]) { height: 56px; padding: 0 14px; font-size: 14px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea { min-height: 140px; padding: 14px; font-size: 14px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-agree { margin-top: 2px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-submit { height: 64px; margin-top: 20px; border-radius: 10px; font-size: 20px; }
+    
+}
+
+@media (max-width: 360px) {
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-row { grid-template-columns: 1fr; }
+    .internie-landing-mobile-inquiry-card { padding: 34px 20px 26px; }
 }
