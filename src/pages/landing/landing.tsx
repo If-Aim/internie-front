@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { ApiError, createInquiry } from "../../api/client";
 import SeoMeta from "../../utils/SeoMetadata";
 
 import heroImage from "../../assets/landing/hero.svg";
@@ -22,6 +23,24 @@ type LandingFooterLink = {
     label: string;
     path: string | null;
     sectionId: string | null;
+};
+
+type InquiryFormState = {
+    companyName: string;
+    contactName: string;
+    position: string;
+    companyEmail: string;
+    phone: string;
+    question: string;
+};
+
+const EMPTY_INQUIRY_FORM: InquiryFormState = {
+    companyName: "",
+    contactName: "",
+    position: "",
+    companyEmail: "",
+    phone: "",
+    question: ""
 };
 
 function FaqArrow(): React.ReactElement {
@@ -72,11 +91,69 @@ export default function Landing(): React.ReactElement {
     
     const [openFaqIndexes, setOpenFaqIndexes] = useState<Set<number>>(() => new Set());
     const [inquiryOpen, setInquiryOpen] = useState(false);
+    const [inquiryForm, setInquiryForm] = useState<InquiryFormState>(EMPTY_INQUIRY_FORM);
+    const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [inquirySubmitting, setInquirySubmitting] = useState(false);
     const [inquiryDocked, setInquiryDocked] = useState(false);
     const [inquiryDockPosition, setInquiryDockPosition] = useState({
         top: 0,
         left: 0
     });
+
+    const updateInquiryField = (field: keyof InquiryFormState, value: string) => {
+        setInquiryForm((prev) => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleInquirySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (inquirySubmitting) return;
+
+        const payload = {
+            companyName: inquiryForm.companyName.trim(),
+            contactName: inquiryForm.contactName.trim(),
+            position: inquiryForm.position.trim(),
+            companyEmail: inquiryForm.companyEmail.trim(),
+            phone: inquiryForm.phone.trim(),
+            question: inquiryForm.question.trim() || null
+        };
+
+        if (!payload.companyName || !payload.contactName || !payload.position || !payload.companyEmail || !payload.phone) {
+            window.alert("필수 항목을 모두 입력해주세요.");
+            return;
+        }
+
+        if (!/^[0-9-]+$/.test(payload.phone)) {
+            window.alert("연락처는 숫자와 하이픈만 입력해주세요.");
+            return;
+        }
+
+        if (!privacyAgreed) {
+            window.alert("개인정보 수집 및 이용에 동의해주세요.");
+            return;
+        }
+
+        setInquirySubmitting(true);
+
+        try {
+            await createInquiry(payload);
+            window.alert("문의가 정상적으로 접수되었습니다.");
+            setInquiryForm(EMPTY_INQUIRY_FORM);
+            setPrivacyAgreed(false);
+            setInquiryOpen(false);
+        } catch (error) {
+            const message = error instanceof ApiError
+                ? error.message
+                : "문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요.";
+
+            window.alert(message);
+        } finally {
+            setInquirySubmitting(false);
+        }
+    };
 
     const handleFaqToggle = (index: number) => {
         setOpenFaqIndexes((prev) => {
@@ -290,7 +367,9 @@ export default function Landing(): React.ReactElement {
                             <h2>채용 담당자님은 실무 과제만 주세요.<br />나머지는 인터니가 할게요!</h2>
                         </div>
 
-                        <img className="internie-landing-content-image internie-landing-reveal" src={missionImage} alt="인터니 미션 관리 화면" />
+                        <div className="internie-landing-content-image-reveal internie-landing-reveal">
+                            <img className="internie-landing-content-image" src={missionImage} alt="인터니 미션 관리 화면" />
+                        </div>
                         <div className="internie-landing-section-paragraph">                    
                             <span>지원자 모집부터 운영·관리까지,<br />담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
                         </div>
@@ -459,14 +538,14 @@ export default function Landing(): React.ReactElement {
                             </button>
                         </div>
 
-                        <form className="internie-landing-inquiry-form">
+                        <form className="internie-landing-inquiry-form" onSubmit={handleInquirySubmit}>
                             <div className="internie-landing-inquiry-row">
                                 <label>
                                     <span>
                                         기업명<em>*</em>
                                     </span>
 
-                                    <input type="text" placeholder="예) AIM" />
+                                    <input type="text" name="companyName" value={inquiryForm.companyName} maxLength={50} placeholder="예) AIM" autoComplete="organization" required onChange={(event) => updateInquiryField("companyName", event.target.value)} />
                                 </label>
 
                                 <label>
@@ -474,7 +553,7 @@ export default function Landing(): React.ReactElement {
                                         담당자명<em>*</em>
                                     </span>
 
-                                    <input type="text" placeholder="예) 김유진"/>
+                                    <input type="text" name="contactName" value={inquiryForm.contactName} maxLength={100} placeholder="예) 김유진" autoComplete="name" required onChange={(event) => updateInquiryField("contactName", event.target.value)} />
                                 </label>
                             </div>
 
@@ -483,7 +562,7 @@ export default function Landing(): React.ReactElement {
                                     직책<em>*</em>
                                 </span>
 
-                                <input type="text" placeholder="예) 인사팀장"/>
+                                <input type="text" name="position" value={inquiryForm.position} maxLength={50} placeholder="예) 인사팀장" autoComplete="organization-title" required onChange={(event) => updateInquiryField("position", event.target.value)} />
                             </label>
 
                             <label>
@@ -491,7 +570,7 @@ export default function Landing(): React.ReactElement {
                                     회사 이메일<em>*</em>
                                 </span>
 
-                                <input type="email" placeholder="example@company.com"/>
+                                <input type="email" name="companyEmail" value={inquiryForm.companyEmail} maxLength={255} placeholder="example@company.com" autoComplete="email" required onChange={(event) => updateInquiryField("companyEmail", event.target.value)} />
                             </label>
 
                             <label>
@@ -499,7 +578,7 @@ export default function Landing(): React.ReactElement {
                                     연락처<em>*</em>
                                 </span>
 
-                                <input type="tel" placeholder="010-0000-0000"/>
+                                <input type="tel" name="phone" value={inquiryForm.phone} maxLength={30} pattern="[0-9-]+" inputMode="tel" placeholder="010-0000-0000" autoComplete="tel" required onChange={(event) => updateInquiryField("phone", event.target.value)} />
                             </label>
 
                             <label>
@@ -507,17 +586,17 @@ export default function Landing(): React.ReactElement {
                                     어떤 점이 궁금하신가요? (선택)
                                 </span>
 
-                                <textarea rows={4} />
+                                <textarea name="question" value={inquiryForm.question} maxLength={2000} rows={4} onChange={(event) => updateInquiryField("question", event.target.value)} />
                             </label>
 
                             <label className="internie-landing-inquiry-agree">
-                                <input type="checkbox" />
+                                <input type="checkbox" checked={privacyAgreed} required onChange={(event) => setPrivacyAgreed(event.target.checked)} />
 
                                 <span>개인정보 수집 및 이용에 동의합니다.</span>
                             </label>
 
-                            <button type="submit" className="internie-landing-inquiry-submit">
-                                문의 보내기
+                            <button type="submit" className="internie-landing-inquiry-submit" disabled={inquirySubmitting}>
+                                {inquirySubmitting ? "전송 중..." : "문의 보내기"}
                             </button>
                         </form>
                     </div>

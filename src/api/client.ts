@@ -309,6 +309,32 @@ export function buildWebSocketUrl(path = "/ws"): string {
     return url.toString();
 }
 
+/* Inquiry */
+export type InquiryCreateRequest = {
+    companyName: string;
+    contactName: string;
+    position: string;
+    companyEmail: string;
+    phone: string;
+    question?: string | null;
+};
+
+export async function createInquiry(input: InquiryCreateRequest): Promise<void> {
+    await apiPublicJson<void>("/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            companyName: input.companyName.trim(),
+            contactName: input.contactName.trim(),
+            position: input.position.trim(),
+            companyEmail: input.companyEmail.trim(),
+            phone: input.phone.trim(),
+            question: input.question?.trim() || null,
+        }),
+    });
+}
+
+
 /* Auth */ 
 // 회원가입 요청
 export type SignupRequest = {

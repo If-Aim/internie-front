@@ -162,6 +162,9 @@
 .internie-landing-reveal { opacity: 0; transition-property: opacity, transform, filter; transition-duration: 0.8s; transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1); will-change: opacity, transform; }
 .internie-landing-reveal.is-visible { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
 
+.internie-landing-content-image-reveal { opacity: 0; transform: none !important; filter: none !important; will-change: opacity; }
+.internie-landing-content-image-reveal.is-visible { opacity: 1; transform: none !important; }
+
 .internie-reveal-up { transform: translate3d(0, 48px, 0); }
 .internie-reveal-down { transform: translate3d(0, -48px, 0); }
 .internie-reveal-left { transform: translate3d(-60px, 0, 0); }
@@ -222,7 +225,7 @@
     .internie-landing-problem-card p { margin-top: 8px; font-size: 8px; line-height: 1.6; font-weight: 400; }
 
     .internie-landing-section-blue { padding-top: 110px; padding-bottom: 90px; }
-    .internie-landing-content-image { width: min(92%, 320px); }
+    .internie-landing-content-image { width: 100%; max-width: 420px; height: auto; }
     .internie-landing-section-paragraph { margin-top: 30px; font-size: 12px; line-height: 1.7; }
 
     .internie-landing-project-visual { width: 100%; max-width: 390px; min-height: 330px; margin-top: 56px; }
