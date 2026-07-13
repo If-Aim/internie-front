@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 #root{ overflow: auto !important;}
 .internie-landing-text-line { display: block; white-space: nowrap; }
 .internie-landing { position: relative; width: 100%; min-width: 1180px; min-height: 100vh; background: #FFFFFF; color: #000; }
@@ -409,4 +411,398 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-guide-section .internie-landing-section-heading h2 { font-size: clamp(21px, 6.7vw, 24px); }
     .internie-landing-section-paragraph { font-size: 12px; }
     .internie-landing-evaluation-section .internie-landing-section-heading h2 { font-size: clamp(18px, 5.6vw, 21px); }
+}
+
+
+/* ========================================
+   English landing typography
+======================================== */
+
+.internie-landing.is-en {
+    font-family: Inter, Pretendard, Arial, sans-serif;
+}
+
+.internie-landing.is-en button,
+.internie-landing.is-en input,
+.internie-landing.is-en textarea {
+    font-family: inherit;
+}
+
+/* 영어 문장은 한국어보다 길기 때문에 전역 nowrap 해제 */
+.internie-landing.is-en .internie-landing-text-line {
+    white-space: normal;
+}
+
+/* Header */
+.internie-landing.is-en .internie-landing-login {
+    font-family: Inter, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.17px;
+}
+
+/* Hero */
+.internie-landing.is-en .internie-landing-hero-copy-desktop {
+    width: min(100%, 700px);
+    margin: 0 auto;
+}
+
+.internie-landing.is-en .internie-landing-hero h1 {
+    font-family: Inter, sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.493;
+    letter-spacing: -2.24px;
+}
+
+.internie-landing.is-en .internie-landing-hero-copy-desktop > p,
+.internie-landing.is-en .internie-landing-hero-subtitle {
+    margin-top: 24px;
+    font-family: Inter, sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 31.35px;
+    letter-spacing: 0;
+}
+
+.internie-landing.is-en .internie-landing-hero-cta {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.17px;
+}
+
+/* 공통 섹션 제목 */
+.internie-landing.is-en .internie-landing-section-heading {
+    width: min(100%, 960px);
+}
+
+.internie-landing.is-en .internie-landing-section-heading > span {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.28px;
+}
+
+.internie-landing.is-en .internie-landing-section-heading h2 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 64px;
+    letter-spacing: -1.26px;
+}
+
+/* Problem cards */
+.internie-landing.is-en .internie-landing-problem-card {
+    min-height: 240px;
+    padding: 29px;
+}
+
+.internie-landing.is-en .internie-landing-problem-card strong {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 18px;
+    border-radius: 11px;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.internie-landing.is-en .internie-landing-problem-card h3 {
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.38px;
+}
+
+.internie-landing.is-en .internie-landing-problem-card p {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 24.75px;
+    letter-spacing: 0;
+}
+
+/* How it works 설명 */
+.internie-landing.is-en .internie-landing-section-paragraph {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 27.2px;
+}
+
+/* Create / Review 섹션 */
+.internie-landing.is-en .internie-landing-project-section .internie-landing-section-heading h2,
+.internie-landing.is-en .internie-landing-evaluation-section .internie-landing-section-heading h2 {
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 48px;
+    letter-spacing: -1.26px;
+}
+
+.internie-landing.is-en .internie-landing-section-heading-badge {
+    font-size: 20px !important;
+    font-weight: 800;
+    line-height: 48px !important;
+}
+
+/* FAQ */
+.internie-landing.is-en .internie-landing-faq-heading span,
+.internie-landing.is-en .internie-landing-faq-heading h2 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 64px;
+    letter-spacing: -1.26px;
+}
+
+.internie-landing.is-en .internie-landing-faq-question {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 64px;
+    letter-spacing: -1.26px;
+}
+
+.internie-landing.is-en .internie-landing-faq-answer-inner p {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 48px;
+    letter-spacing: 0;
+}
+
+/* Final CTA */
+.internie-landing.is-en .internie-landing-final-cta h2 {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 48px;
+    letter-spacing: -1.2px;
+}
+
+.internie-landing.is-en .internie-landing-final-cta p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.internie-landing.is-en .internie-landing-inquiry-anchor.is-docked .internie-landing-consult-button {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+/* Desktop inquiry */
+.internie-landing.is-en .internie-landing-inquiry-header h2 {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 64px;
+    letter-spacing: -1.26px;
+}
+
+.internie-landing.is-en .internie-landing-inquiry-form label > span {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 24px;
+    letter-spacing: -1.26px;
+}
+
+.internie-landing.is-en .internie-landing-inquiry-form input:not([type="checkbox"]),
+.internie-landing.is-en .internie-landing-inquiry-form textarea {
+    font-size: 20px;
+}
+
+.internie-landing.is-en .internie-landing-inquiry-agree span {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 20px;
+}
+
+.internie-landing.is-en .internie-landing-inquiry-submit {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Footer */
+.internie-landing.is-en .internie-landing-footer-logo strong {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.internie-landing.is-en .internie-landing-footer-brand > p {
+    font-size: 14px;
+    line-height: 22.4px;
+}
+
+.internie-landing.is-en .internie-landing-footer-column > strong {
+    font-size: 13px;
+}
+
+.internie-landing.is-en .internie-landing-footer-links button,
+.internie-landing.is-en .internie-landing-footer-contact p,
+.internie-landing.is-en .internie-landing-footer-contact span {
+    font-size: 14px;
+}
+
+.internie-landing.is-en .internie-landing-footer-copyright span {
+    font-size: 12.5px;
+}
+
+
+@media (max-width: 768px) {
+    .internie-landing.is-en .internie-landing-text-line {
+        white-space: normal;
+    }
+
+    /* Mobile hero */
+    .internie-landing.is-en .internie-landing-hero-copy-mobile {
+        width: 100%;
+    }
+
+    .internie-landing.is-en .internie-landing-hero-copy-mobile p {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 24px;
+        letter-spacing: 0;
+    }
+
+    .internie-landing.is-en .internie-landing-hero-copy-mobile h1 {
+        margin-top: 20px;
+        font-family: Inter, sans-serif;
+        font-size: clamp(38px, 12.2vw, 48px);
+        font-weight: 800;
+        line-height: 1.3;
+        letter-spacing: -0.48px;
+    }
+
+    .internie-landing.is-en .internie-landing-hero-cta {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    /* Problem */
+    .internie-landing.is-en .internie-landing-problem-section .internie-landing-section-heading > span {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .internie-landing.is-en .internie-landing-problem-section .internie-landing-section-heading h2 {
+        font-size: 32px;
+        line-height: 36px;
+        letter-spacing: -1.26px;
+    }
+
+    .internie-landing.is-en .internie-landing-problem-card {
+        width: 280px;
+        min-height: 224px;
+        padding: 29px;
+    }
+
+    .internie-landing.is-en .internie-landing-problem-card strong {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 18px;
+        font-size: 20px;
+    }
+
+    .internie-landing.is-en .internie-landing-problem-card h3 {
+        font-size: 19px;
+        line-height: 1.3;
+        letter-spacing: -0.38px;
+    }
+
+    .internie-landing.is-en .internie-landing-problem-card p {
+        font-size: 15px;
+        line-height: 24.75px;
+    }
+
+    /* How it works */
+    .internie-landing.is-en .internie-landing-guide-section .internie-landing-section-heading > span {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .internie-landing.is-en .internie-landing-guide-section .internie-landing-section-heading h2 {
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 48px;
+        letter-spacing: -1.26px;
+    }
+
+    .internie-landing.is-en .internie-landing-section-paragraph {
+        font-size: 15px;
+        line-height: 24.75px;
+    }
+
+    /* Create / Review */
+    .internie-landing.is-en .internie-landing-project-section .internie-landing-section-heading h2,
+    .internie-landing.is-en .internie-landing-evaluation-section .internie-landing-section-heading h2 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 36px;
+        letter-spacing: -1.26px;
+    }
+
+    .internie-landing.is-en .internie-landing-section-heading-badge {
+        font-size: 20px !important;
+        line-height: 48px !important;
+    }
+
+    /* FAQ */
+    .internie-landing.is-en .internie-landing-faq-heading > span {
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 64px;
+    }
+
+    .internie-landing.is-en .internie-landing-faq-question {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.4;
+        letter-spacing: -0.5px;
+    }
+
+    .internie-landing.is-en .internie-landing-faq-answer-inner p {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 32px;
+        letter-spacing: 0;
+    }
+
+    /* Final CTA */
+    .internie-landing.is-en .internie-landing-final-cta h2 {
+        font-size: 24px;
+        line-height: 30px;
+        letter-spacing: -1.2px;
+    }
+
+    .internie-landing.is-en .internie-landing-final-cta p {
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    .internie-landing.is-en .internie-landing-consult-button {
+        font-size: 16px;
+    }
+
+    /* Mobile inquiry */
+    .internie-landing.is-en .internie-landing-mobile-inquiry-header h1 {
+        font-size: 32px;
+        line-height: 1.2;
+    }
+
+    .internie-landing.is-en .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label > span {
+        font-size: 20px;
+        line-height: 24px;
+    }
+
+    .internie-landing.is-en .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input:not([type="checkbox"]),
+    .internie-landing.is-en .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea {
+        font-size: 20px;
+    }
+
+    /* Footer */
+    .internie-landing.is-en .internie-landing-footer-logo strong {
+        font-size: 16px;
+    }
+
+    .internie-landing.is-en .internie-landing-footer-brand > p,
+    .internie-landing.is-en .internie-landing-footer-company span,
+    .internie-landing.is-en .internie-landing-footer-copyright span {
+        font-size: 10px;
+        line-height: 14px;
+    }
 }
