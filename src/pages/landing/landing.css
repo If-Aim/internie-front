@@ -116,7 +116,8 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-final-cta h2 { margin: 0; color: #FFFFFF; font-size: clamp(28px, 3vw, 40px); font-weight: 800; line-height: 1.35; word-break: keep-all; }
 .internie-landing-final-cta p { margin: 12px 0 0; color: rgba(255, 255, 255, 0.75); font-size: 15px; font-weight: 500; line-height: 1.7; }
 
-.internie-landing-final-cta-mobile-copy,
+.internie-landing-final-cta-desktop { display: block; }
+.internie-landing-final-cta-mobile-copy { display: none; }
 
 .internie-landing-footer { width: 100%; padding: 64px 24px 32px; background: #0B1933; color: #FFFFFF; }
 .internie-landing-footer-inner { display: grid; grid-template-columns: 1.6fr 0.7fr 1fr; gap: 80px; width: min(100%, 1120px); margin: 0 auto; }
@@ -317,7 +318,9 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-final-cta h2 { font-size: clamp(24px, 7.6vw, 30px); line-height: 1.4; }
     .internie-landing-final-cta p { font-size: clamp(13px, 4vw, 16px); line-height: 1.5; }
     .internie-landing-final-button-slot { width: auto; height: auto; }
-
+    .internie-landing-final-cta-desktop { display: none; }
+    .internie-landing-final-cta-mobile-copy { display: block; }
+    
     .internie-landing-inquiry-anchor { position: fixed; right: auto; bottom: 32px; left: 50%; z-index: 1200; display: flex; align-items: center; transform: translateX(-50%); }
     .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; transform: none; }
     .internie-landing-consult-button { min-width: 120px; height: 48px; padding: 0 14px; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 16px; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
