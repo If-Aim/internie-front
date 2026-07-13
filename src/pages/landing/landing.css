@@ -46,7 +46,7 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-section-heading > span { display: inline-block; margin-bottom: 13px; color: #0166FF; justify-self: center; justify-content: center; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; }
 .internie-landing-section-heading h2 .internie-landing-text-line { margin: 0; color: inherit; font-size: inherit; font-weight: inherit; line-height: inherit; }
 .internie-landing-section-heading-badge { display: inline-block; background-color: #0166FF; width: 120px; height: 48px; padding: 0; border-radius: 25px; margin-bottom: 14px; color: #fff !important; justify-self: center; justify-content: center; text-align: center; font-size: 20px !important; font-weight: 700; line-height: 48px !important; }
-.internie-landing-section-heading h2 { margin: 0; color: #000; font-size: clamp(20px, 8vw, 42px); font-weight: 800; line-height: 1.35; word-break: keep-all; }
+.internie-landing-section-heading h2 { margin: 0; color: #000; font-size: clamp(16px, 6vw, 36px); font-weight: 800; line-height: 1.35; word-break: keep-all; }
 
 .internie-landing-project-visual { position: relative; width: 1100px; margin: 0 auto; }
 .internie-landing-project-main { display: block; width: auto; height: auto; max-width: none; margin: 0 auto; object-fit: contain; }

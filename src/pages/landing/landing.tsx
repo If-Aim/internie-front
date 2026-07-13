@@ -652,13 +652,6 @@ export default function Landing(): React.ReactElement {
                                         </span>
                                     </h1>
                                 </div>
-
-                                {isEnglish && (
-                                    <button type="button" className="internie-landing-hero-cta" onClick={handleInquiryOpen}>
-                                        <span className="internie-landing-hero-cta-desktop">{t("landing.hero.desktop.cta")}</span>
-                                        <span className="internie-landing-hero-cta-mobile">{t("landing.hero.mobile.cta")}</span>
-                                    </button>
-                                )}
                             </div>
 
                             <picture className="internie-landing-hero-picture internie-landing-reveal">
