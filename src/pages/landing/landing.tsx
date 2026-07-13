@@ -5,7 +5,8 @@ import { ApiError, createInquiry } from "../../api/client";
 import SeoMeta from "../../utils/SeoMetadata";
 
 import heroImage from "../../assets/landing/hero.svg";
-import heroMobileImage from "../../assets/landing/hero-mobile.png";
+import hero1Image from "../../assets/landing/hero-1.svg";
+import hero2Image from "../../assets/landing/hero-2.svg";
 import missionImage from "../../assets/landing/mission.svg";
 import missionMobileImage from "../../assets/landing/mission-mobile.png";
 import projectMainImage from "../../assets/landing/project-main.png";
@@ -157,14 +158,18 @@ function LandingFooter({
             <div className="internie-landing-footer-inner">
                 <div className="internie-landing-footer-brand">
                     <div className="internie-landing-footer-logo">
-                        <strong>인터니</strong>
-                        <small>Internie</small>
+                        <strong>internie</strong>
                     </div>
 
                     <p>
-                        이력서로는 알 수 없는 능력을,<br />
-                        미션 수행 과정과 결과로 확인합니다. by aim
+                        이력서로 알 수 없는 실력을, 데이터로 증명합니다<br />
+                        by aim
                     </p>
+
+                    <div className="internie-landing-footer-company">
+                        <span>상호 aim(에임) · 대표 김유진</span>
+                        <span>purieu.k@gmail.com</span>
+                    </div>
                 </div>
 
                 <div className="internie-landing-footer-column">
@@ -501,23 +506,38 @@ export default function Landing(): React.ReactElement {
 
                     <main>
                         <section id="internie-landing-top" className="internie-landing-hero">
-                            <div>
-                                <h1>일하는 방식을 직접 보고<br/>채용 성과를 높이세요</h1>
-                                <p>인터니에서 누가 우리 팀의 일을<br/>잘하는지 결과물과 수행 데이터로 확인하세요</p>
+                            <div className="internie-landing-hero-copy">
+                                <div className="internie-landing-hero-logo">internie</div>
+                                <p>
+                                    <span className="internie-landing-text-line">인터니에서 누가 <strong>“우리 팀의 일”</strong>을</span>
+                                    <span className="internie-landing-text-line">잘하는지 결과물과 수행 데이터로 확인하세요</span>
+                                </p>
+
+                                <h1>
+                                    <span className="internie-landing-text-line">일하는 방식을 보고</span>
+                                    <span className="internie-landing-text-line"><strong>채용</strong> 하세요</span>
+                                </h1>
                             </div>
-                            <button type="button" className="internie-landing-primary-button internie-landing-reveal" onClick={handleInquiryOpen}>
-                                문의하기
-                            </button>
+
                             <picture className="internie-landing-hero-picture internie-landing-reveal">
-                                <source media="(max-width: 768px)" srcSet={heroMobileImage} />
                                 <img className="internie-landing-hero-image" src={heroImage} alt="인터니 채용 프로세스" />
                             </picture>
+
+                            <div className="internie-landing-mobile-hero-visual internie-landing-reveal">
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-main" src={hero1Image} alt="인터니 지원자 평가 화면" />
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-left" src={hero2Image} alt="" aria-hidden="true" />
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-right" src={hero2Image} alt="" aria-hidden="true" />
+                            </div>
                         </section>
 
-                        <section className="internie-landing-section internie-landing-section-white">
+                        <section className="internie-landing-section internie-landing-section-white internie-landing-problem-section">
                             <div className="internie-landing-section-heading">
                                 <span>이런 스타트업이라면</span>
-                                <h2>채용 전에,<br />함께 일해보세요</h2>
+
+                                <h2>
+                                    <span className="internie-landing-text-line">채용 전에,</span>
+                                    <span className="internie-landing-text-line">함께 일해보세요</span>
+                                </h2>
                             </div>
 
                             <div className="internie-landing-problem-cards">
@@ -544,7 +564,11 @@ export default function Landing(): React.ReactElement {
                         <section className="internie-landing-section internie-landing-section-blue">
                             <div className="internie-landing-section-heading">
                                 <span>어떻게 사용하나요?</span>
-                                <h2>채용 담당자님은 실무 과제만 주세요.<br />나머지는 인터니가 할게요!</h2>
+
+                                <h2>
+                                    <span className="internie-landing-text-line">담당자님은 과제만 주세요,</span>
+                                    <span className="internie-landing-text-line">나머지는 인터니가 할게요!</span>
+                                </h2>
                             </div>
 
                             <div className="internie-landing-content-image-reveal internie-landing-reveal">
@@ -553,15 +577,20 @@ export default function Landing(): React.ReactElement {
                                     <img className="internie-landing-content-image" src={missionImage} alt="인터니 미션 관리 화면" />
                                 </picture>
                             </div>
-                            <div className="internie-landing-section-paragraph">                    
-                                <span>지원자 모집부터 운영·관리까지,<br />담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
+                            <div className="internie-landing-section-paragraph">
+                                <span className="internie-landing-text-line">지원자 모집부터 운영·관리까지,</span>
+                                <span className="internie-landing-text-line">담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
                             </div>
                         </section>
 
-                        <section className="internie-landing-section internie-landing-section-white">
+                        <section className="internie-landing-section internie-landing-section-white internie-landing-project-section">
                             <div className="internie-landing-section-heading">
                                 <span className="internie-landing-section-heading-badge">과제 생성</span>
-                                <h2>우리 팀의 프로젝트가<br />학생에게 제공돼요</h2>
+
+                                <h2>
+                                    <span className="internie-landing-text-line">우리 팀의 프로젝트가</span>
+                                    <span className="internie-landing-text-line">학생에게 제공돼요</span>
+                                </h2>
                             </div>
                             
                             <div className="internie-landing-project-visual internie-landing-sequence">
@@ -576,10 +605,14 @@ export default function Landing(): React.ReactElement {
                             </div>
                         </section>
 
-                        <section className="internie-landing-section internie-landing-section-white">
+                        <section className="internie-landing-section internie-landing-section-white internie-landing-evaluation-section">
                             <div className="internie-landing-section-heading">
                                 <span className="internie-landing-section-heading-badge">과제 평가</span>
-                                <h2>단계별 산출물을 통해<br />학생들이 일하는 방식을 확인해요</h2>
+
+                                <h2>
+                                    <span className="internie-landing-text-line">단계별 산출물을 통해</span>
+                                    <span className="internie-landing-text-line">학생들이 일하는 방식을 확인해요</span>
+                                </h2>
                             </div>
 
                             <div className="internie-landing-evaluation-visual internie-landing-sequence">
@@ -626,13 +659,20 @@ export default function Landing(): React.ReactElement {
                         <section className="internie-landing-final-cta">
                             <div className="internie-landing-final-cta-inner internie-landing-reveal">
                                 <div>
-                                    <h2>이력서 말고, 일하는 걸 보세요.</h2>
-                                    <p>미션 수행 과정과 결과를 통해 더 정확한 채용을 시작하세요.</p>
+                                    <h2>
+                                        <span className="internie-landing-text-line">이력서 말고,</span>
+                                        <span className="internie-landing-text-line">일하는 걸 보세요.</span>
+                                    </h2>
+
+                                    <p>
+                                        <span className="internie-landing-text-line">미션 하나면 충분합니다.</span>
+                                        <span className="internie-landing-text-line">지금 바로 도입 문의하세요</span>
+                                    </p>
                                 </div>
 
                                 <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot">
                                     <button type="button" className="internie-landing-mobile-final-button" onClick={handleInquiryOpen}>
-                                        도입 문의
+                                        문의하기
                                     </button>
                                 </div>
                             </div>
@@ -685,7 +725,7 @@ export default function Landing(): React.ReactElement {
                                 handleInquiryOpen();
                             }}
                         >
-                            도입 문의
+                            문의하기
                         </button>
                     </div>
                 </div>
