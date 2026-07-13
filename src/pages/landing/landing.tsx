@@ -748,11 +748,19 @@ export default function Landing(): React.ReactElement {
                         <div className="internie-landing-mobile-inquiry-success">
                             <div className="internie-landing-mobile-inquiry-success-content">
                                 <span className="internie-landing-mobile-inquiry-success-icon" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none">
-                                        <path d="M16 28.5L24 36.5L41 16.5" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+                                        <circle className="internie-inquiry-success-circle" cx="25" cy="25" r="25" fill="#0166FF" />
+                                        <path
+                                            className="internie-inquiry-success-check"
+                                            d="M15 26.1633C16.9613 27.5897 20.884 31.5124 22.4887 34.1869C24.4501 29.9077 29.4426 20.2793 34.7917 16"
+                                            pathLength="1"
+                                            stroke="white"
+                                            strokeWidth="3"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
                                     </svg>
                                 </span>
-
                                 <strong>제출이 완료되었습니다</strong>
                             </div>
 
