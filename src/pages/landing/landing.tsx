@@ -380,12 +380,11 @@ export default function Landing(): React.ReactElement {
 
         const firstName = inquiryForm.firstName.trim();
         const lastName = inquiryForm.lastName.trim();
-        const contactName = isEnglish ? `${firstName} ${lastName}`.trim() : inquiryForm.contactName.trim();
 
         const payload = {
             companyName: inquiryForm.companyName.trim(),
-            contactName,
-            position: isEnglish ? "N/A" : inquiryForm.position.trim(),
+            contactName: isEnglish ? `${firstName} ${lastName}`.trim() : inquiryForm.contactName.trim(),
+            position: isEnglish ? null : inquiryForm.position.trim(),
             companyEmail: inquiryForm.companyEmail.trim(),
             phone: inquiryForm.phone.trim(),
             question: inquiryForm.question.trim() || null
@@ -645,7 +644,12 @@ export default function Landing(): React.ReactElement {
 
                                     <h1>
                                         <span className="internie-landing-text-line">{t("landing.hero.mobile.titleLine1")}</span>
-                                        <span className="internie-landing-text-line">{t("landing.hero.mobile.titleLine2")}</span>
+                                        <span className="internie-landing-text-line">
+                                            <Trans
+                                                i18nKey="landing.hero.mobile.titleLine2"
+                                                components={{ strong: <strong /> }}
+                                            />
+                                        </span>
                                     </h1>
                                 </div>
 

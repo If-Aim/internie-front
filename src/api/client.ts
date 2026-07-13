@@ -313,7 +313,7 @@ export function buildWebSocketUrl(path = "/ws"): string {
 export type InquiryCreateRequest = {
     companyName: string;
     contactName: string;
-    position: string;
+    position: string | null;
     companyEmail: string;
     phone: string;
     question?: string | null;
@@ -326,11 +326,11 @@ export async function createInquiry(input: InquiryCreateRequest): Promise<void> 
         body: JSON.stringify({
             companyName: input.companyName.trim(),
             contactName: input.contactName.trim(),
-            position: input.position.trim(),
+            position: input.position?.trim() || null,
             companyEmail: input.companyEmail.trim(),
             phone: input.phone.trim(),
-            question: input.question?.trim() || null,
-        }),
+            question: input.question?.trim() || null
+        })
     });
 }
 
