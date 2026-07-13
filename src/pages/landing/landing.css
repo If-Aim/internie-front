@@ -308,6 +308,7 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-inquiry-anchor { position: fixed; right: auto; bottom: 32px; left: 50%; z-index: 1200; display: flex; align-items: center; transform: translateX(-50%); }
     .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; transform: none; }
     .internie-landing-consult-button { min-width: 120px; height: 48px; padding: 0 14px; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 16px; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
+    .internie-landing-inquiry-anchor.is-docked .internie-landing-consult-button { background: #FFFFFF; color: #0166FF; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12); }
     .internie-landing-final-button-slot { width: 120px; height: 48px; }
     .internie-landing-mobile-final-button { display: none; }
 
