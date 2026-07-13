@@ -117,7 +117,6 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-final-cta p { margin: 12px 0 0; color: rgba(255, 255, 255, 0.75); font-size: 15px; font-weight: 500; line-height: 1.7; }
 
 .internie-landing-final-cta-mobile-copy,
-.internie-landing-final-button-mobile { display: none; }
 
 .internie-landing-footer { width: 100%; padding: 64px 24px 32px; background: #0B1933; color: #FFFFFF; }
 .internie-landing-footer-inner { display: grid; grid-template-columns: 1.6fr 0.7fr 1fr; gap: 80px; width: min(100%, 1120px); margin: 0 auto; }
@@ -209,7 +208,6 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-default-view { width: 100%; }
 .internie-landing-mobile-inquiry-page { display: none; }
 
-.internie-landing-mobile-final-button { display: none; }
 @media (prefers-reduced-motion: reduce) {
     .internie-landing-reveal { opacity: 1; transform: none; filter: none; transition: none; }
     .internie-landing-primary-button, .internie-landing-problem-card, .internie-landing-final-cta button, .internie-landing-floating-button { transition: none; }
@@ -319,20 +317,12 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-final-cta h2 { font-size: clamp(24px, 7.6vw, 30px); line-height: 1.4; }
     .internie-landing-final-cta p { font-size: clamp(13px, 4vw, 16px); line-height: 1.5; }
     .internie-landing-final-button-slot { width: auto; height: auto; }
-    .internie-landing-mobile-final-button { display: flex; align-items: center; justify-content: center; min-width: 160px; height: 64px; padding: 0 28px; border: 0; border-radius: 12px; background: #FFFFFF; color: #0166FF; font-size: 24px; font-weight: 700; }
-
-    .internie-landing-final-cta-desktop,
-    .internie-landing-final-button-desktop { display: none; }
-
-    .internie-landing-final-cta-mobile-copy,
-    .internie-landing-final-button-mobile { display: block; }
 
     .internie-landing-inquiry-anchor { position: fixed; right: auto; bottom: 32px; left: 50%; z-index: 1200; display: flex; align-items: center; transform: translateX(-50%); }
     .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; transform: none; }
     .internie-landing-consult-button { min-width: 120px; height: 48px; padding: 0 14px; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 16px; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
     .internie-landing-inquiry-anchor.is-docked .internie-landing-consult-button { background: #FFFFFF; color: #0166FF; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12); }
     .internie-landing-final-button-slot { width: 120px; height: 48px; }
-    .internie-landing-mobile-final-button { display: none; }
 
     .internie-landing-footer { padding: 24px 20px 28px; background: #FFFFFF; color: #71717A; }
     .internie-landing-footer-inner { display: block; width: 100%; }

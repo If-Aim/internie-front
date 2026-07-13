@@ -25,15 +25,15 @@ import hero1EnglishImage from "../../assets/landing/en/hero-1.svg";
 import hero2EnglishImage from "../../assets/landing/en/hero-2.svg";
 import missionEnglishImage from "../../assets/landing/en/mission.svg";
 // import missionMobileEnglishImage from "../../assets/landing/en/mission-mobile.png";
-// import projectMainEnglishImage from "../../assets/landing/en/project-main.png";
-// import projectTrackingEnglishImage from "../../assets/landing/en/project-tracking.png";
-// import projectMonitoringEnglishImage from "../../assets/landing/en/project-monitoring.png";
-// import projectReviewEnglishImage from "../../assets/landing/en/project-review.png";
-// import projectInsightEnglishImage from "../../assets/landing/en/project-insight.png";
-// import evaluationMainEnglishImage from "../../assets/landing/en/evaluation-main.png";
-// import evaluationRow1EnglishImage from "../../assets/landing/en/evaluation-row-1.png";
-// import evaluationRow2EnglishImage from "../../assets/landing/en/evaluation-row-2.png";
-// import evaluationRow3EnglishImage from "../../assets/landing/en/evaluation-row-3.png";
+import projectMainEnglishImage from "../../assets/landing/en/project-main.png";
+import projectTrackingEnglishImage from "../../assets/landing/en/project-tracking.png";
+import projectMonitoringEnglishImage from "../../assets/landing/en/project-monitoring.png";
+import projectReviewEnglishImage from "../../assets/landing/en/project-review.png";
+import projectInsightEnglishImage from "../../assets/landing/en/project-insight.png";
+import evaluationMainEnglishImage from "../../assets/landing/en/evaluation-main.png";
+import evaluationRow1EnglishImage from "../../assets/landing/en/evaluation-row-1.png";
+import evaluationRow2EnglishImage from "../../assets/landing/en/evaluation-row-2.png";
+import evaluationRow3EnglishImage from "../../assets/landing/en/evaluation-row-3.png";
 
 import "./landing.css";
 
@@ -281,6 +281,17 @@ export default function Landing(): React.ReactElement {
     const heroMobileSideSrc = isEnglish ? hero2EnglishImage : hero2Image;
     const missionDesktopSrc = isEnglish ? missionEnglishImage : missionImage;
     const missionMobileSrc = isEnglish ? missionEnglishImage : missionMobileImage;
+
+    const projectMainSrc = isEnglish ? projectMainEnglishImage : projectMainImage;
+    const projectTrackingSrc = isEnglish ? projectTrackingEnglishImage : projectTrackingImage;
+    const projectMonitoringSrc = isEnglish ? projectMonitoringEnglishImage : projectMonitoringImage;
+    const projectReviewSrc = isEnglish ? projectReviewEnglishImage : projectReviewImage;
+    const projectInsightSrc = isEnglish ? projectInsightEnglishImage : projectInsightImage;
+
+    const evaluationMainSrc = isEnglish ? evaluationMainEnglishImage : evaluationMainImage;
+    const evaluationRow1Src = isEnglish ? evaluationRow1EnglishImage : evaluationRow1Image;
+    const evaluationRow2Src = isEnglish ? evaluationRow2EnglishImage : evaluationRow2Image;
+    const evaluationRow3Src = isEnglish ? evaluationRow3EnglishImage : evaluationRow3Image;
     
     const landingRef = useRef<HTMLDivElement | null>(null);
     const finalCtaButtonRef = useRef<HTMLDivElement | null>(null);
@@ -729,13 +740,33 @@ export default function Landing(): React.ReactElement {
                             </div>
                             
                             <div className="internie-landing-project-visual internie-landing-sequence">
-                                <img className="internie-landing-project-main" src={projectMainImage} alt="인터니 과제 관리 화면" />
+                                <img
+                                    className="internie-landing-project-main"
+                                    src={projectMainSrc}
+                                    alt={t("landing.project.mainImageAlt")}
+                                />
 
                                 <div className="internie-landing-project-card-group">
-                                    <img className="internie-landing-project-card internie-project-card-1" src={projectTrackingImage} alt="트래킹 인프라 구축 과제" />
-                                    <img className="internie-landing-project-card internie-project-card-2" src={projectMonitoringImage} alt="모니터링 주기 설정 과제" />
-                                    <img className="internie-landing-project-card internie-project-card-3" src={projectReviewImage} alt="성과 리뷰 과제" />
-                                    <img className="internie-landing-project-card internie-project-card-4" src={projectInsightImage} alt="인사이트 도출 과제" />
+                                    <img
+                                        className="internie-landing-project-card internie-project-card-1"
+                                        src={projectTrackingSrc}
+                                        alt={t("landing.project.trackingImageAlt")}
+                                    />
+                                    <img
+                                        className="internie-landing-project-card internie-project-card-2"
+                                        src={projectMonitoringSrc}
+                                        alt={t("landing.project.monitoringImageAlt")}
+                                    />
+                                    <img
+                                        className="internie-landing-project-card internie-project-card-3"
+                                        src={projectReviewSrc}
+                                        alt={t("landing.project.reviewImageAlt")}
+                                    />
+                                    <img
+                                        className="internie-landing-project-card internie-project-card-4"
+                                        src={projectInsightSrc}
+                                        alt={t("landing.project.insightImageAlt")}
+                                    />
                                 </div>
                             </div>
                         </section>
@@ -751,12 +782,28 @@ export default function Landing(): React.ReactElement {
                             </div>
 
                             <div className="internie-landing-evaluation-visual internie-landing-sequence">
-                                <img className="internie-landing-evaluation-main" src={evaluationMainImage} alt="인터니 과제 평가 화면" />
+                                <img
+                                    className="internie-landing-evaluation-main"
+                                    src={evaluationMainSrc}
+                                    alt={t("landing.evaluation.mainImageAlt")}
+                                />
 
                                 <div className="internie-landing-evaluation-card-group">
-                                    <img className="internie-landing-evaluation-card internie-evaluation-card-1" src={evaluationRow1Image} alt="과제 평가 카드 1" />
-                                    <img className="internie-landing-evaluation-card internie-evaluation-card-2" src={evaluationRow2Image} alt="과제 평가 카드 2" />
-                                    <img className="internie-landing-evaluation-card internie-evaluation-card-3" src={evaluationRow3Image} alt="과제 평가 카드 3" />
+                                    <img
+                                        className="internie-landing-evaluation-card internie-evaluation-card-1"
+                                        src={evaluationRow1Src}
+                                        alt={t("landing.evaluation.row1ImageAlt")}
+                                    />
+                                    <img
+                                        className="internie-landing-evaluation-card internie-evaluation-card-2"
+                                        src={evaluationRow2Src}
+                                        alt={t("landing.evaluation.row2ImageAlt")}
+                                    />
+                                    <img
+                                        className="internie-landing-evaluation-card internie-evaluation-card-3"
+                                        src={evaluationRow3Src}
+                                        alt={t("landing.evaluation.row3ImageAlt")}
+                                    />
                                 </div>
                             </div>
                         </section>
@@ -817,12 +864,7 @@ export default function Landing(): React.ReactElement {
                                     </p>
                                 </div>
 
-                                <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot">
-                                    <button type="button" className="internie-landing-mobile-final-button" onClick={handleInquiryOpen}>
-                                        <span className="internie-landing-final-button-desktop">{t("landing.finalCta.desktop.button")}</span>
-                                        <span className="internie-landing-final-button-mobile">{t("landing.finalCta.mobile.button")}</span>
-                                    </button>
-                                </div>
+                                <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot" aria-hidden="true"/>
                             </div>
                         </section>
                     </main>
