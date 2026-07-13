@@ -705,7 +705,7 @@ export default function Landing(): React.ReactElement {
                             </div>
                         </section>
 
-                        <section className="internie-landing-section internie-landing-section-blue">
+                        <section className="internie-landing-section internie-landing-section-blue internie-landing-guide-section">
                             <div className="internie-landing-section-heading">
                                 <span>{t("landing.howItWorks.eyebrow")}</span>
 
