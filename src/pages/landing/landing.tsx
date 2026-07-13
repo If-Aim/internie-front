@@ -102,7 +102,7 @@ function InquiryForm({
             </label>
 
             <button type="submit" className="internie-landing-inquiry-submit" disabled={submitting}>
-                {submitting ? "전송 중..." : "문의 보내기"}
+                {submitting ? "전송 중..." : "제출하기"}
             </button>
         </form>
     );
@@ -228,6 +228,7 @@ export default function Landing(): React.ReactElement {
     const [inquiryForm, setInquiryForm] = useState<InquiryFormState>(EMPTY_INQUIRY_FORM);
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [inquirySubmitting, setInquirySubmitting] = useState(false);
+    const [inquirySubmitted, setInquirySubmitted] = useState(false);
     const [inquiryDocked, setInquiryDocked] = useState(false);
     const [inquiryDockPosition, setInquiryDockPosition] = useState({
         top: 0,
@@ -240,6 +241,8 @@ export default function Landing(): React.ReactElement {
 
     const handleInquiryOpen = () => {
         const scrollRoot = document.getElementById("root");
+
+        setInquirySubmitted(false);
 
         if (isMobileViewport()) {
             inquiryReturnScrollRef.current = scrollRoot?.scrollTop ?? window.scrollY;
@@ -266,6 +269,7 @@ export default function Landing(): React.ReactElement {
         const restoreMobileScroll = isMobileViewport();
 
         setInquiryOpen(false);
+        setInquirySubmitted(false);
 
         requestAnimationFrame(() => {
             if (!restoreMobileScroll) return;
@@ -324,9 +328,16 @@ export default function Landing(): React.ReactElement {
 
         try {
             await createInquiry(payload);
-            window.alert("문의가 정상적으로 접수되었습니다.");
+
             setInquiryForm(EMPTY_INQUIRY_FORM);
             setPrivacyAgreed(false);
+
+            if (isMobileViewport()) {
+                setInquirySubmitted(true);
+                return;
+            }
+
+            window.alert("문의가 정상적으로 접수되었습니다.");
             handleInquiryClose();
         } catch (error) {
             const message = error instanceof ApiError
@@ -733,35 +744,47 @@ export default function Landing(): React.ReactElement {
                     className={`internie-landing-mobile-inquiry-page${inquiryOpen ? " is-open" : ""}`}
                     aria-hidden={!inquiryOpen}
                 >
-                    <div className="internie-landing-mobile-inquiry-inner">
-                        <div className="internie-landing-mobile-inquiry-card">
-                            <button
-                                type="button"
-                                className="internie-landing-mobile-inquiry-close"
-                                aria-label="문의 화면 닫기"
-                                onClick={handleInquiryClose}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18 6L6 18M18 18L6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                            </button>
+                    {inquirySubmitted ? (
+                        <div className="internie-landing-mobile-inquiry-success">
+                            <div className="internie-landing-mobile-inquiry-success-content">
+                                <span className="internie-landing-mobile-inquiry-success-icon" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none">
+                                        <path d="M16 28.5L24 36.5L41 16.5" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </span>
 
-                            <div className="internie-landing-mobile-inquiry-heading">
-                                <h1>문의하기</h1>
+                                <strong>제출이 완료되었습니다</strong>
                             </div>
 
-                            <InquiryForm
-                                form={inquiryForm}
-                                privacyAgreed={privacyAgreed}
-                                submitting={inquirySubmitting}
-                                onFieldChange={updateInquiryField}
-                                onPrivacyChange={setPrivacyAgreed}
-                                onSubmit={handleInquirySubmit}
-                            />
+                            <button type="button" className="internie-landing-mobile-inquiry-success-button" onClick={handleInquiryClose}>
+                                돌아가기
+                            </button>
                         </div>
-                    </div>
-                </section>
+                    ) : (
+                        <div className="internie-landing-mobile-inquiry-inner">
+                            <div className="internie-landing-mobile-inquiry-card">
+                                <header className="internie-landing-mobile-inquiry-header">
+                                    <button type="button" className="internie-landing-mobile-inquiry-back" aria-label="랜딩페이지로 돌아가기" onClick={handleInquiryClose}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M15 6L9 12L15 18" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
 
+                                    <h1>문의하기</h1>
+                                </header>
+
+                                <InquiryForm
+                                    form={inquiryForm}
+                                    privacyAgreed={privacyAgreed}
+                                    submitting={inquirySubmitting}
+                                    onFieldChange={updateInquiryField}
+                                    onPrivacyChange={setPrivacyAgreed}
+                                    onSubmit={handleInquirySubmit}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </section>
                 <LandingFooter onLinkClick={handleFooterLinkClick} />
             </div>
         </>

@@ -1,9 +1,10 @@
 #root{ overflow: auto !important;}
 .internie-landing-text-line { display: block; white-space: nowrap; }
 .internie-landing { position: relative; width: 100%; min-width: 1180px; min-height: 100vh; background: #FFFFFF; color: #000; }
-::-webkit-scrollbar {width: 4px;color:#D9D9D9;}
-::-webkit-scrollbar-track {background: none;}
-::-webkit-scrollbar-thumb { border-radius: 999px;border: none;background-clip: content-box;}
+html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent; }
+::-webkit-scrollbar { width: 4px;}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border-radius: 999px; background: #D9D9D9; }
 
 .internie-landing * { box-sizing: border-box; }
 .internie-landing button { cursor: pointer; }
@@ -321,24 +322,45 @@
     .internie-landing-footer-copyright span { color: #71717A; font-size: 10px; }
 
     .internie-landing-default-view.is-inquiry-open { display: none; }
-    .internie-landing-mobile-inquiry-page.is-open { display: block; width: 100%; min-height: 100dvh; padding: 72px 16px 100px; background: #FFFFFF; }
-    .internie-landing-mobile-inquiry-card { position: relative; width: 100%; margin: 0 auto; padding: 38px 28px 32px; border: 1px solid #E4E9F0; border-radius: 20px; background: #FFFFFF; box-shadow: 0 6px 24px rgba(15, 23, 42, 0.14); }
-    .internie-landing-mobile-inquiry-close { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #0B1220; }
-    .internie-landing-mobile-inquiry-heading { padding-right: 40px; margin-bottom: 34px; }
-    .internie-landing-mobile-inquiry-heading h1 { margin: 0; color: #0B1220; font-size: 26px; font-weight: 800; line-height: 1.3; }
-    .internie-landing-mobile-inquiry-heading p { margin: 8px 0 0; color: #808080; font-size: 14px; font-weight: 500; line-height: 1.6; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form { gap: 18px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label { gap: 9px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label > span { font-size: 14px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input:not([type="checkbox"]) { height: 56px; padding: 0 14px; font-size: 14px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea { min-height: 140px; padding: 14px; font-size: 14px; }
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-submit { height: 64px; margin-top: 20px; border-radius: 10px; font-size: 20px; }
+    .internie-landing-mobile-inquiry-page.is-open { display: block; width: 100%; min-height: 100dvh; background: #FFFFFF; }
+    .internie-landing-mobile-inquiry-inner { width: 100%; min-height: 100dvh; }
+    .internie-landing-mobile-inquiry-card { width: 100%; max-width: 680px; min-height: 100dvh; margin: 0 auto; padding: clamp(56px, 15vw, 80px) clamp(24px, 8vw, 36px) 60px; border: 0; border-radius: 0; background: #FFFFFF; box-shadow: none; }
+
+    .internie-landing-mobile-inquiry-header { display: flex; align-items: center; gap: clamp(8px, 3vw, 16px); margin-bottom: clamp(24px, 8vw, 47px); }
+    .internie-landing-mobile-inquiry-header h1 { margin: 0; color: #050505; font-size: clamp(20px, 6vw, 36px); font-weight: 800; line-height: 1.2; }
+    .internie-landing-mobile-inquiry-back { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 32px; height: 40px; padding: 0; border: 0; background: transparent; color: #8A8A8A; }
+
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form { display: flex; flex-direction: column; gap: clamp(28px, 9vw, 40px); }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-row { display: grid; grid-template-columns: 1fr; gap: clamp(28px, 9vw, 40px); }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label { gap: clamp(8px, 4vw, 12px); }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label > span { color: #000; font-size: clamp(12px, 5vw, 20px); font-weight: 800; line-height: 1.3; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form label > span em { margin-left: 2px; color: #FF0000; }
+
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input:not([type="checkbox"]), .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea { width: 100%; border: 1px solid #E1E1E1; border-radius: clamp(8px, 4vw, 10px); background: #FFFFFF; color: #000; font-family: inherit; font-size: clamp(12px, 4vw, 20px); font-weight: 500; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input:not([type="checkbox"]) { height: clamp(48px, 16vw, 64px); padding: 0 clamp(12px, 6vw, 20px); }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea { min-height: clamp(160px, 45vw, 220px); padding: clamp(18px, 6vw, 28px); line-height: 1.5; resize: none; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form input::placeholder, .internie-landing-mobile-inquiry-page .internie-landing-inquiry-form textarea::placeholder { color: #8A8A8A; }
+
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-agree { display: flex !important; flex-direction: row !important; align-items: center; gap: 10px !important; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-agree input { flex-shrink: 0; width: 18px; height: 18px; }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-agree span { color: #808080 !important; font-size: clamp(12px, 3.6vw, 14px) !important; font-weight: 500 !important; }
+
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-submit { position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom)); left: 20px; z-index: 1300; width: calc(100% - 40px); max-width: 640px; height: clamp(60px, 17vw, 72px); margin: 0 auto; border: 0; border-radius: clamp(8px, 4vw, 10px); background: #0166FF; color: #FFFFFF; font-size: clamp(19px, 5.8vw, 26px); font-weight: 700; box-shadow: 0 14px 32px rgba(1, 102, 255, 0.28); }
+    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-submit:disabled { opacity: 0.55; }
+
+    .internie-landing-mobile-inquiry-success { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 100dvh; padding: 24px 24px 120px; background: #FFFFFF; }
+    .internie-landing-mobile-inquiry-success-content { display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 7vw, 32px); text-align: center; }
+    .internie-landing-mobile-inquiry-success-icon { display: flex; align-items: center; justify-content: center; width: clamp(72px, 20vw, 96px); height: clamp(72px, 20vw, 96px); border-radius: 50%; background: #0166FF; }
+    .internie-landing-mobile-inquiry-success-icon svg { width: 60%; height: 60%; }
+    .internie-landing-mobile-inquiry-success-content strong { color: #0166FF; font-size: clamp(24px, 7vw, 34px); font-weight: 800; line-height: 1.3; }
+
+    .internie-landing-mobile-inquiry-success-button { position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom)); left: 20px; z-index: 1300; width: calc(100% - 40px); max-width: 640px; height: 60px; margin: 0 auto; border: 0; border-radius: 16px; background: #0166FF; color: #FFFFFF; font-size: 18px; font-weight: 700; box-shadow: 0 14px 32px rgba(1, 102, 255, 0.24); }
+
 }
 
 @media (max-width: 360px) {
-    .internie-landing-mobile-inquiry-page .internie-landing-inquiry-row { grid-template-columns: 1fr; }
-    .internie-landing-mobile-inquiry-card { padding: 34px 20px 26px; }
+    .internie-landing-mobile-inquiry-card { padding-right: 24px; padding-left: 24px; }
+    .internie-landing-mobile-inquiry-header { margin-bottom: 44px; }
 
     .internie-landing-hero { min-height: 0; padding-top: 48px; padding-bottom: 48px; }
     .internie-landing-hero-copy h1 { font-size: clamp(20px, 11.5vw, 48px); }
