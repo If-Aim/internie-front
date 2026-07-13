@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { ApiError, createInquiry } from "../../api/client";
@@ -19,6 +20,21 @@ import evaluationRow1Image from "../../assets/landing/evaluation-row-1.png";
 import evaluationRow2Image from "../../assets/landing/evaluation-row-2.png";
 import evaluationRow3Image from "../../assets/landing/evaluation-row-3.png";
 
+import heroEnglishImage from "../../assets/landing/en/hero.svg";
+import hero1EnglishImage from "../../assets/landing/en/hero-1.svg";
+import hero2EnglishImage from "../../assets/landing/en/hero-2.svg";
+import missionEnglishImage from "../../assets/landing/en/mission.svg";
+// import missionMobileEnglishImage from "../../assets/landing/en/mission-mobile.png";
+// import projectMainEnglishImage from "../../assets/landing/en/project-main.png";
+// import projectTrackingEnglishImage from "../../assets/landing/en/project-tracking.png";
+// import projectMonitoringEnglishImage from "../../assets/landing/en/project-monitoring.png";
+// import projectReviewEnglishImage from "../../assets/landing/en/project-review.png";
+// import projectInsightEnglishImage from "../../assets/landing/en/project-insight.png";
+// import evaluationMainEnglishImage from "../../assets/landing/en/evaluation-main.png";
+// import evaluationRow1EnglishImage from "../../assets/landing/en/evaluation-row-1.png";
+// import evaluationRow2EnglishImage from "../../assets/landing/en/evaluation-row-2.png";
+// import evaluationRow3EnglishImage from "../../assets/landing/en/evaluation-row-3.png";
+
 import "./landing.css";
 
 type LandingFooterLink = {
@@ -30,6 +46,8 @@ type LandingFooterLink = {
 type InquiryFormState = {
     companyName: string;
     contactName: string;
+    firstName: string;
+    lastName: string;
     position: string;
     companyEmail: string;
     phone: string;
@@ -39,6 +57,8 @@ type InquiryFormState = {
 const EMPTY_INQUIRY_FORM: InquiryFormState = {
     companyName: "",
     contactName: "",
+    firstName: "",
+    lastName: "",
     position: "",
     companyEmail: "",
     phone: "",
@@ -62,47 +82,83 @@ function InquiryForm({
     onPrivacyChange,
     onSubmit
 }: InquiryFormProps): React.ReactElement {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.resolvedLanguage?.startsWith("en") ?? false;
+
     return (
         <form className="internie-landing-inquiry-form" onSubmit={onSubmit}>
-            <div className="internie-landing-inquiry-row">
-                <label>
-                    <span>기업명<em>*</em></span>
-                    <input type="text" name="companyName" value={form.companyName} maxLength={50} placeholder="예) AIM" autoComplete="organization" required onChange={(event) => onFieldChange("companyName", event.target.value)} />
-                </label>
+            {isEnglish ? (
+                <>
+                    <div className="internie-landing-inquiry-row">
+                        <label>
+                            <span>{t("landing.inquiry.fields.firstName")}<em>*</em></span>
+                            <input type="text" name="firstName" value={form.firstName} maxLength={50} autoComplete="given-name" required onChange={(event) => onFieldChange("firstName", event.target.value)} />
+                        </label>
 
-                <label>
-                    <span>담당자명<em>*</em></span>
-                    <input type="text" name="contactName" value={form.contactName} maxLength={100} placeholder="예) 김유진" autoComplete="name" required onChange={(event) => onFieldChange("contactName", event.target.value)} />
-                </label>
-            </div>
+                        <label>
+                            <span>{t("landing.inquiry.fields.lastName")}<em>*</em></span>
+                            <input type="text" name="lastName" value={form.lastName} maxLength={50} autoComplete="family-name" required onChange={(event) => onFieldChange("lastName", event.target.value)} />
+                        </label>
+                    </div>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.workEmail")}<em>*</em></span>
+                        <input type="email" name="companyEmail" value={form.companyEmail} maxLength={255} placeholder="example@company.com" autoComplete="email" required onChange={(event) => onFieldChange("companyEmail", event.target.value)} />
+                    </label>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.phone")}<em>*</em></span>
+                        <input type="tel" name="phone" value={form.phone} maxLength={30} pattern="[0-9+()\s-]{7,30}" inputMode="tel" placeholder="+1 555 000 0000" autoComplete="tel" required onChange={(event) => onFieldChange("phone", event.target.value)} />
+                    </label>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.companyName")}<em>*</em></span>
+                        <input type="text" name="companyName" value={form.companyName} maxLength={50} autoComplete="organization" required onChange={(event) => onFieldChange("companyName", event.target.value)} />
+                    </label>
+                </>
+            ) : (
+                <>
+                    <div className="internie-landing-inquiry-row">
+                        <label>
+                            <span>{t("landing.inquiry.fields.companyName")}<em>*</em></span>
+                            <input type="text" name="companyName" value={form.companyName} maxLength={50} placeholder={t("landing.inquiry.fields.companyNamePlaceholder")} autoComplete="organization" required onChange={(event) => onFieldChange("companyName", event.target.value)} />
+                        </label>
+
+                        <label>
+                            <span>{t("landing.inquiry.fields.contactName")}<em>*</em></span>
+                            <input type="text" name="contactName" value={form.contactName} maxLength={100} placeholder={t("landing.inquiry.fields.contactNamePlaceholder")} autoComplete="name" required onChange={(event) => onFieldChange("contactName", event.target.value)} />
+                        </label>
+                    </div>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.position")}<em>*</em></span>
+                        <input type="text" name="position" value={form.position} maxLength={50} placeholder={t("landing.inquiry.fields.positionPlaceholder")} autoComplete="organization-title" required onChange={(event) => onFieldChange("position", event.target.value)} />
+                    </label>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.workEmail")}<em>*</em></span>
+                        <input type="email" name="companyEmail" value={form.companyEmail} maxLength={255} placeholder="example@company.com" autoComplete="email" required onChange={(event) => onFieldChange("companyEmail", event.target.value)} />
+                    </label>
+
+                    <label>
+                        <span>{t("landing.inquiry.fields.phone")}<em>*</em></span>
+                        <input type="tel" name="phone" value={form.phone} maxLength={30} pattern="[0-9-]+" inputMode="tel" placeholder="010-0000-0000" autoComplete="tel" required onChange={(event) => onFieldChange("phone", event.target.value)} />
+                    </label>
+                </>
+            )}
 
             <label>
-                <span>직책<em>*</em></span>
-                <input type="text" name="position" value={form.position} maxLength={50} placeholder="예) 인사팀장" autoComplete="organization-title" required onChange={(event) => onFieldChange("position", event.target.value)} />
-            </label>
-
-            <label>
-                <span>회사 이메일<em>*</em></span>
-                <input type="email" name="companyEmail" value={form.companyEmail} maxLength={255} placeholder="example@company.com" autoComplete="email" required onChange={(event) => onFieldChange("companyEmail", event.target.value)} />
-            </label>
-
-            <label>
-                <span>연락처<em>*</em></span>
-                <input type="tel" name="phone" value={form.phone} maxLength={30} pattern="[0-9-]+" inputMode="tel" placeholder="010-0000-0000" autoComplete="tel" required onChange={(event) => onFieldChange("phone", event.target.value)} />
-            </label>
-
-            <label>
-                <span>어떤 점이 궁금하신가요? (선택)</span>
+                <span>{t("landing.inquiry.fields.question")}</span>
                 <textarea name="question" value={form.question} maxLength={2000} rows={4} onChange={(event) => onFieldChange("question", event.target.value)} />
             </label>
 
             <label className="internie-landing-inquiry-agree">
                 <input type="checkbox" checked={privacyAgreed} required onChange={(event) => onPrivacyChange(event.target.checked)} />
-                <span>개인정보 수집 및 이용에 동의합니다.</span>
+                <span>{t("landing.inquiry.privacyAgreement")}</span>
             </label>
 
             <button type="submit" className="internie-landing-inquiry-submit" disabled={submitting}>
-                {submitting ? "전송 중..." : "제출하기"}
+                {submitting ? t("landing.inquiry.submitting") : t("landing.inquiry.submit")}
             </button>
         </form>
     );
@@ -116,36 +172,6 @@ function FaqArrow(): React.ReactElement {
     );
 }
 
-const LANDING_FOOTER_LINKS: LandingFooterLink[] = [
-    { label: "홈", path: null, sectionId: "internie-landing-top" },
-    { label: "서비스 소개", path: null, sectionId: null },
-    { label: "소식 소개", path: null, sectionId: null },
-    { label: "FAQ", path: null, sectionId: "internie-landing-faq" }
-];
-
-const LANDING_FAQ_ITEMS = [
-    {
-        question: "세팅에 시간이 얼마나 걸리고, 우리는 뭘 해야 하나요?",
-        answer: "담당자는 JD나 실무 과제만 전달해 주시면 됩니다. 미션 설계부터 지원자 운영, 제출물 관리, 평가 지원까지 인터니가 진행합니다. 담당자는 최종 결과를 확인하고 지원자를 검토하면 됩니다."
-    },
-    {
-        question: "어떤 직무·규모에 맞나요? 개발직만 되나요?",
-        answer: "개발뿐 아니라 마케팅, 기획, 운영, CS, 디자인 등 결과물을 만드는 대부분의 직무에 적용할 수 있습니다. 채용하려는 직무의 JD나 과제를 공유해 주시면, 그에 맞는 미션으로 설계해드립니다. 특히 신입·인턴처럼 이력서만으로 판단하기 어려운 채용에서 활용도가 높습니다."
-    },
-    {
-        question: "지원자에게 보상을 제공해야 하나요?",
-        answer: "필수는 아닙니다. 기본적으로는 무료 참여이며, 완료자에게는 참여 인증 뱃지를 제공합니다. 필요하다면 소정의 참여 보상이나 인증서 발급도 함께 운영할 수 있습니다."
-    },
-    {
-        question: "우리 회사 실무를 외부에 공개해야 하는데, 보안·기밀은 괜찮나요?",
-        answer: "원본 업무를 그대로 공개하지 않습니다. 회사명, 고객 정보, 민감한 데이터는 제거하거나 익명화하고, 실무 맥락만 살려 미션을 구성합니다. 어떤 내용을 공개할지는 기업이 직접 결정하며, 필요하면 NDA 절차도 함께 적용할 수 있습니다."
-    },
-    {
-        question: "부정행위나 AI 대필은 어떻게 걸러내나요?",
-        answer: "인터니는 결과물만 평가하지 않습니다. 과제를 수행하는 과정과 단계별 산출물을 함께 보기 때문에, 대필이나 단순 복붙은 과정에서 드러날 가능성이 높습니다. AI 역시 사용 여부보다 어떻게 활용했는지를 하나의 평가 요소로 활용합니다."
-    }
-];
-
 type LandingFooterProps = {
     onLinkClick: (link: LandingFooterLink) => void;
 };
@@ -153,6 +179,16 @@ type LandingFooterProps = {
 function LandingFooter({
     onLinkClick
 }: LandingFooterProps): React.ReactElement {
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.resolvedLanguage?.startsWith("en") ?? false;
+
+    const footerLinks: LandingFooterLink[] = [
+        { label: t("landing.footer.links.home"), path: null, sectionId: "internie-landing-top" },
+        { label: t("landing.footer.links.product"), path: null, sectionId: null },
+        { label: t("landing.footer.links.about"), path: null, sectionId: null },
+        { label: t("landing.footer.links.faq"), path: null, sectionId: "internie-landing-faq" }
+    ];
+
     return (
         <footer className="internie-landing-footer">
             <div className="internie-landing-footer-inner">
@@ -162,21 +198,30 @@ function LandingFooter({
                     </div>
 
                     <p>
-                        이력서로 알 수 없는 실력을, 데이터로 증명합니다<br />
-                        by aim
+                        {t("landing.footer.taglineLine1")}<br />
+                        {t("landing.footer.taglineLine2")}
                     </p>
 
-                    <div className="internie-landing-footer-company">
-                        <span>상호 aim(에임) · 대표 김유진</span>
-                        <span>purieu.k@gmail.com</span>
-                    </div>
+                    {!isEnglish && (
+                        <div className="internie-landing-footer-company">
+                            <span>{t("landing.footer.companyName")}</span>
+                            <span>purieu.k@gmail.com</span>
+                        </div>
+                    )}
+
+                    {isEnglish && (
+                        <div className="internie-landing-footer-company internie-landing-footer-company-mobile">
+                            <span>{t("landing.footer.companyName")}</span>
+                            <span>purieu.k@gmail.com</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="internie-landing-footer-column">
-                    <strong>바로가기</strong>
+                    <strong>{t("landing.footer.linksTitle")}</strong>
 
-                    <nav className="internie-landing-footer-links" aria-label="푸터 바로가기">
-                        {LANDING_FOOTER_LINKS.map((link) => {
+                    <nav className="internie-landing-footer-links" aria-label={t("landing.footer.navAria")}>
+                        {footerLinks.map((link) => {
                             const pending = !link.path && !link.sectionId;
 
                             return (
@@ -198,11 +243,23 @@ function LandingFooter({
                 </div>
 
                 <div className="internie-landing-footer-column internie-landing-footer-contact">
-                    <strong>고객 문의</strong>
+                    <strong>
+                        {isEnglish
+                            ? t("landing.footer.companyInfoTitle")
+                            : t("landing.footer.contactTitle")}
+                    </strong>
 
                     <div>
-                        <p>대표 문의</p>
-                        <span>aim2a.kor@gmail.com</span>
+                        <p>
+                            {isEnglish
+                                ? t("landing.footer.companyName")
+                                : t("landing.footer.representative")}
+                        </p>
+                        <span>
+                            {isEnglish
+                                ? "purieu.k@gmail.com"
+                                : "aim2a.kor@gmail.com"}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -216,7 +273,15 @@ function LandingFooter({
 
 export default function Landing(): React.ReactElement {
     const navigate = useNavigate();
-
+    const { t, i18n } = useTranslation();
+    const isEnglish = i18n.resolvedLanguage?.startsWith("en") ?? false;
+    
+    const heroDesktopSrc = isEnglish ? heroEnglishImage : heroImage;
+    const heroMobileMainSrc = isEnglish ? hero1EnglishImage : hero1Image;
+    const heroMobileSideSrc = isEnglish ? hero2EnglishImage : hero2Image;
+    const missionDesktopSrc = isEnglish ? missionEnglishImage : missionImage;
+    const missionMobileSrc = isEnglish ? missionEnglishImage : missionMobileImage;
+    
     const landingRef = useRef<HTMLDivElement | null>(null);
     const finalCtaButtonRef = useRef<HTMLDivElement | null>(null);
     const inquiryPopoverRef = useRef<HTMLDivElement | null>(null);
@@ -234,6 +299,19 @@ export default function Landing(): React.ReactElement {
         top: 0,
         left: 0
     });
+
+    const problemItems = ["item1", "item2", "item3"].map((key) => ({
+        number: t(`landing.problem.items.${key}.number`),
+        titleLine1: t(`landing.problem.items.${key}.titleLine1`),
+        titleLine2: t(`landing.problem.items.${key}.titleLine2`),
+        descriptionLine1: t(`landing.problem.items.${key}.descriptionLine1`),
+        descriptionLine2: t(`landing.problem.items.${key}.descriptionLine2`)
+    }));
+
+    const faqItems = ["item1", "item2", "item3", "item4", "item5"].map((key) => ({
+        question: t(`landing.faq.items.${key}.question`),
+        answer: t(`landing.faq.items.${key}.answer`)
+    }));
 
     const isMobileViewport = () => {
         return window.matchMedia("(max-width: 768px)").matches;
@@ -300,27 +378,39 @@ export default function Landing(): React.ReactElement {
 
         if (inquirySubmitting) return;
 
+        const firstName = inquiryForm.firstName.trim();
+        const lastName = inquiryForm.lastName.trim();
+        const contactName = isEnglish ? `${firstName} ${lastName}`.trim() : inquiryForm.contactName.trim();
+
         const payload = {
             companyName: inquiryForm.companyName.trim(),
-            contactName: inquiryForm.contactName.trim(),
-            position: inquiryForm.position.trim(),
+            contactName,
+            position: isEnglish ? "N/A" : inquiryForm.position.trim(),
             companyEmail: inquiryForm.companyEmail.trim(),
             phone: inquiryForm.phone.trim(),
             question: inquiryForm.question.trim() || null
         };
 
-        if (!payload.companyName || !payload.contactName || !payload.position || !payload.companyEmail || !payload.phone) {
-            window.alert("필수 항목을 모두 입력해주세요.");
+        const hasMissingRequiredField = isEnglish
+            ? !firstName || !lastName || !payload.companyName || !payload.companyEmail || !payload.phone
+            : !payload.companyName || !payload.contactName || !payload.position || !payload.companyEmail || !payload.phone;
+
+        if (hasMissingRequiredField) {
+            window.alert(t("landing.inquiry.errors.required"));
             return;
         }
 
-        if (!/^[0-9-]+$/.test(payload.phone)) {
-            window.alert("연락처는 숫자와 하이픈만 입력해주세요.");
+        const phonePattern = isEnglish
+            ? /^[0-9+()\s-]{7,30}$/
+            : /^[0-9-]+$/;
+
+        if (!phonePattern.test(payload.phone)) {
+            window.alert(t("landing.inquiry.errors.phone"));
             return;
         }
 
         if (!privacyAgreed) {
-            window.alert("개인정보 수집 및 이용에 동의해주세요.");
+            window.alert(t("landing.inquiry.errors.privacy"));
             return;
         }
 
@@ -337,12 +427,12 @@ export default function Landing(): React.ReactElement {
                 return;
             }
 
-            window.alert("문의가 정상적으로 접수되었습니다.");
+            window.alert(t("landing.inquiry.errors.success"));
             handleInquiryClose();
         } catch (error) {
-            const message = error instanceof ApiError
+            const message = !isEnglish && error instanceof ApiError
                 ? error.message
-                : "문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요.";
+                : t("landing.inquiry.errors.submitFailed");
 
             window.alert(message);
         } finally {
@@ -498,12 +588,12 @@ export default function Landing(): React.ReactElement {
     return (
         <>
             <SeoMeta
-                title="인터니 | 실무 미션 기반 채용 플랫폼"
-                description="이력서만으로 알 수 없는 지원자의 실무 역량을 확인하세요. 인터니는 실무 미션의 수행 과정과 결과를 통해 기업의 채용 판단을 돕습니다."
-                lang="ko"
+                title={t("landing.seo.title")}
+                description={t("landing.seo.description")}
+                lang={isEnglish ? "en" : "ko"}
                 canonical="https://www.internie.com/"
             />
-            <div ref={landingRef} className={`internie-landing${inquiryOpen ? " is-inquiry-open" : ""}`}>
+            <div ref={landingRef} className={`internie-landing ${isEnglish ? "is-en" : "is-ko"}${inquiryOpen ? " is-inquiry-open" : ""}`}>
                 <div className={`internie-landing-default-view${inquiryOpen ? " is-inquiry-open" : ""}`}>
                     <header className="internie-landing-header">
                         <button type="button" className="internie-landing-logo" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
@@ -511,7 +601,7 @@ export default function Landing(): React.ReactElement {
                         </button>
 
                         <button type="button" className="internie-landing-login" onClick={() => navigate("/login")}>
-                            로그인
+                            {t("landing.header.login")}
                         </button>
                     </header>
 
@@ -519,88 +609,125 @@ export default function Landing(): React.ReactElement {
                         <section id="internie-landing-top" className="internie-landing-hero">
                             <div className="internie-landing-hero-copy">
                                 <div className="internie-landing-hero-logo">internie</div>
-                                <p>
-                                    <span className="internie-landing-text-line">인터니에서 누가 <strong>“우리 팀의 일”</strong>을</span>
-                                    <span className="internie-landing-text-line">잘하는지 결과물과 수행 데이터로 확인하세요</span>
-                                </p>
 
-                                <h1>
-                                    <span className="internie-landing-text-line">일하는 방식을 보고</span>
-                                    <span className="internie-landing-text-line"><strong>채용</strong> 하세요</span>
-                                </h1>
+                                <div className="internie-landing-hero-copy-desktop">
+                                    <p>
+                                        <span className="internie-landing-text-line">
+                                            <Trans i18nKey="landing.hero.desktop.pretitleLine1" components={{ strong: <strong /> }} />
+                                        </span>
+                                        <span className="internie-landing-text-line">
+                                            <Trans i18nKey="landing.hero.desktop.pretitleLine2" components={{ strong: <strong /> }} />
+                                        </span>
+                                    </p>
+
+                                    <h1>
+                                        <span className="internie-landing-text-line">
+                                            <Trans i18nKey="landing.hero.desktop.titleLine1" components={{ strong: <strong /> }} />
+                                        </span>
+                                        <span className="internie-landing-text-line">
+                                            <Trans i18nKey="landing.hero.desktop.titleLine2" components={{ strong: <strong /> }} />
+                                        </span>
+                                    </h1>
+
+                                    {t("landing.hero.desktop.subtitleLine1") && (
+                                        <p className="internie-landing-hero-subtitle">
+                                            <span className="internie-landing-text-line">{t("landing.hero.desktop.subtitleLine1")}</span>
+                                            <span className="internie-landing-text-line">{t("landing.hero.desktop.subtitleLine2")}</span>
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="internie-landing-hero-copy-mobile">
+                                    <p>
+                                        <span className="internie-landing-text-line">{t("landing.hero.mobile.pretitleLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.hero.mobile.pretitleLine2")}</span>
+                                    </p>
+
+                                    <h1>
+                                        <span className="internie-landing-text-line">{t("landing.hero.mobile.titleLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.hero.mobile.titleLine2")}</span>
+                                    </h1>
+                                </div>
+
+                                {isEnglish && (
+                                    <button type="button" className="internie-landing-hero-cta" onClick={handleInquiryOpen}>
+                                        <span className="internie-landing-hero-cta-desktop">{t("landing.hero.desktop.cta")}</span>
+                                        <span className="internie-landing-hero-cta-mobile">{t("landing.hero.mobile.cta")}</span>
+                                    </button>
+                                )}
                             </div>
 
                             <picture className="internie-landing-hero-picture internie-landing-reveal">
-                                <img className="internie-landing-hero-image" src={heroImage} alt="인터니 채용 프로세스" />
+                                <img className="internie-landing-hero-image" src={heroDesktopSrc} alt={t("landing.hero.imageAlt")} />
                             </picture>
 
                             <div className="internie-landing-mobile-hero-visual internie-landing-reveal">
-                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-main" src={hero1Image} alt="인터니 지원자 평가 화면" />
-                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-left" src={hero2Image} alt="" aria-hidden="true" />
-                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-right" src={hero2Image} alt="" aria-hidden="true" />
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-main" src={heroMobileMainSrc} alt={t("landing.hero.mainCardAlt")} />
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-left" src={heroMobileSideSrc} alt="" aria-hidden="true" />
+                                <img className="internie-landing-mobile-hero-card internie-landing-mobile-hero-card-right" src={heroMobileSideSrc} alt="" aria-hidden="true" />
                             </div>
                         </section>
 
                         <section className="internie-landing-section internie-landing-section-white internie-landing-problem-section">
                             <div className="internie-landing-section-heading">
-                                <span>이런 스타트업이라면</span>
+                                <span>{t("landing.problem.eyebrow")}</span>
 
                                 <h2>
-                                    <span className="internie-landing-text-line">채용 전에,</span>
-                                    <span className="internie-landing-text-line">함께 일해보세요</span>
+                                    <span className="internie-landing-text-line">{t("landing.problem.titleLine1")}</span>
+                                    <span className="internie-landing-text-line">{t("landing.problem.titleLine2")}</span>
                                 </h2>
                             </div>
 
                             <div className="internie-landing-problem-cards">
-                                <article className="internie-landing-problem-card internie-landing-reveal">
-                                    <strong>01</strong>
-                                    <h3>이력서만으로<br/>지원자를 알지 못합니다</h3>
-                                    <p>지원자가 실제로 어떻게 문제를<br/>해결하는지 파악하기 어렵습니다</p>
-                                </article>
+                                {problemItems.map((item) => (
+                                    <article key={item.number} className="internie-landing-problem-card internie-landing-reveal">
+                                        <strong>{item.number}</strong>
 
-                                <article className="internie-landing-problem-card internie-landing-reveal">
-                                    <strong>02</strong>
-                                    <h3>면접 시간이 늘어나도,<br/>결과는 똑같습니다</h3>
-                                    <p>커뮤니케이션, 실행력, 피드백 수용 방식은<br/>실제 업무 과정에서 드러납니다</p>
-                                </article>
+                                        <h3>
+                                            {item.titleLine1}
+                                            {item.titleLine2 && <><br />{item.titleLine2}</>}
+                                        </h3>
 
-                                <article className="internie-landing-problem-card internie-landing-reveal">
-                                    <strong>03</strong>
-                                    <h3>결국,<br/>다시 감에 의존합니다</h3>
-                                    <p>과제 전형을 진행해도,<br/>채용 근거는 남지 않습니다</p>
-                                </article>
+                                        <p>
+                                            {item.descriptionLine1}
+                                            {item.descriptionLine2 && <><br />{item.descriptionLine2}</>}
+                                        </p>
+                                    </article>
+                                ))}
                             </div>
                         </section>
 
                         <section className="internie-landing-section internie-landing-section-blue">
                             <div className="internie-landing-section-heading">
-                                <span>어떻게 사용하나요?</span>
+                                <span>{t("landing.howItWorks.eyebrow")}</span>
 
                                 <h2>
-                                    <span className="internie-landing-text-line">담당자님은 과제만 주세요,</span>
-                                    <span className="internie-landing-text-line">나머지는 인터니가 할게요!</span>
+                                    <span className="internie-landing-text-line">{t("landing.howItWorks.titleLine1")}</span>
+                                    <span className="internie-landing-text-line">{t("landing.howItWorks.titleLine2")}</span>
                                 </h2>
                             </div>
 
                             <div className="internie-landing-content-image-reveal internie-landing-reveal">
                                 <picture className="internie-landing-content-picture">
-                                    <source media="(max-width: 768px)" srcSet={missionMobileImage} />
-                                    <img className="internie-landing-content-image" src={missionImage} alt="인터니 미션 관리 화면" />
+                                    <source media="(max-width: 768px)" srcSet={missionMobileSrc} />
+                                    <img className="internie-landing-content-image" src={missionDesktopSrc} alt={t("landing.howItWorks.imageAlt")} />
                                 </picture>
                             </div>
                             <div className="internie-landing-section-paragraph">
-                                <span className="internie-landing-text-line">지원자 모집부터 운영·관리까지,</span>
-                                <span className="internie-landing-text-line">담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요</span>
+                                <span className="internie-landing-text-line">{t("landing.howItWorks.descriptionLine1")}</span>
+                                <span className="internie-landing-text-line">
+                                    <Trans i18nKey="landing.howItWorks.descriptionLine2" components={{ strong: <strong /> }} />
+                                </span>
                             </div>
                         </section>
 
                         <section className="internie-landing-section internie-landing-section-white internie-landing-project-section">
                             <div className="internie-landing-section-heading">
-                                <span className="internie-landing-section-heading-badge">과제 생성</span>
+                                <span className="internie-landing-section-heading-badge">{t("landing.project.badge")}</span>
 
                                 <h2>
-                                    <span className="internie-landing-text-line">우리 팀의 프로젝트가</span>
-                                    <span className="internie-landing-text-line">학생에게 제공돼요</span>
+                                    <span className="internie-landing-text-line">{t("landing.project.titleLine1")}</span>
+                                    <span className="internie-landing-text-line">{t("landing.project.titleLine2")}</span>
                                 </h2>
                             </div>
                             
@@ -618,11 +745,11 @@ export default function Landing(): React.ReactElement {
 
                         <section className="internie-landing-section internie-landing-section-white internie-landing-evaluation-section">
                             <div className="internie-landing-section-heading">
-                                <span className="internie-landing-section-heading-badge">과제 평가</span>
+                                <span className="internie-landing-section-heading-badge">{t("landing.evaluation.badge")}</span>
 
                                 <h2>
-                                    <span className="internie-landing-text-line">단계별 산출물을 통해</span>
-                                    <span className="internie-landing-text-line">학생들이 일하는 방식을 확인해요</span>
+                                    <span className="internie-landing-text-line">{t("landing.evaluation.titleLine1")}</span>
+                                    <span className="internie-landing-text-line">{t("landing.evaluation.titleLine2")}</span>
                                 </h2>
                             </div>
 
@@ -640,12 +767,12 @@ export default function Landing(): React.ReactElement {
                         <section id="internie-landing-faq" className="internie-landing-faq">
                             <div className="internie-landing-faq-inner">
                                 <div className="internie-landing-faq-heading">
-                                    <span>FAQ</span>
-                                    <h2>자주 묻는 질문</h2>
+                                    <span>{t("landing.faq.eyebrow")}</span>
+                                    <h2>{t("landing.faq.title")}</h2>
                                 </div>
 
                                 <div className="internie-landing-faq-list">
-                                    {LANDING_FAQ_ITEMS.map((item, index) => {
+                                    {faqItems.map((item, index) => {
                                         const isOpen = openFaqIndexes.has(index);
 
                                         return (
@@ -669,21 +796,34 @@ export default function Landing(): React.ReactElement {
 
                         <section className="internie-landing-final-cta">
                             <div className="internie-landing-final-cta-inner internie-landing-reveal">
-                                <div>
+                                <div className="internie-landing-final-cta-desktop">
                                     <h2>
-                                        <span className="internie-landing-text-line">이력서 말고,</span>
-                                        <span className="internie-landing-text-line">일하는 걸 보세요.</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.desktop.titleLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.desktop.titleLine2")}</span>
                                     </h2>
 
                                     <p>
-                                        <span className="internie-landing-text-line">미션 하나면 충분합니다.</span>
-                                        <span className="internie-landing-text-line">지금 바로 도입 문의하세요</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.desktop.descriptionLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.desktop.descriptionLine2")}</span>
+                                    </p>
+                                </div>
+
+                                <div className="internie-landing-final-cta-mobile-copy">
+                                    <h2>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.mobile.titleLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.mobile.titleLine2")}</span>
+                                    </h2>
+
+                                    <p>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.mobile.descriptionLine1")}</span>
+                                        <span className="internie-landing-text-line">{t("landing.finalCta.mobile.descriptionLine2")}</span>
                                     </p>
                                 </div>
 
                                 <div ref={finalCtaButtonRef} className="internie-landing-final-button-slot">
                                     <button type="button" className="internie-landing-mobile-final-button" onClick={handleInquiryOpen}>
-                                        문의하기
+                                        <span className="internie-landing-final-button-desktop">{t("landing.finalCta.desktop.button")}</span>
+                                        <span className="internie-landing-final-button-mobile">{t("landing.finalCta.mobile.button")}</span>
                                     </button>
                                 </div>
                             </div>
@@ -704,9 +844,9 @@ export default function Landing(): React.ReactElement {
                     >
                         <div className={`internie-landing-inquiry-popover${inquiryOpen ? " is-open" : ""}`} aria-hidden={!inquiryOpen}>
                             <div className="internie-landing-inquiry-header">
-                                <h2>문의하기</h2>
+                                <h2>{t("landing.inquiry.title")}</h2>
 
-                                <button type="button" className="internie-landing-inquiry-close" aria-label="문의창 닫기" onClick={handleInquiryClose}>
+                                <button type="button" className="internie-landing-inquiry-close" aria-label={t("landing.inquiry.closeAria")} onClick={handleInquiryClose}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <path d="M18 6L6 18M18 18L6 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
                                     </svg>
@@ -736,7 +876,7 @@ export default function Landing(): React.ReactElement {
                                 handleInquiryOpen();
                             }}
                         >
-                            문의하기
+                            {t("landing.inquiry.openButton")}
                         </button>
                     </div>
                 </div>
@@ -761,24 +901,24 @@ export default function Landing(): React.ReactElement {
                                         />
                                     </svg>
                                 </span>
-                                <strong>제출이 완료되었습니다</strong>
+                                <strong>{t("landing.inquiry.success")}</strong>
                             </div>
 
                             <button type="button" className="internie-landing-mobile-inquiry-success-button" onClick={handleInquiryClose}>
-                                돌아가기
+                                {t("landing.inquiry.back")}
                             </button>
                         </div>
                     ) : (
                         <div className="internie-landing-mobile-inquiry-inner">
                             <div className="internie-landing-mobile-inquiry-card">
                                 <header className="internie-landing-mobile-inquiry-header">
-                                    <button type="button" className="internie-landing-mobile-inquiry-back" aria-label="랜딩페이지로 돌아가기" onClick={handleInquiryClose}>
+                                    <button type="button" className="internie-landing-mobile-inquiry-back" aria-label={t("landing.inquiry.backAria")} onClick={handleInquiryClose}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <path d="M15 6L9 12L15 18" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                     </button>
 
-                                    <h1>문의하기</h1>
+                                    <h1>{t("landing.inquiry.openButton")}</h1>
                                 </header>
 
                                 <InquiryForm

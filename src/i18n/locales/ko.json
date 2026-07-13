@@ -9,6 +9,179 @@
             "description": "인터니 서비스에 로그인합니다."
         }
     },
+    "landing": {
+        "seo": {
+            "title": "인터니 | 실무 미션 기반 채용 플랫폼",
+            "description": "이력서만으로 알 수 없는 지원자의 실무 역량을 확인하세요. 인터니는 실무 미션의 수행 과정과 결과를 통해 기업의 채용 판단을 돕습니다."
+        },
+        "header": {
+            "login": "로그인"
+        },
+        "hero": {
+            "desktop": {
+                "pretitleLine1": "인터니에서 누가 <strong>“우리 팀의 일”</strong>을",
+                "pretitleLine2": "잘하는지 결과물과 수행 데이터로 확인하세요",
+                "titleLine1": "일하는 방식을 보고",
+                "titleLine2": "<strong>채용</strong> 하세요",
+                "subtitleLine1": "",
+                "subtitleLine2": "",
+                "cta": "문의하기"
+            },
+            "mobile": {
+                "pretitleLine1": "인터니에서 누가 “우리 팀의 일”을",
+                "pretitleLine2": "잘하는지 결과물과 수행 데이터로 확인하세요",
+                "titleLine1": "일하는 방식을 보고",
+                "titleLine2": "채용 하세요",
+                "cta": "문의하기"
+            },
+            "imageAlt": "인터니 채용 프로세스",
+            "mainCardAlt": "인터니 지원자 평가 화면"
+        },
+        "problem": {
+            "eyebrow": "이런 스타트업이라면",
+            "titleLine1": "채용 전에,",
+            "titleLine2": "함께 일해보세요",
+            "items": {
+                "item1": {
+                    "number": "01",
+                    "titleLine1": "이력서만으로",
+                    "titleLine2": "지원자를 알지 못합니다",
+                    "descriptionLine1": "지원자가 실제로 어떻게 문제를",
+                    "descriptionLine2": "해결하는지 파악하기 어렵습니다"
+                },
+                "item2": {
+                    "number": "02",
+                    "titleLine1": "면접 시간이 늘어나도,",
+                    "titleLine2": "결과는 똑같습니다",
+                    "descriptionLine1": "커뮤니케이션, 실행력, 피드백 수용 방식은",
+                    "descriptionLine2": "실제 업무 과정에서 드러납니다"
+                },
+                "item3": {
+                    "number": "03",
+                    "titleLine1": "결국,",
+                    "titleLine2": "다시 감에 의존합니다",
+                    "descriptionLine1": "과제 전형을 진행해도,",
+                    "descriptionLine2": "채용 근거는 남지 않습니다"
+                }
+            }
+        },
+        "howItWorks": {
+            "eyebrow": "어떻게 사용하나요?",
+            "titleLine1": "담당자님은 과제만 주세요,",
+            "titleLine2": "나머지는 인터니가 할게요!",
+            "descriptionLine1": "지원자 모집부터 운영·관리까지,",
+            "descriptionLine2": "담당자님은 결과물과 <strong>'누가 잘했는지'</strong>만 확인하세요",
+            "imageAlt": "인터니 미션 관리 화면"
+        },
+        "project": {
+            "badge": "과제 생성",
+            "titleLine1": "우리 팀의 프로젝트가",
+            "titleLine2": "학생에게 제공돼요",
+            "mainAlt": "인터니 과제 관리 화면",
+            "trackingAlt": "트래킹 인프라 구축 과제",
+            "monitoringAlt": "모니터링 주기 설정 과제",
+            "reviewAlt": "성과 리뷰 과제",
+            "insightAlt": "인사이트 도출 과제"
+        },
+        "evaluation": {
+            "badge": "과제 평가",
+            "titleLine1": "단계별 산출물을 통해",
+            "titleLine2": "학생들이 일하는 방식을 확인해요",
+            "mainAlt": "인터니 과제 평가 화면",
+            "row1Alt": "과제 평가 카드 1",
+            "row2Alt": "과제 평가 카드 2",
+            "row3Alt": "과제 평가 카드 3"
+        },
+        "faq": {
+            "eyebrow": "FAQ",
+            "title": "자주 묻는 질문",
+            "items": {
+                "item1": {
+                    "question": "세팅에 시간이 얼마나 걸리고, 우리는 뭘 해야 하나요?",
+                    "answer": "담당자는 JD나 실무 과제만 전달해 주시면 됩니다. 미션 설계부터 지원자 운영, 제출물 관리, 평가 지원까지 인터니가 진행합니다. 담당자는 최종 결과를 확인하고 지원자를 검토하면 됩니다."
+                },
+                "item2": {
+                    "question": "어떤 직무·규모에 맞나요? 개발직만 되나요?",
+                    "answer": "개발뿐 아니라 마케팅, 기획, 운영, CS, 디자인 등 결과물을 만드는 대부분의 직무에 적용할 수 있습니다. 채용하려는 직무의 JD나 과제를 공유해 주시면, 그에 맞는 미션으로 설계해드립니다. 특히 신입·인턴처럼 이력서만으로 판단하기 어려운 채용에서 활용도가 높습니다."
+                },
+                "item3": {
+                    "question": "지원자에게 보상을 제공해야 하나요?",
+                    "answer": "필수는 아닙니다. 기본적으로는 무료 참여이며, 완료자에게는 참여 인증 뱃지를 제공합니다. 필요하다면 소정의 참여 보상이나 인증서 발급도 함께 운영할 수 있습니다."
+                },
+                "item4": {
+                    "question": "우리 회사 실무를 외부에 공개해야 하는데, 보안·기밀은 괜찮나요?",
+                    "answer": "원본 업무를 그대로 공개하지 않습니다. 회사명, 고객 정보, 민감한 데이터는 제거하거나 익명화하고, 실무 맥락만 살려 미션을 구성합니다. 어떤 내용을 공개할지는 기업이 직접 결정하며, 필요하면 NDA 절차도 함께 적용할 수 있습니다."
+                },
+                "item5": {
+                    "question": "부정행위나 AI 대필은 어떻게 걸러내나요?",
+                    "answer": "인터니는 결과물만 평가하지 않습니다. 과제를 수행하는 과정과 단계별 산출물을 함께 보기 때문에, 대필이나 단순 복붙은 과정에서 드러날 가능성이 높습니다. AI 역시 사용 여부보다 어떻게 활용했는지를 하나의 평가 요소로 활용합니다."
+                }
+            }
+        },
+        "finalCta": {
+            "desktop": {
+                "titleLine1": "이력서 말고,",
+                "titleLine2": "일하는 걸 보세요.",
+                "descriptionLine1": "미션 하나면 충분합니다.",
+                "descriptionLine2": "지금 바로 도입 문의하세요",
+                "button": "문의하기"
+            },
+            "mobile": {
+                "titleLine1": "이력서 말고,",
+                "titleLine2": "일하는 걸 보세요.",
+                "descriptionLine1": "미션 하나면 충분합니다.",
+                "descriptionLine2": "지금 바로 도입 문의하세요",
+                "button": "문의하기"
+            }
+        },
+        "inquiry": {
+            "title": "문의하기",
+            "openButton": "문의하기",
+            "closeAria": "문의창 닫기",
+            "backAria": "랜딩페이지로 돌아가기",
+            "fields": {
+                "companyName": "기업명",
+                "companyNamePlaceholder": "예) AIM",
+                "contactName": "담당자명",
+                "contactNamePlaceholder": "예) 김유진",
+                "firstName": "이름",
+                "lastName": "성",
+                "position": "직책",
+                "positionPlaceholder": "예) 인사팀장",
+                "workEmail": "회사 이메일",
+                "phone": "연락처",
+                "question": "어떤 점이 궁금하신가요? (선택)"
+            },
+            "privacyAgreement": "개인정보 수집 및 이용에 동의합니다.",
+            "submit": "제출하기",
+            "submitting": "전송 중...",
+            "success": "제출이 완료되었습니다",
+            "back": "돌아가기",
+            "errors": {
+                "required": "필수 항목을 모두 입력해주세요.",
+                "phone": "연락처는 숫자와 하이픈만 입력해주세요.",
+                "privacy": "개인정보 수집 및 이용에 동의해주세요.",
+                "success": "문의가 정상적으로 접수되었습니다.",
+                "submitFailed": "문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요."
+            }
+        },
+        "footer": {
+            "taglineLine1": "이력서로 알 수 없는 실력을, 데이터로 증명합니다",
+            "taglineLine2": "by aim",
+            "companyName": "상호 aim(에임) · 대표 김유진",
+            "linksTitle": "바로가기",
+            "navAria": "푸터 바로가기",
+            "links": {
+                "home": "홈",
+                "product": "서비스 소개",
+                "about": "소식 소개",
+                "faq": "FAQ"
+            },
+            "contactTitle": "고객 문의",
+            "representative": "대표 문의",
+            "companyInfoTitle": "기업 정보"
+        }
+    },
     "comment_login": "로그인 관련",
     "login": {
         "title": "환영합니다",

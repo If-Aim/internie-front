@@ -27,6 +27,11 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-hero-image { display: block; width: 100%; height: auto; object-fit: contain; }
 .internie-landing-mobile-hero-visual { display: none; }
 
+.internie-landing-hero-copy-mobile,
+.internie-landing-hero-cta-mobile { display: none; }
+.internie-landing-hero-cta { display: flex; width: 160px; height: 64px; align-items: center; justify-content: center; margin: 40px auto 0; border: 0; border-radius: 12px; background: #0166ff; color: #fff; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
+
+
 .internie-landing-primary-button { min-width: 160px; height: 64px; margin-top: 79px; padding: 0 22px; border: 0; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 24px; font-weight: 700; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
 .internie-landing-primary-button:hover { background: #0166FF; transform: translateY(-2px); box-shadow: 0 14px 30px rgba(8, 108, 255, 0.3); }
 
@@ -109,6 +114,8 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-final-cta h2 { margin: 0; color: #FFFFFF; font-size: clamp(28px, 3vw, 40px); font-weight: 800; line-height: 1.35; word-break: keep-all; }
 .internie-landing-final-cta p { margin: 12px 0 0; color: rgba(255, 255, 255, 0.75); font-size: 15px; font-weight: 500; line-height: 1.7; }
 
+.internie-landing-final-cta-mobile-copy,
+.internie-landing-final-button-mobile { display: none; }
 
 .internie-landing-footer { width: 100%; padding: 64px 24px 32px; background: #0B1933; color: #FFFFFF; }
 .internie-landing-footer-inner { display: grid; grid-template-columns: 1.6fr 0.7fr 1fr; gap: 80px; width: min(100%, 1120px); margin: 0 auto; }
@@ -129,6 +136,9 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
 .internie-landing-footer-contact span { color: #C7D2E4; font-size: 12px; font-weight: 500; line-height: 1.5; }
 .internie-landing-footer-copyright { width: min(100%, 1120px); margin: 48px auto 0; }
 .internie-landing-footer-copyright span { color: rgba(255, 255, 255, 0.3); font-size: 12px; font-weight: 500; }
+
+.internie-landing-footer-company-mobile { display: none; }
+
 
 .internie-landing-inquiry-anchor { position: fixed; right: max(11px, calc((100vw - 1120px) / 2 - 21px)); bottom: 50px; z-index: 1200; display: flex; flex-direction: column; align-items: flex-end; }
 .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; }
@@ -222,6 +232,12 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-hero-copy h1 { order: 2; margin: 16px 0 0; color: #FFFFFF; font-size: clamp(20px, 11.5vw, 48px); font-weight: 800; line-height: 1.3; text-shadow: 0 0 10px rgba(0, 0, 0, 0.14);}
     .internie-landing-hero-copy h1 strong { color: #0166FF; font-weight: 800; }
 
+    .internie-landing-hero-copy-desktop,
+    .internie-landing-hero-cta-desktop { display: none; }
+
+    .internie-landing-hero-copy-mobile,
+    .internie-landing-hero-cta-mobile { display: block; }
+    
     .internie-landing-hero-picture { display: none; }
     .internie-landing-mobile-hero-visual { position: relative; top: 0; z-index: 2; display: block; width: 100%; max-width: 393px; height: 390px; margin: 48px auto 0; pointer-events: none; }
     .internie-landing-mobile-hero-card { position: absolute; display: block; max-width: 260px; height: auto; object-fit: contain; border-radius: 10px;}
@@ -281,8 +297,6 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-evaluation-card-2 { left: -16px; align-self: flex-start; }
     .internie-evaluation-card-3 { left: 15px; align-self: flex-start; }
 
-
-
     .internie-landing-faq { min-height: 0; padding: clamp(64px, 23vw, 92px) clamp(20px, 8vw, 32px) clamp(48px, 17vw, 70px); background: #EAF2FF; scroll-margin-top: 56px; }
     .internie-landing-faq-inner { width: 100%; }
     .internie-landing-faq-heading { margin-bottom: clamp(24px, 10vw, 40px); }
@@ -305,6 +319,12 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-final-button-slot { width: auto; height: auto; }
     .internie-landing-mobile-final-button { display: flex; align-items: center; justify-content: center; min-width: 160px; height: 64px; padding: 0 28px; border: 0; border-radius: 12px; background: #FFFFFF; color: #0166FF; font-size: 24px; font-weight: 700; }
 
+    .internie-landing-final-cta-desktop,
+    .internie-landing-final-button-desktop { display: none; }
+
+    .internie-landing-final-cta-mobile-copy,
+    .internie-landing-final-button-mobile { display: block; }
+
     .internie-landing-inquiry-anchor { position: fixed; right: auto; bottom: 32px; left: 50%; z-index: 1200; display: flex; align-items: center; transform: translateX(-50%); }
     .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; transform: none; }
     .internie-landing-consult-button { min-width: 120px; height: 48px; padding: 0 14px; border-radius: 12px; background: #0166FF; color: #FFFFFF; font-size: 16px; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
@@ -321,6 +341,7 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-footer-column { display: none; }
     .internie-landing-footer-copyright { width: 100%; margin-top: 8px; }
     .internie-landing-footer-copyright span { color: #71717A; font-size: 10px; }
+    .internie-landing.is-en .internie-landing-footer-company-mobile { display: flex; }
 
     .internie-landing-default-view.is-inquiry-open { display: none; }
     .internie-landing-mobile-inquiry-page.is-open { display: block; width: 100%; min-height: 100dvh; background: #FFFFFF; }

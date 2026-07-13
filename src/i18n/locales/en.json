@@ -9,7 +9,179 @@
             "description": "Sign in to Internie."
         }
     },
-
+	"landing": {
+		"seo": {
+			"title": "Internie | Korea Market Projects with Local Talent",
+			"description": "Run real projects with Korean students, test your Korea market assumptions, and review both the work and the process behind it."
+		},
+		"header": {
+			"login": "Log in"
+		},
+		"hero": {
+			"desktop": {
+				"pretitleLine1": "Want Korea GTM?",
+				"pretitleLine2": "",
+				"titleLine1": "Work with Korea First!",
+				"titleLine2": "",
+				"subtitleLine1": "Run a real project with Korean students",
+				"subtitleLine2": "Learn the market from people who live in it",
+				"cta": "Book a call"
+			},
+			"mobile": {
+				"pretitleLine1": "Run a real project",
+				"pretitleLine2": "with Korean students",
+				"titleLine1": "Work with",
+				"titleLine2": "Korea first.",
+				"cta": "Talk to us"
+			},
+			"imageAlt": "Internie Korea market project process",
+			"mainCardAlt": "Internie project evaluation screen"
+		},
+		"problem": {
+			"eyebrow": "If Korea is on your roadmap",
+			"titleLine1": "You can't read a market",
+			"titleLine2": "you've never worked in",
+			"items": {
+				"item1": {
+					"number": "01",
+					"titleLine1": "Looking into Korea",
+					"titleLine2": "isn't cheap",
+					"descriptionLine1": "A trip, a local hire, an agency retainer —",
+					"descriptionLine2": "before you even know if Korea is worth it."
+				},
+				"item2": {
+					"number": "02",
+					"titleLine1": "Entering a market where",
+					"titleLine2": "you don't know anyone",
+					"descriptionLine1": "Markets are made of people.",
+					"descriptionLine2": "Reports don't introduce you to any of them."
+				},
+				"item3": {
+					"number": "03",
+					"titleLine1": "Your first Korea hire",
+					"titleLine2": "is a blind bet",
+					"descriptionLine1": "Resumes in a second language,",
+					"descriptionLine2": "and no way to see how any of them actually work."
+				}
+			}
+		},
+		"howItWorks": {
+			"eyebrow": "How it works",
+			"titleLine1": "Give us the Question.",
+			"titleLine2": "And we'll manage the Whole Thing",
+			"descriptionLine1": "From sourcing to delivery, we handle it.",
+			"descriptionLine2": "You review the output — and see who delivered.",
+			"imageAlt": "Internie project and mission management workflow"
+		},
+		"project": {
+			"badge": "Create",
+			"titleLine1": "Your Korea Question",
+			"titleLine2": "becomes a Student Mission",
+			"mainAlt": "Internie student mission creation screen",
+			"trackingAlt": "Student project tracking task",
+			"monitoringAlt": "Student project monitoring task",
+			"reviewAlt": "Student performance review task",
+			"insightAlt": "Student market insight task"
+		},
+		"evaluation": {
+			"badge": "Review",
+			"titleLine1": "See the output",
+			"titleLine2": "— and how each person got there",
+			"mainAlt": "Internie student project evaluation screen",
+			"row1Alt": "Student project evaluation item 1",
+			"row2Alt": "Student project evaluation item 2",
+			"row3Alt": "Student project evaluation item 3"
+		},
+		"faq": {
+			"eyebrow": "FAQ",
+			"title": "Frequently asked questions",
+			"items": {
+				"item1": {
+					"question": "Do the students get paid?",
+					"answer": "Payment is not required. Students can participate without compensation, and completed projects can include a participation badge or certificate. Additional rewards can also be arranged when needed."
+				},
+				"item2": {
+					"question": "Who designs the mission?",
+					"answer": "Share your market question, job description, or practical project with us. Internie turns it into a structured mission and manages student sourcing, submissions, and project operations."
+				},
+				"item3": {
+					"question": "How do you make sure the work is any good?",
+					"answer": "We review both the final output and the steps that led to it. Milestones, intermediate deliverables, deadlines, and feedback history make each student's execution process visible."
+				},
+				"item4": {
+					"question": "What does it cost?",
+					"answer": "Pricing depends on the project scope, duration, number of participants, and level of operational support. Book a call and we will recommend a suitable starting plan."
+				},
+				"item5": {
+					"question": "Can we hire the students afterward?",
+					"answer": "Yes. Companies can continue discussions with suitable students after the project, subject to the student's agreement and the company's standard hiring process."
+				}
+			}
+		},
+		"finalCta": {
+			"desktop": {
+				"titleLine1": "Test Korea before you commit to it.",
+				"titleLine2": "",
+				"descriptionLine1": "One mission is enough to start.",
+				"descriptionLine2": "Book a free 30-minute call.",
+				"button": "Book a free call"
+			},
+			"mobile": {
+				"titleLine1": "Start with one project.",
+				"titleLine2": "Meet Korea through real work.",
+				"descriptionLine1": "One mission is enough to start.",
+				"descriptionLine2": "Book a free call.",
+				"button": "Talk to us"
+			}
+		},
+		"inquiry": {
+			"title": "Contact us",
+			"openButton": "Contact us",
+			"closeAria": "Close contact form",
+			"backAria": "Return to the landing page",
+			"fields": {
+				"companyName": "Company name",
+				"companyNamePlaceholder": "",
+				"contactName": "Contact name",
+				"contactNamePlaceholder": "",
+				"firstName": "First name",
+				"lastName": "Last name",
+				"position": "Position",
+				"positionPlaceholder": "",
+				"workEmail": "Work email",
+				"phone": "Phone",
+				"question": "What can we help you with? (optional)"
+			},
+			"privacyAgreement": "I agree to the Privacy Policy and the collection and use of personal information.",
+			"submit": "Send",
+			"submitting": "Sending...",
+			"success": "Your inquiry has been submitted.",
+			"back": "Go back",
+			"errors": {
+				"required": "Please complete all required fields.",
+				"phone": "Please enter a valid phone number using numbers, +, spaces, parentheses, or hyphens.",
+				"privacy": "Please agree to the Privacy Policy and the collection and use of personal information.",
+				"success": "Your inquiry has been submitted successfully.",
+				"submitFailed": "Failed to send your inquiry. Please try again shortly."
+			}
+		},
+		"footer": {
+			"taglineLine1": "Evidence a resume can't give you — from how the work actually gets done.",
+			"taglineLine2": "by aim",
+			"companyName": "aim · CEO Yujin Kim",
+			"linksTitle": "Links",
+			"navAria": "Footer links",
+			"links": {
+				"home": "Home",
+				"product": "Product",
+				"about": "About aim",
+				"faq": "FAQ"
+			},
+			"contactTitle": "Contact",
+			"representative": "General inquiries",
+			"companyInfoTitle": "Company info"
+		}
+	},
 	"comment_login": "로그인 관련",
 	"login": {
         "title": "Log In",
