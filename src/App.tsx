@@ -1,13 +1,14 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./protectedRoute";
 import AdminRoute from "./adminRoute";
 import AdminClientRoute from "./clientAdminRoute";
 import EcaAdminRoute from "./ecaAdminRoute";
-import GlobalModalHost from "./globalModalHost"
+import GlobalModalHost from "./globalModalHost";
 
-const Landing = lazy(() => import("./pages/landing/landing"));
+const Opening = lazy(() => import("./pages/landing/opening"));
+const LocalizedLanding = lazy(() => import("./pages/landing/localizedLanding"));
 
 const Auth = lazy(() => import("./pages/auth/auth"));
 const Signup = lazy(() => import("./pages/auth/signup"));
@@ -17,7 +18,7 @@ const KakaoCallback = lazy(() => import("./pages/kakaoCallback"));
 const PrivacyPolicy = lazy(() => import("./pages/privacy/privacyPolicy"));
 const OnBoarding = lazy(() => import("./pages/auth/onboarding"));
 const OrganizationInvite = lazy(() => import("./pages/admin/desktop/ecaClient/invite/organizationInvite"));
-const ExternalActivityInvite = lazy(()=> import("./pages/student/desktop/eca/invite/ecaInvite"))
+const ExternalActivityInvite = lazy(() => import("./pages/student/desktop/eca/invite/ecaInvite"));
 
 const StudentApp = lazy(() => import("./pages/student/studentApp"));
 const AdminApp = lazy(() => import("./pages/admin/adminApp"));
@@ -28,7 +29,9 @@ export default function App(): React.ReactElement {
     return (
         <Suspense fallback={<div />}>
             <Routes>
-                <Route path="/" element={<Landing />} />
+                <Route path="/" element={<Opening />} />
+                <Route path="/company" element={<LocalizedLanding language="ko" />} />
+                <Route path="/global" element={<LocalizedLanding language="en" />} />
 
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Auth />} />
@@ -59,6 +62,7 @@ export default function App(): React.ReactElement {
 
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+
             <GlobalModalHost />
         </Suspense>
     );

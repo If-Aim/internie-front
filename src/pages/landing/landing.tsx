@@ -271,7 +271,13 @@ function LandingFooter({
     );
 }
 
-export default function Landing(): React.ReactElement {
+type LandingProps = {
+    canonical: string;
+};
+
+export default function Landing({
+    canonical
+}: LandingProps): React.ReactElement {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const isEnglish = i18n.resolvedLanguage?.startsWith("en") ?? false;
@@ -601,7 +607,7 @@ export default function Landing(): React.ReactElement {
                 title={t("landing.seo.title")}
                 description={t("landing.seo.description")}
                 lang={isEnglish ? "en" : "ko"}
-                canonical="https://www.internie.com/"
+                canonical={canonical}
             />
             <div ref={landingRef} className={`internie-landing ${isEnglish ? "is-en" : "is-ko"}${inquiryOpen ? " is-inquiry-open" : ""}`}>
                 <div className={`internie-landing-default-view${inquiryOpen ? " is-inquiry-open" : ""}`}>
@@ -743,29 +749,29 @@ export default function Landing(): React.ReactElement {
                                 <img
                                     className="internie-landing-project-main"
                                     src={projectMainSrc}
-                                    alt={t("landing.project.mainImageAlt")}
+                                    alt={t("landing.project.mainAlt")}
                                 />
 
                                 <div className="internie-landing-project-card-group">
                                     <img
                                         className="internie-landing-project-card internie-project-card-1"
                                         src={projectTrackingSrc}
-                                        alt={t("landing.project.trackingImageAlt")}
+                                        alt={t("landing.project.trackingAlt")}
                                     />
                                     <img
                                         className="internie-landing-project-card internie-project-card-2"
                                         src={projectMonitoringSrc}
-                                        alt={t("landing.project.monitoringImageAlt")}
+                                        alt={t("landing.project.monitoringAlt")}
                                     />
                                     <img
                                         className="internie-landing-project-card internie-project-card-3"
                                         src={projectReviewSrc}
-                                        alt={t("landing.project.reviewImageAlt")}
+                                        alt={t("landing.project.reviewAlt")}
                                     />
                                     <img
                                         className="internie-landing-project-card internie-project-card-4"
                                         src={projectInsightSrc}
-                                        alt={t("landing.project.insightImageAlt")}
+                                        alt={t("landing.project.insightAlt")}
                                     />
                                 </div>
                             </div>
@@ -785,24 +791,24 @@ export default function Landing(): React.ReactElement {
                                 <img
                                     className="internie-landing-evaluation-main"
                                     src={evaluationMainSrc}
-                                    alt={t("landing.evaluation.mainImageAlt")}
+                                    alt={t("landing.evaluation.mainAlt")}
                                 />
 
                                 <div className="internie-landing-evaluation-card-group">
                                     <img
                                         className="internie-landing-evaluation-card internie-evaluation-card-1"
                                         src={evaluationRow1Src}
-                                        alt={t("landing.evaluation.row1ImageAlt")}
+                                        alt={t("landing.evaluation.row1Alt")}
                                     />
                                     <img
                                         className="internie-landing-evaluation-card internie-evaluation-card-2"
                                         src={evaluationRow2Src}
-                                        alt={t("landing.evaluation.row2ImageAlt")}
+                                        alt={t("landing.evaluation.row2Alt")}
                                     />
                                     <img
                                         className="internie-landing-evaluation-card internie-evaluation-card-3"
                                         src={evaluationRow3Src}
-                                        alt={t("landing.evaluation.row3ImageAlt")}
+                                        alt={t("landing.evaluation.row3Alt")}
                                     />
                                 </div>
                             </div>
