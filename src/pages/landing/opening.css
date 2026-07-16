@@ -27,6 +27,7 @@
 .internie-opening-card:hover .internie-opening-card-arrow { transform: translateX(5px); }
 .internie-opening-login { display: flex; align-items: center; gap: 5px; margin-top: 190px; color: #8CA1C2; font-size: 16px; font-weight: 500; }
 .internie-opening-login button { padding: 0; border: 0; border-bottom: 1px solid #7186A9; background: transparent; color: #7186A9; font-weight: 700; }
+
 .internie-opening-footer { width: 100%; padding: 67px 32px 35px; background: #FFFFFF; }
 .internie-opening-footer-inner { display: grid; grid-template-columns: 1.4fr 0.7fr 1fr; gap: 90px; width: min(100%, 1240px); margin: 0 auto; }
 .internie-opening-footer-brand { min-width: 0; }
@@ -38,8 +39,9 @@
 .internie-opening-footer-column p { margin: 0 0 10px; color: #A1B1CC; font-size: 12px; font-weight: 500; line-height: 1.6; }
 .internie-opening-footer-column > span { color: #A1B1CC; font-size: 12px; font-weight: 500; }
 .internie-opening-footer-links { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-.internie-opening-footer-links button { padding: 0; border: 0; background: transparent; color: #A1B1CC; font-size: 12px; font-weight: 500; }
-.internie-opening-footer-links button:hover:not(:disabled) { color: #0166FF; }
+
+.internie-opening-footer-links button, .internie-opening-footer-links a { padding: 0; border: 0; background: transparent; color: #A1B1CC; font-size: 12px; font-weight: 500; line-height: normal; text-decoration: none; }
+.internie-opening-footer-links button:hover:not(:disabled), .internie-opening-footer-links a:hover { color: #0166FF; }
 .internie-opening-footer-links button:disabled { cursor: default; opacity: 0.65; }
 .internie-opening-footer-copyright { width: min(100%, 1240px); margin: 54px auto 0; color: #8799B6; font-size: 11px; font-weight: 500; }
 
