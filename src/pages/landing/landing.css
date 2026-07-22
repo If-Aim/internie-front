@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 #root{ overflow: auto !important;}
 .internie-landing-text-line { display: block; white-space: nowrap; }
@@ -327,7 +329,7 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-inquiry-anchor.is-docked .internie-landing-consult-button { background: #FFFFFF; color: #0166FF; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12); }
     .internie-landing-final-button-slot { width: 120px; height: 48px; }
 
-    .internie-landing-footer { padding: 24px 20px 28px; background: #FFFFFF; color: #71717A; }
+    .internie-landing-footer { padding: 24px 20px 28px; background: #FFFFFF; color: #EAF2FF; }
     .internie-landing-footer-inner { display: block; width: 100%; }
     .internie-landing-footer-logo strong { color: #71717A; font-family: Montserrat, sans-serif; font-size: 16px; }
     .internie-landing-footer-brand > p { margin-top: 12px; color: #71717A; font-size: 10px; line-height: 14px; }
@@ -336,6 +338,7 @@ html, body, #root { scrollbar-width: thin; scrollbar-color: #D9D9D9 transparent;
     .internie-landing-footer-column { display: none; }
     .internie-landing-footer-copyright { width: 100%; margin-top: 8px; }
     .internie-landing-footer-copyright span { color: #71717A; font-size: 10px; }
+    .internie-landing-footer-margin { display: block; height: 80px; background: transparent; }
     .internie-landing.is-en .internie-landing-footer-company-mobile { display: flex; }
 
     .internie-landing-default-view.is-inquiry-open { display: none; }

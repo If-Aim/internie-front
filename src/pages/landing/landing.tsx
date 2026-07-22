@@ -267,6 +267,7 @@ function LandingFooter({
             <div className="internie-landing-footer-copyright">
                 <span>© 2026 aim. All rights reserved.</span>
             </div>
+            <div className="internie-landing-footer-margin"/>
         </footer>
     );
 }
