@@ -655,7 +655,6 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
 
     useEffect(() => {
         const scrollRoot = document.getElementById("root");
-        const floatingBottom = 50;
         let frameId = 0;
         const updateInquiryPosition = () => {
             cancelAnimationFrame(frameId);
@@ -667,12 +666,16 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                 const landingRect = landing.getBoundingClientRect();
                 const slotRect = slot.getBoundingClientRect();
                 const buttonHeight = button.offsetHeight;
+                const isMobile = isMobileViewport();
+                const floatingBottom = isMobile ? 32 : 50;
                 const floatingButtonTop = window.innerHeight - floatingBottom - buttonHeight;
                 const shouldDock = slotRect.top <= floatingButtonTop;
                 setInquiryDocked((prev) => prev === shouldDock ? prev : shouldDock);
                 if (!shouldDock) return;
-                const nextTop = slotRect.top - landingRect.top;
-                const nextLeft = slotRect.left - landingRect.left;
+                const nextTop = slotRect.top - landingRect.top + (slotRect.height - button.offsetHeight) / 2;
+                const nextLeft = isMobile
+                    ? slotRect.left - landingRect.left + slotRect.width / 2
+                    : slotRect.left - landingRect.left;
                 setInquiryDockPosition((prev) => {
                     if (Math.abs(prev.top - nextTop) < 0.5 && Math.abs(prev.left - nextLeft) < 0.5) {
                         return prev;
@@ -751,7 +754,11 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                 <h2>{t("landing.diagnosis.title")}</h2>
                             </div>
                             <div className="internie-dx-layout">
-                                <DiagnosisVisual key={activeDiagnosis.id} variant={activeDiagnosis.visual} />
+                                <div className="internie-dx-visual-shell">
+                                    <div className="internie-dx-visual-scale">
+                                        <DiagnosisVisual key={activeDiagnosis.id} variant={activeDiagnosis.visual} />
+                                    </div>
+                                </div>
                                 <fieldset className="internie-dx-options">
                                     <legend className="sr-only">{t("landing.diagnosis.legend")}</legend>
                                     {DIAGNOSIS_ITEMS.map((item) => {
