@@ -9,179 +9,442 @@
             "description": "Sign in to Internie."
         }
     },
-	"landing": {
-		"seo": {
-			"title": "Internie | Korea Market Projects with Local Talent",
-			"description": "Run real projects with Korean students, test your Korea market assumptions, and review both the work and the process behind it."
-		},
-		"header": {
-			"login": "Log in"
-		},
-		"hero": {
-			"desktop": {
-				"pretitleLine1": "Want Korea GTM?",
-				"pretitleLine2": "",
-				"titleLine1": "Work with Korea First!",
-				"titleLine2": "",
-				"subtitleLine1": "Run a real project with Korean students",
-				"subtitleLine2": "Learn the market from people who live in it",
-				"cta": "Book a call"
-			},
-			"mobile": {
-				"pretitleLine1": "Run a real project",
-				"pretitleLine2": "with Korean students",
-				"titleLine1": "Work with",
-				"titleLine2": "Korea first.",
-				"cta": "Talk to us"
-			},
-			"imageAlt": "Internie Korea market project process",
-			"mainCardAlt": "Internie project evaluation screen"
-		},
-		"problem": {
-			"eyebrow": "If Korea is on your roadmap",
-			"titleLine1": "You can't read a market",
-			"titleLine2": "you've never worked in",
-			"items": {
-				"item1": {
-					"number": "01",
-					"titleLine1": "Looking into Korea",
-					"titleLine2": "isn't cheap",
-					"descriptionLine1": "A trip, a local hire, an agency retainer —",
-					"descriptionLine2": "before you even know if Korea is worth it."
-				},
-				"item2": {
-					"number": "02",
-					"titleLine1": "Entering a market where",
-					"titleLine2": "you don't know anyone",
-					"descriptionLine1": "Markets are made of people.",
-					"descriptionLine2": "Reports don't introduce you to any of them."
-				},
-				"item3": {
-					"number": "03",
-					"titleLine1": "Your first Korea hire",
-					"titleLine2": "is a blind bet",
-					"descriptionLine1": "Resumes in a second language,",
-					"descriptionLine2": "and no way to see how any of them actually work."
-				}
-			}
-		},
-		"howItWorks": {
-			"eyebrow": "How it works",
-			"titleLine1": "Give us the Question.",
-			"titleLine2": "And we'll manage the Whole Thing",
-			"descriptionLine1": "From sourcing to delivery, we handle it.",
-			"descriptionLine2": "You review the output — and see who delivered.",
-			"imageAlt": "Internie project and mission management workflow"
-		},
-		"project": {
-			"badge": "Create",
-			"titleLine1": "Your Korea Question",
-			"titleLine2": "becomes a Student Mission",
-			"mainAlt": "Internie student mission creation screen",
-			"trackingAlt": "Student project tracking task",
-			"monitoringAlt": "Student project monitoring task",
-			"reviewAlt": "Student performance review task",
-			"insightAlt": "Student market insight task"
-		},
-		"evaluation": {
-			"badge": "Review",
-			"titleLine1": "See the output",
-			"titleLine2": "— and how each person got there",
-			"mainAlt": "Internie student project evaluation screen",
-			"row1Alt": "Student project evaluation item 1",
-			"row2Alt": "Student project evaluation item 2",
-			"row3Alt": "Student project evaluation item 3"
-		},
-		"faq": {
-			"eyebrow": "FAQ",
-			"title": "Frequently asked questions",
-			"items": {
-				"item1": {
-					"question": "Do the students get paid?",
-					"answer": "Payment is not required. Students can participate without compensation, and completed projects can include a participation badge or certificate. Additional rewards can also be arranged when needed."
-				},
-				"item2": {
-					"question": "Who designs the mission?",
-					"answer": "Share your market question, job description, or practical project with us. Internie turns it into a structured mission and manages student sourcing, submissions, and project operations."
-				},
-				"item3": {
-					"question": "How do you make sure the work is any good?",
-					"answer": "We review both the final output and the steps that led to it. Milestones, intermediate deliverables, deadlines, and feedback history make each student's execution process visible."
-				},
-				"item4": {
-					"question": "What does it cost?",
-					"answer": "Pricing depends on the project scope, duration, number of participants, and level of operational support. Book a call and we will recommend a suitable starting plan."
-				},
-				"item5": {
-					"question": "Can we hire the students afterward?",
-					"answer": "Yes. Companies can continue discussions with suitable students after the project, subject to the student's agreement and the company's standard hiring process."
-				}
-			}
-		},
-		"finalCta": {
-			"desktop": {
-				"titleLine1": "Test Korea before you commit to it.",
-				"titleLine2": "",
-				"descriptionLine1": "One mission is enough to start.",
-				"descriptionLine2": "Book a free 30-minute call.",
-				"button": "Book a free call"
-			},
-			"mobile": {
-				"titleLine1": "Start with one project.",
-				"titleLine2": "Meet Korea through real work.",
-				"descriptionLine1": "One mission is enough to start.",
-				"descriptionLine2": "Book a free call.",
-				"button": "Talk to us"
-			}
-		},
-		"inquiry": {
-			"title": "Contact us",
-			"openButton": "Contact us",
-			"closeAria": "Close contact form",
-			"backAria": "Return to the landing page",
-			"fields": {
-				"companyName": "Company name",
-				"companyNamePlaceholder": "",
-				"contactName": "Contact name",
-				"contactNamePlaceholder": "",
-				"firstName": "First name",
-				"lastName": "Last name",
-				"position": "Position",
-				"positionPlaceholder": "",
-				"workEmail": "Work email",
-				"phone": "Phone",
-				"question": "What can we help you with? (optional)"
-			},
-			"privacyAgreement": "I agree to the Privacy Policy and the collection and use of personal information.",
-			"submit": "Send",
-			"submitting": "Sending...",
-			"success": "Your inquiry has been submitted.",
-			"back": "Go back",
-			"errors": {
-				"required": "Please complete all required fields.",
-				"phone": "Please enter a valid phone number using numbers, +, spaces, parentheses, or hyphens.",
-				"privacy": "Please agree to the Privacy Policy and the collection and use of personal information.",
-				"success": "Your inquiry has been submitted successfully.",
-				"submitFailed": "Failed to send your inquiry. Please try again shortly."
-			}
-		},
-		"footer": {
-			"taglineLine1": "Evidence a resume can't give you — from how the work actually gets done.",
-			"taglineLine2": "by aim",
-			"companyName": "aim · CEO Eugine Kim",
-			"linksTitle": "Links",
-			"navAria": "Footer links",
-			"links": {
-				"home": "Home",
-				"product": "Product",
-				"about": "About aim",
-				"faq": "FAQ"
-			},
-			"contactTitle": "Contact",
-			"representative": "General inquiries",
-			"companyInfoTitle": "Company info"
-		}
-	},
+    "landing": {
+        "seo": {
+            "title": "Internie | Work-Sample Mission Hiring Platform",
+            "description": "See practical skills that resumes cannot show. Internie helps companies make hiring decisions through real work missions, execution process, and outcomes."
+        },
+        "header": {
+            "login": "Log in"
+        },
+        "hero": {
+            "desktop": {
+                "pretitleLine1": "Start with a real work mission, not another job post.",
+                "pretitleLine2": "Internie, a work-based hiring platform",
+                "titleLine1": "More talent,",
+                "titleLine2": "with a more accurate method",
+                "subtitleLine1": "",
+                "subtitleLine2": "",
+                "cta": "Start hiring",
+                "cards": {
+                    "resume": "Resume",
+                    "application": "Application",
+                    "mission": "Mission record",
+                    "missionTitle": "Performance marketing strategy",
+                    "missionPercent": "100%",
+                    "missionTag1": "Content planning",
+                    "missionTag2": "12 copy options",
+                    "missionTag3": "A/B test plan",
+                    "missionDescription": "This student met the deadline and managed the process systematically. They are likely to perform reliably in companies that value execution and self-management."
+                }
+            },
+            "mobile": {
+                "pretitleLine1": "See who can actually do",
+                "pretitleLine2": "your team's work through outcomes and data",
+                "titleLine1": "Hire by seeing",
+                "titleLine2": "how they <strong>work</strong>",
+                "cta": "Contact us"
+            },
+            "imageAlt": "Internie hiring process",
+            "mainCardAlt": "Internie candidate evaluation screen"
+        },
+        "diagnosis": {
+            "eyebrow": "Problem",
+            "title": "Run a Hiring Self-Diagnosis for Your Company",
+            "legend": "Select a hiring diagnosis item",
+            "items": {
+                "portfolio": "It is hard to tell what part of the portfolio this person actually worked on.",
+                "interviewGap": "Someone who spoke well in the interview worked very differently in practice.",
+                "smallTeam": "Our team is small, so one wrong hire can hit us hard.",
+                "companyIntro": "Candidates who come to interviews do not understand what our company actually does.",
+                "internEvaluation": "Even after hiring interns, we keep wondering what to assign and how to evaluate them.",
+                "lowApplicants": "Even when we post a job opening, very few candidates apply.",
+                "youthHiringDeadline": "We need to hire a young employee full-time within the startup support or R&D project period."
+            }
+        },
+        "solution": {
+            "ariaLabel": "Solution",
+            "eyebrow": "Solution",
+            "title": "From hiring promotion to evaluation, all in one flow",
+            "frameTitle": "Internie mission hiring process animation"
+        },
+        "workflow": {
+            "eyebrow": "How It Works",
+            "titleLine1": "Just give us the work,",
+            "titleLine2": "Internie will handle the rest!",
+            "steps": {
+                "onboarding": {
+                    "title": "Onboarding",
+                    "description": "Set the hiring criteria. We start with who you want and what you need to check, then adjust the mission format and timeline to fit your company."
+                },
+                "design": {
+                    "title": "Mission Design",
+                    "description": "We turn a real piece of your team's work into a mission. This mission becomes <strong>a first introduction to your company for candidates</strong> and <strong>a later decision-making standard for your company</strong>."
+                },
+                "progress": {
+                    "title": "Student Execution",
+                    "description": "Your company can review how candidates perform the mission. You can evaluate how they solve problems, communicate, and collaborate."
+                },
+                "hire": {
+                    "title": "Hiring",
+                    "description": "Instead of guessing from resumes, decide who to work with based on skills proven through the mission. You keep evidence from working together before making the hire."
+                }
+            }
+        },
+        "missionExamples": {
+            "eyebrow": "How It Works",
+            "title": "Examples of Missions You Can Create",
+            "hoverTitle": "Create this as our company mission",
+            "items": {
+                "influencer": {
+                    "category": "Marketing",
+                    "title": "Find 30 influencer candidates and draft first outreach messages",
+                    "description": "Check target-customer fit, channel fit, and persuasive outreach writing",
+                    "tags": [
+                        "Candidate list",
+                        "Outreach copy",
+                        "Selection criteria"
+                    ]
+                },
+                "reels": {
+                    "category": "Content Marketing",
+                    "title": "Create a reels concept and draft for a new product",
+                    "description": "Check message structure, visual expression, and brand-tone alignment",
+                    "tags": [
+                        "Reels draft",
+                        "Proposal",
+                        "Copy lines"
+                    ]
+                },
+                "onboarding": {
+                    "category": "Service · Planning",
+                    "title": "Analyze competitor onboarding and suggest 3 improvement hypotheses",
+                    "description": "Check problem definition, screen-flow understanding, and prioritization sense",
+                    "tags": [
+                        "Analysis sheet",
+                        "Improvement hypotheses",
+                        "Selection criteria"
+                    ]
+                },
+                "cx": {
+                    "category": "Sales · CX",
+                    "title": "Write responses to 5 real customer inquiries and suggest recurring-issue improvements",
+                    "description": "Check problem definition, communication, and improvement thinking",
+                    "tags": [
+                        "Improvement proposal",
+                        "Response drafts",
+                        "Recurring inquiry classification"
+                    ]
+                }
+            }
+        },
+        "visual": {
+            "overlayTags": {
+                "hiring": "Hiring evaluation",
+                "candidate": "Candidate validation",
+                "skill": "Skill evaluation"
+            },
+            "mission": {
+                "overlay": {
+                    "badge": "Discover",
+                    "title": "Meet through real work and hire by outcomes",
+                    "body": "Show candidates real work missions instead of only company introductions. Candidates understand your company through the work."
+                },
+                "board": {
+                    "title": "Startups Hiring Now",
+                    "cardDescription": "Candidates show their skills by completing a real slice of work as a mission.",
+                    "filters": {
+                        "all": "All",
+                        "marketing": "Marketing",
+                        "commerce": "Commerce",
+                        "content": "Content",
+                        "cx": "CX"
+                    },
+                    "cards": {
+                        "commerce": {
+                            "category": "Commerce",
+                            "title": "Improve a new product detail page",
+                            "company": "Beauty brand · DTC store",
+                            "period": "⏱ 3 days",
+                            "level": "Difficulty <strong>Medium</strong>"
+                        },
+                        "marketing": {
+                            "category": "Marketing",
+                            "title": "Create a 2-week Instagram retention content calendar",
+                            "company": "Beauty brand · Growth",
+                            "period": "⏱ 4 days",
+                            "level": "Difficulty <strong>Easy</strong>"
+                        },
+                        "cx": {
+                            "category": "CX",
+                            "title": "Classify 100 one-on-one customer inquiries",
+                            "company": "Beauty brand · CS",
+                            "period": "⏱ 2 days",
+                            "level": "Difficulty <strong>Medium</strong>"
+                        }
+                    }
+                }
+            },
+            "report": {
+                "avatar": "K",
+                "title": "K○○ · Execution Evidence Report",
+                "subtitle": "Mission · New product detail-page conversion copy",
+                "scoreLabel": "Evidence score",
+                "filesTitle": "Submitted Outputs",
+                "open": "Open →",
+                "resultTag": "Real output a resume could not show",
+                "processTitle": "Execution Process",
+                "files": {
+                    "file1": {
+                        "title": "detail-page_conversion-copy_v2",
+                        "meta": "PDF · 6 pages"
+                    },
+                    "file2": {
+                        "title": "A/B copy proposal sheet",
+                        "meta": "Figma · 3 options"
+                    }
+                },
+                "process": {
+                    "day1": "Day 1",
+                    "event1": "First broke down the structure of 3 competitors' detail pages",
+                    "day2": "Day 2",
+                    "event2": "Repositioned the price-resistance section with reviews and ingredient evidence",
+                    "day3": "Day 3",
+                    "event3": "Expanded the work into 3 CTA copy options and an A/B proposal"
+                },
+                "scoreTitle": "Skill Evaluation",
+                "scores": {
+                    "problem": "Problem definition",
+                    "execution": "Execution · Completion",
+                    "communication": "Communication"
+                },
+                "overlay": {
+                    "badge": "Validate",
+                    "title": "A resume is an inference. A mission is evidence.",
+                    "body": "The output and execution process remain as records.\nYou can see what this person actually did and how they did it."
+                }
+            },
+            "collaboration": {
+                "workspace": "FromMedi",
+                "teamChannel": "Team channels",
+                "personal": "Personal",
+                "directMessage": "Direct message",
+                "header": "# Team_A_meeting",
+                "deadline": "D-42 until mission deadline",
+                "dataNote": "✓ Assignment, submission, and feedback data can be used as hiring evidence.",
+                "channels": {
+                    "notice": "#all_notice",
+                    "meeting": "#Team_A_meeting",
+                    "teamNotice": "#Team_A_notice"
+                },
+                "messages": {
+                    "studentA": "Student A",
+                    "timeA": "10:47 AM",
+                    "bodyA": "This is the final submission",
+                    "fileTitle": "0416 Team Assignment 1",
+                    "fileMeta": "Edited 15 min ago",
+                    "studentB": "Student B",
+                    "timeB": "11:02 AM",
+                    "bodyB": "Thank you! Could you also upload yesterday's meeting notes?"
+                },
+                "overlay": {
+                    "badge": "Validate",
+                    "title": "Hire based on real execution data, not intuition",
+                    "body": "The mission process itself becomes an evaluation unit.\nExecution and collaboration records accumulate to support hiring decisions."
+                }
+            },
+            "compare": {
+                "title": "Same mission, candidate comparison",
+                "subtitle": "New product detail-page copy · 3 candidates",
+                "viewEvidence": "View evidence",
+                "note": "For small teams, decide based on real evidence from the same mission instead of gut feeling.",
+                "sort": {
+                    "score": "Evidence score",
+                    "quality": "Completion",
+                    "period": "Timeline"
+                },
+                "headers": {
+                    "candidate": "Candidate",
+                    "total": "Total",
+                    "strength": "Strengths",
+                    "evidence": "Evidence"
+                },
+                "rows": {
+                    "row1": {
+                        "avatar": "K",
+                        "name": "K○○",
+                        "meta": "Commerce · completed in 3 days",
+                        "tag1": "Problem reframing",
+                        "tag2": "A/B proposal"
+                    },
+                    "row2": {
+                        "avatar": "L",
+                        "name": "L○○",
+                        "meta": "Marketing · completed in 4 days",
+                        "tag1": "Solid planning",
+                        "tag2": "Reliable schedule"
+                    },
+                    "row3": {
+                        "avatar": "P",
+                        "name": "P○○",
+                        "meta": "Content · completed in 3 days",
+                        "tag1": "Copy sense",
+                        "tag2": "Weak evidence"
+                    }
+                },
+                "overlay": {
+                    "badge": "Validate",
+                    "title": "Before hiring, use evidence from actually working together",
+                    "body": "Compare candidates side by side on the same mission.\nReduce mishiring risk by deciding with evidence, not intuition."
+                }
+            }
+        },
+        "problem": {
+            "eyebrow": "For startups like this",
+            "titleLine1": "Before you hire,",
+            "titleLine2": "work together first",
+            "items": {
+                "item1": {
+                    "number": "01",
+                    "titleLine1": "A resume alone",
+                    "titleLine2": "cannot show the candidate",
+                    "descriptionLine1": "It is hard to see how a candidate",
+                    "descriptionLine2": "actually solves problems."
+                },
+                "item2": {
+                    "number": "02",
+                    "titleLine1": "Even when interviews get longer,",
+                    "titleLine2": "the result is the same",
+                    "descriptionLine1": "Communication, execution, and response to feedback",
+                    "descriptionLine2": "show up in the real work process."
+                },
+                "item3": {
+                    "number": "03",
+                    "titleLine1": "In the end,",
+                    "titleLine2": "you rely on intuition again",
+                    "descriptionLine1": "Even after running assignments,",
+                    "descriptionLine2": "you are left without hiring evidence."
+                }
+            }
+        },
+        "howItWorks": {
+            "eyebrow": "How do you use it?",
+            "titleLine1": "Just give us the assignment,",
+            "titleLine2": "Internie will handle the rest!",
+            "descriptionLine1": "From candidate sourcing to operations and management,",
+            "descriptionLine2": "you only review the results and <strong>'who performed well'</strong>.",
+            "imageAlt": "Internie mission management screen"
+        },
+        "project": {
+            "badge": "Create Mission",
+            "titleLine1": "Your team's project",
+            "titleLine2": "is offered to students",
+            "mainAlt": "Internie assignment management screen",
+            "trackingAlt": "Tracking infrastructure mission",
+            "monitoringAlt": "Monitoring cycle setup mission",
+            "reviewAlt": "Performance review mission",
+            "insightAlt": "Insight discovery mission"
+        },
+        "evaluation": {
+            "badge": "Evaluate Mission",
+            "titleLine1": "Review step-by-step deliverables",
+            "titleLine2": "to see how students work",
+            "mainAlt": "Internie mission evaluation screen",
+            "row1Alt": "Mission evaluation card 1",
+            "row2Alt": "Mission evaluation card 2",
+            "row3Alt": "Mission evaluation card 3"
+        },
+        "faq": {
+            "eyebrow": "FAQ",
+            "title": "Frequently Asked Questions",
+            "items": {
+                "item1": {
+                    "question": "How long does setup take, and what do we need to do?",
+                    "answer": "You only need to share the job description or a real work assignment. Internie handles mission design, candidate operations, submission management, and evaluation support. Your team reviews the final results and candidates."
+                },
+                "item2": {
+                    "question": "What roles and company sizes does this fit? Is it only for developers?",
+                    "answer": "It works not only for developers but also for marketing, planning, operations, CS, design, and most roles that produce tangible outputs. Share the role or assignment you are hiring for, and we will design a suitable mission. It is especially useful for junior and intern hiring, where resumes alone are hard to judge."
+                },
+                "item3": {
+                    "question": "Do we need to compensate candidates?",
+                    "answer": "It is not required. By default, candidates can participate for free and receive a participation badge when they complete the mission. If needed, small rewards or certificates can also be provided."
+                },
+                "item4": {
+                    "question": "Is it safe to expose our real work externally? What about confidentiality?",
+                    "answer": "We do not expose the original work as-is. Company names, customer information, and sensitive data are removed or anonymized, while the practical work context is preserved. Your company decides what can be shared, and NDA procedures can be applied when needed."
+                },
+                "item5": {
+                    "question": "How do you detect cheating or AI-written submissions?",
+                    "answer": "Internie does not evaluate only the final output. Because we review the process and step-by-step deliverables, ghostwriting and simple copy-paste are more likely to become visible. For AI use, we evaluate not just whether it was used, but how it was used."
+                }
+            }
+        },
+        "finalCta": {
+            "desktop": {
+                "titleLine1": "Do not just read the resume.",
+                "titleLine2": "See how they work.",
+                "descriptionLine1": "One mission is enough.",
+                "descriptionLine2": "Contact us to get started today.",
+                "button": "Contact us"
+            },
+            "mobile": {
+                "titleLine1": "Do not just read the resume.",
+                "titleLine2": "See how they work.",
+                "descriptionLine1": "One mission is enough.",
+                "descriptionLine2": "Contact us to get started today.",
+                "button": "Contact us"
+            }
+        },
+        "inquiry": {
+            "title": "Contact us",
+            "openButton": "Contact us",
+            "closeAria": "Close inquiry window",
+            "backAria": "Return to landing page",
+            "fields": {
+                "companyName": "Company name",
+                "companyNamePlaceholder": "e.g. AIM",
+                "contactName": "Contact name",
+                "contactNamePlaceholder": "e.g. Eugene Kim",
+                "firstName": "First name",
+                "lastName": "Last name",
+                "position": "Position",
+                "positionPlaceholder": "e.g. HR Lead",
+                "workEmail": "Work email",
+                "phone": "Phone",
+                "question": "What would you like to know? (optional)"
+            },
+            "privacyAgreement": "I agree to the collection and use of personal information.",
+            "submit": "Submit",
+            "submitting": "Submitting...",
+            "success": "Your inquiry has been submitted",
+            "back": "Go back",
+            "errors": {
+                "required": "Please fill in all required fields.",
+                "phone": "Please enter numbers and hyphens only.",
+                "privacy": "Please agree to the collection and use of personal information.",
+                "success": "Your inquiry has been submitted successfully.",
+                "submitFailed": "Failed to submit your inquiry. Please try again shortly."
+            }
+        },
+        "footer": {
+            "taglineLine1": "Prove skills that resumes cannot show, with data",
+            "taglineLine2": "by aim",
+            "companyName": "aim · CEO Eugene Kim",
+            "linksTitle": "Quick links",
+            "navAria": "Footer quick links",
+            "links": {
+                "home": "Home",
+                "product": "Service",
+                "about": "News",
+                "faq": "FAQ"
+            },
+            "contactTitle": "Customer inquiries",
+            "representative": "General inquiry",
+            "companyInfoTitle": "Company information"
+        }
+    },
+
 	"comment_login": "로그인 관련",
 	"login": {
         "title": "Log In",
