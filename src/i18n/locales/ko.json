@@ -19,13 +19,24 @@
         },
         "hero": {
             "desktop": {
-                "pretitleLine1": "인터니에서 누가 <strong>“우리 팀의 일”</strong>을",
-                "pretitleLine2": "잘하는지 결과물과 수행 데이터로 확인하세요",
-                "titleLine1": "일하는 방식을 보고",
-                "titleLine2": "<strong>채용</strong>하세요",
+                "pretitleLine1": "채용 공고가 아니라 실무 미션으로 시작하세요.",
+                "pretitleLine2": "업무 기반 채용 플랫폼, 인터니",
+                "titleLine1": "더 많은 인재를,",
+                "titleLine2": "더 정확한 방법으로",
                 "subtitleLine1": "",
                 "subtitleLine2": "",
-                "cta": "문의하기"
+                "cta": "채용 시작하기",
+                "cards": {
+                    "resume": "이력서",
+                    "application": "지원서",
+                    "mission": "미션 기록",
+                    "missionTitle": "퍼포먼스 마케팅 전략 수립",
+                    "missionPercent": "100%",
+                    "missionTag1": "콘텐츠 기획",
+                    "missionTag2": "카피 12종",
+                    "missionTag3": "A/B 테스트안",
+                    "missionDescription": "이 학생은 제출 기한을 준수하고 과정을 체계적으로 관리했습니다. 실행력과 자기관리 역량을 중요하게 보는 기업에서 안정적으로 성과를 낼 가능성이 있습니다."
+                }
             },
             "mobile": {
                 "pretitleLine1": "인터니에서 누가 “우리 팀의 일”을",
@@ -36,6 +47,257 @@
             },
             "imageAlt": "인터니 채용 프로세스",
             "mainCardAlt": "인터니 지원자 평가 화면"
+        },
+        "diagnosis": {
+            "eyebrow": "Problem",
+            "title": "우리 회사, 채용 자가진단 하기",
+            "legend": "채용 자가진단 선택",
+            "items": {
+                "portfolio": "포트폴리오에서 이 사람이 실제로 맡은 부분이 무엇인지 알기 어렵습니다.",
+                "interviewGap": "면접에서 잘 말하던 사람이, 막상 일은 다르게 했습니다.",
+                "smallTeam": "팀이 작아서 한 사람을 잘못 뽑으면 타격이 큽니다.",
+                "companyIntro": "면접에 온 지원자가 우리가 무엇을 하는 회사인지 잘 모릅니다.",
+                "internEvaluation": "인턴을 뽑아도 무엇을 맡기고 어떻게 평가할지 매번 고민입니다.",
+                "lowApplicants": "공고를 올려도 지원자가 거의 오지 않습니다.",
+                "youthHiringDeadline": "창업지원·R&D 과제 기간 안에 청년을 정규직으로 채용해야 합니다."
+            }
+        },
+        "solution": {
+            "ariaLabel": "솔루션",
+            "eyebrow": "Solution",
+            "title": "채용 홍보부터 평가까지, 한번에",
+            "frameTitle": "인터니 미션 채용 프로세스 애니메이션"
+        },
+        "workflow": {
+            "eyebrow": "How It Works",
+            "titleLine1": "담당자님은 업무만 주세요,",
+            "titleLine2": "나머지는 인터니가 할게요!",
+            "steps": {
+                "onboarding": {
+                    "title": "온보딩",
+                    "description": "채용의 기준을 설정합니다. 어떤 사람을 원하고, 무엇을 확인하고 싶은지에서 시작하여, 과제 방식과 진행 기간 등을 회사에 맞게 정합니다."
+                },
+                "design": {
+                    "title": "미션 설계",
+                    "description": "팀의 업무 한 조각을 미션으로 설계합니다. 이 미션은 <strong>지원자에게는 회사를 처음 알리는 소개</strong>로, <strong>회사에는 나중에 판단할 기준</strong>으로 쓰입니다."
+                },
+                "progress": {
+                    "title": "학생 수행",
+                    "description": "회사는 지원자의 과제 수행 과정을 확인할 수 있습니다. 문제를 해결하는 방식부터 커뮤니케이션 방식, 협업 태도까지 검증합니다."
+                },
+                "hire": {
+                    "title": "채용",
+                    "description": "이력서로 추론하는 대신, 미션에서 확인된 역량을 근거로 함께할 사람을 결정합니다. 채용 전에 이미 함께 일해본 근거가 남습니다."
+                }
+            }
+        },
+        "missionExamples": {
+            "eyebrow": "How It Works",
+            "title": "이런 미션을 만들 수 있어요",
+            "hoverTitle": "우리 회사 미션으로 만들기",
+            "items": {
+                "influencer": {
+                    "category": "마케팅",
+                    "title": "인플루언서 후보 30명 발굴 및 1차 컨택 문안 작성",
+                    "description": "타깃 고객, 채널 적합도, 컨택 문안의 설득력 확인",
+                    "tags": [
+                        "후보 리스트",
+                        "컨택 문안",
+                        "선정 기준"
+                    ]
+                },
+                "reels": {
+                    "category": "콘텐츠 마케팅",
+                    "title": "신제품 릴스 기획안 및 시안 제작",
+                    "description": "메세지 구조, 시각 표현, 브랜드 톤 반영력 확인",
+                    "tags": [
+                        "릴스 시안",
+                        "기획안",
+                        "카피문구"
+                    ]
+                },
+                "onboarding": {
+                    "category": "서비스 · 기획",
+                    "title": "경쟁 서비스 온보딩 분석 후 개선 가설 3개 제안",
+                    "description": "문제 정의, 화면 흐름 이해, 우선순위 감각 확인",
+                    "tags": [
+                        "분석 시트",
+                        "개선 가설",
+                        "선정 기준"
+                    ]
+                },
+                "cx": {
+                    "category": "세일즈 · CX",
+                    "title": "실제 고객 문의 5건 응대안 작성 및 반복 문의 개선 제안",
+                    "description": "문제 정의, 커뮤니케이션, 개선 사고 확인",
+                    "tags": [
+                        "개선 제안",
+                        "응대안",
+                        "반복 문의 분류"
+                    ]
+                }
+            }
+        },
+        "visual": {
+            "overlayTags": {
+                "hiring": "채용 평가",
+                "candidate": "지원자 검증",
+                "skill": "역량 평가"
+            },
+            "mission": {
+                "overlay": {
+                    "badge": "발견",
+                    "title": "실무로 만나고 결과로 채용하세요",
+                    "body": "회사 소개 대신 실제 업무 미션을 보여줍니다. 지원자는 업무를 통해 회사를 이해합니다."
+                },
+                "board": {
+                    "title": "채용 중 스타트업",
+                    "cardDescription": "실제 업무 일부를 미션으로 수행하며 역량을 보여줍니다.",
+                    "filters": {
+                        "all": "전체",
+                        "marketing": "마케팅",
+                        "commerce": "커머스",
+                        "content": "콘텐츠",
+                        "cx": "CX"
+                    },
+                    "cards": {
+                        "commerce": {
+                            "category": "커머스",
+                            "title": "신제품 상세페이지, 개선 작업",
+                            "company": "뷰티 브랜드 · 자사몰 운영",
+                            "period": "⏱ 3일",
+                            "level": "난이도 <strong>보통</strong>"
+                        },
+                        "marketing": {
+                            "category": "마케팅",
+                            "title": "인스타 리텐션 콘텐츠 2주 캘린더",
+                            "company": "뷰티 브랜드 · 그로스",
+                            "period": "⏱ 4일",
+                            "level": "난이도 <strong>쉬움</strong>"
+                        },
+                        "cx": {
+                            "category": "CX",
+                            "title": "1:1 문의 100건, 유형 분류",
+                            "company": "뷰티 브랜드 · CS",
+                            "period": "⏱ 2일",
+                            "level": "난이도 <strong>보통</strong>"
+                        }
+                    }
+                }
+            },
+            "report": {
+                "avatar": "김",
+                "title": "김○○ · 수행 근거 리포트",
+                "subtitle": "미션 · 신제품 상세페이지 전환 카피",
+                "scoreLabel": "종합 근거 점수",
+                "filesTitle": "제출 결과물",
+                "open": "열기 →",
+                "resultTag": "이력서엔 안 보이던 실제 산출물",
+                "processTitle": "수행 과정",
+                "files": {
+                    "file1": {
+                        "title": "상세페이지_전환카피_v2",
+                        "meta": "PDF · 6페이지"
+                    },
+                    "file2": {
+                        "title": "A/B 문구 제안 시트",
+                        "meta": "Figma · 3안"
+                    }
+                },
+                "process": {
+                    "day1": "1일차",
+                    "event1": "경쟁사 3곳 상세페이지 구조를 먼저 분해함",
+                    "day2": "2일차",
+                    "event2": "가격 저항 구간을 후기·성분 근거로 재배치",
+                    "day3": "3일차",
+                    "event3": "CTA 문구 3안 A/B 제안까지 스스로 확장"
+                },
+                "scoreTitle": "역량 평가",
+                "scores": {
+                    "problem": "문제 정의",
+                    "execution": "실행·완성도",
+                    "communication": "커뮤니케이션"
+                },
+                "overlay": {
+                    "badge": "검증",
+                    "title": "이력서는 추론, 미션은 증거",
+                    "body": "결과물과 수행 과정이 그대로 기록으로 남습니다.\n이 사람이 실제로 어느 부분을 어떻게 했는지가 근거로 보입니다."
+                }
+            },
+            "collaboration": {
+                "workspace": "프롬메디",
+                "teamChannel": "팀 채널",
+                "personal": "개인",
+                "directMessage": "개인 메세지",
+                "header": "# Team_A_회의",
+                "deadline": "미션 마감까지 D-42",
+                "dataNote": "✓ 배정·제출·피드백이 데이터로 채용의 근거로 활용됩니다.",
+                "channels": {
+                    "notice": "#전체_공지",
+                    "meeting": "#Team_A_회의",
+                    "teamNotice": "#Team_A_공지"
+                },
+                "messages": {
+                    "studentA": "학생 A",
+                    "timeA": "오전 10:47",
+                    "bodyA": "최종 제출물입니다",
+                    "fileTitle": "0416 팀 과제 1차",
+                    "fileMeta": "15분 전 수정됨",
+                    "studentB": "학생 B",
+                    "timeB": "오전 11:02",
+                    "bodyB": "감사합니다! 어제 회의록도 같이 올려주실 수 있나요?"
+                },
+                "overlay": {
+                    "badge": "검증",
+                    "title": "감이 아닌 실제 수행 데이터 기반 채용",
+                    "body": "미션 수행 과정이 그대로 평가 단위가 됩니다.\n수행·협업 기록이 쌓여 채용 근거를 뒷받침합니다."
+                }
+            },
+            "compare": {
+                "title": "같은 미션, 지원자 비교",
+                "subtitle": "신제품 상세페이지 카피 · 3명",
+                "viewEvidence": "근거 보기",
+                "note": "소규모 팀일수록 감이 아니라 같은 미션의 실제 수행 근거로 결정합니다.",
+                "sort": {
+                    "score": "근거 점수순",
+                    "quality": "완성도순",
+                    "period": "기간순"
+                },
+                "headers": {
+                    "candidate": "지원자",
+                    "total": "종합",
+                    "strength": "강점",
+                    "evidence": "근거"
+                },
+                "rows": {
+                    "row1": {
+                        "avatar": "김",
+                        "name": "김○○",
+                        "meta": "커머스 · 3일 완료",
+                        "tag1": "문제 재정의",
+                        "tag2": "A/B 제안"
+                    },
+                    "row2": {
+                        "avatar": "이",
+                        "name": "이○○",
+                        "meta": "마케팅 · 4일 완료",
+                        "tag1": "기획 탄탄",
+                        "tag2": "일정 성실"
+                    },
+                    "row3": {
+                        "avatar": "박",
+                        "name": "박○○",
+                        "meta": "콘텐츠 · 3일 완료",
+                        "tag1": "카피 감각",
+                        "tag2": "근거 부족"
+                    }
+                },
+                "overlay": {
+                    "badge": "검증",
+                    "title": "뽑기 전에, 실제로 일해본 근거로",
+                    "body": "지원자들의 같은 미션 수행을 나란히 비교합니다.\n감이 아니라 근거로 결정해 오채용 리스크를 줄입니다."
+                }
+            }
         },
         "problem": {
             "eyebrow": "이런 스타트업이라면",

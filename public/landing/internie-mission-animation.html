@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internie 채용 프로세스 애니메이션</title>
+    <style>
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; overflow: hidden; }
+button, input, textarea { font: inherit; }
+button { border: 0; }
+body { color: #0b1220; font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+.internie-demo-page { display: grid; min-height: 100vh; place-items: center; }
+.internie-demo { width: min(100%, 1440px); }
+.internie-demo-stage { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 28px; background: linear-gradient(180deg, #ffffff 0%, #e9f2ff 100%); perspective: 1600px; }
+.internie-demo-background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.internie-demo-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.65; }
+.internie-demo-orb-a { left: -10%; top: -25%; width: 38%; aspect-ratio: 1; background: #d9eaff; }
+.internie-demo-orb-b { right: -10%; bottom: -28%; width: 34%; aspect-ratio: 1; background: #cfe3ff; }
+.internie-demo-dot { position: absolute; width: 0.55cqw; aspect-ratio: 1; border-radius: 50%; background: #0166ff; opacity: 0.22; animation: internieFloat 5s ease-in-out infinite alternate; }
+.internie-demo-dot-a { left: 7%; top: 18%; }
+.internie-demo-dot-b { left: 31%; top: 74%; animation-delay: -1.2s; }
+.internie-demo-dot-c { right: 24%; top: 20%; animation-delay: -2.1s; }
+.internie-demo-dot-d { right: 8%; top: 61%; animation-delay: -3.4s; }
+.internie-demo-scene { position: absolute; inset: 0; z-index: 2; opacity: 0; visibility: hidden; transform: translate3d(5%, 0, 0); transition: opacity 680ms ease, transform 680ms cubic-bezier(0.22, 1, 0.36, 1), visibility 680ms; }
+.internie-demo-scene.is-active { opacity: 1; visibility: visible; transform: translate3d(0, 0, 0); }
+.internie-demo-scene.is-leaving { opacity: 0; visibility: visible; transform: translate3d(-4%, 0, 0); }
+.internie-demo-dashboard-shell, .internie-demo-submission-dashboard { display: grid; position: absolute; left: 6.25%; right: 6.25%; top: 9%; bottom: 9%; overflow: hidden; border-radius: 1.6cqw; background: #ffffff; box-shadow: 0 1.3cqw 3cqw rgba(1, 60, 150, 0.14); }
+.internie-demo-dashboard-shell {
+    grid-template-columns: 20% minmax(0, 1fr) 0%;
+    column-gap: 0;
+    background: #eef3fa;
+    transition:
+        grid-template-columns 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+        column-gap 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.internie-demo-dashboard-shell.is-form-open {
+    grid-template-columns: 20% minmax(0, 1fr) 36%;
+    column-gap: 1cqw;
+}
+.internie-demo-submission-dashboard { grid-template-columns: 20% 1fr; }
+.internie-demo-sidebar { padding: 2cqw 1.5cqw; background: #f6f9fe; }
+.internie-demo-logo { color: #0166ff; font-size: 1.8cqw; font-weight: 900; }
+.internie-demo-sidebar nav { display: grid; gap: 0.7cqw; margin-top: 2.5cqw; }
+.internie-demo-sidebar nav span { padding: 0.8cqw 1cqw; border-radius: 0.7cqw; color: #667085; font-size: 1cqw; }
+.internie-demo-sidebar nav .is-current { background: #e4efff; color: #0166ff; font-weight: 800; }
+.internie-demo-dashboard-content, .internie-demo-submission-content { min-width: 0; padding: 1.8cqw 2cqw; }
+.internie-demo-dashboard-content {
+    grid-column: 2;
+    overflow: hidden;
+    border-radius: 0 1.35cqw 1.35cqw 0;
+    background: #ffffff;
+    transition:
+        padding 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-radius 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.internie-demo-dashboard-shell.is-form-open .internie-demo-dashboard-content {
+    padding-right: 1.25cqw;
+    border-radius: 0 1.1cqw 1.1cqw 0;
+}
+.internie-demo-content-title { display: flex; align-items: center; justify-content: space-between; }
+.internie-demo-content-title small, .internie-demo-result-list-title small { color: #667085; font-size: 0.75cqw; font-weight: 700; }
+.internie-demo-content-title h3, .internie-demo-result-list-title h3 { margin: 0.25cqw 0 0; font-size: 1.7cqw; }
+.internie-demo-primary-button, .internie-demo-register-button, .internie-demo-start-evaluation-button, .internie-demo-hire-button { cursor: pointer; border-radius: 0.8cqw; background: #0166ff; color: #ffffff; font-weight: 800; transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease; }
+.internie-demo-primary-button { padding: 0.85cqw 1.2cqw; font-size: 0.95cqw; }
+.internie-demo-table { margin-top: 1.5cqw; }
+.internie-demo-table-head, .internie-demo-table-row { display: grid; grid-template-columns: 2.5fr 1.05fr 0.55fr 0.75fr; align-items: center; gap: 0.7cqw; }
+.internie-demo-table-head { padding: 0 1cqw 0.6cqw; color: #7a8494; font-size: 0.82cqw; font-weight: 700; }
+.internie-demo-table-row { min-height: 4.45cqw; margin-bottom: 0.7cqw; padding: 0 1cqw; border: 1px solid #e7edf6; border-radius: 0.8cqw; color: #4b5563; font-size: 0.85cqw; }
+.internie-demo-table-row strong { color: #0b1220; font-size: 0.94cqw; }
+.internie-demo-table-row em { display: inline-flex; justify-content: center; padding: 0.45cqw 0.7cqw; border-radius: 999px; background: #fff2d7; color: #b56a00; font-style: normal; font-weight: 800; }
+.internie-demo-table-row em.is-green { background: #e6f7ee; color: #14804a; }
+.internie-demo-table-row em.is-gray { background: #eef2f7; color: #667085; }
+.internie-demo-new-mission-row { opacity: 0; transform: translateY(-1cqw); transition: opacity 450ms ease, transform 450ms cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-demo-new-mission-row.is-visible { opacity: 1; transform: translateY(0); }
+.internie-demo-form-drawer {
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    grid-column: 3;
+    flex-direction: column;
+    padding: 1.35cqw 1.5cqw;
+    border: 1px solid #e1e8f1;
+    border-radius: 1.1cqw;
+    background: #ffffff;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateX(2.4cqw) scale(0.985);
+    transform-origin: right center;
+    transition:
+        opacity 520ms ease 140ms,
+        transform 920ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
+}
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+.internie-demo-evaluation-drawer {
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    grid-column: 2;
+    flex-direction: column;
+    padding: 1.35cqw 1.5cqw;
+    border: 1px solid #e1e8f1;
+    border-radius: 1.1cqw;
+    background: #ffffff;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateX(2.4cqw) scale(0.985);
+    transform-origin: right center;
+    transition:
+        opacity 520ms ease 140ms,
+        transform 920ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
+}
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+.internie-demo-drawer-header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; margin-bottom: 0.7cqw; }
+.internie-demo-drawer-header small { color: #667085; font-size: 0.75cqw; font-weight: 700; }
+.internie-demo-drawer-header h3 { margin: 0.25cqw 0 0; font-size: 1.7cqw; }
+.internie-demo-drawer-header > span { color: #667085; font-size: 2cqw; }
+.internie-demo-form-drawer label { display: grid; flex: 0 0 auto; gap: 0.28cqw; margin-top: 0.48cqw; color: #344054; font-size: 0.76cqw; font-weight: 700; }
+.internie-demo-form-drawer input, .internie-demo-form-drawer textarea { width: 100%; min-width: 0; padding: 0 0.9cqw; border: 1px solid #dde5f0; border-radius: 0.7cqw; outline: none; background: #f8fafd; color: #0b1220; font-size: 0.9cqw; resize: none; }
+.internie-demo-form-drawer input { height: 2.55cqw; }
+.internie-demo-form-drawer textarea { min-height: 4.15cqw; padding-top: 0.62cqw; line-height: 1.35; }
+.internie-demo-form-drawer input.is-focused, .internie-demo-form-drawer textarea.is-focused { border-color: #0166ff; box-shadow: 0 0 0 0.22cqw rgba(1, 102, 255, 0.12); }
+.internie-demo-register-button { flex: 0 0 auto; width: 100%; height: 3cqw; margin-top: auto; font-size: 0.92cqw; }
+.internie-demo-toast { display: flex; position: absolute; right: 12%; bottom: 17%; z-index: 20; align-items: center; gap: 0.8cqw; padding: 1cqw 1.35cqw; border-radius: 1cqw; background: #0b1220; color: #ffffff; opacity: 0; transform: translateY(1cqw); box-shadow: 0 1cqw 2cqw rgba(11, 18, 32, 0.22); transition: opacity 300ms ease, transform 300ms ease; }
+.internie-demo-toast.is-visible { opacity: 1; transform: translateY(0); }
+.internie-demo-toast > span { width: 1.2cqw; aspect-ratio: 1; border-radius: 50%; background: #42d392; }
+.internie-demo-toast strong { font-size: 0.95cqw; }
+.internie-demo-submission-count { display: flex; align-items: baseline; gap: 0.45cqw; padding: 0.65cqw 1cqw; border-radius: 999px; background: #e4efff; color: #0166ff; }
+.internie-demo-submission-count strong { font-size: 1.25cqw; }
+.internie-demo-submission-count span { font-size: 0.78cqw; font-weight: 800; }
+.internie-demo-empty-state { display: flex; height: 75%; align-items: center; flex-direction: column; justify-content: center; color: #667085; text-align: center; transition: opacity 380ms ease, transform 380ms ease; }
+.internie-demo-empty-state.is-hidden { opacity: 0; transform: translateY(-0.8cqw); pointer-events: none; }
+.internie-demo-empty-icon { display: flex; align-items: flex-end; gap: 0.35cqw; height: 3.5cqw; margin-bottom: 1cqw; }
+.internie-demo-empty-icon span { width: 1.1cqw; border-radius: 0.35cqw 0.35cqw 0 0; background: #bdd8ff; }
+.internie-demo-empty-icon span:nth-child(1) { height: 45%; }
+.internie-demo-empty-icon span:nth-child(2) { height: 80%; background: #86b6ff; }
+.internie-demo-empty-icon span:nth-child(3) { height: 60%; }
+.internie-demo-empty-state strong { color: #344054; font-size: 1.15cqw; }
+.internie-demo-empty-state p { margin: 0.55cqw 0 0; font-size: 0.85cqw; }
+.internie-demo-submission-grid { display: grid; position: absolute; left: 22.4%; right: 2.2%; top: 27%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1cqw; }
+.internie-demo-submission-card { min-width: 0; padding: 1.15cqw; border: 1px solid #e4eaf2; border-radius: 1.05cqw; background: #ffffff; opacity: 0; transform: translateY(2.2cqw) scale(0.96); box-shadow: 0 0.8cqw 1.8cqw rgba(1, 60, 150, 0.08); transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-demo-submission-card.is-entered { opacity: 1; transform: translateY(0) scale(1); }
+.internie-demo-submission-card-top { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.7cqw; }
+.internie-demo-avatar { display: grid; width: 3cqw; aspect-ratio: 1; place-items: center; border-radius: 50%; background: #4e8eff; color: #ffffff; font-size: 1cqw; font-weight: 800; }
+.internie-demo-avatar.is-dark, .internie-demo-notification > span.is-dark { background: #1556d8; }
+.internie-demo-avatar.is-light, .internie-demo-notification > span.is-light { background: #68a9ff; }
+.internie-demo-submission-card-top > div { display: grid; }
+.internie-demo-submission-card-top strong { font-size: 0.96cqw; }
+.internie-demo-submission-card-top small { color: #667085; font-size: 0.68cqw; }
+.internie-demo-submission-card-top em { color: #0166ff; font-size: 0.68cqw; font-style: normal; font-weight: 800; }
+.internie-demo-submission-file { display: flex; align-items: center; gap: 0.75cqw; margin-top: 1.1cqw; padding: 0.85cqw; border-radius: 0.8cqw; background: #f6f9fe; }
+.internie-demo-submission-file > span, .internie-demo-file-row > div > span { display: grid; width: 2.6cqw; aspect-ratio: 1; place-items: center; border-radius: 0.65cqw; background: #ffffff; color: #0166ff; font-size: 0.58cqw; font-weight: 900; }
+.internie-demo-submission-file > div { display: grid; min-width: 0; }
+.internie-demo-submission-file strong { overflow: hidden; font-size: 0.78cqw; text-overflow: ellipsis; white-space: nowrap; }
+.internie-demo-submission-file small { color: #667085; font-size: 0.65cqw; }
+.internie-demo-submission-meta { display: flex; flex-wrap: wrap; gap: 0.45cqw; margin-top: 0.9cqw; }
+.internie-demo-submission-meta span { padding: 0.4cqw 0.6cqw; border-radius: 999px; background: #eef5ff; color: #3d6da8; font-size: 0.63cqw; font-weight: 700; }
+.internie-demo-notification-stack { position: absolute; right: 4%; bottom: 8%; z-index: 20; width: 24%; }
+.internie-demo-notification { display: flex; align-items: center; gap: 0.75cqw; margin-top: 0.55cqw; padding: 0.85cqw 1cqw; border-radius: 0.95cqw; background: #0b1220; color: #ffffff; opacity: 0; transform: translateX(2cqw); box-shadow: 0 0.8cqw 1.8cqw rgba(11, 18, 32, 0.18); transition: opacity 350ms ease, transform 350ms cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-demo-notification.is-visible { opacity: 1; transform: translateX(0); }
+.internie-demo-notification > span { display: grid; width: 2.4cqw; aspect-ratio: 1; place-items: center; border-radius: 50%; background: #4e8eff; color: #ffffff; font-size: 0.8cqw; font-weight: 800; }
+.internie-demo-notification p { display: grid; margin: 0; }
+.internie-demo-notification strong { font-size: 0.78cqw; }
+.internie-demo-notification small { color: #aebbd0; font-size: 0.65cqw; }
+.internie-demo-results-dashboard { display: grid; position: absolute; left: 6.25%; right: 6.25%; top: 9%; bottom: 9%; grid-template-columns: 28% 1fr; overflow: hidden; border-radius: 1.6cqw; background: #ffffff; box-shadow: 0 1.3cqw 3cqw rgba(1, 60, 150, 0.14); }
+.internie-demo-result-list { padding: 1.5cqw; background: #f8fafd; }
+.internie-demo-result-list-title { display: flex; align-items: center; justify-content: space-between; }
+.internie-demo-result-list-title > span { padding: 0.45cqw 0.75cqw; border-radius: 999px; background: #e4efff; color: #0166ff; font-size: 0.7cqw; font-weight: 800; }
+.internie-demo-result-card { display: grid; width: 100%; min-height: 5.3cqw; margin-top: 0.8cqw; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.8cqw; cursor: pointer; padding: 0.8cqw; border: 1px solid #e5eaf1; border-radius: 1cqw; background: #ffffff; color: #0b1220; text-align: left; transition: border 220ms ease, background 220ms ease, transform 220ms ease; }
+.internie-demo-result-card.is-selected { border: 2px solid #86b6ff; background: #eaf2ff; }
+.internie-demo-result-card p { display: grid; margin: 0; }
+.internie-demo-result-card strong { font-size: 0.95cqw; }
+.internie-demo-result-card small { color: #667085; font-size: 0.68cqw; }
+.internie-demo-result-card em { color: #667085; font-size: 0.7cqw; font-style: normal; font-weight: 800; }
+.internie-demo-result-card.is-selected em { color: #0166ff; }
+.internie-demo-result-detail { position: relative; min-width: 0; overflow: hidden; }
+.internie-demo-result-placeholder { display: flex; position: absolute; inset: 0; align-items: center; flex-direction: column; justify-content: center; color: #667085; text-align: center; transition: opacity 380ms ease, transform 380ms ease; }
+.internie-demo-result-placeholder.is-hidden { opacity: 0; transform: translateY(-1cqw); pointer-events: none; }
+.internie-demo-placeholder-window { display: flex; width: 7cqw; height: 4.4cqw; align-items: center; justify-content: center; gap: 0.45cqw; margin-bottom: 1cqw; border: 1px solid #dbe5f1; border-radius: 0.8cqw; background: #f6f9fe; }
+.internie-demo-placeholder-window span { width: 0.8cqw; aspect-ratio: 1; border-radius: 50%; background: #bdd8ff; }
+.internie-demo-result-placeholder strong { color: #344054; font-size: 1.15cqw; }
+.internie-demo-result-placeholder p { width: 58%; margin: 0.55cqw 0 0; font-size: 0.82cqw; line-height: 1.55; }
+.internie-demo-result-content { position: absolute; inset: 0; padding: 1.4cqw; opacity: 0; transform: translateX(3cqw); pointer-events: none; transition: opacity 520ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-demo-result-content.is-visible { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.internie-demo-result-profile { display: flex; align-items: center; justify-content: space-between; }
+.internie-demo-result-profile > div { display: flex; align-items: center; gap: 0.75cqw; }
+.internie-demo-result-profile p { display: grid; margin: 0; }
+.internie-demo-result-profile strong { font-size: 1cqw; }
+.internie-demo-result-profile small { color: #667085; font-size: 0.7cqw; }
+.internie-demo-result-profile > span { padding: 0.45cqw 0.75cqw; border-radius: 999px; background: #e6f7ee; color: #14804a; font-size: 0.7cqw; font-weight: 800; }
+.internie-demo-result-columns { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.1cqw; margin-top: 1cqw; }
+.internie-demo-result-preview, .internie-demo-process-log { min-width: 0; }
+.internie-demo-video-preview { position: relative; height: 13.7cqw; overflow: hidden; border-radius: 1cqw; background: linear-gradient(135deg, #0b1220 0%, #18499b 100%); color: #ffffff; }
+.internie-demo-video-preview::after { position: absolute; right: -8%; bottom: -45%; width: 44%; aspect-ratio: 1; border-radius: 50%; background: rgba(141, 187, 255, 0.24); content: ""; }
+.internie-demo-video-preview > small { display: block; margin: 1.4cqw 1.6cqw 0; color: #8dbbff; font-size: 0.75cqw; font-weight: 800; }
+.internie-demo-video-preview > strong { display: block; margin: 1cqw 1.6cqw 0; font-size: 2cqw; line-height: 1.24; }
+.internie-demo-play-button { display: grid; position: absolute; right: 8%; top: 34%; z-index: 2; width: 4.2cqw; aspect-ratio: 1; cursor: pointer; place-items: center; border-radius: 50%; background: #ffffff; box-shadow: 0 0.7cqw 1.5cqw rgba(0, 0, 0, 0.22); transition: transform 180ms ease; }
+.internie-demo-play-button > span { width: 0; height: 0; margin-left: 0.35cqw; border-top: 0.65cqw solid transparent; border-bottom: 0.65cqw solid transparent; border-left: 1cqw solid #0166ff; }
+.internie-demo-file-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1cqw; margin-top: 0.85cqw; }
+.internie-demo-file-row > div { display: flex; min-width: 0; align-items: center; gap: 0.7cqw; padding: 0.65cqw; border-radius: 0.75cqw; background: #f6f9fe; }
+.internie-demo-file-row p { display: grid; min-width: 0; margin: 0; }
+.internie-demo-file-row strong { overflow: hidden; font-size: 0.72cqw; text-overflow: ellipsis; white-space: nowrap; }
+.internie-demo-file-row small { color: #667085; font-size: 0.62cqw; }
+.internie-demo-process-log { padding: 1.05cqw; border-radius: 1cqw; background: #f6f9fe; }
+.internie-demo-process-log h3 { margin: 0; font-size: 1cqw; }
+.internie-demo-process-log ol { display: grid; gap: 0.78cqw; margin: 1cqw 0 0; padding: 0; list-style: none; }
+.internie-demo-process-log li { display: grid; position: relative; grid-template-columns: 2.8cqw 1fr; gap: 0.6cqw; padding-left: 1.1cqw; }
+.internie-demo-process-log li::before { position: absolute; left: 0; top: 0.18cqw; width: 0.7cqw; aspect-ratio: 1; border-radius: 50%; background: #0166ff; content: ""; }
+.internie-demo-process-log li:not(:last-child)::after { position: absolute; left: 0.31cqw; top: 0.9cqw; width: 0.1cqw; height: 2.15cqw; background: #afcfff; content: ""; }
+.internie-demo-process-log time { color: #0166ff; font-size: 0.72cqw; font-weight: 800; }
+.internie-demo-process-log p { display: grid; margin: 0; }
+.internie-demo-process-log strong { font-size: 0.78cqw; }
+.internie-demo-process-log small { color: #667085; font-size: 0.64cqw; }
+.internie-demo-review-comment { display: grid; gap: 0.35cqw; margin-top: 0.85cqw; padding: 0.85cqw 1cqw; border-radius: 0.8cqw; background: #eef5ff; opacity: 0; transform: translateY(0.8cqw); transition: opacity 420ms ease, transform 420ms ease; }
+.internie-demo-review-comment.is-visible { opacity: 1; transform: translateY(0); }
+.internie-demo-review-comment small { color: #667085; font-size: 0.66cqw; }
+.internie-demo-review-comment strong { color: #344054; font-size: 0.78cqw; }
+.internie-demo-evaluation-dashboard {
+    display: grid;
+    position: absolute;
+    left: 6.25%;
+    right: 6.25%;
+    top: 9%;
+    bottom: 9%;
+    grid-template-columns: minmax(0, 1fr) 0%;
+    column-gap: 0;
+    overflow: hidden;
+    border-radius: 1.6cqw;
+    background: #eef3fa;
+    box-shadow: 0 1.3cqw 3cqw rgba(1, 60, 150, 0.14);
+    transition:
+        grid-template-columns 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+        column-gap 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.internie-demo-evaluation-dashboard.is-evaluation-open {
+    grid-template-columns: minmax(0, 1fr) 37%;
+    column-gap: 1cqw;
+}
+.internie-demo-evaluation-summary {
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    padding: 1.6cqw;
+    border-radius: 1.35cqw;
+    background: #ffffff;
+    overflow: hidden;
+    transition: padding 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-summary {
+    padding-right: 1.25cqw;
+}
+.internie-demo-evaluation-preview { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 1.1cqw; margin-top: 1.2cqw; }
+.internie-demo-evaluation-preview .internie-demo-video-preview { height: 15cqw; }
+.internie-demo-evaluation-facts { display: grid; gap: 0.75cqw; }
+.internie-demo-evaluation-facts > div { display: grid; align-content: center; padding: 0.9cqw 1cqw; border-radius: 0.85cqw; background: #f6f9fe; }
+.internie-demo-evaluation-facts small { color: #667085; font-size: 0.68cqw; }
+.internie-demo-evaluation-facts strong { margin-top: 0.25cqw; color: #0166ff; font-size: 1.15cqw; }
+.internie-demo-start-evaluation-button { width: 100%; height: 3.2cqw; margin-top: 1.05cqw; font-size: 0.95cqw; }
+.internie-demo-evaluation-drawer { width: auto; z-index: auto; }
+.internie-demo-total-score { display: grid; width: 4.6cqw; aspect-ratio: 1; place-items: center; align-content: center; border-radius: 50%; background: #eaf2ff; color: #0166ff; }
+.internie-demo-total-score strong { font-size: 1.7cqw; line-height: 1; }
+.internie-demo-total-score small { font-size: 0.6cqw; }
+.internie-demo-score-row { display: grid; position: relative; margin-top: 1.05cqw; grid-template-columns: 1fr auto; row-gap: 0.5cqw; }
+.internie-demo-score-row span, .internie-demo-score-row em { font-size: 0.78cqw; font-style: normal; font-weight: 700; }
+.internie-demo-score-row em { color: #0166ff; }
+.internie-demo-score-row::after { grid-column: 1 / -1; height: 0.42cqw; border-radius: 999px; background: #e8eef6; content: ""; }
+.internie-demo-score-row i { position: absolute; left: 0; bottom: 0; width: var(--score); height: 0.42cqw; border-radius: 999px; background: #0166ff; transform: scaleX(0); transform-origin: left; transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-score-row i { transform: scaleX(1); }
+.internie-demo-evaluation-note { margin-top: 1.2cqw; padding: 0.95cqw; border-radius: 0.85cqw; background: #f0f6ff; }
+.internie-demo-evaluation-note small { color: #667085; font-size: 0.68cqw; font-weight: 700; }
+.internie-demo-evaluation-note p { margin: 0.5cqw 0 0; color: #344054; font-size: 0.75cqw; line-height: 1.55; }
+.internie-demo-hire-button { width: 100%; height: 3cqw; margin-top: 1.1cqw; font-size: 0.86cqw; }
+.internie-demo-progress { display: flex; position: absolute; left: 26%; right: 26%; bottom: 3%; z-index: 30; align-items: center; justify-content: space-between; padding: 0.75cqw 1.1cqw; border-radius: 1.3cqw; background: rgba(255, 255, 255, 0.94); box-shadow: 0 0.65cqw 1.8cqw rgba(1, 60, 150, 0.1); opacity: 0; transform: translateY(1cqw); transition: opacity 300ms ease, transform 300ms ease; }
+.internie-demo-progress.is-visible { opacity: 1; transform: translateY(0); }
+.internie-demo-progress span { display: inline-flex; align-items: center; gap: 0.45cqw; color: #7a8494; font-size: 0.72cqw; font-weight: 800; transition: color 220ms ease; }
+.internie-demo-progress span strong { font-size: 0.8cqw; }
+.internie-demo-progress span.is-active { color: #0166ff; }
+.internie-demo-progress i { width: 1.8cqw; height: 1px; background: #d7e2f0; }
+.internie-demo-cursor { position: absolute; left: 0; top: 0; z-index: 100; width: 2.8cqw; pointer-events: none; opacity: 0; transform: translate3d(0, 0, 0); will-change: transform; }
+.internie-demo-cursor.is-visible { opacity: 1; }
+.internie-demo-cursor svg { display: block; width: 100%; overflow: visible; filter: drop-shadow(0 0.45cqw 0.55cqw rgba(11, 18, 32, 0.28)); transform-origin: 15% 12%; }
+.internie-demo-cursor path { fill: #ffffff; stroke: #0166ff; stroke-width: 5; stroke-linejoin: round; }
+.internie-demo-cursor.is-clicking svg { animation: internieCursorClick 220ms ease; }
+.internie-demo-ripple { position: absolute; z-index: 90; width: 2.5cqw; aspect-ratio: 1; pointer-events: none; border: 0.22cqw solid #0166ff; border-radius: 50%; transform: translate(-50%, -50%) scale(0.25); animation: internieRipple 520ms ease-out forwards; }
+.internie-demo-replay { position: absolute; right: 1.6%; bottom: 2.2%; z-index: 120; cursor: pointer; padding: 0.55cqw 0.9cqw; border: 1px solid rgba(1, 102, 255, 0.18); border-radius: 999px; background: rgba(255, 255, 255, 0.86); color: #0166ff; font-size: 0.72cqw; font-weight: 800; backdrop-filter: blur(8px); }
+.is-demo-pressed { transform: scale(0.94) !important; box-shadow: 0 0.25cqw 0.8cqw rgba(1, 102, 255, 0.2) !important; }
+@keyframes internieFloat { from { transform: translateY(-0.6cqw); } to { transform: translateY(0.6cqw); } }
+@keyframes internieCardBreath { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-0.5cqw); } }
+@keyframes internieCursorClick { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.82); } }
+@keyframes internieRipple { from { opacity: 0.95; transform: translate(-50%, -50%) scale(0.25); } to { opacity: 0; transform: translate(-50%, -50%) scale(2); } }
+@media (max-width: 720px) { .internie-demo-page { padding: 12px; } .internie-demo-stage { border-radius: 14px; } }
+@media (prefers-reduced-motion: reduce) { .internie-demo-dot { animation: none; } .internie-demo-scene { transition-duration: 1ms; } }
+
+.internie-demo-dashboard-shell.is-form-open .internie-demo-table-head,
+.internie-demo-dashboard-shell.is-form-open .internie-demo-table-row { grid-template-columns: minmax(0, 2.2fr) minmax(5.8cqw, 0.9fr) 3.6cqw 4.6cqw; }
+.internie-demo-dashboard-shell.is-form-open .internie-demo-table-row strong,
+.internie-demo-dashboard-shell.is-form-open .internie-demo-table-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *,
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > * {
+    animation: internieDrawerContentIn 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *:nth-child(2),
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > *:nth-child(2) { animation-delay: 80ms; }
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *:nth-child(3),
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > *:nth-child(3) { animation-delay: 130ms; }
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *:nth-child(4),
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > *:nth-child(4) { animation-delay: 180ms; }
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *:nth-child(5),
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > *:nth-child(5) { animation-delay: 230ms; }
+.internie-demo-dashboard-shell.is-form-open .internie-demo-form-drawer > *:nth-child(6),
+.internie-demo-evaluation-dashboard.is-evaluation-open .internie-demo-evaluation-drawer > *:nth-child(6) { animation-delay: 280ms; }
+
+@keyframes internieDrawerContentIn {
+    from { opacity: 0; transform: translateX(0.9cqw); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.internie-demo-mockup { transform-style: preserve-3d; will-change: transform; }
+.internie-demo-scene-create.is-active .internie-demo-mockup { animation: internieCamCreate 1050ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.internie-demo-scene-submissions.is-active .internie-demo-mockup { animation: internieCamSubmissions 1050ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.internie-demo-scene-results.is-active .internie-demo-mockup { animation: internieCamResults 1050ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.internie-demo-scene-evaluation.is-active .internie-demo-mockup { animation: internieCamEvaluation 1050ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes internieCamCreate {
+    from { transform: perspective(1400px) rotateX(9deg) rotateY(-12deg) scale(0.92); }
+    to { transform: perspective(1400px) rotateX(0) rotateY(0) scale(1); }
+}
+@keyframes internieCamSubmissions {
+    from { transform: perspective(1400px) rotateX(-7deg) rotateY(11deg) scale(0.93); }
+    to { transform: perspective(1400px) rotateX(0) rotateY(0) scale(1); }
+}
+@keyframes internieCamResults {
+    from { transform: perspective(1400px) rotateX(6deg) rotateY(11deg) scale(0.93); }
+    to { transform: perspective(1400px) rotateX(0) rotateY(0) scale(1); }
+}
+@keyframes internieCamEvaluation {
+    from { transform: perspective(1400px) rotateX(-8deg) rotateY(-10deg) scale(0.94); }
+    to { transform: perspective(1400px) rotateX(0) rotateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .internie-demo-mockup { animation: none !important; transform: none !important; }
+}
+
+</style>
+</head>
+<body>
+    <main class="internie-demo-page">
+        <section class="internie-demo" aria-label="채용 담당자 중심 미션 채용 데모">
+            <div class="internie-demo-stage" data-demo-stage>
+                <div class="internie-demo-background" aria-hidden="true">
+                    <span class="internie-demo-orb internie-demo-orb-a"></span>
+                    <span class="internie-demo-orb internie-demo-orb-b"></span>
+                    <span class="internie-demo-dot internie-demo-dot-a"></span>
+                    <span class="internie-demo-dot internie-demo-dot-b"></span>
+                    <span class="internie-demo-dot internie-demo-dot-c"></span>
+                    <span class="internie-demo-dot internie-demo-dot-d"></span>
+                </div>
+
+                <article class="internie-demo-scene internie-demo-scene-create is-active" data-scene="create">
+                    <div class="internie-demo-dashboard-shell internie-demo-mockup">
+                        <aside class="internie-demo-sidebar">
+                            <strong class="internie-demo-logo">internie</strong>
+                            <nav>
+                                <span>대시보드</span>
+                                <span class="is-current">미션 관리</span>
+                                <span>제출 결과물</span>
+                                <span>평가 기록</span>
+                            </nav>
+                        </aside>
+
+                        <section class="internie-demo-dashboard-content">
+                            <div class="internie-demo-content-title">
+                                <div>
+                                    <small>기업 채용 관리</small>
+                                    <h3>미션 관리</h3>
+                                </div>
+                                <button type="button" class="internie-demo-primary-button" data-target="create-button">+ 새 미션 등록</button>
+                            </div>
+
+                            <div class="internie-demo-table">
+                                <div class="internie-demo-table-head">
+                                    <span>미션명</span>
+                                    <span>분야</span>
+                                    <span>기간</span>
+                                    <span>상태</span>
+                                </div>
+                                <div class="internie-demo-table-row">
+                                    <strong>신제품 SNS 캠페인 기획</strong>
+                                    <span>마케팅</span>
+                                    <span>10일</span>
+                                    <em class="is-green">진행 중</em>
+                                </div>
+                                <div class="internie-demo-table-row">
+                                    <strong>고객 인터뷰 인사이트 정리</strong>
+                                    <span>리서치</span>
+                                    <span>7일</span>
+                                    <em class="is-gray">완료</em>
+                                </div>
+                                <div class="internie-demo-table-row internie-demo-new-mission-row" data-target="new-mission-row">
+                                    <strong>첫 브랜드 필름 30초, 2주 안에</strong>
+                                    <span>콘텐츠 마케팅</span>
+                                    <span>14일</span>
+                                    <em>모집 중</em>
+                                </div>
+                            </div>
+                        </section>
+
+                        <aside class="internie-demo-form-drawer" data-target="mission-drawer">
+                            <div class="internie-demo-drawer-header">
+                                <div>
+                                    <small>새로운 채용 미션</small>
+                                    <h3>미션 등록</h3>
+                                </div>
+                                <span aria-hidden="true">×</span>
+                            </div>
+
+                            <label>
+                                미션 분야
+                                <input type="text" data-target="field-category" value="" readonly>
+                            </label>
+                            <label>
+                                미션 제목
+                                <input type="text" data-target="field-title" value="" readonly>
+                            </label>
+                            <label>
+                                수행 기간
+                                <input type="text" data-target="field-duration" value="" readonly>
+                            </label>
+                            <label>
+                                평가 기준
+                                <textarea data-target="field-criteria" rows="2" readonly></textarea>
+                            </label>
+
+                            <button type="button" class="internie-demo-register-button" data-target="register-button">미션 등록하기</button>
+                        </aside>
+                    </div>
+
+                    <div class="internie-demo-toast" data-target="register-toast">
+                        <span></span>
+                        <strong>새 미션이 등록되었습니다</strong>
+                    </div>
+                </article>
+
+                <article class="internie-demo-scene internie-demo-scene-submissions" data-scene="submissions">
+                    <div class="internie-demo-submission-dashboard internie-demo-mockup">
+                        <aside class="internie-demo-sidebar">
+                            <strong class="internie-demo-logo">internie</strong>
+                            <nav>
+                                <span>대시보드</span>
+                                <span>미션 관리</span>
+                                <span class="is-current">제출 결과물</span>
+                                <span>평가 기록</span>
+                            </nav>
+                        </aside>
+
+                        <section class="internie-demo-submission-content">
+                            <div class="internie-demo-content-title">
+                                <div>
+                                    <small>첫 브랜드 필름 30초, 2주 안에</small>
+                                    <h3>제출 결과물</h3>
+                                </div>
+                                <div class="internie-demo-submission-count">
+                                    <strong data-target="submission-count">0</strong>
+                                    <span>명 제출</span>
+                                </div>
+                            </div>
+
+                            <div class="internie-demo-empty-state" data-target="submission-empty">
+                                <div class="internie-demo-empty-icon">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <strong>아직 제출된 결과물이 없습니다</strong>
+                                <p>학생이 과제를 제출하면 이 화면에 자동으로 표시됩니다.</p>
+                            </div>
+
+                            <div class="internie-demo-submission-grid">
+                                <article class="internie-demo-submission-card" data-submission-card="1">
+                                    <div class="internie-demo-submission-card-top">
+                                        <span class="internie-demo-avatar">하</span>
+                                        <div>
+                                            <strong>김하늘</strong>
+                                            <small>미디어커뮤니케이션</small>
+                                        </div>
+                                        <em>방금 전</em>
+                                    </div>
+                                    <div class="internie-demo-submission-file">
+                                        <span>MP4</span>
+                                        <div>
+                                            <strong>브랜드 필름 시안.mp4</strong>
+                                            <small>38.1MB · 최종 제출</small>
+                                        </div>
+                                    </div>
+                                    <div class="internie-demo-submission-meta">
+                                        <span>피드백 반영 2회</span>
+                                        <span>기한 내 제출</span>
+                                    </div>
+                                </article>
+
+                                <article class="internie-demo-submission-card" data-submission-card="2">
+                                    <div class="internie-demo-submission-card-top">
+                                        <span class="internie-demo-avatar is-dark">준</span>
+                                        <div>
+                                            <strong>박서준</strong>
+                                            <small>경영학</small>
+                                        </div>
+                                        <em>1분 전</em>
+                                    </div>
+                                    <div class="internie-demo-submission-file">
+                                        <span>PDF</span>
+                                        <div>
+                                            <strong>브랜드 필름 제안서.pdf</strong>
+                                            <small>4.8MB · 최종 제출</small>
+                                        </div>
+                                    </div>
+                                    <div class="internie-demo-submission-meta">
+                                        <span>피드백 반영 1회</span>
+                                        <span>기한 내 제출</span>
+                                    </div>
+                                </article>
+
+                                <article class="internie-demo-submission-card" data-submission-card="3">
+                                    <div class="internie-demo-submission-card-top">
+                                        <span class="internie-demo-avatar is-light">연</span>
+                                        <div>
+                                            <strong>이서연</strong>
+                                            <small>시각디자인</small>
+                                        </div>
+                                        <em>3분 전</em>
+                                    </div>
+                                    <div class="internie-demo-submission-file">
+                                        <span>MP4</span>
+                                        <div>
+                                            <strong>브랜드 필름 최종안.mp4</strong>
+                                            <small>42.7MB · 최종 제출</small>
+                                        </div>
+                                    </div>
+                                    <div class="internie-demo-submission-meta">
+                                        <span>피드백 반영 3회</span>
+                                        <span>기한 내 제출</span>
+                                    </div>
+                                </article>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="internie-demo-notification-stack">
+                        <div class="internie-demo-notification" data-target="notification-1"><span>하</span><p><strong>김하늘 님이 제출했습니다</strong><small>브랜드 필름 시안.mp4</small></p></div>
+                        <div class="internie-demo-notification" data-target="notification-2"><span class="is-dark">준</span><p><strong>박서준 님이 제출했습니다</strong><small>브랜드 필름 제안서.pdf</small></p></div>
+                        <div class="internie-demo-notification" data-target="notification-3"><span class="is-light">연</span><p><strong>이서연 님이 제출했습니다</strong><small>브랜드 필름 최종안.mp4</small></p></div>
+                    </div>
+                </article>
+
+                <article class="internie-demo-scene internie-demo-scene-results" data-scene="results">
+                    <div class="internie-demo-results-dashboard internie-demo-mockup">
+                        <aside class="internie-demo-result-list">
+                            <div class="internie-demo-result-list-title">
+                                <div>
+                                    <small>제출 완료</small>
+                                    <h3>참가자 3명</h3>
+                                </div>
+                                <span>최신순</span>
+                            </div>
+
+                            <button type="button" class="internie-demo-result-card" data-target="result-kim">
+                                <span class="internie-demo-avatar">하</span>
+                                <p><strong>김하늘</strong><small>미디어커뮤니케이션</small></p>
+                                <em>결과 보기</em>
+                            </button>
+
+                            <button type="button" class="internie-demo-result-card">
+                                <span class="internie-demo-avatar is-dark">준</span>
+                                <p><strong>박서준</strong><small>경영학</small></p>
+                                <em>결과 보기</em>
+                            </button>
+
+                            <button type="button" class="internie-demo-result-card">
+                                <span class="internie-demo-avatar is-light">연</span>
+                                <p><strong>이서연</strong><small>시각디자인</small></p>
+                                <em>결과 보기</em>
+                            </button>
+                        </aside>
+
+                        <section class="internie-demo-result-detail">
+                            <div class="internie-demo-result-placeholder" data-target="result-placeholder">
+                                <div class="internie-demo-placeholder-window">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <strong>확인할 결과물을 선택하세요</strong>
+                                <p>왼쪽 목록에서 참가자를 선택하면 제출물과 수행 기록이 표시됩니다.</p>
+                            </div>
+
+                            <div class="internie-demo-result-content" data-target="result-content">
+                                <div class="internie-demo-result-profile">
+                                    <div>
+                                        <span class="internie-demo-avatar">하</span>
+                                        <p><strong>김하늘</strong><small>미디어커뮤니케이션 · 최종 제출</small></p>
+                                    </div>
+                                    <span>기한 내 제출</span>
+                                </div>
+
+                                <div class="internie-demo-result-columns">
+                                    <section class="internie-demo-result-preview">
+                                        <div class="internie-demo-video-preview">
+                                            <small>MOVEMENT LAB</small>
+                                            <strong>나를 움직이는<br>작은 변화</strong>
+                                            <button type="button" class="internie-demo-play-button" data-target="play-button" aria-label="결과 영상 재생">
+                                                <span></span>
+                                            </button>
+                                        </div>
+                                        <div class="internie-demo-file-row">
+                                            <div><span>PDF</span><p><strong>브랜드 필름 기획안.pdf</strong><small>2.4MB</small></p></div>
+                                            <div><span>MP4</span><p><strong>브랜드 필름 시안.mp4</strong><small>38.1MB</small></p></div>
+                                        </div>
+                                    </section>
+
+                                    <section class="internie-demo-process-log">
+                                        <h3>수행 기록</h3>
+                                        <ol>
+                                            <li><time>D+1</time><p><strong>문제 정의</strong><small>핵심 고객과 메시지 정리</small></p></li>
+                                            <li><time>D+3</time><p><strong>기획안 제출</strong><small>레퍼런스 3안 비교</small></p></li>
+                                            <li><time>D+7</time><p><strong>1차 피드백 반영</strong><small>톤앤매너 전면 수정</small></p></li>
+                                            <li><time>D+10</time><p><strong>최종 결과물 제출</strong><small>브랜드 메시지 명확화</small></p></li>
+                                        </ol>
+                                    </section>
+                                </div>
+
+                                <div class="internie-demo-review-comment" data-target="review-comment">
+                                    <small>실무자 검토 메모</small>
+                                    <strong>피드백 이후 방향 전환이 빠르고, 수정 이유가 명확합니다.</strong>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </article>
+
+                <article class="internie-demo-scene internie-demo-scene-evaluation" data-scene="evaluation">
+                    <div class="internie-demo-evaluation-dashboard internie-demo-mockup">
+                        <section class="internie-demo-evaluation-summary">
+                            <div class="internie-demo-result-profile">
+                                <div>
+                                    <span class="internie-demo-avatar">하</span>
+                                    <p><strong>김하늘</strong><small>콘텐츠 마케팅 미션 · 최종 제출</small></p>
+                                </div>
+                                <span>검토 대기</span>
+                            </div>
+
+                            <div class="internie-demo-evaluation-preview">
+                                <div class="internie-demo-video-preview">
+                                    <small>MOVEMENT LAB</small>
+                                    <strong>나를 움직이는<br>작은 변화</strong>
+                                </div>
+                                <div class="internie-demo-evaluation-facts">
+                                    <div><small>수행 기간</small><strong>10일</strong></div>
+                                    <div><small>피드백 반영</small><strong>2회</strong></div>
+                                    <div><small>최종 제출</small><strong>D+10</strong></div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="internie-demo-start-evaluation-button" data-target="start-evaluation-button">평가 시작하기</button>
+                        </section>
+
+                        <aside class="internie-demo-evaluation-drawer" data-target="evaluation-drawer">
+                            <div class="internie-demo-drawer-header">
+                                <div>
+                                    <small>김하늘 · 종합 평가</small>
+                                    <h3>평가 결과</h3>
+                                </div>
+                                <div class="internie-demo-total-score"><strong>92</strong><small>점</small></div>
+                            </div>
+
+                            <div class="internie-demo-score-row"><span>문제 정의</span><em>94</em><i style="--score: 94%;"></i></div>
+                            <div class="internie-demo-score-row"><span>실행 완성도</span><em>88</em><i style="--score: 88%;"></i></div>
+                            <div class="internie-demo-score-row"><span>피드백 반영</span><em>96</em><i style="--score: 96%;"></i></div>
+                            <div class="internie-demo-score-row"><span>커뮤니케이션</span><em>90</em><i style="--score: 90%;"></i></div>
+
+                            <div class="internie-demo-evaluation-note">
+                                <small>실무자 의견</small>
+                                <p>피드백을 빠르게 이해하고 결과물에 반영했습니다. 브랜드 메시지를 스스로 재정의한 과정이 인상적입니다.</p>
+                            </div>
+
+                            <button type="button" class="internie-demo-hire-button" data-target="hire-button">채용 검토 대상으로 지정</button>
+                        </aside>
+                    </div>
+
+                    <div class="internie-demo-toast" data-target="hire-toast">
+                        <span></span>
+                        <strong>채용 검토 대상으로 지정했습니다</strong>
+                    </div>
+                </article>
+
+                <div class="internie-demo-progress" data-demo-progress>
+                    <span class="is-active">01 <strong>미션 등록</strong></span>
+                    <i></i>
+                    <span>02 <strong>제출 수집</strong></span>
+                    <i></i>
+                    <span>03 <strong>결과 확인</strong></span>
+                    <i></i>
+                    <span>04 <strong>평가·채용</strong></span>
+                </div>
+
+                <div class="internie-demo-cursor" data-demo-cursor aria-hidden="true">
+                    <svg viewBox="0 0 54 68" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 4L47 38L29 40L39 60L27 66L17 44L5 57L6 4Z"></path>
+                    </svg>
+                </div>
+
+                <button type="button" class="internie-demo-replay" data-demo-replay>다시 보기</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+(() => {
+    const stage = document.querySelector("[data-demo-stage]");
+    const cursor = document.querySelector("[data-demo-cursor]");
+    const replayButton = document.querySelector("[data-demo-replay]");
+    const progress = document.querySelector("[data-demo-progress]");
+    const scenes = [...document.querySelectorAll("[data-scene]")];
+    const progressItems = progress ? [...progress.querySelectorAll("span")] : [];
+    const state = { token: 0, cursorX: 0, cursorY: 0 };
+
+    if (!stage || !cursor || !replayButton || !progress) return;
+
+    const sleep = (duration) => new Promise(resolve => window.setTimeout(resolve, duration));
+
+    function getTarget(name) {
+        return stage.querySelector(`[data-target="${name}"]`);
+    }
+
+    function getSubmissionCard(index) {
+        return stage.querySelector(`[data-submission-card="${index}"]`);
+    }
+
+    function resetInteractiveState() {
+        stage.querySelectorAll(".is-demo-pressed").forEach(element => element.classList.remove("is-demo-pressed"));
+        stage.querySelectorAll(".internie-demo-toast.is-visible").forEach(element => element.classList.remove("is-visible"));
+        stage.querySelectorAll(".internie-demo-notification.is-visible").forEach(element => element.classList.remove("is-visible"));
+        stage.querySelectorAll(".internie-demo-submission-card.is-entered").forEach(element => element.classList.remove("is-entered"));
+        stage.querySelectorAll(".internie-demo-result-card.is-selected").forEach(element => element.classList.remove("is-selected"));
+        stage.querySelectorAll(".internie-demo-ripple").forEach(element => element.remove());
+
+        getTarget("mission-drawer")?.closest(".internie-demo-dashboard-shell")?.classList.remove("is-form-open");
+        getTarget("new-mission-row")?.classList.remove("is-visible");
+        getTarget("submission-empty")?.classList.remove("is-hidden");
+        getTarget("result-placeholder")?.classList.remove("is-hidden");
+        getTarget("result-content")?.classList.remove("is-visible");
+        getTarget("review-comment")?.classList.remove("is-visible");
+        getTarget("evaluation-drawer")?.closest(".internie-demo-evaluation-dashboard")?.classList.remove("is-evaluation-open");
+
+        const count = getTarget("submission-count");
+        if (count) count.textContent = "0";
+
+        ["field-category", "field-title", "field-duration", "field-criteria"].forEach(name => {
+            const field = getTarget(name);
+            if (!field) return;
+            field.value = "";
+            field.classList.remove("is-focused");
+        });
+    }
+
+    function updateProgress(sceneName) {
+        const sceneIndexMap = { create: 0, submissions: 1, results: 2, evaluation: 3 };
+        const activeIndex = sceneIndexMap[sceneName];
+
+        progressItems.forEach((item, index) => item.classList.toggle("is-active", index === activeIndex));
+        progress.classList.toggle("is-visible", Number.isInteger(activeIndex));
+    }
+
+    async function showScene(sceneName, token) {
+        if (token !== state.token) return false;
+
+        const currentScene = scenes.find(scene => scene.classList.contains("is-active"));
+        const nextScene = scenes.find(scene => scene.dataset.scene === sceneName);
+        if (!nextScene || currentScene === nextScene) return true;
+
+        currentScene?.classList.remove("is-active");
+        currentScene?.classList.add("is-leaving");
+        nextScene.classList.remove("is-leaving");
+        nextScene.classList.add("is-active");
+        updateProgress(sceneName);
+
+        await sleep(720);
+        currentScene?.classList.remove("is-leaving");
+        return token === state.token;
+    }
+
+    function getTargetPosition(target, anchorX = 0.55, anchorY = 0.55) {
+        const stageRect = stage.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        return {
+            x: targetRect.left - stageRect.left + targetRect.width * anchorX,
+            y: targetRect.top - stageRect.top + targetRect.height * anchorY
+        };
+    }
+
+    async function moveCursorTo(target, duration, token, anchorX = 0.55, anchorY = 0.55) {
+        if (!target || token !== state.token) return false;
+
+        const nextPosition = getTargetPosition(target, anchorX, anchorY);
+        cursor.classList.add("is-visible");
+
+        const animation = cursor.animate(
+            [
+                { transform: `translate3d(${state.cursorX}px, ${state.cursorY}px, 0)` },
+                { transform: `translate3d(${nextPosition.x}px, ${nextPosition.y}px, 0)` }
+            ],
+            {
+                duration,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                fill: "forwards"
+            }
+        );
+
+        try {
+            await animation.finished;
+        } catch {
+            return false;
+        }
+
+        state.cursorX = nextPosition.x;
+        state.cursorY = nextPosition.y;
+        return token === state.token;
+    }
+
+    async function clickTarget(target, token) {
+        if (!target || token !== state.token) return false;
+
+        cursor.classList.add("is-clicking");
+        target.classList.add("is-demo-pressed");
+
+        const ripple = document.createElement("span");
+        ripple.className = "internie-demo-ripple";
+        ripple.style.left = `${state.cursorX}px`;
+        ripple.style.top = `${state.cursorY}px`;
+        stage.appendChild(ripple);
+
+        await sleep(220);
+        cursor.classList.remove("is-clicking");
+        target.classList.remove("is-demo-pressed");
+        window.setTimeout(() => ripple.remove(), 600);
+
+        return token === state.token;
+    }
+
+    async function typeText(field, value, token, delay = 34) {
+        if (!field || token !== state.token) return false;
+
+        field.value = "";
+        field.classList.add("is-focused");
+
+        for (const character of value) {
+            if (token !== state.token) return false;
+            field.value += character;
+            await sleep(delay);
+        }
+
+        await sleep(180);
+        field.classList.remove("is-focused");
+        return token === state.token;
+    }
+
+    async function showToast(targetName, duration, token) {
+        const toast = getTarget(targetName);
+        if (!toast || token !== state.token) return false;
+
+        toast.classList.add("is-visible");
+        await sleep(duration);
+        toast.classList.remove("is-visible");
+
+        return token === state.token;
+    }
+
+    async function addSubmission(index, token) {
+        const card = getSubmissionCard(index);
+        const notification = getTarget(`notification-${index}`);
+        const count = getTarget("submission-count");
+        const emptyState = getTarget("submission-empty");
+
+        if (!card || !notification || !count || token !== state.token) return false;
+
+        if (index === 1) emptyState?.classList.add("is-hidden");
+        notification.classList.add("is-visible");
+        await sleep(320);
+        card.classList.add("is-entered");
+        count.textContent = String(index);
+        await sleep(1250);
+        notification.classList.remove("is-visible");
+
+        return token === state.token;
+    }
+
+    function resetScenes() {
+        scenes.forEach(scene => {
+            scene.classList.remove("is-active", "is-leaving");
+            if (scene.dataset.scene === "create") scene.classList.add("is-active");
+        });
+
+        updateProgress("create");
+        cursor.classList.remove("is-visible", "is-clicking");
+        cursor.getAnimations().forEach(animation => animation.cancel());
+        state.cursorX = stage.clientWidth * 0.86;
+        state.cursorY = stage.clientHeight * 0.8;
+        cursor.style.transform = `translate3d(${state.cursorX}px, ${state.cursorY}px, 0)`;
+    }
+
+    async function runDemo() {
+        const token = ++state.token;
+        resetInteractiveState();
+        resetScenes();
+
+        await sleep(200);
+        if (!await showScene("create", token)) return;
+        await sleep(500);
+
+        const createButton = getTarget("create-button");
+        if (!await moveCursorTo(createButton, 900, token)) return;
+        if (!await clickTarget(createButton, token)) return;
+
+        getTarget("mission-drawer")?.closest(".internie-demo-dashboard-shell")?.classList.add("is-form-open");
+        await sleep(1550);
+
+        const categoryField = getTarget("field-category");
+        if (!await moveCursorTo(categoryField, 620, token, 0.3, 0.55)) return;
+        if (!await clickTarget(categoryField, token)) return;
+        if (!await typeText(categoryField, "콘텐츠 마케팅", token)) return;
+
+        const titleField = getTarget("field-title");
+        if (!await moveCursorTo(titleField, 580, token, 0.3, 0.55)) return;
+        if (!await clickTarget(titleField, token)) return;
+        if (!await typeText(titleField, "첫 브랜드 필름 30초, 2주 안에", token, 28)) return;
+
+        const durationField = getTarget("field-duration");
+        if (!await moveCursorTo(durationField, 520, token, 0.3, 0.55)) return;
+        if (!await clickTarget(durationField, token)) return;
+        if (!await typeText(durationField, "14일", token, 90)) return;
+
+        const criteriaField = getTarget("field-criteria");
+        if (!await moveCursorTo(criteriaField, 520, token, 0.28, 0.4)) return;
+        if (!await clickTarget(criteriaField, token)) return;
+        if (!await typeText(criteriaField, "문제 정의 · 실행력 · 피드백 반영", token, 28)) return;
+
+        const registerButton = getTarget("register-button");
+        if (!await moveCursorTo(registerButton, 620, token)) return;
+        if (!await clickTarget(registerButton, token)) return;
+
+        getTarget("mission-drawer")?.closest(".internie-demo-dashboard-shell")?.classList.remove("is-form-open");
+        await sleep(700);
+        getTarget("new-mission-row")?.classList.add("is-visible");
+        await showToast("register-toast", 1400, token);
+        await sleep(1100);
+
+        if (!await showScene("submissions", token)) return;
+        cursor.classList.remove("is-visible");
+        await sleep(1900);
+
+        if (!await addSubmission(1, token)) return;
+        await sleep(850);
+        if (!await addSubmission(2, token)) return;
+        await sleep(850);
+        if (!await addSubmission(3, token)) return;
+        await sleep(1800);
+
+        if (!await showScene("results", token)) return;
+        await sleep(1900);
+
+        const resultCard = getTarget("result-kim");
+        if (!await moveCursorTo(resultCard, 950, token, 0.35, 0.55)) return;
+        if (!await clickTarget(resultCard, token)) return;
+
+        resultCard.classList.add("is-selected");
+        getTarget("result-placeholder")?.classList.add("is-hidden");
+        await sleep(280);
+        getTarget("result-content")?.classList.add("is-visible");
+        await sleep(1700);
+
+        const playButton = getTarget("play-button");
+        if (!await moveCursorTo(playButton, 720, token)) return;
+        if (!await clickTarget(playButton, token)) return;
+        await sleep(900);
+        getTarget("review-comment")?.classList.add("is-visible");
+        await sleep(2100);
+
+        if (!await showScene("evaluation", token)) return;
+        await sleep(1700);
+
+        const startEvaluationButton = getTarget("start-evaluation-button");
+        if (!await moveCursorTo(startEvaluationButton, 850, token)) return;
+        if (!await clickTarget(startEvaluationButton, token)) return;
+        getTarget("evaluation-drawer")?.closest(".internie-demo-evaluation-dashboard")?.classList.add("is-evaluation-open");
+        await sleep(2850);
+
+        const hireButton = getTarget("hire-button");
+        if (!await moveCursorTo(hireButton, 720, token)) return;
+        if (!await clickTarget(hireButton, token)) return;
+        await showToast("hire-toast", 1500, token);
+        await sleep(1600);
+
+        cursor.classList.remove("is-visible");
+        await sleep(900);
+
+        if (token === state.token) runDemo();
+    }
+
+    replayButton.addEventListener("click", runDemo);
+    runDemo();
+})();
+
+</script>
+</body>
+</html>
