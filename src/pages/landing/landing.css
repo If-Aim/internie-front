@@ -15,8 +15,8 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-landing-logo { padding: 0; border: 0; background: transparent; color: #0166ff; font-family: Montserrat, Pretendard, sans-serif; font-size: 20px; font-weight: 700; line-height: 1; }
 .internie-landing-login { min-width: 96px; padding: 8px 12px; border: 0; background: transparent; color: #000000; font-size: 20px; font-weight: 700; line-height: 32px; }
 .internie-landing main { width: 100%; padding-top: 64px; }
-.internie-landing-hero { position: relative; min-height: 960px; overflow: hidden; background: linear-gradient(108deg, #0166ff 0%, #ddebff 100%); opacity: 0; animation: internie-hero-fade 0.5s ease-out 0.04s forwards; }
-.internie-landing-hero-inner { position: relative; display: flex; align-items: center; justify-content: space-between; width: min(100%, 1426px); height: 960px; margin: 0 auto; padding: 0 0 0 10px; }
+.internie-landing-hero { position: relative; min-height: 880px; overflow: hidden; background: linear-gradient(108deg, #0166ff 0%, #ddebff 100%); opacity: 0; animation: internie-hero-fade 0.5s ease-out 0.04s forwards; }
+.internie-landing-hero-inner { position: relative; display: flex; align-items: center; justify-content: space-between; width: min(100%, 1426px); height: 880px; margin: 0 auto; padding: 0 0 0 10px; }
 .internie-landing-hero-copy { position: relative; z-index: 2; width: 626px; padding-top: 34px; color: #ffffff; }
 .internie-landing-hero-copy h1 { margin: 0; color: #ffffff; font-size: 58px; font-weight: 800; line-height: 1.24; letter-spacing: 0; }
 .internie-landing-hero-copy p { margin: 16px 0 0; color: rgba(255, 255, 255, 0.86); font-size: 20px; font-weight: 500; line-height: 32px; letter-spacing: 0; word-break: keep-all; }
