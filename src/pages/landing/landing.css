@@ -195,9 +195,10 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-workflow-panel { width: 1136px; height: 696px; margin: 0 auto; padding: 45px 60px 45px; border-radius: 28px; background: #ffffff; box-shadow: 0 34px 45px rgba(1, 60, 150, 0.13); }
 .internie-workflow-panel .internie-landing-section-heading { margin-bottom: 80px; }
 .internie-workflow-steps { position: relative; display: grid; grid-template-columns: repeat(4, 237.5px); gap: 22px; width: 1016px; height: 356px; margin: 0 auto; }
-.internie-workflow-steps::before { position: absolute; left: 112px; right: 112px; top: 93px; z-index: 0; height: 2px; background-image: radial-gradient(circle, #bdd8ff 1.25px, transparent 1.35px); background-size: 8px 2px; background-repeat: repeat-x; content: ""; }
-.internie-workflow-step { position: relative; z-index: 1; text-align: center; }
-.internie-workflow-step-visual { position: relative; width: 237.5px; height: 172px; margin: 0 auto 22px; opacity: 0; transform: translateY(44px); transition: opacity 0.45s ease, transform 0.72s cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-workflow-step { position: relative; z-index: 1; overflow: visible; text-align: center; }
+.internie-workflow-step-visual { position: relative; z-index: 2; width: 237.5px; height: 172px; margin: 0 auto 22px; opacity: 0; transform: translateY(44px); transition: opacity 0.45s ease, transform 0.72s cubic-bezier(0.22, 1, 0.36, 1); }
+.internie-workflow-connector { position: absolute; left: calc(100% - 33px); top: 42px; z-index: 0; display: block; width: 88px; height: 55px; overflow: visible; color: #8fb6f5; pointer-events: none; }
+.internie-workflow-connector.is-inverted { top: 18px; transform: scaleY(-1); transform-origin: center; }
 .internie-workflow-step-visual span, .internie-workflow-step-visual span::before, .internie-workflow-step-visual span::after { position: absolute; display: block; box-sizing: border-box; content: ""; }
 .internie-workflow-step-visual.is-onboarding span:nth-child(1) { left: 12px; top: 23px; width: 214px; height: 125px; overflow: hidden; border: 1px solid #eaf0f8; border-radius: 12px; background: #ffffff; box-shadow: 0 10px 26px rgba(1, 60, 150, 0.09); }
 .internie-workflow-step-visual.is-onboarding span:nth-child(1)::before { inset: 0 0 auto 0; height: 26px; background: #0b1b3a; }

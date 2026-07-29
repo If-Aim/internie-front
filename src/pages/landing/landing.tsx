@@ -487,6 +487,14 @@ function StepIllustration({ kind }: { kind: string }): React.ReactElement {
     );
 }
 
+function WorkflowConnector({ inverted }: { inverted: boolean }): React.ReactElement {
+    return (
+        <svg className={`internie-workflow-connector${inverted ? " is-inverted" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 55" fill="none" aria-hidden="true">
+            <path d="M1 1C36.1692 71 55.7077 71 86.9692 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="1 9" />
+        </svg>
+    );
+}
+
 function MissionExampleCard({ example, onInquiryOpen }: { example: MissionExample; onInquiryOpen: () => void }): React.ReactElement {
     const { t } = useTranslation();
     const tags = [0, 1, 2].map((index) => t(`landing.missionExamples.items.${example.id}.tags.${index}`));
@@ -794,9 +802,12 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                     <h2>{t("landing.workflow.titleLine1")}<br />{t("landing.workflow.titleLine2")}</h2>
                                 </div>
                                 <div className="internie-workflow-steps">
-                                    {WORKFLOW_STEPS.map((step) => (
+                                    {WORKFLOW_STEPS.map((step, index) => (
                                         <article key={step.number} className="internie-workflow-step">
                                             <StepIllustration kind={step.kind} />
+                                            {index < WORKFLOW_STEPS.length - 1 && (
+                                                <WorkflowConnector inverted={index % 2 === 1} />
+                                            )}
                                             <div className="internie-workflow-copy">
                                                 <h3><span>{step.number}</span>{t(step.titleKey)}</h3>
                                                 <p><Trans i18nKey={step.descriptionKey} components={{ strong: <strong /> }} /></p>
