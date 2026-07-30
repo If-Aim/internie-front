@@ -5,10 +5,12 @@ import Landing from "./landing";
 
 type LocalizedLandingProps = {
     language: "ko" | "en";
+    canonical?: string;
 };
 
 export default function LocalizedLanding({
-    language
+    language,
+    canonical
 }: LocalizedLandingProps): React.ReactElement {
     const { i18n } = useTranslation();
     const [languageReady, setLanguageReady] = useState(() => {
@@ -49,9 +51,9 @@ export default function LocalizedLanding({
     return (
         <Landing
             canonical={
-                language === "en"
+                canonical ?? (language === "en"
                     ? "https://www.internie.com/global"
-                    : "https://www.internie.com/company"
+                    : "https://www.internie.com/company")
             }
         />
     );

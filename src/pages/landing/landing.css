@@ -13,6 +13,11 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-landing-text-line { display: block; white-space: nowrap; }
 .internie-landing-header { position: fixed; top: 0; left: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; width: 100%; min-width: 1180px; height: 64px; padding: 0 116px 0 34px; background: #ffffff; }
 .internie-landing-logo { padding: 0; border: 0; background: transparent; color: #0166ff; font-family: Montserrat, Pretendard, sans-serif; font-size: 20px; font-weight: 700; line-height: 1; }
+.internie-landing-header-actions { display: flex; align-items: center; gap: 10px; }
+.internie-landing-student-link { padding: 8px 12px; border: 0; background: transparent; color: #565c6b; font-size: 15px; font-weight: 700; line-height: 24px; white-space: nowrap; }
+.internie-landing-language-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 78px; height: 40px; padding: 0 12px; border: 1px solid #e6ebf2; border-radius: 999px; background: #ffffff; color: #0b1220; font-size: 14px; font-weight: 800; line-height: 20px; white-space: nowrap; }
+.internie-landing-language-button img { width: 18px; height: 18px; flex: 0 0 auto; }
+.internie-landing-language-button img:last-child { width: 16px; height: 16px; }
 .internie-landing-login { min-width: 96px; padding: 8px 12px; border: 0; background: transparent; color: #000000; font-size: 20px; font-weight: 700; line-height: 32px; }
 .internie-landing main { width: 100%; padding-top: 64px; }
 .internie-landing-hero { position: relative; min-height: 880px; overflow: hidden; background: linear-gradient(108deg, #0166ff 0%, #ddebff 100%); opacity: 0; animation: internie-hero-fade 0.5s ease-out 0.04s forwards; }
@@ -349,6 +354,11 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 @media (max-width: 768px) {
     .internie-landing { min-width: 0; overflow-x: hidden; }
     .internie-landing-header { min-width: 0; padding: 0 20px; }
+    .internie-landing-header-actions { gap: 6px; }
+    .internie-landing-student-link { padding: 6px 4px; font-size: 13px; line-height: 20px; }
+    .internie-landing-language-button { min-width: 66px; height: 34px; padding: 0 8px; gap: 4px; font-size: 12px; }
+    .internie-landing-language-button img { width: 15px; height: 15px; }
+    .internie-landing-language-button img:last-child { width: 12px; height: 12px; }
     .internie-landing-login { min-width: auto; font-size: 16px; line-height: 24px; }
     .internie-landing main { padding-top: 64px; }
     .internie-landing-hero { min-height: 760px; background: linear-gradient(180deg, #2757f9 0%, #0029b2 66%, #2c5bf9 100%); }

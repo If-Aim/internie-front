@@ -603,6 +603,16 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    const handleStudentClick = () => {
+        navigate("/login");
+    };
+
+    const handleLanguageSwitch = async () => {
+        const nextLanguage = isEnglish ? "ko" : "en";
+        await i18n.changeLanguage(nextLanguage);
+        navigate(nextLanguage === "en" ? "/global" : "/");
+    };
+
     const updateInquiryField = (field: keyof InquiryFormState, value: string) => {
         setInquiryForm((prev) => ({ ...prev, [field]: value }));
     };
@@ -764,7 +774,15 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                 <div className={`internie-landing-default-view${inquiryOpen ? " is-inquiry-open" : ""}`}>
                     <header className="internie-landing-header">
                         <button type="button" className="internie-landing-logo" onClick={handleLogoClick}>internie</button>
-                        <button type="button" className="internie-landing-login" onClick={() => navigate("/login")}>{t("landing.header.login")}</button>
+                        <div className="internie-landing-header-actions">
+                            <button type="button" className="internie-landing-student-link" onClick={handleStudentClick}>{t("landing.header.student")}</button>
+                            <button type="button" className="internie-landing-language-button" aria-label={t("landing.header.languageSwitchAria")} onClick={() => void handleLanguageSwitch()}>
+                                <img src="/icons/globe-01.svg" alt="" aria-hidden="true" />
+                                <span>{isEnglish ? "KO" : "EN"}</span>
+                                <img src="/icons/chevron-down-80.svg" alt="" aria-hidden="true" />
+                            </button>
+                            <button type="button" className="internie-landing-login" onClick={() => navigate("/login")}>{t("landing.header.login")}</button>
+                        </div>
                     </header>
                     <main>
                         <section id="internie-landing-top" className="internie-landing-hero">
