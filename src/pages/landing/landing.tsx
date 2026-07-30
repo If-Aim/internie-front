@@ -310,6 +310,31 @@ function HeroMissionCard(): React.ReactElement {
     );
 }
 
+function HeroMobileDocumentCard({ className = "", label }: { className?: string; label: string }): React.ReactElement {
+    return (
+        <article className={`internie-hero-mobile-document-card ${className}`} aria-hidden="true">
+            <span className="internie-hero-mobile-doc-label">{label}</span>
+            <span className="internie-hero-mobile-doc-line is-strong" />
+            <span className="internie-hero-mobile-doc-line is-medium" />
+            <span className="internie-hero-mobile-doc-line is-long" />
+            <span className="internie-hero-mobile-doc-line is-short" />
+            <div className="internie-hero-mobile-doc-chips"><span /><span /></div>
+        </article>
+    );
+}
+
+function HeroMobileMissionCard({ className = "" }: { className?: string }): React.ReactElement {
+    const { t } = useTranslation();
+    return (
+        <article className={`internie-hero-mobile-mission-card ${className}`} aria-hidden="true">
+            <strong>{t("landing.hero.mobile.cards.projectTitle", { defaultValue: "팀 프로젝트" })}</strong>
+            <div className="internie-hero-mobile-progress"><span><i /></span><b>{t("landing.hero.mobile.cards.projectPercent", { defaultValue: "100%" })}</b></div>
+            <div className="internie-hero-mobile-tags"><span>{t("landing.hero.mobile.cards.projectTag1", { defaultValue: "콘텐츠 기획" })}</span><span>{t("landing.hero.mobile.cards.projectTag2", { defaultValue: "카피 12종" })}</span><span>{t("landing.hero.mobile.cards.projectTag3", { defaultValue: "A/B 테스트안" })}</span></div>
+            <p>{t("landing.hero.mobile.cards.projectDescription", { defaultValue: "이 학생은 제출 기한을 준수하고 과정을 체계적으로 관리했습니다. 실행력과 자기관리 역량을 중요하게 보는 기업에서 안정적으로 성과를 낼 가능성이 있습니다." })}</p>
+        </article>
+    );
+}
+
 function DiagnosisVisual({ variant }: { variant: DiagnosisVisualType }): React.ReactElement {
     const { t } = useTranslation();
 
@@ -747,12 +772,15 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                 <div className="internie-landing-hero-copy">
                                     <h1>{t("landing.hero.desktop.titleLine1")}<br />{t("landing.hero.desktop.titleLine2")}</h1>
                                     <p>{t("landing.hero.desktop.pretitleLine1")}<br />{t("landing.hero.desktop.pretitleLine2")}</p>
-                                    <button type="button" onClick={handleInquiryOpen}>{t("landing.hero.desktop.cta")}</button>
+                                    <button type="button" className="internie-landing-hero-cta" onClick={handleInquiryOpen}>{t("landing.hero.desktop.cta")}</button>
                                 </div>
                                 <div className="internie-landing-hero-visual" aria-hidden="true">
                                     <HeroResumeCard className="is-main" label={t("landing.hero.desktop.cards.resume")} />
                                     <HeroResumeCard className="is-top" label={t("landing.hero.desktop.cards.application")} />
                                     <HeroMissionCard />
+                                    <HeroMobileDocumentCard className="is-mobile-left" label={t("landing.hero.desktop.cards.resume")} />
+                                    <HeroMobileMissionCard className="is-mobile-front" />
+                                    <HeroMobileDocumentCard className="is-mobile-right" label={t("landing.hero.desktop.cards.application")} />
                                 </div>
                             </div>
                         </section>
@@ -769,16 +797,20 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                 </div>
                                 <fieldset className="internie-dx-options">
                                     <legend className="sr-only">{t("landing.diagnosis.legend")}</legend>
-                                    {DIAGNOSIS_ITEMS.map((item) => {
-                                        const checked = item.id === selectedDiagnosisId;
-                                        return (
-                                            <label key={item.id} className={`internie-dx-option${checked ? " is-active" : ""}`}>
-                                                <input type="radio" name="internieDiagnosis" checked={checked} onChange={() => setSelectedDiagnosisId(item.id)} />
-                                                <span aria-hidden="true" />
-                                                <b>{t(item.labelKey)}</b>
-                                            </label>
-                                        );
-                                    })}
+                                    <div className="internie-dx-options-track">
+                                        {DIAGNOSIS_ITEMS.map((item) => {
+                                            const checked = item.id === selectedDiagnosisId;
+                                            return (
+                                                <div key={item.id} className="internie-dx-option-row">
+                                                    <label className={`internie-dx-option${checked ? " is-active" : ""}`}>
+                                                        <input type="radio" name="internieDiagnosis" checked={checked} onChange={() => setSelectedDiagnosisId(item.id)} />
+                                                        <span aria-hidden="true" />
+                                                        <b>{t(item.labelKey)}</b>
+                                                    </label>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </fieldset>
                             </div>
                         </section>
