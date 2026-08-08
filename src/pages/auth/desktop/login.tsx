@@ -186,18 +186,13 @@ export default function Login(): React.ReactElement {
             return;
         }
 
-        const buttonWidth = buttonContainer.parentElement?.clientWidth || 180;
-
         buttonContainer.innerHTML = "";
 
         window.google.accounts.id.renderButton(buttonContainer, {
-            type: "standard",
+            type: "icon",
             theme: "outline",
             size: "large",
-            text: "continue_with",
-            shape: "rectangular",
-            logo_alignment: "left",
-            width: Math.min(buttonWidth, 400),
+            shape: "circle",
             locale: isEnglish ? "en" : "ko",
         });
     };
@@ -462,9 +457,8 @@ export default function Login(): React.ReactElement {
                                 </div>
 
                                 {!isEnglish && (
-                                    <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
-                                        <img src="/logos/kakao_Logo.svg" alt="" width={16} height={16} />
-                                        <span>{t("login.loginWithKakao")}</span>
+                                    <button type="button" className="login-desktop-kakao-button" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
+                                        <img src="/logos/kakao_Logo.svg" alt="" className="login-desktop-kakao-icon" />
                                     </button>
                                 )}
                             </div>

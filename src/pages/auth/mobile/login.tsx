@@ -86,6 +86,7 @@ export default function Login() {
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
     const isEnglish = currentLanguage.startsWith("en");
     const googleInitializedRef = useRef(false);
+    const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
     const [loginId, setLoginId] = useState("");
     const [password, setPassword] = useState("");
@@ -94,34 +95,27 @@ export default function Login() {
     const [loginError, setLoginError] = useState<string | null>(null);
     const [googleReady, setGoogleReady] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(true);
-    const [googleLoadFailed, setGoogleLoadFailed] = useState(false);
+    const [/*googleLoadFailed*/, setGoogleLoadFailed] = useState(false);
 
     const go = (url: string) => {
         window.location.href = url;
     };
 
-    const handleGoogleClick = () => {
-        if (googleLoading || googleLoadFailed || !googleReady || !window.google?.accounts?.id) {
-            setLoginError(t("login.googleNotReady"));
+    const renderGoogleButton = () => {
+        const buttonContainer = googleButtonRef.current;
+
+        if (!buttonContainer || !window.google?.accounts?.id) {
             return;
         }
 
-        window.google.accounts.id.prompt((notification: any) => {
-            if (notification.isNotDisplayed?.()) {
-                console.error("Google prompt not displayed", notification.getNotDisplayedReason?.());
-                setLoginError(t("login.googleLoginFailed"));
-                return;
-            }
+        buttonContainer.innerHTML = "";
 
-            if (notification.isSkippedMoment?.()) {
-                console.error("Google prompt skipped", notification.getSkippedReason?.());
-                setLoginError(t("login.googleLoginFailed"));
-                return;
-            }
-
-            if (notification.isDismissedMoment?.()) {
-                console.error("Google prompt dismissed", notification.getDismissedReason?.());
-            }
+        window.google.accounts.id.renderButton(buttonContainer, {
+            type: "icon",
+            theme: "outline",
+            size: "large",
+            shape: "circle",
+            locale: isEnglish ? "en" : "ko",
         });
     };
 
@@ -190,6 +184,7 @@ export default function Login() {
                 }
 
                 if (googleInitializedRef.current) {
+                    renderGoogleButton();
                     setGoogleReady(true);
                     setGoogleLoading(false);
                     setGoogleLoadFailed(false);
@@ -200,6 +195,9 @@ export default function Login() {
 
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
+                    ux_mode: "popup",
+                    use_fedcm_for_button: true,
+                    button_auto_select: false,
                     callback: async (response: any) => {
                         const idToken = response?.credential;
 
@@ -230,6 +228,8 @@ export default function Login() {
                     },
                 });
 
+                renderGoogleButton();
+
                 setGoogleReady(true);
                 setGoogleLoading(false);
                 setGoogleLoadFailed(false);
@@ -247,7 +247,7 @@ export default function Login() {
         return () => {
             cancelled = true;
         };
-    }, [navigate, t]);
+    }, [navigate, t, isEnglish]);
 
     return (
         <>
@@ -309,25 +309,15 @@ export default function Login() {
                     </section>
 
                     <section className="mobile-login-social-section">
+                        <div className="mobile-login-google-slot" aria-busy={googleLoading}>
+                            <div ref={googleButtonRef} className={`mobile-login-google-button ${googleReady ? "is-ready" : ""}`}></div>
+                        </div>
+
                         {!isEnglish && (
-                            <button type="button" className="mobile-login-social-btn mobile-login-kakao-btn" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
-                                <span className="mobile-login-social-icon" aria-hidden="true">
-                                    <img src="/logos/kakao_Logo.svg" alt="" />
-                                </span>
-                                <span className="mobile-login-social-text">{t("login.startWithKakao")}</span>
+                            <button type="button" className="mobile-login-kakao-button" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>
+                                <img src="/logos/kakao_Logo.svg" alt="" className="mobile-login-kakao-icon" />
                             </button>
                         )}
-
-                        <button type="button" className="mobile-login-social-btn mobile-login-google-btn" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
-                            <span className="mobile-login-social-icon" aria-hidden="true">
-                                <img src="/logos/google_Logo.svg" alt="" />
-                            </span>
-                            {googleLoading ? (
-                                <span className="google-login-spinner" aria-hidden="true"></span>
-                            ) : (
-                                <span className="mobile-login-social-text">{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.startWithGoogle")}</span>
-                            )}
-                        </button>
                     </section>
 
                     <section className="mobile-login-signup-section">
