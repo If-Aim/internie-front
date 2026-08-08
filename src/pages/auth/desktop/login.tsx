@@ -84,6 +84,7 @@ export default function Login(): React.ReactElement {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const googleInitializedRef = useRef(false);
+    const googleButtonRef = useRef<HTMLDivElement | null>(null);
     const currentLanguage = i18n.resolvedLanguage || i18n.language;
     const isEnglish = currentLanguage.startsWith("en");
 
@@ -178,36 +179,29 @@ export default function Login(): React.ReactElement {
         showErrorToast(message || getGoogleLoginFailedMessage());
     };
 
-    const handleGoogleClick = () => {
-        if (googleLoading || googleLoadFailed || !googleReady || !window.google?.accounts?.id) {
-            showGoogleLoginFailureToast(t("login.googleNotReady"));
+    const renderGoogleButton = () => {
+        const buttonContainer = googleButtonRef.current;
+
+        if (!buttonContainer || !window.google?.accounts?.id) {
             return;
         }
 
-        window.google.accounts.id.prompt((notification: any) => {
-            if (notification.isNotDisplayed?.()) {
-                const reason = notification.getNotDisplayedReason?.();
+        const buttonWidth = buttonContainer.parentElement?.clientWidth || 180;
 
-                console.error("Google prompt not displayed", reason);
+        buttonContainer.innerHTML = "";
 
-                showErrorToast(getGoogleLoginGuideMessage(), { guide: true, duration: 8000 });
-                return;
-            }
-
-            if (notification.isSkippedMoment?.()) {
-                const reason = notification.getSkippedReason?.();
-
-                console.error("Google prompt skipped", reason);
-
-                showErrorToast(getGoogleLoginGuideMessage(), { guide: true, duration: 8000 });
-                return;
-            }
-
-            if (notification.isDismissedMoment?.()) {
-                console.error("Google prompt dismissed", notification.getDismissedReason?.());
-            }
+        window.google.accounts.id.renderButton(buttonContainer, {
+            type: "standard",
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left",
+            width: Math.min(buttonWidth, 400),
+            locale: isEnglish ? "en" : "ko",
         });
     };
+
 
     const handleLocalLogin = async () => {
         const trimmedLoginId = loginId.trim();
@@ -276,6 +270,7 @@ export default function Login(): React.ReactElement {
                 }
 
                 if (googleInitializedRef.current) {
+                    renderGoogleButton();
                     setGoogleReady(true);
                     setGoogleLoading(false);
                     setGoogleLoadFailed(false);
@@ -286,6 +281,9 @@ export default function Login(): React.ReactElement {
 
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
+                    ux_mode: "popup",
+                    use_fedcm_for_button: true,
+                    button_auto_select: false,
                     callback: async (response: any) => {
                         const idToken = response?.credential;
 
@@ -297,6 +295,7 @@ export default function Login(): React.ReactElement {
 
                         try {
                             const data = await loginWithGoogle(idToken);
+
                             googleLoginFailCountRef.current = 0;
                             navigate(data.onboardingCompleted ? "/student" : "/onboarding", { replace: true });
                         } catch (e) {
@@ -316,6 +315,8 @@ export default function Login(): React.ReactElement {
                         }
                     },
                 });
+
+                renderGoogleButton();
 
                 setGoogleReady(true);
                 setGoogleLoading(false);
@@ -444,14 +445,21 @@ export default function Login(): React.ReactElement {
                             </div>
 
                             <div className={`login-desktop-socials ${isEnglish ? "is-english" : ""}`}>
-                                <button type="button" className="login-desktop-btn google" onClick={handleGoogleClick} disabled={googleLoading || googleLoadFailed || !googleReady} aria-label={t("login.startWithGoogleAria")}>
-                                    <img src="/logos/google_Logo.svg" alt="" width={16} height={16} />
-                                    {googleLoading ? (
-                                        <span className="google-login-spinner" aria-hidden="true"></span>
-                                    ) : (
-                                        <span>{googleLoadFailed ? t("login.googleLoadFailedShort") : t("login.loginWithGoogle")}</span>
+                                <div className="login-desktop-google-slot">
+                                    {googleLoading && (
+                                        <div className="login-desktop-google-placeholder">
+                                            <span className="google-login-spinner" aria-hidden="true"></span>
+                                        </div>
                                     )}
-                                </button>
+
+                                    {googleLoadFailed && (
+                                        <div className="login-desktop-google-placeholder">
+                                            {t("login.googleLoadFailedShort")}
+                                        </div>
+                                    )}
+
+                                    <div ref={googleButtonRef} className={`login-desktop-google-button ${googleReady ? "is-ready" : ""}`}></div>
+                                </div>
 
                                 {!isEnglish && (
                                     <button type="button" className="login-desktop-btn kakao" onClick={() => go(kakaoAuthUrl)} aria-label={t("login.startWithKakaoAria")}>

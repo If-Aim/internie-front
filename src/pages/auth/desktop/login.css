@@ -31,8 +31,11 @@
 
 .login-desktop-btn { width: 100%; height: 50px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .login-desktop-btn.primary { margin-top: 11px; background: #F6F6F6; color: #6B6B6B; }
-.login-desktop-btn.google { background: #fff; color: #6B6B6B; border: 1px solid #ddd; }
 .login-desktop-btn.kakao { background: #fee500; color: #000; }
+.login-desktop-google-slot { width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: center; position: relative; }
+.login-desktop-google-button { width: 100%; display: none; align-items: center; justify-content: center; }
+.login-desktop-google-button.is-ready { display: flex; }
+.login-desktop-google-placeholder { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #6B6B6B; }
 
 .login-desktop-social-divider { position: relative; display: flex; align-items: center; justify-content: center; font-size: 12px; line-height: 20px; font-weight: 500; color: #A2A2A2; }
 .login-desktop-social-divider::before,.login-desktop-social-divider::after { content: ""; flex: 1; height: 1px; background: #E7E7E7; }
