@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { ApiError, createInquiry } from "../../api/client";
 import SeoMeta from "../../utils/SeoMetadata";
+import heroMobileImage from "../../assets/landing/hero-mobile.png";
 
 import "./landing.css";
 
@@ -280,57 +281,31 @@ function LandingFooter({ onLinkClick }: { onLinkClick: (link: LandingFooterLink)
     );
 }
 
-function HeroResumeCard({ className = "", label }: { className?: string; label: string }): React.ReactElement {
+function HeroProgressCard({ className = "", count, label }: { className?: string; count: string; label: string }): React.ReactElement {
     return (
-        <article className={`internie-hero-resume-card ${className}`} aria-hidden="true">
-            <span className="internie-hero-card-label">{label}</span>
-            <span className="internie-hero-line is-strong" />
-            <span className="internie-hero-line is-medium" />
-            <span className="internie-hero-line" />
-            <span className="internie-hero-line is-short" />
-            <span className="internie-hero-line is-mid" />
-            <div className="internie-hero-chip-row">
-                <span />
-                <span />
+        <article className={`internie-hero-progress-card ${className}`} aria-hidden="true">
+            <span className="internie-hero-progress-dot" />
+            <div>
+                <strong>{count}</strong>
+                <span>{label}</span>
             </div>
         </article>
     );
 }
 
 function HeroMissionCard(): React.ReactElement {
-    const { t } = useTranslation();
-
     return (
         <article className="internie-hero-mission-card" aria-hidden="true">
-            <strong>{t("landing.hero.desktop.cards.missionTitle")}</strong>
-            <div className="internie-hero-mission-progress"><span><i /></span><b>{t("landing.hero.desktop.cards.missionPercent")}</b></div>
-            <div className="internie-hero-mission-tags"><span>{t("landing.hero.desktop.cards.missionTag1")}</span><span>{t("landing.hero.desktop.cards.missionTag2")}</span><span>{t("landing.hero.desktop.cards.missionTag3")}</span></div>
-            <p>{t("landing.hero.desktop.cards.missionDescription")}</p>
-        </article>
-    );
-}
-
-function HeroMobileDocumentCard({ className = "", label }: { className?: string; label: string }): React.ReactElement {
-    return (
-        <article className={`internie-hero-mobile-document-card ${className}`} aria-hidden="true">
-            <span className="internie-hero-mobile-doc-label">{label}</span>
-            <span className="internie-hero-mobile-doc-line is-strong" />
-            <span className="internie-hero-mobile-doc-line is-medium" />
-            <span className="internie-hero-mobile-doc-line is-long" />
-            <span className="internie-hero-mobile-doc-line is-short" />
-            <div className="internie-hero-mobile-doc-chips"><span /><span /></div>
-        </article>
-    );
-}
-
-function HeroMobileMissionCard({ className = "" }: { className?: string }): React.ReactElement {
-    const { t } = useTranslation();
-    return (
-        <article className={`internie-hero-mobile-mission-card ${className}`} aria-hidden="true">
-            <strong>{t("landing.hero.mobile.cards.projectTitle", { defaultValue: "팀 프로젝트" })}</strong>
-            <div className="internie-hero-mobile-progress"><span><i /></span><b>{t("landing.hero.mobile.cards.projectPercent", { defaultValue: "100%" })}</b></div>
-            <div className="internie-hero-mobile-tags"><span>{t("landing.hero.mobile.cards.projectTag1", { defaultValue: "콘텐츠 기획" })}</span><span>{t("landing.hero.mobile.cards.projectTag2", { defaultValue: "카피 12종" })}</span><span>{t("landing.hero.mobile.cards.projectTag3", { defaultValue: "A/B 테스트안" })}</span></div>
-            <p>{t("landing.hero.mobile.cards.projectDescription", { defaultValue: "이 학생은 제출 기한을 준수하고 과정을 체계적으로 관리했습니다. 실행력과 자기관리 역량을 중요하게 보는 기업에서 안정적으로 성과를 낼 가능성이 있습니다." })}</p>
+            <header>
+                <span>aim</span>
+                <b>에임랩</b>
+            </header>
+            <strong>첫 브랜드 필름 30초, 2주 안에</strong>
+            <p>D-12</p>
+            <div>
+                <span>미션 도전하기</span>
+                <span>직무 도전하기</span>
+            </div>
         </article>
     );
 }
@@ -788,17 +763,23 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                         <section id="internie-landing-top" className="internie-landing-hero">
                             <div className="internie-landing-hero-inner">
                                 <div className="internie-landing-hero-copy">
+                                    <p>{t("landing.hero.desktop.pretitleLine1")}{t("landing.hero.desktop.pretitleLine2") && <><br />{t("landing.hero.desktop.pretitleLine2")}</>}</p>
                                     <h1>{t("landing.hero.desktop.titleLine1")}<br />{t("landing.hero.desktop.titleLine2")}</h1>
-                                    <p>{t("landing.hero.desktop.pretitleLine1")}<br />{t("landing.hero.desktop.pretitleLine2")}</p>
                                     <button type="button" className="internie-landing-hero-cta" onClick={handleInquiryOpen}>{t("landing.hero.desktop.cta")}</button>
                                 </div>
+                                <div className="internie-landing-hero-mobile-copy">
+                                    <strong>internie</strong>
+                                    <p>{t("landing.hero.mobileLegacy.pretitleLine1")}<br />{t("landing.hero.mobileLegacy.pretitleLine2")}</p>
+                                    <h1>{t("landing.hero.mobileLegacy.titleLine1")}<br />{t("landing.hero.mobileLegacy.titleLine2")}</h1>
+                                </div>
                                 <div className="internie-landing-hero-visual" aria-hidden="true">
-                                    <HeroResumeCard className="is-main" label={t("landing.hero.desktop.cards.resume")} />
-                                    <HeroResumeCard className="is-top" label={t("landing.hero.desktop.cards.application")} />
+                                    <HeroProgressCard className="is-planning" count="12 in progress" label="기획" />
+                                    <HeroProgressCard className="is-design" count="32 in progress" label="디자인" />
                                     <HeroMissionCard />
-                                    <HeroMobileDocumentCard className="is-mobile-left" label={t("landing.hero.desktop.cards.resume")} />
-                                    <HeroMobileMissionCard className="is-mobile-front" />
-                                    <HeroMobileDocumentCard className="is-mobile-right" label={t("landing.hero.desktop.cards.application")} />
+                                    <HeroProgressCard className="is-gtm" count="26 in progress" label="글로벌 GTM" />
+                                    <HeroProgressCard className="is-development" count="15 in progress" label="개발" />
+                                    <HeroProgressCard className="is-marketing" count="48 in progress" label="마케팅" />
+                                    <img className="internie-landing-hero-mobile-image" src={heroMobileImage} alt="" />
                                 </div>
                             </div>
                         </section>

@@ -21,10 +21,10 @@
         },
         "hero": {
             "desktop": {
-                "pretitleLine1": "채용 공고가 아니라 실무 미션으로 시작하세요.",
-                "pretitleLine2": "업무 기반 채용 플랫폼, 인터니",
-                "titleLine1": "더 많은 인재를,",
-                "titleLine2": "더 정확한 방법으로",
+                "pretitleLine1": "업무 기반 채용 플랫폼, 인터니",
+                "pretitleLine2": "",
+                "titleLine1": "채용 공고가 아닌 실무 미션으로",
+                "titleLine2": "더 많은 인재를 채용하세요",
                 "subtitleLine1": "",
                 "subtitleLine2": "",
                 "cta": "채용 시작하기",
@@ -46,6 +46,12 @@
                 "titleLine1": "일하는 방식을 보고",
                 "titleLine2": "<strong>채용</strong>하세요",
                 "cta": "문의하기"
+            },
+            "mobileLegacy": {
+                "pretitleLine1": "채용 공고가 아니라 실무 미션으로 시작하세요.",
+                "pretitleLine2": "업무 기반 채용 플랫폼, 인터니",
+                "titleLine1": "더 많은 인재를,",
+                "titleLine2": "더 정확한 방법으로"
             },
             "imageAlt": "인터니 채용 프로세스",
             "mainCardAlt": "인터니 지원자 평가 화면"

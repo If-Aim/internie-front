@@ -1,4 +1,5 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 #root { min-height: 100dvh !important; overflow: auto !important; }
 :root { --bg: #F0F6FF; --text: #000; --muted: #CFCFCF; --line: #D8D8D8; --white: #FFFFFF; --blue: #0166FF; --kakao: #FFE500; }
@@ -11,7 +12,7 @@ body { margin: 0; font-family: "Pretendard Variable", Pretendard, sans-serif; ba
 .mobile-login-main { min-height: calc(100dvh - env(safe-area-inset-top)); overflow: auto; padding: 0 37px 40px; display: flex; flex-direction: column; align-items: center; }
 
 .mobile-login-logo-section { width: 100%; padding-top: 96px; display: flex; justify-content: center; }
-.mobile-login-logo { margin: 0; font-size: 32px; line-height: 36px; font-weight: 600; color: var(--text); font-family: "Montserrat", sans-serif; }
+.mobile-login-logo { margin: 0; font-size: 32px; line-height: 36px; font-weight: 600; color: var(--text); font-family: "Montserrat", sans-serif; letter-spacing: -0.9px; }
 
 .mobile-login-form-section { width: 100%; margin-top: 82px; }
 .mobile-login-input-wrap { position: relative; width: 100%; }

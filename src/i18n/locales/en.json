@@ -21,10 +21,10 @@
         },
         "hero": {
             "desktop": {
-                "pretitleLine1": "Start with a real work mission, not another job post.",
-                "pretitleLine2": "Internie, a work-based hiring platform",
-                "titleLine1": "More talent,",
-                "titleLine2": "with a more accurate method",
+                "pretitleLine1": "Internie, a work-based hiring platform",
+                "pretitleLine2": "",
+                "titleLine1": "Hire more talent",
+                "titleLine2": "with real work missions",
                 "subtitleLine1": "",
                 "subtitleLine2": "",
                 "cta": "Start hiring",
@@ -46,6 +46,12 @@
                 "titleLine1": "Hire by seeing",
                 "titleLine2": "how they <strong>work</strong>",
                 "cta": "Contact us"
+            },
+            "mobileLegacy": {
+                "pretitleLine1": "Start with a real work mission, not another job post.",
+                "pretitleLine2": "Internie, a work-based hiring platform",
+                "titleLine1": "More talent,",
+                "titleLine2": "with a more accurate method"
             },
             "imageAlt": "Internie hiring process",
             "mainCardAlt": "Internie candidate evaluation screen"
