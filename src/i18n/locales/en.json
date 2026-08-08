@@ -21,13 +21,13 @@
         },
         "hero": {
             "desktop": {
-                "pretitleLine1": "Internie, a work-based hiring platform",
+                "pretitleLine1": "Recruitment Platform based on Work-Experience",
                 "pretitleLine2": "",
-                "titleLine1": "Hire more talent",
-                "titleLine2": "with real work missions",
+                "titleLine1": "Reach the Korean market,",
+                "titleLine2": "the low-risk way",
                 "subtitleLine1": "",
                 "subtitleLine2": "",
-                "cta": "Start hiring",
+                "cta": "Get started",
                 "cards": {
                     "resume": "Resume",
                     "application": "Application",
@@ -35,7 +35,7 @@
                     "missionTitle": "Performance marketing strategy",
                     "missionPercent": "100%",
                     "missionTag1": "Content planning",
-                    "missionTag2": "12 copy options",
+                    "missionTag2": "12 copy",
                     "missionTag3": "A/B test plan",
                     "missionDescription": "This student met the deadline and managed the process systematically. They are likely to perform reliably in companies that value execution and self-management."
                 }
@@ -48,24 +48,25 @@
                 "cta": "Contact us"
             },
             "mobileLegacy": {
-                "pretitleLine1": "Start with a real work mission, not another job post.",
-                "pretitleLine2": "Internie, a work-based hiring platform",
-                "titleLine1": "More talent,",
-                "titleLine2": "with a more accurate method"
+                "pretitleLine1": "Test your Korea marketing with Korean university talent — content, localization, channels — before you commit.",
+                "pretitleLine2": "",
+                "titleLine1": "Reach the Korean market,",
+                "titleLine2": "the low-risk way",
+                "cardTitle": "Team Project"
             },
             "imageAlt": "Internie hiring process",
             "mainCardAlt": "Internie candidate evaluation screen"
         },
         "diagnosis": {
             "eyebrow": "Problem",
-            "title": "Run a Hiring Self-Diagnosis for Your Company",
+            "title": "Considering the\nKorean market?",
             "legend": "Select a hiring diagnosis item",
             "items": {
-                "portfolio": "It is hard to tell what part of the portfolio this person actually worked on.",
-                "interviewGap": "Someone who spoke well in the interview worked very differently in practice.",
-                "smallTeam": "Our team is small, so one wrong hire can hit us hard.",
-                "companyIntro": "Candidates who come to interviews do not understand what our company actually does.",
-                "internEvaluation": "Even after hiring interns, we keep wondering what to assign and how to evaluate them.",
+                "portfolio": "You want to reach Korean users, but you're not sure where to start.",
+                "interviewGap": "Consulting quotes are expensive and take months.",
+                "smallTeam": "You can't test the market without committing real resources first.",
+                "companyIntro": "You have no one on the ground who reads the local context.",
+                "internEvaluation": "You need Korean content or localization, but a full-time hire is premature.",
                 "lowApplicants": "Even when we post a job opening, very few candidates apply.",
                 "youthHiringDeadline": "We need to hire a young employee full-time within the startup support or R&D project period."
             }
@@ -73,75 +74,75 @@
         "solution": {
             "ariaLabel": "Solution",
             "eyebrow": "Solution",
-            "title": "From hiring promotion to evaluation, all in one flow",
+            "title": "From first signal\nto market entry",
             "frameTitle": "Internie mission hiring process animation"
         },
         "workflow": {
             "eyebrow": "How It Works",
-            "titleLine1": "Just give us the work,",
-            "titleLine2": "Internie will handle the rest!",
+            "titleLine1": "Just bring the work",
+            "titleLine2": "internie handles the rest.",
             "steps": {
                 "onboarding": {
                     "title": "Onboarding",
-                    "description": "Set the hiring criteria. We start with who you want and what you need to check, then adjust the mission format and timeline to fit your company."
+                    "description": "We set the goal. Starting from who you\nwant and what you need to learn, we\nshape the mission format and timeline\nto fit your Korea question."
                 },
                 "design": {
-                    "title": "Mission Design",
-                    "description": "We turn a real piece of your team's work into a mission. This mission becomes <strong>a first introduction to your company for candidates</strong> and <strong>a later decision-making standard for your company</strong>."
+                    "title": "Make Mission",
+                    "description": "We turn one slice of your Korea question into a mission.\nyour intro to Korean talent,\nand your basis for judging later."
                 },
                 "progress": {
-                    "title": "Student Execution",
-                    "description": "Your company can review how candidates perform the mission. You can evaluate how they solve problems, communicate, and collaborate."
+                    "title": "Do Mission",
+                    "description": "You see how the work gets done, problem-solving, communication, collaboration, the things\na resume can't show."
                 },
                 "hire": {
-                    "title": "Hiring",
-                    "description": "Instead of guessing from resumes, decide who to work with based on skills proven through the mission. You keep evidence from working together before making the hire."
+                    "title": "Decide",
+                    "description": "Instead of inferring from a resume, you decide on demonstrated work. You've worked together before you commit."
                 }
             }
         },
         "missionExamples": {
             "eyebrow": "How It Works",
-            "title": "Examples of Missions You Can Create",
-            "hoverTitle": "Create this as our company mission",
+            "title": "Missions you can run",
+            "hoverTitle": "Create this as our mission",
             "items": {
                 "influencer": {
-                    "category": "Marketing",
-                    "title": "Find 30 influencer candidates and draft first outreach messages",
-                    "description": "Check target-customer fit, channel fit, and persuasive outreach writing",
+                    "category": "Content",
+                    "title": "Build a 2-week Korea content calendar",
+                    "description": "Checks messaging, local nuance, and hook strength",
                     "tags": [
-                        "Candidate list",
-                        "Outreach copy",
-                        "Selection criteria"
+                        "Calendar",
+                        "Hooks",
+                        "Themes"
                     ]
                 },
                 "reels": {
-                    "category": "Content Marketing",
-                    "title": "Create a reels concept and draft for a new product",
-                    "description": "Check message structure, visual expression, and brand-tone alignment",
+                    "category": "Localization",
+                    "title": "Localize your landing page for Korea",
+                    "description": "Checks tone transfer, local nuance, and brand-fit",
                     "tags": [
-                        "Reels draft",
-                        "Proposal",
-                        "Copy lines"
+                        "Draft",
+                        "Copy",
+                        "Tone"
                     ]
                 },
                 "onboarding": {
-                    "category": "Service · Planning",
-                    "title": "Analyze competitor onboarding and suggest 3 improvement hypotheses",
-                    "description": "Check problem definition, screen-flow understanding, and prioritization sense",
+                    "category": "Channel",
+                    "title": "Map Korea's marketing channels",
+                    "description": "Checks research depth, channel fit, and strategy",
                     "tags": [
-                        "Analysis sheet",
-                        "Improvement hypotheses",
-                        "Selection criteria"
+                        "Channels",
+                        "Strategy",
+                        "Fit"
                     ]
                 },
                 "cx": {
-                    "category": "Sales · CX",
-                    "title": "Write responses to 5 real customer inquiries and suggest recurring-issue improvements",
-                    "description": "Check problem definition, communication, and improvement thinking",
+                    "category": "Creative",
+                    "title": "Draft Korea-ready ad creative + copy",
+                    "description": "Checks creativity, message clarity, and local resonance",
                     "tags": [
-                        "Improvement proposal",
-                        "Response drafts",
-                        "Recurring inquiry classification"
+                        "Concepts",
+                        "Copy",
+                        "Visual"
                     ]
                 }
             }
@@ -364,7 +365,6 @@
         },
         "faq": {
             "eyebrow": "FAQ",
-            "title": "Frequently Asked Questions",
             "items": {
                 "item1": {
                     "question": "How long does setup take, and what do we need to do?",
@@ -400,7 +400,7 @@
                 "titleLine1": "Do not just read the resume.",
                 "titleLine2": "See how they work.",
                 "descriptionLine1": "One mission is enough.",
-                "descriptionLine2": "Contact us to get started today.",
+                "descriptionLine2": "Get started today.",
                 "button": "Contact us"
             }
         },
@@ -436,7 +436,7 @@
             }
         },
         "footer": {
-            "taglineLine1": "Prove skills that resumes cannot show, with data",
+            "taglineLine1": "Proving skills a resume can't show, through real work data.",
             "taglineLine2": "by aim",
             "companyName": "aim · CEO Eugene Kim",
             "linksTitle": "Quick links",

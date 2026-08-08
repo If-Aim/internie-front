@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 import { ApiError, createInquiry } from "../../api/client";
 import SeoMeta from "../../utils/SeoMetadata";
-import heroMobileImage from "../../assets/landing/hero-mobile.png";
 
 import "./landing.css";
 
@@ -306,6 +305,38 @@ function HeroMissionCard(): React.ReactElement {
                 <span>미션 도전하기</span>
                 <span>직무 도전하기</span>
             </div>
+        </article>
+    );
+}
+
+function HeroMobileDocumentCard({ className = "" }: { className?: string }): React.ReactElement {
+    const { t } = useTranslation();
+
+    return (
+        <article className={`internie-hero-mobile-document-card ${className}`} aria-hidden="true">
+            <span>{t("landing.hero.desktop.cards.resume")}</span>
+            <i className="is-strong" />
+            <i className="is-medium" />
+            <i className="is-long" />
+            <i className="is-short" />
+            <div><b /><b /></div>
+        </article>
+    );
+}
+
+function HeroMobileMissionCard(): React.ReactElement {
+    const { t } = useTranslation();
+
+    return (
+        <article className="internie-hero-mobile-mission-card" aria-hidden="true">
+            <strong>{t("landing.hero.mobileLegacy.cardTitle")}</strong>
+            <div className="internie-hero-mobile-progress"><span><i /></span><b>{t("landing.hero.desktop.cards.missionPercent")}</b></div>
+            <div className="internie-hero-mobile-tags">
+                <span>{t("landing.hero.desktop.cards.missionTag1")}</span>
+                <span>{t("landing.hero.desktop.cards.missionTag2")}</span>
+                <span>{t("landing.hero.desktop.cards.missionTag3")}</span>
+            </div>
+            <p>{t("landing.hero.desktop.cards.missionDescription")}</p>
         </article>
     );
 }
@@ -769,7 +800,7 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                 </div>
                                 <div className="internie-landing-hero-mobile-copy">
                                     <strong>internie</strong>
-                                    <p>{t("landing.hero.mobileLegacy.pretitleLine1")}<br />{t("landing.hero.mobileLegacy.pretitleLine2")}</p>
+                                    <p>{t("landing.hero.mobileLegacy.pretitleLine1")}{t("landing.hero.mobileLegacy.pretitleLine2") && <><br />{t("landing.hero.mobileLegacy.pretitleLine2")}</>}</p>
                                     <h1>{t("landing.hero.mobileLegacy.titleLine1")}<br />{t("landing.hero.mobileLegacy.titleLine2")}</h1>
                                 </div>
                                 <div className="internie-landing-hero-visual" aria-hidden="true">
@@ -779,7 +810,9 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                                     <HeroProgressCard className="is-gtm" count="26 in progress" label="글로벌 GTM" />
                                     <HeroProgressCard className="is-development" count="15 in progress" label="개발" />
                                     <HeroProgressCard className="is-marketing" count="48 in progress" label="마케팅" />
-                                    <img className="internie-landing-hero-mobile-image" src={heroMobileImage} alt="" />
+                                    <HeroMobileDocumentCard className="is-left" />
+                                    <HeroMobileDocumentCard className="is-right" />
+                                    <HeroMobileMissionCard />
                                 </div>
                             </div>
                         </section>
@@ -863,7 +896,6 @@ export default function Landing({ canonical }: LandingProps): React.ReactElement
                             <div className="internie-landing-faq-inner">
                                 <div className="internie-landing-faq-heading">
                                     <span>{t("landing.faq.eyebrow")}</span>
-                                    <h2>{t("landing.faq.title")}</h2>
                                 </div>
                                 <div className="internie-landing-faq-list">
                                     {faqItems.map((item, index) => {

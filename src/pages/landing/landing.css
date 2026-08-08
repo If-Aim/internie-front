@@ -23,15 +23,15 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-landing-language-button img:last-child { width: 16px; height: 16px; }
 .internie-landing-login { min-width: 96px; padding: 8px 12px; border: 0; background: transparent; color: #000000; font-size: 20px; font-weight: 700; line-height: 32px; }
 .internie-landing main { width: 100%; padding-top: 64px; }
-.internie-landing-hero { position: relative; min-height: 1016px; overflow: hidden; background: linear-gradient(180deg, #083a89 0%, #005dff 100%); opacity: 0; animation: internie-hero-fade 0.5s ease-out 0.04s forwards; }
-.internie-landing-hero-inner { position: relative; width: min(100%, 1920px); height: 1016px; margin: 0 auto; }
-.internie-landing-hero-copy { position: absolute; left: 50%; top: 124px; z-index: 5; width: min(100%, 820px); color: #ffffff; text-align: center; transform: translateX(-50%); }
+.internie-landing-hero { position: relative; height: calc(100vh - 64px); min-height: 760px; max-height: 900px; overflow: hidden; background: linear-gradient(180deg, #083a89 0%, #005dff 100%); opacity: 0; animation: internie-hero-fade 0.5s ease-out 0.04s forwards; }
+.internie-landing-hero-inner { position: relative; width: min(100%, 1920px); height: 100%; margin: 0 auto; }
+.internie-landing-hero-copy { position: absolute; left: 50%; top: clamp(72px, 11vh, 112px); z-index: 5; width: min(100%, 820px); color: #ffffff; text-align: center; transform: translateX(-50%); }
 .internie-landing-hero-copy h1 { margin: 18px 0 0; color: #ffffff; font-size: 64px; font-weight: 800; line-height: 80px; letter-spacing: 0; word-break: keep-all; }
 .internie-landing-hero-copy p { margin: 0; color: #eaf2ff; font-size: 32px; font-weight: 500; line-height: 36px; letter-spacing: 0; word-break: keep-all; }
 .internie-landing-hero-copy button { display: inline-flex; align-items: center; justify-content: center; width: 197px; height: 64px; margin-top: 34px; border: 0; border-radius: 50px; background: #ffffff; color: #0166ff; font-size: 24px; font-weight: 800; box-shadow: none; transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .internie-landing-hero-copy button:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(1, 60, 150, 0.24); }
-.internie-landing-hero-mobile-copy, .internie-landing-hero-mobile-image { display: none; }
-.internie-landing-hero-visual { position: absolute; left: 50%; top: 564px; width: 1142px; height: 391px; transform: translateX(-50%); }
+.internie-landing-hero-mobile-copy, .internie-landing-hero-mobile-image, .internie-hero-mobile-document-card, .internie-hero-mobile-mission-card { display: none; }
+.internie-landing-hero-visual { position: absolute; left: 50%; bottom: 28px; width: 1142px; height: 391px; transform: translateX(-50%); }
 .internie-hero-progress-card { position: absolute; z-index: 2; display: flex; align-items: center; gap: 24px; width: 320px; height: 84px; padding: 20px 23px; border-radius: 10px; background: #ffffff; box-shadow: 0 8px 15px #a9cbff; animation: internie-float 5.8s ease-in-out infinite; }
 .internie-hero-progress-card.is-planning { left: 39px; top: 81px; z-index: 2; animation-delay: -1.2s; }
 .internie-hero-progress-card.is-design { left: 0; top: 188px; z-index: 2; animation-delay: -2.8s; }
@@ -267,7 +267,7 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-mission-example-card.is-card-b:hover, .internie-mission-example-card.is-card-b:focus-visible, .internie-mission-example-card.is-card-d:hover, .internie-mission-example-card.is-card-d:focus-visible { transform: rotate(3deg) translateY(-4px); }
 .internie-mission-example-card > span { display: inline-flex; align-items: center; height: 32px; padding: 0 20px; border-radius: 999px; background: #eaf1ff; color: #0166ff; font-size: 16px; font-weight: 800; }
 .internie-mission-example-card h3 { display: -webkit-box; min-height: 58px; margin: 24px 0 14px; overflow: hidden; color: #000000; font-size: 24px; font-weight: 800; line-height: 29px; letter-spacing: 0; word-break: normal; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
-.internie-mission-example-card p { display: -webkit-box; min-height: 52px; margin: 0; overflow: hidden; color: #808080; font-size: 16px; font-weight: 500; line-height: 26px; word-break: normal; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+.internie-mission-example-card p { display: -webkit-box; min-height: 52px; margin: 0; overflow: hidden; color: #808080; font-size: 16px; font-weight: 500; line-height: 26px; word-break: normal; overflow-wrap: anywhere; -webkit-line-clamp: 2; line-clamp: 2; }
 .internie-mission-example-card div:not(.internie-mission-card-hover) { position: absolute; left: 40px; right: 40px; bottom: 40px; display: flex; gap: 8px; padding-top: 24px; border-top: 1px solid #e7e7e7; }
 .internie-mission-example-card small { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 8px; background: #f0f6ff; color: #4a5a72; font-size: 13px; font-weight: 700; }
 .internie-mission-card-hover { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: space-between; padding: 40px; border-radius: 16px; background: rgba(1, 102, 255, 0.9); opacity: 0; pointer-events: none; transition: opacity 0.24s ease; }
@@ -364,17 +364,39 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
     .internie-landing-hero-copy { display: none; }
     .internie-landing-hero-mobile-copy { position: absolute; left: 0; top: 0; z-index: 5; display: block; width: 100%; height: 400px; color: #ffffff; text-align: center; }
     .internie-landing-hero-mobile-copy strong { position: absolute; left: 0; top: 128px; display: block; width: 100%; color: #ffffff; font-family: Montserrat, Pretendard, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.2; letter-spacing: -0.96px; }
-    .internie-landing-hero-mobile-copy p { position: absolute; left: 0; top: 210px; width: 100%; margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 800; line-height: 20px; white-space: pre-wrap; }
-    .internie-landing-hero-mobile-copy h1 { position: absolute; left: 0; top: 275px; width: 100%; margin: 0; color: #ffffff; font-size: 36px; font-weight: 800; line-height: 1.3; letter-spacing: 0; text-shadow: 0 0 10px rgba(0, 0, 0, 0.14); font-family: Paperlogy; }
+    .internie-landing-hero-mobile-copy p { position: absolute; left: 50%; top: 210px; width: min(100%, 360px); margin: 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; font-weight: 800; line-height: 20px; white-space: pre-wrap; transform: translateX(-50%); }
+    .internie-landing-hero-mobile-copy h1 { position: absolute; left: 0; top: 275px; width: 100%; margin: 0; color: #ffffff; font-size: 36px; font-weight: 700; line-height: 1.3; letter-spacing: 0; text-shadow: 0 0 10px rgba(0, 0, 0, 0.14); font-family: Paperlogy; }
     .internie-landing-hero-cta { display: none !important; }
-    .internie-landing-hero-visual { position: absolute; left: 12px; top: 400px; width: 369px; height: 391px; margin: 0; transform: none; }
+    .internie-landing-hero-visual { position: absolute; left: 0; top: 400px; width: 393px; max-width: 100vw; height: 391px; margin: 0; transform: none; }
     .internie-landing-inquiry-anchor { left: 50%; right: auto; bottom: 32px; transform: translateX(-50%); }
     .internie-landing-consult-button { min-width: 160px; width: 160px; height: 56px; border-radius: 12px; background: #fff; color: #0166ff; font-size: 20px; font-weight: 700; box-shadow: 0 12px 28px -10px rgba(1, 102, 255, 0.65); }
     .internie-landing-hero-visual > .internie-hero-progress-card, .internie-landing-hero-visual > .internie-hero-mission-card { display: none; }
-    .internie-landing-hero-mobile-image { display: block; width: 369px; height: 391px; object-fit: contain; }
+    .internie-hero-mobile-document-card { position: absolute; z-index: 1; display: block; width: 234px; height: 187px; padding: 17px 14px; border: 1px solid #e6ebf2; border-radius: 14px; background: #ffffff; box-shadow: 0 16px 30px rgba(11, 18, 32, 0.1); }
+    .internie-hero-mobile-document-card.is-left { left: 12px; top: 143px; }
+    .internie-hero-mobile-document-card.is-right { left: 147px; top: 193px; }
+    .internie-hero-mobile-document-card > span { display: inline-flex; height: 19px; padding: 4px 9px; border-radius: 5px; background: #f1f3f7; color: #c8d0dd; font-size: 10px; font-weight: 800; line-height: 1; }
+    .internie-hero-mobile-document-card i { display: block; height: 8px; margin-top: 11px; border-radius: 4px; background: #d9dee7; }
+    .internie-hero-mobile-document-card i.is-strong { width: 64%; background: #c1c8d4; }
+    .internie-hero-mobile-document-card i.is-medium { width: 55%; }
+    .internie-hero-mobile-document-card i.is-long { width: 84%; }
+    .internie-hero-mobile-document-card i.is-short { width: 72%; }
+    .internie-hero-mobile-document-card div { display: flex; gap: 6px; margin-top: 18px; }
+    .internie-hero-mobile-document-card b { width: 36px; height: 14px; border-radius: 4px; background: #e9ecf1; }
+    .internie-hero-mobile-document-card b + b { width: 48px; }
+    .internie-hero-mobile-mission-card { position: absolute; left: 67px; top: 84px; z-index: 3; display: block; width: 282px; height: 199px; padding: 27px 16px 18px; border: 1px solid #d6e4ff; border-radius: 14px; background: #ffffff; overflow: hidden; box-shadow: 0 18px 32px rgba(1, 60, 150, 0.16); }
+    .internie-hero-mobile-mission-card strong { display: block; color: #0b1220; font-size: 16px; font-weight: 800; line-height: 1.2; }
+    .internie-hero-mobile-progress { display: flex; align-items: center; gap: 6px; margin-top: 18px; }
+    .internie-hero-mobile-progress span { position: relative; flex: 1; height: 6px; overflow: hidden; border-radius: 99px; background: #eaf0fa; }
+    .internie-hero-mobile-progress span i { position: absolute; inset: 0; border-radius: 99px; background: #0166ff; }
+    .internie-hero-mobile-progress b { color: #0166ff; font-size: 11px; font-weight: 800; line-height: 1; }
+    .internie-hero-mobile-tags { display: flex; gap: 6px; margin-top: 10px; }
+    .internie-hero-mobile-tags span { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; background: #f0f6ff; color: #4a5a72; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .internie-hero-mobile-mission-card p { position: absolute; left: 16px; right: 16px; bottom: 18px; margin: 0; padding-top: 13px; border-top: 1px solid #e7e7e7; color: #c6c6c6; font-size: 10px; font-weight: 500; line-height: 14px; word-break: keep-all; }
+    .internie-landing.is-en .internie-landing-hero-mobile-copy p { top: 205px; width: 350px; font-family: Inter, Pretendard, sans-serif; font-weight: 800; }
+    .internie-landing.is-en .internie-landing-hero-mobile-copy h1 { font-family: Montserrat, Pretendard, sans-serif; font-size: 30px; line-height: 1.35; letter-spacing: -0.3px; }
 
     .internie-landing-section { min-height: auto; padding: 96px 20px; background: linear-gradient(180deg, #FFF 0%, #EAF2FF 100%); }
-    .internie-landing-section-heading h2 { font-size: 30px; line-height: 42px; }
+    .internie-landing-section-heading h2 { font-size: 30px; line-height: 42px; white-space: pre-line;}
     .internie-landing-inquiry-anchor.is-docked { position: absolute; right: auto; bottom: auto; transform: translateX(-50%); }
     
     .internie-landing-diagnosis-section { min-height: auto; padding: clamp(96px, 24vw, 135px) 0 clamp(88px, 22vw, 116px); background: #ffffff; }

@@ -51,7 +51,8 @@
                 "pretitleLine1": "채용 공고가 아니라 실무 미션으로 시작하세요.",
                 "pretitleLine2": "업무 기반 채용 플랫폼, 인터니",
                 "titleLine1": "더 많은 인재를,",
-                "titleLine2": "더 정확한 방법으로"
+                "titleLine2": "더 정확한 방법으로",
+                "cardTitle": "팀 프로젝트"
             },
             "imageAlt": "인터니 채용 프로세스",
             "mainCardAlt": "인터니 지원자 평가 화면"
@@ -364,7 +365,6 @@
         },
         "faq": {
             "eyebrow": "FAQ",
-            "title": "자주 묻는 질문",
             "items": {
                 "item1": {
                     "question": "세팅에 시간이 얼마나 걸리고, 우리는 뭘 해야 하나요?",
