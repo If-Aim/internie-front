@@ -304,6 +304,10 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
 .internie-landing-footer-brand > p { margin: 18px 0 0; color: #9aaac4; font-size: 13px; font-weight: 500; line-height: 1.8; }
 .internie-landing-footer-company { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 20px; }
 .internie-landing-footer-company span { color: rgba(255, 255, 255, 0.36); font-size: 10px; font-weight: 500; line-height: 1.6; }
+.internie-landing-footer-business { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 4px; }
+.internie-landing-footer-business span, .internie-landing-footer-business a { color: rgba(255, 255, 255, 0.36); font-size: 10px; font-weight: 500; line-height: 1.6; }
+.internie-landing-footer-business a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; transition: color 0.2s ease; }
+.internie-landing-footer-business a:hover { color: rgba(255, 255, 255, 0.72); }
 .internie-landing-footer-column > strong { display: block; margin-bottom: 18px; color: #7c8aa3; font-size: 12px; font-weight: 700; }
 .internie-landing-footer-links { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .internie-landing-footer-links button { padding: 0; border: 0; background: transparent; color: #c7d2e4; font-size: 12px; font-weight: 500; text-align: left; transition: color 0.2s ease; }
@@ -470,6 +474,8 @@ html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, #root::-webkit-scr
     .internie-landing-footer-brand > p { width: 240px; margin: 4px 0 0; color: #ffffff; font-size: 10px; font-weight: 400; line-height: 14px; }
     .internie-landing-footer-company { display: flex; width: 240px; margin-top: 8px; flex-direction: column; gap: 0; }
     .internie-landing-footer-company span { color: #ffffff; font-size: 10px; font-weight: 400; line-height: 14px; }
+    .internie-landing-footer-business { display: flex; width: 240px; margin-top: 2px; flex-wrap: wrap; gap: 0 6px; }
+    .internie-landing-footer-business span, .internie-landing-footer-business a { color: #ffffff; font-size: 10px; font-weight: 400; line-height: 14px; }
     .internie-landing-footer-copyright { width: 100%; max-width: 353px; margin: 8px auto 0; }
     .internie-landing-footer-copyright span { color: #ffffff; font-size: 10px; font-weight: 400; line-height: 14px; }
     .internie-landing-footer-margin { display: none; }

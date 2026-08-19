@@ -238,6 +238,14 @@ function LandingFooter({ onLinkClick }: { onLinkClick: (link: LandingFooterLink)
         { label: t("landing.footer.links.faq"), path: null, sectionId: "internie-landing-faq" }
     ];
 
+    // const BUSINESS_NUMBER = "8303901486";
+    // const BUSINESS_INFO_URL = `https://www.ftc.go.kr/bizCommPop.do?wrkr_no=${BUSINESS_NUMBER}`;
+
+    // const openBusinessInfo = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    //     e.preventDefault();
+    //     window.open(BUSINESS_INFO_URL, "bizCommPop", "width=750,height=700,scrollbars=yes,resizable=yes");
+    // };
+
     return (
         <footer className="internie-landing-footer">
             <div className="internie-landing-footer-inner">
@@ -249,6 +257,10 @@ function LandingFooter({ onLinkClick }: { onLinkClick: (link: LandingFooterLink)
                     <div className="internie-landing-footer-company">
                         <span>{t("landing.footer.companyName")}</span>
                         <span>purieu.k@gmail.com</span>
+                    </div>
+                    <div className="internie-landing-footer-business">
+                        <span>사업자등록번호 : 830-39-01486</span>
+                        {/* <a href={BUSINESS_INFO_URL} target="_blank" rel="noopener noreferrer" onClick={openBusinessInfo}>사업자정보확인</a> */}
                     </div>
                 </div>
                 <div className="internie-landing-footer-column">
