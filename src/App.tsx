@@ -8,6 +8,7 @@ import EcaAdminRoute from "./ecaAdminRoute";
 import GlobalModalHost from "./globalModalHost";
 
 const LocalizedLanding = lazy(() => import("./pages/landing/localizedLanding"));
+const MarketingLanding = lazy(() => import("./pages/landing/landing_marketing"));
 
 const Auth = lazy(() => import("./pages/auth/auth"));
 const Signup = lazy(() => import("./pages/auth/signup"));
@@ -28,7 +29,8 @@ export default function App(): React.ReactElement {
     return (
         <Suspense fallback={<div />}>
             <Routes>
-                <Route path="/" element={<LocalizedLanding language="ko" canonical="https://www.internie.com/" />} />
+                <Route path="/" element={<MarketingLanding />} />
+                <Route path="/temp" element={<LocalizedLanding language="ko" canonical="https://www.internie.com/temp" />} />
                 <Route path="/company" element={<LocalizedLanding language="ko" />} />
                 <Route path="/global" element={<LocalizedLanding language="en" />} />
 
