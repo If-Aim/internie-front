@@ -4,14 +4,16 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import ko from "./locales/ko.json";
 import en from "./locales/en.json";
+import marketingKo from "./locales/marketing.ko.json";
+import marketingEn from "./locales/marketing.en.json";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      ko: { translation: ko },
-      en: { translation: en },
+      ko: { translation: ko, marketing: marketingKo },
+      en: { translation: en, marketing: marketingEn },
     },
 
     fallbackLng: "ko",
