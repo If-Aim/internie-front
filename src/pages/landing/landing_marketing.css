@@ -167,6 +167,12 @@
 .marketing-inquiry-status:empty { display: none; }
 .marketing-inquiry-status.is-error, .marketing-inquiry-status.is-required { color: #b42318; }
 .marketing-landing [hidden] { display: none !important; }
+.marketing-order-flow { display: grid; isolation: isolate; overflow: clip; overflow-anchor: none; }
+.marketing-order-flow > :is(.marketing-products-step, .marketing-checkout) { grid-area: 1 / 1; align-self: start; min-width: 0; transition: opacity .48s cubic-bezier(.22, 1, .36, 1), transform .48s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .48s; }
+.marketing-order-flow > .marketing-products-step { z-index: 1; opacity: 1; transform: translateX(0); visibility: visible; transition-delay: 0s; }
+.marketing-order-flow > .marketing-checkout { z-index: 0; opacity: 0; transform: translateX(48px); visibility: hidden; pointer-events: none; }
+.marketing-order-flow.is-checkout-open > .marketing-products-step { z-index: 0; opacity: 0; transform: translateX(-48px); visibility: hidden; pointer-events: none; transition-delay: 0s, 0s, .48s; }
+.marketing-order-flow.is-checkout-open > .marketing-checkout { z-index: 1; opacity: 1; transform: translateX(0); visibility: visible; pointer-events: auto; transition-delay: 0s; }
 .marketing-checkout { padding: 64px 32px 96px; background: linear-gradient(180deg, #e4ecf8, #f8fafc); scroll-margin-top: 0; }
 .marketing-back-button { display: block; margin: 0 auto 28px; padding: 10px 16px; border: 1px solid #c9d9f0; border-radius: 12px; background: #fff; color: #4a5a72; font-size: 15px; }
 .marketing-checkout > h2 { font-size: 42px; font-weight: 800; line-height: 1.5; letter-spacing: -1.26px; text-align: center; }
