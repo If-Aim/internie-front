@@ -245,7 +245,7 @@
     .marketing-product-list { width: 100%; gap: 20px; }
     .marketing-product-card { min-height: 230px; padding: 26px; }
     .marketing-product-card > strong { font-size: 21px; }
-    .marketing-summary { order: -1; top: 12px; z-index: 2; max-height: calc(100dvh - 24px); padding: 18px 20px; border: 1px solid #e7e7e7; box-shadow: 0 8px 24px #0b173012; }
+    .marketing-summary { order: 0; top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 2; max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px)); padding: 18px 20px; border: 1px solid #e7e7e7; box-shadow: 0 -8px 24px #0b173012; }
     .marketing-summary-eyebrow, .marketing-summary-selection ul, .marketing-summary-note { display: none; }
     .marketing-summary h2 { margin-top: 0; font-size: 18px; }
     .marketing-summary-selection { margin-top: 6px; padding-bottom: 0; border: 0; }
